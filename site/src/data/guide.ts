@@ -26,7 +26,9 @@ const img = (key: string, widths: number[], w: number, h: number, alt: string, c
 const IMG = {
   driving: img('driving', [640, 1280], 1280, 720, 'A dark sedan turns across a city street with smoke around its tires in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
   slimJim: img('slim-jim', [640, 1280], 1280, 720, 'A character stands beside a red parked car with “Slim Jim” and “Smash Window” prompts on screen in GTA VI.', 'On-screen theft options in GTA VI gameplay — Rockstar Games.'),
-  buggy: img('dominator-buggy', W3, 1920, 1080, 'The ’67 Vapid Dominator Buggy splashes through mud on a dirt trail in GTA VI.', `’67 Vapid Dominator Buggy, Ultimate Edition. ${RS}`),
+  // Ownership pair (Fausto, 2026-10-04): safehouse with Jason's Ganado + Buggy at a garage. Alt/captions: Claude placeholders, Codex review pending.
+  safehouse: img('safehouse', W3, 1920, 1080, 'Jason’s stilt house on the water with a yellow Ganado pickup parked in front in GTA VI.', `Jason’s Safehouse Vehicles, Ultimate Edition. ${RS}`),
+  buggy: img('dominator-buggy-garage', W3, 1920, 1080, 'The ’67 Vapid Dominator Buggy parked in front of an open garage door in GTA VI.', `’67 Vapid Dominator Buggy, Ultimate Edition. ${RS}`),
   rideout: img('rideout-customs', W3, 1920, 1080, 'A mechanic works beneath a yellow Albany Manana while another stands beside it in a GTA VI workshop.', `Rideout Customs Mod Shop, Ultimate Edition. ${RS}`),
   willies: img('one-eyed-willies', W3, 1920, 1080, 'Mechanics work around a bright green pickup with its hood raised in a GTA VI workshop.', `One-Eyed Willie’s Mod Shop, Ultimate Edition. ${RS}`),
   wyman: img('classic-collection-wyman', W3, 1920, 1080, 'Wyman holds a wrench beside classic cars and workshop tools in a yard in GTA VI.', `Wyman and the Classic Car Collection, Ultimate Edition. ${RS}`),
@@ -109,7 +111,7 @@ export const guideSections: GuideSection[] = [
   },
   {
     id: 'ownership',
-    images: [IMG.buggy],
+    images: [IMG.safehouse, IMG.buggy],
     title: 'Vehicle Ownership, Garages, and Safehouse Vehicles',
     status: 'Rockstar Interview',
     paragraphs: [
