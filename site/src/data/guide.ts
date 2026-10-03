@@ -4,6 +4,7 @@
 // approved by Fausto 2026-10-03 with Claude's corrections:
 // Dazed staging link replaced with the public URL; "The Lab" line and the
 // "See All Confirmed Mod Shops" CTA removed (no target page yet).
+// Non-car vehicles: at most 1–2 incidental sentences (Fausto, DEC-0097); no own section.
 // Codex corrections 2026-10-03 (Codex Zuarbeit/The-Guide-Korrekturen-2026-10-03.md) applied:
 // one label set, Famitsu ownership facts, Garage scope, ~200 vehicle card.
 // Internal links FROM the Guide: Claude decides (Fausto, 2026-10-03, DEC-0095).
@@ -11,31 +12,32 @@
 // Never add leak information here. Visible text: "GTA VI"; meta: "GTA 6".
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
-export const GUIDE_UPDATED = '2026-10-03';
+export const GUIDE_UPDATED = '2026-10-04';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
 /** Images in public/images/guide/<key>-<width>.webp (Fausto's selection, Visual/Guide, 2026-10-03).
- *  Cars only, no boats or aircraft (Fausto). Alt texts and captions: Claude placeholders, Codex review pending. */
+ *  Cars only, no boats or aircraft (Fausto). Alt texts/captions: Codex 2026-10-03, approved; Rideout alt says
+ *  'coupe' (the car has a roof; Codex had 'convertible'). */
 export interface GuideImage { key: string; widths: number[]; w: number; h: number; alt: string; caption: string }
 const W3 = [640, 1280, 1920];
 const RS = 'Official screenshot — Rockstar Games.';
 const img = (key: string, widths: number[], w: number, h: number, alt: string, caption: string): GuideImage => ({ key, widths, w, h, alt, caption });
 const IMG = {
-  driving: img('driving', [640, 1280], 1280, 720, 'A dark sedan kicks up tire smoke while turning on a city street in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
-  slimJim: img('slim-jim', [640, 1280], 1280, 720, 'A player stands at a parked car with on-screen prompts for Slim Jim and Smash Window in GTA VI.', 'On-screen theft options in GTA VI gameplay — Rockstar Games.'),
+  driving: img('driving', [640, 1280], 1280, 720, 'A dark sedan turns across a city street with smoke around its tires in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
+  slimJim: img('slim-jim', [640, 1280], 1280, 720, 'A character stands beside a red parked car with “Slim Jim” and “Smash Window” prompts on screen in GTA VI.', 'On-screen theft options in GTA VI gameplay — Rockstar Games.'),
   buggy: img('dominator-buggy', W3, 1920, 1080, 'The ’67 Vapid Dominator Buggy splashes through mud on a dirt trail in GTA VI.', `’67 Vapid Dominator Buggy, Ultimate Edition. ${RS}`),
-  rideout: img('rideout-customs', W3, 1920, 1080, 'Mechanics work on a yellow coupe inside Rideout Customs in GTA VI.', `Rideout Customs Mod Shop, Ultimate Edition. ${RS}`),
-  willies: img('one-eyed-willies', W3, 1920, 1080, 'A lifted green off-roader is worked on inside One-Eyed Willie’s Mod Shop in GTA VI.', `One-Eyed Willie’s Mod Shop, Ultimate Edition. ${RS}`),
-  wyman: img('classic-collection-wyman', W3, 1920, 1080, 'Collector Wyman stands in a yard full of classic cars in GTA VI.', `Wyman and the Classic Car Collection, Ultimate Edition. ${RS}`),
-  classicCar: img('classic-collection-car', W3, 1920, 1080, 'Rear view of a turquoise classic coupe from the Classic Car Collection in GTA VI.', `Classic Car Collection, Ultimate Edition. ${RS}`),
+  rideout: img('rideout-customs', W3, 1920, 1080, 'A mechanic works beneath a yellow coupe while another stands beside it in a GTA VI workshop.', `Rideout Customs Mod Shop, Ultimate Edition. ${RS}`),
+  willies: img('one-eyed-willies', W3, 1920, 1080, 'Mechanics work around a bright green pickup with its hood raised in a GTA VI workshop.', `One-Eyed Willie’s Mod Shop, Ultimate Edition. ${RS}`),
+  wyman: img('classic-collection-wyman', W3, 1920, 1080, 'Wyman holds a wrench beside classic cars and workshop tools in a yard in GTA VI.', `Wyman and the Classic Car Collection, Ultimate Edition. ${RS}`),
+  classicCar: img('classic-collection-car', W3, 1920, 1080, 'A turquoise Sirius coupe with black side stripes and a rear spoiler, viewed from behind in GTA VI.', `Sirius from the Classic Car Collection, Ultimate Edition. ${RS}`),
   circuitRace: img('circuit-race', [640, 1280, 1672], 1672, 941, 'A pack of race cars on a wet, palm-lined circuit in GTA VI.', 'Circuit racing in GTA VI — Rockstar Games.'),
-  streetRace: img('street-race', [640, 1280], 1280, 720, 'A tuned car races down a dusty street at sunset with a blue exhaust flame in GTA VI.', 'Street racing in GTA VI — Rockstar Games.'),
-  circuitEmpty: img('circuit-empty', [640, 1280, 1672], 1672, 941, 'An empty, palm-lined paved race circuit with blue curbs in GTA VI.', 'The paved circuit shown in official GTA VI material — Rockstar Games.'),
-  carMeet: img('car-meet', [640, 1280, 1919], 1919, 1079, 'Drivers gather around customized cars at a parking-lot meet in GTA VI.', 'A car meet in GTA VI — Rockstar Games.'),
-  takeover: img('street-takeover', [640, 1280, 1672], 1672, 941, 'Aerial view of a street takeover with a car doing burnouts surrounded by a crowd in GTA VI.', 'A street takeover in GTA VI — Rockstar Games.'),
+  streetRace: img('street-race', [640, 1280], 1280, 720, 'Customized cars race along a street at sunset, with a blue exhaust flame behind the nearest car in GTA VI.', 'Street racing in GTA VI — Rockstar Games.'),
+  circuitEmpty: img('circuit-empty', [640, 1280, 1672], 1672, 941, 'An empty race circuit lined with palms, fencing, and blue and red painted trackside areas in GTA VI.', 'The paved circuit shown in official GTA VI material — Rockstar Games.'),
+  carMeet: img('car-meet', [640, 1280, 1919], 1919, 1079, 'People gather beside customized cars at an outdoor parking-lot meet in GTA VI.', 'A car meet in GTA VI — Rockstar Games.'),
+  takeover: img('street-takeover', [640, 1280, 1672], 1672, 941, 'A crowd surrounds cars and tire smoke at a nighttime street takeover in GTA VI, viewed from above.', 'A street takeover in GTA VI — Rockstar Games.'),
 };
-export const guideHeroImage = img('hero-cheetah', W3, 1920, 1080, 'A white Grotti Cheetah ’95 parked at dusk in GTA VI.', `Grotti Cheetah ’95, Ultimate Edition. ${RS}`);
+export const guideHeroImage = img('hero-cheetah', W3, 1920, 1080, 'Close-up of a white Grotti Cheetah ’95 with raised pop-up headlights in warm evening light in GTA VI.', `Grotti Cheetah ’95, Ultimate Edition. ${RS}`);
 
 export interface GuideSection {
   id: string;
@@ -66,7 +68,7 @@ export const guideSections: GuideSection[] = [
     status: 'Shown by Rockstar',
     paragraphs: [
       `GTA VI brings back familiar in-game manufacturers and models while adding vehicles created specifically for Leonida. Rockstar has named only part of the lineup, while many vehicles shown in official trailers and screenshots are identified by their design and badges. Those are community identifications, not Rockstar-confirmed names. <a href="{base}garage/">The Garage</a> focuses on racing-relevant cars and is not a complete list of every vehicle shown for GTA VI.`,
-      `The known lineup reaches beyond cars. Official material includes motorcycles, boats, a kayak, personal watercraft, helicopters, planes, and specialist vehicles alongside sedans, muscle cars, supercars, SUVs, off-road builds, and classics. A vehicle appearing in footage confirms that it exists in the world; it does not always prove that the player can own or drive it.`,
+      `Official footage also shows motorcycles, watercraft, and aircraft, but this guide focuses on cars and racing. A car appearing on screen does not by itself establish how it can be owned, stored, or customized.`,
       `Open The Garage for individual models, <a href="{base}garage/classes/">GTA classes</a>, <a href="{base}garage/manufacturers/">manufacturers</a>, first appearances, release information, and real-life inspirations. Prices and tested performance data will be added when they can be verified in the released game.`,
     ],
     cta: { label: 'Explore The Garage', href: 'garage/' },
@@ -112,13 +114,13 @@ export const guideSections: GuideSection[] = [
     status: 'Rockstar Interview',
     paragraphs: [
       `GTA VI has personal vehicles and expandable garage storage. Nelson told Famitsu that players begin with room for three vehicles. If all three spaces are occupied, one vehicle must be sold before another can be registered as personal. Buying garages around the map expands that capacity. Rockstar has not announced the later-game ownership limit, whether individual properties have different capacities, or how freely vehicles can be moved between garages.`,
-      `Rockstar has named Jason’s Safehouse Vehicles as Ultimate Edition content and shown the Dinka Enduro motorcycle, Crest Kayak, and Ganado Retro Build under that label. The Ultimate Edition also includes the <a href="{base}garage/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a> with a garage, while the Vintage Vice City Pack includes the <a href="{base}garage/vehicles/vapid-stanier-55/">’55 Vapid Stanier Sedan</a> with a garage.`,
+      `Rockstar’s Ultimate Edition includes Jason’s Safehouse Vehicles and the Ganado Retro Build. It also includes the <a href="{base}garage/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a> with a garage, while the Vintage Vice City Pack includes the <a href="{base}garage/vehicles/vapid-stanier-55/">’55 Vapid Stanier Sedan</a> with a garage.`,
       `The accompanying Rockstar press material identifies those locations as Paradise Garage in Watson Bay and Shore Court Garage near Ocean Beach. They are personal garages, not confirmed tuning shops.`,
     ],
     sources: [
       { label: 'Famitsu — Exclusive Interview with Rob Nelson', url: FAMITSU, note: 'August 28, 2026: three initial vehicle spaces, the replacement rule when storage is full, and purchasable garages that expand ownership capacity.' },
       { label: 'Rockstar Games — GTA VI Editions', url: R_EDITIONS, note: 'Jason’s Safehouse Vehicles, Ganado Retro Build, and the named vehicle bonuses.' },
-      { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: '“Jason’s Safehouse Vehicles,” “Dinka Enduro Motorcycle,” “Crest Kayak,” and “Ganado Retro Build.”' },
+      { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: '“Jason’s Safehouse Vehicles,” “Ganado Retro Build,” and “’67 Vapid Dominator Buggy.”' },
       { label: 'Rockstar Support — GTA VI Platforms, Editions, and Versions', url: R_SUPPORT, note: 'edition and pre-order package contents.' },
       { label: 'TheSixthAxis — GTA VI Ultimate Edition and Vintage Vice City Pack', url: TSA, note: 'June 24, 2026: documentation of Rockstar’s accompanying descriptions for Paradise Garage and Shore Court Garage.' },
     ],
@@ -205,20 +207,6 @@ export const guideSections: GuideSection[] = [
     ],
   },
   {
-    id: 'other-vehicles',
-    title: 'Motorcycles, Boats, Watercraft, and Aircraft',
-    status: 'Shown by Rockstar',
-    paragraphs: [
-      `Leonida is built for more than four wheels. Rockstar has named the Dinka Enduro motorcycle, Crest Kayak, and Shitzu Squalo boat as edition content. Official footage also shows dirt bikes, personal watercraft, speedboats, helicopters, and fixed-wing aircraft across the state.`,
-      `Dazed describes Jason and Lucia riding a jetski together, which directly establishes at least one playable form of personal watercraft. For many other aircraft and boats, official footage confirms their presence without defining ownership, storage, customization, or full player access.`,
-    ],
-    sources: [
-      { label: 'Rockstar Games — GTA VI Editions', url: R_EDITIONS, note: 'Dinka Enduro, Crest Kayak, and Shitzu Squalo package content.' },
-      { label: 'Rockstar Games — GTA VI Media', url: R_MEDIA, note: 'official videos and imagery showing land, water, and air vehicles.' },
-      { label: 'Dazed — GTA VI: An Exclusive Deep Dive', url: DAZED, note: 'Jason and Lucia using a jetski.' },
-    ],
-  },
-  {
     id: 'not-confirmed',
     title: 'What Rockstar Has Not Confirmed Yet',
     status: 'Not Confirmed',
@@ -247,7 +235,7 @@ export const guideCoverage: { name: string; text: string }[] = [
 
 /** FAQ: the same text is used for the visible answers and FAQPage JSON-LD. */
 export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
-  { q: 'What vehicles are confirmed for GTA VI?', a: 'Rockstar has named selected cars, motorcycles, boats, and other vehicles through its editions pages and official screenshots. Many more vehicles are visible in official footage without being named by Rockstar, and no complete official list or total has been published. The Garage focuses on racing-relevant cars and identifies the evidence behind each listed model.' },
+  { q: 'Which cars has Rockstar confirmed for GTA VI?', a: 'Rockstar has named cars including the ’95 Grotti Cheetah and ’67 Vapid Dominator Buggy. More cars appear in official footage without being named; their model names are often community identifications. Rockstar has not published a complete official lineup. The Garage focuses on racing-relevant cars.' },
   { q: 'How does stealing cars work in GTA VI?', a: 'Rockstar North’s Rob Nelson described a tiered system. Some parked vehicles require tools such as a Slim Jim or key cloner, while occupied vehicles can still be carjacked. A phone scanner can provide information about a vehicle’s security, tracker, value, and registration cost.' },
   { q: 'Can stolen cars become personal vehicles?', a: 'Yes. A stolen car can be registered as a personal vehicle. Unregistered stolen vehicles remain temporarily but disappear when the game is restarted. Players begin with storage for three vehicles and can buy garages to expand it; the complete list of eligible vehicles and the later-game ownership limit remain unannounced.' },
   { q: 'Does GTA VI have car customization?', a: 'Yes. Rockstar has confirmed specialist mod shops and described cosmetic and performance-oriented modifications. The complete parts catalog and standard-edition workshop options remain unknown.' },
@@ -274,5 +262,5 @@ export const GUIDE_VEHICLES = {
   label: 'Vehicles Identified',
   sourceLabel: 'GTABase',
   sourceUrl: 'https://www.gtabase.com/gta-6/vehicles/',
-  note: 'count of vehicles shown in official Rockstar trailers, screenshots, and the Extended Look, including cars, motorcycles, boats, and aircraft. Most names are community identifications. Rockstar has not published an official total. Checked October 3, 2026.',
+  note: 'count across all vehicle types shown in official Rockstar material, not just the cars covered here. Most names are community identifications. Rockstar has not published an official total. Checked October 3, 2026.',
 };

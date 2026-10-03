@@ -1,9 +1,10 @@
 ---
 import TaxonomyIndex from '../../../components/TaxonomyIndex.astro';
-import { manufacturerPages, vehiclesByMake } from '../../../data/garage-taxonomy';
+import { manufacturerPages, vehiclesByMake, manufacturersAbout } from '../../../data/garage-taxonomy';
 // COPY STATUS: approved (Codex 2026-10-02, Fausto).
 ---
 <TaxonomyIndex
+  about={manufacturersAbout}
   kind="manufacturer"
   pages={manufacturerPages.map((page) => ({ page, vehicles: vehiclesByMake(page.slug) }))}
   title="GTA VI Car Manufacturers — Browse by Brand"

@@ -1,9 +1,10 @@
 ---
 import TaxonomyIndex from '../../../components/TaxonomyIndex.astro';
-import { classPages, vehiclesInClass } from '../../../data/garage-taxonomy';
+import { classPages, vehiclesInClass, classesAbout } from '../../../data/garage-taxonomy';
 // COPY STATUS: approved (Codex 2026-10-02, Fausto).
 ---
 <TaxonomyIndex
+  about={classesAbout}
   kind="class"
   pages={classPages.map((page) => ({ page, vehicles: vehiclesInClass(page.slug) }))}
   title="GTA VI Vehicle Classes — Browse by Class"

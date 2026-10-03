@@ -14,8 +14,10 @@ interface Props {
   heading: string;
   description: string;
   intro: string;
+  /** text block under the grid (H2 + paragraphs) */
+  about?: { heading: string; paragraphs: string[] };
 }
-const { kind, pages, title, heading, description, intro } = Astro.props;
+const { kind, pages, title, heading, description, intro, about } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const dir = kind === 'class' ? 'classes' : 'manufacturers';
 const path = `garage/${dir}/`;
@@ -73,11 +75,18 @@ const jsonLd = [{
           </span>
           <span class="ti-count">{c.count} {c.count === 1 ? 'vehicle' : 'vehicles'}</span>
           {c.page.inspiration?.length && <span class="ti-insp">Real-life inspiration: <b>{c.page.inspiration.join(' · ')}</b></span>}
-          {c.named.length > 0 && <span class="ti-models">{c.named.join(' · ')}</span>}
+          {c.page.teaser ? <span class="ti-teaser">{c.page.teaser}</span> : c.named.length > 0 && <span class="ti-models">{c.named.join(' · ')}</span>}
         </span>
       </a>
     ))}
   </section>
+
+  {about && (
+    <section class="wrap ti-about" aria-labelledby="ti-about-h">
+      <h2 class="ti-about-h" id="ti-about-h">{about.heading}</h2>
+      {about.paragraphs.map((t) => <p>{t}</p>)}
+    </section>
+  )}
 
   <nav class="wrap ti-more" aria-label="More in The Garage">
     <a href={`${base}garage/${kind === 'class' ? 'manufacturers' : 'classes'}/`}>{kind === 'class' ? 'Browse by Manufacturer' : 'Browse by Class'} →</a>
@@ -107,6 +116,11 @@ const jsonLd = [{
   .ti-insp b { color: var(--gh-text); font-weight: 700; }
   .ti-count { color: var(--gh-yellow); font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
   .ti-models { color: var(--gh-muted); font-size: .78rem; line-height: 1.4; }
+  .ti-teaser { color: var(--gh-text); font-size: .86rem; line-height: 1.45; margin-top: .15rem; }
+  .ti-about { padding-top: 2.5rem; }
+  .ti-about > * { max-width: 780px; }
+  .ti-about-h { margin: 0 0 .7rem; padding-top: 1.75rem; border-top: 1px solid var(--gh-line); font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: clamp(1.3rem, 3vw, 1.6rem); line-height: 1.1; }
+  .ti-about p { margin: 0 0 .9rem; line-height: 1.7; }
   .ti-more { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-block: 2.5rem var(--gh-gap-section); }
   .ti-more a { color: var(--gh-yellow); font-weight: 700; font-size: .88rem; text-decoration: none; }
 </style>
