@@ -44,6 +44,7 @@
 .ev-month:first-child { margin-top: 0; }
 .ev-list { display: flex; flex-direction: column; gap: .75rem; }
 .ev-row { display: grid; grid-template-columns: 4.5rem 1fr auto; gap: 1.1rem; align-items: stretch; padding: 1rem 1.1rem; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg); }
+.ev-row.is-target { border-color: var(--gh-yellow); box-shadow: 0 0 0 1px var(--gh-yellow); }
 .ev-row.is-cancelled { opacity: .55; }
 .ev-row.is-cancelled .ev-title { text-decoration: line-through; }
 .ev-date { align-self: center; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: .5rem 0; border-radius: var(--gh-radius); background: rgba(252,250,247,.05); border: 1px solid var(--gh-line); line-height: 1; }

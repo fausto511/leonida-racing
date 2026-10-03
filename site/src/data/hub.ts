@@ -290,7 +290,7 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
   const hostedBy = who || e.host
     ? `<span class="ev-by">Hosted by ${who}${e.host ? ` ${crewTagHtml(e.host.tag, e.host.color, 'sm')}` : ''}</span>`
     : '';
-  return `<article class="ev-row${cancelled ? ' is-cancelled' : ''}" data-type="${esc(e.event_type)}" data-platforms="${esc(e.platforms.join('|'))}" data-start="${esc(e.starts_at)}">
+  return `<article class="ev-row${cancelled ? ' is-cancelled' : ''}" id="event-${esc(e.event_id)}" data-type="${esc(e.event_type)}" data-platforms="${esc(e.platforms.join('|'))}" data-start="${esc(e.starts_at)}">
   <div class="ev-date" data-ts="${esc(e.starts_at)}">
     <span class="ev-wd" data-fmt="wd">${esc(wd)}</span>
     <span class="ev-day" data-fmt="day">${esc(day)}</span>

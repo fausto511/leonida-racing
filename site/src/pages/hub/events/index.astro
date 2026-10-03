@@ -99,6 +99,9 @@ const initialHtml = groups.map((g) => `<h2 class="ev-month">${g.label}</h2><div 
     rsvp.setEvents(events, true);
     flagEl.hidden = true;
     render();
+    // Deep link from the Discord bot / shares: /hub/events/#event-<id> (2026-10-04)
+    const target = location.hash.startsWith('#event-') ? document.getElementById(location.hash.slice(1)) : null;
+    if (target) { target.scrollIntoView({ block: 'center' }); target.classList.add('is-target'); }
     await rsvp.connect();
   });
 </script>
