@@ -17,8 +17,8 @@ export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
 /** Images in public/images/guide/<key>-<width>.webp (Fausto's selection, Visual/Guide, 2026-10-03).
- *  Cars only, no boats or aircraft (Fausto). Alt texts/captions: Codex 2026-10-03, approved; Rideout alt says
- *  'coupe' (the car has a roof; Codex had 'convertible'). */
+ *  Cars only, no boats or aircraft (Fausto). Alt texts/captions: Codex 2026-10-03, approved; Rideout alt names
+ *  the Albany Manana (Fausto, 2026-10-04; Codex had 'convertible'). */
 export interface GuideImage { key: string; widths: number[]; w: number; h: number; alt: string; caption: string }
 const W3 = [640, 1280, 1920];
 const RS = 'Official screenshot — Rockstar Games.';
@@ -27,7 +27,7 @@ const IMG = {
   driving: img('driving', [640, 1280], 1280, 720, 'A dark sedan turns across a city street with smoke around its tires in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
   slimJim: img('slim-jim', [640, 1280], 1280, 720, 'A character stands beside a red parked car with “Slim Jim” and “Smash Window” prompts on screen in GTA VI.', 'On-screen theft options in GTA VI gameplay — Rockstar Games.'),
   buggy: img('dominator-buggy', W3, 1920, 1080, 'The ’67 Vapid Dominator Buggy splashes through mud on a dirt trail in GTA VI.', `’67 Vapid Dominator Buggy, Ultimate Edition. ${RS}`),
-  rideout: img('rideout-customs', W3, 1920, 1080, 'A mechanic works beneath a yellow coupe while another stands beside it in a GTA VI workshop.', `Rideout Customs Mod Shop, Ultimate Edition. ${RS}`),
+  rideout: img('rideout-customs', W3, 1920, 1080, 'A mechanic works beneath a yellow Albany Manana while another stands beside it in a GTA VI workshop.', `Rideout Customs Mod Shop, Ultimate Edition. ${RS}`),
   willies: img('one-eyed-willies', W3, 1920, 1080, 'Mechanics work around a bright green pickup with its hood raised in a GTA VI workshop.', `One-Eyed Willie’s Mod Shop, Ultimate Edition. ${RS}`),
   wyman: img('classic-collection-wyman', W3, 1920, 1080, 'Wyman holds a wrench beside classic cars and workshop tools in a yard in GTA VI.', `Wyman and the Classic Car Collection, Ultimate Edition. ${RS}`),
   classicCar: img('classic-collection-car', W3, 1920, 1080, 'A turquoise Sirius coupe with black side stripes and a rear spoiler, viewed from behind in GTA VI.', `Sirius from the Classic Car Collection, Ultimate Edition. ${RS}`),
