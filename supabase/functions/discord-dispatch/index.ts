@@ -13,6 +13,9 @@
 // event is no longer visible (unpublished, deleted, no longer matching).
 // Cancelled events keep their card, marked "Cancelled", without buttons;
 // the native Discord event (server Events list) is deleted.
+// Server admins may edit our server events in Discord: location / voice channel
+// and cover image are kept; title, time and description follow the website.
+// If they delete one, it is not recreated (REMOVED).
 //
 // Test events (hub_events.is_test) only reach guilds listed in
 // discord_bot_state 'test_guild_ids' (comma separated).
@@ -159,6 +162,16 @@ async function nativeEvent(e: any, withImage: boolean) {
   return body;
 }
 
+// Updates only touch what the website owns (title, time, description). Location /
+// voice channel, privacy and cover image stay as the server admin set them.
+async function nativeEventPatch(e: any) {
+  const { name, scheduled_start_time, scheduled_end_time, description } = await nativeEvent(e, false) as any;
+  return { name, scheduled_start_time, scheduled_end_time, description };
+}
+// scheduled_event_id = REMOVED: a server admin deleted our server event by hand ->
+// respect that and never recreate it for this feed + event.
+const REMOVED = "removed";
+
 async function createServerEvent(f: any, e: any): Promise<DResult> {
   const s = await discord("POST", `/guilds/${f.guild_id}/scheduled-events`, await nativeEvent(e, true));
   if (s.status === 400) { // e.g. image rejected -> try once without it
@@ -177,7 +190,7 @@ async function sync(f: any, eventId: string, e: any | null, going: number, depth
   if (!want) {
     if (!ref) return;
     if (ref.message_id) await discord("DELETE", `/channels/${ref.channel_id}/messages/${ref.message_id}`);
-    if (ref.scheduled_event_id) await discord("DELETE", `/guilds/${f.guild_id}/scheduled-events/${ref.scheduled_event_id}`);
+    if (ref.scheduled_event_id && ref.scheduled_event_id !== REMOVED) await discord("DELETE", `/guilds/${f.guild_id}/scheduled-events/${ref.scheduled_event_id}`);
     await db.from("discord_messages").delete().eq("feed_id", f.feed_id).eq("event_id", eventId);
     return;
   }
@@ -212,20 +225,22 @@ async function sync(f: any, eventId: string, e: any | null, going: number, depth
   if (!ref.message_id) return; // another run is posting it right now
   const r = await discord("PATCH", `/channels/${ref.channel_id}/messages/${ref.message_id}`, card(e, going));
   if (r.status === 404 && depth === 0) { // message deleted by a server admin -> forget it and repost once
-    if (ref.scheduled_event_id) await discord("DELETE", `/guilds/${f.guild_id}/scheduled-events/${ref.scheduled_event_id}`);
+    if (ref.scheduled_event_id && ref.scheduled_event_id !== REMOVED) await discord("DELETE", `/guilds/${f.guild_id}/scheduled-events/${ref.scheduled_event_id}`);
     await db.from("discord_messages").delete().eq("feed_id", f.feed_id).eq("event_id", eventId);
     return sync(f, eventId, e, going, 1);
   }
   if (!r.ok) { await feedError(f, describeFail(r, "edit messages in the channel")); console.log("edit failed", r.status, r.text.slice(0, 300)); }
 
   let sched: string | null = ref.scheduled_event_id;
-  if (sched && (cancelled || !f.native_events)) {
+  if (sched === REMOVED) {
+    if (!f.native_events) sched = null; // option switched off -> forget the opt-out
+  } else if (sched && (cancelled || !f.native_events)) {
     await discord("DELETE", `/guilds/${f.guild_id}/scheduled-events/${sched}`);
     sched = null;
   } else if (!cancelled && f.native_events && future) {
     if (sched) {
-      const s = await discord("PATCH", `/guilds/${f.guild_id}/scheduled-events/${sched}`, await nativeEvent(e, false));
-      if (s.status === 404) sched = null;
+      const s = await discord("PATCH", `/guilds/${f.guild_id}/scheduled-events/${sched}`, await nativeEventPatch(e));
+      if (s.status === 404) sched = REMOVED; // deleted in Discord by an admin
     }
     if (!sched) {
       const s = await createServerEvent(f, e);
@@ -235,7 +250,7 @@ async function sync(f: any, eventId: string, e: any | null, going: number, depth
   }
   await db.from("discord_messages").update({ scheduled_event_id: sched, state: cancelled ? "cancelled" : "live", updated_at: new Date().toISOString() })
     .eq("feed_id", f.feed_id).eq("event_id", eventId);
-  if (r.ok && (sched || !f.native_events || !future || cancelled)) await feedError(f, null);
+  if (r.ok && (sched || !f.native_events || !future || cancelled)) await feedError(f, null); // REMOVED counts as fine
 }
 
 // ---------- outbox handlers ----------

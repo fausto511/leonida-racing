@@ -394,7 +394,7 @@ async function feedRemove(i: any) {
   const { names } = await feedsWithNames(i.guild_id);
   // Remove the server events this feed created; posted cards stay in the channel.
   const { data: refs } = await db.from("discord_messages").select("scheduled_event_id").eq("feed_id", f.feed_id).not("scheduled_event_id", "is", null);
-  for (const r of refs ?? []) await api(`/guilds/${i.guild_id}/scheduled-events/${r.scheduled_event_id}`, { method: "DELETE" });
+  for (const r of refs ?? []) if (r.scheduled_event_id !== "removed") await api(`/guilds/${i.guild_id}/scheduled-events/${r.scheduled_event_id}`, { method: "DELETE" });
   const { error } = await db.from("discord_feeds").delete().eq("feed_id", f.feed_id);
   if (error) throw error;
   return { content: `Feed removed: <#${f.channel_id}> · ${feedLabel(f, names)}. Posts already in the channel stay there.` };
