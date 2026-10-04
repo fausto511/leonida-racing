@@ -22,8 +22,8 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const PUBLIC_KEY = "5aef5b94df1e1470f44ce3f5eac2e53618c6582759ebe295d9745eeceeb0cfe6";
 const APP_ID = "1552506662533861376";
 const SITE = "https://leonidaracing.com";
-// Guild install with bot user + slash commands. Permissions: View Channels, Send Messages, Embed Links, Manage Events + Create Events (server events, package 3).
-const INVITE = `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot+applications.commands&permissions=17600775998464&integration_type=0`;
+// Guild install with bot user + slash commands. Permissions: View Channels, Send Messages, Embed Links, Manage Events + Create Events (server events), Connect (needed to update server events an admin moved to a voice channel).
+const INVITE = `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot+applications.commands&permissions=17600777047040&integration_type=0`;
 const YELLOW = 0xffd74c;
 const DISCORD_BOT_TOKEN = Deno.env.get("DISCORD_BOT_TOKEN") ?? "";
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });

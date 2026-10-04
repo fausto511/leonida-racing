@@ -25,7 +25,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const APP_ID = "1552506662533861376";
 const SITE = "https://leonidaracing.com";
-const INVITE = `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot+applications.commands&permissions=17600775998464&integration_type=0`;
+const INVITE = `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot+applications.commands&permissions=17600777047040&integration_type=0`;
 const YELLOW = 0xffd74c, GREY = 0x5c5c6e;
 const TOKEN = Deno.env.get("DISCORD_BOT_TOKEN") ?? "";
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
@@ -241,6 +241,14 @@ async function sync(f: any, eventId: string, e: any | null, going: number, depth
     if (sched) {
       const s = await discord("PATCH", `/guilds/${f.guild_id}/scheduled-events/${sched}`, await nativeEventPatch(e));
       if (s.status === 404) sched = REMOVED; // deleted in Discord by an admin
+      else if (!s.ok) {
+        console.log("event update failed", s.status, s.text.slice(0, 300));
+        await feedError(f, s.status === 403
+          ? "Can't update a server event: if it was moved to a voice channel, give Leonida Racing View Channel and Connect there."
+          : describeFail(s, "update server events"));
+        await db.from("discord_messages").update({ updated_at: new Date().toISOString() }).eq("feed_id", f.feed_id).eq("event_id", eventId);
+        return;
+      }
     }
     if (!sched) {
       const s = await createServerEvent(f, e);
