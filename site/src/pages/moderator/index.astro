@@ -163,10 +163,11 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
 <script>
   import { getSupabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '../../scripts/supabase-client';
 
-  const MODERATE_SUBMISSION_URL = import.meta.env.PUBLIC_MODERATE_SUBMISSION_URL ?? '';
-  // Stricter than the shared module's own backendConfigured -- this page
-  // also needs its own edge function URL configured.
-  const backendConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && MODERATE_SUBMISSION_URL);
+  // Derived from the project URL like every other function URL on the site. The old
+  // separate build secret PUBLIC_MODERATE_SUBMISSION_URL still held the setup
+  // placeholder in production (2026-10-04) and broke Reveal / Approve.
+  const MODERATE_SUBMISSION_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/moderate-submission` : '';
+  const backendConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
   const noticeEl = document.getElementById('backend-notice');
   const authBoxEl = document.getElementById('auth-box');
