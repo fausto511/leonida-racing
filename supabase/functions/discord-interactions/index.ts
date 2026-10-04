@@ -9,6 +9,7 @@
 //
 // Package 1: /events, /event, /car, /create-event.
 // Package 2: /leonida feed add|list|edit|remove (table discord_feeds).
+// Package 4: I'm in / Withdraw buttons on the cards (rpc discord_rsvp).
 // Package 3: cards are posted by the separate function discord-dispatch; test
 // events (hub_events.is_test) are never shown by these commands.
 // Option "add_to_server_events" = DB column native_events (Discord scheduled events).
@@ -417,6 +418,35 @@ async function feedAutocomplete(i: any) {
   return json({ type: 8, data: { choices: choices.slice(0, 25) } });
 }
 
+// ---------- I'm in / Withdraw buttons (package 4) ----------
+// custom_id "rsvp:in:<event_id>" / "rsvp:out:<event_id>" on the cards posted by
+// discord-dispatch. Same rules as the website via rpc discord_rsvp. The card's
+// "Going" count is refreshed by discord-dispatch within about a minute.
+async function rsvpButton(i: any) {
+  const [, action, eventId] = String(i.data?.custom_id ?? "").split(":");
+  if (!/^[0-9a-f-]{36}$/.test(eventId ?? "")) return ephemeral("This button doesn't work anymore.");
+  const { data, error } = await db.rpc("discord_rsvp", { p_event: eventId, p_discord_id: discordId(i), p_going: action === "in" });
+  if (error) throw error;
+  const r = data as any;
+  const count = r.max ? `${r.going} / ${r.max}` : `${r.going}`;
+  const hostRow = r.discord_url ? [row(linkButton("Host Discord", r.discord_url), linkButton("Details", `${SITE}/hub/events/#event-${eventId}`))]
+    : [row(linkButton("Details", `${SITE}/hub/events/#event-${eventId}`))];
+  const psn = r.host_name ? ` Host on PSN: **${r.host_name}**.` : "";
+  switch (r.status) {
+    case "no_profile": return ephemeral("To sign up, create your Leonida Racing driver profile first. It uses this Discord account, so it takes one click. Then press \u201cI'm in\u201d again.", [profileButton]);
+    case "not_found": return ephemeral("This event isn't available anymore.");
+    case "in": return ephemeral(`You're in for **${r.title}** \u2014 ${count} going.${psn}${r.discord_url ? " Join the host's Discord for the lobby invite." : ""}`, hostRow);
+    case "already": return ephemeral(`You're already in for **${r.title}** (${count} going).${psn}`, hostRow);
+    case "out": return ephemeral(`You're no longer signed up for **${r.title}**.`);
+    case "not_in": return ephemeral(`You weren't signed up for **${r.title}**.`);
+    case "full": return ephemeral(`Sorry, **${r.title}** is full (${count}).`);
+    case "closed": return ephemeral(`Sign-ups for **${r.title}** are closed.`);
+    case "cancelled": return ephemeral(`**${r.title}** has been cancelled.`);
+    case "past": return ephemeral(`**${r.title}** is already over.`);
+  }
+  return ephemeral("This action isn't available yet.");
+}
+
 // ---------- entry ----------
 Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("Leonida Racing Discord bot", { status: 200 });
@@ -431,6 +461,7 @@ Deno.serve(async (req) => {
   if (!commandsChecked) { commandsChecked = true; bg(registerCommandsIfChanged()); }
   try {
     if (i.type === 4) return i.data?.name === "leonida" ? await feedAutocomplete(i) : await autocomplete(i);
+    if (i.type === 3 && String(i.data?.custom_id ?? "").startsWith("rsvp:")) return await rsvpButton(i);
     if (i.type === 2) {
       switch (i.data?.name) {
         case "events": return await cmdEvents(i);

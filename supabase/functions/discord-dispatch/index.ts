@@ -20,6 +20,7 @@
 // Test events (hub_events.is_test) only reach guilds listed in
 // discord_bot_state 'test_guild_ids' (comma separated).
 //
+// Package 4: cards carry I'm in / Withdraw buttons (custom_id rsvp:in|out:<event_id>).
 // COPY STATUS: all user-facing texts are Claude placeholders, Codex review pending.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -122,7 +123,14 @@ function card(e: any, going: number) {
   if (cancelled) embed.description = "This event has been cancelled.";
   else if (e.description) embed.description = clip(String(e.description), 300);
   if (!cancelled) embed.image = { url: `${SITE}/images/hub/${EVENT_IMAGE[e.event_type] ?? "hub-events"}-1672.jpg` };
-  const buttons = [linkButton("Details", eventUrl(e))];
+  // Package 4: I'm in / Withdraw (handled by discord-interactions, rpc discord_rsvp).
+  const full = !!e.max_participants && going >= e.max_participants;
+  const buttons: Record<string, unknown>[] = [];
+  if (!cancelled) {
+    buttons.push({ type: 2, style: 3, label: full ? "Full" : e.registration === "closed" ? "Sign-ups closed" : "I'm in", custom_id: `rsvp:in:${e.event_id}`, disabled: full || e.registration === "closed" });
+    buttons.push({ type: 2, style: 2, label: "Withdraw", custom_id: `rsvp:out:${e.event_id}` });
+  }
+  buttons.push(linkButton("Details", eventUrl(e)));
   if (!cancelled && hostDiscord) buttons.push(linkButton("Host Discord", hostDiscord));
   if (!cancelled) buttons.push(linkButton("Add to your server", INVITE));
   return { embeds: [embed], components: [row(...buttons)], allowed_mentions: { parse: [] } };
