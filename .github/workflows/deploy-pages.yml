@@ -9,10 +9,9 @@ name: Deploy site to GitHub Pages
 #     ins Build gereicht, weil Astro sie client-seitig in die Submit-Seite
 #     einbacken muss)
 #
-# Base-Path-Hinweis: astro.config.mjs setzt aktuell `base: '/gellhorn-racing'`
-# fuer die GitHub-Pages-Projektseite. Sobald die eigene Domain
-# (gellhornracing.com) angeschlossen wird, muss dort `base` entfernt und
-# `site` auf die eigene Domain geaendert werden (siehe Kommentar dort).
+# Base-Path-Hinweis: Die Seite laeuft seit 2026-09-27 auf der eigenen Domain
+# leonidaracing.com (Custom Domain in den Pages-Einstellungen), daher kein
+# `base` in astro.config.mjs. Repo heisst seit 2026-10-04 `leonida-racing`.
 
 on:
   push:
