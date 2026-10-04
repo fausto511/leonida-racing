@@ -128,7 +128,7 @@ async function registerCommands() {
 let commandsChecked = false;
 
 // ---------- data ----------
-const EVENT_COLS = "event_id,title,event_type,starts_at,ends_at,platforms,host_name,status,max_participants,registration,discord_url,host:crews(name,tag,discord_url)";
+const EVENT_COLS = "event_id,title,event_type,starts_at,ends_at,platforms,host_name,status,max_participants,registration,discord_url,host:crews(name,tag,discord_url),creator:drivers!hub_events_created_by_fkey(display_name,deleted_at)";
 async function upcomingEvents(type?: string, platform?: string, limit = 5) {
   let q = db.from("hub_events").select(EVENT_COLS).eq("is_published", true).eq("is_test", false).neq("status", "cancelled")
     .gte("starts_at", new Date(Date.now() - 3 * 3600e3).toISOString()).order("starts_at").limit(limit);
@@ -142,7 +142,10 @@ async function goingCount(eventId: string) {
   return count ?? 0;
 }
 const eventUrl = (e: any) => `${SITE}/hub/events/#event-${e.event_id}`;
-const hostLabel = (e: any) => e.host?.name ? `${e.host.name}${e.host.tag ? ` [${e.host.tag}]` : ""}` : (e.host_name ?? "Community host");
+// Host = a person (PSN name, else the creator's site name); a crew is shown separately.
+const hostPerson = (e: any) => e.host_name ?? (e.creator && !e.creator.deleted_at ? e.creator.display_name : null) ?? "Community host";
+const crewLabel = (e: any) => e.host?.name ? `${e.host.name}${e.host.tag ? ` [${e.host.tag}]` : ""}` : null;
+const hostLabel = (e: any) => crewLabel(e) ? `${hostPerson(e)} \u00b7 ${crewLabel(e)}` : hostPerson(e);
 
 async function eventEmbed(e: any) {
   const going = await goingCount(e.event_id);
@@ -150,9 +153,10 @@ async function eventEmbed(e: any) {
     { name: "Starts", value: `<t:${unix(e.starts_at)}:F>\n<t:${unix(e.starts_at)}:R>`, inline: true },
     { name: "Type", value: EVENT_TYPES[e.event_type] ?? e.event_type, inline: true },
     { name: "Platform", value: (e.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p).join(", ") || "—", inline: true },
-    { name: "Host", value: hostLabel(e), inline: true },
+    { name: "Host", value: e.host_name ? `[${e.host_name}](https://profile.playstation.com/${encodeURIComponent(e.host_name)})` : hostPerson(e), inline: true },
     { name: "Going", value: e.max_participants ? `${going} / ${e.max_participants}` : String(going), inline: true },
   ];
+  if (crewLabel(e)) fields.push({ name: "Crew", value: crewLabel(e)!, inline: true });
   if (e.registration === "closed") fields.push({ name: "Sign-ups", value: "Closed", inline: true });
   return {
     title: clip(e.title, 256), url: eventUrl(e), color: YELLOW, fields,

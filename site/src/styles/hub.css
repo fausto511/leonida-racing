@@ -188,7 +188,12 @@ a.ev-dc:hover { color: #aab2ff; text-decoration: underline; text-underline-offse
 /* Next step after "I'm in" (2026-10-01): reach the host for the invite */
 .ev-next { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; padding: .85rem 1rem; border: 1px solid rgba(88,101,242,.55); border-radius: var(--gh-radius); background: rgba(88,101,242,.12); }
 .ev-next-text { flex: 1 1 18rem; margin: 0; font-size: .86rem; color: var(--gh-text); }
-.ev-next-dc { background: #5865f2; color: #fff; padding: .65rem 1.2rem; font-size: .85rem; }
+.ev-next-actions { display: flex; flex-wrap: wrap; gap: .6rem; }
+.ev-next-dc, .ev-next-ps { display: inline-flex; align-items: center; gap: .5rem; color: #fff; padding: .65rem 1.2rem; font-size: .85rem; text-decoration: none; }
+.ev-next-dc { background: #5865f2; }
+/* PlayStation blue (brand colour for links that lead to PlayStation) */
+.ev-next-ps { background: #0070d1; }
+.ev-next-ps:hover { filter: brightness(1.1); }
 .ev-next-dc:hover { filter: brightness(1.1); }
 .ev-next-dc.is-disabled { opacity: .45; cursor: default; filter: none; }
 .ev-next-psn { display: inline-flex; align-items: center; gap: .45rem; color: var(--gh-muted); font-size: .8rem; }

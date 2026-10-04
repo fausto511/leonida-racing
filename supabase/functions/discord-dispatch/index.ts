@@ -45,7 +45,10 @@ const linkButton = (label: string, url: string) => ({ type: 2, style: 5, label, 
 const row = (...b: unknown[]) => ({ type: 1, components: b });
 const eventUrl = (e: any) => `${SITE}/hub/events/#event-${e.event_id}`;
 const endOf = (e: any) => (e.ends_at ? new Date(e.ends_at) : new Date(new Date(e.starts_at).getTime() + DEFAULT_DURATION_MS));
-const hostLabel = (e: any) => e.host?.name ? `${e.host.name}${e.host.tag ? ` [${e.host.tag}]` : ""}` : (e.host_name ?? "Community host");
+// The host is always a person (Fausto 2026-10-04): PSN name, else the creator's
+// site name. A crew can organise an event but can't host the lobby -> own field.
+const hostPerson = (e: any) => e.host_name ?? (e.creator && !e.creator.deleted_at ? e.creator.display_name : null) ?? "Community host";
+const crewLabel = (e: any) => e.host?.name ? `${e.host.name}${e.host.tag ? ` [${e.host.tag}]` : ""}` : null;
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
 
 type DResult = { ok: boolean; status: number; data: any; text: string };
@@ -64,7 +67,7 @@ async function discord(method: string, path: string, body?: unknown): Promise<DR
 }
 
 // ---------- data ----------
-const EVENT_COLS = "event_id,title,event_type,starts_at,ends_at,platforms,host_name,host_crew_id,created_by,status,is_published,is_test,max_participants,registration,discord_url,description,host:crews(name,tag,discord_url)";
+const EVENT_COLS = "event_id,title,event_type,starts_at,ends_at,platforms,host_name,host_crew_id,created_by,status,is_published,is_test,max_participants,registration,discord_url,description,host:crews(name,tag,discord_url),creator:drivers!hub_events_created_by_fkey(display_name,deleted_at)";
 async function loadEvent(id: string) {
   const { data } = await db.from("hub_events").select(EVENT_COLS).eq("event_id", id).maybeSingle();
   return data as any | null;
@@ -113,11 +116,10 @@ function card(e: any, going: number) {
     { name: "Starts", value: `<t:${unix(e.starts_at)}:F>\n<t:${unix(e.starts_at)}:R>`, inline: true },
     { name: "Type", value: EVENT_TYPES[e.event_type] ?? e.event_type, inline: true },
     { name: "Platform", value: (e.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p).join(", ") || "—", inline: true },
-    { name: "Host", value: psnLink && !e.host?.name ? psnLink : hostLabel(e), inline: true },
+    { name: "Host", value: psnLink ?? hostPerson(e), inline: true },
     { name: "Going", value: e.max_participants ? `${going} / ${e.max_participants}` : String(going), inline: true },
   ];
-  // Crew-hosted event with a PSN contact: show the PSN name as an extra field.
-  if (psnLink && e.host?.name) fields.push({ name: "Host on PSN", value: psnLink, inline: true });
+  if (crewLabel(e)) fields.push({ name: "Crew", value: crewLabel(e)!, inline: true });
   if (!cancelled && e.registration === "closed") fields.push({ name: "Sign-ups", value: "Closed", inline: true });
   const embed: Record<string, unknown> = {
     title: clip(cancelled ? `Cancelled: ${e.title}` : e.title, 256), url: eventUrl(e),
@@ -160,7 +162,7 @@ async function coverImage(type: string): Promise<string | null> {
 }
 async function nativeEvent(e: any, withImage: boolean) {
   const platforms = (e.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p).join(", ");
-  const facts = [`${EVENT_TYPES[e.event_type] ?? e.event_type} \u00b7 ${platforms}`, `Host: ${hostLabel(e)}`];
+  const facts = [`${EVENT_TYPES[e.event_type] ?? e.event_type} \u00b7 ${platforms}`, `Host: ${hostPerson(e)}`, ...(crewLabel(e) ? [`Crew: ${crewLabel(e)}`] : [])];
   const tail = `\n\n${facts.join("\n")}\n${eventUrl(e)}`;
   const desc = e.description ? clip(String(e.description), 1000 - tail.length) + tail : tail.trimStart();
   const body: Record<string, unknown> = {

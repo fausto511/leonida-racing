@@ -1,7 +1,7 @@
 // Event sign-ups ("I'm in"), shared by the Event Calendar and the Hub
 // overview (2026-10-02). Everyone sees who is going; logged-in drivers can
 // join / cancel; rules (capacity, closed, cancelled, past) are enforced by the DB.
-import { eventDiscord, esc, psnProfileUrl, type HubEvent } from '../data/hub';
+import { eventDiscord, esc, psnProfileUrl, iconDiscord, iconPlayStation, type HubEvent } from '../data/hub';
 import { sampleRsvps, setSampleRsvp } from './sample-rsvp';
 import { backendConfigured, getSupabase } from './supabase-client';
 
@@ -17,21 +17,27 @@ export function createEventRsvp(root: HTMLElement) {
 
   const isOver = (e: HubEvent) => new Date(e.ends_at ?? new Date(new Date(e.starts_at).getTime() + 3 * 3600e3).toISOString()) < new Date();
 
-  // COPY STATUS: approved (Codex 2026-10-02, Fausto).
+  // Next step after "I'm in": one button per way to reach the host, each in the
+  // platform's colour with its logo (Fausto 2026-10-04). The host's name is
+  // already shown in the row ("Hosted by"), so it isn't repeated here.
+  // COPY STATUS: sentences for the "both" case and button labels are Claude
+  // placeholders (Codex review pending); the rest was approved 2026-10-02.
   function nextStepHtml(e: HubEvent, sample: boolean): string {
-    const discord = sample ? null : eventDiscord(e);
-    const psn = e.host_name ? esc(e.host_name) : '';
-    // PSN profile link instead of "Copy" (Fausto 2026-10-04): copying on a PC
-    // doesn't help on the console; the profile page opens in the PlayStation
-    // app / browser where the friend request can be sent directly.
-    const psnPart = psn ? `<span class="ev-next-psn">Host on PlayStation: <strong>${psn}</strong> <a class="ev-next-copy" href="${esc(psnProfileUrl(e.host_name!))}" target="_blank" rel="noopener nofollow">Open PSN Profile ↗</a></span>` : '';
     if (sample) {
       return `<div class="ev-next"><p class="ev-next-text"><strong>You\u2019re in.</strong> This is a sample event, so no real invite will be sent.</p></div>`;
     }
-    if (discord) {
-      return `<div class="ev-next"><p class="ev-next-text"><strong>You\u2019re in \u2014 one more step.</strong> Join the host\u2019s Discord so they can send your lobby invite.</p><a class="btn ev-next-dc" href="${esc(discord)}" target="_blank" rel="noopener">Join the Host\u2019s Discord</a>${psnPart}</div>`;
-    }
-    return `<div class="ev-next"><p class="ev-next-text"><strong>You\u2019re in \u2014 one more step.</strong> Add the host on PlayStation and message them for your lobby invite.</p>${psnPart}</div>`;
+    const discord = eventDiscord(e);
+    const psn = e.host_name ?? null;
+    const buttons = [
+      discord ? `<a class="btn ev-next-dc" href="${esc(discord)}" target="_blank" rel="noopener">${iconDiscord}Join the Host\u2019s Discord</a>` : '',
+      psn ? `<a class="btn ev-next-ps" href="${esc(psnProfileUrl(psn))}" target="_blank" rel="noopener nofollow">${iconPlayStation}Add the Host on PlayStation</a>` : '',
+    ].join('');
+    const text = discord && psn
+      ? 'Join the host\u2019s Discord or add them on PlayStation to get your lobby invite.'
+      : discord
+        ? 'Join the host\u2019s Discord so they can send your lobby invite.'
+        : 'Add the host on PlayStation and message them for your lobby invite.';
+    return `<div class="ev-next"><p class="ev-next-text"><strong>You\u2019re in \u2014 one more step.</strong> ${text}</p>${buttons ? `<div class="ev-next-actions">${buttons}</div>` : ''}</div>`;
   }
 
   function renderRsvps() {
