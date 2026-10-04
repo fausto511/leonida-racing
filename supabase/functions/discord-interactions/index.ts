@@ -9,6 +9,8 @@
 //
 // Package 1: /events, /event, /car, /create-event.
 // Package 2: /leonida feed add|list|edit|remove (table discord_feeds).
+// Package 3: cards are posted by the separate function discord-dispatch; test
+// events (hub_events.is_test) are never shown by these commands.
 // Option "add_to_server_events" = DB column native_events (Discord scheduled events).
 // The global command list is (re)registered with the bot token on Discord's
 // verification PING and on the first request after a deploy whenever
@@ -127,7 +129,7 @@ let commandsChecked = false;
 // ---------- data ----------
 const EVENT_COLS = "event_id,title,event_type,starts_at,ends_at,platforms,host_name,status,max_participants,registration,discord_url,host:crews(name,tag,discord_url)";
 async function upcomingEvents(type?: string, platform?: string, limit = 5) {
-  let q = db.from("hub_events").select(EVENT_COLS).eq("is_published", true).neq("status", "cancelled")
+  let q = db.from("hub_events").select(EVENT_COLS).eq("is_published", true).eq("is_test", false).neq("status", "cancelled")
     .gte("starts_at", new Date(Date.now() - 3 * 3600e3).toISOString()).order("starts_at").limit(limit);
   if (type) q = q.eq("event_type", type);
   if (platform) q = q.contains("platforms", [platform]);
@@ -175,7 +177,7 @@ async function cmdEvents(i: any) {
 
 async function cmdEvent(i: any) {
   const id = String(opt(i, "event") ?? "");
-  const { data: e } = await db.from("hub_events").select(EVENT_COLS).eq("event_id", id).eq("is_published", true).maybeSingle();
+  const { data: e } = await db.from("hub_events").select(EVENT_COLS).eq("event_id", id).eq("is_published", true).eq("is_test", false).maybeSingle();
   if (!e) return ephemeral("I couldn't find that event. Pick one from the suggestions while typing.");
   return reply({ embeds: [await eventEmbed(e)], components: [row(linkButton("Details", eventUrl(e)), addButton)] });
 }
@@ -213,7 +215,7 @@ async function autocomplete(i: any) {
   const term = String(focused?.value ?? "").trim();
   let choices: { name: string; value: string }[] = [];
   if (i.data?.name === "event") {
-    let q = db.from("hub_events").select("event_id,title,starts_at").eq("is_published", true).neq("status", "cancelled")
+    let q = db.from("hub_events").select("event_id,title,starts_at").eq("is_published", true).eq("is_test", false).neq("status", "cancelled")
       .gte("starts_at", new Date(Date.now() - 3 * 3600e3).toISOString()).order("starts_at").limit(25);
     if (term) q = q.ilike("title", `%${term}%`);
     const { data } = await q;
@@ -390,6 +392,9 @@ async function feedRemove(i: any) {
   const f = await feedOfGuild(i);
   if (!f) return { content: "I couldn't find that feed on this server. Pick one from the suggestions while typing." };
   const { names } = await feedsWithNames(i.guild_id);
+  // Remove the server events this feed created; posted cards stay in the channel.
+  const { data: refs } = await db.from("discord_messages").select("scheduled_event_id").eq("feed_id", f.feed_id).not("scheduled_event_id", "is", null);
+  for (const r of refs ?? []) await api(`/guilds/${i.guild_id}/scheduled-events/${r.scheduled_event_id}`, { method: "DELETE" });
   const { error } = await db.from("discord_feeds").delete().eq("feed_id", f.feed_id);
   if (error) throw error;
   return { content: `Feed removed: <#${f.channel_id}> · ${feedLabel(f, names)}. Posts already in the channel stay there.` };
