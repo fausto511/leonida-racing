@@ -9,7 +9,7 @@
 //
 // Package 1: /events, /event, /car, /create-event.
 // Package 2: /leonida feed add|list|edit|remove (table discord_feeds).
-// Option "events_tab" = DB column native_events (Discord scheduled events).
+// Option "add_to_server_events" = DB column native_events (Discord scheduled events).
 // The global command list is (re)registered with the bot token on Discord's
 // verification PING and on the first request after a deploy whenever
 // COMMANDS_VERSION differs from the one stored in discord_bot_state.
@@ -56,14 +56,14 @@ const COMMANDS = [
         { type: 3, name: "platform", description: "Only this platform (required for the public calendar)", required: false, choices: Object.entries(PLATFORMS).map(([value, name]) => ({ name, value })) },
         { type: 3, name: "event_type", description: "Only this event type", required: false, choices: Object.entries(EVENT_TYPES).map(([value, name]) => ({ name, value })) },
         { type: 3, name: "crew", description: "Your crew (only needed if you lead more than one)", required: false, autocomplete: true },
-        { type: 5, name: "events_tab", description: "Also list each event in this server's Events tab (next to the channel list)", required: false },
+        { type: 5, name: "add_to_server_events", description: "Also add each event to this server's Events (top of the channel list)", required: false },
         { type: 3, name: "reminders", description: "Reminder posts before the start", required: false, choices: REMINDER_CHOICES },
         { type: 5, name: "mention_attendees", description: "Mention drivers who are in when posting reminders", required: false },
       ] },
       { type: 1, name: "list", description: "Show this server's feeds" },
       { type: 1, name: "edit", description: "Change a feed's options", options: [
         { type: 3, name: "feed", description: "Feed to change", required: true, autocomplete: true },
-        { type: 5, name: "events_tab", description: "Also list each event in this server's Events tab (next to the channel list)", required: false },
+        { type: 5, name: "add_to_server_events", description: "Also add each event to this server's Events (top of the channel list)", required: false },
         { type: 3, name: "reminders", description: "Reminder posts before the start", required: false, choices: REMINDER_CHOICES },
         { type: 5, name: "mention_attendees", description: "Mention drivers who are in when posting reminders", required: false },
       ] },
@@ -73,7 +73,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-10-04.3";
+const COMMANDS_VERSION = "2026-10-04.4";
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
@@ -283,7 +283,7 @@ async function feedsWithNames(guildId: string) {
   return { feeds, names: { crews, hosts } };
 }
 const optionsLine = (f: any) => [
-  `Events tab: ${f.native_events ? "on" : "off"}`,
+  `Server events: ${f.native_events ? "on" : "off"}`,
   `Reminders: ${REMINDERS[f.reminders] ?? f.reminders}`,
   ...(f.reminders !== "off" ? [`Mentions: ${f.mention_attendees ? "on" : "off"}`] : []),
 ].join(" · ");
@@ -305,7 +305,7 @@ async function feedAdd(i: any) {
   const source = String(opt(i, "source") ?? "");
   const platform = opt(i, "platform") as string | undefined;
   const eventType = opt(i, "event_type") as string | undefined;
-  const nativeEvents = opt(i, "events_tab") === true;
+  const nativeEvents = opt(i, "add_to_server_events") === true;
   const reminders = (opt(i, "reminders") as string | undefined) ?? "off";
   const mention = opt(i, "mention_attendees") === true;
   const who = discordId(i);
@@ -354,7 +354,7 @@ async function feedAdd(i: any) {
     throw error;
   }
   const notes: string[] = [];
-  if (nativeEvents && (BigInt(i.app_permissions ?? "0") & PERM_MANAGE_EVENTS) === 0n) notes.push("Events tab is switched on, but Leonida Racing doesn't have the “Manage Events” permission yet. Until it does, only the posts in the channel will appear.");
+  if (nativeEvents && (BigInt(i.app_permissions ?? "0") & PERM_MANAGE_EVENTS) === 0n) notes.push("Adding to server events is switched on, but Leonida Racing doesn't have the “Manage Events” permission yet. Until it does, only the posts in the channel will appear.");
   if (mention && reminders === "off") notes.push("Mentions only apply to reminders, which are off for this feed.");
   return { content: [`Feed added: <#${channelId}> · ${srcText}${filters ? ` · ${filters}` : ""}.`, ...notes].join("\n") };
 }
@@ -376,14 +376,14 @@ async function feedEdit(i: any) {
   const f = await feedOfGuild(i);
   if (!f) return { content: "I couldn't find that feed on this server. Pick one from the suggestions while typing." };
   const patch: Record<string, unknown> = {};
-  for (const [o, col] of [["events_tab", "native_events"], ["reminders", "reminders"], ["mention_attendees", "mention_attendees"]]) { const v = opt(i, o); if (v !== undefined) patch[col] = v; }
+  for (const [o, col] of [["add_to_server_events", "native_events"], ["reminders", "reminders"], ["mention_attendees", "mention_attendees"]]) { const v = opt(i, o); if (v !== undefined) patch[col] = v; }
   if (!Object.keys(patch).length) return { content: "Nothing to change. Pick at least one option." };
   patch.updated_at = new Date().toISOString();
   const { data: upd, error } = await db.from("discord_feeds").update(patch).eq("feed_id", f.feed_id).select("*").single();
   if (error) throw error;
   const { names } = await feedsWithNames(i.guild_id);
   const notes: string[] = [];
-  if (upd.native_events && (BigInt(i.app_permissions ?? "0") & PERM_MANAGE_EVENTS) === 0n) notes.push("Leonida Racing doesn't have the “Manage Events” permission yet, so nothing will appear in the Events tab until it does.");
+  if (upd.native_events && (BigInt(i.app_permissions ?? "0") & PERM_MANAGE_EVENTS) === 0n) notes.push("Leonida Racing doesn't have the “Manage Events” permission yet, so nothing will be added to your server events until it does.");
   return { content: [`Feed updated: <#${upd.channel_id}> · ${feedLabel(upd, names)}\n${optionsLine(upd)}`, ...notes].join("\n") };
 }
 async function feedRemove(i: any) {
