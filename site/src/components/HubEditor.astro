@@ -134,12 +134,11 @@ const base = import.meta.env.BASE_URL;
               </fieldset>
               <label>Host PSN name <small>so players can add you on PlayStation</small><input type="text" name="host_name" maxlength="16" placeholder="e.g. Racer_01" autocomplete="off" /></label>
               <label>Host crew <small>optional — its tag is shown next to your name</small><select name="host_crew_id"><option value="">— none —</option></select></label>
-              <label>Location<input type="text" name="location" maxlength="80" placeholder="e.g. Vice Beach" /></label>
-              <label class="span2">Discord invite <small>where participants meet you — a PSN name or a Discord (yours or your crew's) is required</small><input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
-              <label>Details link <small>optional, any https page</small><input type="url" name="join_url" placeholder="https://…" /></label>
+              <label>Location <small>optional — more places are added after release</small><select name="location"><option value="">— not specified —</option></select></label>
+              <label class="span2">Discord invite <small>where participants meet you — a PSN name or a Discord (yours or your crew's) is required. Tip: create the invite in your rules or info channel, newcomers land right there.</small><input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
               <label>Max. participants <small>optional, e.g. lobby size</small><input type="number" name="max_participants" min="2" max="500" step="1" /></label>
               <label>Sign-ups <small>Controls the “I'm in” button on the calendar</small><select name="registration"><option value="open">Open</option><option value="closed">Closed — Listed, No Sign-ups</option></select></label>
-              <label class="span2">Stream link <small>Optional — Twitch, YouTube, or Kick. Shown even when sign-ups are full or closed.</small><input type="url" name="stream_url" placeholder="https://www.twitch.tv/…" /></label>
+              <label class="span2">Stream link <small>Twitch, YouTube, or Kick. Required for events created with closed sign-ups. Shown even when sign-ups are full or closed.</small><input type="url" name="stream_url" placeholder="https://www.twitch.tv/…" /></label>
               <label class="span2">Description <small><span id="event-desc-count">0</span>/600</small><textarea name="description" maxlength="600" rows="3"></textarea></label>
               <label class="span2" data-mod-only>Note to the host <small>optional, e.g. why the event is hidden or what to fix</small><textarea name="moderation_note" maxlength="300" rows="2"></textarea></label>
             </div>
@@ -410,7 +409,7 @@ const base = import.meta.env.BASE_URL;
   }
   function markInvalid(form: HTMLFormElement, names: string[]) {
     form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
-    names.map((n) => (n === 'starts_before_launch' ? 'starts_at' : n)).forEach((n) => form.querySelector(`[name="${n}"]`)?.setAttribute('aria-invalid', 'true'));
+    names.map((n) => (n === 'starts_before_launch' ? 'starts_at' : n === 'closed_needs_stream' ? 'stream_url' : n)).forEach((n) => form.querySelector(`[name="${n}"]`)?.setAttribute('aria-invalid', 'true'));
   }
   // Friendlier wording for the database's own checks.
   function dbError(e: { message: string; code?: string }) {
@@ -458,10 +457,11 @@ const base = import.meta.env.BASE_URL;
   async function loadAll() {
     listErrorEl.hidden = true;
     const sb = getSupabase();
-    const [c, e, t] = await Promise.all([
+    const [c, e, t, l] = await Promise.all([
       sb.from('crews').select('*').order('is_partner', { ascending: false }).order('sort_order').order('name'),
       sb.from('hub_events').select('*, streams:hub_event_streams(stream_id, platform, url, sort_order)').order('starts_at', { ascending: false }),
       sb.from('community_tracks').select('*').order('updated_at', { ascending: false }),
+      sb.from('hub_locations').select('name').order('sort_order').order('name'),
     ]);
     if (c.error || e.error) {
       listErrorEl.textContent = `Could not load: ${(c.error || e.error)!.message}`;
@@ -470,6 +470,7 @@ const base = import.meta.env.BASE_URL;
     crews = c.data ?? [];
     events = e.data ?? [];
     tracks = t.data ?? [];
+    fillLocationSelect((l.data ?? []).map((x: any) => x.name));
     const trTab = document.querySelector<HTMLElement>('.hc-tab[data-kind="tracks"]');
     const toReview = isMod ? tracks.filter((x) => !x.is_published).length : 0;
     if (trTab) trTab.innerHTML = `Tracks${toReview ? `<span class="tab-count">${toReview}</span>` : ''}`;
@@ -724,13 +725,25 @@ const base = import.meta.env.BASE_URL;
       host_name: blank(fd.get('host_name')),
       location: blank(fd.get('location')),
       description: blank(fd.get('description')),
-      join_url: blank(fd.get('join_url')),
       discord_url: blank(fd.get('discord_url')),
       max_participants: fd.get('max_participants') ? Number(fd.get('max_participants')) : null,
       registration: String(fd.get('registration') ?? 'open') === 'closed' ? 'closed' : 'open',
       is_published: isMod ? fd.get('is_published') === 'on' : true,
       ...(isMod ? { moderation_note: blank(fd.get('moderation_note')) } : {}),
     };
+  }
+  // Locations come from hub_locations (DEC-0101). An old free-text value that is no
+  // longer in the list is kept as an extra option, so editing doesn't drop it.
+  function fillLocationSelect(names: string[]) {
+    const sel = ef.location as HTMLSelectElement;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— not specified —</option>' + names.map((n) => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+    setLocation(cur);
+  }
+  function setLocation(v: string) {
+    const sel = ef.location as HTMLSelectElement;
+    if (v && ![...sel.options].some((o) => o.value === v)) sel.insertAdjacentHTML('beforeend', `<option value="${esc(v)}">${esc(v)}</option>`);
+    sel.value = v;
   }
   // Stream link lives in hub_event_streams (RS-0058), not on the event row.
   const streamUrlFromForm = () => String(new FormData(eventForm).get('stream_url') ?? '').trim();
@@ -741,7 +754,6 @@ const base = import.meta.env.BASE_URL;
     // Earliest start = GTA VI launch day, local midnight (RS-0051; DB check hub_events_not_before_launch)
     else if (new Date(e.starts_at) < new Date(2026, 10, 19, 0, 0, 0)) bad.push('starts_before_launch');
     if (e.ends_at && e.starts_at && new Date(e.ends_at) <= new Date(e.starts_at)) bad.push('ends_at');
-    if (e.join_url && !/^https:\/\//.test(e.join_url)) bad.push('join_url');
     if (e.discord_url && !/^https:\/\/(discord\.gg|discord\.com\/invite)\/[A-Za-z0-9-]+$/.test(e.discord_url)) bad.push('discord_url');
     // DEC-0077: PSN name or a Discord (own invite / host crew with one) -- at least one, both allowed
     if (e.host_name && !/^[A-Za-z][A-Za-z0-9_-]{2,15}$/.test(e.host_name)) bad.push('host_name');
@@ -750,9 +762,12 @@ const base = import.meta.env.BASE_URL;
     if (e.max_participants != null && (!Number.isInteger(e.max_participants) || e.max_participants < 2 || e.max_participants > 500)) bad.push('max_participants');
     const su = streamUrlFromForm();
     if (su && !streamPlatform(su)) bad.push('stream_url');
+    // DEC-0101: an event created with closed sign-ups must be watchable. Switching a
+    // running event to closed later stays allowed (existing sign-ups remain valid).
+    else if (!su && !selectedId && e.registration === 'closed') bad.push('closed_needs_stream');
     return bad;
   }
-  const eventFieldHelp: Record<string, string> = { title: 'title (3–80 characters)', starts_at: 'start date/time', starts_before_launch: 'events can start on Nov 19, 2026 (GTA VI launch day) at the earliest', ends_at: 'end must be after start', join_url: 'details link must start with https://', discord_url: 'Discord invite (https://discord.gg/… or https://discord.com/invite/…)', host_name: 'PSN name (3–16 characters, starts with a letter; letters, digits, - and _)', contact_required: 'add your PSN name or a Discord invite (or pick a host crew that has one), so players can reach you', max_participants: 'max. participants between 2 and 500', stream_url: 'a Twitch channel, YouTube video/live/channel, or Kick channel URL (https://…)' };
+  const eventFieldHelp: Record<string, string> = { title: 'title (3–80 characters)', starts_at: 'start date/time', starts_before_launch: 'events can start on Nov 19, 2026 (GTA VI launch day) at the earliest', ends_at: 'end must be after start', discord_url: 'Discord invite (https://discord.gg/… or https://discord.com/invite/…)', host_name: 'PSN name (3–16 characters, starts with a letter; letters, digits, - and _)', contact_required: 'add your PSN name or a Discord invite (or pick a host crew that has one), so players can reach you', max_participants: 'max. participants between 2 and 500', stream_url: 'a Twitch channel, YouTube video/live/channel, or Kick channel URL (https://…)', closed_needs_stream: 'an event with closed sign-ups needs a stream link (Twitch, YouTube, or Kick), so people can at least watch it' };
 
   function renderEventPreview() {
     const e = eventFromForm();
@@ -760,7 +775,7 @@ const base = import.meta.env.BASE_URL;
     const preview: HubEvent = {
       event_id: 'preview', title: e.title || 'Event title', event_type: e.event_type as any, starts_at: e.starts_at ?? new Date().toISOString(),
       ends_at: e.ends_at, platforms: e.platforms as any, host_name: e.host_name, location: e.location, description: e.description,
-      join_url: e.join_url, discord_url: e.discord_url, status: e.status as any, host: host ? { name: host.name, tag: host.tag, color: host.color, discord_url: host.discord_url ?? null } : null,
+      join_url: null, discord_url: e.discord_url, status: e.status as any, host: host ? { name: host.name, tag: host.tag, color: host.color, discord_url: host.discord_url ?? null } : null,
       registration: e.registration as any,
       streams: (() => { const u = streamUrlFromForm(); const pl = u ? streamPlatform(u) : null; return pl ? [{ platform: pl, url: u }] : []; })(),
     };
@@ -775,7 +790,8 @@ const base = import.meta.env.BASE_URL;
     eventForm.reset();
     $('event-form-title').textContent = row ? `Edit: ${row.title}` : 'New event';
     const r = row ?? { event_type: 'race', status: 'scheduled', platforms: [] };
-    for (const k of ['title', 'host_name', 'location', 'description', 'join_url', 'discord_url']) ef[k].value = r[k] ?? '';
+    for (const k of ['title', 'host_name', 'description', 'discord_url']) ef[k].value = r[k] ?? '';
+    setLocation(r.location ?? '');
     ef.event_type.value = r.event_type;
     ef.status.value = r.status;
     ef.starts_at.value = toLocalInput(r.starts_at ?? null);
