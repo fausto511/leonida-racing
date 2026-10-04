@@ -27,8 +27,9 @@ const jsonLd = [
     description,
     url: pageUrl,
     mainEntityOfPage: pageUrl,
-    datePublished: GUIDE_PUBLISHED,
-    dateModified: GUIDE_UPDATED,
+    // Full ISO 8601 with time zone (Google flags date-only values); noon UTC like the visible label.
+    datePublished: `${GUIDE_PUBLISHED}T12:00:00Z`,
+    dateModified: `${GUIDE_UPDATED}T12:00:00Z`,
     author: org,
     publisher: org,
     image: new URL(`${base}images/guide/og-guide.jpg`, Astro.site).href,
