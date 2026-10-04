@@ -124,19 +124,48 @@ function card(e: any, going: number) {
   if (!cancelled) buttons.push(linkButton("Add to your server", INVITE));
   return { embeds: [embed], components: [row(...buttons)], allowed_mentions: { parse: [] } };
 }
-function nativeEvent(e: any) {
-  const lines = [
-    `${EVENT_TYPES[e.event_type] ?? e.event_type} · ${(e.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p).join(", ")}`,
-    `Host: ${hostLabel(e)}`,
-    eventUrl(e),
-  ];
-  return {
+// Cover image for server events: Discord wants a data URI (shown cropped to
+// about 2.5:1). Fetched once per type per function instance from the website.
+const coverCache = new Map<string, string | null>();
+async function coverImage(type: string): Promise<string | null> {
+  const name = EVENT_IMAGE[type] ?? "hub-events";
+  if (coverCache.has(name)) return coverCache.get(name)!;
+  let uri: string | null = null;
+  try {
+    const r = await fetch(`${SITE}/images/hub/${name}-1672.jpg`);
+    if (r.ok) {
+      const bytes = new Uint8Array(await r.arrayBuffer());
+      let bin = "";
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      uri = `data:image/jpeg;base64,${btoa(bin)}`;
+    } else console.log("cover fetch", r.status);
+  } catch (err) { console.log("cover fetch failed", String(err)); }
+  coverCache.set(name, uri);
+  return uri;
+}
+async function nativeEvent(e: any, withImage: boolean) {
+  const platforms = (e.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p).join(", ");
+  const facts = [`${EVENT_TYPES[e.event_type] ?? e.event_type} \u00b7 ${platforms}`, `Host: ${hostLabel(e)}`];
+  const tail = `\n\n${facts.join("\n")}\n${eventUrl(e)}`;
+  const desc = e.description ? clip(String(e.description), 1000 - tail.length) + tail : tail.trimStart();
+  const body: Record<string, unknown> = {
     name: clip(e.title, 100), privacy_level: 2, entity_type: 3,
-    entity_metadata: { location: clip(eventUrl(e), 100) },
+    entity_metadata: { location: clip(`Leonida Racing \u00b7 ${platforms || "GTA VI"}`, 100) },
     scheduled_start_time: new Date(e.starts_at).toISOString(),
     scheduled_end_time: endOf(e).toISOString(),
-    description: clip(lines.join("\n"), 1000),
+    description: desc,
   };
+  if (withImage) { const img = await coverImage(e.event_type); if (img) body.image = img; }
+  return body;
+}
+
+async function createServerEvent(f: any, e: any): Promise<DResult> {
+  const s = await discord("POST", `/guilds/${f.guild_id}/scheduled-events`, await nativeEvent(e, true));
+  if (s.status === 400) { // e.g. image rejected -> try once without it
+    console.log("event create 400, retry without image", s.text.slice(0, 300));
+    return discord("POST", `/guilds/${f.guild_id}/scheduled-events`, await nativeEvent(e, false));
+  }
+  return s;
 }
 
 // ---------- sync one feed x one event ----------
@@ -171,7 +200,7 @@ async function sync(f: any, eventId: string, e: any | null, going: number, depth
     }
     const patch: Record<string, unknown> = { message_id: r.data.id, updated_at: new Date().toISOString() };
     if (f.native_events && future) {
-      const s = await discord("POST", `/guilds/${f.guild_id}/scheduled-events`, nativeEvent(e));
+      const s = await createServerEvent(f, e);
       if (s.ok) patch.scheduled_event_id = s.data.id;
       else { await feedError(f, describeFail(s, "create server events")); console.log("event create failed", s.status, s.text.slice(0, 300)); }
     }
@@ -195,11 +224,11 @@ async function sync(f: any, eventId: string, e: any | null, going: number, depth
     sched = null;
   } else if (!cancelled && f.native_events && future) {
     if (sched) {
-      const s = await discord("PATCH", `/guilds/${f.guild_id}/scheduled-events/${sched}`, nativeEvent(e));
+      const s = await discord("PATCH", `/guilds/${f.guild_id}/scheduled-events/${sched}`, await nativeEvent(e, false));
       if (s.status === 404) sched = null;
     }
     if (!sched) {
-      const s = await discord("POST", `/guilds/${f.guild_id}/scheduled-events`, nativeEvent(e));
+      const s = await createServerEvent(f, e);
       if (s.ok) sched = s.data.id;
       else { await feedError(f, describeFail(s, "create server events")); console.log("event create failed", s.status, s.text.slice(0, 300)); }
     }
