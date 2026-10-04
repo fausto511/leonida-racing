@@ -1,6 +1,9 @@
 ---
 import '../styles/tokens.css';
 import '../styles/fonts.css';
+// Preload the two fonts every page uses above the fold (CLS fix 2026-10-04).
+import fontDisplayUrl from '../assets/fonts/roboto-condensed-italic-latin.woff2?url';
+import fontTextUrl from '../assets/fonts/roboto-regular-latin.woff2?url';
 import ConsentBar from '../components/ConsentBar.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -59,6 +62,8 @@ if (breadcrumbs.length) {
 <html lang="en" style="background:#14141a;color-scheme:dark">
   <head>
     <meta charset="utf-8" />
+    <link rel="preload" href={fontDisplayUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fontTextUrl} as="font" type="font/woff2" crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#14141a" />

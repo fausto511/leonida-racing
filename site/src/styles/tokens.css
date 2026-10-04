@@ -19,8 +19,8 @@
   --gh-yellow: #ffd74c;
 
   /* type */
-  --gh-font-display: 'Gellhorn Display', 'Arial Narrow', sans-serif;
-  --gh-font-body: 'Gellhorn Text', -apple-system, 'Segoe UI', sans-serif;
+  --gh-font-display: 'Gellhorn Display', 'Gellhorn Display Fallback', 'Arial Narrow', sans-serif;
+  --gh-font-body: 'Gellhorn Text', 'Gellhorn Text Fallback', -apple-system, 'Segoe UI', sans-serif;
 
   /* rhythm — 8px card radius per design system; section gaps 64-96px desktop */
   --gh-radius: 4px;

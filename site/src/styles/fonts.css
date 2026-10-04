@@ -54,3 +54,39 @@
   font-display: swap;
   unicode-range: U+0100-024F, U+0300-036F;
 }
+
+/* Metric-matched fallbacks (CLS fix, 2026-10-04). Until the web fonts have
+   loaded the browser draws text in a local system font. Without adjustment
+   that font is wider/taller than Roboto, so lines re-wrap and the page jumps
+   when the web font swaps in (PageSpeed: Cumulative Layout Shift 0.28 on
+   mobile). size-adjust / ascent / descent scale the local font to Roboto's
+   metrics, computed with fontTools against Arial-metric Liberation Sans
+   (display at wght 850). Android has no Arial: these faces then don't match
+   and the stack falls through to the next font unchanged. */
+@font-face {
+  font-family: 'Gellhorn Display Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Helvetica Neue Bold'), local('Liberation Sans Bold');
+  font-weight: 800 900;
+  size-adjust: 81.97%;
+  ascent-override: 113.18%;
+  descent-override: 29.78%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Gellhorn Text Fallback';
+  src: local('Arial'), local('ArialMT'), local('Helvetica Neue'), local('Liberation Sans');
+  font-weight: 400;
+  size-adjust: 98.23%;
+  ascent-override: 94.45%;
+  descent-override: 24.85%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Gellhorn Text Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Helvetica Neue Bold'), local('Liberation Sans Bold');
+  font-weight: 700 900;
+  size-adjust: 94.50%;
+  ascent-override: 98.17%;
+  descent-override: 25.83%;
+  line-gap-override: 0%;
+}
