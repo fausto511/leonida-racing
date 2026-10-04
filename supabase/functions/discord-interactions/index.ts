@@ -142,24 +142,27 @@ async function goingCount(eventId: string) {
   return count ?? 0;
 }
 const eventUrl = (e: any) => `${SITE}/hub/events/#event-${e.event_id}`;
-// Host = a person (PSN name, else the creator's site name); a crew is shown separately.
+// Host = a person (PSN name, else the creator's site name); the crew as a tag behind it.
 const hostPerson = (e: any) => e.host_name ?? (e.creator && !e.creator.deleted_at ? e.creator.display_name : null) ?? "Community host";
-const crewLabel = (e: any) => e.host?.name ? `${e.host.name}${e.host.tag ? ` [${e.host.tag}]` : ""}` : null;
-const hostLabel = (e: any) => crewLabel(e) ? `${hostPerson(e)} \u00b7 ${crewLabel(e)}` : hostPerson(e);
+// Crew shown GTA-style as a tag behind the host name, e.g. "Fausto-511 [LR]".
+const crewTag = (e: any) => e.host?.tag ? `[${e.host.tag}]` : e.host?.name ? `[${e.host.name}]` : "";
+const withTag = (e: any, name: string) => crewTag(e) ? `${name} ${crewTag(e)}` : name;
+const psnOrName = (e: any) => e.host_name ? `[${e.host_name}](https://profile.playstation.com/${encodeURIComponent(e.host_name)})` : hostPerson(e);
+const typeLine = (e: any) => [EVENT_TYPES[e.event_type] ?? e.event_type, ...(e.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p)].join(" \u00b7 ");
+const goingValue = (e: any, going: number, closed: boolean) => (e.max_participants ? `${going} / ${e.max_participants}` : String(going)) + (closed ? "\nSign-ups closed" : "");
+const hostLabel = (e: any) => withTag(e, hostPerson(e));
 
 async function eventEmbed(e: any) {
   const going = await goingCount(e.event_id);
+  // Compact on purpose: Discord mobile stacks every field, so type/platform go
+  // into the author line and the crew tag behind the host name.
   const fields = [
     { name: "Starts", value: `<t:${unix(e.starts_at)}:F>\n<t:${unix(e.starts_at)}:R>`, inline: true },
-    { name: "Type", value: EVENT_TYPES[e.event_type] ?? e.event_type, inline: true },
-    { name: "Platform", value: (e.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p).join(", ") || "—", inline: true },
-    { name: "Host", value: e.host_name ? `[${e.host_name}](https://profile.playstation.com/${encodeURIComponent(e.host_name)})` : hostPerson(e), inline: true },
-    { name: "Going", value: e.max_participants ? `${going} / ${e.max_participants}` : String(going), inline: true },
+    { name: "Host", value: withTag(e, psnOrName(e)), inline: true },
+    { name: "Going", value: goingValue(e, going, e.registration === "closed"), inline: true },
   ];
-  if (crewLabel(e)) fields.push({ name: "Crew", value: crewLabel(e)!, inline: true });
-  if (e.registration === "closed") fields.push({ name: "Sign-ups", value: "Closed", inline: true });
   return {
-    title: clip(e.title, 256), url: eventUrl(e), color: YELLOW, fields,
+    author: { name: typeLine(e) }, title: clip(e.title, 256), url: eventUrl(e), color: YELLOW, fields,
     image: { url: `${SITE}/images/hub/hub-events-1672.jpg` },
     footer: { text: "Leonida Racing · leonidaracing.com" },
   };

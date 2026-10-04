@@ -46,9 +46,13 @@ const row = (...b: unknown[]) => ({ type: 1, components: b });
 const eventUrl = (e: any) => `${SITE}/hub/events/#event-${e.event_id}`;
 const endOf = (e: any) => (e.ends_at ? new Date(e.ends_at) : new Date(new Date(e.starts_at).getTime() + DEFAULT_DURATION_MS));
 // The host is always a person (Fausto 2026-10-04): PSN name, else the creator's
-// site name. A crew can organise an event but can't host the lobby -> own field.
+// site name. A crew can organise an event but can't host the lobby -> shown as a tag.
 const hostPerson = (e: any) => e.host_name ?? (e.creator && !e.creator.deleted_at ? e.creator.display_name : null) ?? "Community host";
-const crewLabel = (e: any) => e.host?.name ? `${e.host.name}${e.host.tag ? ` [${e.host.tag}]` : ""}` : null;
+// Crew shown GTA-style as a tag behind the host name, e.g. "Fausto-511 [LR]".
+const crewTag = (e: any) => e.host?.tag ? `[${e.host.tag}]` : e.host?.name ? `[${e.host.name}]` : "";
+const withTag = (e: any, name: string) => crewTag(e) ? `${name} ${crewTag(e)}` : name;
+const typeLine = (e: any) => [EVENT_TYPES[e.event_type] ?? e.event_type, ...(e.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p)].join(" \u00b7 ");
+const goingValue = (e: any, going: number, closed: boolean) => (e.max_participants ? `${going} / ${e.max_participants}` : String(going)) + (closed ? "\nSign-ups closed" : "");
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
 
 type DResult = { ok: boolean; status: number; data: any; text: string };
@@ -112,17 +116,15 @@ function card(e: any, going: number) {
   const hostDiscord = e.discord_url ?? e.host?.discord_url ?? null;
   // Host PSN name links to the PSN profile (friend request from the PlayStation app / browser).
   const psnLink = !cancelled && e.host_name ? `[${e.host_name}](https://profile.playstation.com/${encodeURIComponent(e.host_name)})` : null;
+  // Compact on purpose: Discord mobile stacks every field, so type/platform go
+  // into the author line and the crew tag behind the host name.
   const fields = [
     { name: "Starts", value: `<t:${unix(e.starts_at)}:F>\n<t:${unix(e.starts_at)}:R>`, inline: true },
-    { name: "Type", value: EVENT_TYPES[e.event_type] ?? e.event_type, inline: true },
-    { name: "Platform", value: (e.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p).join(", ") || "—", inline: true },
-    { name: "Host", value: psnLink ?? hostPerson(e), inline: true },
-    { name: "Going", value: e.max_participants ? `${going} / ${e.max_participants}` : String(going), inline: true },
+    { name: "Host", value: withTag(e, psnLink ?? hostPerson(e)), inline: true },
+    { name: "Going", value: goingValue(e, going, !cancelled && e.registration === "closed"), inline: true },
   ];
-  if (crewLabel(e)) fields.push({ name: "Crew", value: crewLabel(e)!, inline: true });
-  if (!cancelled && e.registration === "closed") fields.push({ name: "Sign-ups", value: "Closed", inline: true });
   const embed: Record<string, unknown> = {
-    title: clip(cancelled ? `Cancelled: ${e.title}` : e.title, 256), url: eventUrl(e),
+    author: { name: typeLine(e) }, title: clip(cancelled ? `Cancelled: ${e.title}` : e.title, 256), url: eventUrl(e),
     color: cancelled ? GREY : YELLOW, fields,
     footer: { text: "Leonida Racing · times shown in your time zone" },
   };
@@ -162,7 +164,7 @@ async function coverImage(type: string): Promise<string | null> {
 }
 async function nativeEvent(e: any, withImage: boolean) {
   const platforms = (e.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p).join(", ");
-  const facts = [`${EVENT_TYPES[e.event_type] ?? e.event_type} \u00b7 ${platforms}`, `Host: ${hostPerson(e)}`, ...(crewLabel(e) ? [`Crew: ${crewLabel(e)}`] : [])];
+  const facts = [`${EVENT_TYPES[e.event_type] ?? e.event_type} \u00b7 ${platforms}`, `Host: ${withTag(e, hostPerson(e))}`];
   const tail = `\n\n${facts.join("\n")}\n${eventUrl(e)}`;
   const desc = e.description ? clip(String(e.description), 1000 - tail.length) + tail : tail.trimStart();
   const body: Record<string, unknown> = {

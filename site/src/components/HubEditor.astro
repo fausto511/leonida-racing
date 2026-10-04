@@ -207,15 +207,15 @@ const base = import.meta.env.BASE_URL;
                 <input type="text" id="role-driver-search" placeholder="Type at least 2 letters" autocomplete="off" />
               </label>
               <div class="span2 driver-results" id="role-driver-results"></div>
-              <fieldset class="span2"><legend>Role</legend>
-                <label class="check"><input type="radio" name="role" value="crew_leader" checked /> Crew Leader — manages one crew (card, join requests, members)</label>
-                <label class="check"><input type="radio" name="role" value="event_host" /> Event Host — publishes own events in the calendar</label>
-                <label class="check"><input type="radio" name="role" value="creator" /> Creator — submits own race jobs to Tracks (a moderator publishes them)</label>
+              <fieldset class="span2"><legend>Roles <small>pick one or more</small></legend>
+                <label class="check"><input type="checkbox" name="role" value="crew_leader" /> Crew Leader — manages one crew (card, join requests, members)</label>
+                <label class="check"><input type="checkbox" name="role" value="event_host" /> Event Host — publishes own events in the calendar</label>
+                <label class="check"><input type="checkbox" name="role" value="creator" /> Creator — submits own race jobs to Tracks (a moderator publishes them)</label>
               </fieldset>
-              <label class="span2" id="role-crew-wrap">Crew<select id="role-crew"></select></label>
+              <label class="span2" id="role-crew-wrap" hidden>Crew <small>crew not listed yet? Create it under Crews first, or let the driver apply with a new crew (approving the request creates it)</small><select id="role-crew"></select></label>
             </div>
             <div class="form-actions">
-              <button type="button" class="btn btn-primary" id="role-grant">Grant role</button>
+              <button type="button" class="btn btn-primary" id="role-grant">Grant roles</button>
               <p class="form-msg" id="role-msg" aria-live="polite"></p>
             </div>
           </div>
@@ -998,7 +998,9 @@ const base = import.meta.env.BASE_URL;
   }
   function fillRoleCrewSelect() {
     const sel = $<HTMLSelectElement>('role-crew');
-    sel.innerHTML = crews.map((c) => `<option value="${esc(c.crew_id)}">${esc(c.tag)} · ${esc(c.name)}${c.is_published ? '' : ' (draft)'}</option>`).join('') || '<option value="">Create a crew first</option>';
+    sel.innerHTML = crews.length
+      ? '<option value="">— choose the crew —</option>' + crews.map((c) => `<option value="${esc(c.crew_id)}">${esc(c.tag)} · ${esc(c.name)}${c.is_published ? '' : ' (draft)'}</option>`).join('')
+      : '<option value="">Create a crew first</option>';
   }
   function roleMsg(text: string, isError = false) {
     const el = $('role-msg'); el.textContent = text; el.className = `form-msg ${text ? (isError ? 'is-error' : 'is-ok') : ''}`;
@@ -1015,10 +1017,8 @@ const base = import.meta.env.BASE_URL;
     showForm('roles');
     renderList();
   }
-  const syncRoleCrew = () => {
-    const role = (document.querySelector('input[name="role"]:checked') as HTMLInputElement).value;
-    $('role-crew-wrap').hidden = role !== 'crew_leader';
-  };
+  const pickedRoles = () => [...document.querySelectorAll<HTMLInputElement>('input[name="role"]:checked')].map((i) => i.value);
+  const syncRoleCrew = () => { $('role-crew-wrap').hidden = !pickedRoles().includes('crew_leader'); };
   document.querySelectorAll('input[name="role"]').forEach((i) => i.addEventListener('change', syncRoleCrew));
 
   let searchTimer: number | undefined;
@@ -1042,13 +1042,20 @@ const base = import.meta.env.BASE_URL;
     roleMsg('');
   });
   $('role-grant').addEventListener('click', async () => {
-    const role = (document.querySelector('input[name="role"]:checked') as HTMLInputElement).value;
+    const picked = pickedRoles();
     const crewId = $<HTMLSelectElement>('role-crew').value || null;
     if (!pickedDriver) { roleMsg('Pick a driver from the search results first.', true); return; }
-    if (role === 'crew_leader' && !crewId) { roleMsg('Choose the crew this driver leads.', true); return; }
-    const { error } = await getSupabase().from('hub_roles').insert({ driver_id: pickedDriver.driver_id, role, crew_id: role === 'crew_leader' ? crewId : null, granted_by: ownDriverId });
-    if (error) { roleMsg(/duplicate|unique/i.test(error.message) ? 'This driver already has that role.' : dbError(error), true); return; }
-    roleMsg(`${pickedDriver.display_name} is now ${roleLabel(role)}.`);
+    if (!picked.length) { roleMsg('Pick at least one role.', true); return; }
+    if (picked.includes('crew_leader') && !crewId) { roleMsg('Choose the crew this driver leads.', true); return; }
+    // One insert per role, so an existing role doesn't block the others.
+    const granted: string[] = [], had: string[] = [];
+    for (const role of picked) {
+      const { error } = await getSupabase().from('hub_roles').insert({ driver_id: pickedDriver.driver_id, role, crew_id: role === 'crew_leader' ? crewId : null, granted_by: ownDriverId });
+      if (!error) granted.push(roleLabel(role));
+      else if (/duplicate|unique/i.test(error.message)) had.push(roleLabel(role));
+      else { roleMsg(dbError(error), true); await loadRoles(); renderList(); return; }
+    }
+    roleMsg([granted.length ? `${pickedDriver.display_name} is now ${granted.join(' + ')}.` : '', had.length ? `Already had: ${had.join(', ')}.` : ''].filter(Boolean).join(' '), !granted.length);
     await loadRoles(); renderList();
   });
   $('role-revoke').addEventListener('click', async () => {
