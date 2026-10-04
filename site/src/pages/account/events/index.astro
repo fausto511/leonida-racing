@@ -80,9 +80,10 @@ const base = import.meta.env.BASE_URL;
 
 <script>
   import { backendConfigured, getSupabase } from '../../../scripts/supabase-client';
-  import { esc, sampleEventsUpcoming, eventDiscord } from '../../../data/hub';
+  import { esc, sampleEventsUpcoming, eventRowHtml, localizeTimes, type HubEvent } from '../../../data/hub';
   import { fetchLiveEvents } from '../../../scripts/hub-live';
-  import { sampleRsvps, setSampleRsvp } from '../../../scripts/sample-rsvp';
+  import { sampleRsvps } from '../../../scripts/sample-rsvp';
+  import { createEventRsvp } from '../../../scripts/event-rsvp';
   document.addEventListener('hc-access', (e: any) => {
     document.getElementById('host-block')!.hidden = !e.detail.hasAccess;
   });
@@ -91,30 +92,34 @@ const base = import.meta.env.BASE_URL;
   let me: string | null = null;
   // Sample sign-ups (RS-0033) count only while no real events are published.
   let samplesActive: boolean | null = null;
+  // Full event rows like in the calendar (Fausto 2026-10-04): same markup,
+  // same "Going ✓" / next-step block, PSN profile link and host Discord.
+  const rsvp = createEventRsvp(listEl);
+  const EVENT_COLS = 'event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,created_by,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)';
   async function loadMine() {
     const since = new Date(Date.now() - 6 * 3600e3).toISOString();
-    const { data } = await getSupabase().from('hub_event_rsvps').select('event_id, event:hub_events(title, starts_at, status, discord_url, host_name, host:crews(name, tag, color, discord_url))').eq('driver_id', me!);
-    const rows: { id: string; title: string; starts_at: string; status: string; sample: boolean; discord?: string | null; psn?: string | null }[] = ((data ?? []) as any[])
-      .filter((r) => r.event && r.event.starts_at >= since)
-      .map((r) => ({ id: r.event_id, title: r.event.title, starts_at: r.event.starts_at, status: r.event.status, sample: false, discord: r.event.status === 'cancelled' ? null : eventDiscord(r.event), psn: r.event.status === 'cancelled' ? null : r.event.host_name }));
-    if (samplesActive === null) samplesActive = !(await fetchLiveEvents());
-    if (samplesActive) {
-      const picked = sampleRsvps();
-      sampleEventsUpcoming().filter((e) => picked.has(e.event_id)).forEach((e) => rows.push({ id: e.event_id, title: e.title, starts_at: e.starts_at, status: e.status, sample: true }));
+    const { data } = await getSupabase().from('hub_event_rsvps').select(`event_id, event:hub_events(${EVENT_COLS})`).eq('driver_id', me!);
+    let events: HubEvent[] = ((data ?? []) as any[]).map((r) => r.event).filter((e) => e && e.starts_at >= since);
+    let live = true;
+    if (!events.length) {
+      if (samplesActive === null) samplesActive = !(await fetchLiveEvents());
+      if (samplesActive) {
+        const picked = sampleRsvps();
+        events = sampleEventsUpcoming().filter((e) => picked.has(e.event_id));
+        live = false;
+      }
     }
-    rows.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
-    listEl.innerHTML = rows.length
-      ? rows.map((r) => `<div class="rsvp-row"><span class="rsvp-when">${esc(new Date(r.starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }))}</span><span class="rsvp-title">${r.status === 'cancelled' ? '✕ ' : ''}${esc(r.title)}${r.sample ? ' <span class="chip chip-sample" title="Example event — it will not take place">Sample</span>' : ''}</span>${r.discord ? `<a class="btn ev-discord" href="${esc(r.discord)}" target="_blank" rel="noopener">Host Discord</a>` : r.psn ? `<span class="rsvp-psn">Host PSN: <strong>${esc(r.psn)}</strong></span>` : ''}<button type="button" class="btn btn-outline" data-cancel="${esc(r.id)}"${r.sample ? ' data-sample="1"' : ''}>Cancel</button></div>`).join('')
-      : `<p class="rsvp-empty">You haven't signed up for any upcoming event. <a href="${base}hub/events/">Browse the calendar</a>.</p>`;
+    events.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+    if (!events.length) {
+      listEl.innerHTML = `<p class="rsvp-empty">You haven't signed up for any upcoming event. <a href="${base}hub/events/">Browse the calendar</a>.</p>`;
+      return;
+    }
+    listEl.innerHTML = `<div class="ev-list">${events.map((e) => eventRowHtml(e, { rsvp: true, sample: !live })).join('')}</div>`;
+    localizeTimes(listEl);
+    rsvp.setEvents(events, live);
+    rsvp.renderRsvps();
+    if (live) await rsvp.connect();
   }
-  listEl.addEventListener('click', async (e) => {
-    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-cancel]');
-    if (!b || !me) return;
-    b.disabled = true;
-    if (b.dataset.sample) setSampleRsvp(b.dataset.cancel!, false);
-    else await getSupabase().from('hub_event_rsvps').delete().eq('event_id', b.dataset.cancel!).eq('driver_id', me);
-    await loadMine();
-  });
   async function init(session: any) {
     document.getElementById('acc-auth')!.hidden = Boolean(session);
     document.getElementById('acc-body')!.hidden = !session;

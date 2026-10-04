@@ -429,9 +429,14 @@ async function rsvpButton(i: any) {
   if (error) throw error;
   const r = data as any;
   const count = r.max ? `${r.going} / ${r.max}` : `${r.going}`;
-  const hostRow = r.discord_url ? [row(linkButton("Host Discord", r.discord_url), linkButton("Details", `${SITE}/hub/events/#event-${eventId}`))]
-    : [row(linkButton("Details", `${SITE}/hub/events/#event-${eventId}`))];
-  const psn = r.host_name ? ` Host on PSN: **${r.host_name}**.` : "";
+  // Ways to reach the host (Fausto 2026-10-04): Discord invite and/or PSN profile page
+  // (friend request straight from the PlayStation app or browser).
+  const reach: unknown[] = [];
+  if (r.discord_url) reach.push(linkButton("Host Discord", r.discord_url));
+  if (r.host_name) reach.push(linkButton("Host PSN Profile", `https://profile.playstation.com/${encodeURIComponent(r.host_name)}`));
+  reach.push(linkButton("Details", `${SITE}/hub/events/#event-${eventId}`));
+  const hostRow = [row(...reach)];
+  const psn = r.host_name ? ` Host on PSN: **${r.host_name}** (send a friend request via the button below).` : "";
   switch (r.status) {
     case "no_profile": return ephemeral("To sign up, create your Leonida Racing driver profile first. It uses this Discord account, so it takes one click. Then press \u201cI'm in\u201d again.", [profileButton]);
     case "not_found": return ephemeral("This event isn't available anymore.");

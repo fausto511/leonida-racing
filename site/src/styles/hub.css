@@ -195,6 +195,9 @@ a.ev-dc:hover { color: #aab2ff; text-decoration: underline; text-underline-offse
 .ev-next-psn strong { color: var(--gh-text); }
 .ev-next-copy { padding: .2rem .55rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); background: none; color: var(--gh-muted); font-size: .72rem; font-weight: 700; cursor: pointer; }
 .ev-next-copy:hover { color: var(--gh-text); border-color: var(--gh-muted); }
+a.ev-next-copy { text-decoration: none; }
+.ev-psn-link { color: inherit; text-decoration: none; }
+.ev-psn-link:hover strong { text-decoration: underline; text-decoration-color: var(--gh-red); text-underline-offset: 3px; }
 
 /* Stream link on events (RS-0058) */
 .ev-watch { display: inline-flex; align-items: center; gap: .35rem; color: #c9a7ff; font-weight: 700; text-decoration: none; }

@@ -271,6 +271,12 @@ export function crewCardHtml(c: HubCrew, roster?: string[], opts: { sample?: boo
 // visitor's local time zone right after load.
 /** opts.rsvp: sign-up slot the page script fills (live and sample events).
  *  opts.sample: marks the row as a sample event. */
+/** Public PSN profile page (Fausto 2026-10-04): opens the profile on the web or
+ *  in the PlayStation app, where players can send a friend request. */
+export function psnProfileUrl(name: string): string {
+  return `https://profile.playstation.com/${encodeURIComponent(name)}`;
+}
+
 export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boolean } = {}): string {
   const start = new Date(e.starts_at);
   const end = e.ends_at ? new Date(e.ends_at) : null;
@@ -285,7 +291,9 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
   // PSN name (marked "PSN" so players know whom to add on PlayStation), else
   // the creator's site display name as fallback (DEC-0077).
   const who = e.host_name
-    ? `<strong title="PSN name — add the host on PlayStation">${esc(e.host_name)}</strong><span class="ev-psn">PSN</span>`
+    ? (opts.sample
+      ? `<strong title="PSN name — add the host on PlayStation">${esc(e.host_name)}</strong><span class="ev-psn">PSN</span>`
+      : `<a class="ev-psn-link" href="${esc(psnProfileUrl(e.host_name))}" target="_blank" rel="noopener nofollow" title="Open the host's PSN profile to send a friend request"><strong>${esc(e.host_name)}</strong><span class="ev-psn">PSN</span></a>`)
     : e.host_account ? `<strong>${esc(e.host_account)}</strong>` : '';
   const hostedBy = who || e.host
     ? `<span class="ev-by">Hosted by ${who}${e.host ? ` ${crewTagHtml(e.host.tag, e.host.color, 'sm')}` : ''}</span>`

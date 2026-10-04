@@ -107,13 +107,17 @@ const describeFail = (r: DResult, what: string) =>
 function card(e: any, going: number) {
   const cancelled = e.status === "cancelled";
   const hostDiscord = e.discord_url ?? e.host?.discord_url ?? null;
+  // Host PSN name links to the PSN profile (friend request from the PlayStation app / browser).
+  const psnLink = !cancelled && e.host_name ? `[${e.host_name}](https://profile.playstation.com/${encodeURIComponent(e.host_name)})` : null;
   const fields = [
     { name: "Starts", value: `<t:${unix(e.starts_at)}:F>\n<t:${unix(e.starts_at)}:R>`, inline: true },
     { name: "Type", value: EVENT_TYPES[e.event_type] ?? e.event_type, inline: true },
     { name: "Platform", value: (e.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p).join(", ") || "—", inline: true },
-    { name: "Host", value: hostLabel(e), inline: true },
+    { name: "Host", value: psnLink && !e.host?.name ? psnLink : hostLabel(e), inline: true },
     { name: "Going", value: e.max_participants ? `${going} / ${e.max_participants}` : String(going), inline: true },
   ];
+  // Crew-hosted event with a PSN contact: show the PSN name as an extra field.
+  if (psnLink && e.host?.name) fields.push({ name: "Host on PSN", value: psnLink, inline: true });
   if (!cancelled && e.registration === "closed") fields.push({ name: "Sign-ups", value: "Closed", inline: true });
   const embed: Record<string, unknown> = {
     title: clip(cancelled ? `Cancelled: ${e.title}` : e.title, 256), url: eventUrl(e),

@@ -1,7 +1,7 @@
 // Event sign-ups ("I'm in"), shared by the Event Calendar and the Hub
 // overview (2026-10-02). Everyone sees who is going; logged-in drivers can
 // join / cancel; rules (capacity, closed, cancelled, past) are enforced by the DB.
-import { eventDiscord, esc, type HubEvent } from '../data/hub';
+import { eventDiscord, esc, psnProfileUrl, type HubEvent } from '../data/hub';
 import { sampleRsvps, setSampleRsvp } from './sample-rsvp';
 import { backendConfigured, getSupabase } from './supabase-client';
 
@@ -21,7 +21,10 @@ export function createEventRsvp(root: HTMLElement) {
   function nextStepHtml(e: HubEvent, sample: boolean): string {
     const discord = sample ? null : eventDiscord(e);
     const psn = e.host_name ? esc(e.host_name) : '';
-    const psnPart = psn ? `<span class="ev-next-psn">Host on PlayStation: <strong>${psn}</strong> <button type="button" class="ev-next-copy" data-copy="${psn}">Copy</button></span>` : '';
+    // PSN profile link instead of "Copy" (Fausto 2026-10-04): copying on a PC
+    // doesn't help on the console; the profile page opens in the PlayStation
+    // app / browser where the friend request can be sent directly.
+    const psnPart = psn ? `<span class="ev-next-psn">Host on PlayStation: <strong>${psn}</strong> <a class="ev-next-copy" href="${esc(psnProfileUrl(e.host_name!))}" target="_blank" rel="noopener nofollow">Open PSN Profile ↗</a></span>` : '';
     if (sample) {
       return `<div class="ev-next"><p class="ev-next-text"><strong>You\u2019re in.</strong> This is a sample event, so no real invite will be sent.</p></div>`;
     }
