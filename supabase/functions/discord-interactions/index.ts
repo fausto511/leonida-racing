@@ -326,13 +326,13 @@ async function feedAdd(i: any) {
     row_.created_by_driver_id = driver.driver_id;
     if (source === "crew") {
       const crews = await leaderCrews(driver.driver_id);
-      if (!crews.length) return { content: "You need to be a crew leader on Leonida Racing to add a crew feed." };
+      if (!crews.length) return { content: "You need to be a crew leader on Leonida Racing to add a crew feed. You can apply on the website; a moderator reviews it.", components: [row(linkButton("Apply as Crew Leader", `${SITE}/account/crew/`))] };
       const picked = opt(i, "crew") as string | undefined;
       const crew = picked ? crews.find((c) => c.crew_id === picked) : crews.length === 1 ? crews[0] : undefined;
       if (!crew) return { content: picked ? "You don't lead that crew on Leonida Racing." : "You lead more than one crew. Pick one with the crew option." };
       row_.crew_id = crew.crew_id; srcText = `${crew.name} [${crew.tag}]`;
     } else if (source === "host") {
-      if (!(await rolesOf(driver.driver_id)).some((r) => r.role === "event_host")) return { content: "You need the host role on Leonida Racing to add a host feed." };
+      if (!(await rolesOf(driver.driver_id)).some((r) => r.role === "event_host")) return { content: "You need the host role on Leonida Racing to add a host feed. You can apply on the website; a moderator reviews it.", components: [row(linkButton("Apply as Event Host", `${SITE}/account/events/`))] };
       row_.host_driver_id = driver.driver_id; srcText = `events hosted by ${driver.display_name}`;
     } else return { content: "Unknown source." };
   }
