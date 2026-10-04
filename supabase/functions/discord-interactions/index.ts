@@ -22,8 +22,8 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const PUBLIC_KEY = "5aef5b94df1e1470f44ce3f5eac2e53618c6582759ebe295d9745eeceeb0cfe6";
 const APP_ID = "1552506662533861376";
 const SITE = "https://leonidaracing.com";
-// Guild install with bot user + slash commands. Permissions: View Channels, Send Messages, Embed Links, Manage Events (native Discord events, package 3).
-const INVITE = `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot+applications.commands&permissions=8589954048&integration_type=0`;
+// Guild install with bot user + slash commands. Permissions: View Channels, Send Messages, Embed Links, Manage Events + Create Events (server events, package 3).
+const INVITE = `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot+applications.commands&permissions=17600775998464&integration_type=0`;
 const YELLOW = 0xffd74c;
 const DISCORD_BOT_TOKEN = Deno.env.get("DISCORD_BOT_TOKEN") ?? "";
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
@@ -230,7 +230,7 @@ async function autocomplete(i: any) {
 }
 
 // ---------- feeds (package 2) ----------
-const PERM_ADMIN = 1n << 3n, PERM_MANAGE_GUILD = 1n << 5n, PERM_MANAGE_EVENTS = 1n << 33n;
+const PERM_ADMIN = 1n << 3n, PERM_MANAGE_GUILD = 1n << 5n, PERM_CREATE_EVENTS = 1n << 44n; // creating scheduled events needs CREATE_EVENTS
 const SOURCES: Record<string, string> = { crew: "Crew", host: "Host profile", public: "Public calendar" };
 const canManage = (i: any) => { const p = BigInt(i.member?.permissions ?? "0"); return (p & PERM_ADMIN) !== 0n || (p & PERM_MANAGE_GUILD) !== 0n; };
 const discordId = (i: any): string => i.member?.user?.id ?? i.user?.id ?? "";
@@ -356,7 +356,7 @@ async function feedAdd(i: any) {
     throw error;
   }
   const notes: string[] = [];
-  if (nativeEvents && (BigInt(i.app_permissions ?? "0") & PERM_MANAGE_EVENTS) === 0n) notes.push("Adding to server events is switched on, but Leonida Racing doesn't have the “Manage Events” permission yet. Until it does, only the posts in the channel will appear.");
+  if (nativeEvents && (BigInt(i.app_permissions ?? "0") & PERM_CREATE_EVENTS) === 0n) notes.push("Adding to server events is switched on, but Leonida Racing doesn't have the “Create Events” permission yet. Until it does, only the posts in the channel will appear.");
   if (mention && reminders === "off") notes.push("Mentions only apply to reminders, which are off for this feed.");
   return { content: [`Feed added: <#${channelId}> · ${srcText}${filters ? ` · ${filters}` : ""}.`, ...notes].join("\n") };
 }
@@ -385,7 +385,7 @@ async function feedEdit(i: any) {
   if (error) throw error;
   const { names } = await feedsWithNames(i.guild_id);
   const notes: string[] = [];
-  if (upd.native_events && (BigInt(i.app_permissions ?? "0") & PERM_MANAGE_EVENTS) === 0n) notes.push("Leonida Racing doesn't have the “Manage Events” permission yet, so nothing will be added to your server events until it does.");
+  if (upd.native_events && (BigInt(i.app_permissions ?? "0") & PERM_CREATE_EVENTS) === 0n) notes.push("Leonida Racing doesn't have the “Create Events” permission yet, so nothing will be added to your server events until it does.");
   return { content: [`Feed updated: <#${upd.channel_id}> · ${feedLabel(upd, names)}\n${optionsLine(upd)}`, ...notes].join("\n") };
 }
 async function feedRemove(i: any) {

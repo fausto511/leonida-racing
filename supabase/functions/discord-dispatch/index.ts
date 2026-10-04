@@ -22,7 +22,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const APP_ID = "1552506662533861376";
 const SITE = "https://leonidaracing.com";
-const INVITE = `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot+applications.commands&permissions=8589954048&integration_type=0`;
+const INVITE = `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot+applications.commands&permissions=17600775998464&integration_type=0`;
 const YELLOW = 0xffd74c, GREY = 0x5c5c6e;
 const TOKEN = Deno.env.get("DISCORD_BOT_TOKEN") ?? "";
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
@@ -95,7 +95,7 @@ async function feedError(f: any, msg: string | null) {
   f.last_error = msg;
 }
 const describeFail = (r: DResult, what: string) =>
-  r.status === 403 ? `Missing permission to ${what} (check View Channel, Send Messages, Embed Links${what.includes("event") ? ", Manage Events" : ""}).`
+  r.status === 403 ? `Missing permission to ${what} (check View Channel, Send Messages, Embed Links${what.includes("event") ? ", Create Events, Manage Events" : ""}).`
   : r.status === 404 ? `Channel or server not found (was it deleted, or was the bot removed?).`
   : `Discord error ${r.status} while trying to ${what}.`;
 
