@@ -43,7 +43,8 @@ const ogImageHeight = Astro.props.ogImageHeight ?? (Astro.props.ogImage ? undefi
 const base = import.meta.env.BASE_URL;
 // Every page title ends with the brand (DEC-0082), unless it already contains it (home)
 // or the page opts out (vehicle detail pages, approved copy 2026-10-01).
-const fullTitle = title.includes(SITE_NAME) || !brandSuffix ? title : `${title} | ${SITE_NAME}`;
+// <title>, og:title and twitter:title use "GTA 6" (search spelling); visible page text keeps "GTA VI" (RS-0044).
+const fullTitle = (title.includes(SITE_NAME) || !brandSuffix ? title : `${title} | ${SITE_NAME}`).replace(/\bGTA VI\b/g, 'GTA 6');
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImageUrl = new URL(`${base}${ogImage}`, Astro.site).href;
 const allJsonLd = [...jsonLd];
