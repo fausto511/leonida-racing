@@ -4,6 +4,13 @@
 // overviews the same photos stay decorative (alt=""), the name is right there.
 // New photo: "[Color] [Make Model] [view/action] [setting]" -- only what is visible.
 export const vehiclePhotoAlt: Record<string, string> = {
+  // Added 2026-10-06 (Claude, from the photos; Fausto allowed alt texts without Codex):
+  'albany-manana': 'Yellow Albany Manana on jack stands in a workshop, a mechanic underneath',
+  'annis-elegy-retro-custom': 'Annis Elegy Retro Custom with graphic livery and glowing taillights at night, rear view',
+  'declasse-tulip': 'Red Declasse Tulip driving toward the camera on a sunny road',
+  'ubermacht-cypher': 'White Übermacht Cypher race car with a rear wing on a wet track, rear view',
+  'ubermacht-sentinel-classic-cabrio': 'Red Übermacht Sentinel Classic Cabrio parked in front of a shop, front view',
+  'vapid-caracara-4x4': 'Silver Vapid Caracara 4x4 pickup with hood stripe on a gravel driveway',
   'canis-kamacho': 'Green Canis Kamacho off-road truck against a glowing green backdrop',
   'declasse-mamba-gt': 'Red Declasse Mamba GT race car with number 36 livery',
   'dundreary-sirius': 'Turquoise Dundreary Sirius coupe viewed from the rear quarter',

@@ -13,6 +13,10 @@ export interface VehicleOption {
   // Unset = not officially announced (leak-only) -> shown as "TBA".
   releaseId?: string;
   firstSeenIn?: string; // earliest official appearance; unset for leak-only vehicles
+  // Official Rockstar source for firstSeenIn (YouTube with &t= or rockstargames.com) and the m:ss
+  // inside the video; only set where verified (Codex 2026-10-06, 17 of 100).
+  firstSeenUrl?: string;
+  firstSeenTimestamp?: string;
   realLifeInspiration?: string; // one editorially chosen real-world model
   // Access requirement, independent of releaseId (a launch car can still need the Ultimate Edition):
   acquisition?: 'pre-order' | 'ultimate-edition' | 'gta-plus';
@@ -36,6 +40,7 @@ interface GeneratedVehicle {
   vehicle_id: string; make: string; model: string; manufacturer_logo_slug: string; classes: string[];
   seats: number | null; drive: string | null; acquisition: string | null; has_photo: boolean;
   release_id: string | null; first_seen_in: string | null; real_life_inspiration: string | null;
+  first_seen_url?: string | null; first_seen_timestamp?: string | null;
 }
 export interface VehicleValue {
   vehicle_id: string; metric: 'price_gtad' | 'top_speed_mph' | 'gellhorn_reference_lap_ms'; value: number;
@@ -55,6 +60,8 @@ export const vehicleOptions: VehicleOption[] = (generated.vehicles as GeneratedV
   ...(v.has_photo ? { photo: true } : {}),
   ...(v.release_id ? { releaseId: v.release_id } : {}),
   ...(v.first_seen_in ? { firstSeenIn: v.first_seen_in } : {}),
+  ...(v.first_seen_url ? { firstSeenUrl: v.first_seen_url } : {}),
+  ...(v.first_seen_timestamp ? { firstSeenTimestamp: v.first_seen_timestamp } : {}),
   ...(v.real_life_inspiration ? { realLifeInspiration: v.real_life_inspiration } : {}),
 }));
 

@@ -153,7 +153,9 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
     <div class="v-performance-grid v-release-grid">
       <div class="panel v-metric"><span>Release Date</span>{release?.date ? <strong><time datetime={release.date}>{releaseDateText}</time></strong> : <strong class="v-muted">{releaseDateText}</strong>}</div>
       <div class="panel v-metric"><span>Added With</span><strong class={release ? undefined : 'v-muted'}>{addedWithText}</strong>{addedWithNote && <small>{addedWithNote}</small>}</div>
-      <div class="panel v-metric"><span>First Seen In</span><strong class={vehicle.firstSeenIn ? undefined : 'v-muted'}>{vehicle.firstSeenIn ?? 'Not officially revealed'}</strong></div>
+      <div class="panel v-metric"><span>First Seen In</span>{vehicle.firstSeenIn && vehicle.firstSeenUrl
+        ? <strong><a class="v-source-link" href={vehicle.firstSeenUrl} target="_blank" rel="noopener">{vehicle.firstSeenIn}{vehicle.firstSeenTimestamp && <> · {vehicle.firstSeenTimestamp}</>} <span aria-hidden="true">↗</span></a></strong>
+        : <strong class={vehicle.firstSeenIn ? undefined : 'v-muted'}>{vehicle.firstSeenIn ?? 'Not officially revealed'}</strong>}</div>
       <div class="panel v-metric"><span>Real-Life Inspiration</span>{vehicle.realLifeInspiration ? <strong>{vehicle.realLifeInspiration}</strong> : <strong class="status-pending"><span class="status-dot"></span>Data pending</strong>}</div>
     </div>
   </section>
@@ -168,7 +170,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
 
   {similar.length > 0 && (
     <section class="wrap v-similar" id="v-similar" aria-labelledby="v-similar-title">
-      {/* COPY STATUS: heading is an unreviewed Claude placeholder (2026-10-06), Codex review pending (DEC-0088). */}
+      {/* COPY STATUS: heading reviewed by Codex 2026-10-06, no change. */}
       <h2 id="v-similar-title">Similar Cars</h2>
       <div class="v-similar-grid">
         {similar.map((v) => <VehicleTile vehicle={v} />)}
@@ -250,6 +252,8 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   /* Similar Cars: same spacing as between the other blocks; always full rows
      (4 / 2x2 / 1 column), never a half-filled second row (Fausto, 2026-10-06). */
   .v-description.has-similar { padding-bottom: 0; }
+  .v-source-link { color: inherit; text-decoration: underline; text-decoration-color: var(--gh-yellow); text-underline-offset: .2em; }
+  .v-source-link:hover { color: var(--gh-yellow); }
   .v-similar { padding-top: var(--gh-gap-card); padding-bottom: var(--gh-gap-section); }
   .v-similar-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gh-gap-card); }
   @media (max-width: 1120px) { .v-similar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
