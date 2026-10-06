@@ -88,10 +88,16 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
       <label class="ui-search v-search-field"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input type="search" id="v-search" placeholder="Search Vehicle" aria-label="Search vehicles" autocomplete="off" /></label>
       <ul id="v-search-results" class="v-search-results" hidden></ul>
     </div>
-    <button type="button" id="v-own" class="v-own-btn" role="switch" aria-pressed="false" aria-checked="false" hidden>
-      <span class="v-own-box" aria-hidden="true"></span>
-      <span class="v-own-label">I Own This Vehicle</span>
-    </button>
+    <div class="v-own-wrap">
+      <!-- Shortcut to My Garage, shown while this vehicle is owned (Fausto, 2026-10-06; replaces the fading "Added to My Garage" note). -->
+      <a href={`${base}account/garage/`} id="v-garage-link" class="v-garage-link" aria-label="Open My Garage" title="Open My Garage" hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M7 21v-8h10v8"/><path d="M7 16h10"/><path d="M7 19h10"/></svg>
+      </a>
+      <button type="button" id="v-own" class="v-own-btn" role="switch" aria-pressed="false" aria-checked="false" hidden>
+        <span class="v-own-box" aria-hidden="true"></span>
+        <span class="v-own-label">I Own This Vehicle</span>
+      </button>
+    </div>
     <a href={`${base}garage/#compare`} id="v-compare-cta" class="garage-compare-btn">Compare Selected (0)</a>
     <p class="v-own-msg" id="v-own-msg" role="status" hidden></p>
   </section>
@@ -195,8 +201,11 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
 
   .v-identity { padding: var(--gh-pad-card); }
   /* "I own this" toggle (RS-0032) */
-  .v-own-btn[hidden], .v-own-msg[hidden] { display: none; }
-  .v-own-btn { justify-self: end; display: inline-flex; align-items: center; gap: .5rem; padding: .55rem 1rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-surface); color: var(--gh-text); font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .v-own-btn[hidden], .v-own-msg[hidden], .v-garage-link[hidden] { display: none; }
+  .v-own-wrap { justify-self: end; display: flex; align-items: stretch; gap: .5rem; }
+  .v-garage-link { display: inline-flex; align-items: center; justify-content: center; width: 2.4rem; flex: none; border-radius: var(--gh-radius); border: 1px solid var(--gh-yellow); background: rgba(255,215,76,.08); color: var(--gh-yellow); }
+  .v-garage-link:hover { background: rgba(255,215,76,.16); }
+  .v-own-btn { display: inline-flex; align-items: center; gap: .5rem; padding: .55rem 1rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-surface); color: var(--gh-text); font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
   .v-own-btn:hover { border-color: var(--gh-muted); }
   /* Toggle switch instead of a checkbox (Fausto, 2026-10-02) */
   .v-own-box { position: relative; flex: none; box-sizing: border-box; width: 2.1rem; height: 1.2rem; border-radius: 999px; background: rgba(160,160,198,.25); border: 1px solid var(--gh-line); transition: background .15s, border-color .15s; }
@@ -250,7 +259,9 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
     .v-stage { grid-template-columns: 1fr; }
     .v-toolbar { grid-template-columns: 1fr 1fr; }
     .v-search-wrap { grid-column: 1 / -1; }
-    .garage-compare-btn, .v-own-btn { justify-self: stretch; justify-content: center; text-align: center; }
+    .garage-compare-btn, .v-own-wrap { justify-self: stretch; }
+    .garage-compare-btn, .v-own-btn { justify-content: center; text-align: center; }
+    .v-own-btn { flex: 1; }
     .v-own-msg { justify-self: start; }
   }
 </style>
@@ -348,6 +359,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   const btn = document.getElementById('v-own') as HTMLButtonElement;
   const label = btn.querySelector('.v-own-label') as HTMLElement;
   const msg = document.getElementById('v-own-msg') as HTMLElement;
+  const garageLink = document.getElementById('v-garage-link') as HTMLAnchorElement;
   const vehicleId = (document.getElementById('v-compare-mark') as HTMLElement).dataset.id!;
   const base = import.meta.env.BASE_URL;
   let me: string | null = null;
@@ -356,6 +368,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
     btn.setAttribute('aria-pressed', String(owned));
     btn.setAttribute('aria-checked', String(owned));
     label.textContent = owned ? 'In My Garage' : 'I Own This Vehicle';
+    garageLink.hidden = !owned;
   }
   let noteTimer: number | undefined;
   function note(html: string) {
@@ -369,7 +382,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
     btn.disabled = true;
     try {
       render(await setOwned(me, vehicleId, want));
-      note(want ? `Added to <a href="${base}account/garage/">My Garage</a>.` : '');
+      note(''); // success is shown by the garage shortcut; the note is only for errors
     } catch {
       note('Could not save — please try again.');
     }
