@@ -1,6 +1,7 @@
 ---
 import Base from '../../../../layouts/Base.astro';
-import { vehicleOptions, vehicleValues, formatVehicleValue, valueSourceLabels, type VehicleValue } from '../../../../data/vehicles';
+import { vehicleOptions, vehicleValues, formatVehicleValue, valueSourceLabels, compareGarageOrder, type VehicleValue } from '../../../../data/vehicles';
+import VehicleTile from '../../../../components/VehicleTile.astro';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
 import { releaseById, formatReleaseDate } from '../../../../data/releases';
 import { classHref, makeHref } from '../../../../data/garage-taxonomy';
@@ -41,9 +42,21 @@ const photoAlt = vehiclePhotoAlt[vehicle.id] ?? `${fullName} in GTA VI`;
 const metaTitle = `${fullName} — GTA VI Car Specs & Performance`;
 const metaDescription = `Explore the ${fullName} in GTA 6, including key vehicle details, release information, real-life inspiration, and available performance data.`;
 const makeLink = makeHref(vehicle);
-// Measured values with provenance (RS-0052); missing = "Data pending"
+// Measured values with provenance (RS-0052). Missing values show a per-field
+// status (Fausto, 2026-10-06) instead of "Data pending"; same three rows, so
+// real values simply replace the status after launch.
 const vals = vehicleValues[vehicle.id] ?? {};
 const valueTitle = (v: VehicleValue) => [valueSourceLabels[v.source_type], v.game_release_id && releaseById[v.game_release_id]?.name, v.measured_at].filter(Boolean).join(' · ');
+
+// Similar Cars (Fausto, 2026-10-06): up to 6 officially revealed vehicles that
+// share a class, ranked by same primary class, same drive, same seat count;
+// ties in garage order. Leak-only vehicles (no releaseId) are never suggested.
+const similar = vehicleOptions
+  .filter((v) => v.id !== vehicle.id && v.releaseId && v.classes.some((c) => vehicle.classes.includes(c)))
+  .map((v) => ({ v, score: (v.classes[0] === vehicle.classes[0] ? 4 : 0) + (v.drive === vehicle.drive ? 2 : 0) + (v.seats === vehicle.seats ? 1 : 0) }))
+  .sort((a, b) => b.score - a.score || compareGarageOrder(a.v, b.v))
+  .slice(0, 6)
+  .map((x) => x.v);
 
 // Lightweight index for the quick vehicle search/switch dropdown above the
 // stage -- id/name/href only, so the client script doesn't need the full
@@ -120,11 +133,11 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
         {vehicle.releaseId && <> · <a rel="nofollow" href={`${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(vehicle.id)}#leaderboard`}>Gellhorn Leaderboard</a></>}
       </p>
       <dl class="v-key">
-        <div><dt>Price</dt>{vals.price_gtad ? <dd title={valueTitle(vals.price_gtad)}>{formatVehicleValue(vals.price_gtad)} <small class="v-src">{valueSourceLabels[vals.price_gtad.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>Data pending</dd>}</div>
+        <div><dt>Price</dt>{vals.price_gtad ? <dd title={valueTitle(vals.price_gtad)}>{formatVehicleValue(vals.price_gtad)} <small class="v-src">{valueSourceLabels[vals.price_gtad.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>Not announced yet</dd>}</div>
         <div><dt>Seats</dt><dd>{vehicle.seats}</dd></div>
         <div><dt>Drive</dt><dd>{vehicle.drive}</dd></div>
-        <div><dt>Top Speed</dt>{vals.top_speed_mph ? <dd title={valueTitle(vals.top_speed_mph)}>{formatVehicleValue(vals.top_speed_mph)} <small class="v-src">{valueSourceLabels[vals.top_speed_mph.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>Data pending</dd>}</div>
-        <div><dt>Gellhorn Lab Time</dt>{vals.gellhorn_reference_lap_ms ? <dd title={valueTitle(vals.gellhorn_reference_lap_ms)}>{formatVehicleValue(vals.gellhorn_reference_lap_ms)} <small class="v-src">{valueSourceLabels[vals.gellhorn_reference_lap_ms.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>Data pending</dd>}</div>
+        <div><dt>Top Speed</dt>{vals.top_speed_mph ? <dd title={valueTitle(vals.top_speed_mph)}>{formatVehicleValue(vals.top_speed_mph)} <small class="v-src">{valueSourceLabels[vals.top_speed_mph.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>Measured after launch</dd>}</div>
+        <div><dt>Gellhorn Lab Time</dt>{vals.gellhorn_reference_lap_ms ? <dd title={valueTitle(vals.gellhorn_reference_lap_ms)}>{formatVehicleValue(vals.gellhorn_reference_lap_ms)} <small class="v-src">{valueSourceLabels[vals.gellhorn_reference_lap_ms.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>From Nov 19, 2026</dd>}</div>
       </dl>
     </aside>
   </section>
@@ -143,6 +156,16 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
     <section class="wrap v-description">
       <div class="panel v-description-panel">
         {copy.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+    </section>
+  )}
+
+  {similar.length > 0 && (
+    <section class="wrap v-similar" id="v-similar" aria-labelledby="v-similar-title">
+      {/* COPY STATUS: heading is an unreviewed Claude placeholder (2026-10-06), Codex review pending (DEC-0088). */}
+      <h2 id="v-similar-title">Similar Cars</h2>
+      <div class="v-similar-grid">
+        {similar.map((v) => <VehicleTile vehicle={v} />)}
       </div>
     </section>
   )}
@@ -200,7 +223,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   .v-src { color: var(--gh-muted); font-size: .68rem; font-weight: 600; margin-left: .3rem; }
 
   .v-performance { padding-top: var(--gh-gap-card); }
-  .v-performance h2 { font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin: 0 0 1rem; }
+  .v-performance h2, .v-similar h2 { font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin: 0 0 1rem; }
   .v-performance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--gh-gap-card); }
   .v-metric { padding: var(--gh-pad-card); display: flex; flex-direction: column; gap: .5rem; }
   .v-metric span { color: var(--gh-muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
@@ -215,6 +238,8 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   .v-description-panel { padding: var(--gh-pad-card); color: var(--gh-muted); font-size: .8rem; line-height: 1.6; }
   .v-description-panel p { margin: 0 0 1rem; }
   .v-description-panel p:last-child { margin-bottom: 0; }
+  .v-similar { padding-bottom: var(--gh-gap-section); }
+  .v-similar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr)); gap: var(--gh-gap-card); }
 
   @media (max-width: 760px) {
     .v-stage { grid-template-columns: 1fr; }
@@ -276,6 +301,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
 
 <script>
   import { getSelected, isSelected, toggleSelected } from '../../../../scripts/compare';
+  import { initVehicleTiles } from '../../../../scripts/vehicle-tiles';
 
   const iconBtn = document.getElementById('v-compare-mark') as HTMLButtonElement | null;
   const compareCta = document.getElementById('v-compare-cta') as HTMLAnchorElement | null;
@@ -303,6 +329,10 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   }
 
   updateCompareCta();
+
+  // Similar Cars tiles: compare marks + owned badges, keeping the counter in sync.
+  const similarSection = document.getElementById('v-similar');
+  if (similarSection) initVehicleTiles(similarSection, updateCompareCta);
 </script>
 
 <script>
