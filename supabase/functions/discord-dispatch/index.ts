@@ -21,6 +21,13 @@
 // discord_bot_state 'test_guild_ids' (comma separated).
 //
 // Package 4: cards carry I'm in / Withdraw buttons (custom_id rsvp:in|out:<event_id>).
+//
+// Gone servers/channels (privacy, 06.10.2026): if Discord reports the channel
+// as deleted (10003) the feed is removed; if the bot is no longer in the server
+// (GET /guilds -> 10004 / 50001) all feeds of that server are removed. A plain
+// missing permission keeps the feed and only sets last_error. The same check
+// runs once a day for every feed (body {"housekeeping": true}, cron job
+// "discord-housekeeping"), so feeds without new events are cleaned up too.
 // COPY STATUS: all user-facing texts are Claude placeholders, Codex review pending.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -109,6 +116,47 @@ const describeFail = (r: DResult, what: string) =>
   r.status === 403 ? `Missing permission to ${what} (check View Channel, Send Messages, Embed Links${what.includes("event") ? ", Create Events, Manage Events" : ""}).`
   : r.status === 404 ? `Channel or server not found (was it deleted, or was the bot removed?).`
   : `Discord error ${r.status} while trying to ${what}.`;
+
+// ---------- gone servers / channels ----------
+const UNKNOWN_CHANNEL = 10003, UNKNOWN_GUILD = 10004, MISSING_ACCESS = 50001;
+async function botLeftGuild(guildId: string): Promise<boolean> {
+  const g = await discord("GET", `/guilds/${guildId}`);
+  return !g.ok && (g.status === 403 || g.status === 404) && [UNKNOWN_GUILD, MISSING_ACCESS].includes(g.data?.code);
+}
+async function dropGuild(guildId: string) {
+  console.log("bot no longer in server, removing its feeds", guildId);
+  await db.from("discord_feeds").delete().eq("guild_id", guildId); // messages + outbox rows cascade
+}
+async function dropFeed(f: any) {
+  console.log("channel gone, removing feed", f.feed_id);
+  const { data: refs } = await db.from("discord_messages").select("scheduled_event_id").eq("feed_id", f.feed_id);
+  for (const r of refs ?? []) {
+    if (r.scheduled_event_id && r.scheduled_event_id !== REMOVED) await discord("DELETE", `/guilds/${f.guild_id}/scheduled-events/${r.scheduled_event_id}`);
+  }
+  await db.from("discord_feeds").delete().eq("feed_id", f.feed_id);
+}
+// true = the feed (or its whole server) was removed, caller stops.
+async function handleGone(f: any, r: DResult): Promise<boolean> {
+  if (r.status === 404 && r.data?.code === UNKNOWN_CHANNEL) { await dropFeed(f); return true; }
+  if (r.status === 403 || (r.status === 404 && r.data?.code === UNKNOWN_GUILD)) {
+    if (await botLeftGuild(f.guild_id)) { await dropGuild(f.guild_id); return true; }
+  }
+  return false;
+}
+async function housekeeping() {
+  const { data: feeds } = await db.from("discord_feeds").select("feed_id,guild_id,channel_id");
+  const byGuild = new Map<string, any[]>();
+  for (const f of feeds ?? []) byGuild.set(f.guild_id, [...(byGuild.get(f.guild_id) ?? []), f]);
+  let guildsRemoved = 0, feedsRemoved = 0;
+  for (const [guildId, list] of byGuild) {
+    if (await botLeftGuild(guildId)) { await dropGuild(guildId); guildsRemoved++; feedsRemoved += list.length; continue; }
+    for (const f of list) {
+      const c = await discord("GET", `/channels/${f.channel_id}`);
+      if (c.status === 404 && c.data?.code === UNKNOWN_CHANNEL) { await dropFeed(f); feedsRemoved++; }
+    }
+  }
+  return { guilds: byGuild.size, guildsRemoved, feedsRemoved };
+}
 
 // ---------- card ----------
 function card(e: any, going: number) {
@@ -223,6 +271,7 @@ async function sync(f: any, eventId: string, e: any | null, going: number, depth
     const r = await discord("POST", `/channels/${f.channel_id}/messages`, card(e, going));
     if (!r.ok) {
       await db.from("discord_messages").delete().eq("feed_id", f.feed_id).eq("event_id", eventId);
+      if (await handleGone(f, r)) return;
       await feedError(f, describeFail(r, "post in the channel"));
       console.log("post failed", f.feed_id, r.status, r.text.slice(0, 300));
       return;
@@ -245,6 +294,7 @@ async function sync(f: any, eventId: string, e: any | null, going: number, depth
     await db.from("discord_messages").delete().eq("feed_id", f.feed_id).eq("event_id", eventId);
     return sync(f, eventId, e, going, 1);
   }
+  if (!r.ok && await handleGone(f, r)) return;
   if (!r.ok) { await feedError(f, describeFail(r, "edit messages in the channel")); console.log("edit failed", r.status, r.text.slice(0, 300)); }
 
   let sched: string | null = ref.scheduled_event_id;
@@ -318,6 +368,8 @@ Deno.serve(async (req) => {
   const { data: ok } = await db.rpc("check_job_token", { p_name: "discord-dispatch", p_token: req.headers.get("x-job-token") ?? "" });
   if (ok !== true) return json({ error: "forbidden" }, 403);
   if (!TOKEN) return json({ error: "DISCORD_BOT_TOKEN missing" }, 500);
+  const body = await req.json().catch(() => ({}));
+  if (body?.housekeeping === true) return json(await housekeeping());
 
   const started = Date.now();
   let done = 0, failed = 0;
