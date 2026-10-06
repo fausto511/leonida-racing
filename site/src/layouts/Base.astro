@@ -96,8 +96,9 @@ if (breadcrumbs.length) {
     <link rel="manifest" href={`${base}manifest.webmanifest`} />
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <Header section={section} />
-    <main><slot /></main>
+    <main id="main" tabindex="-1"><slot /></main>
     <Footer />
     <ConsentBar />
   </body>
