@@ -48,14 +48,14 @@ const makeLink = makeHref(vehicle);
 const vals = vehicleValues[vehicle.id] ?? {};
 const valueTitle = (v: VehicleValue) => [valueSourceLabels[v.source_type], v.game_release_id && releaseById[v.game_release_id]?.name, v.measured_at].filter(Boolean).join(' · ');
 
-// Similar Cars (Fausto, 2026-10-06): up to 6 officially revealed vehicles that
+// Similar Cars (Fausto, 2026-10-06): up to 4 (one row) officially revealed vehicles that
 // share a class, ranked by same primary class, same drive, same seat count;
 // ties in garage order. Leak-only vehicles (no releaseId) are never suggested.
 const similar = vehicleOptions
   .filter((v) => v.id !== vehicle.id && v.releaseId && v.classes.some((c) => vehicle.classes.includes(c)))
   .map((v) => ({ v, score: (v.classes[0] === vehicle.classes[0] ? 4 : 0) + (v.drive === vehicle.drive ? 2 : 0) + (v.seats === vehicle.seats ? 1 : 0) }))
   .sort((a, b) => b.score - a.score || compareGarageOrder(a.v, b.v))
-  .slice(0, 6)
+  .slice(0, 4)
   .map((x) => x.v);
 
 // Lightweight index for the quick vehicle search/switch dropdown above the
@@ -153,7 +153,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   </section>
 
   {copy && (
-    <section class="wrap v-description">
+    <section class={`wrap v-description${similar.length > 0 ? ' has-similar' : ''}`}>
       <div class="panel v-description-panel">
         {copy.map((paragraph) => <p>{paragraph}</p>)}
       </div>
@@ -238,8 +238,13 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   .v-description-panel { padding: var(--gh-pad-card); color: var(--gh-muted); font-size: .8rem; line-height: 1.6; }
   .v-description-panel p { margin: 0 0 1rem; }
   .v-description-panel p:last-child { margin-bottom: 0; }
-  .v-similar { padding-bottom: var(--gh-gap-section); }
-  .v-similar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr)); gap: var(--gh-gap-card); }
+  /* Similar Cars: same spacing as between the other blocks; always full rows
+     (4 / 2x2 / 1 column), never a half-filled second row (Fausto, 2026-10-06). */
+  .v-description.has-similar { padding-bottom: 0; }
+  .v-similar { padding-top: var(--gh-gap-card); padding-bottom: var(--gh-gap-section); }
+  .v-similar-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gh-gap-card); }
+  @media (max-width: 1120px) { .v-similar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .v-similar-grid { grid-template-columns: 1fr; } }
 
   @media (max-width: 760px) {
     .v-stage { grid-template-columns: 1fr; }
