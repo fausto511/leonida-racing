@@ -345,24 +345,6 @@
    "real_life_inspiration": "Dodge Challenger SRT Demon (2018)"
   },
   {
-   "vehicle_id": "buckingham-jubilee",
-   "make": "Buckingham",
-   "model": "Jubilee",
-   "manufacturer_logo_slug": "buckingham",
-   "classes": [
-    "SUVs"
-   ],
-   "seats": 4,
-   "drive": "AWD",
-   "acquisition": null,
-   "has_photo": false,
-   "release_id": "base-game",
-   "first_seen_in": "Trailer 1",
-   "first_seen_url": null,
-   "first_seen_timestamp": null,
-   "real_life_inspiration": "Rolls-Royce Cullinan"
-  },
-  {
    "vehicle_id": "canis-kamacho",
    "make": "Canis",
    "model": "Kamacho",
@@ -757,6 +739,24 @@
    "first_seen_url": "https://www.youtube.com/watch?v=VQRLujxTm3c&t=30s",
    "first_seen_timestamp": "0:30",
    "real_life_inspiration": "Lexus RC F"
+  },
+  {
+   "vehicle_id": "enus-jubilee",
+   "make": "Enus",
+   "model": "Jubilee",
+   "manufacturer_logo_slug": "enus",
+   "classes": [
+    "SUVs"
+   ],
+   "seats": 4,
+   "drive": "AWD",
+   "acquisition": null,
+   "has_photo": false,
+   "release_id": "base-game",
+   "first_seen_in": "Trailer 1",
+   "first_seen_url": null,
+   "first_seen_timestamp": null,
+   "real_life_inspiration": "Rolls-Royce Cullinan"
   },
   {
    "vehicle_id": "enus-paragon-r",

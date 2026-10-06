@@ -36,7 +36,7 @@ export default defineConfig({
       filter: (page) =>
         !page.includes('/account/') && !page.includes('/moderator/') && !page.includes('/hub/') &&
         !page.endsWith('/time-attack/') && !page.includes('/tracks/') && !page.includes('/report/') && !page.includes('/report-content/') && !page.endsWith('.txt') &&
-        !page.endsWith('/garage/vehicles/vapid-caracara/') && !page.endsWith('/time-attack/submit/') &&
+        !page.endsWith('/garage/vehicles/vapid-caracara/') && !page.endsWith('/garage/vehicles/buckingham-jubilee/') && !page.endsWith('/time-attack/submit/') &&
         !noindexVehiclePaths.some((p) => page.endsWith(p)),
     }),
   ],
