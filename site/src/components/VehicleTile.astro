@@ -52,14 +52,14 @@ const acquisitionLabels: Record<string, string> = {
   </div>
   <button type="button" class="v-compare-mark" data-id={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to compare`}><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg></button>
   <div class="v-data">
-    <span>Price{vehicleValues[v.id]?.price_gtad ? <strong>{formatVehicleValue(vehicleValues[v.id]!.price_gtad!)}</strong> : <strong class="status-pending"><span class="status-dot"></span>Data pending</strong>}</span>
+    <span>Price{vehicleValues[v.id]?.price_gtad ? <strong>{formatVehicleValue(vehicleValues[v.id]!.price_gtad!)}</strong> : <strong class="status-pending"><span class="status-dot"></span>Not announced</strong>}</span>
     <span>GTA Class<strong>{v.classes.join(' / ')}</strong></span>
   </div>
   <details class="v-expand">
     <summary>Racing data</summary>
     <div class="v-inner">
-      <span>Gellhorn Lap{vehicleValues[v.id]?.gellhorn_reference_lap_ms ? <strong>{formatVehicleValue(vehicleValues[v.id]!.gellhorn_reference_lap_ms!)}</strong> : <strong class="status-pending"><span class="status-dot"></span>Data pending</strong>}</span>
-      <span>Top Speed{vehicleValues[v.id]?.top_speed_mph ? <strong>{formatVehicleValue(vehicleValues[v.id]!.top_speed_mph!)}</strong> : <strong class="status-pending"><span class="status-dot"></span>Data pending</strong>}</span>
+      <span>Gellhorn Lap{vehicleValues[v.id]?.gellhorn_reference_lap_ms ? <strong>{formatVehicleValue(vehicleValues[v.id]!.gellhorn_reference_lap_ms!)}</strong> : <strong class="status-pending"><span class="status-dot"></span>From Nov 19</strong>}</span>
+      <span>Top Speed{vehicleValues[v.id]?.top_speed_mph ? <strong>{formatVehicleValue(vehicleValues[v.id]!.top_speed_mph!)}</strong> : <strong class="status-pending"><span class="status-dot"></span>After launch</strong>}</span>
       <span>Drive<strong>{v.drive}</strong></span>
     </div>
   </details>
