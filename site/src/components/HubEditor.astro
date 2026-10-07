@@ -60,11 +60,10 @@ const base = import.meta.env.BASE_URL;
             </div>
             <p class="track-note" id="crew-mod-note" hidden></p>
             <div class="grid">
-              <label class="span2">Crew name *<input type="text" name="name" maxlength="40" required /></label>
+              <label class="span2">Crew name * <small>max. 22 characters</small><input type="text" name="name" maxlength="22" required /></label>
               <label>Crew tag * <small>exactly 4 letters/digits</small><input type="text" name="tag" maxlength="4" required class="tag-input" /></label>
               <label>Crew color *<span class="color-row"><input type="color" name="color_picker" value="#ed253d" /><input type="text" name="color" value="#ed253d" maxlength="7" /></span></label>
               <label data-mod-only>URL slug * <small>auto from name</small><input type="text" name="slug" maxlength="48" required /></label>
-              <label>Members <small>optional, e.g. from Social Club</small><input type="number" name="member_count" min="0" step="1" /></label>
               <fieldset class="span2 platforms-set"><legend>Platforms</legend>
                 {PLATFORMS.map((p) => p.active
                   ? <label class="check"><input type="checkbox" name="platforms" value={p.id} checked data-locked /> {p.label}</label>
@@ -74,7 +73,7 @@ const base = import.meta.env.BASE_URL;
                 {Object.entries(focusLabels).map(([k, v]) => <label class="check"><input type="checkbox" name="focus" value={k} /> {v}</label>)}
               </fieldset>
               <label>Region<input type="text" name="region" maxlength="40" placeholder="e.g. Europe" /></label>
-              <fieldset class="span2 lang-set"><legend>Languages <small>pick all your crew speaks</small></legend>
+              <fieldset class="span2 lang-set"><legend>Languages <small>up to 2</small></legend>
                 {mainCrewLanguages.map((k) => <label class="check"><input type="checkbox" name="languages" value={k} /> {crewLanguages[k]}</label>)}
                 <details class="lang-more">
                   <summary>More languages</summary>
@@ -83,7 +82,7 @@ const base = import.meta.env.BASE_URL;
                   </div>
                 </details>
               </fieldset>
-              <label class="span2">Description <small><span id="crew-desc-count">0</span>/400</small><textarea name="description" maxlength="400" rows="3"></textarea></label>
+              <label class="span2">Description <small><span id="crew-desc-count">0</span>/90 · no links</small><textarea name="description" maxlength="90" rows="2"></textarea></label>
               <label>Discord invite<input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
               <label>Social Club page<input type="url" name="social_club_url" placeholder="https://socialclub.rockstargames.com/…" /></label>
               <label class="check" data-mod-only><input type="checkbox" name="is_partner" /> Partner crew</label>
@@ -594,7 +593,6 @@ const base = import.meta.env.BASE_URL;
 
   function crewFromForm(): HubCrew & { slug: string; sort_order: number; is_published: boolean } {
     const fd = new FormData(crewForm);
-    const mc = blank(fd.get('member_count'));
     return {
       slug: String(fd.get('slug') ?? '').trim(),
       name: String(fd.get('name') ?? '').trim(),
@@ -605,7 +603,6 @@ const base = import.meta.env.BASE_URL;
       region: blank(fd.get('region')),
       languages: fd.getAll('languages').map(String),
       description: blank(fd.get('description')),
-      member_count: mc === null ? null : Math.max(0, Math.round(Number(mc))),
       discord_url: blank(fd.get('discord_url')),
       social_club_url: blank(fd.get('social_club_url')),
       is_partner: fd.get('is_partner') === 'on',
@@ -618,7 +615,9 @@ const base = import.meta.env.BASE_URL;
 
   function validateCrew(c: ReturnType<typeof crewFromForm>): string[] {
     const bad: string[] = [];
-    if (c.name.length < 2) bad.push('name');
+    if (c.name.length < 2 || c.name.length > 22) bad.push('name');
+    if (c.description && (c.description.length > 90 || /(https?:\/\/|www\.|discord\.(gg|com)\/)/i.test(c.description))) bad.push('description');
+    if (c.languages.length > 2) bad.push('languages');
     if (!/^[A-Z0-9]{4}$/.test(c.tag)) bad.push('tag');
     if (!/^#[0-9a-f]{6}$/.test(c.color)) bad.push('color');
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(c.slug)) bad.push('slug');
@@ -627,13 +626,14 @@ const base = import.meta.env.BASE_URL;
     return bad;
   }
   const crewFieldHelp: Record<string, string> = {
-    name: 'name (2–40 characters)', tag: 'tag (exactly 4 letters/digits)', color: 'color (#rrggbb)', slug: 'URL slug (a-z, 0-9, hyphens)',
+    name: 'name (2–22 characters)', description: 'description (max. 90 characters, no links)', languages: 'languages (up to 2)', tag: 'tag (exactly 4 letters/digits)', color: 'color (#rrggbb)', slug: 'URL slug (a-z, 0-9, hyphens)',
     discord_url: 'Discord invite (https://discord.gg/… or https://discord.com/invite/…)', social_club_url: 'Social Club link (https://socialclub.rockstargames.com/…)',
   };
 
   function renderCrewPreview() {
     const c = crewFromForm();
-    const safe = { ...c, tag: c.tag || '????', name: c.name || 'Crew name', color: /^#[0-9a-f]{6}$/.test(c.color) ? c.color : '#a0a0c6' };
+    // member count is counted by the DB (active members); the preview shows the saved value
+    const safe = { ...c, member_count: crews.find((x) => x.crew_id === selectedId)?.member_count ?? 1, tag: c.tag || '????', name: c.name || 'Crew name', color: /^#[0-9a-f]{6}$/.test(c.color) ? c.color : '#a0a0c6' };
     $('crew-preview').innerHTML = crewCardHtml(safe);
     $('crew-desc-count').textContent = String((cf.description.value || '').length);
   }
@@ -659,7 +659,6 @@ const base = import.meta.env.BASE_URL;
     for (const k of ['name', 'tag', 'slug', 'region', 'description', 'discord_url', 'social_club_url']) cf[k].value = r[k] ?? '';
     cf.color.value = r.color ?? '#ed253d';
     cf.color_picker.value = r.color ?? '#ed253d';
-    cf.member_count.value = r.member_count ?? '';
     cf.sort_order.value = r.sort_order ?? 0;
     cf.is_partner.checked = Boolean(r.is_partner);
     cf.is_featured.checked = Boolean(r.is_featured);
@@ -689,6 +688,12 @@ const base = import.meta.env.BASE_URL;
   cf.color.addEventListener('input', () => { if (/^#[0-9a-fA-F]{6}$/.test(cf.color.value)) cf.color_picker.value = cf.color.value.toLowerCase(); });
   crewForm.addEventListener('input', renderCrewPreview);
   crewForm.addEventListener('change', renderCrewPreview);
+  // at most 2 languages (Fausto 2026-10-07): a third tick is undone right away
+  crewForm.addEventListener('change', (ev) => {
+    const t = ev.target as HTMLInputElement;
+    if (t.name !== 'languages' || !t.checked) return;
+    if (crewForm.querySelectorAll('input[name="languages"]:checked').length > 2) { t.checked = false; msg(crewForm, 'Pick up to 2 languages.', true); renderCrewPreview(); }
+  });
 
   crewForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();

@@ -45,10 +45,10 @@ const { focus } = Astro.props;
           <label class="ra-radio" id="ra-existing-opt"><input type="radio" name="crew_mode" value="existing" /> My crew is already listed</label>
         </div>
         <div class="ra-grid" id="ra-new">
-          <label class="ra-span2">Crew name *<input type="text" name="new_crew_name" maxlength="40" /></label>
+          <label class="ra-span2">Crew name * <small>max. 22 characters</small><input type="text" name="new_crew_name" maxlength="22" /></label>
           <label>Crew tag * <small>exactly 4 letters/digits</small><input type="text" name="new_crew_tag" maxlength="4" class="ra-tag" /></label>
           <label>Crew color *<span class="ra-color"><input type="color" name="color_picker" value="#ed253d" /><input type="text" name="new_crew_color" value="#ed253d" maxlength="7" /></span></label>
-          <label class="ra-span2">Short description <small>optional, shown on the crew card</small><textarea name="new_crew_description" maxlength="400" rows="2"></textarea></label>
+          <label class="ra-span2">Short description <small>optional, max. 90 characters, no links</small><textarea name="new_crew_description" maxlength="90" rows="2"></textarea></label>
         </div>
         <div id="ra-existing" hidden>
           <label>Crew<select name="crew_id"></select></label>
@@ -202,7 +202,9 @@ const { focus } = Astro.props;
       if (existing) { if (!f.crew_id.value) bad.push('crew_id'); }
       else {
         const n = String(f.new_crew_name.value).trim();
-        if (n.length < 2 || n.length > 40) bad.push('new_crew_name');
+        if (n.length < 2 || n.length > 22) bad.push('new_crew_name');
+        const nd = String(f.new_crew_description.value).trim();
+        if (nd && (nd.length > 90 || /(https?:\/\/|www\.|discord\.(gg|com)\/)/i.test(nd))) bad.push('new_crew_description');
         if (!/^[A-Z0-9]{4}$/.test(f.new_crew_tag.value)) bad.push('new_crew_tag');
         if (!/^#[0-9a-fA-F]{6}$/.test(f.new_crew_color.value)) bad.push('new_crew_color');
       }
@@ -225,7 +227,7 @@ const { focus } = Astro.props;
     return bad;
   }
   const help: Record<string, string> = {
-    none: 'You already have this role or an open request.', crew_id: 'choose your crew', new_crew_name: 'crew name (2–40 characters)',
+    none: 'You already have this role or an open request.', crew_id: 'choose your crew', new_crew_name: 'crew name (2–22 characters)', new_crew_description: 'description (max. 90 characters, no links)',
     new_crew_tag: 'crew tag (exactly 4 letters/digits)', new_crew_color: 'crew color (#rrggbb)', new_crew_discord_url: 'Discord invite (https://discord.gg/…)',
     new_crew_social_club_url: 'Social Club crew page (https://socialclub.rockstargames.com/…)', crew_links: 'add a Discord invite or a Social Club crew page',
     host_message: 'a few words about your events', link_url: 'link must start with https://',

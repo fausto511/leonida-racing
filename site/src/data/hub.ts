@@ -236,34 +236,44 @@ const iconClock = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" s
 /** opts.actions: HTML for the action area at the bottom of the card (My Account:
  *  status + Set as Active Crew / Leave Crew). Without it, cards that can be joined
  *  get an empty .crew-join-slot there, filled by scripts/crew-membership.ts (2026-10-07). */
-export function crewCardHtml(c: HubCrew, roster?: string[], opts: { sample?: boolean; actions?: string } = {}): string {
+export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: boolean; actions?: string } = {}): string {
+  // Uniform card (Fausto 2026-10-07): every block has a fixed height, so lines and
+  // strips sit at the same place on every card. Name one line (max 22 chars), description
+  // two lines (max 90), chips one row, region/languages + link icons one row, actions strip.
+  // Roster hidden for now. COPY STATUS: titles/labels are Claude placeholders, Codex review pending.
   const discord = safeUrl(c.discord_url);
   const joinId = c.crew_id ?? (opts.sample ? c.slug : null);
   const sc = safeUrl(c.social_club_url);
-  const langs = c.languages ?? [];
+  const langs = (c.languages ?? []).slice(0, 2);
   const meta = [c.region, langs.map(languageLabel).join(', ')].filter(Boolean).map(esc).join(' · ');
-  return `<article class="crew-card"${joinId ? ` data-crew-id="${esc(joinId)}"` : ''} data-platforms="${esc(c.platforms.join('|'))}" data-focus="${esc(c.focus.join('|'))}" data-languages="${esc(langs.join('|'))}" data-search="${esc(`${c.name} ${c.tag}`.toLowerCase())}" style="--crew-color:${safeColor(c.color)}">
+  const chipItems = [
+    ...c.platforms.filter((p) => (ACTIVE_PLATFORMS as readonly string[]).includes(p)).map((p) => ({ cls: 'chip chip-platform', label: platformShort[p] ?? p })),
+    ...c.focus.map((f) => ({ cls: 'chip', label: focusLabels[f] ?? f })),
+  ];
+  // one row: up to 4 chips, otherwise 3 + "+N" (the rest in the tooltip)
+  const shown = chipItems.length > 4 ? chipItems.slice(0, 3) : chipItems;
+  const rest = chipItems.slice(shown.length);
+  const chips = shown.map((x) => `<span class="${x.cls}">${esc(x.label)}</span>`).concat(rest.length ? [`<span class="chip chip-more" title="${esc(rest.map((x) => x.label).join(', '))}">+${rest.length}</span>`] : []);
+  const members = c.member_count != null ? `<p class="crew-members">${iconUsers}${esc(c.member_count)} ${c.member_count === 1 ? 'Member' : 'Members'}</p>` : '';
+  const scLink = sc ? `<a class="crew-icon-link crew-icon-sc" href="${esc(sc)}" target="_blank" rel="noopener" title="Social Club" aria-label="Social Club">SC</a>` : '';
+  const dcLink = discord ? `<a class="crew-icon-link crew-icon-dc" href="${esc(discord)}" target="_blank" rel="noopener" title="Discord" aria-label="Discord">${iconDiscord}</a>`
+    : opts.sample ? `<span class="crew-icon-link crew-icon-dc is-disabled" title="Sample crew — no Discord server">${iconDiscord}</span>` : '';
+  const report = c.crew_id ? `<a class="crew-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?crew=${encodeURIComponent(c.crew_id)}`)}" title="Report this crew to the moderators" aria-label="Report this crew"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/></svg></a>` : '';
+  return `<article class="crew-card"${joinId ? ` data-crew-id="${esc(joinId)}"` : ''} data-platforms="${esc(c.platforms.join('|'))}" data-focus="${esc(c.focus.join('|'))}" data-languages="${esc((c.languages ?? []).join('|'))}" data-search="${esc(`${c.name} ${c.tag}`.toLowerCase())}" style="--crew-color:${safeColor(c.color)}">
+  ${report}
   <div class="crew-card-head">
     ${crewEmblemHtml(c.color)}
     <div class="crew-card-id">
-      <h3 class="crew-name">${esc(c.name)}${c.is_partner ? ' <span class="crew-partner">Partner</span>' : ''}</h3>
-      ${c.member_count != null ? `<p class="crew-members">${iconUsers}${esc(c.member_count)} Members</p>` : ''}
+      <h3 class="crew-name" title="${esc(c.name)}">${esc(c.name)}${c.is_partner ? ' <span class="crew-partner">Partner</span>' : ''}</h3>
+      ${members}
       ${crewTagHtml(c.tag, c.color)}
     </div>
   </div>
-  ${c.description ? `<p class="crew-desc">${esc(c.description)}</p>` : ''}
-  <div class="crew-chips">
-    ${platformChips(c.platforms)}
-    ${c.focus.map((f) => `<span class="chip">${esc(focusLabels[f] ?? f)}</span>`).join('')}
-  </div>
-  ${roster && roster.length ? `<details class="crew-roster"><summary>Roster · ${roster.length} driver${roster.length === 1 ? '' : 's'}</summary><ul>${roster.map((n) => `<li>${esc(n)}</li>`).join('')}</ul></details>` : ''}
+  <p class="crew-desc">${c.description ? esc(c.description) : ''}</p>
+  <div class="crew-chips">${chips.join('')}</div>
   <div class="crew-foot">
-    <span class="crew-meta">${meta}</span>
-    <span class="crew-links">
-      ${sc ? `<a class="crew-link" href="${esc(sc)}" target="_blank" rel="noopener">Social Club</a>` : ''}
-      ${discord ? `<a class="crew-link crew-link-discord" href="${esc(discord)}" target="_blank" rel="noopener">Discord</a>` : opts.sample ? '<span class="crew-link crew-link-discord is-disabled" title="Sample crew — no Discord server">Discord</span>' : ''}
-      ${c.crew_id ? `<a class="crew-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?crew=${encodeURIComponent(c.crew_id)}`)}" title="Report this crew to the moderators">Report</a>` : ''}
-    </span>
+    <span class="crew-meta" title="${meta}">${meta}</span>
+    <span class="crew-links">${scLink}${dcLink}</span>
   </div>
   ${opts.actions ? `<div class="crew-actions">${opts.actions}</div>` : joinId ? '<div class="crew-actions"><span class="crew-join-slot"></span></div>' : ''}
 </article>`;

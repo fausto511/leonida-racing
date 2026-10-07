@@ -38,13 +38,34 @@
 .crew-link { color: var(--gh-text); font-size: .75rem; font-weight: 700; text-decoration: none; padding: .35rem .6rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); }
 .crew-link:hover { border-color: var(--gh-muted); }
 .crew-link-discord { background: #5865f2; border-color: #5865f2; color: #fff; }
-/* Membership actions in their own strip at the bottom of the card (Fausto 2026-10-07) */
-.crew-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: 0 -1.2rem -1rem; padding: .75rem 1.2rem; border-top: 1px solid var(--gh-line); background: rgba(252,250,247,.03); }
+/* Uniform crew cards (Fausto 2026-10-07): fixed-height blocks, so lines and strips
+   line up across cards. Name 1 line, description 2 lines, chips 1 row, meta + icons
+   1 row, actions strip 1 row. */
+.crew-card-head { padding-right: 1.4rem; }
+.crew-card-id { flex: 1; min-height: 4.6rem; }
+.crew-name { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crew-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: calc(1.55em * 2); }
+.crew-chips { flex-wrap: nowrap; overflow: hidden; height: 1.75rem; align-items: center; }
+.crew-chips .chip { flex-shrink: 0; }
+.crew-foot { height: 2.9rem; padding-top: .8rem; }
+.crew-meta { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crew-links { flex-shrink: 0; flex-wrap: nowrap; }
+.crew-icon-link { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); color: var(--gh-text); text-decoration: none; font-size: .7rem; font-weight: 800; letter-spacing: .03em; }
+.crew-icon-link:hover { border-color: var(--gh-muted); }
+.crew-icon-dc { background: #5865f2; border-color: #5865f2; color: #fff; }
+.crew-icon-link.is-disabled { opacity: .45; pointer-events: none; }
+.crew-report { position: absolute; top: .75rem; right: .75rem; display: inline-flex; padding: .25rem; color: var(--gh-muted); opacity: .55; border-radius: var(--gh-radius); }
+.crew-report:hover { opacity: 1; color: var(--gh-text); }
+/* Membership actions in their own strip at the bottom of the card */
+.crew-actions { display: flex; flex-wrap: nowrap; align-items: center; gap: .5rem; height: 3.1rem; margin: 0 -1.2rem -1rem; padding: 0 1.2rem; border-top: 1px solid var(--gh-line); background: rgba(252,250,247,.03); }
 .crew-actions:has(.crew-join-slot:empty) { display: none; }
 .crew-join-slot { display: contents; }
+.crew-actions { gap: .35rem; }
+.crew-actions .crew-pill { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; padding: .3rem .45rem; letter-spacing: .02em; }
+.crew-actions .crew-link { padding: .3rem .45rem; }
 .crew-action-btn { font: inherit; font-size: .75rem; font-weight: 700; cursor: pointer; background: transparent; }
 .crew-action-btn:disabled { opacity: .6; cursor: default; }
-.crew-action-btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .4rem; margin-left: auto; }
+.crew-action-btns { display: flex; flex-wrap: nowrap; justify-content: flex-end; gap: .35rem; margin-left: auto; flex-shrink: 0; }
 
 /* ---- Event rows ---------------------------------------------------------- */
 .ev-month { margin: 2rem 0 .75rem; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1rem; letter-spacing: .02em; color: var(--gh-muted); }
