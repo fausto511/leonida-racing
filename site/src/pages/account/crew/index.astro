@@ -122,11 +122,17 @@ const base = import.meta.env.BASE_URL;
       return;
     }
     const head = `<div class="mem-head"><p>You're in <strong>${active.length}</strong> crew${active.length === 1 ? '' : 's'}${pending.length ? ` with <strong>${pending.length}</strong> request${pending.length === 1 ? '' : 's'} pending` : ''} (${used}/${LIMIT}). Your <strong>Active Crew</strong> tag appears next to your name, including on leaderboards.</p>${find}</div>`;
-    const cards = active.map((m) => {
+    // Cards side by side like in The Hub; status and buttons in the card's bottom strip (Fausto 2026-10-07).
+    const cards = `<div class="crew-grid">${active.map((m) => {
       const c = crewData.get(m.crew_id);
+      if (!c) return '';
       const leads = leaderIds.includes(m.crew_id);
-      return `<div class="mem-current"><div class="crew-grid">${c ? crewCardHtml(c) : ''}</div><div class="mem-side"><p>${crewTagHtml(m.tag, m.color, 'sm')} <strong>${esc(m.crew_name)}</strong>${m.is_primary ? ' <span class="crew-pill">Active Crew</span>' : ''}${leads ? '<br>You lead this crew — manage it below.' : ''}</p>${m.is_primary || active.length < 2 ? '' : `<button type="button" class="btn btn-outline" data-primary="${esc(m.crew_id)}">Set as Active Crew</button>`}<button type="button" class="btn btn-outline" data-leave="${esc(m.membership_id)}" data-kind="leave">Leave Crew</button></div></div>`;
-    }).join('');
+      const actions = `<span class="crew-pill${m.is_primary ? '' : ' is-pending'}">${m.is_primary ? 'Active Crew' : 'Crew Member'}</span>${leads ? '<span class="crew-pill">Crew Leader</span>' : ''}`
+        + '<span class="crew-action-btns">'
+        + (m.is_primary || active.length < 2 ? '' : `<button type="button" class="crew-link crew-action-btn" data-primary="${esc(m.crew_id)}">Set as Active Crew</button>`)
+        + `<button type="button" class="crew-link crew-action-btn" data-leave="${esc(m.membership_id)}" data-kind="leave">Leave Crew</button></span>`;
+      return crewCardHtml(c, undefined, { actions });
+    }).join('')}</div>`;
     const reqs = pending.length ? `<div class="mem-pending">${pending.map((m) => `<div class="panel mem-empty-card"><p>Your request to join ${crewTagHtml(m.tag, m.color, 'sm')} <strong>${esc(m.crew_name)}</strong> is waiting for the crew leader.</p><button type="button" class="btn btn-outline" data-leave="${esc(m.membership_id)}" data-kind="withdraw">Withdraw</button></div>`).join('')}</div>` : '';
     memEl.innerHTML = invHtml + head + msg + cards + reqs;
   }

@@ -233,7 +233,10 @@ const iconClock = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" s
  *  anonymised drivers are already excluded by the DB view). */
 /** opts.sample: sample crew -- demo "Request to join" (keyed by slug) and a
  *  greyed-out Discord link, so the card is not a dead end (2026-10-02). */
-export function crewCardHtml(c: HubCrew, roster?: string[], opts: { sample?: boolean } = {}): string {
+/** opts.actions: HTML for the action area at the bottom of the card (My Account:
+ *  status + Set as Active Crew / Leave Crew). Without it, cards that can be joined
+ *  get an empty .crew-join-slot there, filled by scripts/crew-membership.ts (2026-10-07). */
+export function crewCardHtml(c: HubCrew, roster?: string[], opts: { sample?: boolean; actions?: string } = {}): string {
   const discord = safeUrl(c.discord_url);
   const joinId = c.crew_id ?? (opts.sample ? c.slug : null);
   const sc = safeUrl(c.social_club_url);
@@ -257,12 +260,12 @@ export function crewCardHtml(c: HubCrew, roster?: string[], opts: { sample?: boo
   <div class="crew-foot">
     <span class="crew-meta">${meta}</span>
     <span class="crew-links">
-      ${joinId ? '<span class="crew-join-slot"></span>' : ''}
       ${sc ? `<a class="crew-link" href="${esc(sc)}" target="_blank" rel="noopener">Social Club</a>` : ''}
       ${discord ? `<a class="crew-link crew-link-discord" href="${esc(discord)}" target="_blank" rel="noopener">Discord</a>` : opts.sample ? '<span class="crew-link crew-link-discord is-disabled" title="Sample crew — no Discord server">Discord</span>' : ''}
       ${c.crew_id ? `<a class="crew-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?crew=${encodeURIComponent(c.crew_id)}`)}" title="Report this crew to the moderators">Report</a>` : ''}
     </span>
   </div>
+  ${opts.actions ? `<div class="crew-actions">${opts.actions}</div>` : joinId ? '<div class="crew-actions"><span class="crew-join-slot"></span></div>' : ''}
 </article>`;
 }
 
