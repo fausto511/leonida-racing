@@ -35,23 +35,22 @@ const REMINDERS: Record<string, string> = { off: "Off", "24h": "24 hours before"
 const REMINDER_CHOICES = Object.entries(REMINDERS).map(([value, name]) => ({ name, value }));
 const MAX_FEEDS_PER_SERVER = 10;
 
-// While testing (package 1-6) commands are visible to members with "Manage Server" only.
-// Package 7 opens /events, /event, /car to everyone.
-const TEST_PERMS = "32";
+// /events, /event, /car, /create-event are open to everyone (Fausto 2026-10-07):
+// read-only or link-only; publishing events still needs the host role on the website.
 const COMMANDS = [
-  { name: "events", description: "Upcoming GTA VI events from the Leonida Racing calendar", default_member_permissions: TEST_PERMS, dm_permission: false,
+  { name: "events", description: "Upcoming GTA VI events from the Leonida Racing calendar", dm_permission: false,
     options: [
       { type: 3, name: "type", description: "Event type", required: false, choices: Object.entries(EVENT_TYPES).map(([value, name]) => ({ name, value })) },
       { type: 3, name: "platform", description: "Platform", required: false, choices: Object.entries(PLATFORMS).map(([value, name]) => ({ name, value })) },
     ] },
-  { name: "event", description: "Show one event", default_member_permissions: TEST_PERMS, dm_permission: false,
+  { name: "event", description: "Show one event", dm_permission: false,
     options: [{ type: 3, name: "event", description: "Start typing the event name", required: true, autocomplete: true }] },
-  { name: "car", description: "Vehicle card from The Garage", default_member_permissions: TEST_PERMS, dm_permission: false,
+  { name: "car", description: "Vehicle card from The Garage", dm_permission: false,
     options: [{ type: 3, name: "vehicle", description: "Start typing a make or model", required: true, autocomplete: true }] },
-  { name: "create-event", description: "Create an event on Leonida Racing", default_member_permissions: TEST_PERMS, dm_permission: false },
+  { name: "create-event", description: "Create an event on Leonida Racing", dm_permission: false },
   // Setup command: always "Manage Server" only (also checked at runtime).
   { name: "leonida", description: "Set up Leonida Racing on this server", default_member_permissions: "32", dm_permission: false,
-    options: [{ type: 2, name: "feed", description: "Event feeds for this server", options: [
+    options: [{ type: 2, name: "feed", description: "Leonida Racing feeds for this server", options: [
       { type: 1, name: "add", description: "Post events from a source into a channel", options: [
         { type: 7, name: "channel", description: "Channel for the event posts", required: true, channel_types: [0, 5] },
         { type: 3, name: "source", description: "Which events", required: true, choices: [
@@ -62,6 +61,10 @@ const COMMANDS = [
         { type: 5, name: "add_to_server_events", description: "Also add each event to this server's Events (top of the channel list)", required: false },
         { type: 3, name: "reminders", description: "Reminder posts before the start", required: false, choices: REMINDER_CHOICES },
         { type: 5, name: "mention_attendees", description: "Mention drivers who are in when posting reminders", required: false },
+      ] },
+      // Own subcommand, so the event-only options (platform, reminders ...) don't show up (Fausto 06.10.).
+      { type: 1, name: "vehicles", description: "Post new vehicles into a channel", options: [
+        { type: 7, name: "channel", description: "Channel for the vehicle posts", required: true, channel_types: [0, 5] },
       ] },
       { type: 1, name: "list", description: "Show this server's feeds" },
       { type: 1, name: "edit", description: "Change a feed's options", options: [
@@ -76,7 +79,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-10-04.4";
+const COMMANDS_VERSION = "2026-10-07.1";
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
@@ -192,7 +195,7 @@ async function cmdEvent(i: any) {
 
 async function cmdCar(i: any) {
   const id = String(opt(i, "vehicle") ?? "");
-  const { data: v } = await db.from("vehicles").select("vehicle_id,make,model,classes,drive,seats,real_life_inspiration,first_seen_in,has_photo").eq("vehicle_id", id).maybeSingle();
+  const { data: v } = await db.from("vehicles").select("vehicle_id,make,model,classes,drive,seats,real_life_inspiration,first_seen_in,has_photo").eq("vehicle_id", id).not("release_id", "is", null).maybeSingle();
   if (!v) return ephemeral("I couldn't find that vehicle. Pick one from the suggestions while typing.");
   const url = `${SITE}/garage/vehicles/${v.vehicle_id}/`;
   const fields = [
@@ -229,7 +232,7 @@ async function autocomplete(i: any) {
     const { data } = await q;
     choices = (data ?? []).map((e: any) => ({ name: clip(`${e.title} · ${new Date(e.starts_at).toISOString().slice(0, 10)}`, 100), value: e.event_id }));
   } else if (i.data?.name === "car") {
-    let q = db.from("vehicles").select("vehicle_id,make,model").order("make").order("model").limit(25);
+    let q = db.from("vehicles").select("vehicle_id,make,model").not("release_id", "is", null).order("make").order("model").limit(25); // officially shown only
     if (term) q = q.or(`model.ilike.%${term.replace(/[,()%]/g, "")}%,make.ilike.%${term.replace(/[,()%]/g, "")}%`);
     const { data } = await q;
     choices = (data ?? []).map((v: any) => ({ name: clip(`${v.make} ${v.model}`, 100), value: v.vehicle_id }));
@@ -239,7 +242,7 @@ async function autocomplete(i: any) {
 
 // ---------- feeds (package 2) ----------
 const PERM_ADMIN = 1n << 3n, PERM_MANAGE_GUILD = 1n << 5n, PERM_CREATE_EVENTS = 1n << 44n; // creating scheduled events needs CREATE_EVENTS
-const SOURCES: Record<string, string> = { crew: "Crew", host: "Host profile", public: "Public calendar" };
+const SOURCES: Record<string, string> = { crew: "Crew", host: "Host profile", public: "Public calendar", vehicles: "New vehicles" };
 const canManage = (i: any) => { const p = BigInt(i.member?.permissions ?? "0"); return (p & PERM_ADMIN) !== 0n || (p & PERM_MANAGE_GUILD) !== 0n; };
 const discordId = (i: any): string => i.member?.user?.id ?? i.user?.id ?? "";
 const api = (path: string, init: RequestInit = {}) => fetch(`https://discord.com/api/v10${path}`, {
@@ -277,6 +280,7 @@ async function leaderCrews(driverId: string) {
 const profileButton = row(linkButton("Create Your Driver Profile", `${SITE}/account/`));
 
 function feedLabel(f: any, names: { crews: Record<string, string>; hosts: Record<string, string> }) {
+  if (f.source === "vehicles") return "New vehicles";
   const src = f.source === "crew" ? `Crew: ${names.crews[f.crew_id] ?? "unknown crew"}`
     : f.source === "host" ? `Host: ${names.hosts[f.host_driver_id] ?? "unknown host"}` : "Public calendar";
   const filters = [...(f.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p), ...(f.event_types ?? []).map((t: string) => EVENT_TYPES[t] ?? t)];
@@ -292,7 +296,7 @@ async function feedsWithNames(guildId: string) {
   if (hostIds.length) for (const d of (await db.from("drivers").select("driver_id,display_name").in("driver_id", hostIds)).data ?? []) hosts[d.driver_id] = d.display_name;
   return { feeds, names: { crews, hosts } };
 }
-const optionsLine = (f: any) => [
+const optionsLine = (f: any) => f.source === "vehicles" ? "One post per new vehicle, a summary when several arrive at once" : [
   `Server events: ${f.native_events ? "on" : "off"}`,
   `Reminders: ${REMINDERS[f.reminders] ?? f.reminders}`,
   ...(f.reminders !== "off" ? [`Mentions: ${f.mention_attendees ? "on" : "off"}`] : []),
@@ -303,6 +307,7 @@ async function cmdLeonida(i: any) {
   if (!canManage(i)) return ephemeral("Only members with the “Manage Server” permission can set up Leonida Racing feeds.");
   switch (subPath(i)) {
     case "feed add": return deferEphemeral(i, () => feedAdd(i));
+    case "feed vehicles": return deferEphemeral(i, () => feedAdd(i, "vehicles"));
     case "feed list": return deferEphemeral(i, () => feedList(i));
     case "feed edit": return deferEphemeral(i, () => feedEdit(i));
     case "feed remove": return deferEphemeral(i, () => feedRemove(i));
@@ -310,9 +315,9 @@ async function cmdLeonida(i: any) {
   return ephemeral("This action isn't available yet.");
 }
 
-async function feedAdd(i: any) {
+async function feedAdd(i: any, forceSource?: string) {
   const channelId = String(opt(i, "channel") ?? "");
-  const source = String(opt(i, "source") ?? "");
+  const source = forceSource ?? String(opt(i, "source") ?? "");
   const platform = opt(i, "platform") as string | undefined;
   const eventType = opt(i, "event_type") as string | undefined;
   const nativeEvents = opt(i, "add_to_server_events") === true;
@@ -329,7 +334,12 @@ async function feedAdd(i: any) {
     native_events: nativeEvents, reminders, mention_attendees: mention, created_by_discord_id: who,
   };
   let srcText = "the public calendar";
-  if (source === "public") {
+  const notes: string[] = [];
+  if (source === "vehicles") {
+    if (platform || eventType || nativeEvents || reminders !== "off" || mention) notes.push("Event options don't apply to vehicle feeds and were ignored.");
+    Object.assign(row_, { platforms: null, event_types: null, native_events: false, reminders: "off", mention_attendees: false });
+    srcText = "new vehicles";
+  } else if (source === "public") {
     if (!platform) return { content: "Please choose a platform for the public calendar, so the channel only gets events you can join." };
   } else {
     const driver = await driverByDiscord(who);
@@ -352,7 +362,7 @@ async function feedAdd(i: any) {
   const filters = [platform && PLATFORMS[platform], eventType && EVENT_TYPES[eventType]].filter(Boolean).join(" · ");
   const post = await api(`/channels/${channelId}/messages`, { method: "POST", body: JSON.stringify({
     allowed_mentions: { parse: [] },
-    embeds: [{ color: YELLOW, description: `This channel now receives events from **${srcText}**${filters ? ` (${filters})` : ""} via Leonida Racing.`, footer: { text: "Leonida Racing · leonidaracing.com" } }],
+    embeds: [{ color: YELLOW, description: source === "vehicles" ? `This channel now receives **${srcText}** via Leonida Racing.` : `This channel now receives events from **${srcText}**${filters ? ` (${filters})` : ""} via Leonida Racing.`, footer: { text: "Leonida Racing · leonidaracing.com" } }],
   }) });
   if (!post.ok) {
     console.log("feed add test post", post.status, await post.text());
@@ -363,10 +373,9 @@ async function feedAdd(i: any) {
     if (error.code === "23505") return { content: `<#${channelId}> already has this feed.` };
     throw error;
   }
-  const notes: string[] = [];
-  if (nativeEvents && (BigInt(i.app_permissions ?? "0") & PERM_CREATE_EVENTS) === 0n) notes.push("Adding to server events is switched on, but Leonida Racing doesn't have the “Create Events” permission yet. Until it does, only the posts in the channel will appear.");
-  if (mention && reminders === "off") notes.push("Mentions only apply to reminders, which are off for this feed.");
-  return { content: [`Feed added: <#${channelId}> · ${srcText}${filters ? ` · ${filters}` : ""}.`, ...notes].join("\n") };
+  if (source !== "vehicles" && nativeEvents && (BigInt(i.app_permissions ?? "0") & PERM_CREATE_EVENTS) === 0n) notes.push("Adding to server events is switched on, but Leonida Racing doesn't have the “Create Events” permission yet. Until it does, only the posts in the channel will appear.");
+  if (source !== "vehicles" && mention && reminders === "off") notes.push("Mentions only apply to reminders, which are off for this feed.");
+  return { content: [`Feed added: <#${channelId}> · ${srcText}${source !== "vehicles" && filters ? ` · ${filters}` : ""}.`, ...notes].join("\n") };
 }
 
 async function feedList(i: any) {
@@ -385,6 +394,7 @@ async function feedOfGuild(i: any) {
 async function feedEdit(i: any) {
   const f = await feedOfGuild(i);
   if (!f) return { content: "I couldn't find that feed on this server. Pick one from the suggestions while typing." };
+  if (f.source === "vehicles") return { content: "Vehicle feeds have no options to change." };
   const patch: Record<string, unknown> = {};
   for (const [o, col] of [["add_to_server_events", "native_events"], ["reminders", "reminders"], ["mention_attendees", "mention_attendees"]]) { const v = opt(i, o); if (v !== undefined) patch[col] = v; }
   if (!Object.keys(patch).length) return { content: "Nothing to change. Pick at least one option." };
