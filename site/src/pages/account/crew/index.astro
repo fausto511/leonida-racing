@@ -103,7 +103,7 @@ const base = import.meta.env.BASE_URL;
     const activeIds = mine.filter((m) => m.status === 'active').map((m) => m.crew_id);
     crewData = new Map();
     if (activeIds.length) {
-      const c = await sb.from('crews').select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner').in('crew_id', activeIds);
+      const c = await sb.from('crews').select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_official').in('crew_id', activeIds);
       for (const row of (c.data ?? []) as any[]) crewData.set(row.crew_id, row);
     }
     render();

@@ -2,6 +2,10 @@
 // Apply for ONE role (RS-0026, DEC-0068): Crew Leader on My Account > Crew,
 // Event Host on My Account > Events, Creator on My Account > Tracks (RS-0045). Both requests can be open at the same
 // time (one open request per role). Moderators decide in Hub Content > Requests.
+import { focusLabels, crewRegionLabels } from '../data/hub';
+import { PLATFORMS } from '../data/platforms';
+import { crewLanguages } from '../data/languages';
+const langOptions = Object.entries(crewLanguages).sort((a, b) => a[1].localeCompare(b[1]));
 interface Props { focus: 'crew_leader' | 'event_host' | 'creator'; }
 const { focus } = Astro.props;
 ---
@@ -49,6 +53,16 @@ const { focus } = Astro.props;
           <label>Crew tag * <small>exactly 4 letters/digits</small><input type="text" name="new_crew_tag" maxlength="4" class="ra-tag" /></label>
           <label>Crew color *<span class="ra-color"><input type="color" name="color_picker" value="#ed253d" /><input type="text" name="new_crew_color" value="#ed253d" maxlength="7" /></span></label>
           <label class="ra-span2">Short description <small>optional, max. 90 characters, no links</small><textarea name="new_crew_description" maxlength="90" rows="2"></textarea></label>
+          <!-- Required crew profile (Fausto 07.10.): platform, focus, language, region. -->
+          <fieldset class="ra-span2 ra-checks" data-field="new_crew_platforms"><legend>Platforms *</legend>
+            {PLATFORMS.filter((p) => p.active).map((p) => <label class="ra-radio"><input type="checkbox" name="new_crew_platforms" value={p.id} checked /> {p.label}</label>)}
+          </fieldset>
+          <fieldset class="ra-span2 ra-checks" data-field="new_crew_focus"><legend>Focus * <small>at least 1</small></legend>
+            {Object.entries(focusLabels).map(([k, v]) => <label class="ra-radio"><input type="checkbox" name="new_crew_focus" value={k} /> {v}</label>)}
+          </fieldset>
+          <label>Language *<select name="new_crew_lang1"><option value="">Choose…</option>{langOptions.map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
+          <label>Second language <small>optional</small><select name="new_crew_lang2"><option value="">—</option>{langOptions.map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
+          <label>Region *<select name="new_crew_region"><option value="">Choose a region…</option>{Object.entries(crewRegionLabels).map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
         </div>
         <div id="ra-existing" hidden>
           <label>Crew<select name="crew_id"></select></label>
@@ -105,6 +119,9 @@ const { focus } = Astro.props;
   .ra-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.1rem; }
   @media (max-width: 560px) { .ra-grid { grid-template-columns: 1fr; } }
   .ra-span2 { grid-column: 1 / -1; }
+  .ra-checks { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; border: 0; padding: 0; margin: 0; }
+  .ra-checks legend { width: 100%; padding: 0 0 .4rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+  .ra-checks[aria-invalid="true"] legend { color: var(--gh-red); }
   .ra-links-note { margin: 1rem 0 .6rem; font-size: .84rem; }
   .ra label:not(.ra-choice):not(.ra-radio) { display: flex; flex-direction: column; gap: .35rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
   .ra small { font-weight: 500; text-transform: none; letter-spacing: 0; opacity: .85; }
@@ -194,6 +211,8 @@ const { focus } = Astro.props;
     await load();
   });
 
+  const checked = (name: string) => [...form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]:checked`)].map((i) => i.value);
+  const crewLangs = () => [f.new_crew_lang1.value, f.new_crew_lang2.value].filter((v: string, i: number, a: string[]) => v && a.indexOf(v) === i);
   function validate(): string[] {
     const bad: string[] = [];
     if (!(f.want_leader.checked && canLeader) && !(f.want_host.checked && canHost) && !(f.want_creator.checked && canCreator)) return ['none'];
@@ -207,6 +226,11 @@ const { focus } = Astro.props;
         if (nd && (nd.length > 90 || /(https?:\/\/|www\.|discord\.(gg|com)\/)/i.test(nd))) bad.push('new_crew_description');
         if (!/^[A-Z0-9]{4}$/.test(f.new_crew_tag.value)) bad.push('new_crew_tag');
         if (!/^#[0-9a-fA-F]{6}$/.test(f.new_crew_color.value)) bad.push('new_crew_color');
+        if (!checked('new_crew_platforms').length) bad.push('new_crew_platforms');
+        if (!checked('new_crew_focus').length) bad.push('new_crew_focus');
+        if (!f.new_crew_lang1.value) bad.push('new_crew_lang1');
+        if (f.new_crew_lang2.value && f.new_crew_lang2.value === f.new_crew_lang1.value) bad.push('new_crew_lang2');
+        if (!f.new_crew_region.value) bad.push('new_crew_region');
       }
       const d = String(f.new_crew_discord_url.value).trim();
       const sc = String(f.new_crew_social_club_url.value).trim();
@@ -230,6 +254,7 @@ const { focus } = Astro.props;
     none: 'You already have this role or an open request.', crew_id: 'choose your crew', new_crew_name: 'crew name (2–22 characters)', new_crew_description: 'description (max. 90 characters, no links)',
     new_crew_tag: 'crew tag (exactly 4 letters/digits)', new_crew_color: 'crew color (#rrggbb)', new_crew_discord_url: 'Discord invite (https://discord.gg/…)',
     new_crew_social_club_url: 'Social Club crew page (https://socialclub.rockstargames.com/…)', crew_links: 'add a Discord invite or a Social Club crew page',
+    new_crew_platforms: 'platform (at least 1)', new_crew_focus: 'focus (at least 1)', new_crew_lang1: 'language', new_crew_lang2: 'second language (different from the first)', new_crew_region: 'region',
     host_message: 'a few words about your events', link_url: 'link must start with https://',
     creator_message: 'a few words about your race jobs', creator_link_url: 'link must start with https://',
   };
@@ -246,7 +271,7 @@ const { focus } = Astro.props;
       const existing = (form.querySelector('input[name="crew_mode"]:checked') as HTMLInputElement).value === 'existing';
       rows.push(existing
         ? { driver_id: me, role: 'crew_leader', crew_id: f.crew_id.value, new_crew_discord_url: blank(f.new_crew_discord_url.value), new_crew_social_club_url: blank(f.new_crew_social_club_url.value), message: blank(f.leader_message.value) }
-        : { driver_id: me, role: 'crew_leader', new_crew_name: String(f.new_crew_name.value).trim(), new_crew_tag: f.new_crew_tag.value, new_crew_color: f.new_crew_color.value.toLowerCase(), new_crew_discord_url: blank(f.new_crew_discord_url.value), new_crew_social_club_url: blank(f.new_crew_social_club_url.value), new_crew_description: blank(f.new_crew_description.value), message: blank(f.leader_message.value) });
+        : { driver_id: me, role: 'crew_leader', new_crew_name: String(f.new_crew_name.value).trim(), new_crew_tag: f.new_crew_tag.value, new_crew_color: f.new_crew_color.value.toLowerCase(), new_crew_discord_url: blank(f.new_crew_discord_url.value), new_crew_social_club_url: blank(f.new_crew_social_club_url.value), new_crew_description: blank(f.new_crew_description.value), new_crew_platforms: checked('new_crew_platforms'), new_crew_focus: checked('new_crew_focus'), new_crew_languages: crewLangs(), new_crew_region: f.new_crew_region.value, message: blank(f.leader_message.value) });
     }
     if (f.want_host.checked && canHost) rows.push({ driver_id: me, role: 'event_host', message: blank(f.host_message.value), link_url: blank(f.link_url.value) });
     if (f.want_creator.checked && canCreator) rows.push({ driver_id: me, role: 'creator', message: blank(f.creator_message.value), link_url: blank(f.creator_link_url.value) });

@@ -33,6 +33,25 @@ export interface HubCrew {
   is_partner: boolean;
   /** set by moderators; featured crews come first on Hub overview + home (2026-10-03) */
   is_featured?: boolean;
+  /** set by moderators: "Official" badge (site crews, original creators; Fausto 2026-10-07) */
+  is_official?: boolean;
+}
+
+/** Crew regions (Fausto 2026-10-07): fixed list instead of free text, one per crew.
+ *  Same values as the DB check crews_region_valid. */
+export type CrewRegion = 'international' | 'north-america' | 'south-america' | 'europe' | 'middle-east' | 'africa' | 'asia' | 'oceania';
+export const crewRegionLabels: Record<CrewRegion, string> = {
+  international: 'International',
+  'north-america': 'North America',
+  'south-america': 'South America',
+  europe: 'Europe',
+  'middle-east': 'Middle East',
+  africa: 'Africa',
+  asia: 'Asia',
+  oceania: 'Oceania',
+};
+export function regionLabel(r: string | null | undefined): string {
+  return r ? (crewRegionLabels as Record<string, string>)[r] ?? r : '';
 }
 
 export type StreamPlatform = 'twitch' | 'youtube' | 'kick';
@@ -115,12 +134,12 @@ export const eventTypeLabels: Record<EventType, string> = {
 // Sample data (fictional)
 // ---------------------------------------------------------------------------
 export const sampleCrews: HubCrew[] = [
-  { slug: 'sample-apex-syndicate', name: 'Apex Syndicate', tag: 'APEX', color: '#ed253d', platforms: ['ps5'], focus: ['racing', 'league'], region: 'Europe', languages: ['en'], description: 'Clean, competitive circuit racing with weekly league nights. Sample entry.', member_count: 142, discord_url: null, social_club_url: null, is_partner: true },
-  { slug: 'sample-vice-drift-union', name: 'Vice Drift Union', tag: 'VDRU', color: '#ff7ab6', platforms: ['ps5'], focus: ['drift', 'car-meet'], region: 'North America', languages: ['en'], description: 'Tandem drift sessions and themed car meets. Sample entry.', member_count: 88, discord_url: null, social_club_url: null, is_partner: false },
-  { slug: 'sample-leonida-lap-club', name: 'Leonida Lap Club', tag: 'LLAP', color: '#ffd74c', platforms: ['ps5'], focus: ['time-attack', 'racing'], region: 'Worldwide', languages: ['en'], description: 'Hotlap hunters chasing tenths on every board. Sample entry.', member_count: 37, discord_url: null, social_club_url: null, is_partner: false },
-  { slug: 'sample-nordring-crew', name: 'Nordring Crew', tag: 'NRDC', color: '#3fa7ff', platforms: ['ps5'], focus: ['racing', 'cruise'], region: 'Europe', languages: ['de'], description: 'German-speaking racing crew with relaxed Sunday cruises. Sample entry.', member_count: 64, discord_url: null, social_club_url: null, is_partner: false },
-  { slug: 'sample-gulf-coast-racing', name: 'Gulf Coast Racing', tag: 'GCRX', color: '#27c281', platforms: ['ps5'], focus: ['league'], region: 'North America', languages: ['en'], description: 'Season-based league with fixed grids and stewarding. Sample entry.', member_count: 210, discord_url: null, social_club_url: null, is_partner: false },
-  { slug: 'sample-midnight-meet', name: 'Midnight Meet', tag: 'MNMT', color: '#9b6bff', platforms: ['ps5'], focus: ['car-meet', 'cruise'], region: 'Europe', languages: ['en'], description: 'Late-night meets, photo spots and convoy cruises. Sample entry.', member_count: 51, discord_url: null, social_club_url: null, is_partner: false },
+  { slug: 'sample-apex-syndicate', name: 'Apex Syndicate', tag: 'APEX', color: '#ed253d', platforms: ['ps5'], focus: ['racing', 'league'], region: 'europe', languages: ['en'], description: 'Clean, competitive circuit racing with weekly league nights. Sample entry.', member_count: 142, discord_url: null, social_club_url: null, is_partner: true },
+  { slug: 'sample-vice-drift-union', name: 'Vice Drift Union', tag: 'VDRU', color: '#ff7ab6', platforms: ['ps5'], focus: ['drift', 'car-meet'], region: 'north-america', languages: ['en'], description: 'Tandem drift sessions and themed car meets. Sample entry.', member_count: 88, discord_url: null, social_club_url: null, is_partner: false },
+  { slug: 'sample-leonida-lap-club', name: 'Leonida Lap Club', tag: 'LLAP', color: '#ffd74c', platforms: ['ps5'], focus: ['time-attack', 'racing'], region: 'international', languages: ['en'], description: 'Hotlap hunters chasing tenths on every board. Sample entry.', member_count: 37, discord_url: null, social_club_url: null, is_partner: false },
+  { slug: 'sample-nordring-crew', name: 'Nordring Crew', tag: 'NRDC', color: '#3fa7ff', platforms: ['ps5'], focus: ['racing', 'cruise'], region: 'europe', languages: ['de'], description: 'German-speaking racing crew with relaxed Sunday cruises. Sample entry.', member_count: 64, discord_url: null, social_club_url: null, is_partner: false },
+  { slug: 'sample-gulf-coast-racing', name: 'Gulf Coast Racing', tag: 'GCRX', color: '#27c281', platforms: ['ps5'], focus: ['league'], region: 'north-america', languages: ['en'], description: 'Season-based league with fixed grids and stewarding. Sample entry.', member_count: 210, discord_url: null, social_club_url: null, is_partner: false },
+  { slug: 'sample-midnight-meet', name: 'Midnight Meet', tag: 'MNMT', color: '#9b6bff', platforms: ['ps5'], focus: ['car-meet', 'cruise'], region: 'europe', languages: ['en'], description: 'Late-night meets, photo spots and convoy cruises. Sample entry.', member_count: 51, discord_url: null, social_club_url: null, is_partner: false },
 ];
 
 const sampleHost = (slug: string) => {
@@ -245,7 +264,7 @@ export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: bo
   const joinId = c.crew_id ?? (opts.sample ? c.slug : null);
   const sc = safeUrl(c.social_club_url);
   const langs = (c.languages ?? []).slice(0, 2);
-  const meta = [c.region, langs.map(languageLabel).join(', ')].filter(Boolean).map(esc).join(' · ');
+  const meta = [regionLabel(c.region), langs.map(languageLabel).join(', ')].filter(Boolean).map(esc).join(' · ');
   const chipItems = [
     ...c.platforms.filter((p) => (ACTIVE_PLATFORMS as readonly string[]).includes(p)).map((p) => ({ cls: 'chip chip-platform', label: platformShort[p] ?? p })),
     ...c.focus.map((f) => ({ cls: 'chip', label: focusLabels[f] ?? f })),
@@ -264,9 +283,9 @@ export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: bo
   <div class="crew-card-head">
     ${crewEmblemHtml(c.color)}
     <div class="crew-card-id">
-      <h3 class="crew-name" title="${esc(c.name)}">${esc(c.name)}${c.is_partner ? ' <span class="crew-partner">Partner</span>' : ''}</h3>
+      <h3 class="crew-name" title="${esc(c.name)}">${esc(c.name)}</h3>
       ${members}
-      ${crewTagHtml(c.tag, c.color)}
+      <div class="crew-id-row">${crewTagHtml(c.tag, c.color)}${c.is_official ? '<span class="crew-badge crew-official" title="Official crew of this site or of the original creators">Official</span>' : ''}${c.is_partner ? '<span class="crew-badge crew-partner">Partner</span>' : ''}</div>
     </div>
   </div>
   <p class="crew-desc">${c.description ? esc(c.description) : ''}</p>

@@ -5,7 +5,7 @@
 // crews the driver leads / the events they run / the tracks they built (RS-0045).
 // RLS enforces the same rules.
 import '../styles/hub.css';
-import { eventTypeLabels, focusLabels, platformLabels } from '../data/hub';
+import { eventTypeLabels, focusLabels, platformLabels, crewRegionLabels } from '../data/hub';
 import { PLATFORMS, comingLater } from '../data/platforms';
 import { crewLanguages, mainCrewLanguages } from '../data/languages';
 import { raceTypeLabels, layoutLabels, trackVehicleClasses } from '../data/tracks';
@@ -69,11 +69,11 @@ const base = import.meta.env.BASE_URL;
                   ? <label class="check"><input type="checkbox" name="platforms" value={p.id} checked data-locked /> {p.label}</label>
                   : <label class="check is-soon" title={comingLater(p)}><input type="checkbox" disabled /> {p.label} <span class="soon">Coming later</span></label>)}
               </fieldset>
-              <fieldset class="span2"><legend>Focus</legend>
+              <fieldset class="span2 focus-set"><legend>Focus * <small>at least 1</small></legend>
                 {Object.entries(focusLabels).map(([k, v]) => <label class="check"><input type="checkbox" name="focus" value={k} /> {v}</label>)}
               </fieldset>
-              <label>Region<input type="text" name="region" maxlength="40" placeholder="e.g. Europe" /></label>
-              <fieldset class="span2 lang-set"><legend>Languages <small>up to 2</small></legend>
+              <label>Region *<select name="region" required><option value="">Choose a region…</option>{Object.entries(crewRegionLabels).map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
+              <fieldset class="span2 lang-set"><legend>Languages * <small>1–2</small></legend>
                 {mainCrewLanguages.map((k) => <label class="check"><input type="checkbox" name="languages" value={k} /> {crewLanguages[k]}</label>)}
                 <details class="lang-more">
                   <summary>More languages</summary>
@@ -85,8 +85,9 @@ const base = import.meta.env.BASE_URL;
               <label class="span2">Description <small><span id="crew-desc-count">0</span>/90 · no links</small><textarea name="description" maxlength="90" rows="2"></textarea></label>
               <label>Discord invite<input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
               <label>Social Club page<input type="url" name="social_club_url" placeholder="https://socialclub.rockstargames.com/…" /></label>
+              <label class="check" data-mod-only><input type="checkbox" name="is_official" /> Official crew <small>this site's own crews or the original creators</small></label>
               <label class="check" data-mod-only><input type="checkbox" name="is_partner" /> Partner crew</label>
-              <label class="check" data-mod-only><input type="checkbox" name="is_featured" /> Featured crew <small>shown on the home page and Hub overview</small></label>
+              <label class="check" data-mod-only><input type="checkbox" name="is_featured" /> Featured crew <small>shown first on the home page, Hub overview and crew list</small></label>
               <label data-mod-only>Sort order <small>lower = earlier</small><input type="number" name="sort_order" step="1" value="0" /></label>
               <label class="span2" data-mod-only>Note to the crew leader <small>optional, e.g. why the crew is hidden or what to fix</small><textarea name="moderation_note" maxlength="300" rows="2"></textarea></label>
             </div>
@@ -323,8 +324,9 @@ const base = import.meta.env.BASE_URL;
 
 <script>
   import { getSupabase, backendConfigured } from '../scripts/supabase-client';
-  import { crewCardHtml, eventRowHtml, crewTagHtml, esc, localizeTimes, streamPlatform, type HubCrew, type HubEvent } from '../data/hub';
+  import { crewCardHtml, eventRowHtml, crewTagHtml, esc, localizeTimes, streamPlatform, crewRegionLabels, regionLabel, focusLabels, platformLabels, type HubCrew, type HubEvent } from '../data/hub';
   import { ACTIVE_PLATFORMS } from '../data/platforms';
+  import { languageLabel } from '../data/languages';
   import { trackRowHtml, type CommunityTrack } from '../data/tracks';
   // DEC-0073: only active platforms can be saved; PS5 is always set while it is the only one.
   const platformsFrom = (fd: FormData) => {
@@ -457,7 +459,7 @@ const base = import.meta.env.BASE_URL;
     listErrorEl.hidden = true;
     const sb = getSupabase();
     const [c, e, t, l] = await Promise.all([
-      sb.from('crews').select('*').order('is_partner', { ascending: false }).order('sort_order').order('name'),
+      sb.from('crews').select('*').order('is_featured', { ascending: false }).order('sort_order').order('name'),
       sb.from('hub_events').select('*, streams:hub_event_streams(stream_id, platform, url, sort_order)').order('starts_at', { ascending: false }),
       sb.from('community_tracks').select('*').order('updated_at', { ascending: false }),
       sb.from('hub_locations').select('name').order('sort_order').order('name'),
@@ -607,6 +609,7 @@ const base = import.meta.env.BASE_URL;
       social_club_url: blank(fd.get('social_club_url')),
       is_partner: fd.get('is_partner') === 'on',
       is_featured: fd.get('is_featured') === 'on',
+      is_official: fd.get('is_official') === 'on',
       sort_order: Math.round(Number(fd.get('sort_order') || 0)),
       is_published: fd.get('is_published') === 'on',
       ...(isMod ? { moderation_note: blank(fd.get('moderation_note')) } : {}),
@@ -617,7 +620,10 @@ const base = import.meta.env.BASE_URL;
     const bad: string[] = [];
     if (c.name.length < 2 || c.name.length > 22) bad.push('name');
     if (c.description && (c.description.length > 90 || /(https?:\/\/|www\.|discord\.(gg|com)\/)/i.test(c.description))) bad.push('description');
-    if (c.languages.length > 2) bad.push('languages');
+    if (c.languages.length < 1 || c.languages.length > 2) bad.push('languages');
+    if (c.platforms.length < 1) bad.push('platforms');
+    if (c.focus.length < 1) bad.push('focus');
+    if (!c.region || !(c.region in crewRegionLabels)) bad.push('region');
     if (!/^[A-Z0-9]{4}$/.test(c.tag)) bad.push('tag');
     if (!/^#[0-9a-f]{6}$/.test(c.color)) bad.push('color');
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(c.slug)) bad.push('slug');
@@ -626,7 +632,7 @@ const base = import.meta.env.BASE_URL;
     return bad;
   }
   const crewFieldHelp: Record<string, string> = {
-    name: 'name (2–22 characters)', description: 'description (max. 90 characters, no links)', languages: 'languages (up to 2)', tag: 'tag (exactly 4 letters/digits)', color: 'color (#rrggbb)', slug: 'URL slug (a-z, 0-9, hyphens)',
+    name: 'name (2–22 characters)', description: 'description (max. 90 characters, no links)', languages: 'languages (pick 1–2)', platforms: 'platform (at least 1)', focus: 'focus (at least 1)', region: 'region (pick one)', tag: 'tag (exactly 4 letters/digits)', color: 'color (#rrggbb)', slug: 'URL slug (a-z, 0-9, hyphens)',
     discord_url: 'Discord invite (https://discord.gg/… or https://discord.com/invite/…)', social_club_url: 'Social Club link (https://socialclub.rockstargames.com/…)',
   };
 
@@ -662,6 +668,7 @@ const base = import.meta.env.BASE_URL;
     cf.sort_order.value = r.sort_order ?? 0;
     cf.is_partner.checked = Boolean(r.is_partner);
     cf.is_featured.checked = Boolean(r.is_featured);
+    cf.is_official.checked = Boolean(r.is_official);
     cf.is_published.checked = Boolean(r.is_published);
     cf.moderation_note.value = r.moderation_note ?? '';
     showModNote('crew-mod-note', r, isMod);
@@ -698,7 +705,7 @@ const base = import.meta.env.BASE_URL;
   crewForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const c: any = crewFromForm();
-    if (!isMod) { delete c.slug; delete c.is_partner; delete c.is_featured; delete c.sort_order; delete c.is_published; }
+    if (!isMod) { delete c.slug; delete c.is_partner; delete c.is_featured; delete c.is_official; delete c.sort_order; delete c.is_published; }
     const bad = validateCrew({ ...crewFromForm(), ...(isMod ? {} : { slug: crews.find((x) => x.crew_id === selectedId)?.slug ?? 'x' }) });
     markInvalid(crewForm, bad);
     if (bad.length) { msg(crewForm, `Please fix: ${bad.map((b) => crewFieldHelp[b] ?? b).join('; ')}.`, true); return; }
@@ -1131,6 +1138,10 @@ const base = import.meta.env.BASE_URL;
       row('Crew Social Club', link(r.new_crew_social_club_url), true),
       r.role === 'crew_leader' && !r.new_crew_discord_url && !r.new_crew_social_club_url ? row('Crew links', '<strong>none given</strong> (older request)', true) : '',
       row('Crew description', r.new_crew_description),
+      row('Platforms', (r.new_crew_platforms ?? []).map((p: string) => platformLabels[p as keyof typeof platformLabels] ?? p).join(', ')),
+      row('Focus', (r.new_crew_focus ?? []).map((f: string) => focusLabels[f as keyof typeof focusLabels] ?? f).join(', ')),
+      row('Languages', (r.new_crew_languages ?? []).map((l: string) => languageLabel(l)).join(', ')),
+      row('Region', r.new_crew_region ? regionLabel(r.new_crew_region) : null),
       row('Message', r.message),
       row('Link', link(r.link_url), true),
     ].join('') + '</dl>';

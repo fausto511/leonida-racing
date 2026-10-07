@@ -11,9 +11,10 @@ export async function fetchLiveCrews(): Promise<HubCrew[] | null> {
   try {
     const { data, error } = await getSupabase()
       .from('crews')
-      .select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_featured')
+      .select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_featured,is_official')
       .eq('is_published', true)
-      .order('is_partner', { ascending: false })
+      // Fausto 2026-10-07: featured crews first, then by sort order (lower = earlier), then name
+      .order('is_featured', { ascending: false })
       .order('sort_order', { ascending: true })
       .order('name', { ascending: true });
     if (error || !data || data.length === 0) return null;

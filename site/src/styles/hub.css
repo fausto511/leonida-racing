@@ -28,7 +28,8 @@
 .crew-card-head { display: flex; gap: .9rem; align-items: flex-start; }
 .crew-card-id { display: flex; flex-direction: column; align-items: flex-start; gap: .35rem; min-width: 0; }
 .crew-name { margin: 0; font-size: 1.1rem; font-weight: 800; line-height: 1.2; }
-.crew-partner { display: inline-block; vertical-align: middle; margin-left: .35rem; padding: .12rem .45rem; border-radius: 999px; background: var(--gh-yellow); color: #1a1206; font-size: .58rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.crew-id-row { display: flex; align-items: center; gap: .35rem; flex-wrap: nowrap; min-width: 0; }
+.crew-badge, .crew-partner { display: inline-block; vertical-align: middle; padding: .12rem .45rem; border-radius: 999px; background: var(--gh-yellow); color: #1a1206; font-size: .58rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 .crew-members { display: inline-flex; align-items: center; gap: .35rem; margin: 0; color: var(--gh-muted); font-size: .8rem; }
 .crew-desc { margin: 0; color: var(--gh-muted); font-size: .86rem; line-height: 1.55; }
 .crew-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
@@ -249,3 +250,6 @@ a.ev-next-copy { text-decoration: none; }
 /* Crew invites (RS-0063) */
 .mem-invite { margin: .6rem 0 1rem; }
 .mem-invite-search { max-width: 22rem; margin: .2rem 0 .5rem; }
+
+/* Official badge (Fausto 2026-10-07): own colour, shown before Partner */
+.crew-official { background: var(--gh-red, #ed253d); color: #fff; }

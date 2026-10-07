@@ -1,12 +1,12 @@
 // Compact crew / event cards for the home page strips (2026-09-28).
 // Full cards live in The Hub; these link there.
-import { esc, crewEmblemHtml, crewTagHtml, focusLabels, eventTypeLabels, eventTypeImages, type HubCrew, type HubEvent } from './hub';
+import { esc, regionLabel, crewEmblemHtml, crewTagHtml, focusLabels, eventTypeLabels, eventTypeImages, type HubCrew, type HubEvent } from './hub';
 
 const base = import.meta.env.BASE_URL;
 
 export function homeCrewCard(c: HubCrew): string {
   const focus = c.focus.slice(0, 2).map((f) => `<span class="chip">${esc(focusLabels[f] ?? f)}</span>`).join('');
-  const sub = [c.member_count != null ? `${c.member_count} members` : null, c.region].filter(Boolean).map(esc).join(' · ');
+  const sub = [c.member_count != null ? `${c.member_count} ${c.member_count === 1 ? 'member' : 'members'}` : null, regionLabel(c.region)].filter(Boolean).map(esc).join(' · ');
   return `<a class="hc-card" rel="nofollow" href="${base}hub/crews/?q=${encodeURIComponent(c.tag)}">
   <span class="hc-top">${crewEmblemHtml(c.color)}<span style="min-width:0"><span class="hc-name">${esc(c.name)}</span><span class="hc-sub">${sub}</span></span></span>
   <span class="hc-chips">${crewTagHtml(c.tag, c.color, 'sm')}${focus}</span>
