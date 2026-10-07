@@ -48,11 +48,16 @@ const { focus } = Astro.props;
           <label class="ra-span2">Crew name *<input type="text" name="new_crew_name" maxlength="40" /></label>
           <label>Crew tag * <small>exactly 4 letters/digits</small><input type="text" name="new_crew_tag" maxlength="4" class="ra-tag" /></label>
           <label>Crew color *<span class="ra-color"><input type="color" name="color_picker" value="#ed253d" /><input type="text" name="new_crew_color" value="#ed253d" maxlength="7" /></span></label>
-          <label class="ra-span2">Discord invite <small>optional</small><input type="url" name="new_crew_discord_url" placeholder="https://discord.gg/…" /></label>
           <label class="ra-span2">Short description <small>optional, shown on the crew card</small><textarea name="new_crew_description" maxlength="400" rows="2"></textarea></label>
         </div>
         <div id="ra-existing" hidden>
           <label>Crew<select name="crew_id"></select></label>
+        </div>
+        <!-- Crew links: at least one required (Fausto 07.10.). COPY: Claude placeholder, Codex review pending. -->
+        <p class="ra-full ra-links-note">Add your crew’s Discord invite or its Social Club crew page. At least one is required so a moderator can check the crew.</p>
+        <div class="ra-grid">
+          <label>Discord invite<input type="url" name="new_crew_discord_url" placeholder="https://discord.gg/…" /></label>
+          <label>Social Club crew page<input type="url" name="new_crew_social_club_url" placeholder="https://socialclub.rockstargames.com/crew/…" /></label>
         </div>
         <label class="ra-full">Note to the moderators <small>optional — e.g. how we can confirm you lead this crew</small><textarea name="leader_message" maxlength="500" rows="2"></textarea></label>
       </fieldset>
@@ -100,6 +105,7 @@ const { focus } = Astro.props;
   .ra-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.1rem; }
   @media (max-width: 560px) { .ra-grid { grid-template-columns: 1fr; } }
   .ra-span2 { grid-column: 1 / -1; }
+  .ra-links-note { margin: 1rem 0 .6rem; font-size: .84rem; }
   .ra label:not(.ra-choice):not(.ra-radio) { display: flex; flex-direction: column; gap: .35rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
   .ra small { font-weight: 500; text-transform: none; letter-spacing: 0; opacity: .85; }
   .ra input[type="text"], .ra input[type="url"], .ra select, .ra textarea {
@@ -199,9 +205,12 @@ const { focus } = Astro.props;
         if (n.length < 2 || n.length > 40) bad.push('new_crew_name');
         if (!/^[A-Z0-9]{4}$/.test(f.new_crew_tag.value)) bad.push('new_crew_tag');
         if (!/^#[0-9a-fA-F]{6}$/.test(f.new_crew_color.value)) bad.push('new_crew_color');
-        const d = String(f.new_crew_discord_url.value).trim();
-        if (d && !/^https:\/\/(discord\.gg|discord\.com\/invite)\/[A-Za-z0-9-]+$/.test(d)) bad.push('new_crew_discord_url');
       }
+      const d = String(f.new_crew_discord_url.value).trim();
+      const sc = String(f.new_crew_social_club_url.value).trim();
+      if (!d && !sc) bad.push('crew_links');
+      if (d && !/^https:\/\/(discord\.gg|discord\.com\/invite)\/[A-Za-z0-9-]+$/.test(d)) bad.push('new_crew_discord_url');
+      if (sc && !/^https:\/\/socialclub\.rockstargames\.com\//.test(sc)) bad.push('new_crew_social_club_url');
     }
     if (f.want_host.checked && canHost) {
       if (String(f.host_message.value).trim().length < 5) bad.push('host_message');
@@ -218,6 +227,7 @@ const { focus } = Astro.props;
   const help: Record<string, string> = {
     none: 'You already have this role or an open request.', crew_id: 'choose your crew', new_crew_name: 'crew name (2–40 characters)',
     new_crew_tag: 'crew tag (exactly 4 letters/digits)', new_crew_color: 'crew color (#rrggbb)', new_crew_discord_url: 'Discord invite (https://discord.gg/…)',
+    new_crew_social_club_url: 'Social Club crew page (https://socialclub.rockstargames.com/…)', crew_links: 'add a Discord invite or a Social Club crew page',
     host_message: 'a few words about your events', link_url: 'link must start with https://',
     creator_message: 'a few words about your race jobs', creator_link_url: 'link must start with https://',
   };
@@ -227,13 +237,14 @@ const { focus } = Astro.props;
     const bad = validate();
     form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
     bad.forEach((n) => form.querySelector(`[name="${n}"]`)?.setAttribute('aria-invalid', 'true'));
+    if (bad.includes('crew_links')) ['new_crew_discord_url', 'new_crew_social_club_url'].forEach((n) => form.querySelector(`[name="${n}"]`)?.setAttribute('aria-invalid', 'true'));
     if (bad.length) { msg(bad[0] === 'none' ? help.none : `Please fix: ${bad.map((b) => help[b]).join('; ')}.`, true); return; }
     const rows: any[] = [];
     if (f.want_leader.checked && canLeader) {
       const existing = (form.querySelector('input[name="crew_mode"]:checked') as HTMLInputElement).value === 'existing';
       rows.push(existing
-        ? { driver_id: me, role: 'crew_leader', crew_id: f.crew_id.value, message: blank(f.leader_message.value) }
-        : { driver_id: me, role: 'crew_leader', new_crew_name: String(f.new_crew_name.value).trim(), new_crew_tag: f.new_crew_tag.value, new_crew_color: f.new_crew_color.value.toLowerCase(), new_crew_discord_url: blank(f.new_crew_discord_url.value), new_crew_description: blank(f.new_crew_description.value), message: blank(f.leader_message.value) });
+        ? { driver_id: me, role: 'crew_leader', crew_id: f.crew_id.value, new_crew_discord_url: blank(f.new_crew_discord_url.value), new_crew_social_club_url: blank(f.new_crew_social_club_url.value), message: blank(f.leader_message.value) }
+        : { driver_id: me, role: 'crew_leader', new_crew_name: String(f.new_crew_name.value).trim(), new_crew_tag: f.new_crew_tag.value, new_crew_color: f.new_crew_color.value.toLowerCase(), new_crew_discord_url: blank(f.new_crew_discord_url.value), new_crew_social_club_url: blank(f.new_crew_social_club_url.value), new_crew_description: blank(f.new_crew_description.value), message: blank(f.leader_message.value) });
     }
     if (f.want_host.checked && canHost) rows.push({ driver_id: me, role: 'event_host', message: blank(f.host_message.value), link_url: blank(f.link_url.value) });
     if (f.want_creator.checked && canCreator) rows.push({ driver_id: me, role: 'creator', message: blank(f.creator_message.value), link_url: blank(f.creator_link_url.value) });

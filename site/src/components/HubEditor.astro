@@ -1123,6 +1123,8 @@ const base = import.meta.env.BASE_URL;
       r.role === 'crew_leader' && r.crew ? row('Existing crew', `${crewTagHtml(r.crew.tag, r.crew.color, 'sm')} ${esc(r.crew.name)}`, true) : '',
       r.role === 'crew_leader' && !r.crew ? row('New crew', `${crewTagHtml(r.new_crew_tag, r.new_crew_color, 'sm')} ${esc(r.new_crew_name)} <small>(goes live as soon as you approve)</small>`, true) : '',
       row('Crew Discord', link(r.new_crew_discord_url), true),
+      row('Crew Social Club', link(r.new_crew_social_club_url), true),
+      r.role === 'crew_leader' && !r.new_crew_discord_url && !r.new_crew_social_club_url ? row('Crew links', '<strong>none given</strong> (older request)', true) : '',
       row('Crew description', r.new_crew_description),
       row('Message', r.message),
       row('Link', link(r.link_url), true),
