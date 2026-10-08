@@ -190,7 +190,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   </section>
 
   {copy && (
-    <section class={`wrap v-description${similar.length > 0 ? ' has-similar' : ''}`}>
+    <section class={`wrap v-description${similar.length > 0 || family.length > 0 ? ' has-similar' : ''}`}>
       <div class="panel v-description-panel">
         {copy.map((paragraph) => <p>{paragraph}</p>)}
       </div>
@@ -302,8 +302,11 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
     .v-strip-f { flex-basis: 40%; border-right: 0; padding-block: .6rem; }
     .v-origins { gap: .7rem; }
   }
+  /* Even rhythm (Fausto 2026-10-08): every block below the stage is one --gh-gap-card apart;
+     Similar Cars -> More <Family> Models included (was double gap). */
   .v-similar:has(+ .v-family) { padding-bottom: var(--gh-gap-card); }
   .v-family { padding-top: var(--gh-gap-card); }
+  .v-similar + .v-family { padding-top: 0; }
   .v-family-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
   .v-family-all { color: var(--gh-text); font-size: .85rem; font-weight: 700; }
 
