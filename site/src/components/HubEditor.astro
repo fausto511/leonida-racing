@@ -418,6 +418,8 @@ const base = import.meta.env.BASE_URL;
     if (e.code === '23505' || /duplicate key/.test(m)) return 'This URL slug is already used by another crew — change it.';
     if (/crews_tag_check/.test(m)) return 'Crew tag must be exactly 4 letters/digits.';
     if (/hub_events_not_before_launch/.test(m)) return 'Events can start on Nov 19, 2026 (GTA VI launch day) at the earliest.';
+    if (/crew_has_members/.test(m)) return 'Remove all other members first — then you can delete the crew.';
+    if (/crew_leader_protected/.test(m)) return 'Only a moderator can remove a crew leader.';
     if (/row-level security/.test(m)) return 'Not allowed — your account is not a moderator.';
     if (/check constraint/.test(m)) return `The database rejected a value (${m.match(/"([^"]+)"/)?.[1] ?? 'check'}). Please review the fields.`;
     return m;
@@ -515,6 +517,7 @@ const base = import.meta.env.BASE_URL;
 
   function renderMembers(message = '', isError = false) {
     if (!selectedId) return;
+    if (!isMod && !crewForm.hidden) resetDelete(crewForm, true); // delete only once no other member is left
     const mine = members.filter((m) => m.crew_id === selectedId);
     const pending = mine.filter((m) => m.status === 'pending');
     const active = mine.filter((m) => m.status === 'active');
@@ -557,7 +560,7 @@ const base = import.meta.env.BASE_URL;
       drop.disabled = true;
       const { error } = await sb.from('crew_memberships').delete().eq('membership_id', drop.dataset.drop!);
       await loadMembers(); renderList();
-      renderMembers(error ? `That did not work: ${error.message}` : drop.dataset.label === 'Decline' ? 'Request declined.' : drop.dataset.label === 'Withdraw' ? 'Invite withdrawn.' : 'Member removed.', Boolean(error));
+      renderMembers(error ? (/crew_leader_protected/.test(error.message) ? 'Only a moderator can remove a crew leader.' : `That did not work: ${error.message}`) : drop.dataset.label === 'Decline' ? 'Request declined.' : drop.dataset.label === 'Withdraw' ? 'Invite withdrawn.' : 'Member removed.', Boolean(error));
       return;
     }
     const inv = t.closest<HTMLButtonElement>('[data-invite]');
@@ -976,9 +979,15 @@ const base = import.meta.env.BASE_URL;
   // ------------------------------------------------------------ delete (two-step, no browser dialog)
   function resetDelete(form: HTMLFormElement, show: boolean) {
     const b = form.querySelector<HTMLButtonElement>('[data-action="delete"]')!;
-    b.hidden = !show || (form === crewForm && !isMod);
+    b.hidden = !show;
     b.dataset.armed = '';
-    b.textContent = 'Delete';
+    b.textContent = form === crewForm && !isMod ? 'Delete crew' : 'Delete';
+    // Crew leaders delete their crew only once no other member is left (Fausto 2026-10-07).
+    if (form === crewForm && !isMod) {
+      const others = members.filter((m) => m.crew_id === selectedId && m.status === 'active' && m.driver_id !== ownDriverId).length;
+      b.disabled = others > 0;
+      b.title = others > 0 ? `Remove all other members first (${others} left).` : 'Deletes the crew card, open join requests and invites. Events you hosted stay.';
+    } else { b.disabled = false; b.title = ''; }
   }
   [crewForm, eventForm, trackForm].forEach((form) => {
     const b = form.querySelector<HTMLButtonElement>('[data-action="delete"]')!;
@@ -993,8 +1002,11 @@ const base = import.meta.env.BASE_URL;
       const sb = getSupabase();
       const table = form === crewForm ? 'crews' : form === trackForm ? 'community_tracks' : 'hub_events';
       const key = form === crewForm ? 'crew_id' : form === trackForm ? 'track_id' : 'event_id';
-      const { error } = await sb.from(table).delete().eq(key, selectedId);
+      const { error } = form === crewForm && !isMod
+        ? await sb.rpc('delete_own_crew', { p_crew: selectedId })
+        : await sb.from(table).delete().eq(key, selectedId);
       if (error) { msg(form, dbError(error), true); resetDelete(form, true); return; }
+      if (form === crewForm && !isMod) { location.reload(); return; } // leader role is gone with the crew
       selectedId = null;
       showForm(null);
       await loadAll();

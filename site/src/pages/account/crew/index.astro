@@ -130,7 +130,7 @@ const base = import.meta.env.BASE_URL;
       const actions = `<span class="crew-pill${m.is_primary ? '' : ' is-pending'}">${m.is_primary ? 'Active Crew' : 'Crew Member'}</span>${leads ? '<span class="crew-pill">Crew Leader</span>' : ''}`
         + '<span class="crew-action-btns">'
         + (m.is_primary || active.length < 2 ? '' : `<button type="button" class="crew-link crew-action-btn" data-primary="${esc(m.crew_id)}">Set as Active Crew</button>`)
-        + `<button type="button" class="crew-link crew-action-btn" data-leave="${esc(m.membership_id)}" data-kind="leave">Leave Crew</button></span>`;
+        + `<button type="button" class="crew-link crew-action-btn" data-leave="${esc(m.membership_id)}" data-kind="${leads ? 'leave-leader' : 'leave'}">Leave Crew</button></span>`;
       return crewCardHtml(c, undefined, { actions });
     }).join('')}</div>`;
     const reqs = pending.length ? `<div class="mem-pending">${pending.map((m) => `<div class="panel mem-empty-card"><p>Your request to join ${crewTagHtml(m.tag, m.color, 'sm')} <strong>${esc(m.crew_name)}</strong> is waiting for the crew leader.</p><button type="button" class="btn btn-outline" data-leave="${esc(m.membership_id)}" data-kind="withdraw">Withdraw</button></div>`).join('')}</div>` : '';
@@ -160,12 +160,14 @@ const base = import.meta.env.BASE_URL;
     if (!b) return;
     if (b.dataset.armed !== '1') {
       b.dataset.armed = '1';
-      b.textContent = b.dataset.kind === 'leave' ? 'Click again to leave' : 'Click again to withdraw';
+      // Leaving as crew leader also ends the leader role; the crew stays (Fausto 2026-10-07). COPY: Claude placeholder.
+      b.textContent = b.dataset.kind === 'leave-leader' ? 'Click again — you also lose the leader role' : b.dataset.kind === 'leave' ? 'Click again to leave' : 'Click again to withdraw';
       setTimeout(() => { if (b.isConnected && b.dataset.armed === '1') render(); }, 4000);
       return;
     }
     b.disabled = true;
     const { error } = await getSupabase().from('crew_memberships').delete().eq('membership_id', b.dataset.leave!);
+    if (!error && b.dataset.kind === 'leave-leader') { location.reload(); return; } // Crew Management section must disappear
     await load();
     render(error ? 'That did not work. Please try again.' : b.dataset.kind === 'leave' ? 'You left the crew.' : 'Request withdrawn.', Boolean(error));
   });
