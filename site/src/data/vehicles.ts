@@ -23,6 +23,13 @@ export interface VehicleOption {
   // true = a garage photo exists at public/images/vehicles/<id>-{640,1280,1920}.webp
   // (made from "Visual/Cars/<Make Model> Garage.jpg", 2026-09-30).
   photo?: boolean;
+  // Model family slug (Fausto 2026-10-08), e.g. 'dominator'; set by hand in Moderator > Vehicles.
+  family?: string;
+  // Earlier GTA titles with the same model name (see data/gta-titles.ts).
+  // undefined = not researched yet; [] = new in GTA VI.
+  previousGames?: string[];
+  // Can it be sold in-game? undefined = unknown.
+  sellable?: 'yes' | 'no';
 }
 
 // RULE (Fausto, 2026-09-30): vehicleOptions lists ONLY vehicles whose GTA VI
@@ -41,9 +48,12 @@ interface GeneratedVehicle {
   seats: number | null; drive: string | null; acquisition: string | null; has_photo: boolean;
   release_id: string | null; first_seen_in: string | null; real_life_inspiration: string | null;
   first_seen_url?: string | null; first_seen_timestamp?: string | null;
+  family?: string | null; previous_games?: string[] | null; sellable?: string | null;
 }
 export interface VehicleValue {
-  vehicle_id: string; metric: 'price_gtad' | 'top_speed_mph' | 'gellhorn_reference_lap_ms'; value: number;
+  vehicle_id: string; metric: 'price_gtad' | 'sell_price_gtad' | 'top_speed_mph' | 'gellhorn_reference_lap_ms'; value: number;
+  /** 'stock' (default) or 'tuned' (Fausto 2026-10-08: measure stock first, tuned later). */
+  tuning?: 'stock' | 'tuned';
   source_type: 'in_game' | 'rockstar' | 'controlled_test' | 'community' | 'derived'; method: string | null;
   game_release_id: string | null; platform: string | null; measured_at: string | null; evidence_url: string | null;
 }
@@ -63,14 +73,33 @@ export const vehicleOptions: VehicleOption[] = (generated.vehicles as GeneratedV
   ...(v.first_seen_url ? { firstSeenUrl: v.first_seen_url } : {}),
   ...(v.first_seen_timestamp ? { firstSeenTimestamp: v.first_seen_timestamp } : {}),
   ...(v.real_life_inspiration ? { realLifeInspiration: v.real_life_inspiration } : {}),
+  ...(v.family ? { family: v.family } : {}),
+  ...(Array.isArray(v.previous_games) ? { previousGames: v.previous_games } : {}),
+  ...(v.sellable === 'yes' || v.sellable === 'no' ? { sellable: v.sellable } : {}),
 }));
 
 // Current measured values per vehicle (price, top speed, reference lap), each
 // with its provenance. Missing = not measured yet ("Data pending").
+// vehicleValues = stock values (what pages and rankings show first);
+// vehicleValuesTuned = fully tuned values, added later (Fausto 2026-10-08).
 export const vehicleValues: Record<string, Partial<Record<VehicleValue['metric'], VehicleValue>>> = {};
+export const vehicleValuesTuned: Record<string, Partial<Record<VehicleValue['metric'], VehicleValue>>> = {};
 for (const val of generated.values as VehicleValue[]) {
-  (vehicleValues[val.vehicle_id] ??= {})[val.metric] = { ...val, value: Number(val.value) };
+  const target = val.tuning === 'tuned' ? vehicleValuesTuned : vehicleValues;
+  (target[val.vehicle_id] ??= {})[val.metric] = { ...val, value: Number(val.value) };
 }
+
+// Model families (Fausto 2026-10-08): other members of the same family, any class.
+// A family gets its own page from FAMILY_PAGE_MIN models on.
+export const FAMILY_PAGE_MIN = 5;
+export const familyMembers = (family: string) => vehicleOptions.filter((v) => v.family === family);
+export function familyName(family: string): string {
+  // Display name = the shared model name of the family's members, e.g. "Dominator".
+  const members = familyMembers(family);
+  const words = members.map((m) => m.model.split(' ')[0]);
+  return words.length ? words.sort((a, b) => a.length - b.length)[0] : family.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+export const familySlugs = () => [...new Set(vehicleOptions.map((v) => v.family).filter((f): f is string => Boolean(f)))];
 
 // Garage tile order (RS-0049, DEC-0086, Fausto 2026-09-30):
 //  1. vehicles with a photo first (only matters while photos are missing;
@@ -100,7 +129,7 @@ export const valueSourceLabels: Record<VehicleValue['source_type'], string> = {
   in_game: 'In-game', rockstar: 'Rockstar', controlled_test: 'Measured', community: 'Community', derived: 'Calculated',
 };
 export function formatVehicleValue(v: VehicleValue): string {
-  if (v.metric === 'price_gtad') return `GTA$ ${Math.round(v.value).toLocaleString('en-US')}`;
+  if (v.metric === 'price_gtad' || v.metric === 'sell_price_gtad') return `GTA$ ${Math.round(v.value).toLocaleString('en-US')}`;
   if (v.metric === 'top_speed_mph') return `${v.value.toFixed(1)} mph`;
   const ms = Math.round(v.value); const m = Math.floor(ms / 60000); const s = (ms % 60000) / 1000;
   return `${m}:${s.toFixed(3).padStart(6, '0')}`;

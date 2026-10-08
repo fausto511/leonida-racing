@@ -1,6 +1,7 @@
 ---
 import Base from '../../../../layouts/Base.astro';
-import { vehicleOptions, vehicleValues, formatVehicleValue, valueSourceLabels, compareGarageOrder, type VehicleValue } from '../../../../data/vehicles';
+import { vehicleOptions, vehicleValues, formatVehicleValue, valueSourceLabels, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, type VehicleValue } from '../../../../data/vehicles';
+import { gtaTitleBySlug, sortTitles } from '../../../../data/gta-titles';
 import VehicleTile from '../../../../components/VehicleTile.astro';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
 import { releaseById, formatReleaseDate } from '../../../../data/releases';
@@ -51,8 +52,14 @@ const valueTitle = (v: VehicleValue) => [valueSourceLabels[v.source_type], v.gam
 // Similar Cars (Fausto, 2026-10-06): up to 4 (one row) officially revealed vehicles that
 // share a class, ranked by same primary class, same drive, same seat count;
 // ties in garage order. Leak-only vehicles (no releaseId) are never suggested.
+// Model family (Fausto 2026-10-08): own row below Similar Cars, any class; family
+// members are left out of Similar Cars so no car shows up twice.
+const family = vehicle.family ? familyMembers(vehicle.family).filter((v) => v.id !== vehicle.id && v.releaseId).sort(compareGarageOrder) : [];
+const familyLabel = vehicle.family ? familyName(vehicle.family) : '';
+const familyPage = vehicle.family && familyMembers(vehicle.family).length >= FAMILY_PAGE_MIN ? `${base}garage/families/${vehicle.family}/` : null;
+const familyIds = new Set(family.map((v) => v.id));
 const similar = vehicleOptions
-  .filter((v) => v.id !== vehicle.id && v.releaseId && v.classes.some((c) => vehicle.classes.includes(c)))
+  .filter((v) => v.id !== vehicle.id && v.releaseId && !familyIds.has(v.id) && v.classes.some((c) => vehicle.classes.includes(c)))
   .map((v) => ({ v, score: (v.classes[0] === vehicle.classes[0] ? 4 : 0) + (v.drive === vehicle.drive ? 2 : 0) + (v.seats === vehicle.seats ? 1 : 0) }))
   .sort((a, b) => b.score - a.score || compareGarageOrder(a.v, b.v))
   .slice(0, 4)
@@ -157,6 +164,25 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
         ? <strong><a class="v-source-link" href={vehicle.firstSeenUrl} target="_blank" rel="noopener">{vehicle.firstSeenIn}{vehicle.firstSeenTimestamp && <> · {vehicle.firstSeenTimestamp}</>} <span aria-hidden="true">↗</span></a></strong>
         : <strong class={vehicle.firstSeenIn ? undefined : 'v-muted'}>{vehicle.firstSeenIn ?? 'Not officially revealed'}</strong>}</div>
       <div class="panel v-metric"><span>Real-Life Inspiration</span>{vehicle.realLifeInspiration ? <strong>{vehicle.realLifeInspiration}</strong> : <strong class="status-pending"><span class="status-dot"></span>Data pending</strong>}</div>
+      {/* New vs Returning (Fausto 2026-10-08). COPY: Claude placeholders, Codex review pending. */}
+      <div class="panel v-metric"><span>GTA History</span>{!vehicle.previousGames
+        ? <strong class="status-pending"><span class="status-dot"></span>Being checked</strong>
+        : vehicle.previousGames.length === 0
+          ? <strong>New in GTA VI</strong>
+          : <><strong>Returning</strong><small>{sortTitles(vehicle.previousGames).map((g) => gtaTitleBySlug[g]?.short ?? g).join(' · ')}</small></>}</div>
+    </div>
+  </section>
+
+  {/* How to get it (Fausto 2026-10-08): fields ready, values follow after launch. COPY: Claude placeholders, Codex review pending. */}
+  <section class="wrap v-performance v-ownership">
+    <h2>How to Get It</h2>
+    <div class="v-performance-grid v-own-grid">
+      <div class="panel v-metric"><span>Purchase Price</span>{vals.price_gtad ? <strong title={valueTitle(vals.price_gtad)}>{formatVehicleValue(vals.price_gtad)}</strong> : <strong class="status-pending"><span class="status-dot"></span>Not announced yet</strong>}{vehicle.acquisition && <small>{acquisitionNotes[vehicle.acquisition]}</small>}</div>
+      <div class="panel v-metric"><span>Sell Value</span>{vehicle.sellable === 'no'
+        ? <strong>Can't be sold</strong>
+        : vals.sell_price_gtad ? <><strong title={valueTitle(vals.sell_price_gtad)}>{formatVehicleValue(vals.sell_price_gtad)}</strong><small>Stock, without upgrades</small></>
+        : <strong class="status-pending"><span class="status-dot"></span>From Nov 19, 2026</strong>}</div>
+      <div class="panel v-metric"><span>Where to Get It</span><strong class="status-pending"><span class="status-dot"></span>From Nov 19, 2026</strong></div>
     </div>
   </section>
 
@@ -174,6 +200,19 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
       <h2 id="v-similar-title">Similar Cars</h2>
       <div class="v-similar-grid">
         {similar.map((v) => <VehicleTile vehicle={v} />)}
+      </div>
+    </section>
+  )}
+
+  {family.length > 0 && (
+    <section class="wrap v-similar v-family" id="v-family" aria-labelledby="v-family-title">
+      {/* COPY STATUS: Claude placeholder, Codex review pending. */}
+      <div class="v-family-head">
+        <h2 id="v-family-title">More {familyLabel} Models</h2>
+        {familyPage && <a class="v-family-all" href={familyPage}>All {familyLabel} models →</a>}
+      </div>
+      <div class="v-similar-grid">
+        {family.slice(0, 4).map((v) => <VehicleTile vehicle={v} />)}
       </div>
     </section>
   )}
@@ -241,9 +280,16 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   .v-metric strong { font-size: .95rem; }
   .v-metric strong.v-muted { color: var(--gh-muted); font-weight: 600; }
   .v-metric small { color: var(--gh-muted); font-size: .75rem; margin-top: -.25rem; }
-  .v-release-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  @media (max-width: 1100px) { .v-release-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .v-release-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .v-own-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .v-ownership { padding-top: var(--gh-gap-card); }
+  @media (max-width: 1100px) { .v-release-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .v-own-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 700px) { .v-own-grid { grid-template-columns: 1fr; } }
   @media (max-width: 480px) { .v-release-grid { grid-template-columns: 1fr; } }
+  .v-similar:has(+ .v-family) { padding-bottom: var(--gh-gap-card); }
+  .v-family { padding-top: var(--gh-gap-card); }
+  .v-family-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .v-family-all { color: var(--gh-text); font-size: .85rem; font-weight: 700; }
 
   .v-description { padding-top: var(--gh-gap-card); padding-bottom: var(--gh-gap-section); }
   .v-description-panel { padding: var(--gh-pad-card); color: var(--gh-muted); font-size: .8rem; line-height: 1.6; }
@@ -353,6 +399,8 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   // Similar Cars tiles: compare marks + owned badges, keeping the counter in sync.
   const similarSection = document.getElementById('v-similar');
   if (similarSection) initVehicleTiles(similarSection, updateCompareCta);
+  const familySection = document.getElementById('v-family');
+  if (familySection) initVehicleTiles(familySection, updateCompareCta);
 </script>
 
 <script>

@@ -2,10 +2,13 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { vehicleOptions } from './src/data/vehicles.ts';
+import { dataNoindexPaths } from './src/data/rankings.ts';
 
 // noindex pages that must stay out of the sitemap (RS-0050): vehicles without
 // an official release (leak-only) and the submit form until launch day.
 const noindexVehiclePaths = vehicleOptions.filter((v) => !v.releaseId).map((v) => `/garage/vehicles/${v.id}/`);
+// Rankings, New cars and family pages stay out until enough data/copy exists (Fausto 2026-10-08).
+const noindexDataPaths = dataNoindexPaths();
 
 // Eigene Domain leonidaracing.com (DEC-0081, angebunden 2026-09-27): Seite
 // liegt auf der Root, daher kein `base` mehr. Vorher: GitHub-Pages-
@@ -37,7 +40,7 @@ export default defineConfig({
         !page.includes('/account/') && !page.includes('/moderator/') && !page.includes('/hub/') &&
         !page.endsWith('/time-attack/') && !page.includes('/tracks/') && !page.includes('/report/') && !page.includes('/report-content/') && !page.endsWith('.txt') &&
         !page.endsWith('/garage/vehicles/vapid-caracara/') && !page.endsWith('/garage/vehicles/buckingham-jubilee/') && !page.endsWith('/time-attack/submit/') &&
-        !noindexVehiclePaths.some((p) => page.endsWith(p)),
+        !noindexVehiclePaths.some((p) => page.endsWith(p)) && !noindexDataPaths.some((p) => page.endsWith(p)),
     }),
   ],
   // Forwarding URLs (/time-attack/ and the old /tracks/gellhorn-international-raceway/)

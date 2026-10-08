@@ -8,6 +8,7 @@
 import Base from '../../../layouts/Base.astro';
 import ModeratorNav from '../../../components/ModeratorNav.astro';
 import { readdirSync } from 'node:fs';
+import { gtaTitles } from '../../../data/gta-titles';
 import path from 'node:path';
 
 // Manufacturer logos that exist in public/images/logos (<slug>-gta-6-logo.webp)
@@ -53,6 +54,10 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
             <label>Added with (release)<select name="release_id" id="vx-release"></select><small>Empty = not officially announced (page shows "TBA" and is not indexed).</small></label>
             <label>First seen in<input name="first_seen_in" list="vx-firstseen" maxlength="60" /><datalist id="vx-firstseen"></datalist></label>
             <label>Real-life inspiration<input name="real_life_inspiration" maxlength="80" /></label>
+            <label>Model family<input name="family" list="vx-families" maxlength="40" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. dominator" /><datalist id="vx-families"></datalist><small>Same slug for all models of a family. From 5 models the family gets its own page.</small></label>
+            <label>Can be sold<select name="sellable"><option value="">Unknown</option><option value="yes">Yes</option><option value="no">No (e.g. free bonus car)</option></select></label>
+            <label>GTA history<select name="history" id="vx-history"><option value="">Not checked yet</option><option value="new">New in GTA VI</option><option value="returning">Returning (pick titles)</option></select><small>Returning = same model name in an earlier title.</small></label>
+            <fieldset class="vx-classes" id="vx-titles" hidden><legend>Earlier titles with this model name</legend><div class="vx-title-boxes">{gtaTitles.map((t) => <label><input type="checkbox" name="previous_games" value={t.slug} /> {t.short}</label>)}</div></fieldset>
             <label class="vx-check"><input type="checkbox" name="has_photo" /> Garage photo exists (<code>public/images/vehicles/&lt;id&gt;-640/1280/1920.webp</code>)</label>
           </div>
           <div class="vx-actions">
@@ -63,11 +68,12 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
 
         <section id="vx-values" class="panel vx-form" hidden>
           <h2 class="vx-h2">Measured values</h2>
-          <p class="vx-hint">Price, top speed and the Gellhorn reference lap. Each value keeps where it came from. Adding a new value makes the previous one "superseded".</p>
+          <p class="vx-hint">Price, sell value, top speed and the Gellhorn reference lap. Measure stock first; tuned values are kept separately. Each value keeps where it came from. Adding a new value makes the previous one (same value and tuning) "superseded".</p>
           <div id="vx-value-list"></div>
           <form id="vx-value-form" class="vx-fields vx-value-form">
-            <label>Value *<select name="metric" id="vx-metric"><option value="price_gtad">Price (GTA$)</option><option value="top_speed_mph">Top speed (mph)</option><option value="gellhorn_reference_lap_ms">Gellhorn reference lap (m:ss.mmm)</option></select></label>
+            <label>Value *<select name="metric" id="vx-metric"><option value="price_gtad">Price (GTA$)</option><option value="sell_price_gtad">Sell value (GTA$)</option><option value="top_speed_mph">Top speed (mph)</option><option value="gellhorn_reference_lap_ms">Gellhorn reference lap (m:ss.mmm)</option></select></label>
             <label>Amount *<input name="value" id="vx-value" required placeholder="e.g. 1250000" /></label>
+            <label>Tuning *<select name="tuning"><option value="stock">Stock (no upgrades)</option><option value="tuned">Fully tuned</option></select><small>Prices and sell values: always stock.</small></label>
             <label>Source *<select name="source_type"><option value="in_game">In-game (shown in the game)</option><option value="controlled_test">Measured (controlled test)</option><option value="rockstar">Rockstar (official)</option><option value="community">Community</option><option value="derived">Calculated</option></select></label>
             <label>Method<input name="method" maxlength="40" placeholder="e.g. LR-TS-1" /><small>Methodology version, once decided.</small></label>
             <label>Game version<select name="game_release_id" id="vx-value-release"></select></label>
@@ -114,6 +120,8 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
   .vx-classes { grid-column: 1 / -1; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); padding: .5rem .7rem; }
   :global(#vx-class-boxes) { display: flex; flex-wrap: wrap; gap: .3rem 1rem; }
   :global(#vx-class-boxes label) { flex-direction: row; align-items: center; gap: .35rem; font-weight: 600; color: var(--gh-text); }
+  .vx-title-boxes { display: flex; flex-wrap: wrap; gap: .3rem 1rem; }
+  .vx-title-boxes label { flex-direction: row !important; align-items: center; gap: .35rem; font-weight: 600 !important; color: var(--gh-text) !important; }
   .vx-check { flex-direction: row !important; align-items: center; grid-column: 1 / -1; color: var(--gh-text) !important; font-weight: 600 !important; }
   .mod-wrap input:not([type="checkbox"]), .mod-wrap select { padding: .45rem .6rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text); font: inherit; font-size: .85rem; }
   .mod-wrap input[aria-invalid="true"] { border-color: var(--gh-red); }
@@ -137,7 +145,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
   import { esc } from '../../../data/hub';
 
   const CLASSES = ['Super', 'Sports', 'Sports Classics', 'Muscle', 'Coupes', 'Sedans', 'Compacts', 'SUVs', 'Off-Road', 'Vans', 'Utility', 'Motorcycles', 'Cycles', 'Open Wheel', 'Industrial', 'Commercial', 'Service', 'Emergency', 'Military'];
-  const METRIC: Record<string, string> = { price_gtad: 'Price', top_speed_mph: 'Top speed', gellhorn_reference_lap_ms: 'Gellhorn ref. lap' };
+  const METRIC: Record<string, string> = { price_gtad: 'Price', sell_price_gtad: 'Sell value', top_speed_mph: 'Top speed', gellhorn_reference_lap_ms: 'Gellhorn ref. lap' };
   const SOURCE: Record<string, string> = { in_game: 'In-game', controlled_test: 'Measured', rockstar: 'Rockstar', community: 'Community', derived: 'Calculated' };
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const form = $<HTMLFormElement>('vx-form');
@@ -150,7 +158,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
     const m = $('vx-msg'); m.hidden = !text; m.textContent = text; m.className = `vx-msg is-${kind}`;
   }
   const fmtValue = (metric: string, v: number) => {
-    if (metric === 'price_gtad') return `GTA$ ${Math.round(v).toLocaleString('en-US')}`;
+    if (metric === 'price_gtad' || metric === 'sell_price_gtad') return `GTA$ ${Math.round(v).toLocaleString('en-US')}`;
     if (metric === 'top_speed_mph') return `${Number(v).toFixed(1)} mph`;
     const ms = Math.round(v); return `${Math.floor(ms / 60000)}:${((ms % 60000) / 1000).toFixed(3).padStart(6, '0')}`;
   };
@@ -176,6 +184,8 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
     $('vx-value-release').innerHTML = `<option value="">—</option>${opts}`;
     const seen = [...new Set(vehicles.map((v) => v.first_seen_in).filter(Boolean))].sort();
     $('vx-firstseen').innerHTML = seen.map((s) => `<option value="${esc(s)}"></option>`).join('');
+    const fams = [...new Set(vehicles.map((v) => v.family).filter(Boolean))].sort();
+    $('vx-families').innerHTML = fams.map((f) => `<option value="${esc(f)}"></option>`).join('');
   }
 
   function openVehicle(v: any | null) {
@@ -192,6 +202,11 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
     el.acquisition.value = v?.acquisition ?? ''; el.release_id.value = v?.release_id ?? '';
     el.first_seen_in.value = v?.first_seen_in ?? ''; el.real_life_inspiration.value = v?.real_life_inspiration ?? '';
     el.has_photo.checked = Boolean(v?.has_photo);
+    el.family.value = v?.family ?? ''; el.sellable.value = v?.sellable ?? '';
+    const pg: string[] | null = v?.previous_games ?? null;
+    el.history.value = pg == null ? '' : pg.length ? 'returning' : 'new';
+    form.querySelectorAll<HTMLInputElement>('input[name="previous_games"]').forEach((i) => (i.checked = Boolean(pg?.includes(i.value))));
+    $('vx-titles').hidden = el.history.value !== 'returning';
     const cls = new Set<string>(v?.classes ?? []);
     const extra = [...cls].filter((c) => !CLASSES.includes(c));
     $('vx-class-boxes').innerHTML = [...CLASSES, ...extra].map((c) => `<label><input type="checkbox" name="classes" value="${esc(c)}" ${cls.has(c) ? 'checked' : ''} /> ${esc(c)}</label>`).join('');
@@ -204,7 +219,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
   async function loadVehicles() {
     const sb = getSupabase();
     const [vr, rr] = await Promise.all([
-      sb.from('vehicles').select('vehicle_id, make, model, manufacturer_logo_slug, classes, seats, drive, acquisition, has_photo, release_id, first_seen_in, real_life_inspiration, updated_at').order('make').order('model'),
+      sb.from('vehicles').select('vehicle_id, make, model, manufacturer_logo_slug, classes, seats, drive, acquisition, has_photo, release_id, first_seen_in, real_life_inspiration, family, previous_games, sellable, updated_at').order('make').order('model'),
       sb.from('game_releases').select('release_id, name, release_date').order('sort_order'),
     ]);
     if (vr.error || rr.error) { msg(`Could not load: ${(vr.error ?? rr.error)!.message}`, 'error'); return; }
@@ -214,12 +229,12 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
 
   async function loadValues() {
     const { data, error } = await getSupabase().from('vehicle_values')
-      .select('value_id, metric, value, source_type, method, game_release_id, platform, measured_at, evidence_url, note, status, created_at, creator:drivers!vehicle_values_created_by_fkey(display_name)')
+      .select('value_id, metric, tuning, value, source_type, method, game_release_id, platform, measured_at, evidence_url, note, status, created_at, creator:drivers!vehicle_values_created_by_fkey(display_name)')
       .eq('vehicle_id', selected.vehicle_id).order('created_at', { ascending: false });
     if (error) { $('vx-value-list').innerHTML = `<p class="vx-meta">Could not load values: ${esc(error.message)}</p>`; return; }
     $('vx-value-list').innerHTML = data?.length ? `<table class="vx-table"><thead><tr><th>Value</th><th>Amount</th><th>Source</th><th>Version</th><th>Measured</th><th>Status</th><th></th></tr></thead><tbody>${data.map((r: any) => `
       <tr class="${r.status === 'current' ? '' : 'is-old'}">
-        <td>${esc(METRIC[r.metric] ?? r.metric)}</td>
+        <td>${esc(METRIC[r.metric] ?? r.metric)}${r.tuning === 'tuned' ? ' <small>(tuned)</small>' : ''}</td>
         <td>${esc(fmtValue(r.metric, Number(r.value)))}${r.evidence_url ? ` <a href="${esc(r.evidence_url)}" target="_blank" rel="noopener">evidence</a>` : ''}${r.note ? `<br><small>${esc(r.note)}</small>` : ''}</td>
         <td>${esc(SOURCE[r.source_type] ?? r.source_type)}${r.method ? ` · ${esc(r.method)}` : ''}${r.platform ? ` · ${esc(r.platform.toUpperCase())}` : ''}</td>
         <td>${esc(releases.find((x) => x.release_id === r.game_release_id)?.name ?? '—')}</td>
@@ -251,7 +266,11 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
       acquisition: el.acquisition.value || null, release_id: el.release_id.value || null,
       first_seen_in: el.first_seen_in.value.trim() || null, real_life_inspiration: el.real_life_inspiration.value.trim() || null,
       has_photo: el.has_photo.checked,
+      family: el.family.value.trim() || null, sellable: el.sellable.value || null,
+      previous_games: el.history.value === '' ? null : el.history.value === 'new' ? [] : [...form.querySelectorAll<HTMLInputElement>('input[name="previous_games"]:checked')].map((i) => i.value),
     };
+    if (row.family && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(row.family)) { msg('Model family: lowercase letters, digits and dashes (e.g. dominator).', 'error'); return; }
+    if (el.history.value === 'returning' && !row.previous_games.length) { msg('Pick at least one earlier title, or choose "New in GTA VI".', 'error'); return; }
     const sb = getSupabase();
     let res;
     if (selected) res = await sb.from('vehicles').update(row).eq('vehicle_id', selected.vehicle_id).select().single();
@@ -273,7 +292,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
     const value = parseValue(el.metric.value, el.value.value);
     if (value == null) { msg(el.metric.value === 'gellhorn_reference_lap_ms' ? 'Lap time format: m:ss.mmm (e.g. 1:24.642).' : 'Enter a positive number.', 'error'); return; }
     const { error } = await getSupabase().from('vehicle_values').insert({
-      vehicle_id: selected.vehicle_id, metric: el.metric.value, value, source_type: el.source_type.value,
+      vehicle_id: selected.vehicle_id, metric: el.metric.value, tuning: el.metric.value.includes('price') ? 'stock' : el.tuning.value, value, source_type: el.source_type.value,
       method: el.method.value.trim() || null, game_release_id: el.game_release_id.value || null, platform: el.platform.value || null,
       measured_at: el.measured_at.value || null, evidence_url: el.evidence_url.value.trim() || null, note: el.note.value.trim() || null,
     });
@@ -285,7 +304,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
 
   $('vx-metric').addEventListener('change', () => {
     const m = ($('vx-metric') as HTMLSelectElement).value;
-    ($('vx-value') as HTMLInputElement).placeholder = m === 'price_gtad' ? 'e.g. 1250000' : m === 'top_speed_mph' ? 'e.g. 124.5' : 'e.g. 1:24.642';
+    ($('vx-value') as HTMLInputElement).placeholder = m.includes('price') ? 'e.g. 1250000' : m === 'top_speed_mph' ? 'e.g. 124.5' : 'e.g. 1:24.642';
   });
   $('vx-value-list').addEventListener('click', async (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-reject]'); if (!b) return;
@@ -299,6 +318,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
     openVehicle(vehicles.find((v) => v.vehicle_id === b.dataset.id));
   });
   $('vx-search').addEventListener('input', renderList);
+  $('vx-history').addEventListener('change', () => { $('vx-titles').hidden = ($('vx-history') as HTMLSelectElement).value !== 'returning'; });
   $('vx-new').addEventListener('click', () => openVehicle(null));
 
   async function init(session: any) {

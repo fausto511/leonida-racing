@@ -1,0 +1,43 @@
+---
+// New cars in GTA VI (Fausto 2026-10-08): officially revealed vehicles with no
+// earlier GTA title of the same model name (vehicles.previous_games = '{}').
+// noindex until the research covers most revealed cars (data/rankings.ts).
+// COPY STATUS: Claude placeholders, Codex review pending.
+import Base from '../../../layouts/Base.astro';
+import VehicleTile from '../../../components/VehicleTile.astro';
+import { compareGarageOrder } from '../../../data/vehicles';
+import { newCars, newCarsIndexable, newCarsResearchCoverage } from '../../../data/rankings';
+
+const base = import.meta.env.BASE_URL;
+const list = newCars().sort(compareGarageOrder);
+const coverage = newCarsResearchCoverage();
+const title = 'New Cars in GTA 6';
+const description = 'Every car that is brand new in GTA 6: officially revealed models that never appeared in an earlier GTA game under the same name.';
+---
+<Base title={title} description={description} section="garage" noindex={!newCarsIndexable()}
+  breadcrumbs={[{ name: 'The Garage', path: 'garage/' }, { name: 'New Cars', path: 'garage/new-cars/' }]}>
+  <section class="wrap nc-head">
+    <nav class="nc-crumbs" aria-label="Breadcrumb"><a href={`${base}garage/`}>The Garage</a><span aria-hidden="true">/</span><span>New Cars</span></nav>
+    <p class="eyebrow">GTA VI</p>
+    <h1 class="display nc-title">{title}</h1>
+    <p class="nc-intro">Cars that debut in GTA VI. A car counts as returning when an earlier GTA game, expansion or GTA Online had a vehicle with the same model name, even if it looked different there.</p>
+    {coverage < 1 && <p class="nc-note">Still checking: {Math.round(coverage * 100)}% of the officially revealed cars have been compared with earlier GTA games so far.</p>}
+  </section>
+  <section class="wrap nc-grid" aria-label="New cars">
+    {list.length ? list.map((v) => <VehicleTile vehicle={v} />) : (
+      <div class="panel nc-empty"><p>We are comparing every revealed car with earlier GTA games. New models show up here as soon as they are checked.</p><a class="btn btn-outline" href={`${base}garage/`}>Browse The Garage</a></div>
+    )}
+  </section>
+</Base>
+
+<style>
+  .nc-head { padding-top: 1.75rem; }
+  .nc-crumbs { display: flex; gap: .45rem; font-size: .78rem; color: var(--gh-muted); margin-bottom: 1rem; }
+  .nc-crumbs a { color: var(--gh-muted); }
+  .nc-title { margin: .3rem 0 .8rem; font-size: clamp(2rem, 4.5vw, 3rem); }
+  .nc-intro { margin: 0 0 .6rem; color: var(--gh-muted); max-width: 46rem; }
+  .nc-note { margin: .4rem 0 0; font-size: .82rem; color: var(--gh-yellow); }
+  .nc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: var(--gh-gap-card); padding-block: 1.5rem var(--gh-gap-section); }
+  .nc-empty { grid-column: 1 / -1; padding: var(--gh-pad-card); display: grid; gap: 1rem; justify-items: start; }
+  .nc-empty p { margin: 0; color: var(--gh-muted); }
+</style>

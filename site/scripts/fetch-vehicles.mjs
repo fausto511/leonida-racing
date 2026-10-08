@@ -31,8 +31,8 @@ if (!URL_ || !KEY) {
 }
 
 const [vehicles, values, releases] = await Promise.all([
-  get('vehicles?select=vehicle_id,make,model,manufacturer_logo_slug,classes,seats,drive,acquisition,has_photo,release_id,first_seen_in,first_seen_url,first_seen_timestamp,real_life_inspiration&order=make.asc,model.asc'),
-  get('vehicle_values?status=eq.current&select=vehicle_id,metric,value,source_type,method,game_release_id,platform,measured_at,evidence_url&order=vehicle_id.asc,metric.asc'),
+  get('vehicles?select=vehicle_id,make,model,manufacturer_logo_slug,classes,seats,drive,acquisition,has_photo,release_id,first_seen_in,first_seen_url,first_seen_timestamp,real_life_inspiration,family,previous_games,sellable&order=make.asc,model.asc'),
+  get('vehicle_values?status=eq.current&select=vehicle_id,metric,tuning,value,source_type,method,game_release_id,platform,measured_at,evidence_url&order=vehicle_id.asc,metric.asc'),
   get('game_releases?select=release_id,name,kind,release_date,sort_order&order=sort_order.asc'),
 ]);
 if (!Array.isArray(vehicles) || vehicles.length === 0) throw new Error('fetch-vehicles: database returned no vehicles -- refusing to build an empty garage');
