@@ -14,7 +14,7 @@ export function getStaticPaths() {
 const { f } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const name = familyName(f);
-const list = familyMembers(f).sort(compareGarageOrder);
+const list = familyMembers(f).filter((v) => v.releaseId).sort(compareGarageOrder);
 const classes = [...new Set(list.flatMap((v) => v.classes))];
 const title = `${name} Models in GTA 6`;
 const description = `All ${name} models in GTA 6 in one place: ${list.length} versions across ${classes.join(', ')}, with specs, release details and performance data.`;

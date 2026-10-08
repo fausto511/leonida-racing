@@ -5,7 +5,7 @@ const KEY = 'gellhorn-compare-selected';
 
 // Vehicle ids that were renamed; old ids stored in a visitor's browser are
 // mapped to the new one (2026-09-30: Caracara -> Caracara 4x4).
-const RENAMED: Record<string, string> = { 'vapid-caracara': 'vapid-caracara-4x4' };
+const RENAMED: Record<string, string> = { 'vapid-caracara': 'vapid-caracara-4x4', 'karin-contender': 'vapid-contender' };
 
 export function getSelected(): string[] {
   try {

@@ -56,7 +56,7 @@ const valueTitle = (v: VehicleValue) => [valueSourceLabels[v.source_type], v.gam
 // members are left out of Similar Cars so no car shows up twice.
 const family = vehicle.family ? familyMembers(vehicle.family).filter((v) => v.id !== vehicle.id && v.releaseId).sort(compareGarageOrder) : [];
 const familyLabel = vehicle.family ? familyName(vehicle.family) : '';
-const familyPage = vehicle.family && familyMembers(vehicle.family).length >= FAMILY_PAGE_MIN ? `${base}garage/families/${vehicle.family}/` : null;
+const familyPage = vehicle.family && familyMembers(vehicle.family).filter((v) => v.releaseId).length >= FAMILY_PAGE_MIN ? `${base}garage/families/${vehicle.family}/` : null;
 const familyIds = new Set(family.map((v) => v.id));
 const similar = vehicleOptions
   .filter((v) => v.id !== vehicle.id && v.releaseId && !familyIds.has(v.id) && v.classes.some((c) => vehicle.classes.includes(c)))

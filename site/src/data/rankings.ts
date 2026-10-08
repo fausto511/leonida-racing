@@ -70,7 +70,8 @@ export const newCarsIndexable = () => newCars().length > 0 && newCarsResearchCov
 
 // Family pages: from FAMILY_PAGE_MIN models; indexed once the family has its own copy.
 export const familyCopy: Record<string, string[]> = {};
-export const familyPageSlugs = () => familySlugs().filter((f) => familyMembers(f).length >= FAMILY_PAGE_MIN);
+// only officially revealed members count and are shown (leak-only vehicles stay off public pages; Codex 08.10.)
+export const familyPageSlugs = () => familySlugs().filter((f) => familyMembers(f).filter((v) => v.releaseId).length >= FAMILY_PAGE_MIN);
 export const familyIndexable = (f: string) => Boolean(familyCopy[f]?.length) && familyMembers(f).some((v) => v.releaseId);
 
 /** Paths (relative, with trailing slash) that are noindex because data/copy is missing -> kept out of the sitemap. */
