@@ -143,14 +143,16 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
           <>{i > 0 && ' / '}{classHref(c) ? <a href={`${base}${classHref(c)}`}>{c}</a> : c}</>
         ))}
         {makeLink && <> · <a href={`${base}${makeLink}`}>More {vehicle.make} Cars</a></>}
-        {vehicle.releaseId && <> · <a rel="nofollow" href={`${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(vehicle.id)}#leaderboard`}>Gellhorn Leaderboard</a></>}
       </p>
       <dl class="v-key">
         <div><dt>Price</dt>{vals.price_gtad ? <dd title={valueTitle(vals.price_gtad)}>{formatVehicleValue(vals.price_gtad)} <small class="v-src">{valueSourceLabels[vals.price_gtad.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>Not announced yet</dd>}</div>
         <div><dt>Top Speed</dt>{vals.top_speed_mph ? <dd title={valueTitle(vals.top_speed_mph)}>{formatVehicleValue(vals.top_speed_mph)} <small class="v-src">{valueSourceLabels[vals.top_speed_mph.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>Measured after launch</dd>}</div>
         <div><dt>Drive</dt><dd>{vehicle.drive}</dd></div>
         <div><dt>Seats</dt><dd>{vehicle.seats}</dd></div>
-        <div><dt>Gellhorn Lab Time</dt>{vals.gellhorn_reference_lap_ms ? <dd title={valueTitle(vals.gellhorn_reference_lap_ms)}>{formatVehicleValue(vals.gellhorn_reference_lap_ms)} <small class="v-src">{valueSourceLabels[vals.gellhorn_reference_lap_ms.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>From Nov 19, 2026</dd>}</div>
+        {/* Leaderboard link moved from the line under the name onto this value (Fausto 2026-10-08). */}
+        <div><dt>Gellhorn Lap Time</dt>{vehicle.releaseId
+          ? <dd class={vals.gellhorn_reference_lap_ms ? undefined : 'status-pending'}><a class="v-lb-link" rel="nofollow" href={`${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(vehicle.id)}#leaderboard`} title="Open the Gellhorn leaderboard for this car">{vals.gellhorn_reference_lap_ms ? <>{formatVehicleValue(vals.gellhorn_reference_lap_ms)} <small class="v-src">{valueSourceLabels[vals.gellhorn_reference_lap_ms.source_type]}</small></> : <><span class="status-dot"></span>From Nov 19, 2026</>} <span aria-hidden="true">↗</span></a></dd>
+          : vals.gellhorn_reference_lap_ms ? <dd title={valueTitle(vals.gellhorn_reference_lap_ms)}>{formatVehicleValue(vals.gellhorn_reference_lap_ms)}</dd> : <dd class="status-pending"><span class="status-dot"></span>From Nov 19, 2026</dd>}</div>
       </dl>
     </aside>
   </section>
@@ -263,7 +265,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   .v-maker { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; }
   .v-maker img { filter: brightness(0) invert(1); opacity: .85; object-fit: contain; }
   .v-maker span { color: var(--gh-muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
-  .v-title { display: block; font-size: clamp(1.6rem, 3vw, 2.2rem); margin: 0 0 .3rem; line-height: 1.1; }
+  .v-title { display: block; font-size: clamp(1.45rem, 2.7vw, 2rem); margin: 0 0 .3rem; line-height: 1.1; }
   .v-classes { color: var(--gh-muted); font-size: .85rem; margin: 0 0 1.25rem; }
   .v-classes a { color: var(--gh-muted); text-decoration: underline; text-decoration-color: var(--gh-line); text-underline-offset: 3px; }
   .v-classes a:hover { color: var(--gh-text); }
@@ -271,6 +273,8 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   .v-key > div { display: flex; justify-content: space-between; border-top: 1px solid var(--gh-line); padding-top: .6rem; }
   .v-key dt { color: var(--gh-muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; margin: 0; }
   .v-key dd { margin: 0; font-size: .85rem; font-weight: 600; }
+  .v-lb-link { color: inherit; text-decoration: underline; text-decoration-color: rgba(160,160,198,.5); text-underline-offset: 3px; display: inline-flex; align-items: center; gap: .35rem; }
+  .v-lb-link:hover { color: var(--gh-text); text-decoration-color: var(--gh-text); }
   .v-src { color: var(--gh-muted); font-size: .68rem; font-weight: 600; margin-left: .3rem; }
 
   .v-similar h2 { font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin: 0 0 1rem; }
