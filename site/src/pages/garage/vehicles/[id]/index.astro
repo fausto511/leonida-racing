@@ -147,43 +147,44 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
       </p>
       <dl class="v-key">
         <div><dt>Price</dt>{vals.price_gtad ? <dd title={valueTitle(vals.price_gtad)}>{formatVehicleValue(vals.price_gtad)} <small class="v-src">{valueSourceLabels[vals.price_gtad.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>Not announced yet</dd>}</div>
-        <div><dt>Seats</dt><dd>{vehicle.seats}</dd></div>
-        <div><dt>Drive</dt><dd>{vehicle.drive}</dd></div>
         <div><dt>Top Speed</dt>{vals.top_speed_mph ? <dd title={valueTitle(vals.top_speed_mph)}>{formatVehicleValue(vals.top_speed_mph)} <small class="v-src">{valueSourceLabels[vals.top_speed_mph.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>Measured after launch</dd>}</div>
+        <div><dt>Drive</dt><dd>{vehicle.drive}</dd></div>
+        <div><dt>Seats</dt><dd>{vehicle.seats}</dd></div>
         <div><dt>Gellhorn Lab Time</dt>{vals.gellhorn_reference_lap_ms ? <dd title={valueTitle(vals.gellhorn_reference_lap_ms)}>{formatVehicleValue(vals.gellhorn_reference_lap_ms)} <small class="v-src">{valueSourceLabels[vals.gellhorn_reference_lap_ms.source_type]}</small></dd> : <dd class="status-pending"><span class="status-dot"></span>From Nov 19, 2026</dd>}</div>
       </dl>
     </aside>
   </section>
 
-  <section class="wrap v-performance">
-    <h2>Release Info</h2>
-    <div class="v-performance-grid v-release-grid">
-      <div class="panel v-metric"><span>Release Date</span>{release?.date ? <strong><time datetime={release.date}>{releaseDateText}</time></strong> : <strong class="v-muted">{releaseDateText}</strong>}</div>
-      <div class="panel v-metric"><span>Added With</span><strong class={release ? undefined : 'v-muted'}>{addedWithText}</strong>{addedWithNote && <small>{addedWithNote}</small>}</div>
-      <div class="panel v-metric"><span>First Seen In</span>{vehicle.firstSeenIn && vehicle.firstSeenUrl
-        ? <strong><a class="v-source-link" href={vehicle.firstSeenUrl} target="_blank" rel="noopener">{vehicle.firstSeenIn}{vehicle.firstSeenTimestamp && <> · {vehicle.firstSeenTimestamp}</>} <span aria-hidden="true">↗</span></a></strong>
-        : <strong class={vehicle.firstSeenIn ? undefined : 'v-muted'}>{vehicle.firstSeenIn ?? 'Not officially revealed'}</strong>}</div>
-      <div class="panel v-metric"><span>Real-Life Inspiration</span>{vehicle.realLifeInspiration ? <strong>{vehicle.realLifeInspiration}</strong> : <strong class="status-pending"><span class="status-dot"></span>Data pending</strong>}</div>
-      {/* New vs Returning (Fausto 2026-10-08). COPY: Claude placeholders, Codex review pending. */}
-      <div class="panel v-metric"><span>GTA History</span>{!vehicle.previousGames
-        ? <strong class="status-pending"><span class="status-dot"></span>Being checked</strong>
+  {/* Release / Ownership / Origins (Fausto 2026-10-08, mockup E): two flat strips aligned
+      with photo + main panel, origins as a borderless row below, same column split.
+      COPY STATUS: labels and status texts are Claude placeholders, Codex review pending. */}
+  <section class="wrap v-facts">
+    <div class="v-facts-row">
+      <div class="panel v-strip">
+        <h2 class="v-strip-title">Release</h2>
+        <div class="v-strip-f"><span>Release Date</span>{release?.date ? <strong><time datetime={release.date}>{releaseDateText}</time></strong> : <strong class="v-muted">{releaseDateText}</strong>}</div>
+        <div class="v-strip-f"><span>Added With</span><strong class={release ? undefined : 'v-muted'} title={addedWithNote}>{addedWithText}</strong></div>
+        <div class="v-strip-f"><span>First Seen In</span>{vehicle.firstSeenIn && vehicle.firstSeenUrl
+          ? <strong><a class="v-source-link" href={vehicle.firstSeenUrl} target="_blank" rel="noopener">{vehicle.firstSeenIn}{vehicle.firstSeenTimestamp && <> · {vehicle.firstSeenTimestamp}</>} <span aria-hidden="true">↗</span></a></strong>
+          : <strong class={vehicle.firstSeenIn ? undefined : 'v-muted'}>{vehicle.firstSeenIn ?? 'Not officially revealed'}</strong>}</div>
+      </div>
+      <div class="panel v-strip">
+        <h2 class="v-strip-title">Ownership</h2>
+        <div class="v-strip-f"><span>Sell Value</span>{vehicle.sellable === 'no'
+          ? <strong>Can't be sold</strong>
+          : vals.sell_price_gtad ? <strong title={`${valueTitle(vals.sell_price_gtad)} · stock, without upgrades`}>{formatVehicleValue(vals.sell_price_gtad)}</strong>
+          : <strong class="status-pending"><span class="status-dot"></span>After launch</strong>}</div>
+        <div class="v-strip-f"><span>Where to Get It</span>{vehicle.acquisition ? <strong>{acquisitionNotes[vehicle.acquisition]}</strong> : <strong class="status-pending"><span class="status-dot"></span>After launch</strong>}</div>
+      </div>
+    </div>
+    <dl class="v-origins">
+      <div><dt>Real-Life Inspiration</dt>{vehicle.realLifeInspiration ? <dd>{vehicle.realLifeInspiration}</dd> : <dd class="status-pending"><span class="status-dot"></span>Data pending</dd>}</div>
+      <div><dt>GTA History</dt>{!vehicle.previousGames
+        ? <dd class="status-pending"><span class="status-dot"></span>Being checked</dd>
         : vehicle.previousGames.length === 0
-          ? <strong>New in GTA VI</strong>
-          : <><strong>Returning</strong><small>{sortTitles(vehicle.previousGames).map((g) => gtaTitleBySlug[g]?.short ?? g).join(' · ')}</small></>}</div>
-    </div>
-  </section>
-
-  {/* How to get it (Fausto 2026-10-08): fields ready, values follow after launch. COPY: Claude placeholders, Codex review pending. */}
-  <section class="wrap v-performance v-ownership">
-    <h2>How to Get It</h2>
-    <div class="v-performance-grid v-own-grid">
-      <div class="panel v-metric"><span>Purchase Price</span>{vals.price_gtad ? <strong title={valueTitle(vals.price_gtad)}>{formatVehicleValue(vals.price_gtad)}</strong> : <strong class="status-pending"><span class="status-dot"></span>Not announced yet</strong>}{vehicle.acquisition && <small>{acquisitionNotes[vehicle.acquisition]}</small>}</div>
-      <div class="panel v-metric"><span>Sell Value</span>{vehicle.sellable === 'no'
-        ? <strong>Can't be sold</strong>
-        : vals.sell_price_gtad ? <><strong title={valueTitle(vals.sell_price_gtad)}>{formatVehicleValue(vals.sell_price_gtad)}</strong><small>Stock, without upgrades</small></>
-        : <strong class="status-pending"><span class="status-dot"></span>From Nov 19, 2026</strong>}</div>
-      <div class="panel v-metric"><span>Where to Get It</span><strong class="status-pending"><span class="status-dot"></span>From Nov 19, 2026</strong></div>
-    </div>
+          ? <dd><span class="v-hist-tag">New in GTA VI</span></dd>
+          : <dd class="v-hist"><span class="v-hist-tag">Returning</span>{sortTitles(vehicle.previousGames).map((g) => <span class="v-hist-chip" title={gtaTitleBySlug[g]?.name}>{gtaTitleBySlug[g]?.short ?? g}</span>)}</dd>}</div>
+    </dl>
   </section>
 
   {copy && (
@@ -272,20 +273,31 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   .v-key dd { margin: 0; font-size: .85rem; font-weight: 600; }
   .v-src { color: var(--gh-muted); font-size: .68rem; font-weight: 600; margin-left: .3rem; }
 
-  .v-performance { padding-top: var(--gh-gap-card); }
-  .v-performance h2, .v-similar h2 { font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin: 0 0 1rem; }
-  .v-performance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--gh-gap-card); }
-  .v-metric { padding: var(--gh-pad-card); display: flex; flex-direction: column; gap: .5rem; }
-  .v-metric span { color: var(--gh-muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
-  .v-metric strong { font-size: .95rem; }
-  .v-metric strong.v-muted { color: var(--gh-muted); font-weight: 600; }
-  .v-metric small { color: var(--gh-muted); font-size: .75rem; margin-top: -.25rem; }
-  .v-release-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .v-own-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .v-ownership { padding-top: var(--gh-gap-card); }
-  @media (max-width: 1100px) { .v-release-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .v-own-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  @media (max-width: 700px) { .v-own-grid { grid-template-columns: 1fr; } }
-  @media (max-width: 480px) { .v-release-grid { grid-template-columns: 1fr; } }
+  .v-similar h2 { font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin: 0 0 1rem; }
+  .v-facts { padding-top: var(--gh-gap-card); }
+  /* same column split as .v-stage, so the strips line up with photo and main panel */
+  .v-facts-row, .v-origins { display: grid; grid-template-columns: 1.5fr 1fr; gap: var(--gh-gap-card); }
+  .v-strip { display: flex; align-items: stretch; padding: 0; overflow: hidden; }
+  .v-strip-title { display: flex; align-items: center; margin: 0; padding: 0 1rem; border-right: 1px solid var(--gh-line); background: rgba(252,250,247,.03); font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: .8rem; white-space: nowrap; }
+  .v-strip-f { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: .15rem; padding: .55rem 1.1rem; border-right: 1px solid var(--gh-line); }
+  .v-strip-f:last-child { border-right: 0; }
+  .v-strip-f span { color: var(--gh-muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+  .v-strip-f strong { font-size: .86rem; }
+  .v-strip-f strong.v-muted { color: var(--gh-muted); font-weight: 600; }
+  .v-origins { margin: 0; padding: .9rem 0 0; }
+  .v-origins > div { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem .7rem; padding: 0 1.1rem; }
+  .v-origins dt { color: var(--gh-muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; margin: 0; }
+  .v-origins dd { margin: 0; font-size: .84rem; font-weight: 600; }
+  .v-hist { display: flex; flex-wrap: wrap; gap: .3rem; }
+  .v-hist-tag { display: inline-flex; padding: .12rem .5rem; border-radius: 999px; background: rgba(255,215,76,.14); color: var(--gh-yellow); font-size: .64rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+  .v-hist-chip { display: inline-flex; padding: .12rem .5rem; border-radius: 999px; border: 1px solid var(--gh-line); background: rgba(252,250,247,.05); font-size: .66rem; font-weight: 700; }
+  @media (max-width: 900px) {
+    .v-facts-row, .v-origins { grid-template-columns: 1fr; }
+    .v-strip { flex-wrap: wrap; }
+    .v-strip-title { flex-basis: 100%; padding: .55rem 1.1rem; border-right: 0; border-bottom: 1px solid var(--gh-line); }
+    .v-strip-f { flex-basis: 40%; border-right: 0; padding-block: .6rem; }
+    .v-origins { gap: .7rem; }
+  }
   .v-similar:has(+ .v-family) { padding-bottom: var(--gh-gap-card); }
   .v-family { padding-top: var(--gh-gap-card); }
   .v-family-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
