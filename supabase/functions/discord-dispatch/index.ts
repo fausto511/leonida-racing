@@ -28,6 +28,12 @@
 // missing permission keeps the feed and only sets last_error. The same check
 // runs once a day for every feed (body {"housekeeping": true}, cron job
 // "discord-housekeeping"), so feeds without new events are cleaned up too.
+//
+// New vehicles (DEC-0106, 06.10.2026): outbox kind 'vehicle' (trigger on vehicles
+// when release_id gets set). Waits until the vehicle page is live on the website
+// (rebuild every 3 h), then posts to every feed with source 'vehicles': one card
+// per vehicle, or one summary when VEHICLE_DIGEST_FROM or more are ready at once.
+// Role sync (08.10.2026): see "Discord role sync" below.
 // COPY STATUS: all user-facing texts are Claude placeholders, Codex review pending.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -156,6 +162,80 @@ async function housekeeping() {
     }
   }
   return { guilds: byGuild.size, guildsRemoved, feedsRemoved };
+}
+
+// ---------- new vehicles (DEC-0106) ----------
+const VEHICLE_COLS = "vehicle_id,make,model,classes,drive,seats,real_life_inspiration,first_seen_in,has_photo,release_id";
+const VEHICLE_DIGEST_FROM = 4;          // 4+ vehicles ready at once -> one summary post
+const VEHICLE_WAIT_MAX_ATTEMPTS = 96;   // re-check every 30 min, give up after ~48 h
+const vehicleUrl = (v: any) => `${SITE}/garage/vehicles/${v.vehicle_id}/`;
+const vehicleImg = (v: any) => `${SITE}/images/vehicles/${v.vehicle_id}-1280.webp`;
+async function live(url: string) { try { const r = await fetch(url, { method: "HEAD" }); return r.ok; } catch { return false; } }
+function vehicleCard(v: any) {
+  const url = vehicleUrl(v);
+  const fields = [
+    { name: "Class", value: (v.classes ?? []).join(", ") || "\u2014", inline: true },
+    { name: "Drivetrain", value: v.drive || "\u2014", inline: true },
+    { name: "Seats", value: v.seats ? String(v.seats) : "\u2014", inline: true },
+  ];
+  if (v.real_life_inspiration) fields.push({ name: "Real-life inspiration", value: v.real_life_inspiration, inline: false });
+  if (v.first_seen_in) fields.push({ name: "First seen in", value: v.first_seen_in, inline: false });
+  return {
+    embeds: [{ author: { name: "New in The Garage" }, title: `${v.make} ${v.model}`, url, color: YELLOW, fields,
+      ...(v._photo ? { image: { url: vehicleImg(v) } } : {}), footer: { text: "Leonida Racing \u00b7 The Garage" } }],
+    components: [row(linkButton("Open in The Garage", url), linkButton("Add to your server", INVITE))],
+    allowed_mentions: { parse: [] },
+  };
+}
+function vehicleDigest(vs: any[]) {
+  const shown = vs.slice(0, 15);
+  const lines = shown.map((v) => `\u2022 [${v.make} ${v.model}](${vehicleUrl(v)})${(v.classes ?? []).length ? ` \u00b7 ${v.classes.join(", ")}` : ""}`);
+  if (vs.length > shown.length) lines.push(`\u2026and ${vs.length - shown.length} more`);
+  const pic = vs.find((v) => v._photo);
+  return {
+    embeds: [{ author: { name: "New in The Garage" }, title: `${vs.length} new vehicles`, url: `${SITE}/garage/`, color: YELLOW,
+      description: clip(lines.join("\n"), 4000), ...(pic ? { image: { url: vehicleImg(pic) } } : {}), footer: { text: "Leonida Racing \u00b7 The Garage" } }],
+    components: [row(linkButton("Open The Garage", `${SITE}/garage/`), linkButton("Add to your server", INVITE))],
+    allowed_mentions: { parse: [] },
+  };
+}
+async function handleVehicles(): Promise<number> {
+  const { data: rows, error } = await db.rpc("discord_claim_vehicles");
+  if (error) { console.error(error); return 0; }
+  if (!rows?.length) return 0;
+  const ids = [...new Set((rows as any[]).map((r) => r.vehicle_id))];
+  const { data: vs } = await db.from("vehicles").select(VEHICLE_COLS).in("vehicle_id", ids).not("release_id", "is", null);
+  const byId = new Map((vs ?? []).map((v: any) => [v.vehicle_id, v]));
+  const ready: any[] = [];
+  for (const r of rows as any[]) {
+    const v = byId.get(r.vehicle_id);
+    if (!v) continue; // deleted or no longer officially shown -> not posted
+    if (await live(vehicleUrl(v))) { if (!ready.includes(v)) ready.push(v); continue; }
+    if (r.attempts < VEHICLE_WAIT_MAX_ATTEMPTS) {
+      await db.from("discord_outbox").update({ processed_at: null, not_before: new Date(Date.now() + 30 * 60e3).toISOString(), last_error: "vehicle page not live yet" }).eq("id", r.id);
+    } else {
+      await db.from("discord_outbox").update({ last_error: "vehicle page never went live, not posted" }).eq("id", r.id);
+    }
+  }
+  if (!ready.length) return 0;
+  ready.sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`));
+  for (const v of ready) v._photo = !!v.has_photo && await live(vehicleImg(v));
+  const msgs = ready.length >= VEHICLE_DIGEST_FROM ? [vehicleDigest(ready)] : ready.map(vehicleCard);
+  const { data: feeds } = await db.from("discord_feeds").select("*").eq("source", "vehicles");
+  for (const f of feeds ?? []) {
+    let ok = true;
+    for (const m of msgs) {
+      const r = await discord("POST", `/channels/${f.channel_id}/messages`, m);
+      if (!r.ok) {
+        ok = false;
+        if (!(await handleGone(f, r))) { await feedError(f, describeFail(r, "post in the channel")); console.log("vehicle post failed", f.feed_id, r.status, r.text.slice(0, 300)); }
+        break;
+      }
+    }
+    if (ok) await feedError(f, null);
+  }
+  console.log("vehicles posted", ready.length, "to", (feeds ?? []).length, "feeds");
+  return ready.length;
 }
 
 // ---------- card ----------
@@ -350,7 +430,7 @@ async function handleEvent(eventId: string) {
 
 async function handleBackfill(feedId: string) {
   const { data: f } = await db.from("discord_feeds").select("*").eq("feed_id", feedId).maybeSingle();
-  if (!f) return;
+  if (!f || f.source === "vehicles") return; // vehicle feeds only get vehicles added from now on
   const { data: upcoming } = await db.from("hub_events").select(EVENT_COLS).eq("is_published", true).neq("status", "cancelled")
     .gte("starts_at", new Date(Date.now() - 3 * 3600e3).toISOString()).order("starts_at").limit(25);
   const { data: refs } = await db.from("discord_messages").select("event_id").eq("feed_id", feedId);
@@ -360,6 +440,116 @@ async function handleBackfill(feedId: string) {
     const e = byId.get(id) ?? await loadEvent(id);
     await sync(f, id, e, e ? await goingCount(id) : 0);
   }
+}
+
+// ---------- Discord role sync (website -> official server, Fausto 07./08.10.2026) ----------
+// "Registered Driver" for every account, plus Crew Leader / Event Host / Creator from
+// hub_roles. One-way: Discord changes never reach the website. A role the bot granted
+// that is now missing was removed by a Discord admin -> it stays off (suppressed) until
+// that role changes on the website (job.reset_role). Roles given by hand on Discord
+// are never removed by the bot. Jobs: table discord_role_jobs (DB triggers + daily
+// discord_role_reconcile()). Server: secret DISCORD_GUILD_ID (same as join-discord-guild).
+const ROLE_GUILD = Deno.env.get("DISCORD_GUILD_ID") ?? "";
+const ROLE_NAMES: Record<string, string> = { member: "Registered Driver", crew_leader: "Crew Leader", event_host: "Event Host", creator: "Creator" };
+const UNKNOWN_MEMBER = 10007;
+let roleIdsCache: Record<string, string> | null = null;
+async function roleStatus(msg: string | null) {
+  await db.from("discord_bot_state").upsert({ key: "role_sync_status", value: msg ?? "ok", updated_at: new Date().toISOString() });
+}
+// Role ids are looked up by name once and stored in discord_bot_state 'role_ids',
+// so renaming a role on Discord later doesn't break anything.
+async function roleIds(): Promise<Record<string, string>> {
+  if (roleIdsCache && Object.keys(ROLE_NAMES).every((k) => roleIdsCache![k])) return roleIdsCache;
+  const { data } = await db.from("discord_bot_state").select("value").eq("key", "role_ids").maybeSingle();
+  let ids: Record<string, string> = {};
+  try { ids = JSON.parse(data?.value ?? "{}"); } catch { /* start fresh */ }
+  if (Object.keys(ROLE_NAMES).some((k) => !ids[k])) {
+    const r = await discord("GET", `/guilds/${ROLE_GUILD}/roles`);
+    if (!r.ok) throw new Error(`role list failed: ${r.status} ${r.text.slice(0, 200)}`);
+    for (const [k, name] of Object.entries(ROLE_NAMES)) {
+      if (ids[k]) continue;
+      const hit = (r.data as any[]).filter((x) => String(x.name).trim().toLowerCase() === name.toLowerCase());
+      if (hit.length === 1) ids[k] = hit[0].id;
+    }
+    await db.from("discord_bot_state").upsert({ key: "role_ids", value: JSON.stringify(ids), updated_at: new Date().toISOString() });
+  }
+  roleIdsCache = ids;
+  return ids;
+}
+async function wantedRoles(discordId: string): Promise<Set<string>> {
+  const want = new Set<string>();
+  const { data: d } = await db.from("drivers").select("driver_id").eq("discord_user_id", discordId).is("deleted_at", null).maybeSingle();
+  if (!d) return want; // no account (or deleted) -> none of our roles
+  want.add("member");
+  const { data: rs } = await db.from("hub_roles").select("role").eq("driver_id", d.driver_id);
+  for (const r of rs ?? []) if (ROLE_NAMES[r.role]) want.add(r.role);
+  return want;
+}
+async function syncRoles(job: any): Promise<"done" | "retry"> {
+  const ids = await roleIds();
+  const uid = job.discord_user_id;
+  const m = await discord("GET", `/guilds/${ROLE_GUILD}/members/${uid}`);
+  if (m.status === 404 && m.data?.code === UNKNOWN_MEMBER) {
+    // Not on the server. Leaving drops all roles, so forget what we granted (but keep
+    // admin removals). Fresh accounts join right after login -> look again shortly.
+    await db.from("discord_role_state").delete().eq("discord_user_id", uid).eq("suppressed", false);
+    return job.attempts < 3 && Date.now() - new Date(job.created_at).getTime() < 3600e3 ? "retry" : "done";
+  }
+  if (!m.ok) throw new Error(`member lookup failed: ${m.status} ${m.text.slice(0, 200)}`);
+  const has = new Set<string>(m.data?.roles ?? []);
+  const want = await wantedRoles(uid);
+  const { data: st } = await db.from("discord_role_state").select("*").eq("discord_user_id", uid);
+  const state = new Map((st ?? []).map((x: any) => [x.role_key, x]));
+  const problems: string[] = [];
+  for (const key of Object.keys(ROLE_NAMES)) {
+    const rid = ids[key];
+    if (!rid) { if (want.has(key)) problems.push(`role "${ROLE_NAMES[key]}" not found on the server`); continue; }
+    const s: any = state.get(key);
+    if (want.has(key)) {
+      if (has.has(rid)) {
+        if (!s || s.suppressed) await db.from("discord_role_state").upsert({ discord_user_id: uid, role_key: key, suppressed: false });
+      } else if (s && job.reset_role !== key) {
+        // we gave it before and it's gone -> a Discord admin removed it: leave it off
+        if (!s.suppressed) await db.from("discord_role_state").update({ suppressed: true }).eq("discord_user_id", uid).eq("role_key", key);
+      } else {
+        const r = await discord("PUT", `/guilds/${ROLE_GUILD}/members/${uid}/roles/${rid}`);
+        if (r.ok) await db.from("discord_role_state").upsert({ discord_user_id: uid, role_key: key, suppressed: false, granted_at: new Date().toISOString() });
+        else problems.push(`can't give "${ROLE_NAMES[key]}" (${r.status}${r.status === 403 ? ": needs Manage Roles and the bot role above it" : ""})`);
+      }
+    } else if (s) {
+      if (has.has(rid) && !s.suppressed) {
+        const r = await discord("DELETE", `/guilds/${ROLE_GUILD}/members/${uid}/roles/${rid}`);
+        if (!r.ok && r.status !== 404) { problems.push(`can't remove "${ROLE_NAMES[key]}" (${r.status})`); continue; }
+      }
+      await db.from("discord_role_state").delete().eq("discord_user_id", uid).eq("role_key", key);
+    }
+  }
+  await roleStatus(problems.length ? problems.join("; ") : null);
+  return "done";
+}
+async function handleRoleJobs(started: number): Promise<number> {
+  if (!ROLE_GUILD) return 0;
+  let n = 0;
+  while (Date.now() - started < TIME_BUDGET_MS) {
+    const { data: jobs, error } = await db.rpc("discord_claim_role_jobs", { p_limit: 20 });
+    if (error) { console.error("role jobs", error.message); break; }
+    if (!jobs?.length) break;
+    for (const j of jobs as any[]) {
+      try {
+        if ((await syncRoles(j)) === "retry") {
+          await db.from("discord_role_jobs").update({ processed_at: null, not_before: new Date(Date.now() + 10 * 60e3).toISOString(), last_error: "not on the server yet" }).eq("id", j.id);
+        }
+        n++;
+      } catch (err) {
+        console.error("role job", j.id, err);
+        await roleStatus(String(err).slice(0, 300));
+        await db.from("discord_role_jobs").update(j.attempts < 5
+          ? { processed_at: null, not_before: new Date(Date.now() + j.attempts * 120_000).toISOString(), last_error: String(err).slice(0, 500) }
+          : { last_error: String(err).slice(0, 500) }).eq("id", j.id);
+      }
+    }
+  }
+  return n;
 }
 
 // ---------- entry ----------
@@ -373,6 +563,8 @@ Deno.serve(async (req) => {
 
   const started = Date.now();
   let done = 0, failed = 0;
+  try { done += await handleVehicles(); } catch (err) { failed++; console.error("vehicles", err); }
+  try { done += await handleRoleJobs(started); } catch (err) { failed++; console.error("roles", err); }
   while (Date.now() - started < TIME_BUDGET_MS) {
     const { data: rows, error } = await db.rpc("discord_claim_outbox", { p_limit: 10 });
     if (error) { console.error(error); break; }
