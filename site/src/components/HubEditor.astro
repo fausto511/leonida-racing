@@ -367,6 +367,7 @@ const base = import.meta.env.BASE_URL;
   let tracks: any[] = [];
   let selectedId: string | null = null; // null + form visible = creating new
   let ownDriverId: string | null = null;
+  let ownPsn: string | null = null; // optional profile PSN name (DEC-0112) -> pre-fills new events
   // Access model (RS-0023): moderators see/edit everything; crew leaders
   // only their crew(s) + those crews' events; event hosts only their own
   // events. The database (RLS + trigger) enforces the same rules -- this
@@ -806,6 +807,7 @@ const base = import.meta.env.BASE_URL;
     $('event-form-title').textContent = row ? `Edit: ${row.title}` : 'New event';
     const r = row ?? { event_type: 'race', status: 'scheduled', platforms: [] };
     for (const k of ['title', 'host_name', 'description', 'discord_url']) ef[k].value = r[k] ?? '';
+    if (!row && ownPsn) ef.host_name.value = ownPsn;
     setLocation(r.location ?? '');
     ef.event_type.value = r.event_type;
     ef.status.value = r.status;
@@ -1218,8 +1220,9 @@ const base = import.meta.env.BASE_URL;
     }
     if (authBoxEl) authBoxEl.hidden = true;
     const sb = getSupabase();
-    const own = await sb.from('drivers').select('driver_id').eq('auth_user_id', session.user.id).maybeSingle();
+    const own = await sb.from('drivers').select('driver_id, psn_name').eq('auth_user_id', session.user.id).maybeSingle();
     ownDriverId = own.data?.driver_id ?? null;
+    ownPsn = own.data?.psn_name ?? null;
     const [modRes, roleRes] = await Promise.all([
       sb.from('moderators').select('driver_id').limit(1),
       ownDriverId ? sb.from('hub_roles').select('role, crew_id').eq('driver_id', ownDriverId) : Promise.resolve({ data: [], error: null }),

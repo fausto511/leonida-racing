@@ -1,5 +1,5 @@
 ---
-// My Account > Settings (RS-0032, RS-0037): display name, sign-out and
+// My Account > Settings (RS-0032, RS-0037): display name, optional PSN name (DEC-0112), sign-out and
 // "Delete my account" (DEC-0079). There is no "hide my name" option any
 // more: changing the display name is the way to stay unrecognised; deleting
 // the account removes all personal data, reviewed times stay as "Deleted driver".
@@ -28,6 +28,11 @@ import AccountSubnav from '../../../components/AccountSubnav.astro';
           <span>Display Name</span>
           <input id="display-name-input" type="text" maxlength="40" />
           <small class="field-hint">Shown on leaderboards, crews and events. Don't want to be recognised? Just pick a different name.</small>
+        </label>
+        <label class="field">
+          <span>PSN Name <small class="opt">optional</small></span>
+          <input id="psn-name-input" type="text" maxlength="16" placeholder="e.g. Racer_01" autocomplete="off" spellcheck="false" />
+          <small class="field-hint">Only used so others can add you on PlayStation: it is filled in for you when you create an event. Leave it empty to keep it to yourself.</small>
         </label>
         <button type="button" id="save-name-btn" class="btn btn-outline">Save</button>
 
@@ -73,10 +78,13 @@ import AccountSubnav from '../../../components/AccountSubnav.astro';
   .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
   .acc-auth { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .acc-auth p { margin: 0; font-size: .88rem; }
-  .settings-card { padding: var(--gh-pad-card); display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.5rem; }
+  .settings-card { padding: var(--gh-pad-card); display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1.5rem; }
+  /* inputs start at the same height; the button lines up with them (label row = 1.55rem) */
+  #save-name-btn { margin-top: 1.55rem; }
   .settings-card .field { display: flex; flex-direction: column; gap: .4rem; flex: 1 1 16rem; }
   .settings-card .field > span { font-weight: 700; font-size: .85rem; }
   .field-hint { color: var(--gh-muted); font-size: .76rem; }
+  .field .opt { font-weight: 400; color: var(--gh-muted); font-size: .76rem; }
   .account-status { padding-left: 1.75rem; border-left: 1px solid var(--gh-line); }
   .account-status-row { display: flex; align-items: center; flex-wrap: wrap; gap: .9rem; padding-block: .05rem; }
   .account-status-row p { margin: 0; font-size: .88rem; }
@@ -111,6 +119,9 @@ import AccountSubnav from '../../../components/AccountSubnav.astro';
   import { backendConfigured, getSupabase, SUPABASE_URL } from '../../../scripts/supabase-client';
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const nameEl = $<HTMLInputElement>('display-name-input');
+  const psnEl = $<HTMLInputElement>('psn-name-input');
+  // Same rule as the DB check (drivers.psn_name, hub_events.host_name).
+  const PSN_RE = /^[A-Za-z][A-Za-z0-9_-]{2,15}$/;
   const msgEl = $('settings-msg');
   const confirmEl = $<HTMLInputElement>('del-confirm');
   const delBtn = $<HTMLButtonElement>('del-btn');
@@ -132,8 +143,8 @@ import AccountSubnav from '../../../components/AccountSubnav.astro';
     $('acc-body').hidden = !s;
     if (!s) return;
     $('auth-user-label').textContent = s.user.user_metadata?.full_name ?? s.user.user_metadata?.name ?? s.user.email ?? s.user.id;
-    const { data } = await getSupabase().from('drivers').select('display_name').eq('auth_user_id', s.user.id).maybeSingle();
-    if (data) nameEl.value = data.display_name ?? '';
+    const { data } = await getSupabase().from('drivers').select('display_name, psn_name').eq('auth_user_id', s.user.id).maybeSingle();
+    if (data) { nameEl.value = data.display_name ?? ''; psnEl.value = data.psn_name ?? ''; }
   }
 
   confirmEl.addEventListener('input', () => { delBtn.disabled = confirmEl.value.trim() !== 'DELETE'; });
@@ -151,7 +162,9 @@ import AccountSubnav from '../../../components/AccountSubnav.astro';
       if (!session) return;
       const name = nameEl.value.trim();
       if (!name) return msg(msgEl, 'Display name cannot be empty.', false);
-      const { error } = await sb.from('drivers').update({ display_name: name }).eq('auth_user_id', session.user.id);
+      const psn = psnEl.value.trim();
+      if (psn && !PSN_RE.test(psn)) return msg(msgEl, 'PSN name: 3–16 characters, starts with a letter; letters, digits, - and _ only.', false);
+      const { error } = await sb.from('drivers').update({ display_name: name, psn_name: psn || null }).eq('auth_user_id', session.user.id);
       msg(msgEl, error ? 'Could not save — please try again.' : 'Saved.', !error);
     });
 
