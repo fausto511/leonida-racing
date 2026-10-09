@@ -36,11 +36,13 @@ const GROUP: Record<string, { label: string; part: 'main' | 'expansion' }> = {
   gta5: { label: 'GTA V', part: 'main' },
   'gta-online': { label: 'GTA V', part: 'expansion' },
 };
+// Kept in the database, not shown on the site (Fausto 2026-10-09: GTA Advance too obscure).
+const HIDDEN_ON_SITE = new Set(['gta-advance']);
 export interface TitleChip { label: string; tooltip: string }
 /** Grouped chips in release order, e.g. ["GTA IV" (Expansion), "GTA V" (Main game and expansion)]. */
 export function groupedTitles(slugs: string[]): TitleChip[] {
   const out: { label: string; main: boolean; exp: boolean }[] = [];
-  for (const s of sortTitles(slugs)) {
+  for (const s of sortTitles(slugs).filter((x) => !HIDDEN_ON_SITE.has(x))) {
     const g = GROUP[s] ?? { label: gtaTitleBySlug[s]?.short ?? s, part: 'main' as const };
     let e = out.find((x) => x.label === g.label);
     if (!e) { e = { label: g.label, main: false, exp: false }; out.push(e); }
