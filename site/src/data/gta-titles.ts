@@ -9,15 +9,15 @@ export const gtaTitles: { slug: string; short: string; name: string }[] = [
   { slug: 'gta-london-1961', short: 'London 1961', name: 'GTA: London 1961' },
   { slug: 'gta2', short: 'GTA 2', name: 'Grand Theft Auto 2' },
   { slug: 'gta3', short: 'GTA III', name: 'Grand Theft Auto III' },
-  { slug: 'gta-vc', short: 'Vice City', name: 'GTA: Vice City' },
-  { slug: 'gta-sa', short: 'San Andreas', name: 'GTA: San Andreas' },
-  { slug: 'gta-advance', short: 'Advance', name: 'GTA Advance' },
-  { slug: 'gta-lcs', short: 'LCS', name: 'GTA: Liberty City Stories' },
-  { slug: 'gta-vcs', short: 'VCS', name: 'GTA: Vice City Stories' },
+  { slug: 'gta-vc', short: 'GTA VC', name: 'GTA: Vice City' },
+  { slug: 'gta-sa', short: 'GTA SA', name: 'GTA: San Andreas' },
+  { slug: 'gta-advance', short: 'GTA Adv', name: 'GTA Advance' },
+  { slug: 'gta-lcs', short: 'GTA LCS', name: 'GTA: Liberty City Stories' },
+  { slug: 'gta-vcs', short: 'GTA VCS', name: 'GTA: Vice City Stories' },
   { slug: 'gta4', short: 'GTA IV', name: 'Grand Theft Auto IV' },
   { slug: 'gta4-tlad', short: 'TLAD', name: 'GTA IV: The Lost and Damned' },
   { slug: 'gta4-tbogt', short: 'TBoGT', name: 'GTA IV: The Ballad of Gay Tony' },
-  { slug: 'gta-ctw', short: 'Chinatown Wars', name: 'GTA: Chinatown Wars' },
+  { slug: 'gta-ctw', short: 'GTA CW', name: 'GTA: Chinatown Wars' },
   { slug: 'gta5', short: 'GTA V', name: 'Grand Theft Auto V' },
   { slug: 'gta-online', short: 'GTA Online', name: 'GTA Online' },
 ];
@@ -46,5 +46,8 @@ export function groupedTitles(slugs: string[]): TitleChip[] {
     if (!e) { e = { label: g.label, main: false, exp: false }; out.push(e); }
     if (g.part === 'main') e.main = true; else e.exp = true;
   }
-  return out.map((e) => ({ label: e.label, tooltip: e.main && e.exp ? 'Main game and expansion' : e.exp ? 'Expansion' : 'Main game' }));
+  // Tooltip: full game name + main game / expansion (short labels need the full name, Fausto 2026-10-09)
+  const full: Record<string, string> = { 'GTA 1': 'Grand Theft Auto (1997)', 'GTA IV': 'Grand Theft Auto IV', 'GTA V': 'Grand Theft Auto V' };
+  const nameOf = (label: string) => full[label] ?? gtaTitles.find((t) => t.short === label)?.name ?? label;
+  return out.map((e) => ({ label: e.label, tooltip: `${nameOf(e.label)} · ${e.main && e.exp ? 'Main game and expansion' : e.exp ? 'Expansion' : 'Main game'}` }));
 }
