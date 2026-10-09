@@ -1,7 +1,7 @@
 ---
 import Base from '../../../../layouts/Base.astro';
 import { vehicleOptions, vehicleValues, formatVehicleValue, valueSourceLabels, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, type VehicleValue } from '../../../../data/vehicles';
-import { gtaTitleBySlug, sortTitles } from '../../../../data/gta-titles';
+import { groupedTitles } from '../../../../data/gta-titles';
 import VehicleTile from '../../../../components/VehicleTile.astro';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
 import { releaseById, formatReleaseDate } from '../../../../data/releases';
@@ -185,7 +185,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
         ? <dd class="status-pending"><span class="status-dot"></span>Earlier appearances under review</dd>
         : vehicle.previousGames.length === 0
           ? <dd><span class="v-hist-tag">New in GTA VI</span></dd>
-          : <dd class="v-hist"><span class="v-hist-tag">Returning</span>{sortTitles(vehicle.previousGames).map((g) => <span class="v-hist-chip" title={gtaTitleBySlug[g]?.name}>{gtaTitleBySlug[g]?.short ?? g}</span>)}</dd>}</div>
+          : <dd class="v-hist"><span class="v-hist-tag">Returning</span>{groupedTitles(vehicle.previousGames).map((t) => <span class="v-hist-chip" title={t.tooltip}>{t.label}</span>)}</dd>}</div>
     </dl>
   </section>
 
