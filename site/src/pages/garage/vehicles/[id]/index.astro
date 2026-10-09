@@ -182,7 +182,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
     <dl class="v-origins">
       <div><dt>Real-Life Inspiration</dt>{vehicle.realLifeInspiration ? <dd>{vehicle.realLifeInspiration}</dd> : <dd class="status-pending"><span class="status-dot"></span>Data pending</dd>}</div>
       <div><dt>GTA History</dt>{!vehicle.previousGames
-        ? <dd class="status-pending"><span class="status-dot"></span>Being checked</dd>
+        ? <dd class="status-pending"><span class="status-dot"></span>Earlier appearances under review</dd>
         : vehicle.previousGames.length === 0
           ? <dd><span class="v-hist-tag">New in GTA VI</span></dd>
           : <dd class="v-hist"><span class="v-hist-tag">Returning</span>{sortTitles(vehicle.previousGames).map((g) => <span class="v-hist-chip" title={gtaTitleBySlug[g]?.name}>{gtaTitleBySlug[g]?.short ?? g}</span>)}</dd>}</div>
@@ -212,7 +212,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
       {/* COPY STATUS: Claude placeholder, Codex review pending. */}
       <div class="v-family-head">
         <h2 id="v-family-title">More {familyLabel} Models</h2>
-        {familyPage && <a class="v-family-all" href={familyPage}>All {familyLabel} models →</a>}
+        {familyPage && <a class="v-family-all" href={familyPage}>View the {familyLabel} family →</a>}
       </div>
       <div class="v-similar-grid">
         {family.slice(0, 4).map((v) => <VehicleTile vehicle={v} />)}

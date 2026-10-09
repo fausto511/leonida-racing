@@ -2,7 +2,7 @@
 // New cars in GTA VI (Fausto 2026-10-08): officially revealed vehicles with no
 // earlier GTA title of the same model name (vehicles.previous_games = '{}').
 // noindex until the research covers most revealed cars (data/rankings.ts).
-// COPY STATUS: Claude placeholders, Codex review pending.
+// COPY STATUS: Codex 2026-10-08, approved by Fausto 2026-10-09.
 import Base from '../../../layouts/Base.astro';
 import VehicleTile from '../../../components/VehicleTile.astro';
 import { compareGarageOrder } from '../../../data/vehicles';
@@ -12,7 +12,7 @@ const base = import.meta.env.BASE_URL;
 const list = newCars().sort(compareGarageOrder);
 const coverage = newCarsResearchCoverage();
 const title = 'New Cars in GTA 6';
-const description = 'Every car that is brand new in GTA 6: officially revealed models that never appeared in an earlier GTA game under the same name.';
+const description = 'Explore officially revealed GTA 6 cars with no identified earlier GTA model counterpart, including new models and distinct variants of familiar families.';
 ---
 <Base title={title} description={description} section="garage" noindex={!newCarsIndexable()}
   breadcrumbs={[{ name: 'The Garage', path: 'garage/' }, { name: 'New Cars', path: 'garage/new-cars/' }]}>
@@ -20,12 +20,12 @@ const description = 'Every car that is brand new in GTA 6: officially revealed m
     <nav class="nc-crumbs" aria-label="Breadcrumb"><a href={`${base}garage/`}>The Garage</a><span aria-hidden="true">/</span><span>New Cars</span></nav>
     <p class="eyebrow">GTA VI</p>
     <h1 class="display nc-title">{title}</h1>
-    <p class="nc-intro">Cars that debut in GTA VI. A car counts as returning when an earlier GTA game, expansion or GTA Online had a vehicle with the same model name, even if it looked different there.</p>
-    {coverage < 1 && <p class="nc-note">Still checking: {Math.round(coverage * 100)}% of the officially revealed cars have been compared with earlier GTA games so far.</p>}
+    <p class="nc-intro">Officially revealed GTA VI cars with no identified counterpart in an earlier GTA game, expansion or GTA Online. A familiar family name does not make every model a returning car. Confirmed renamings are treated as returning models.</p>
+    {coverage < 1 && <p class="nc-note">Earlier GTA appearances reviewed for {Math.round(coverage * 100)}% of officially revealed vehicles. The remaining models are still being checked.</p>}
   </section>
   <section class="wrap nc-grid" aria-label="New cars">
     {list.length ? list.map((v) => <VehicleTile vehicle={v} />) : (
-      <div class="panel nc-empty"><p>We are comparing every revealed car with earlier GTA games. New models show up here as soon as they are checked.</p><a class="btn btn-outline" href={`${base}garage/`}>Browse The Garage</a></div>
+      <div class="panel nc-empty"><p>No vehicles have been classified as new yet. Earlier GTA appearances are still being reviewed.</p><a class="btn btn-outline" href={`${base}garage/`}>Browse The Garage</a></div>
     )}
   </section>
 </Base>

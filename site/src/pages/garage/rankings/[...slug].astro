@@ -2,9 +2,10 @@
 // Ranking pages (Fausto 2026-10-08): fastest (overall + per class), most expensive,
 // cheapest, Gellhorn reference lap. Filled from the database at build time;
 // noindex until enough cars are measured (see data/rankings.ts).
-// COPY STATUS: Claude placeholders, Codex review pending.
+// COPY STATUS: Codex 2026-10-08, approved by Fausto 2026-10-09.
 import Base from '../../../layouts/Base.astro';
 import { rankings, rankingEntries, rankingIndexable, RANKING_MIN_ENTRIES } from '../../../data/rankings';
+// COPY: Codex 2026-10-08, approved 2026-10-09.
 import { formatVehicleValue, valueSourceLabels } from '../../../data/vehicles';
 import { releaseById } from '../../../data/releases';
 
@@ -31,14 +32,18 @@ const jsonLd = entries.length ? [{
     <h1 class="display rk-title">{r.title}</h1>
     <p class="rk-intro">{r.intro}</p>
     {entries.length > 0 && !complete && (
-      <p class="rk-note">Ranked: {entries.length} of {r.scope.length} officially revealed cars so far. Positions can change as more cars are measured.</p>
+      <p class="rk-note">{r.metric === 'price_gtad' ? 'Prices' : 'Results'} available for {entries.length} of {r.scope.length} officially revealed vehicles. Positions may change as more {r.metric === 'price_gtad' ? 'prices' : 'results'} are added.</p>
     )}
   </section>
 
   <section class="wrap rk-body">
     {entries.length === 0 ? (
       <div class="panel rk-empty">
-        <p><strong>This ranking fills in after launch.</strong> GTA VI releases on Nov 19, 2026. We add cars here as soon as they are measured{r.metric === 'price_gtad' ? ' or their prices are confirmed in the game' : ''}.</p>
+        <p>{r.metric === 'price_gtad'
+          ? 'No purchase prices are available yet. Cars will appear here as their prices are recorded in GTA VI.'
+          : r.metric === 'gellhorn_reference_lap_ms'
+            ? 'No reference lap times are available yet. Cars will appear here as their stock results are recorded at Gellhorn International Raceway.'
+            : 'No top-speed results are available yet. Cars will appear here as their stock results are recorded.'}</p>
         <a class="btn btn-outline" href={`${base}garage/`}>Browse The Garage</a>
       </div>
     ) : (
@@ -59,7 +64,7 @@ const jsonLd = entries.length ? [{
         </table>
       </div>
     )}
-    {!indexable && entries.length > 0 && entries.length < RANKING_MIN_ENTRIES && <p class="rk-note">More cars needed before this ranking is complete.</p>}
+    {!indexable && entries.length > 0 && entries.length < RANKING_MIN_ENTRIES && <p class="rk-note">This ranking currently contains only {entries.length} vehicles.</p>}
   </section>
 
   <nav class="wrap rk-more" aria-label="Other rankings">

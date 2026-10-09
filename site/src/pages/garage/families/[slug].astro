@@ -2,7 +2,7 @@
 // Model family pages (Fausto 2026-10-08): from FAMILY_PAGE_MIN models on, e.g. Dominator.
 // Members may span several classes. noindex until the family has its own copy
 // (familyCopy in data/rankings.ts) -- written from community experience after launch.
-// COPY STATUS: Claude placeholders, Codex review pending.
+// COPY STATUS: Codex 2026-10-08, approved by Fausto 2026-10-09.
 import Base from '../../../layouts/Base.astro';
 import VehicleTile from '../../../components/VehicleTile.astro';
 import { familyMembers, familyName, compareGarageOrder } from '../../../data/vehicles';
@@ -17,7 +17,7 @@ const name = familyName(f);
 const list = familyMembers(f).filter((v) => v.releaseId).sort(compareGarageOrder);
 const classes = [...new Set(list.flatMap((v) => v.classes))];
 const title = `${name} Models in GTA 6`;
-const description = `All ${name} models in GTA 6 in one place: ${list.length} versions across ${classes.join(', ')}, with specs, release details and performance data.`;
+const description = `Explore the ${name} model family in GTA 6, with individual vehicle details, release information and available performance results.`;
 ---
 <Base title={title} description={description} section="garage" noindex={!familyIndexable(f)}
   breadcrumbs={[{ name: 'The Garage', path: 'garage/' }, { name: `${name} family`, path: `garage/families/${f}/` }]}>
@@ -26,7 +26,7 @@ const description = `All ${name} models in GTA 6 in one place: ${list.length} ve
     <p class="eyebrow">GTA VI Model Family</p>
     <h1 class="display fm-title">{title}</h1>
     <div class="fm-intro">
-      {familyCopy[f]?.length ? familyCopy[f].map((p) => <p>{p}</p>) : <p>{list.length} {name} models in GTA VI, across {classes.join(', ')}.</p>}
+      {familyCopy[f]?.length ? familyCopy[f].map((p) => <p>{p}</p>) : <p>Explore the {name} model family and the vehicle details currently available for each model.</p>}
     </div>
   </section>
   <section class="wrap fm-grid" aria-label={`${name} models`}>
