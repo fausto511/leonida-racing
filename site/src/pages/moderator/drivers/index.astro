@@ -1,0 +1,131 @@
+---
+// Moderator: drivers overview (Fausto 2026-10-09). Key figures come from the DB
+// (moderator_driver_stats), the list is a paged search (moderator_search_drivers,
+// 25 per page, newest first) -- stays fast with many thousands of accounts.
+// No e-mail addresses, no Discord IDs. Both functions refuse non-moderators.
+import Base from '../../../layouts/Base.astro';
+import ModeratorNav from '../../../components/ModeratorNav.astro';
+---
+<Base title="Drivers — Moderator" description="Internal: registered drivers." section="moderator" noindex>
+  <section class="wrap mod-wrap">
+    <ModeratorNav active="drivers" />
+    <p class="eyebrow">Community</p>
+    <h1 class="display mod-title">Drivers</h1>
+
+    <div id="dx-backend" class="notice" hidden><strong>Backend not connected.</strong><span>Drivers cannot be loaded from this build.</span></div>
+    <div id="dx-auth" class="panel dx-box" hidden><p>Sign in as a moderator to see drivers.</p></div>
+    <div id="dx-notmod" class="panel dx-box" hidden><p>This page is for moderators only.</p></div>
+
+    <div id="dx-body" hidden>
+      <div class="dx-stats" id="dx-stats"></div>
+
+      <div class="panel dx-listbox">
+        <div class="dx-listhead">
+          <label class="ui-search dx-search"><input type="search" id="dx-q" placeholder="Search display name" aria-label="Search drivers" autocomplete="off" /></label>
+          <span class="dx-count" id="dx-count"></span>
+        </div>
+        <div class="dx-table-wrap">
+          <table class="dx-table">
+            <thead><tr><th>Display name</th><th>Joined</th><th>Roles</th><th>Crews</th></tr></thead>
+            <tbody id="dx-rows"></tbody>
+          </table>
+        </div>
+        <div class="dx-pager">
+          <button type="button" class="btn btn-outline" id="dx-prev">← Newer</button>
+          <span id="dx-page"></span>
+          <button type="button" class="btn btn-outline" id="dx-next">Older →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  [hidden] { display: none !important; }
+  .mod-wrap { padding-block: clamp(1.5rem, 4vw, 3rem) clamp(2.5rem, 6vw, 4.5rem); }
+  .mod-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .dx-box { padding: 1rem 1.2rem; } .dx-box p { margin: 0; }
+  .dx-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: var(--gh-gap-card); margin-bottom: var(--gh-gap-card); }
+  :global(.dx-stat) { padding: .9rem 1.1rem; display: flex; flex-direction: column; gap: .25rem; }
+  :global(.dx-stat span) { color: var(--gh-muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
+  :global(.dx-stat strong) { font-family: var(--gh-font-display); font-style: italic; font-weight: 900; font-size: 1.7rem; line-height: 1; }
+  .dx-listbox { padding: 1rem 1.1rem; }
+  .dx-listhead { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: .8rem; }
+  .dx-search { flex: 1 1 16rem; max-width: 24rem; }
+  .dx-count { color: var(--gh-muted); font-size: .8rem; }
+  .dx-table-wrap { overflow-x: auto; }
+  .dx-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .dx-table th, .dx-table td { text-align: left; padding: .55rem .5rem; border-bottom: 1px solid var(--gh-line); white-space: nowrap; }
+  .dx-table th { color: var(--gh-muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
+  :global(.dx-tag) { display: inline-flex; margin-right: .3rem; padding: .1rem .45rem; border-radius: 999px; border: 1px solid var(--gh-line); font-size: .68rem; font-weight: 700; }
+  :global(.dx-tag.is-mod) { border-color: rgba(255,215,76,.5); color: var(--gh-yellow); }
+  :global(.dx-muted) { color: var(--gh-muted); }
+  .dx-pager { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: .9rem; font-size: .8rem; color: var(--gh-muted); }
+  .dx-pager .btn { font-size: .78rem; padding: .4rem .8rem; }
+</style>
+
+<script>
+  import { backendConfigured, getSupabase } from '../../../scripts/supabase-client';
+  import { esc } from '../../../data/hub';
+
+  const PAGE = 25;
+  const ROLE: Record<string, string> = { crew_leader: 'Crew Leader', event_host: 'Event Host', creator: 'Creator' };
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  let offset = 0;
+  let total = 0;
+  let q = '';
+  let timer: number | undefined;
+
+  const stat = (label: string, n: number) => `<div class="panel dx-stat"><span>${esc(label)}</span><strong>${n.toLocaleString('en-US')}</strong></div>`;
+
+  async function loadStats() {
+    const { data, error } = await getSupabase().rpc('moderator_driver_stats');
+    if (error || !data) { $('dx-stats').innerHTML = `<p class="dx-muted">Could not load figures${error ? `: ${esc(error.message)}` : ''}.</p>`; return; }
+    const s = data as Record<string, number>;
+    $('dx-stats').innerHTML = [
+      stat('Drivers', s.total), stat('New, 7 days', s.new_7d), stat('New, 30 days', s.new_30d),
+      stat('Crew Leaders', s.crew_leaders), stat('Event Hosts', s.event_hosts), stat('Creators', s.creators),
+      stat('Moderators', s.moderators), stat('Deleted accounts', s.deleted),
+    ].join('');
+  }
+
+  async function loadPage() {
+    const { data, error } = await getSupabase().rpc('moderator_search_drivers', { p_q: q || null, p_limit: PAGE, p_offset: offset });
+    if (error) { $('dx-rows').innerHTML = `<tr><td colspan="4" class="dx-muted">Could not load drivers: ${esc(error.message)}</td></tr>`; return; }
+    const rows = (data ?? []) as any[];
+    total = rows.length ? Number(rows[0].total_count) : 0;
+    $('dx-rows').innerHTML = rows.length ? rows.map((r) => `<tr>
+      <td>${esc(r.display_name)}</td>
+      <td class="dx-muted">${esc(new Date(r.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' }))}</td>
+      <td>${r.is_moderator ? '<span class="dx-tag is-mod">Moderator</span>' : ''}${(r.roles ?? []).map((x: string) => `<span class="dx-tag">${esc(ROLE[x] ?? x)}</span>`).join('') || (r.is_moderator ? '' : '<span class="dx-muted">—</span>')}</td>
+      <td>${(r.crews ?? []).map((t: string) => `<span class="dx-tag">${esc(t)}</span>`).join('') || '<span class="dx-muted">—</span>'}</td>
+    </tr>`).join('') : `<tr><td colspan="4" class="dx-muted">${q ? 'No driver matches this search.' : 'No drivers yet.'}</td></tr>`;
+    $('dx-count').textContent = q ? `${total.toLocaleString('en-US')} match${total === 1 ? '' : 'es'}` : `${total.toLocaleString('en-US')} drivers`;
+    const pages = Math.max(1, Math.ceil(total / PAGE));
+    $('dx-page').textContent = `Page ${Math.floor(offset / PAGE) + 1} of ${pages}`;
+    ($('dx-prev') as HTMLButtonElement).disabled = offset === 0;
+    ($('dx-next') as HTMLButtonElement).disabled = offset + PAGE >= total;
+  }
+
+  $('dx-q').addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = window.setTimeout(() => { q = ($('dx-q') as HTMLInputElement).value.trim(); offset = 0; loadPage(); }, 300);
+  });
+  $('dx-prev').addEventListener('click', () => { offset = Math.max(0, offset - PAGE); loadPage(); });
+  $('dx-next').addEventListener('click', () => { offset += PAGE; loadPage(); });
+
+  async function init(session: any) {
+    $('dx-auth').hidden = Boolean(session); $('dx-body').hidden = true; $('dx-notmod').hidden = true;
+    if (!session) return;
+    const mod = await getSupabase().from('moderators').select('driver_id').limit(1);
+    if (mod.error || !mod.data?.length) { $('dx-notmod').hidden = false; return; }
+    $('dx-body').hidden = false;
+    await Promise.all([loadStats(), loadPage()]);
+  }
+  if (!backendConfigured) $('dx-backend').hidden = false;
+  else {
+    const sb = getSupabase();
+    sb.auth.getSession().then(({ data }) => init(data?.session ?? null));
+    sb.auth.onAuthStateChange((ev, s) => { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') init(s); });
+  }
+</script>
