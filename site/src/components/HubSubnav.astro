@@ -6,10 +6,10 @@ interface Props {
 const { active = null } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const links = [
-  { key: 'overview', label: 'Overview', href: `${base}hub/` },
-  { key: 'events', label: 'Events', href: `${base}hub/events/` },
-  { key: 'crews', label: 'Crews', href: `${base}hub/crews/` },
-  { key: 'tracks', label: 'Tracks', href: `${base}hub/tracks/` },
+  { key: 'overview', label: 'Overview', href: `${base}community/` },
+  { key: 'events', label: 'Events', href: `${base}community/events/` },
+  { key: 'crews', label: 'Crews', href: `${base}community/crews/` },
+  { key: 'tracks', label: 'Tracks', href: `${base}community/tracks/` },
 ];
 ---
 <div class="subnav-bar">

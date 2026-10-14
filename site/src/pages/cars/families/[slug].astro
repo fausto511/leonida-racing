@@ -20,9 +20,9 @@ const title = `${name} Models in GTA 6`;
 const description = `Explore the ${name} model family in GTA 6, with individual vehicle details, release information and available performance results.`;
 ---
 <Base title={title} description={description} section="garage" noindex={!familyIndexable(f)}
-  breadcrumbs={[{ name: 'The Garage', path: 'garage/' }, { name: `${name} family`, path: `garage/families/${f}/` }]}>
+  breadcrumbs={[{ name: 'The Garage', path: 'cars/' }, { name: `${name} family`, path: `cars/families/${f}/` }]}>
   <section class="wrap fm-head">
-    <nav class="fm-crumbs" aria-label="Breadcrumb"><a href={`${base}garage/`}>The Garage</a><span aria-hidden="true">/</span><span>{name} family</span></nav>
+    <nav class="fm-crumbs" aria-label="Breadcrumb"><a href={`${base}cars/`}>The Garage</a><span aria-hidden="true">/</span><span>{name} family</span></nav>
     <p class="eyebrow">GTA VI Model Family</p>
     <h1 class="display fm-title">{title}</h1>
     <div class="fm-intro">

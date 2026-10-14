@@ -17,7 +17,7 @@ const drives = [...new Set(vehicleOptions.map((v) => v.drive))].sort();
   title="The Garage — GTA VI Vehicle Database"
   description="Browse the GTA 6 vehicle database. Compare cars, key vehicle details, real-life inspirations, release information, and available performance data."
   section="garage"
-  breadcrumbs={[{ name: 'The Garage', path: 'garage/' }]}
+  breadcrumbs={[{ name: 'The Garage', path: 'cars/' }]}
 >
   <section class="hero">
     <picture>
@@ -79,12 +79,12 @@ const drives = [...new Set(vehicleOptions.map((v) => v.drive))].sort();
       <!-- Crawlable class + manufacturer pages (RS-0050, DEC-0087) -->
       <nav class="garage-browse" aria-label="Browse the garage">
         <div>
-          <h2 class="garage-browse-title"><a href={`${base}garage/classes/`}>Browse by Class</a></h2>
-          <ul>{classPages.map((c) => <li><a href={`${base}garage/classes/${c.slug}/`}>{c.name}</a></li>)}</ul>
+          <h2 class="garage-browse-title"><a href={`${base}cars/classes/`}>Browse by Class</a></h2>
+          <ul>{classPages.map((c) => <li><a href={`${base}cars/classes/${c.slug}/`}>{c.name}</a></li>)}</ul>
         </div>
         <div>
-          <h2 class="garage-browse-title"><a href={`${base}garage/manufacturers/`}>Browse by Manufacturer</a></h2>
-          <ul>{manufacturerPages.map((m) => <li><a href={`${base}garage/manufacturers/${m.slug}/`}>{m.name}</a></li>)}</ul>
+          <h2 class="garage-browse-title"><a href={`${base}cars/manufacturers/`}>Browse by Manufacturer</a></h2>
+          <ul>{manufacturerPages.map((m) => <li><a href={`${base}cars/manufacturers/${m.slug}/`}>{m.name}</a></li>)}</ul>
         </div>
       </nav>
     </div>

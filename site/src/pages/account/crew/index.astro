@@ -116,7 +116,7 @@ const base = import.meta.env.BASE_URL;
     const used = active.length + pending.length; // invites don't count until accepted (DEC-0094)
     const invHtml = invites.length ? `<div class="mem-invites">${invites.map((m) => `<div class="panel mem-empty-card mem-invite-card"><p>${crewTagHtml(m.tag, m.color, 'sm')} <strong>${esc(m.crew_name)}</strong> invited you to join their crew${m.invited_by_name ? ` (invite from ${esc(m.invited_by_name)})` : ''}.</p><span class="mem-invite-actions"><button type="button" class="btn btn-primary" data-accept="${esc(m.crew_id)}"${used >= LIMIT ? ` disabled title="You are already in ${LIMIT} crews (open requests included)"` : ''}>Accept</button><button type="button" class="btn btn-outline" data-decline="${esc(m.crew_id)}">Decline</button></span></div>`).join('')}</div>` : '';
     const msg = note ? `<p class="mem-msg${isError ? ' is-error' : ''}">${esc(note)}</p>` : '';
-    const find = used < LIMIT ? `<a class="btn btn-primary" href="${base}hub/crews/">Find a Crew</a>` : '';
+    const find = used < LIMIT ? `<a class="btn btn-primary" href="${base}community/crews/">Find a Crew</a>` : '';
     if (!active.length && !pending.length) {
       memEl.innerHTML = `${invHtml}<div class="panel mem-empty-card"><p><strong>You're not in a crew yet.</strong> Find one that fits how you play and request an invite. You can join or request up to five crews.</p>${find}</div>${msg}`;
       return;

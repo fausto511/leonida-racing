@@ -1,5 +1,5 @@
 ---
-// Overview pages /garage/classes/ and /garage/manufacturers/ (2026-10-01):
+// Overview pages /cars/classes/ and /cars/manufacturers/ (2026-10-01):
 // no dead path above the class/manufacturer pages, and a landing page for
 // "GTA 6 vehicle classes" / "GTA 6 car manufacturers" searches.
 // COPY STATUS: intro + meta approved (Codex 2026-10-02, Fausto).
@@ -20,7 +20,7 @@ interface Props {
 const { kind, pages, title, heading, description, intro, about } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const dir = kind === 'class' ? 'classes' : 'manufacturers';
-const path = `garage/${dir}/`;
+const path = `cars/${dir}/`;
 const cards = pages.map(({ page, vehicles }) => {
   const sorted = [...vehicles].sort(compareGarageOrder);
   const cover = sorted.find((v) => v.photo);
@@ -39,7 +39,7 @@ const jsonLd = [{
   mainEntity: {
     '@type': 'ItemList',
     numberOfItems: cards.length,
-    itemListElement: cards.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.page.name, url: new URL(`${base}garage/${dir}/${c.page.slug}/`, Astro.site).href })),
+    itemListElement: cards.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.page.name, url: new URL(`${base}cars/${dir}/${c.page.slug}/`, Astro.site).href })),
   },
 }];
 ---
@@ -48,11 +48,11 @@ const jsonLd = [{
   description={description}
   section="garage"
   jsonLd={jsonLd}
-  breadcrumbs={[{ name: 'The Garage', path: 'garage/' }, { name: kind === 'class' ? 'Classes' : 'Manufacturers', path }]}
+  breadcrumbs={[{ name: 'The Garage', path: 'cars/' }, { name: kind === 'class' ? 'Classes' : 'Manufacturers', path }]}
 >
   <section class="wrap ti-head">
     <nav class="ti-crumbs" aria-label="Breadcrumb">
-      <a href={`${base}garage/`}>The Garage</a><span aria-hidden="true">/</span><span>{kind === 'class' ? 'Classes' : 'Manufacturers'}</span>
+      <a href={`${base}cars/`}>The Garage</a><span aria-hidden="true">/</span><span>{kind === 'class' ? 'Classes' : 'Manufacturers'}</span>
     </nav>
     <p class="eyebrow">GTA VI Vehicle Database</p>
     <h1 class="display ti-title">{heading}</h1>
@@ -61,7 +61,7 @@ const jsonLd = [{
 
   <section class:list={['wrap', 'ti-grid', { 'ti-grid-logos': kind === 'manufacturer' }]} aria-label={heading}>
     {cards.map((c) => (
-      <a class="ti-card" href={`${base}garage/${dir}/${c.page.slug}/`}>
+      <a class="ti-card" href={`${base}cars/${dir}/${c.page.slug}/`}>
         <span class="ti-photo">
           {c.cover
             ? <img src={`${base}images/vehicles/${c.cover.id}-640.webp`} alt="" width="640" height="360" loading="lazy" />
@@ -89,8 +89,8 @@ const jsonLd = [{
   )}
 
   <nav class="wrap ti-more" aria-label="More in The Garage">
-    <a href={`${base}garage/${kind === 'class' ? 'manufacturers' : 'classes'}/`}>{kind === 'class' ? 'Browse by Manufacturer' : 'Browse by Class'} →</a>
-    <a href={`${base}garage/`}>All Vehicles in The Garage →</a>
+    <a href={`${base}cars/${kind === 'class' ? 'manufacturers' : 'classes'}/`}>{kind === 'class' ? 'Browse by Manufacturer' : 'Browse by Class'} →</a>
+    <a href={`${base}cars/`}>All Vehicles in The Garage →</a>
   </nav>
 </Base>
 

@@ -196,7 +196,7 @@ import AccountSubnav from '../../components/AccountSubnav.astro';
   const linkAttr = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function vehicleCell(run) {
     const label = vehicleLabel(run.vehicles);
-    return run.vehicle_id && run.vehicles ? `<a class="rec-link" href="${BASE}garage/vehicles/${linkAttr(run.vehicle_id)}/">${label}</a>` : label;
+    return run.vehicle_id && run.vehicles ? `<a class="rec-link" href="${BASE}cars/vehicles/${linkAttr(run.vehicle_id)}/">${label}</a>` : label;
   }
   function leaderboardHref(run) {
     const page = TRACK_PAGES[run.track_id];

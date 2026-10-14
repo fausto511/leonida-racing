@@ -91,7 +91,7 @@ const initialHtml = sampleCrews.map((c) => crewCardHtml(c, undefined, { sample: 
 
   [search, focusSel, langSel, platSel].forEach((el) => el.addEventListener('input', applyFilters));
   buildLanguageOptions();
-  // Deep link from the leaderboard crew tag: /hub/crews/?q=TAG
+  // Deep link from the leaderboard crew tag: /community/crews/?q=TAG
   const q0 = new URLSearchParams(location.search).get('q');
   if (q0) { search.value = q0; applyFilters(); }
 

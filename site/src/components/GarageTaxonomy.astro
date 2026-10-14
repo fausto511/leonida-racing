@@ -17,7 +17,7 @@ interface Props {
 const { kind, page, vehicles, label } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const list = [...vehicles].sort(compareGarageOrder);
-const path = `garage/${kind === 'class' ? 'classes' : 'manufacturers'}/${page.slug}/`;
+const path = `cars/${kind === 'class' ? 'classes' : 'manufacturers'}/${page.slug}/`;
 const metaTitle = kind === 'class' ? `GTA VI ${label}` : `${label} in GTA VI`;
 const heading = kind === 'class' ? `GTA VI ${label}` : `${label} in GTA VI`;
 const metaDescription = kind === 'class'
@@ -40,7 +40,7 @@ const jsonLd = [{
       '@type': 'ListItem',
       position: i + 1,
       name: `${v.make} ${v.model}`,
-      url: new URL(`${base}garage/vehicles/${v.id}/`, Astro.site).href,
+      url: new URL(`${base}cars/vehicles/${v.id}/`, Astro.site).href,
     })),
   },
 }];
@@ -50,11 +50,11 @@ const jsonLd = [{
   description={metaDescription}
   section="garage"
   jsonLd={jsonLd}
-  breadcrumbs={[{ name: 'The Garage', path: 'garage/' }, { name: kind === 'class' ? 'Classes' : 'Manufacturers', path: `garage/${kind === 'class' ? 'classes' : 'manufacturers'}/` }, { name: page.name, path }]}
+  breadcrumbs={[{ name: 'The Garage', path: 'cars/' }, { name: kind === 'class' ? 'Classes' : 'Manufacturers', path: `cars/${kind === 'class' ? 'classes' : 'manufacturers'}/` }, { name: page.name, path }]}
 >
   <section class="wrap tax-head">
     <nav class="tax-crumbs" aria-label="Breadcrumb">
-      <a href={`${base}garage/`}>The Garage</a><span aria-hidden="true">/</span><a href={`${base}garage/${kind === 'class' ? 'classes' : 'manufacturers'}/`}>{kind === 'class' ? 'Classes' : 'Manufacturers'}</a><span aria-hidden="true">/</span><span>{page.name}</span>
+      <a href={`${base}cars/`}>The Garage</a><span aria-hidden="true">/</span><a href={`${base}cars/${kind === 'class' ? 'classes' : 'manufacturers'}/`}>{kind === 'class' ? 'Classes' : 'Manufacturers'}</a><span aria-hidden="true">/</span><span>{page.name}</span>
     </nav>
     <p class="eyebrow">{kind === 'class' ? 'GTA VI Vehicle Class' : 'GTA VI Manufacturer'}</p>
     <h1 class="display tax-title">{heading}</h1>
@@ -70,9 +70,9 @@ const jsonLd = [{
 
   <nav class="wrap tax-more" aria-label={kind === 'class' ? 'Other classes' : 'Other manufacturers'}>
     <h2 class="tax-more-title">{kind === 'class' ? 'Other classes' : 'Other manufacturers'}</h2>
-    <ul>{siblings.filter((s) => s.slug !== page.slug).map((s) => <li><a href={`${base}garage/${kind === 'class' ? 'classes' : 'manufacturers'}/${s.slug}/`}>{s.name}</a></li>)}</ul>
-    <a class="tax-all" href={`${base}garage/${kind === 'class' ? 'classes' : 'manufacturers'}/`}>{kind === 'class' ? 'All classes' : 'All manufacturers'} →</a>
-    <a class="tax-all" href={`${base}garage/`}>All vehicles in The Garage →</a>
+    <ul>{siblings.filter((s) => s.slug !== page.slug).map((s) => <li><a href={`${base}cars/${kind === 'class' ? 'classes' : 'manufacturers'}/${s.slug}/`}>{s.name}</a></li>)}</ul>
+    <a class="tax-all" href={`${base}cars/${kind === 'class' ? 'classes' : 'manufacturers'}/`}>{kind === 'class' ? 'All classes' : 'All manufacturers'} →</a>
+    <a class="tax-all" href={`${base}cars/`}>All vehicles in The Garage →</a>
   </nav>
 </Base>
 

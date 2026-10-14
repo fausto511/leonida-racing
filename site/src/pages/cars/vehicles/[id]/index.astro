@@ -56,7 +56,7 @@ const valueTitle = (v: VehicleValue) => [valueSourceLabels[v.source_type], v.gam
 // members are left out of Similar Cars so no car shows up twice.
 const family = vehicle.family ? familyMembers(vehicle.family).filter((v) => v.id !== vehicle.id && v.releaseId).sort(compareGarageOrder) : [];
 const familyLabel = vehicle.family ? familyName(vehicle.family) : '';
-const familyPage = vehicle.family && familyMembers(vehicle.family).filter((v) => v.releaseId).length >= FAMILY_PAGE_MIN ? `${base}garage/families/${vehicle.family}/` : null;
+const familyPage = vehicle.family && familyMembers(vehicle.family).filter((v) => v.releaseId).length >= FAMILY_PAGE_MIN ? `${base}cars/families/${vehicle.family}/` : null;
 const familyIds = new Set(family.map((v) => v.id));
 const similar = vehicleOptions
   .filter((v) => v.id !== vehicle.id && v.releaseId && !familyIds.has(v.id) && v.classes.some((c) => vehicle.classes.includes(c)))
@@ -71,7 +71,7 @@ const similar = vehicleOptions
 const vehicleIndex = vehicleOptions.map((v) => ({
   id: v.id,
   name: `${v.make} ${v.model}`,
-  href: `${base}garage/vehicles/${v.id}/`,
+  href: `${base}cars/vehicles/${v.id}/`,
 }));
 
 // Vehicles with vehicle.photo use their garage photo (public/images/vehicles/);
@@ -88,7 +88,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   ogImageAlt={vehicle.photo ? photoAlt : undefined}
   ogImageWidth={vehicle.photo ? 1280 : undefined}
   ogImageHeight={vehicle.photo ? 720 : undefined}
-  breadcrumbs={[{ name: 'The Garage', path: 'garage/' }, { name: fullName, path: `garage/vehicles/${vehicle.id}/` }]}
+  breadcrumbs={[{ name: 'The Garage', path: 'cars/' }, { name: fullName, path: `cars/vehicles/${vehicle.id}/` }]}
 >
   <section class="wrap v-toolbar">
     <div class="v-search-wrap">
@@ -105,7 +105,7 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
         <span class="v-own-label">I Own This Vehicle</span>
       </button>
     </div>
-    <a href={`${base}garage/#compare`} id="v-compare-cta" class="garage-compare-btn">Compare Selected (0)</a>
+    <a href={`${base}cars/#compare`} id="v-compare-cta" class="garage-compare-btn">Compare Selected (0)</a>
     <p class="v-own-msg" id="v-own-msg" role="status" hidden></p>
   </section>
 

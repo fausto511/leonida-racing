@@ -21,13 +21,13 @@ const related = rankings.filter((x) => x.slug !== r.slug && (x.classSlug ? x.slu
 const pageUrl = new URL(`${base}${r.path}`, Astro.site).href;
 const jsonLd = entries.length ? [{
   '@context': 'https://schema.org', '@type': 'ItemList', name: r.title, url: pageUrl, numberOfItems: entries.length,
-  itemListElement: entries.map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: `${e.vehicle.make} ${e.vehicle.model}`, url: new URL(`${base}garage/vehicles/${e.vehicle.id}/`, Astro.site).href })),
+  itemListElement: entries.map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: `${e.vehicle.make} ${e.vehicle.model}`, url: new URL(`${base}cars/vehicles/${e.vehicle.id}/`, Astro.site).href })),
 }] : undefined;
 ---
 <Base title={r.title} description={r.description} section="garage" noindex={!indexable} jsonLd={jsonLd}
-  breadcrumbs={[{ name: 'The Garage', path: 'garage/' }, { name: 'Rankings', path: 'garage/rankings/fastest/' }, { name: r.title, path: r.path }]}>
+  breadcrumbs={[{ name: 'The Garage', path: 'cars/' }, { name: 'Rankings', path: 'cars/rankings/fastest/' }, { name: r.title, path: r.path }]}>
   <section class="wrap rk-head">
-    <nav class="rk-crumbs" aria-label="Breadcrumb"><a href={`${base}garage/`}>The Garage</a><span aria-hidden="true">/</span><span>Rankings</span></nav>
+    <nav class="rk-crumbs" aria-label="Breadcrumb"><a href={`${base}cars/`}>The Garage</a><span aria-hidden="true">/</span><span>Rankings</span></nav>
     <p class="eyebrow">GTA VI Rankings</p>
     <h1 class="display rk-title">{r.title}</h1>
     <p class="rk-intro">{r.intro}</p>
@@ -44,7 +44,7 @@ const jsonLd = entries.length ? [{
           : r.metric === 'gellhorn_reference_lap_ms'
             ? 'No reference lap times are available yet. Cars will appear here as their stock results are recorded at Gellhorn International Raceway.'
             : 'No top-speed results are available yet. Cars will appear here as their stock results are recorded.'}</p>
-        <a class="btn btn-outline" href={`${base}garage/`}>Browse The Garage</a>
+        <a class="btn btn-outline" href={`${base}cars/`}>Browse The Garage</a>
       </div>
     ) : (
       <div class="panel rk-table-wrap">
@@ -54,7 +54,7 @@ const jsonLd = entries.length ? [{
             {entries.map((e, i) => (
               <tr>
                 <td class="rk-pos">{i + 1}</td>
-                <td><a class="rk-car" href={`${base}garage/vehicles/${e.vehicle.id}/`}><img src={`${base}images/logos/${e.vehicle.logoSlug}-gta-6-logo.webp`} alt="" width="18" height="18" loading="lazy" /><span><small>{e.vehicle.make}</small> {e.vehicle.model}</span></a></td>
+                <td><a class="rk-car" href={`${base}cars/vehicles/${e.vehicle.id}/`}><img src={`${base}images/logos/${e.vehicle.logoSlug}-gta-6-logo.webp`} alt="" width="18" height="18" loading="lazy" /><span><small>{e.vehicle.make}</small> {e.vehicle.model}</span></a></td>
                 <td class="rk-muted">{e.vehicle.classes[0]}</td>
                 <td class="rk-val">{formatVehicleValue(e.value)}</td>
                 <td class="rk-muted">{valueSourceLabels[e.value.source_type]}{e.value.game_release_id && releaseById[e.value.game_release_id] ? ` · ${releaseById[e.value.game_release_id].name}` : ''}</td>

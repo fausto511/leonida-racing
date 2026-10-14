@@ -144,7 +144,7 @@ async function goingCount(eventId: string) {
   const { count } = await db.from("hub_event_rsvps").select("event_id", { count: "exact", head: true }).eq("event_id", eventId);
   return count ?? 0;
 }
-const eventUrl = (e: any) => `${SITE}/hub/events/#event-${e.event_id}`;
+const eventUrl = (e: any) => `${SITE}/community/events/#event-${e.event_id}`;
 // Host = a person (PSN name, else the creator's site name); the crew as a tag behind it.
 const hostPerson = (e: any) => e.host_name ?? (e.creator && !e.creator.deleted_at ? e.creator.display_name : null) ?? "Community host";
 // Crew shown GTA-style as a tag behind the host name, e.g. "Fausto-511 [LR]".
@@ -177,12 +177,12 @@ async function cmdEvents(i: any) {
   const list = await upcomingEvents(type, platform);
   const what = [type && EVENT_TYPES[type], platform && PLATFORMS[platform]].filter(Boolean).join(" · ");
   if (!list.length) {
-    return reply({ content: `No upcoming events${what ? ` (${what})` : ""} right now.`, components: [row(linkButton("Open the calendar", `${SITE}/hub/events/`), addButton)] });
+    return reply({ content: `No upcoming events${what ? ` (${what})` : ""} right now.`, components: [row(linkButton("Open the calendar", `${SITE}/community/events/`), addButton)] });
   }
   const lines = list.map((e) => `**[${clip(e.title, 80)}](${eventUrl(e)})**\n<t:${unix(e.starts_at)}:f> · <t:${unix(e.starts_at)}:R> · ${EVENT_TYPES[e.event_type] ?? e.event_type} · ${hostLabel(e)}`);
   return reply({
     embeds: [{ title: `Upcoming events${what ? ` · ${what}` : ""}`, description: lines.join("\n\n"), color: YELLOW, footer: { text: "Leonida Racing · times shown in your time zone" } }],
-    components: [row(linkButton("Full calendar", `${SITE}/hub/events/`), addButton)],
+    components: [row(linkButton("Full calendar", `${SITE}/community/events/`), addButton)],
   });
 }
 
@@ -197,7 +197,7 @@ async function cmdCar(i: any) {
   const id = String(opt(i, "vehicle") ?? "");
   const { data: v } = await db.from("vehicles").select("vehicle_id,make,model,classes,drive,seats,real_life_inspiration,first_seen_in,has_photo").eq("vehicle_id", id).not("release_id", "is", null).maybeSingle();
   if (!v) return ephemeral("I couldn't find that vehicle. Pick one from the suggestions while typing.");
-  const url = `${SITE}/garage/vehicles/${v.vehicle_id}/`;
+  const url = `${SITE}/cars/vehicles/${v.vehicle_id}/`;
   const fields = [
     { name: "Class", value: (v.classes ?? []).join(", ") || "—", inline: true },
     { name: "Drivetrain", value: v.drive || "—", inline: true },
@@ -451,7 +451,7 @@ async function rsvpButton(i: any) {
   const reach: unknown[] = [];
   if (r.discord_url) reach.push(linkButton("Host Discord", r.discord_url));
   if (r.host_name) reach.push(linkButton("Host PSN Profile", `https://profile.playstation.com/${encodeURIComponent(r.host_name)}`));
-  reach.push(linkButton("Details", `${SITE}/hub/events/#event-${eventId}`));
+  reach.push(linkButton("Details", `${SITE}/community/events/#event-${eventId}`));
   const hostRow = [row(...reach)];
   const psn = r.host_name ? ` Host on PSN: **${r.host_name}** (send a friend request via the button below).` : "";
   switch (r.status) {

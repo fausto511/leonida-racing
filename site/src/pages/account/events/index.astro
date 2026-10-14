@@ -28,7 +28,7 @@ const base = import.meta.env.BASE_URL;
     <div id="acc-body" hidden>
       <div class="panel ev-cta">
         <p><strong>Looking for something to drive?</strong> Races, league rounds, community playlists, and car meets from across the GTA VI scene—all in one calendar.</p>
-        <a class="btn btn-primary" href={`${base}hub/events/`}>Find Events</a>
+        <a class="btn btn-primary" href={`${base}community/events/`}>Find Events</a>
       </div>
 
       <h2 class="section-heading">Events I'm going to</h2>
@@ -111,7 +111,7 @@ const base = import.meta.env.BASE_URL;
     }
     events.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
     if (!events.length) {
-      listEl.innerHTML = `<p class="rsvp-empty">You haven't signed up for any upcoming event. <a href="${base}hub/events/">Browse the calendar</a>.</p>`;
+      listEl.innerHTML = `<p class="rsvp-empty">You haven't signed up for any upcoming event. <a href="${base}community/events/">Browse the calendar</a>.</p>`;
       return;
     }
     listEl.innerHTML = `<div class="ev-list">${events.map((e) => eventRowHtml(e, { rsvp: true, sample: !live })).join('')}</div>`;

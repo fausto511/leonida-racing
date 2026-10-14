@@ -8,11 +8,11 @@ const base = import.meta.env.BASE_URL;
 // Sub-pages show as a dropdown on hover/focus (desktop) and as an indented
 // list in the mobile panel (Fausto, 2026-10-01).
 const globalLinks = [
-  { key: 'garage', label: 'The Garage', href: `${base}garage/`, children: [
-    { label: 'Vehicles', href: `${base}garage/` },
-    { label: 'Compare', href: `${base}garage/#compare` },
-    { label: 'Classes', href: `${base}garage/classes/` },
-    { label: 'Manufacturers', href: `${base}garage/manufacturers/` },
+  { key: 'garage', label: 'The Garage', href: `${base}cars/`, children: [
+    { label: 'Vehicles', href: `${base}cars/` },
+    { label: 'Compare', href: `${base}cars/#compare` },
+    { label: 'Classes', href: `${base}cars/classes/` },
+    { label: 'Manufacturers', href: `${base}cars/manufacturers/` },
   ] },
   // Direct to the track page: /time-attack/ is only a forwarding page (DEC-0047),
   // linking it would add a pointless extra page load on every click.
@@ -22,11 +22,11 @@ const globalLinks = [
     { label: 'Rules', href: `${base}time-attack/rules/` },
     { label: 'Submit a Lap', href: `${base}time-attack/submit/` },
   ] },
-  { key: 'hub', label: 'The Hub', href: `${base}hub/`, children: [
-    { label: 'Overview', href: `${base}hub/` },
-    { label: 'Events', href: `${base}hub/events/` },
-    { label: 'Crews', href: `${base}hub/crews/` },
-    { label: 'Tracks', href: `${base}hub/tracks/` },
+  { key: 'hub', label: 'The Hub', href: `${base}community/`, children: [
+    { label: 'Overview', href: `${base}community/` },
+    { label: 'Events', href: `${base}community/events/` },
+    { label: 'Crews', href: `${base}community/crews/` },
+    { label: 'Tracks', href: `${base}community/tracks/` },
   ] },
   // The Guide (2026-10-03): one page, sub-items jump to its sections.
   { key: 'guide', label: 'The Guide', href: `${base}guide/`, children: [

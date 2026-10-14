@@ -31,7 +31,7 @@ const vehicleIndex = [...vehicleOptions]
 
     <div id="acc-body" hidden>
       <h2 class="section-heading">My Garage <span class="mg-count" id="mg-count"></span></h2>
-      <p class="section-lede">Vehicles you own in GTA VI. Only you can see this list. Add vehicles below, or switch on “I own this vehicle” from any vehicle page in <a href={`${base}garage/`}>The Garage</a>.</p>
+      <p class="section-lede">Vehicles you own in GTA VI. Only you can see this list. Add vehicles below, or switch on “I own this vehicle” from any vehicle page in <a href={`${base}cars/`}>The Garage</a>.</p>
       <p class="mg-msg" id="mg-msg" role="status" hidden></p>
       <div class="mg-grid" id="mg-grid"></div>
     </div>
@@ -151,7 +151,7 @@ const vehicleIndex = [...vehicleOptions]
             ? `<img class="mg-bg mg-real" src="${base}images/vehicles/${esc(x.id)}-640.webp" alt="" loading="lazy" width="640" height="360" />`
             : `<img class="mg-bg" src="${base}images/garage/garage-hero-placeholder.webp" alt="" loading="lazy" width="640" height="360" />`}
           <button type="button" class="mg-remove" data-remove="${esc(x.id)}" title="Remove from my garage" aria-label="Remove ${esc(x.make)} ${esc(x.model)} from my garage">✕</button>
-          <div class="mg-name">${logo(x)}<span><a href="${base}garage/vehicles/${esc(x.id)}/">${esc(x.make)} ${esc(x.model)}</a><small>${esc(x.classes)}</small></span></div>
+          <div class="mg-name">${logo(x)}<span><a href="${base}cars/vehicles/${esc(x.id)}/">${esc(x.make)} ${esc(x.model)}</a><small>${esc(x.classes)}</small></span></div>
         </div>
         <div class="mg-foot"><a rel="nofollow" href="${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(x.id)}">Gellhorn leaderboard →</a></div>
       </article>`;

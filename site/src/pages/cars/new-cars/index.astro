@@ -15,9 +15,9 @@ const title = 'New Cars in GTA 6';
 const description = 'Explore officially revealed GTA 6 cars with no identified earlier GTA model counterpart, including new models and distinct variants of familiar families.';
 ---
 <Base title={title} description={description} section="garage" noindex={!newCarsIndexable()}
-  breadcrumbs={[{ name: 'The Garage', path: 'garage/' }, { name: 'New Cars', path: 'garage/new-cars/' }]}>
+  breadcrumbs={[{ name: 'The Garage', path: 'cars/' }, { name: 'New Cars', path: 'cars/new-cars/' }]}>
   <section class="wrap nc-head">
-    <nav class="nc-crumbs" aria-label="Breadcrumb"><a href={`${base}garage/`}>The Garage</a><span aria-hidden="true">/</span><span>New Cars</span></nav>
+    <nav class="nc-crumbs" aria-label="Breadcrumb"><a href={`${base}cars/`}>The Garage</a><span aria-hidden="true">/</span><span>New Cars</span></nav>
     <p class="eyebrow">GTA VI</p>
     <h1 class="display nc-title">{title}</h1>
     <p class="nc-intro">Officially revealed GTA VI cars with no identified counterpart in an earlier GTA game, expansion or GTA Online. A familiar family name does not make every model a returning car. Confirmed renamings are treated as returning models.</p>
@@ -25,7 +25,7 @@ const description = 'Explore officially revealed GTA 6 cars with no identified e
   </section>
   <section class="wrap nc-grid" aria-label="New cars">
     {list.length ? list.map((v) => <VehicleTile vehicle={v} />) : (
-      <div class="panel nc-empty"><p>No vehicles have been classified as new yet. Earlier GTA appearances are still being reviewed.</p><a class="btn btn-outline" href={`${base}garage/`}>Browse The Garage</a></div>
+      <div class="panel nc-empty"><p>No vehicles have been classified as new yet. Earlier GTA appearances are still being reviewed.</p><a class="btn btn-outline" href={`${base}cars/`}>Browse The Garage</a></div>
     )}
   </section>
 </Base>

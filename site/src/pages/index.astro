@@ -78,7 +78,7 @@ const jsonLd = [
       </div>
 
       <div class="home-tiles">
-        <a class="home-tile" href={`${base}garage/`}>
+        <a class="home-tile" href={`${base}cars/`}>
           <img src={`${base}images/garage/garage-hero-placeholder-640.webp`} srcset={`${base}images/garage/garage-hero-placeholder-640.webp 640w, ${base}images/garage/garage-hero-placeholder-1080.webp 1080w`} sizes="(max-width: 760px) 80vw, 33vw" alt="" width="1672" height="941" loading="lazy" />
           <span class="home-tile-veil" aria-hidden="true"></span>
           <span class="home-tile-copy">
@@ -99,7 +99,7 @@ const jsonLd = [
             <span class="home-tile-lede">Submit a lap. Move up the leaderboard.</span>
           </span>
         </a>
-        <a class="home-tile" href={`${base}hub/`}>
+        <a class="home-tile" href={`${base}community/`}>
           <picture>
             <source type="image/webp" srcset={`${base}images/hub/hub-carmeet-640.webp 640w, ${base}images/hub/hub-carmeet-1080.webp 1080w`} sizes="(max-width: 760px) 80vw, 33vw" />
             <img src={`${base}images/hub/hub-carmeet-1672.jpg`} alt="Car meet in GTA VI: tuned cars and spectators on a waterfront parking lot" width="1672" height="940" loading="lazy" />
@@ -119,7 +119,7 @@ const jsonLd = [
     <div class="home-strip-head">
       <h2 class="display home-strip-title">Crews</h2>
       <span class="hub-sample-flag" id="home-crew-flag">Sample data</span>
-      <a class="home-strip-link" href={`${base}hub/crews/`}>All crews →</a>
+      <a class="home-strip-link" href={`${base}community/crews/`}>All crews →</a>
     </div>
     <p class="home-strip-lede">Find a crew to race with — drivers who challenge each other, share the grid, and show up as a team.</p>
     <div class="home-row" id="home-crews" set:html={crewsHtml} />
@@ -129,7 +129,7 @@ const jsonLd = [
     <div class="home-strip-head">
       <h2 class="display home-strip-title">Events</h2>
       <span class="hub-sample-flag" id="home-ev-flag">Sample data</span>
-      <a class="home-strip-link" href={`${base}hub/events/`}>All events →</a>
+      <a class="home-strip-link" href={`${base}community/events/`}>All events →</a>
     </div>
     <p class="home-strip-lede">Find races, league rounds, community playlists, and car meets. All start times are shown in your time zone.</p>
     <div class="home-row" id="home-events" set:html={eventsHtml} />
@@ -140,7 +140,7 @@ const jsonLd = [
   <section class="wrap home-strip home-strip-sep">
     <div class="home-strip-head">
       <h2 class="display home-strip-title">Featured Cars</h2>
-      <a class="home-strip-link" href={`${base}garage/`}>All Vehicles →</a>
+      <a class="home-strip-link" href={`${base}cars/`}>All Vehicles →</a>
     </div>
     <p class="home-strip-lede">Check the specs. Find your next car.</p>
     <div class="home-row home-cars" id="home-cars">

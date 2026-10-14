@@ -19,8 +19,8 @@ const classLabels: Record<string, string> = {
 };
 
 export interface RankingDef {
-  path: string;              // relative to BASE_URL, e.g. garage/rankings/fastest/
-  slug: string;              // URL segment(s) under garage/rankings/
+  path: string;              // relative to BASE_URL, e.g. cars/rankings/fastest/
+  slug: string;              // URL segment(s) under cars/rankings/
   title: string;             // H1 + browser title
   description: string;       // meta description
   metric: VehicleValue['metric'];
@@ -35,7 +35,7 @@ export interface RankingEntry { vehicle: VehicleOption; value: VehicleValue }
 const revealed = (list: VehicleOption[]) => list.filter((v) => v.releaseId);
 
 function def(slug: string, title: string, description: string, metric: RankingDef['metric'], order: RankingDef['order'], valueLabel: string, intro: string, scope: VehicleOption[], classSlug?: string): RankingDef {
-  return { path: `garage/rankings/${slug}/`, slug, title, description, metric, order, valueLabel, intro, scope: revealed(scope), classSlug };
+  return { path: `cars/rankings/${slug}/`, slug, title, description, metric, order, valueLabel, intro, scope: revealed(scope), classSlug };
 }
 
 // COPY: Codex 2026-10-08 (Garage-Texte-2026-10-08.md), approved by Fausto 2026-10-09.
@@ -93,7 +93,7 @@ export const familyIndexable = (f: string) => FAMILY_INDEX_ENABLED.has(f) && Boo
 export function dataNoindexPaths(): string[] {
   return [
     ...rankings.filter((r) => !rankingIndexable(r)).map((r) => `/${r.path}`),
-    ...(newCarsIndexable() ? [] : ['/garage/new-cars/']),
-    ...familyPageSlugs().filter((f) => !familyIndexable(f)).map((f) => `/garage/families/${f}/`),
+    ...(newCarsIndexable() ? [] : ['/cars/new-cars/']),
+    ...familyPageSlugs().filter((f) => !familyIndexable(f)).map((f) => `/cars/families/${f}/`),
   ];
 }

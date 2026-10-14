@@ -1,6 +1,6 @@
 // Class and manufacturer landing pages of The Garage (RS-0050, DEC-0087,
-// supersedes DEC-0059). Pages: /garage/classes/<slug>/ and
-// /garage/manufacturers/<slug>/.
+// supersedes DEC-0059). Pages: /cars/classes/<slug>/ and
+// /cars/manufacturers/<slug>/.
 //
 // COPY STATUS: all intros are Codex copy approved by Fausto (2026-10-01;
 // Sports Classics, Declasse, Dundreary, Imponte corrected 2026-10-02 so only
@@ -64,8 +64,8 @@ export const manufacturerPages: TaxonomyPage[] = [
 export const classSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 const classSet = new Set(classPages.map((c) => c.slug));
 const makeSet = new Set(manufacturerPages.map((m) => m.slug));
-export const classHref = (name: string) => (classSet.has(classSlug(name)) ? `garage/classes/${classSlug(name)}/` : null);
-export const makeHref = (v: Pick<VehicleOption, 'logoSlug'>) => (makeSet.has(v.logoSlug) ? `garage/manufacturers/${v.logoSlug}/` : null);
+export const classHref = (name: string) => (classSet.has(classSlug(name)) ? `cars/classes/${classSlug(name)}/` : null);
+export const makeHref = (v: Pick<VehicleOption, 'logoSlug'>) => (makeSet.has(v.logoSlug) ? `cars/manufacturers/${v.logoSlug}/` : null);
 export const vehiclesInClass = (slug: string) => vehicleOptions.filter((v) => v.classes.some((c) => classSlug(c) === slug));
 export const vehiclesByMake = (slug: string) => vehicleOptions.filter((v) => v.logoSlug === slug);
 

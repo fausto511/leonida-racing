@@ -21,7 +21,7 @@ const crewsHtml = sampleCrews.slice(0, 3).map((c) => crewCardHtml(c, undefined, 
 
   <section class="wrap hub-body">
     <div class="hub-entry-grid">
-      <a class="hub-entry" href={`${base}hub/events/`}>
+      <a class="hub-entry" href={`${base}community/events/`}>
         <img class="hub-entry-img" src={`${base}images/hub/hub-entry-events-640.webp`} srcset={`${base}images/hub/hub-entry-events-640.webp 640w, ${base}images/hub/hub-entry-events-1280.webp 1280w`} sizes="(max-width: 700px) 100vw, 400px" alt="" width="640" height="360" loading="lazy" />
         <span class="hub-entry-body">
           <span class="eyebrow">Calendar</span>
@@ -30,7 +30,7 @@ const crewsHtml = sampleCrews.slice(0, 3).map((c) => crewCardHtml(c, undefined, 
           <span class="hub-entry-cta">Open calendar →</span>
         </span>
       </a>
-      <a class="hub-entry" href={`${base}hub/crews/`}>
+      <a class="hub-entry" href={`${base}community/crews/`}>
         <img class="hub-entry-img" style="object-position: 50% 15%" src={`${base}images/hub/hub-entry-crews-640.webp`} srcset={`${base}images/hub/hub-entry-crews-640.webp 640w, ${base}images/hub/hub-entry-crews-1280.webp 1280w`} sizes="(max-width: 700px) 100vw, 400px" alt="" width="640" height="360" loading="lazy" />
         <span class="hub-entry-body">
           <span class="eyebrow">Directory</span>
@@ -39,7 +39,7 @@ const crewsHtml = sampleCrews.slice(0, 3).map((c) => crewCardHtml(c, undefined, 
           <span class="hub-entry-cta">Browse crews →</span>
         </span>
       </a>
-      <a class="hub-entry" href={`${base}hub/tracks/`}>
+      <a class="hub-entry" href={`${base}community/tracks/`}>
         <img class="hub-entry-img" src={`${base}images/hub/hub-entry-tracks-640.webp`} srcset={`${base}images/hub/hub-entry-tracks-640.webp 640w, ${base}images/hub/hub-entry-tracks-1280.webp 1280w`} sizes="(max-width: 700px) 100vw, 400px" alt="" width="640" height="360" loading="lazy" />
         <span class="hub-entry-body">
           <span class="eyebrow">Race jobs</span>
@@ -53,14 +53,14 @@ const crewsHtml = sampleCrews.slice(0, 3).map((c) => crewCardHtml(c, undefined, 
     <div class="hub-block-head">
       <h2 class="display hub-block-title">Next Up</h2>
       <span class="hub-sample-flag" id="hub-ev-flag">Sample data</span>
-      <a class="hub-block-link" href={`${base}hub/events/`}>All events</a>
+      <a class="hub-block-link" href={`${base}community/events/`}>All events</a>
     </div>
     <div class="ev-list" id="hub-ev-root" set:html={nextEventsHtml} />
 
     <div class="hub-block-head">
       <h2 class="display hub-block-title">Featured Crews</h2>
       <span class="hub-sample-flag" id="hub-crew-flag">Sample data</span>
-      <a class="hub-block-link" href={`${base}hub/crews/`}>All crews</a>
+      <a class="hub-block-link" href={`${base}community/crews/`}>All crews</a>
     </div>
     <div class="crew-me" id="hub-crew-me" hidden aria-live="polite"></div>
     <div class="crew-grid" id="hub-crew-root" set:html={crewsHtml} />

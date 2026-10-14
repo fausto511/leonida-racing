@@ -102,7 +102,7 @@
   .crew-grid { grid-template-columns: 1fr; }
 }
 
-/* ---- Shared page chrome for /hub/* --------------------------------------- */
+/* ---- Shared page chrome for /community/* --------------------------------------- */
 .hub-head { padding-block: clamp(2.5rem, 5vw, 3.75rem) clamp(1.5rem, 3vw, 2.25rem); background: linear-gradient(180deg, rgba(36,36,48,.6), transparent); }
 .hub-title { margin: .5rem 0 .8rem; font-size: clamp(2.2rem, 4.5vw, 3rem); }
 .hub-lede { margin: 0; max-width: 58ch; color: var(--gh-muted); font-size: 1rem; line-height: 1.6; }

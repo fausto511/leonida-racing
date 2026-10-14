@@ -6,7 +6,7 @@ import { dataNoindexPaths } from './src/data/rankings.ts';
 
 // noindex pages that must stay out of the sitemap (RS-0050): vehicles without
 // an official release (leak-only) and the submit form until launch day.
-const noindexVehiclePaths = vehicleOptions.filter((v) => !v.releaseId).map((v) => `/garage/vehicles/${v.id}/`);
+const noindexVehiclePaths = vehicleOptions.filter((v) => !v.releaseId).map((v) => `/cars/vehicles/${v.id}/`);
 // Rankings, New cars and family pages stay out until enough data/copy exists (Fausto 2026-10-08).
 const noindexDataPaths = dataNoindexPaths();
 
@@ -33,13 +33,13 @@ export default defineConfig({
       // /account/ and /moderator/ are private/internal, not content for
       // search -- excluded from the sitemap and separately set to
       // noindex on the page itself (see Base.astro).
-      // /hub/ stays out while it only shows sample data (noindex, RS-0022).
-      // Forwarding pages (/time-attack/, /tracks/…, the old /garage/vehicles/vapid-caracara/)
+      // /community/ (formerly /hub/) stays out while it only shows sample data (noindex, RS-0022).
+      // Forwarding pages (/time-attack/, /tracks/…, the old /cars/vehicles/vapid-caracara/)
       // are not content either.
       filter: (page) =>
-        !page.includes('/account/') && !page.includes('/moderator/') && !page.includes('/hub/') &&
+        !page.includes('/account/') && !page.includes('/moderator/') && !page.includes('/community/') &&
         !page.endsWith('/time-attack/') && !page.includes('/tracks/') && !page.includes('/report/') && !page.includes('/report-content/') && !page.endsWith('.txt') &&
-        !page.endsWith('/garage/vehicles/vapid-caracara/') && !page.endsWith('/garage/vehicles/buckingham-jubilee/') && !page.endsWith('/garage/vehicles/karin-contender/') && !page.endsWith('/time-attack/submit/') &&
+        !page.endsWith('/cars/vehicles/vapid-caracara/') && !page.endsWith('/cars/vehicles/buckingham-jubilee/') && !page.endsWith('/cars/vehicles/karin-contender/') && !page.endsWith('/time-attack/submit/') &&
         !noindexVehiclePaths.some((p) => page.endsWith(p)) && !noindexDataPaths.some((p) => page.endsWith(p)),
     }),
   ],

@@ -142,7 +142,7 @@ export function lapTime(ms: number) {
 }
 const logoUrl = (slug: string | null) => (slug ? `${base}images/logos/${slug}-gta-6-logo.webp` : null);
 const inGarage = (id: string) => vehicleOptions.some((v) => v.id === id);
-const garageUrl = (id: string) => `${base}garage/vehicles/${encodeURIComponent(id)}/`;
+const garageUrl = (id: string) => `${base}cars/vehicles/${encodeURIComponent(id)}/`;
 
 function logoChip(e: { make: string; logo: string | null }, lg = false) {
   const u = logoUrl(e.logo);
@@ -166,7 +166,7 @@ function vehicleCell(e: LbEntry) {
 }
 function crewTag(c: LbEntry['crew']) {
   if (!c || !/^#[0-9a-fA-F]{6}$/.test(c.color)) return '';
-  return ` <a class="crew-tag crew-tag-sm lb-crew-tag" rel="nofollow" style="--crew-color:${c.color}" href="${base}hub/crews/?q=${encodeURIComponent(c.tag)}" title="Crew ${esc(c.tag)} in The Hub">${esc(c.tag)}</a>`;
+  return ` <a class="crew-tag crew-tag-sm lb-crew-tag" rel="nofollow" style="--crew-color:${c.color}" href="${base}community/crews/?q=${encodeURIComponent(c.tag)}" title="Crew ${esc(c.tag)} in The Hub">${esc(c.tag)}</a>`;
 }
 const CHECK = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
 function statusCell(verified: boolean) {

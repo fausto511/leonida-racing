@@ -56,7 +56,7 @@ const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + "…"
 const unix = (iso: string) => Math.floor(new Date(iso).getTime() / 1000);
 const linkButton = (label: string, url: string) => ({ type: 2, style: 5, label, url });
 const row = (...b: unknown[]) => ({ type: 1, components: b });
-const eventUrl = (e: any) => `${SITE}/hub/events/#event-${e.event_id}`;
+const eventUrl = (e: any) => `${SITE}/community/events/#event-${e.event_id}`;
 const endOf = (e: any) => (e.ends_at ? new Date(e.ends_at) : new Date(new Date(e.starts_at).getTime() + DEFAULT_DURATION_MS));
 // The host is always a person (Fausto 2026-10-04): PSN name, else the creator's
 // site name. A crew can organise an event but can't host the lobby -> shown as a tag.
@@ -168,7 +168,7 @@ async function housekeeping() {
 const VEHICLE_COLS = "vehicle_id,make,model,classes,drive,seats,real_life_inspiration,first_seen_in,has_photo,release_id";
 const VEHICLE_DIGEST_FROM = 4;          // 4+ vehicles ready at once -> one summary post
 const VEHICLE_WAIT_MAX_ATTEMPTS = 96;   // re-check every 30 min, give up after ~48 h
-const vehicleUrl = (v: any) => `${SITE}/garage/vehicles/${v.vehicle_id}/`;
+const vehicleUrl = (v: any) => `${SITE}/cars/vehicles/${v.vehicle_id}/`;
 const vehicleImg = (v: any) => `${SITE}/images/vehicles/${v.vehicle_id}-1280.webp`;
 async function live(url: string) { try { const r = await fetch(url, { method: "HEAD" }); return r.ok; } catch { return false; } }
 function vehicleCard(v: any) {
@@ -193,9 +193,9 @@ function vehicleDigest(vs: any[]) {
   if (vs.length > shown.length) lines.push(`\u2026and ${vs.length - shown.length} more`);
   const pic = vs.find((v) => v._photo);
   return {
-    embeds: [{ author: { name: "New in The Garage" }, title: `${vs.length} new vehicles`, url: `${SITE}/garage/`, color: YELLOW,
+    embeds: [{ author: { name: "New in The Garage" }, title: `${vs.length} new vehicles`, url: `${SITE}/cars/`, color: YELLOW,
       description: clip(lines.join("\n"), 4000), ...(pic ? { image: { url: vehicleImg(pic) } } : {}), footer: { text: "Leonida Racing \u00b7 The Garage" } }],
-    components: [row(linkButton("Open The Garage", `${SITE}/garage/`), linkButton("Add to your server", INVITE))],
+    components: [row(linkButton("Open The Garage", `${SITE}/cars/`), linkButton("Add to your server", INVITE))],
     allowed_mentions: { parse: [] },
   };
 }
