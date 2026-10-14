@@ -25,7 +25,7 @@ const origin = (v: VehicleOption) => (!v.previousGames ? '' : v.previousGames.le
 const cardData = (v: VehicleOption, i: number) => ({
   order: i,
   name: `${v.make} ${v.model}`.toLowerCase(),
-  search: `${v.make} ${v.model} ${v.realLifeInspiration ?? ''}`.toLowerCase(),
+  search: `${v.make} ${v.model} ${v.realLifeInspiration ?? ''} ${v.classes.join(' ')}`.toLowerCase(),
   classes: v.classes.join('|'),
   make: v.logoSlug,
   drive: v.drive,
@@ -106,9 +106,14 @@ function mc(group: string, value: string | number, label: string, n: number | un
       </div>
       <span class="ctl ctl-off" title="Tiers arrive after launch" aria-disabled="true">Tier<Fragment set:html={chev} /></span>
       <div class="dd dd-l">
-        <label class="ctl ctl-price">Max $<input type="text" id="f-max" inputmode="decimal" placeholder="e.g. 750k" aria-label="Maximum price" autocomplete="off" /></label>
-        <div class="menu" data-menu="max" hidden>
+        <label class="ctl ctl-price" id="ctl-price">Max $<input type="text" id="f-max" inputmode="decimal" placeholder="e.g. 750k" aria-label="Maximum price" autocomplete="off" /></label>
+        <div class="menu menu-price" data-menu="max" hidden>
           <span class="menu-h">Max price</span>
+          <div class="rng rng-single" data-range="price" data-single>
+            <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum price" /></div>
+            <div class="rng-vals"><span data-hi>Any</span></div>
+          </div>
+          <span class="menu-sep"></span>
           {PRICE_PRESETS.map(([l, v]) => <button type="button" class="menu-i" data-pick-max={v}>{'$' + l}</button>)}
           <span class="menu-sep"></span>
           <span class="menu-h menu-hint">Or type: 750k, 1.5m</span>
@@ -137,9 +142,9 @@ function mc(group: string, value: string | number, label: string, n: number | un
         <div class="menu" data-menu="sort" hidden>
           <button type="button" class="menu-i on" data-sort="class">Class</button>
           <button type="button" class="menu-i" data-sort="name">Name A–Z</button>
-          <button type="button" class="menu-i" data-sort="price">Price</button>
-          <button type="button" class="menu-i" data-sort="speed">Top speed</button>
-          <button type="button" class="menu-i" data-sort="lap">Gellhorn lap time</button>
+          <button type="button" class="menu-i" data-sort="price" data-needs="price">Price</button>
+          <button type="button" class="menu-i" data-sort="speed" data-needs="speed">Top speed</button>
+          <button type="button" class="menu-i" data-sort="lap" data-needs="lap">Gellhorn lap time</button>
           <span class="menu-sep"></span>
           <button type="button" class="menu-i" disabled title="After launch">Most owned<span>after launch</span></button>
           <button type="button" class="menu-i" data-sort="recent">Recently added</button>
@@ -156,7 +161,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
           lap={rankInClass.has(v.id) ? { rank: rankInClass.get(v.id)!, ms: fastestGellhornLapMs(v.id)! } : null} />
       ))}
     </div>
-    <div class="more"><button type="button" class="btn btn-s" id="show-more" hidden>Show more</button></div>
+    <div class="more"><button type="button" class="btn btn-s" id="show-more" hidden>Show all cars</button></div>
 
     <!-- no results (DEC-0117): drop one filter, closest matches, did you mean -->
     <div class="empty" id="empty" hidden>
@@ -199,15 +204,25 @@ function mc(group: string, value: string | number, label: string, n: number | un
       <span class="dsp-ht"><b id="dsp-title">Detailed search</b><span class="muted">Combine as many filters as you like. Within a group any match counts.</span></span>
       <button type="button" class="dsp-x" id="dsp-close" aria-label="Close">×</button>
     </div>
+    <div class="dsp-q" id="dsp-q" hidden><span class="muted">Search</span><button type="button" class="dsp-qchip" id="dsp-qchip" aria-label="Remove search"><span id="dsp-qtext"></span><b aria-hidden="true">×</b></button><span class="muted dsp-qhint">The search text counts together with these filters.</span></div>
     <div class="dsp-body">
       <div class="dsg"><h4>Class <em data-sel="class"></em></h4><div class="mchips" set:html={classesSorted.map(([c, n]) => mc('class', c, c, n)).join('')} /></div>
-      <div class="dsg"><h4>Max price <em data-sel="max"></em></h4><div class="mchips" set:html={PRICE_PRESETS.map(([l, v]) => mc('max', v, '$' + l, undefined).replace(' disabled', '')).join('')} /></div>
-      <div class="dsg"><h4>Drivetrain <em data-sel="drive"></em></h4><div class="mchips" set:html={[...driveCounts.entries()].sort((a, b) => b[1] - a[1]).map(([d, n]) => mc('drive', d, d, n)).join('')} /></div>
-      <div class="dsg"><h4>Seats <em data-sel="seats"></em></h4><div class="mchips" set:html={[...seatCounts.entries()].sort((a, b) => a[0] - b[0]).map(([s, n]) => mc('seats', s, String(s), n)).join('')} /></div>
-      <div class="dsg"><h4>Availability <em data-sel="avail"></em></h4><div class="mchips" set:html={AVAIL.map(([k, l]) => mc('avail', k, l, availCounts.get(k) ?? 0)).join('')} /></div>
-      <div class="dsg"><h4>New / Returning <em data-sel="origin"></em></h4><div class="mchips" set:html={ORIGIN.map(([k, l]) => mc('origin', k, l, originCounts.get(k) ?? 0)).join('')} /></div>
-      <div class="dsg"><h4>Tier</h4><div class="mchips"><span class="mc off">S · A · B · C · D — unlocks after launch</span></div></div>
-      <div class="dsg"><h4>Top speed · Gellhorn lap · Dealer</h4><div class="mchips"><span class="mc off">Ranges arrive with measured data after launch</span></div></div>
+<div class="dsg rng" data-range="price"><h4>Price <em data-sel="price"></em></h4>
+        <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum price" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum price" /></div>
+        <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
+        <p class="rng-off">Prices arrive after launch.</p>
+      </div>
+      <div class="dsg rng" data-range="speed"><h4>Top speed <em data-sel="speed"></em></h4>
+        <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum top speed" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum top speed" /></div>
+        <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
+        <p class="rng-off">Top speeds arrive with measured data after launch.</p>
+      </div>
+      <div class="dsg rng" data-range="lap"><h4>Gellhorn lap time <em data-sel="lap"></em></h4>
+        <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum gellhorn lap time" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum gellhorn lap time" /></div>
+        <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
+        <p class="rng-off">Lap times arrive after launch.</p>
+      </div>
+      <div class="dsg"><h4>Dealer</h4><div class="mchips"><span class="mc off">Dealer names after launch</span></div></div>
       <div class="dsg dsg-wide">
         <h4>Manufacturer <em data-sel="make"></em><input type="search" class="dsp-msearch" id="dsp-msearch" placeholder={`Search ${makes.length} brands`} aria-label="Search manufacturers" /></h4>
         <div class="mlist" set:html={makes.map(([slug, name]) => mc('make', slug, name, makeCounts.get(slug))).join('')} />
@@ -226,9 +241,9 @@ function mc(group: string, value: string | number, label: string, n: number | un
     <div class="dsp-body sort-list">
       <button type="button" class="menu-i on" data-sort="class">Class</button>
       <button type="button" class="menu-i" data-sort="name">Name A–Z</button>
-      <button type="button" class="menu-i" data-sort="price">Price</button>
-      <button type="button" class="menu-i" data-sort="speed">Top speed</button>
-      <button type="button" class="menu-i" data-sort="lap">Gellhorn lap time</button>
+      <button type="button" class="menu-i" data-sort="price" data-needs="price">Price</button>
+      <button type="button" class="menu-i" data-sort="speed" data-needs="speed">Top speed</button>
+      <button type="button" class="menu-i" data-sort="lap" data-needs="lap">Gellhorn lap time</button>
       <button type="button" class="menu-i" data-sort="recent">Recently added</button>
     </div>
   </div>
@@ -288,11 +303,12 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .ctl-detail:hover { border-color: var(--lr-text); }
   .ctl-count { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--lr-pink); color: var(--lr-on-pink) !important; font-size: 12px; font-weight: 700 !important; }
   .dd { position: relative; }
-  .menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 220px; padding: 6px; border-radius: 8px; background: var(--lr-raised); border: 1px solid rgba(200,200,222,.22); box-shadow: 0 16px 40px rgba(0,0,0,.5); display: flex; flex-direction: column; }
+  .menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 248px; padding: 6px; border-radius: 8px; background: var(--lr-raised); border: 1px solid rgba(200,200,222,.22); box-shadow: 0 16px 40px rgba(0,0,0,.5); display: flex; flex-direction: column; }
   .dd-l .menu { left: 0; right: auto; }
   .menu-scroll { max-height: 360px; overflow-y: auto; }
   .menu-i { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; padding: 0 10px; border: 0; border-radius: 5px; background: none; color: #E4E4EC; font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
-  .menu-i span { color: #77778A; font-size: 12px; }
+  .menu-i :global(span) { color: #77778A; font-size: 12px; white-space: nowrap; }
+  .menu-i { white-space: nowrap; }
   .menu-i:hover:not(:disabled) { background: rgba(251,247,234,.06); }
   .menu-i.on { color: var(--lr-text); font-weight: 600; }
   .menu-i.on::after { content: '✓'; color: var(--lr-pink); }
@@ -347,7 +363,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .cmpbar-cars :global(.cb button:hover) { color: var(--lr-text); }
   .cmpbar-clear { border: 0; background: none; color: var(--lr-muted); font: inherit; font-size: 14px; cursor: pointer; }
   .cmpbar-clear:hover { color: var(--lr-text); }
-  .cmpbar-go { flex: none; }
+  .cmpbar-go { flex: none; gap: .3em; }
 
   /* ---- detailed search ---- */
   .dsp-back { position: fixed; inset: 0; z-index: 60; background: rgba(5,5,10,.6); backdrop-filter: blur(2px); }
@@ -381,7 +397,41 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .dsp-reset:hover { color: var(--lr-text); }
   .sort-list { display: flex; flex-direction: column; gap: 2px; }
 
-  .toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 70; max-width: min(460px, calc(100vw - 32px)); padding: 12px 16px; border-radius: 8px; background: var(--lr-raised); border: 1px solid rgba(200,200,222,.24); box-shadow: 0 16px 40px rgba(0,0,0,.5); font-size: 14px; line-height: 1.45; }
+  /* range sliders (C5/C6, mockup .rng) */
+  .rng-track { position: relative; height: 22px; margin: 4px 9px 10px; }
+  .rng-track::before { content: ''; position: absolute; left: 0; right: 0; top: 9px; height: 4px; border-radius: 999px; background: rgba(251,247,234,.12); }
+  .rng-fill { position: absolute; top: 9px; height: 4px; border-radius: 999px; background: var(--lr-pink); left: 0; right: 0; }
+  .rng-track input { position: absolute; left: -9px; right: -9px; top: 0; width: calc(100% + 18px); height: 22px; margin: 0; background: none; -webkit-appearance: none; appearance: none; pointer-events: none; }
+  .rng-track input::-webkit-slider-runnable-track { background: none; height: 22px; }
+  .rng-track input::-moz-range-track { background: none; }
+  .rng-track input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 18px; height: 18px; margin-top: 2px; border-radius: 999px; background: var(--lr-text); box-shadow: 0 0 0 3px var(--lr-pink); cursor: grab; }
+  .rng-track input::-moz-range-thumb { pointer-events: auto; width: 18px; height: 18px; border: 0; border-radius: 999px; background: var(--lr-text); box-shadow: 0 0 0 3px var(--lr-pink); cursor: grab; }
+  .rng-track input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--lr-pink), 0 0 0 6px rgba(255,149,90,.6); }
+  .rng-vals { display: flex; gap: 10px; align-items: center; }
+  .rng-vals span { flex: 1; height: 38px; display: flex; align-items: center; padding: 0 12px; border: 1px solid rgba(200,200,222,.24); border-radius: 6px; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .rng-vals em { font-style: normal; color: #77778A; }
+  .rng-off { display: none; margin: 8px 0 0; font-size: 12px; color: #77778A; }
+  .rng.is-off { opacity: .5; }
+  .rng.is-off .rng-off { display: block; }
+  .rng.is-off input { pointer-events: none; }
+  .rng.is-off input::-webkit-slider-thumb { pointer-events: none; cursor: not-allowed; box-shadow: 0 0 0 3px #55556A; }
+  .rng.is-off input::-moz-range-thumb { pointer-events: none; box-shadow: 0 0 0 3px #55556A; }
+  .rng.is-off .rng-fill { background: #55556A; }
+  .menu-price { min-width: 260px; }
+  .menu-price .rng-single { padding: 2px 10px 6px; }
+  .menu-price .rng-vals span { height: 32px; }
+  .ctl-price.ctl-off input { cursor: not-allowed; font-size: 12px; }
+  .ctl-price.ctl-off input::placeholder { color: #77778A; }
+  .dsp-q { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; padding: 12px 24px 0; font-size: 13px; }
+  .dsp-qchip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 6px 0 12px; border-radius: 999px; border: 1px solid var(--lr-pink); background: rgba(242,75,157,.08); color: var(--lr-text); font: inherit; font-size: 13px; cursor: pointer; }
+  .dsp-qchip b { font-weight: 400; color: var(--lr-muted); font-size: 15px; width: 18px; }
+  .dsp-qhint { font-size: 12px; }
+  /* C1: hint bubble at the clicked control (mockup: white speech bubble) */
+  .toast { position: fixed; z-index: 70; width: max-content; max-width: min(280px, calc(100vw - 24px)); padding: 12px 14px; border-radius: 8px; background: var(--lr-text); color: #14141F; box-shadow: 0 16px 40px rgba(0,0,0,.5); font-size: 13px; line-height: 1.45; }
+  .toast::after { content: ''; position: absolute; left: var(--arrow-x, 50%); width: 12px; height: 12px; margin-left: -6px; background: var(--lr-text); transform: rotate(45deg); bottom: -6px; }
+  .toast.below::after { bottom: auto; top: -6px; }
+  .toast :global(b) { font-weight: 700; }
+  .toast :global(.btn) { margin-top: 10px; display: flex; width: 100%; }
 
   @media (max-width: 1100px) {
     .cars-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }

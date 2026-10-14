@@ -1,11 +1,13 @@
-// Cars page (Redesign Phase 4, DEC-0117): search, filters (toolbar + detailed
-// search), chips, sort, "Show more", no-results help, compare (max 4) and
-// My Garage. All cards are server-rendered; this only shows/hides/reorders them.
+// Cars page (Redesign Phase 4, DEC-0117; review fixes C1–C7, Fausto 15.10.2026):
+// search, filters (toolbar + detailed search with range sliders), chips, sort,
+// "Show all", no-results help, compare (max 4) and My Garage. All cards are
+// server-rendered; this only shows/hides/reorders them.
 // COPY STATUS: messages are Claude placeholders -> Codex review (DEC-0088).
 import { getSelected, toggleSelected } from './compare';
 import { currentDriverId, fetchOwned, setOwned } from './owned';
 import { backendConfigured, getSupabase } from './supabase-client';
 import { releaseById } from '../data/releases';
+import { lapTime } from '../data/leaderboard';
 
 const PAGE = 24;
 const MAX_COMPARE = 4;
@@ -15,20 +17,35 @@ const cards = [...grid.querySelectorAll<HTMLElement>('.vcard')];
 const N = cards.length;
 
 type Group = 'class' | 'make' | 'drive' | 'seats' | 'avail' | 'origin';
-type FilterKey = Group | 'q' | 'max' | 'own';
-interface State { q: string; max: number | null; own: '' | 'owned' | 'not'; sort: string; sets: Record<Group, Set<string>> }
+type RangeKey = 'price' | 'speed' | 'lap';
+type FilterKey = Group | RangeKey | 'q' | 'own';
+type Range = [number | null, number | null];
+interface State { q: string; own: '' | 'owned' | 'not'; sort: string; sets: Record<Group, Set<string>>; ranges: Record<RangeKey, Range> }
 const emptySets = (): Record<Group, Set<string>> => ({ class: new Set(), make: new Set(), drive: new Set(), seats: new Set(), avail: new Set(), origin: new Set() });
-const state: State = { q: '', max: null, own: '', sort: 'class', sets: emptySets() };
-let limit = PAGE;
+const emptyRanges = (): Record<RangeKey, Range> => ({ price: [null, null], speed: [null, null], lap: [null, null] });
+const state: State = { q: '', own: '', sort: 'class', sets: emptySets(), ranges: emptyRanges() };
+let showAll = false;
 let owned = new Set<string>();
 let driverId: string | null = null;
+
+// ---- data available? (C4: fields without data stay greyed out until it exists) ----
+const values = (k: RangeKey) => cards.map((c) => Number(c.dataset[k])).filter((n) => n > 0);
+const DOMAIN: Record<RangeKey, { min: number; max: number; has: boolean; log: boolean }> = {
+  price: { ...minMax(values('price')), log: true },
+  speed: { ...minMax(values('speed')), log: false },
+  lap: { ...minMax(values('lap')), log: false },
+};
+function minMax(v: number[]) { return v.length ? { min: Math.min(...v), max: Math.max(...v), has: v.length >= 2 && Math.min(...v) < Math.max(...v) } : { min: 0, max: 0, has: false }; }
 
 // ---- labels -----------------------------------------------------------------
 const makeName = new Map<string, string>();
 cards.forEach((c) => makeName.set(c.dataset.make!, c.querySelector('.vc-brand')?.textContent?.trim() ?? c.dataset.make!));
 const AVAIL: Record<string, string> = { base: 'Base game', 'pre-order': 'Pre-Order bonus', 'ultimate-edition': 'Ultimate Edition', 'gta-plus': 'GTA+' };
 const ORIGIN: Record<string, string> = { new: 'New in GTA VI', returning: 'Returning' };
-const fmtMoney = (n: number) => (n >= 1e6 ? `$${+(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `$${+(n / 1e3).toFixed(1)}k` : `$${n}`);
+const SEP = ' · ';
+const fmtMoney = (n: number) => (n >= 1e6 ? `$${+(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `$${+(n / 1e3).toFixed(1)}k` : `$${Math.round(n)}`);
+const FMT: Record<RangeKey, (n: number) => string> = { price: fmtMoney, speed: (n) => `${Math.round(n)} mph`, lap: (n) => lapTime(Math.round(n)) };
+const RANGE_NAME: Record<RangeKey, string> = { price: 'Price', speed: 'Top speed', lap: 'Lap' };
 function valueLabel(g: Group, v: string) {
   if (g === 'make') return makeName.get(v) ?? v;
   if (g === 'seats') return `${v} seats`;
@@ -36,11 +53,19 @@ function valueLabel(g: Group, v: string) {
   if (g === 'origin') return ORIGIN[v] ?? v;
   return v;
 }
-function filterLabel(k: FilterKey): string {
-  if (k === 'q') return `“${state.q}”`;
-  if (k === 'max') return `Max ${fmtMoney(state.max!)}`;
-  if (k === 'own') return state.own === 'owned' ? 'Owned' : 'Not owned';
-  return [...state.sets[k]].map((v) => valueLabel(k, v)).join(' or ');
+function rangeLabel(k: RangeKey, r: Range): string {
+  const [lo, hi] = r;
+  if (k === 'price' && lo == null && hi != null) return `Max ${fmtMoney(hi)}`;
+  if (lo != null && hi != null) return `${RANGE_NAME[k]} ${FMT[k](lo)} – ${FMT[k](hi)}`;
+  if (lo != null) return `${RANGE_NAME[k]} from ${FMT[k](lo)}`;
+  return `${RANGE_NAME[k]} up to ${FMT[k](hi!)}`;
+}
+const isRange = (k: FilterKey): k is RangeKey => k === 'price' || k === 'speed' || k === 'lap';
+function filterLabel(k: FilterKey, st: State = state): string {
+  if (k === 'q') return `“${st.q}”`;
+  if (k === 'own') return st.own === 'owned' ? 'Owned' : 'Not owned';
+  if (isRange(k)) return rangeLabel(k, st.ranges[k]);
+  return [...st.sets[k]].map((v) => valueLabel(k, v)).join(' or ');
 }
 
 // ---- parsing ----------------------------------------------------------------
@@ -55,6 +80,7 @@ export function parseMoney(s: string): number | null {
 }
 
 // ---- matching ---------------------------------------------------------------
+const rangeActive = (r: Range) => r[0] != null || r[1] != null;
 function fails(c: HTMLElement, st: State): FilterKey[] {
   const d = c.dataset;
   const out: FilterKey[] = [];
@@ -69,8 +95,13 @@ function fails(c: HTMLElement, st: State): FilterKey[] {
   if (s.seats.size && !s.seats.has(d.seats!)) out.push('seats');
   if (s.avail.size && !s.avail.has(d.avail!)) out.push('avail');
   if (s.origin.size && !s.origin.has(d.origin!)) out.push('origin');
-  // Max $ hides cars without a price (DEC-0117)
-  if (st.max != null && !(d.price && Number(d.price) <= st.max)) out.push('max');
+  // A range hides cars without that value (DEC-0117: Max $ hides cars without a price)
+  for (const k of ['price', 'speed', 'lap'] as RangeKey[]) {
+    const [lo, hi] = st.ranges[k];
+    if (lo == null && hi == null) continue;
+    const v = Number(d[k]);
+    if (!(v > 0) || (lo != null && v < lo) || (hi != null && v > hi)) out.push(k);
+  }
   if (st.own === 'owned' && !owned.has(d.id!)) out.push('own');
   if (st.own === 'not' && owned.has(d.id!)) out.push('own');
   return out;
@@ -78,16 +109,20 @@ function fails(c: HTMLElement, st: State): FilterKey[] {
 const activeKeys = (st: State): FilterKey[] => [
   ...(st.q ? ['q' as const] : []),
   ...(Object.keys(st.sets) as Group[]).filter((g) => st.sets[g].size),
-  ...(st.max != null ? ['max' as const] : []),
+  ...(['price', 'speed', 'lap'] as RangeKey[]).filter((k) => rangeActive(st.ranges[k])),
   ...(st.own ? ['own' as const] : []),
 ];
 const countWith = (st: State) => cards.filter((c) => !fails(c, st).length).length;
-const cloneState = (st: State): State => ({ ...st, sets: Object.fromEntries((Object.keys(st.sets) as Group[]).map((g) => [g, new Set(st.sets[g])])) as Record<Group, Set<string>> });
+const cloneState = (st: State): State => ({
+  ...st,
+  sets: Object.fromEntries((Object.keys(st.sets) as Group[]).map((g) => [g, new Set(st.sets[g])])) as Record<Group, Set<string>>,
+  ranges: { price: [...st.ranges.price] as Range, speed: [...st.ranges.speed] as Range, lap: [...st.ranges.lap] as Range },
+});
 function without(st: State, k: FilterKey): State {
   const n = cloneState(st);
   if (k === 'q') n.q = '';
-  else if (k === 'max') n.max = null;
   else if (k === 'own') n.own = '';
+  else if (isRange(k)) n.ranges[k] = [null, null];
   else n.sets[k] = new Set();
   return n;
 }
@@ -128,6 +163,60 @@ function didYouMean(q: string): HTMLElement | null {
   return best && best.s <= Math.max(2, Math.floor(w.length / 3)) ? best.c : null;
 }
 
+// ---- range sliders (C5/C6) ------------------------------------------------------
+// Slider position 0..1000 <-> value; price runs on a log scale so the many
+// cheaper cars are not squeezed into the first millimetres.
+const STEPS = 1000;
+function toValue(k: RangeKey, pos: number): number {
+  const { min, max, log } = DOMAIN[k];
+  const t = pos / STEPS;
+  return log ? Math.exp(Math.log(min) + t * (Math.log(max) - Math.log(min))) : min + t * (max - min);
+}
+function toPos(k: RangeKey, v: number | null, end: 'lo' | 'hi'): number {
+  if (v == null) return end === 'lo' ? 0 : STEPS;
+  const { min, max, log } = DOMAIN[k];
+  const t = log ? (Math.log(v) - Math.log(min)) / (Math.log(max) - Math.log(min)) : (v - min) / (max - min);
+  return Math.round(Math.min(1, Math.max(0, t)) * STEPS);
+}
+function niceValue(k: RangeKey, v: number): number {
+  if (k === 'price') { const p = Math.pow(10, Math.floor(Math.log10(v)) - 1); return Math.round(v / p) * p; }
+  if (k === 'lap') return Math.round(v / 100) * 100;
+  return Math.round(v);
+}
+/** paint one slider block from a range */
+function paintRange(el: HTMLElement, k: RangeKey, r: Range) {
+  const lo = el.querySelector<HTMLInputElement>('.rng-lo');
+  const hi = el.querySelector<HTMLInputElement>('.rng-hi')!;
+  const pLo = toPos(k, r[0], 'lo'), pHi = toPos(k, r[1], 'hi');
+  if (lo) lo.value = String(pLo);
+  hi.value = String(pHi);
+  const fill = el.querySelector<HTMLElement>('.rng-fill')!;
+  fill.style.left = `${(lo ? pLo : 0) / STEPS * 100}%`;
+  fill.style.right = `${100 - pHi / STEPS * 100}%`;
+  const loEl = el.querySelector('[data-lo]'); const hiEl = el.querySelector('[data-hi]')!;
+  if (loEl) loEl.textContent = r[0] != null ? FMT[k](r[0]) : 'Any';
+  hiEl.textContent = r[1] != null ? FMT[k](r[1]) : 'Any';
+}
+/** wire a slider block; onChange gets the new range */
+function wireRange(el: HTMLElement, k: RangeKey, get: () => Range, set: (r: Range) => void) {
+  const on = DOMAIN[k].has;
+  el.classList.toggle('is-off', !on);
+  el.querySelectorAll('input').forEach((i) => { i.disabled = !on; });
+  if (!on) { paintRange(el, k, [null, null]); return; }
+  const lo = el.querySelector<HTMLInputElement>('.rng-lo');
+  const hi = el.querySelector<HTMLInputElement>('.rng-hi')!;
+  const read = () => {
+    let a = lo ? Number(lo.value) : 0, b = Number(hi.value);
+    if (lo && a > b) { if (document.activeElement === lo) a = b; else b = a; }
+    const r: Range = [a <= 0 ? null : niceValue(k, toValue(k, a)), b >= STEPS ? null : niceValue(k, toValue(k, b))];
+    set(r);
+    paintRange(el, k, r);
+  };
+  lo?.addEventListener('input', read);
+  hi.addEventListener('input', read);
+  paintRange(el, k, get());
+}
+
 // ---- render -----------------------------------------------------------------
 const esc = (s: string) => s.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]!));
 function render() {
@@ -135,20 +224,20 @@ function render() {
   const matches = cards.filter((c) => !fails(c, state).length).sort(sortKey);
   const rest = cards.filter((c) => !matches.includes(c));
   [...matches, ...rest].forEach((c) => grid.appendChild(c));
+  const limit = showAll ? Infinity : PAGE;
   matches.forEach((c, i) => c.classList.toggle('is-hidden', i >= limit));
   rest.forEach((c) => c.classList.add('is-hidden'));
   grid.classList.toggle('one-class', state.sets.class.size === 1);
+  // C7: one click shows everything
   ($('show-more') as HTMLButtonElement).hidden = matches.length <= limit;
-  $('show-more').textContent = `Show more (${matches.length - limit})`;
+  $('show-more').textContent = `Show all ${matches.length} cars`;
 
-  // chips / count
   const chips = $('chips');
   if (!keys.length) chips.innerHTML = `<span class="muted">Showing ${matches.length} cars</span>`;
   else chips.innerHTML = `<span class="muted">${matches.length} ${matches.length === 1 ? 'car' : 'cars'}</span>`
     + keys.map((k) => `<button type="button" class="fchip" data-drop="${k}" aria-label="Remove filter ${esc(filterLabel(k))}">${esc(filterLabel(k))}<b aria-hidden="true">×</b></button>`).join('')
     + `<button type="button" class="clear-all" data-clear>Clear all</button>`;
 
-  // toolbar labels
   const one = (g: Group, all: string) => (state.sets[g].size === 0 ? all : state.sets[g].size === 1 ? valueLabel(g, [...state.sets[g]][0]) : `${state.sets[g].size} selected`);
   document.querySelector('[data-dd-label="class"]')!.textContent = one('class', 'All');
   document.querySelector('[data-dd-label="make"]')!.textContent = one('make', 'All');
@@ -157,16 +246,18 @@ function render() {
   document.querySelectorAll<HTMLElement>('[data-sort]').forEach((b) => b.classList.toggle('on', b.dataset.sort === state.sort));
   document.querySelectorAll('[data-sort-label]').forEach((el) => { el.textContent = SORT_LABEL[state.sort]; });
   const maxInput = $('f-max') as HTMLInputElement;
-  if (document.activeElement !== maxInput) maxInput.value = state.max != null ? fmtMoney(state.max).replace('$', '') : '';
+  if (document.activeElement !== maxInput) maxInput.value = state.ranges.price[1] != null ? fmtMoney(state.ranges.price[1]).replace('$', '') : '';
+  const single = document.querySelector<HTMLElement>('[data-range="price"][data-single]');
+  if (single && DOMAIN.price.has) paintRange(single, 'price', [null, state.ranges.price[1]]);
   const qInput = $('f-q') as HTMLInputElement;
   if (document.activeElement !== qInput) qInput.value = state.q;
-  const pro = (['drive', 'seats', 'avail', 'origin'] as Group[]).reduce((n, g) => n + state.sets[g].size, 0);
+  const pro = (['drive', 'seats', 'avail', 'origin'] as Group[]).reduce((n, g) => n + state.sets[g].size, 0)
+    + (rangeActive(state.ranges.speed) ? 1 : 0) + (rangeActive(state.ranges.lap) ? 1 : 0) + (state.ranges.price[0] != null ? 1 : 0);
   $('detail-count').hidden = !pro; $('detail-count').textContent = String(pro);
   const allF = keys.filter((k) => k !== 'q' && k !== 'own').length;
   $('filter-count').hidden = !allF; $('filter-count').textContent = String(allF);
   document.querySelectorAll<HTMLElement>('[data-own]').forEach((b) => b.classList.toggle('on', b.dataset.own === state.own));
 
-  // no results
   const empty = $('empty');
   empty.hidden = matches.length > 0;
   if (!matches.length) {
@@ -184,7 +275,6 @@ function render() {
     near.forEach(({ c, f }) => {
       const cl = c.cloneNode(true) as HTMLElement;
       cl.classList.remove('is-hidden');
-      cl.removeAttribute('id');
       cl.querySelector('.vc-name')?.insertAdjacentHTML('afterend', `<span class="miss">Not ${esc(filterLabel(f[0]))}</span>`);
       $('closest').appendChild(cl);
     });
@@ -193,12 +283,17 @@ function render() {
 }
 
 // ---- URL --------------------------------------------------------------------
+const rangeParam = (r: Range) => `${r[0] ?? ''}~${r[1] ?? ''}`;
 function syncUrl() {
   const p = new URLSearchParams();
   if (state.q) p.set('q', state.q);
   if (state.sets.class.size) p.set('class', [...state.sets.class].join(','));
   if (state.sets.make.size) p.set('make', [...state.sets.make].join(','));
-  if (state.max != null) p.set('max', String(state.max));
+  const pr = state.ranges.price;
+  if (pr[0] == null && pr[1] != null) p.set('max', String(pr[1]));
+  else if (rangeActive(pr)) p.set('price', rangeParam(pr));
+  if (rangeActive(state.ranges.speed)) p.set('speed', rangeParam(state.ranges.speed));
+  if (rangeActive(state.ranges.lap)) p.set('lap', rangeParam(state.ranges.lap));
   if (state.sort !== 'class') p.set('sort', state.sort);
   const qs = p.toString();
   history.replaceState(null, '', location.pathname + (qs ? `?${qs}` : '') + location.hash);
@@ -208,27 +303,47 @@ function readUrl() {
   state.q = p.get('q') ?? '';
   p.get('class')?.split(',').filter(Boolean).forEach((c) => state.sets.class.add(c));
   p.get('make')?.split(',').filter(Boolean).forEach((m) => state.sets.make.add(m));
-  const m = p.get('max'); if (m) state.max = parseMoney(m);
-  const s = p.get('sort'); if (s && SORT_LABEL[s]) state.sort = s;
+  const parseR = (v: string | null): Range => { if (!v) return [null, null]; const [a, b] = v.split('~'); return [a ? Number(a) : null, b ? Number(b) : null]; };
+  if (DOMAIN.price.has) {
+    const m = p.get('max'); if (m) state.ranges.price = [null, parseMoney(m)];
+    if (p.get('price')) state.ranges.price = parseR(p.get('price'));
+  }
+  if (DOMAIN.speed.has) state.ranges.speed = parseR(p.get('speed'));
+  if (DOMAIN.lap.has) state.ranges.lap = parseR(p.get('lap'));
+  const s = p.get('sort');
+  if (s && SORT_LABEL[s] && !(['price', 'speed', 'lap'].includes(s) && !DOMAIN[s as RangeKey].has)) state.sort = s;
 }
 
-// ---- toast ------------------------------------------------------------------
-let toastTimer = 0;
-function toast(html: string, ms = 4200) {
+// ---- hint bubble at the clicked control (C1) -------------------------------------
+let bubbleTimer = 0;
+let bubbleAnchor: HTMLElement | null = null;
+function hideBubble() { $('toast').hidden = true; bubbleAnchor = null; }
+function bubble(anchor: HTMLElement, html: string, ms = 4500) {
   const t = $('toast');
   t.innerHTML = html;
   t.hidden = false;
-  clearTimeout(toastTimer);
-  toastTimer = window.setTimeout(() => { t.hidden = true; }, ms);
+  bubbleAnchor = anchor;
+  const a = anchor.getBoundingClientRect();
+  const w = t.offsetWidth, h = t.offsetHeight;
+  const below = a.top - h - 14 < 8; // not enough room above -> show below
+  t.classList.toggle('below', below);
+  const cx = a.left + a.width / 2;
+  const left = Math.min(Math.max(12, cx - w / 2), window.innerWidth - w - 12);
+  t.style.left = `${left}px`;
+  t.style.top = `${below ? a.bottom + 12 : a.top - h - 12}px`;
+  t.style.setProperty('--arrow-x', `${Math.min(w - 14, Math.max(14, cx - left))}px`);
+  clearTimeout(bubbleTimer);
+  bubbleTimer = window.setTimeout(hideBubble, ms);
 }
+window.addEventListener('scroll', () => { if (bubbleAnchor) hideBubble(); }, { passive: true });
+window.addEventListener('resize', () => { if (bubbleAnchor) hideBubble(); });
 const login = () => getSupabase().auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: location.origin + location.pathname + location.search, scopes: 'identify email guilds.join' } });
 
 // ---- compare ----------------------------------------------------------------
 function renderCompare() {
   const sel = getSelected();
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach((b) => b.setAttribute('aria-pressed', String(sel.includes(b.dataset.compare!))));
-  const btn = $('cmp-btn');
-  btn.classList.toggle('on', sel.length > 0);
+  $('cmp-btn').classList.toggle('on', sel.length > 0);
   $('cmp-n').textContent = sel.length ? String(sel.length) : `0 / ${MAX_COMPARE}`;
   $('cmpbar').hidden = sel.length === 0;
   $('cmpbar-n').textContent = String(sel.length);
@@ -237,7 +352,8 @@ function renderCompare() {
     if (!c) return '';
     const img = c.querySelector<HTMLImageElement>('.vc-img img')?.getAttribute('src') ?? '';
     const name = `${c.querySelector('.vc-brand')?.textContent?.trim()} ${c.querySelector('.vc-name')?.textContent?.trim()}`;
-    return `<span class="cb"><img src="${esc(img)}" alt="" width="64" height="40" /><span>${esc(name)}</span><button type="button" data-uncompare="${esc(id)}" aria-label="Remove ${esc(name)} from compare">×</button></span>`;
+    const short = c.querySelector('.vc-name')?.textContent?.trim() ?? name;
+    return `<span class="cb" title="${esc(name)}"><img src="${esc(img)}" alt="" width="64" height="40" /><span>${esc(short)}</span><button type="button" data-uncompare="${esc(id)}" aria-label="Remove ${esc(name)} from compare">×</button></span>`;
   }).join('');
 }
 
@@ -264,8 +380,7 @@ async function loadOwned() {
   renderOwned();
   if (state.own) render();
 }
-const garageTile = $('garage-tile') as HTMLAnchorElement;
-garageTile.addEventListener('click', (e) => {
+($('garage-tile') as HTMLAnchorElement).addEventListener('click', (e) => {
   if (driverId || !backendConfigured) return;
   e.preventDefault();
   login();
@@ -274,11 +389,12 @@ garageTile.addEventListener('click', (e) => {
 // ---- events -----------------------------------------------------------------
 document.addEventListener('click', async (e) => {
   const t = e.target as HTMLElement;
+  if (!t.closest('#toast') && !t.closest('[data-garage]') && !t.closest('[data-compare]') && !t.closest('#cmp-btn')) hideBubble();
   const cmp = t.closest<HTMLElement>('[data-compare]');
   if (cmp) {
     e.preventDefault();
     const id = cmp.dataset.compare!;
-    if (!getSelected().includes(id) && getSelected().length >= MAX_COMPARE) { toast(`You can compare up to ${MAX_COMPARE} cars. Remove one first.`); return; }
+    if (!getSelected().includes(id) && getSelected().length >= MAX_COMPARE) { bubble(cmp, `You can compare up to ${MAX_COMPARE} cars. Remove one first.`); return; }
     toggleSelected(id);
     renderCompare();
     return;
@@ -289,7 +405,7 @@ document.addEventListener('click', async (e) => {
   if (gar) {
     e.preventDefault();
     if (!driverId) {
-      toast(backendConfigured ? 'Log in to track the cars you own. <button type="button" class="btn btn-p btn-sm" data-login>Log in with Discord</button>' : 'Log in to track the cars you own.');
+      bubble(gar, backendConfigured ? 'Log in to track the cars you own.<button type="button" class="btn btn-p btn-sm" data-login>Log in with Discord</button>' : 'Log in to track the cars you own.', 6000);
       return;
     }
     const id = gar.dataset.garage!;
@@ -302,30 +418,30 @@ document.addEventListener('click', async (e) => {
       if (next) {
         let seen = false;
         try { seen = localStorage.getItem('lr-garage-hint') === '1'; localStorage.setItem('lr-garage-hint', '1'); } catch { /* ignore */ }
-        if (!seen) toast('Added to My Garage. Your collection is under <b>My garage</b> in the account menu.', 6000);
+        if (!seen) bubble(gar, 'Added to My Garage. Your collection is under <b>My garage</b> in the account menu.', 6000);
       }
       if (state.own) render();
     } catch {
-      toast('Could not save that. Please try again.');
+      bubble(gar, 'Could not save that. Please try again.');
     } finally { gar.disabled = false; }
     return;
   }
   if (t.closest('[data-login]')) { login(); return; }
   const drop = t.closest<HTMLElement>('[data-drop]');
-  if (drop) { Object.assign(state, without(state, drop.dataset.drop as FilterKey)); limit = PAGE; render(); return; }
-  if (t.closest('[data-clear]')) { Object.assign(state, { q: '', max: null, own: '', sets: emptySets() }); limit = PAGE; render(); return; }
+  if (drop) { Object.assign(state, without(state, drop.dataset.drop as FilterKey)); render(); return; }
+  if (t.closest('[data-clear]')) { Object.assign(state, { q: '', own: '', sets: emptySets(), ranges: emptyRanges() }); render(); return; }
   const dym = t.closest<HTMLElement>('[data-dym]');
   if (dym) { e.preventDefault(); state.q = dym.dataset.dym!; render(); return; }
   const own = t.closest<HTMLElement>('[data-own]');
-  if (own) { state.own = own.dataset.own as State['own']; limit = PAGE; render(); return; }
+  if (own) { state.own = own.dataset.own as State['own']; render(); return; }
   const sort = t.closest<HTMLElement>('[data-sort]');
   if (sort && !(sort as HTMLButtonElement).disabled) { state.sort = sort.dataset.sort!; closeMenus(); closeSheet('sort-sheet'); render(); return; }
   const pc = t.closest<HTMLElement>('[data-pick-class]');
-  if (pc) { state.sets.class = new Set(pc.dataset.pickClass ? [pc.dataset.pickClass] : []); closeMenus(); limit = PAGE; render(); return; }
+  if (pc) { state.sets.class = new Set(pc.dataset.pickClass ? [pc.dataset.pickClass] : []); closeMenus(); render(); return; }
   const pm = t.closest<HTMLElement>('[data-pick-make]');
-  if (pm) { state.sets.make = new Set(pm.dataset.pickMake ? [pm.dataset.pickMake] : []); closeMenus(); limit = PAGE; render(); return; }
+  if (pm) { state.sets.make = new Set(pm.dataset.pickMake ? [pm.dataset.pickMake] : []); closeMenus(); render(); return; }
   const px = t.closest<HTMLElement>('[data-pick-max]');
-  if (px) { state.max = Number(px.dataset.pickMax); closeMenus(); (document.activeElement as HTMLElement)?.blur(); limit = PAGE; render(); return; }
+  if (px) { state.ranges.price = [null, Number(px.dataset.pickMax)]; closeMenus(); (document.activeElement as HTMLElement)?.blur(); render(); return; }
   const dd = t.closest<HTMLElement>('[data-dd]');
   if (dd) {
     const menu = document.querySelector<HTMLElement>(`[data-menu="${dd.dataset.dd}"]`)!;
@@ -341,9 +457,9 @@ function closeMenus() {
   document.querySelectorAll<HTMLElement>('.menu').forEach((m) => { m.hidden = true; });
   document.querySelectorAll('[data-dd]').forEach((b) => b.setAttribute('aria-expanded', 'false'));
 }
-$('show-more').addEventListener('click', () => { limit += PAGE; render(); });
+$('show-more').addEventListener('click', () => { showAll = true; render(); });
 $('cmp-btn').addEventListener('click', () => {
-  if (!getSelected().length) toast(`Pick up to ${MAX_COMPARE} cars with + on the cards.`);
+  if (!getSelected().length) bubble($('cmp-btn'), `Pick up to ${MAX_COMPARE} cars with + on the cards.`);
   else $('cmpbar').scrollIntoView({ block: 'end', behavior: 'smooth' });
 });
 $('cmpbar-clear').addEventListener('click', () => { getSelected().forEach((id) => toggleSelected(id)); renderCompare(); });
@@ -351,34 +467,65 @@ $('cmpbar-clear').addEventListener('click', () => { getSelected().forEach((id) =
 let qTimer = 0;
 ($('f-q') as HTMLInputElement).addEventListener('input', (e) => {
   clearTimeout(qTimer);
-  qTimer = window.setTimeout(() => { state.q = (e.target as HTMLInputElement).value.trim(); limit = PAGE; render(); }, 120);
+  qTimer = window.setTimeout(() => { state.q = (e.target as HTMLInputElement).value.trim(); render(); }, 120);
 });
+
+// Max $ in the toolbar (C4/C6): greyed out until prices exist; popover with slider + presets
 const maxInput = $('f-max') as HTMLInputElement;
-maxInput.addEventListener('focus', () => { closeMenus(); document.querySelector<HTMLElement>('[data-menu="max"]')!.hidden = false; });
-const applyMax = () => { state.max = parseMoney(maxInput.value); limit = PAGE; render(); };
-maxInput.addEventListener('change', applyMax);
-maxInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { applyMax(); closeMenus(); maxInput.blur(); } });
+if (!DOMAIN.price.has) {
+  maxInput.disabled = true;
+  maxInput.placeholder = 'after launch';
+  $('ctl-price').classList.add('ctl-off');
+  $('ctl-price').title = 'Prices arrive after launch';
+} else {
+  maxInput.addEventListener('focus', () => { closeMenus(); document.querySelector<HTMLElement>('[data-menu="max"]')!.hidden = false; });
+  const applyMax = () => { state.ranges.price = [state.ranges.price[0], parseMoney(maxInput.value)]; render(); };
+  maxInput.addEventListener('change', applyMax);
+  maxInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { applyMax(); closeMenus(); maxInput.blur(); } });
+  const single = document.querySelector<HTMLElement>('[data-range="price"][data-single]');
+  let st = 0;
+  if (single) wireRange(single, 'price', () => [null, state.ranges.price[1]], (r) => {
+    state.ranges.price = [state.ranges.price[0], r[1]];
+    maxInput.value = r[1] != null ? fmtMoney(r[1]).replace('$', '') : '';
+    clearTimeout(st); st = window.setTimeout(render, 80);
+  });
+}
+// sort options without data (C4)
+document.querySelectorAll<HTMLButtonElement>('[data-needs]').forEach((b) => {
+  if (DOMAIN[b.dataset.needs as RangeKey].has) return;
+  b.disabled = true;
+  b.title = 'After launch';
+  if (!b.querySelector('span')) b.insertAdjacentHTML('beforeend', '<span>after launch</span>');
+});
 
 // ---- detailed search / filter sheet ------------------------------------------
 let draft: State = cloneState(state);
 const dsp = $('dsp');
-function paintDraft() {
+const rangeBlocks = [...dsp.querySelectorAll<HTMLElement>('.rng[data-range]')];
+rangeBlocks.forEach((el) => {
+  const k = el.dataset.range as RangeKey;
+  wireRange(el, k, () => draft.ranges[k], (r) => { draft.ranges[k] = r; paintDraft(false); });
+});
+function paintDraft(paintRanges = true) {
   dsp.querySelectorAll<HTMLButtonElement>('.mc[data-group]').forEach((b) => {
-    const g = b.dataset.group!;
-    const on = g === 'max' ? draft.max === Number(b.dataset.value) : draft.sets[g as Group].has(b.dataset.value!);
-    b.setAttribute('aria-pressed', String(on));
+    b.setAttribute('aria-pressed', String(draft.sets[b.dataset.group as Group].has(b.dataset.value!)));
   });
   dsp.querySelectorAll<HTMLElement>('[data-sel]').forEach((em) => {
     const g = em.dataset.sel!;
-    const n = g === 'max' ? (draft.max != null ? 1 : 0) : draft.sets[g as Group].size;
+    if (g === 'price' || g === 'speed' || g === 'lap') { em.textContent = rangeActive(draft.ranges[g]) ? 'set' : ''; return; }
+    const n = draft.sets[g as Group].size;
     em.textContent = n ? `${n} selected` : '';
   });
+  if (paintRanges) rangeBlocks.forEach((el) => { const k = el.dataset.range as RangeKey; if (DOMAIN[k].has) paintRange(el, k, draft.ranges[k]); });
+  // C3: the search text is part of the result -> show it here
+  $('dsp-q').hidden = !draft.q;
+  $('dsp-qtext').textContent = `“${draft.q}”`;
   const n = countWith(draft);
   $('dsp-show').textContent = `Show ${n} ${n === 1 ? 'car' : 'cars'}`;
-  const parts = activeKeys(draft).filter((k) => k !== 'q' && k !== 'own').map((k) => (k === 'max' ? `Max ${fmtMoney(draft.max!)}` : [...draft.sets[k as Group]].map((v) => valueLabel(k as Group, v)).join(', ')));
-  $('dsp-sum').textContent = parts.join(' · ');
+  $('dsp-sum').textContent = activeKeys(draft).filter((k) => k !== 'own').map((k) => filterLabel(k, draft)).join(SEP);
 }
 function openSheet(id: string) {
+  hideBubble();
   $('dsp-back').hidden = false;
   $(id).hidden = false;
   document.body.style.overflow = 'hidden';
@@ -395,17 +542,17 @@ $('open-sort-phone').addEventListener('click', () => openSheet('sort-sheet'));
 document.querySelector('[data-close-sort]')!.addEventListener('click', () => closeSheet('sort-sheet'));
 $('dsp-close').addEventListener('click', () => closeSheet('dsp'));
 $('dsp-back').addEventListener('click', () => { closeSheet('dsp'); closeSheet('sort-sheet'); });
+$('dsp-qchip').addEventListener('click', () => { draft.q = ''; paintDraft(); });
 dsp.addEventListener('click', (e) => {
   const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.mc[data-group]');
   if (!b || b.disabled) return;
-  const g = b.dataset.group!;
+  const s = draft.sets[b.dataset.group as Group];
   const v = b.dataset.value!;
-  if (g === 'max') draft.max = draft.max === Number(v) ? null : Number(v);
-  else { const s = draft.sets[g as Group]; s.has(v) ? s.delete(v) : s.add(v); }
+  s.has(v) ? s.delete(v) : s.add(v);
   paintDraft();
 });
-$('dsp-reset').addEventListener('click', () => { draft = { ...cloneState(draft), max: null, sets: emptySets() }; paintDraft(); });
-$('dsp-show').addEventListener('click', () => { Object.assign(state, cloneState(draft)); limit = PAGE; closeSheet('dsp'); render(); });
+$('dsp-reset').addEventListener('click', () => { draft = { ...cloneState(draft), sets: emptySets(), ranges: emptyRanges() }; paintDraft(); });
+$('dsp-show').addEventListener('click', () => { Object.assign(state, cloneState(draft)); closeSheet('dsp'); render(); });
 ($('dsp-msearch') as HTMLInputElement).addEventListener('input', (e) => {
   const q = (e.target as HTMLInputElement).value.trim().toLowerCase();
   dsp.querySelectorAll<HTMLElement>('.mlist .mc').forEach((b) => { b.hidden = Boolean(q) && !b.textContent!.toLowerCase().includes(q); });
@@ -413,6 +560,7 @@ $('dsp-show').addEventListener('click', () => { Object.assign(state, cloneState(
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   closeMenus();
+  hideBubble();
   if (!$('dsp').hidden) closeSheet('dsp');
   if (!$('sort-sheet').hidden) closeSheet('sort-sheet');
 });

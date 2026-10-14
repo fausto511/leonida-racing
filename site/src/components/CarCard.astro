@@ -46,7 +46,6 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     <span class="vc-pills">
       <span class="vc-cls" data-cls-pill>{cls}</span>
       {cars && isNew && <span class="vc-cls vc-new">New</span>}
-      {cars && acq && <span class="vc-cls vc-acq">{acq}</span>}
     </span>
   </a>
   <button type="button" class="vc-cmp" data-compare={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to compare`}>
@@ -89,7 +88,8 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   .vc-cls { height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(11,11,20,.78); backdrop-filter: blur(4px); font-size: 12px; font-weight: 600; color: var(--lr-text); display: inline-flex; align-items: center; }
   .vc-new { background: var(--lr-lime); color: #14141F; font-weight: 700; }
   .vc-acq { color: var(--lr-orange); }
-  .vc-edition { display: none; font-size: 13px; font-weight: 600; color: var(--lr-orange); }
+  /* C2 (Fausto 15.10.): edition as an orange text line, not a second pill in the image */
+  .vc-edition { font-size: 13px; font-weight: 600; color: var(--lr-orange); }
   .vc-garage { position: relative; z-index: 2; flex: none; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid rgba(251,247,234,.22); background: transparent; color: var(--lr-text); cursor: pointer; }
   .vc-garage:hover { border-color: var(--lr-text); }
   .vc-garage:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
@@ -106,7 +106,7 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   .vc-cmp[aria-pressed="true"] .vc-plus { display: none; }
   .vc-cmp[aria-pressed="true"] .vc-check { display: block; }
   .vc-cmp:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
-  .vc-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
+  .vc-body { flex: 1; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
   .vc-brand { display: flex; align-items: center; gap: 8px; min-height: 20px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--lr-muted); }
   .vc-brand img { width: 20px; height: 20px; object-fit: contain; filter: brightness(0) invert(1); opacity: .75; }
   .vc-name { font-size: 18px; font-weight: 700; line-height: 1.2; color: var(--lr-text); text-decoration: none; }
@@ -115,8 +115,8 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   .vcard:has(.vc-name:focus-visible) { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
   .vc-stats { margin-top: 2px; font-size: 14px; color: var(--lr-soft); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .vc-tba { color: var(--lr-muted); }
-  .vc-based { font-size: 14px; color: var(--lr-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .vc-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--lr-line); font-size: 14px; color: var(--lr-soft); }
+  .vc-based { font-size: 14px; color: var(--lr-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; }
+  .vc-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--lr-line); font-size: 14px; color: var(--lr-soft); }
   .vc-rank { display: inline-flex; align-items: center; gap: 8px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .vc-rank svg { width: 16px; height: 16px; flex: none; stroke: var(--lr-orange); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .vc-arrow { color: var(--lr-muted); font-weight: 600; transition: color .15s, transform .15s; }
@@ -128,7 +128,6 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     .vc-cars .vc-img { width: 118px; flex: none; aspect-ratio: auto; }
     .vc-cars .vc-pills { left: 6px; top: 6px; right: 6px; gap: 4px; }
     .vc-cars .vc-cls { height: 22px; padding: 0 7px; font-size: 11px; }
-    .vc-cars .vc-acq { display: none; }
     .vc-cars .vc-ph-logo { width: 48px; height: 48px; }
     .vc-cars .vc-ph-pill { display: none; }
     .vc-cars .vc-body { flex: 1; min-width: 0; padding: 10px 52px 10px 12px; gap: 2px; }
@@ -137,7 +136,6 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     .vc-cars .vc-name { font-size: 16px; }
     .vc-cars .vc-stats { font-size: 13px; }
     .vc-cars .vc-based { display: none; }
-    .vc-cars .vc-edition { display: block; }
     .vc-cars .vc-foot { margin-top: 4px; padding-top: 0; border-top: 0; font-size: 13px; }
     .vc-cars .vc-cmp { top: 10px; right: 8px; width: 40px; height: 40px; }
     .vc-cars .vc-garage { position: absolute; right: 8px; bottom: 10px; width: 40px; height: 40px; }
