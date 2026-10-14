@@ -88,7 +88,7 @@ const base = import.meta.env.BASE_URL;
               <label class="check" data-mod-only><input type="checkbox" name="is_official" /> Official crew <small>this site's own crews or the original creators</small></label>
               <label class="check" data-mod-only><input type="checkbox" name="is_partner" /> Partner crew</label>
               <label class="check" data-mod-only><input type="checkbox" name="is_featured" /> Featured crew <small>shown first on the home page, Hub overview and crew list</small></label>
-              <label data-mod-only>Sort order <small>lower = earlier</small><input type="number" name="sort_order" step="1" value="0" /></label>
+              <label data-mod-only>Sort order <small>lower = earlier · 100 = no fixed spot</small><input type="number" name="sort_order" step="1" value="100" /></label>
               <label class="span2" data-mod-only>Note to the crew leader <small>optional, e.g. why the crew is hidden or what to fix</small><textarea name="moderation_note" maxlength="300" rows="2"></textarea></label>
             </div>
             <div class="preview-wrap"><p class="preview-label">Preview</p><div class="crew-grid preview" id="crew-preview"></div></div>
@@ -614,7 +614,7 @@ const base = import.meta.env.BASE_URL;
       is_partner: fd.get('is_partner') === 'on',
       is_featured: fd.get('is_featured') === 'on',
       is_official: fd.get('is_official') === 'on',
-      sort_order: Math.round(Number(fd.get('sort_order') || 0)),
+      sort_order: Math.round(Number(String(fd.get('sort_order') ?? '').trim() || 100)),  // empty = 100 = no fixed spot
       is_published: fd.get('is_published') === 'on',
       ...(isMod ? { moderation_note: blank(fd.get('moderation_note')) } : {}),
     };
@@ -665,11 +665,11 @@ const base = import.meta.env.BASE_URL;
     crewForm.reset();
     slugTouched = Boolean(row);
     $('crew-form-title').textContent = row ? `Edit: ${row.name}` : 'New crew';
-    const r = row ?? { color: '#ed253d', platforms: [], focus: [], sort_order: 0 };
+    const r = row ?? { color: '#ed253d', platforms: [], focus: [], sort_order: 100 };
     for (const k of ['name', 'tag', 'slug', 'region', 'description', 'discord_url', 'social_club_url']) cf[k].value = r[k] ?? '';
     cf.color.value = r.color ?? '#ed253d';
     cf.color_picker.value = r.color ?? '#ed253d';
-    cf.sort_order.value = r.sort_order ?? 0;
+    cf.sort_order.value = r.sort_order ?? 100;
     cf.is_partner.checked = Boolean(r.is_partner);
     cf.is_featured.checked = Boolean(r.is_featured);
     cf.is_official.checked = Boolean(r.is_official);

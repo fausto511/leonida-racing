@@ -14,6 +14,7 @@ export async function fetchLiveCrews(): Promise<HubCrew[] | null> {
       .select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_featured,is_official,sort_order')
       .eq('is_published', true)
       // Featured crews first, then by sort order (lower = earlier) -- Fausto 2026-10-07.
+      // 100 = default = no fixed spot, so unset crews come after the ones placed on purpose (Fausto 2026-10-14).
       .order('is_featured', { ascending: false })
       .order('sort_order', { ascending: true });
     if (error || !data || data.length === 0) return null;
@@ -23,7 +24,7 @@ export async function fetchLiveCrews(): Promise<HubCrew[] | null> {
     const groups: (typeof rows)[] = [];
     for (const r of rows) {
       const last = groups[groups.length - 1];
-      if (last && last[0].is_featured === r.is_featured && (last[0].sort_order ?? 0) === (r.sort_order ?? 0)) last.push(r);
+      if (last && last[0].is_featured === r.is_featured && (last[0].sort_order ?? 100) === (r.sort_order ?? 100)) last.push(r);
       else groups.push([r]);
     }
     return groups.flatMap(shuffleCopy) as HubCrew[];
