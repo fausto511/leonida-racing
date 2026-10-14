@@ -1,23 +1,72 @@
 ---
+// Home — Redesign Phase 3 (DEC-0116, mockup boards Home guest / active driver /
+// new driver / phone). Order: Hero → Time Attack band → Fastest at Gellhorn →
+// Community → Guide → Discord band. Everything a guest sees is in the HTML;
+// the logged-in dashboard, live leaderboard, live events/crews and the
+// rotations are filled in by scripts/home.ts.
+// COPY STATUS: all new texts are Claude placeholders from the mockup
+// (Codex brief Claude outputs/Codex-Brief-Home-Redesign-2026-10-11.md, DEC-0088).
 import Base from '../layouts/Base.astro';
+import CarCard from '../components/CarCard.astro';
 import { SITE_NAME } from '../data/site';
-import '../styles/hub.css';
 import { sampleCrews, sampleEventsUpcoming } from '../data/hub';
-import { homeCrewCard, homeEventCard } from '../data/home';
-import { LAUNCH_DATE, LAUNCH_AT, LAUNCH_LABEL } from '../data/launch';
-import VehicleTile from '../components/VehicleTile.astro';
-import { vehicleOptions } from '../data/vehicles';
+import { homeEventRow, homeOpenSpotRow, homeCrewRow, homeLbRow } from '../data/home';
+import { sampleEntries, overallRows } from '../data/leaderboard';
+import { vehicleOptions, fastestGellhornLapMs, bandVehicle, type VehicleOption } from '../data/vehicles';
+import { classSlug } from '../data/garage-taxonomy';
+import { guideSections, GUIDE_UPDATED } from '../data/guide';
+
 const base = import.meta.env.BASE_URL;
-// Featured Cars on the home page (Fausto, 2026-10-01). Change the ids here.
-const FEATURED_CAR_IDS = ['grotti-cheetah-95', 'declasse-mamba-gt', 'dundreary-sirius', 'schyster-deviant'];
-const featuredCars = FEATURED_CAR_IDS.map((id) => {
-  const v = vehicleOptions.find((x) => x.id === id);
-  if (!v) throw new Error(`Featured car not found: ${id}`);
-  return v;
-});
+const N = vehicleOptions.length; // DEC-0117: N always from data
+const DISCORD_INVITE_URL = 'https://discord.gg/hPGuBwXRqT';
+const TA = `${base}time-attack/gellhorn-international-raceway/`;
+
+// ---- Time Attack band: sample top 5 until real laps exist ----
+const sampleTop = overallRows(sampleEntries, false).slice(0, 5);
+const sampleTopHtml = sampleTop.map(({ e, rank }) => homeLbRow({ rank, driver: e.driver, crew: e.crew, car: `${e.make} ${e.model}`, ms: e.lap_time_ms })).join('');
+const TA_CHIPS = ['Super', 'Sports', 'Muscle', 'Sports Classics', 'Off-Road'];
+
+// ---- Fastest at Gellhorn: one car per class (DEC-0116) ----
+// The class's fastest car at Gellhorn; until laps exist, the class's band car
+// (first car with a photo). Super and Sports always, two more classes picked at
+// random in the browser; classes without a car are skipped.
+const classNames = [...new Set(vehicleOptions.flatMap((v) => v.classes))];
+const anyLap = vehicleOptions.some((v) => fastestGellhornLapMs(v.id) != null);
+type Pick = { cls: string; v: VehicleOption; ms: number | null };
+const picks: Pick[] = classNames.map((cls) => {
+  const inClass = vehicleOptions.filter((v) => v.classes.includes(cls));
+  const timed = inClass.filter((v) => fastestGellhornLapMs(v.id) != null).sort((a, b) => fastestGellhornLapMs(a.id)! - fastestGellhornLapMs(b.id)!);
+  // before any lap exists: photo car first, else the first car (placeholder card) -- Super/Sports must always show
+  const v = timed[0] ?? (anyLap ? null : bandVehicle(inClass) ?? inClass[0] ?? null);
+  return v ? { cls, v, ms: fastestGellhornLapMs(v.id) } : null;
+}).filter((p): p is Pick => p !== null);
+const fixed = ['Super', 'Sports'];
+const fastFixed = fixed.map((c) => picks.find((p) => p.cls === c)).filter((p): p is Pick => Boolean(p));
+const fastRest = picks.filter((p) => !fixed.includes(p.cls));
+
+// ---- Community (sample rows; live rows replace them in the browser) ----
+const sampleEv = sampleEventsUpcoming().filter((e) => e.status !== 'cancelled').slice(0, 3);
+const eventsHtml = sampleEv.map(homeEventRow).join('') + Array.from({ length: Math.max(0, 3 - sampleEv.length) }, homeOpenSpotRow).join('');
+const crewsHtml = sampleCrews.slice(0, 4).map((c) => homeCrewRow(c, true)).join('');
+
+// ---- Guide: "Racing in GTA VI" fixed, two rotating (never "not-confirmed") ----
+const GUIDE_CARD: Record<string, { img: string; line: string }> = {
+  racing: { img: 'guide/circuit-race', line: 'Circuit, off-road and street racing, each shown with a live race HUD.' },
+  vehicles: { img: 'vehicles/dundreary-sirius', line: 'Which cars Rockstar has named, and which ones are community identifications.' },
+  driving: { img: 'guide/driving', line: 'What Rockstar has said about the rebuilt driving physics so far.' },
+  theft: { img: 'guide/slim-jim', line: 'Stealing, scanning, selling and registering cars, as Rockstar described it.' },
+  ownership: { img: 'guide/safehouse', line: 'Garages, storage spaces and the safehouse vehicles shown so far.' },
+  customization: { img: 'guide/rideout-customs', line: 'Two named mod shops, from detailed interiors to lifted off-road rigs.' },
+  classics: { img: 'guide/classic-collection-wyman', line: 'Classic cars, restoration and special builds from the Ultimate Edition.' },
+  gellhorn: { img: 'guide/circuit-empty', line: 'The paved circuit behind Gellhorn Time Attack, and what is known about it.' },
+  'car-culture': { img: 'guide/car-meet', line: 'Car meets and street takeovers as they appear in official footage.' },
+};
+const guideCards = guideSections.filter((s) => s.id !== 'not-confirmed' && GUIDE_CARD[s.id]);
+const guideFixed = guideCards.find((s) => s.id === 'racing')!;
+const guideRest = guideCards.filter((s) => s.id !== 'racing');
+const guideUpdated = new Date(`${GUIDE_UPDATED}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+
 const home = new URL(base, Astro.site).href;
-const crewsHtml = sampleCrews.slice(0, 4).map(homeCrewCard).join('');
-const eventsHtml = sampleEventsUpcoming().filter((e) => e.status !== 'cancelled').slice(0, 4).map(homeEventCard).join('');
 const jsonLd = [
   {
     '@context': 'https://schema.org',
@@ -26,8 +75,6 @@ const jsonLd = [
     url: home,
     inLanguage: 'en',
     description: 'GTA VI racing database and community: vehicles with verified classes, proof-based lap-time leaderboards, and a hub for racing events and crews.',
-    // Not shown on the page: search engines also get the common "GTA 6"
-    // spelling here (visible text always says "GTA VI", 2026-09-30).
     keywords: 'GTA 6, GTA VI, Grand Theft Auto VI, GTA 6 cars, GTA 6 racing, GTA 6 crews, GTA 6 car meets',
     about: { '@type': 'VideoGame', name: 'Grand Theft Auto VI', alternateName: ['GTA VI', 'GTA 6'] },
   },
@@ -37,303 +84,454 @@ const jsonLd = [
     name: SITE_NAME,
     url: home,
     logo: new URL(`${base}images/logo-512.png`, Astro.site).href,
-    sameAs: ['https://discord.gg/hPGuBwXRqT'],
+    sameAs: [DISCORD_INVITE_URL],
   },
 ];
+const arrowSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z';
 ---
 <Base
   title="Leonida Racing — GTA VI Racing Database & Community"
   description="Explore the GTA 6 car database, submit lap times at Gellhorn International Raceway, and find crews, events, and car meets across Vice City and Leonida."
   jsonLd={jsonLd}
 >
-  <!-- Home layout (Fausto, 2026-09-28): full-width hero image over roughly
-       the top two thirds, thin white line, then the normal background with
-       Crews and Events strips. Hero image: Visual/Cars/gellhorn-race.png
-       (car-maker badge removed in the source file, 06.10.2026). -->
-  <section class="home-hero">
-    <picture class="home-hero-bg">
+  <!-- ===== Hero ===== -->
+  <section class="hero">
+    <picture class="hero-bg">
       <source type="image/webp" srcset={`${base}images/home/home-hero-640.webp 640w, ${base}images/home/home-hero-1080.webp 1080w, ${base}images/home/home-hero-1562.webp 1562w`} sizes="100vw" />
-      <img src={`${base}images/home/home-hero-1562.jpg`} alt="Race cars battling on a palm-lined race track in GTA VI" width="1562" height="1007" loading="eager" fetchpriority="high" />
+      <img src={`${base}images/home/home-hero-1562.jpg`} alt="" width="1562" height="1007" loading="eager" fetchpriority="high" />
     </picture>
-    <div class="home-hero-veil" aria-hidden="true"></div>
+    <span class="hero-tint hero-tint-1" aria-hidden="true"></span>
+    <span class="hero-tint hero-tint-2" aria-hidden="true"></span>
+    <span class="hero-tint hero-tint-3" aria-hidden="true"></span>
+    <span class="hero-tint hero-tint-4" aria-hidden="true"></span>
 
-    <div class="wrap home-hero-inner">
-      <div class="home-intro">
-        <p class="eyebrow">GTA VI Racing Database &amp; Community</p>
-        <h1 class="display home-title">Find the cars setting the pace.<br />Make your mark on the track.</h1>
-        <p class="home-lede">Get the stats on GTA VI cars. See what racers drive and what’s worth a spot in your garage. <br />Put down a time at Gellhorn. Show the community what you’ve got. <br />Find your crew, your next rival, or a car meet to roll up to.</p>
-        <div class="home-cta">
-          <button type="button" id="home-join" class="btn home-join">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 5.3A18 18 0 0 0 15.9 4l-.3.6a15 15 0 0 1 4 1.6 16 16 0 0 0-13.2 0 15 15 0 0 1 4-1.6L10.1 4a18 18 0 0 0-4.4 1.3C2.9 9 2.2 12.6 2.5 16.1a18 18 0 0 0 5.5 2.8l.8-1.3a11 11 0 0 1-1.9-.9l.5-.4a13 13 0 0 0 9.2 0l.5.4a11 11 0 0 1-1.9.9l.8 1.3a18 18 0 0 0 5.5-2.8c.4-4-.7-7.5-2.2-10.8ZM9.3 14c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Zm5.4 0c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Z"/></svg>
-            <span>Login with Discord</span>
-          </button>
-          <a id="home-account" class="btn btn-white-tonal home-join" href={`${base}account/`} hidden>Go to My Account</a>
+    <div class="wrap hero-inner">
+      <!-- guest -->
+      <div class="hero-guest" id="hero-guest">
+        <div class="hero-head">
+          <p class="eyebrow">GTA VI Racing Database &amp; Community</p>
+          <h1 class="display hero-title">The Home of<br /> GTA VI Car Culture</h1>
         </div>
-        <!-- Launch countdown (RS-0050): local midnight, date only (no unlock time announced) -->
-        <p class="home-launch" data-launch-date={LAUNCH_DATE} data-launch-at={LAUNCH_AT ?? ''}>
-          <span class="launch-dot" aria-hidden="true"></span>
-          GTA VI launches <span data-cd-when>{LAUNCH_LABEL}</span>
-          <span class="home-launch-row" data-cd-row hidden><strong data-cd="d">–</strong> days <strong data-cd="h">–</strong> hrs <strong data-cd="m">–</strong> min</span>
-        </p>
-      </div>
-
-      <div class="home-tiles">
-        <a class="home-tile" href={`${base}cars/`}>
-          <img src={`${base}images/garage/garage-hero-placeholder-640.webp`} srcset={`${base}images/garage/garage-hero-placeholder-640.webp 640w, ${base}images/garage/garage-hero-placeholder-1080.webp 1080w`} sizes="(max-width: 760px) 80vw, 33vw" alt="" width="1672" height="941" loading="lazy" />
-          <span class="home-tile-veil" aria-hidden="true"></span>
-          <span class="home-tile-copy">
-            <span class="eyebrow">Vehicles</span>
-            <span class="display home-tile-title">The Garage</span>
-            <span class="home-tile-lede">Check the specs. Find your next car.</span>
-          </span>
-        </a>
-        <a class="home-tile" href={`${base}time-attack/gellhorn-international-raceway/`}>
-          <picture>
-            <source type="image/webp" srcset={`${base}images/gellhorn-raceway-640.webp 640w, ${base}images/gellhorn-raceway-1080.webp 1080w`} sizes="(max-width: 760px) 80vw, 33vw" />
-            <img src={`${base}images/gellhorn-raceway-1672.jpg`} alt="" width="1672" height="941" loading="lazy" />
-          </picture>
-          <span class="home-tile-veil" aria-hidden="true"></span>
-          <span class="home-tile-copy">
-            <span class="eyebrow">Time Attack</span>
-            <span class="display home-tile-title">The Track</span>
-            <span class="home-tile-lede">Submit a lap. Move up the leaderboard.</span>
-          </span>
-        </a>
-        <a class="home-tile" href={`${base}community/`}>
-          <picture>
-            <source type="image/webp" srcset={`${base}images/hub/hub-carmeet-640.webp 640w, ${base}images/hub/hub-carmeet-1080.webp 1080w`} sizes="(max-width: 760px) 80vw, 33vw" />
-            <img src={`${base}images/hub/hub-carmeet-1672.jpg`} alt="Car meet in GTA VI: tuned cars and spectators on a waterfront parking lot" width="1672" height="940" loading="lazy" />
-          </picture>
-          <span class="home-tile-veil" aria-hidden="true"></span>
-          <span class="home-tile-copy">
-            <span class="eyebrow">Community</span>
-            <span class="display home-tile-title">The Hub</span>
-            <span class="home-tile-lede">Find races, crews, and car meets.</span>
-          </span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <section class="wrap home-strip">
-    <div class="home-strip-head">
-      <h2 class="display home-strip-title">Crews</h2>
-      <span class="hub-sample-flag" id="home-crew-flag">Sample data</span>
-      <a class="home-strip-link" href={`${base}community/crews/`}>All crews →</a>
-    </div>
-    <p class="home-strip-lede">Find a crew to race with — drivers who challenge each other, share the grid, and show up as a team.</p>
-    <div class="home-row" id="home-crews" set:html={crewsHtml} />
-  </section>
-
-  <section class="wrap home-strip home-strip-sep">
-    <div class="home-strip-head">
-      <h2 class="display home-strip-title">Events</h2>
-      <span class="hub-sample-flag" id="home-ev-flag">Sample data</span>
-      <a class="home-strip-link" href={`${base}community/events/`}>All events →</a>
-    </div>
-    <p class="home-strip-lede">Find races, league rounds, community playlists, and car meets. All start times are shown in your time zone.</p>
-    <div class="home-row" id="home-events" set:html={eventsHtml} />
-  </section>
-
-  <!-- Featured Cars (Fausto, 2026-10-01): four hand-picked vehicles with photos,
-       same tile as The Garage. -->
-  <section class="wrap home-strip home-strip-sep">
-    <div class="home-strip-head">
-      <h2 class="display home-strip-title">Featured Cars</h2>
-      <a class="home-strip-link" href={`${base}cars/`}>All Vehicles →</a>
-    </div>
-    <p class="home-strip-lede">Check the specs. Find your next car.</p>
-    <div class="home-row home-cars" id="home-cars">
-      {featuredCars.map((v) => <VehicleTile vehicle={v} />)}
-    </div>
-  </section>
-
-  <!-- Discord band (Fausto, 2026-09-28): full-width, Discord blurple,
-       straight rectangle (no slant, Fausto 2026-09-28), big headline + two actions. -->
-  <section class="home-band" aria-labelledby="home-band-title">
-    <div class="wrap home-band-inner">
-      <div class="home-band-copy">
-        <h2 class="display home-band-title" id="home-band-title">Ready to Race?</h2>
-        <p class="home-band-text">Join the Leonida Racing Discord to talk cars and see what the scene is organizing. Meet racers, find events, connect with hosts and creators — or bring something of your own to the community.</p>
-        <div class="home-band-actions">
-          <button type="button" class="btn home-band-btn home-band-primary" id="band-join">Login with Discord</button>
-          <a class="btn home-band-btn home-band-primary" id="band-account" href={`${base}account/`} hidden>Go to My Account</a>
-          <a class="btn home-band-btn home-band-outline" href="https://discord.gg/hPGuBwXRqT" target="_blank" rel="noopener">Join our Discord</a>
+        <p class="hero-sub">Get the stats on GTA VI cars and see what racers drive. Put down a time at Gellhorn. Find your crew, your next rival, or a car meet to roll up to.</p>
+        <div class="htiles">
+          {[
+            { href: `${base}cars/`, img: 'vehicles/declasse-mamba-gt', eb: 'Database', name: 'Cars', line: 'Check the specs. Find your next car.' },
+            { href: TA, img: 'gellhorn-raceway', eb: 'Gellhorn', name: 'Time Attack', line: 'Submit a lap. Move up the leaderboard.' },
+            { href: `${base}community/`, img: 'hub/hub-carmeet', eb: 'Events & Crews', name: 'Community', line: 'Find races, crews, and car meets.' },
+            { href: `${base}guide/`, img: 'guide/guide-hero', eb: 'Sourced', name: 'Guide', line: 'Facts, not rumors. All sourced.' },
+          ].map((t) => (
+            <a href={t.href} class="htile">
+              <span class="htile-img"><img src={`${base}images/${t.img}-640.webp`} alt="" width="640" height="360" loading="eager" /><span class="htile-go" set:html={arrowSvg} /></span>
+              <span class="htile-body"><span class="htile-eb">{t.eb}</span><span class="htile-name">{t.name}</span><span class="htile-live">{t.line}</span></span>
+            </a>
+          ))}
         </div>
       </div>
-      <svg viewBox="0 0 24 24" width="220" height="220" class="home-cta-logo" fill="currentColor" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+
+      <!-- logged in: dashboard (filled by scripts/home.ts) -->
+      <div class="hero-dash" id="hero-dash" hidden>
+        <p class="eyebrow">Your dashboard</p>
+        <h1 class="display hero-title hero-title-dash" id="dash-title">Welcome</h1>
+        <div class="htiles">
+          <a class="mtile" id="dash-lap" href={`${base}account/`}>
+            <span class="mtile-top"><span class="mtile-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></span><span class="htile-eb">Your best lap</span><span class="mtile-go" set:html={arrowSvg} /></span>
+            <span class="mtile-val" data-val>…</span><span class="mtile-sub" data-sub>&nbsp;</span>
+          </a>
+          <a class="mtile" id="dash-garage" href={`${base}account/garage/`}>
+            <span class="mtile-top"><span class="mtile-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12M7 21v-7h10v7"/></svg></span><span class="htile-eb">My Garage</span><span class="mtile-go" set:html={arrowSvg} /></span>
+            <span class="mtile-val" data-val>…</span><span class="mbar"><i data-bar style="width:0%"></i></span><span class="mtile-sub" data-sub>&nbsp;</span>
+          </a>
+          <a class="mtile" id="dash-crew" href={`${base}account/crew/`}>
+            <span class="mtile-top"><span class="mtile-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="htile-eb">Your crew</span><span class="mtile-go" set:html={arrowSvg} /></span>
+            <span class="mtile-val" data-val>…</span><span class="mtile-sub" data-sub>&nbsp;</span>
+          </a>
+          <a class="mtile" id="dash-events" href={`${base}account/events/`}>
+            <span class="mtile-top"><span class="mtile-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg></span><span class="htile-eb">Events</span><span class="mtile-go" set:html={arrowSvg} /></span>
+            <span class="mtile-val" data-val>…</span><span class="mtile-sub" data-sub>&nbsp;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Time Attack band ===== -->
+  <section class="wrap hsec hsec-first">
+    <div class="hsec-head">
+      <div class="hsec-titles">
+        <p class="eyebrow">Time Attack</p>
+        <h2 class="display hsec-title">Gellhorn International Raceway</h2>
+        <p class="hsec-sub">One track, every car, one leaderboard. Set a lap, upload your proof, climb the board.</p>
+      </div>
+      <a href={TA} class="arrow">Full leaderboard →</a>
+    </div>
+    <div class="card tband" id="tband">
+      <a href={TA} class="tband-link" aria-label="Open the Gellhorn leaderboard"></a>
+      <div class="tband-img">
+        <picture>
+          <source type="image/webp" srcset={`${base}images/gellhorn-raceway-640.webp 640w, ${base}images/gellhorn-raceway-1080.webp 1080w`} sizes="(max-width: 760px) 100vw, 640px" />
+          <img src={`${base}images/gellhorn-raceway-1672.jpg`} alt="Gellhorn International Raceway" width="1672" height="941" loading="lazy" />
+        </picture>
+        <div class="tband-actions">
+          <a href={`${base}time-attack/submit/`} class="btn btn-p btn-44">Submit a lap</a>
+          <a href={`${base}time-attack/how-it-works/`} class="btn btn-s btn-44 btn-glass">How it works</a>
+        </div>
+      </div>
+      <div class="tband-board">
+        <div class="tband-head"><h3 id="tband-title">Top 5 · overall</h3><span class="muted" id="tband-flag">sample until launch</span></div>
+        <div class="tband-rows" id="tband-rows" set:html={sampleTopHtml} />
+        <div class="tband-chips">
+          <span class="tband-chips-label">By class</span>
+          {TA_CHIPS.map((c) => <a href={`${TA}?class=${classSlug(c)}`} class="chip chip-sm">{c}</a>)}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Fastest at Gellhorn ===== -->
+  <section class="wrap hsec">
+    <div class="hsec-head">
+      <div class="hsec-titles">
+        <p class="eyebrow">Cars</p>
+        <h2 class="display hsec-title">Fastest at Gellhorn</h2>
+        <p class="hsec-sub">The cars holding each class record right now. Beat a time and the spot is yours.</p>
+      </div>
+      <a href={`${base}cars/`} class="arrow">All {N} cars →</a>
+    </div>
+    <div class="cgrid" id="fastest">
+      {fastFixed.map((p) => <CarCard vehicle={p.v} cls={p.cls} lap={p.ms != null ? { rank: 1, ms: p.ms } : null} rotate="fixed" />)}
+      {fastRest.map((p, i) => <CarCard vehicle={p.v} cls={p.cls} lap={p.ms != null ? { rank: 1, ms: p.ms } : null} rotate={i < 4 - fastFixed.length ? 'pool-default' : 'pool'} />)}
+    </div>
+  </section>
+
+  <!-- ===== Community ===== -->
+  <section class="wrap hsec">
+    <div class="hsec-head">
+      <div class="hsec-titles">
+        <p class="eyebrow">Community</p>
+        <h2 class="display hsec-title">Races, meets and crews</h2>
+        <p class="hsec-sub">Find your next race or car meet, sign up in one click, and connect with crews that run the way you do.</p>
+      </div>
+      <a href={`${base}community/`} class="arrow">Open Community →</a>
+    </div>
+    <div class="ccards">
+      <article class="card ccard">
+        <div class="cimg"><img src={`${base}images/hub/hub-entry-events-640.webp`} srcset={`${base}images/hub/hub-entry-events-640.webp 640w, ${base}images/hub/hub-entry-events-1280.webp 1280w`} sizes="(max-width: 760px) 100vw, 640px" alt="" width="640" height="360" loading="lazy" /></div>
+        <div class="cbody">
+          <h3><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>Next events<span class="ctz">Your local time</span></h3>
+          <div class="crows" id="home-events" set:html={eventsHtml} />
+          <div class="cfoot"><a href={`${base}account/events/`} class="btn btn-s btn-sm">Become a host</a></div>
+        </div>
+      </article>
+      <article class="card ccard">
+        <div class="cimg"><img src={`${base}images/hub/hub-entry-crews-640.webp`} srcset={`${base}images/hub/hub-entry-crews-640.webp 640w, ${base}images/hub/hub-entry-crews-1280.webp 1280w`} sizes="(max-width: 760px) 100vw, 640px" alt="" width="640" height="360" loading="lazy" /></div>
+        <div class="cbody">
+          <h3><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Featured crews</h3>
+          <div class="crows" id="home-crews" set:html={crewsHtml} />
+          <div class="cfoot"><a href={`${base}account/crew/`} class="btn btn-s btn-sm">Start a crew</a></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===== Guide ===== -->
+  <section class="wrap hsec hsec-last">
+    <div class="hsec-head">
+      <div class="hsec-titles">
+        <p class="eyebrow">Guide</p>
+        <h2 class="display hsec-title">What Rockstar has actually shown</h2>
+        <p class="hsec-sub">Every claim with its source. Confirmed facts, community identifications, and open questions, kept apart.</p>
+      </div>
+      <div class="hsec-aside"><span class="muted">Updated {guideUpdated}</span><a href={`${base}guide/`} class="arrow">Open the Guide →</a></div>
+    </div>
+    <div class="cgrid cgrid-3" id="guide-cards">
+      {[guideFixed, ...guideRest].map((s, i) => (
+        <article class="card gcard" data-rotate={i === 0 ? 'fixed' : i <= 2 ? 'pool-default' : 'pool'}>
+          <div class="g-img">
+            <img src={`${base}images/${GUIDE_CARD[s.id].img}-640.webp`} srcset={`${base}images/${GUIDE_CARD[s.id].img}-640.webp 640w, ${base}images/${GUIDE_CARD[s.id].img}-1280.webp 1280w`} sizes="(max-width: 760px) 272px, 420px" alt="" width="640" height="360" loading="lazy" />
+            {s.status && <span class="g-status"><i aria-hidden="true"></i>{s.status}</span>}
+          </div>
+          <div class="g-body">
+            <a href={`${base}guide/#${s.id}`} class="g-name">{s.title}</a>
+            <span class="g-txt">{GUIDE_CARD[s.id].line}</span>
+            <div class="g-foot"><span class="g-src"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>{s.sources.length} {s.sources.length === 1 ? 'source' : 'sources'}</span><span class="g-arrow" aria-hidden="true">→</span></div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- ===== Discord band (one action) ===== -->
+  <section class="dband">
+    <div class="wrap dband-inner">
+      <div class="dband-copy">
+        <h2 class="display dband-title">The scene talks on Discord</h2>
+        <p class="dband-text">Find people to race with, catch the next event, talk cars, and discover new tracks and race jobs.<span class="dband-guest"> Log in with Discord and you join the server automatically.</span></p>
+      </div>
+      <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn dband-btn" id="dband-btn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={discordPath} /></svg>
+        <span id="dband-label">Log in with Discord</span>
+      </a>
     </div>
   </section>
 </Base>
 
+<script>
+  import '../scripts/home';
+</script>
+
 <style>
   [hidden] { display: none !important; }
+  :global(main) { overflow-x: clip; }
+  .ico { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .muted { color: var(--lr-muted); }
+  .tnum, :global(.tnum) { font-variant-numeric: tabular-nums; }
 
-  /* ---- Hero: image over ~2/3 of the viewport, thin white line below ---- */
-  .home-hero {
-    position: relative;
-    min-height: calc(66vh - var(--gh-header-h));
-    min-height: calc(66svh - var(--gh-header-h));
-    display: flex;
-    align-items: flex-end;
-    overflow: hidden;
-    border-bottom: 1px solid var(--gh-line); /* same hairline as under the header */
+  /* ---- hero ---- */
+  .hero { position: relative; display: flex; align-items: flex-end; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
+  .hero-bg, .hero-bg img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .hero-bg img { object-fit: cover; object-position: 60% 40%; }
+  .hero-tint { position: absolute; inset: 0; pointer-events: none; }
+  /* V1 gradient (DEC-0116): pink -> orange colour wash, dark reading side left, line at the bottom */
+  .hero-tint-1 { background: linear-gradient(115deg, rgba(242,75,157,.75) 0%, rgba(242,75,157,.2) 42%, rgba(255,122,61,.2) 58%, rgba(255,122,61,.75) 100%); mix-blend-mode: color; }
+  .hero-tint-2 { background: linear-gradient(115deg, rgba(242,75,157,.22) 0%, rgba(242,75,157,0) 42%, rgba(255,122,61,0) 58%, rgba(255,122,61,.22) 100%); }
+  .hero-tint-3 { background: linear-gradient(90deg, rgba(11,11,20,.86) 0%, rgba(11,11,20,.6) 40%, rgba(11,11,20,.15) 100%); }
+  .hero-tint-4 { background: linear-gradient(180deg, rgba(11,11,20,0) 40%, rgba(11,11,20,.82) 100%), radial-gradient(55% 60% at 22% 42%, rgba(11,11,20,.55) 0%, rgba(11,11,20,0) 100%); }
+  .hero-inner { position: relative; width: 100%; padding-top: 44px; padding-bottom: 28px; }
+  .hero-guest, .hero-dash { display: flex; flex-direction: column; gap: 22px; }
+  :global(html.lr-authed) .hero-guest { visibility: hidden; }
+  .hero-head { display: flex; flex-direction: column; gap: 16px; }
+  .hero-title { margin: 0; font-size: clamp(38px, 5.4vw, 68px); line-height: .98; text-shadow: 0 2px 24px rgba(11,11,20,.55); }
+  .hero-title-dash { font-size: clamp(30px, 4.4vw, 56px); line-height: 1; }
+  .hero-sub { margin: 0; max-width: 760px; font-size: 18px; line-height: 1.6; color: #EDEBF2; font-weight: 500; text-wrap: balance; text-shadow: 0 1px 12px rgba(11,11,20,.9), 0 0 2px rgba(11,11,20,.6); }
+  .htiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 10px; }
+  .htile { position: relative; display: flex; flex-direction: column; background: rgba(20,20,31,.88); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; overflow: hidden; backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s, transform .15s; }
+  .htile:hover, .htile:focus-visible { border-color: var(--lr-orange); transform: translateY(-2px); outline: none; }
+  .htile-img { position: relative; display: block; aspect-ratio: 16 / 6.4; overflow: hidden; background: var(--lr-raised); }
+  .htile-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .htile-go, .mtile-go { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; transition: background .15s, color .15s; }
+  .htile-go { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; background: rgba(11,11,20,.62); backdrop-filter: blur(6px); color: var(--lr-text); }
+  .htile-go :global(svg), .mtile-go :global(svg) { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .htile:hover .htile-go, .htile:focus-visible .htile-go { background: var(--lr-orange); color: #1A0E06; }
+  .htile-body { display: flex; flex-direction: column; gap: 3px; padding: 12px 16px 14px; }
+  .htile-eb { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+  .htile-name { font-family: var(--gh-font-display); font-weight: 800; text-transform: uppercase; font-size: 22px; line-height: 1; }
+  .htile-live { display: block; margin-top: 4px; font-size: 14px; line-height: 1.45; color: #D6D6DE; }
+  .mtile { display: flex; flex-direction: column; gap: 8px; min-height: 150px; padding: 18px; background: rgba(20,20,31,.9); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s, transform .15s; }
+  .mtile:hover, .mtile:focus-visible { border-color: var(--lr-orange); transform: translateY(-2px); outline: none; }
+  .mtile-top { display: flex; align-items: center; gap: 8px; }
+  .mtile-ic { display: inline-flex; color: var(--lr-orange); }
+  .mtile-go { margin-left: auto; width: 30px; height: 30px; color: var(--lr-muted); }
+  .mtile:hover .mtile-go { background: var(--lr-orange); color: #1A0E06; }
+  .mtile-val { margin-top: auto; font-family: var(--gh-font-display); font-weight: 800; text-transform: uppercase; font-size: 26px; line-height: 1.05; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mtile-val :global(small) { font-size: 18px; color: var(--lr-muted); }
+  .mtile-sub { font-size: 14px; line-height: 1.45; color: #D6D6DE; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mtile-sub.is-cta { color: var(--lr-orange); font-weight: 600; }
+  .mbar { display: block; height: 4px; border-radius: 999px; background: rgba(251,247,234,.1); overflow: hidden; margin-top: 2px; }
+  .mbar i { display: block; height: 100%; background: var(--lr-orange); border-radius: 999px; }
+
+  /* ---- section frame ---- */
+  .hsec { display: flex; flex-direction: column; gap: 22px; padding-top: 64px; padding-bottom: 16px; }
+  .hsec-first { padding-top: 36px; }
+  .hsec-last { padding-bottom: 72px; }
+  .hsec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+  .hsec-titles { display: flex; flex-direction: column; gap: 6px; }
+  .hsec-titles .eyebrow { margin: 0; font-size: 12px; font-weight: 600; }
+  .hsec-title { margin: 0; font-size: 34px; line-height: .95; }
+  .hsec-sub { margin: 0; color: var(--lr-muted); font-size: 15px; line-height: 1.5; }
+  .hsec-aside { display: flex; align-items: center; gap: 16px; white-space: nowrap; font-size: 13px; }
+  .hsec-head .arrow { white-space: nowrap; }
+
+  /* ---- chips (mockup .chip) ---- */
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 13px; border-radius: 999px; border: 1px solid rgba(200,200,222,.24); font-size: 13px; font-weight: 500; color: #E4E4EC; background: rgba(11,11,20,.55); text-decoration: none; white-space: nowrap; }
+  .chip:hover { border-color: var(--lr-pink); color: var(--lr-text); }
+  .chip-sm { height: 30px; font-size: 12px; padding: 0 11px; }
+
+  /* ---- Time Attack band ---- */
+  .tband { position: relative; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); transition: border-color .15s; }
+  .tband:hover { border-color: var(--lr-orange); }
+  .tband-link { position: absolute; inset: 0; z-index: 1; }
+  .tband-img { position: relative; min-height: 360px; display: flex; align-items: flex-end; overflow: hidden; }
+  .tband-img picture, .tband-img img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .tband-img img { object-fit: cover; }
+  .tband-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,11,20,0) 50%, rgba(11,11,20,.85) 100%); }
+  .tband-actions { position: relative; z-index: 2; padding: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn-44 { min-height: 44px; font-size: 14px; }
+  .btn-glass { border-color: rgba(251,247,234,.4); background: rgba(11,11,20,.45); }
+  .tband-board { position: relative; z-index: 2; padding: 20px 22px 18px; display: flex; flex-direction: column; pointer-events: none; }
+  .tband-board :global(a) { pointer-events: auto; }
+  .tband-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 0 10px; }
+  .tband-head h3 { margin: 0; font-size: 16px; font-weight: 700; }
+  .tband-head .muted { font-size: 12px; }
+  .tband-rows { display: flex; flex-direction: column; margin-top: 8px; }
+  .tband-rows :global(.trow) { display: flex; align-items: center; gap: 14px; padding: 11px 10px; border-top: 1px solid var(--lr-line); border-radius: 4px; color: var(--lr-text); text-decoration: none; transition: background .15s; }
+  .tband-rows :global(.trow:first-child) { border-top: 0; }
+  .tband-rows :global(.trow:hover) { background: rgba(251,247,234,.06); }
+  .tband-rows :global(.tpos) { width: 24px; flex: none; font-weight: 600; color: var(--lr-muted); }
+  .tband-rows :global(.tpos.is-first) { color: var(--lr-pink); }
+  .tband-rows :global(.tdrv) { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-weight: 600; padding-right: 16px; }
+  .tband-rows :global(.tn) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .tband-rows :global(.crew-tag) { flex: none; }
+  .tband-rows :global(.tcar) { width: 150px; flex: none; font-size: 13px; color: var(--lr-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tband-rows :global(.ttime) { width: 76px; flex: none; text-align: right; font-weight: 600; }
+  .tband-rows :global(.trow.me) { background: var(--lr-raised); }
+  :global(.tband-rows:has(.trow.me) .trow:not(.me) .tn), :global(.tband-rows:has(.trow.me) .trow:not(.me) .ttime) { color: var(--lr-soft); }
+  .tband-rows :global(.trow.gapb) { margin-top: 10px; border-top: 1px solid rgba(200,200,222,.32); }
+  .tband-chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: auto; padding: 14px 10px 0; }
+  .tband-chips-label { font-size: 12px; font-weight: 600; color: var(--lr-muted); margin-right: 4px; }
+
+  /* ---- card grids ---- */
+  .cgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  .cgrid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cgrid > :global([data-rotate="pool"]) { display: none; }
+
+  /* ---- community cards ---- */
+  .ccards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .ccard { display: flex; flex-direction: column; }
+  .cimg { height: 130px; overflow: hidden; }
+  .cimg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cbody { flex: 1; display: flex; flex-direction: column; padding: 18px 22px 20px; }
+  .ccard h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; padding: 0 10px; font-size: 20px; font-weight: 700; }
+  .ccard h3 .ico { width: 20px; height: 20px; color: var(--lr-orange); }
+  .ctz { font-size: 12px; font-weight: 500; color: var(--lr-muted); margin-left: auto; }
+  .crows { display: flex; flex-direction: column; }
+  .crows :global(.crow) { position: relative; display: flex; align-items: center; gap: 14px; padding: 12px 10px; border-top: 1px solid var(--lr-line); border-radius: 4px; transition: background .15s; }
+  .crows :global(.crow:first-child) { border-top: 0; }
+  .crows :global(.crow:hover) { background: rgba(251,247,234,.06); }
+  .crows :global(.clink) { position: absolute; inset: 0; z-index: 1; border-radius: 4px; }
+  .crows :global(.cdate) { width: 40px; flex: none; text-align: center; line-height: 1.1; }
+  .crows :global(.cdate b) { display: block; font-size: 20px; font-weight: 700; }
+  .crows :global(.cdate .up) { display: block; font-size: 11px; font-weight: 600; color: var(--lr-muted); letter-spacing: .06em; text-transform: uppercase; }
+  .crows :global(.cmain) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .crows :global(.cmain b) { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .crows :global(.cmain > span) { font-size: 13px; color: var(--lr-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .crows :global(.cmain .crew-tag) { margin-left: 4px; vertical-align: 1px; }
+  .crows :global(.crow > .crew-tag) { flex: none; min-width: 54px; }
+  .crows :global(.cside) { position: relative; z-index: 2; flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+  /* sign-up slot content from event-rsvp.ts / crew-membership.ts, in the row style */
+  .crows :global(.cside .btn), .crows :global(.crew-join-btn), .crows :global(.crew-withdraw) { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; height: 32px; padding: 0 13px; border-radius: 6px; font-family: var(--gh-font-body); font-size: 13px; font-weight: 600; border: 1px solid rgba(251,247,234,.26); color: var(--lr-text); background: transparent; cursor: pointer; white-space: nowrap; text-decoration: none; }
+  .crows :global(.cside .btn:hover), .crows :global(.crew-join-btn:hover), .crows :global(.crew-withdraw:hover) { border-color: var(--lr-text); }
+  .crows :global(.cside .ev-rsvp-btn.is-in) { background: rgba(217,245,142,.12); border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
+  .crows :global(.ev-going), .crows :global(.ev-going-none) { order: 2; font-size: 12px; color: var(--lr-muted); }
+  .crows :global(.ev-going summary) { cursor: pointer; list-style: none; }
+  .crows :global(.ev-going summary::-webkit-details-marker) { display: none; }
+  .crows :global(.ev-going p) { display: none; }
+  .crows :global(.ev-full) { font-size: 12px; color: var(--lr-muted); }
+  .crows :global(.ev-rsvp-msg) { order: 3; font-size: 11px; color: var(--lr-lime); max-width: 9rem; text-align: right; }
+  .crows :global(.crew-join-slot) { flex-direction: row; align-items: center; gap: 8px; }
+  .crows :global(.crew-pill) { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 6px; background: rgba(251,247,234,.08); color: var(--lr-muted); font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .crows :global(.crew-withdraw) { border-color: transparent; color: var(--lr-muted); padding: 0 6px; }
+  .crows :global(.crew-link) { font-size: 12px; color: var(--lr-muted); }
+  .crows :global(.crow.cfree) { border: 1px dashed rgba(200,200,222,.24); margin-top: 8px; }
+  .crows :global(.crow.cfree:hover) { border-color: rgba(251,247,234,.5); }
+  .crows :global(.crow.cfree .cdate) { display: flex; align-items: center; justify-content: center; height: 44px; }
+  .crows :global(.cplus) { width: 32px; height: 32px; border-radius: 999px; border: 1px dashed rgba(200,200,222,.4); display: inline-flex; align-items: center; justify-content: center; color: var(--lr-muted); font-size: 18px; line-height: 1; }
+  .crows :global(.crow.cfree .cmain b) { color: var(--lr-muted); }
+  .cfoot { margin-top: auto; padding: 16px 10px 0; }
+
+  /* ---- guide cards ---- */
+  .gcard { position: relative; display: flex; flex-direction: column; transition: border-color .15s; }
+  .gcard:hover { border-color: var(--lr-orange); }
+  .g-img { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--lr-raised); }
+  .g-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .g-status { position: absolute; left: 12px; top: 12px; height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(11,11,20,.78); backdrop-filter: blur(4px); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; }
+  .g-status i { width: 7px; height: 7px; border-radius: 999px; background: var(--lr-lime); }
+  .g-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .g-name { font-size: 18px; font-weight: 700; line-height: 1.2; color: var(--lr-text); text-decoration: none; }
+  .g-name::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+  .gcard:has(.g-name:focus-visible) { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+  .g-name:focus-visible { outline: none; }
+  .g-txt { font-size: 14px; color: var(--lr-soft); line-height: 1.45; }
+  .g-foot { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--lr-line); font-size: 13px; }
+  .g-src { display: inline-flex; align-items: center; gap: 8px; color: var(--lr-muted); }
+  .g-src svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .g-arrow { color: var(--lr-muted); font-weight: 600; transition: color .15s, transform .15s; }
+  .gcard:hover .g-arrow { color: var(--lr-orange); transform: translateX(3px); }
+
+  /* ---- Discord band: logo gradient = brand moment (DEC-0114) ---- */
+  .dband { background: var(--lr-brand-gradient); }
+  .dband-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding-top: 56px; padding-bottom: 56px; }
+  .dband-copy { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
+  .dband-title { margin: 0; font-size: 30px; }
+  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
+  :global(html.lr-authed) .dband-guest { display: none; }
+  .dband-btn { background: var(--lr-text); color: var(--lr-on-pink); flex: none; }
+  .dband-btn:hover { background: #fff; color: var(--lr-on-pink); }
+  .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+  /* the footer's top margin would leave a gap under the band */
+  :global(main:has(.dband) + .site-foot) { margin-top: 0; }
+
+  /* ---- responsive ---- */
+  @media (max-width: 1100px) {
+    .htiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cgrid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tband { grid-template-columns: minmax(0, 1fr); }
+    .tband-img { min-height: 240px; }
   }
-  .home-hero-bg, .home-hero-bg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; }
-  /* Colour wash like thesimgrid.com (Fausto, 2026-09-28): a 120deg red ->
-     burgundy -> dark-purple veil at 70 % over the photo, plus a top-to-bottom
-     fade into the page background so the image has no hard bottom edge. */
-  .home-hero-veil {
-    position: absolute; inset: 0;
-    background:
-      linear-gradient(rgba(11,11,20,0) 0%, rgb(20,20,26) 100%),
-      linear-gradient(120deg, rgba(176,40,60,.7) 0%, rgba(90,30,48,.7) 45%, rgba(43,26,43,.7) 75%, rgba(26,20,32,.7) 100%);
-  }
-  .home-hero-inner { position: relative; width: 100%; padding-block: clamp(2rem, 4.5vw, 3.25rem) clamp(1.5rem, 3vw, 2rem); display: grid; gap: clamp(1.75rem, 4vw, 2.75rem); }
-  .home-intro { max-width: 64rem; margin-inline: auto; text-align: center; }
-  .home-title { margin: .5rem 0 1rem; font-size: clamp(2rem, 4vw, 3.4rem); line-height: 1; text-wrap: balance; }
-  .home-lede { margin: 0 auto 1.6rem; color: #d9d8e8; font-size: clamp(.95rem, 1.4vw, 1.08rem); line-height: 1.6; max-width: 46rem; }
-  .home-launch { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .45rem; margin: 1rem 0 0; color: var(--gh-muted); font-size: .8rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
-  .home-launch-row[hidden] { display: none; }
-  .home-launch strong { font-family: var(--gh-font-display); font-weight: 900; font-size: 1.1rem; color: var(--gh-text); }
-  .home-launch .launch-dot { width: .45rem; height: .45rem; border-radius: 50%; background: var(--gh-yellow); }
-  .home-cta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .6rem 1rem; }
-  /* Discord's own colour for the sign-in button, as in the header. */
-  .home-join { gap: .6rem; padding: .95rem 1.5rem; font-size: 1rem; }
-  #home-join { background: #5865f2; color: #fff; border: none; cursor: pointer; }
-  #home-join:hover { filter: brightness(1.1); }
-
-  .home-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-  .home-tile {
-    position: relative; display: flex; align-items: flex-end; aspect-ratio: 2 / 1; overflow: hidden;
-    border-radius: var(--gh-radius-lg); border: 1px solid rgba(251,247,234,.18); text-decoration: none; color: var(--gh-text);
-    background: var(--gh-surface); transition: border-color .15s, transform .15s;
-  }
-  .home-tile:hover, .home-tile:focus-visible { border-color: rgba(251,247,234,.55); transform: translateY(-2px); }
-  .home-tile picture, .home-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .home-tile-veil { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(11,11,20,.95) 5%, rgba(11,11,20,.45) 60%, rgba(11,11,20,.25)); transition: background .15s; }
-  .home-tile:hover .home-tile-veil { background: linear-gradient(0deg, rgba(11,11,20,.9) 5%, rgba(11,11,20,.25) 60%, rgba(11,11,20,.1)); }
-  .home-tile-copy { position: relative; display: flex; flex-direction: column; gap: .25rem; padding: 1rem 1.1rem; }
-  .home-tile-title { font-size: clamp(1.4rem, 2.2vw, 1.8rem); }
-  .home-tile-lede { color: var(--gh-muted); font-size: .82rem; }
-
-  /* ---- Strips below the line ---- */
-  .home-strip { padding-top: clamp(2.25rem, 5vw, 3.25rem); }
-  .home-strip + .home-strip { padding-top: clamp(1.75rem, 4vw, 2.5rem); }
-  .home-strip-head { display: flex; align-items: center; gap: .75rem; margin-bottom: .35rem; }
-  .home-strip-lede { margin: 0 0 1rem; color: var(--gh-muted); font-size: .9rem; }
-  .home-strip-title { margin: 0; font-size: 1.5rem; }
-  .home-strip-link { margin-left: auto; color: var(--gh-muted); font-size: .85rem; font-weight: 700; text-decoration: none; }
-  .home-strip-link:hover { color: var(--gh-text); }
-  .home-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
-
-  :global(.hc-card) { display: flex; flex-direction: column; gap: .65rem; padding: 1rem; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg); text-decoration: none; color: var(--gh-text); transition: border-color .15s; min-width: 0; }
-  :global(.hc-card:hover) { border-color: var(--gh-muted); }
-  :global(.hc-top) { display: flex; align-items: center; gap: .7rem; min-width: 0; }
-  :global(.hc-top .crew-emblem) { width: 2.6rem; height: 2.6rem; flex: none; }
-  :global(.hc-name) { display: block; margin: 0; font-weight: 800; font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  :global(.hc-sub) { display: block; margin: .1rem 0 0; color: var(--gh-muted); font-size: .76rem; }
-  :global(.hc-chips) { display: flex; flex-wrap: wrap; gap: .3rem; }
-  /* event card: image by type, title first, date small (2026-09-30) */
-  :global(.he-card) { padding: 0; gap: 0; overflow: hidden; }
-  :global(.he-img) { position: relative; display: block; aspect-ratio: 16 / 8; background: rgba(200,200,222,.08); }
-  :global(.he-img img) { display: block; width: 100%; height: 100%; object-fit: cover; }
-  :global(.he-type) { position: absolute; top: .6rem; left: .6rem; background: rgba(11,11,20,.8); }
-  :global(.he-body) { display: flex; flex-direction: column; gap: .35rem; padding: .85rem 1rem 1rem; }
-  :global(.he-title) { display: block; margin: 0; font-weight: 800; font-size: 1.02rem; line-height: 1.3; }
-  :global(.he-when) { display: block; color: var(--gh-text); font-size: .8rem; font-weight: 600; }
-  :global(.he-tz) { color: var(--gh-muted); font-size: .7rem; font-weight: 500; }
-  :global(.he-meta) { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; margin: 0; color: var(--gh-muted); font-size: .78rem; }
-
-  .home-strip-sep { position: relative; margin-top: clamp(2rem, 4.5vw, 3rem); }
-  /* hairline across the content width only, like the header line style */
-  .home-strip-sep::before { content: ''; position: absolute; top: 0; left: clamp(1.25rem, 4vw, 2.5rem); right: clamp(1.25rem, 4vw, 2.5rem); border-top: 1px solid var(--gh-line); }
-
-  /* ---- Discord band ---- */
-  .home-band {
-    margin-top: clamp(3rem, 6vw, 4.5rem);
-    margin-bottom: calc(-1 * var(--gh-gap-section)); /* sits right on the footer line */
-    background: #5865f2;
-    color: #fff;
-    padding-block: clamp(3rem, 6vw, 4.5rem);
-  }
-  .home-band-inner { display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
-  .home-band-copy { max-width: 40rem; }
-  .home-band-title { margin: 0 0 .9rem; font-size: clamp(2.2rem, 5vw, 3.6rem); line-height: 1; color: #fff; }
-  .home-band-text { margin: 0 0 1.75rem; font-size: clamp(.95rem, 1.4vw, 1.05rem); line-height: 1.6; color: rgba(255,255,255,.88); }
-  .home-band-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
-  .home-band-btn { padding: .95rem 1.6rem; font-size: 1rem; border-radius: var(--gh-radius); cursor: pointer; }
-  .home-band-primary { background: #fff; color: #4752c4; border: 2px solid #fff; }
-  .home-band-primary:hover { background: #eef0ff; }
-  .home-band-outline { background: transparent; color: #fff; border: 2px solid #fff; }
-  .home-band-outline:hover { background: rgba(255,255,255,.12); }
-  .home-cta-logo { flex: none; width: clamp(8rem, 16vw, 13.5rem); height: auto; color: rgba(255,255,255,.85); }
-
-  @media (max-width: 1000px) {
-    .home-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 900px) {
+    .ccards { grid-template-columns: minmax(0, 1fr); }
+    .cgrid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 760px) {
-    .home-hero { min-height: 0; }
-    .home-join { width: 100%; }
-    .home-title { font-size: clamp(1.5rem, 6.6vw, 1.9rem); }
-    .home-lede br { display: none; } /* one flowing paragraph on phones */
-    /* tiles and strips scroll sideways on phones instead of stacking */
-    .home-tiles, .home-row { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--wrap-pad, 1.25rem); gap: .75rem; margin-inline: calc(-1 * var(--wrap-pad, 1.25rem)); padding-inline: var(--wrap-pad, 1.25rem); scrollbar-width: none; }
-    .home-tiles::-webkit-scrollbar, .home-row::-webkit-scrollbar { display: none; }
-    .home-tile, :global(.home-row > .hc-card) { flex: 0 0 78%; scroll-snap-align: start; }
-    :global(.home-cars > .v-tile) { flex: 0 0 78%; scroll-snap-align: start; }
-    .home-tile { aspect-ratio: 16 / 9; }
-    .home-cta-logo { display: none; }
-    .home-band-btn { flex: 1 1 100%; }
+    .hero-inner { padding-top: 24px; padding-bottom: 20px; }
+    .hero-guest, .hero-dash { gap: 14px; }
+    .hero-sub { font-size: 15px; line-height: 1.5; }
+    .htiles { grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 4px; }
+    .htile { flex-direction: row; align-items: stretch; }
+    .htile:hover { transform: none; }
+    .htile-img { width: 104px; flex: none; aspect-ratio: auto; }
+    .htile-go { display: none; }
+    .htile-body { flex: 1; min-width: 0; padding: 10px 36px 10px 12px; justify-content: center; position: relative; }
+    .htile-body::after { content: '→'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--lr-muted); font-weight: 600; }
+    .htile-eb { font-size: 10px; }
+    .htile-name { font-size: 18px; }
+    .htile-live { font-size: 13px; margin-top: 2px; line-height: 1.35; }
+    .hero-dash .htiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mtile { min-width: 0; }
+    .mtile { min-height: 118px; padding: 12px; gap: 6px; }
+    .mtile:hover { transform: none; }
+    .mtile-val { font-size: 18px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .mtile-val :global(small) { font-size: 13px; }
+    .mtile-sub { font-size: 12px; }
+    .mtile-go { width: 24px; height: 24px; }
+    .mtile .htile-eb { letter-spacing: .06em; white-space: nowrap; }
+
+    .hsec { padding-top: 44px; gap: 16px; }
+    .hsec-first { padding-top: 32px; }
+    .hsec-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .hsec-title { font-size: 26px; }
+    .hsec-sub { font-size: 14px; line-height: 1.45; }
+
+    .tband-img { min-height: 190px; }
+    .tband-actions { padding: 14px; width: 100%; }
+    .tband-actions .btn { min-height: 40px; flex: 1; }
+    .tband-board { padding: 14px 12px; }
+    .tband-rows :global(.trow) { gap: 10px; padding: 10px 6px; }
+    .tband-rows :global(.tcar) { display: none; }
+    .tband-rows :global(.tdrv) { padding-right: 6px; }
+    .tband-rows :global(.ttime) { width: 68px; }
+    .tband-chips { flex-wrap: nowrap; overflow-x: auto; padding: 12px 6px 2px; scrollbar-width: none; }
+    .tband-chips .chip, .tband-chips-label { flex: none; white-space: nowrap; }
+
+    /* horizontal carousels (mockup phone) */
+    .cgrid, .cgrid-3 { display: flex; overflow-x: auto; gap: 12px; margin: 0 calc(-1 * clamp(1.25rem, 4vw, 2.5rem)); padding: 0 clamp(1.25rem, 4vw, 2.5rem) 4px; scroll-snap-type: x mandatory; scroll-padding-left: clamp(1.25rem, 4vw, 2.5rem); scrollbar-width: none; }
+    .cgrid > :global(*) { flex: 0 0 272px; scroll-snap-align: start; }
+
+    .cimg { height: 110px; }
+    .cbody { padding: 14px 12px; }
+    .ccard h3 { font-size: 18px; padding: 0 6px; }
+    .ctz { font-size: 11px; }
+    .crows :global(.crow) { gap: 10px; padding: 11px 6px; align-items: flex-start; }
+    .crows :global(.cmain > span) { white-space: normal; }
+    .crows :global(.cdate) { width: 34px; }
+    .crows :global(.cdate b) { font-size: 18px; }
+    .crows :global(.crow > .crew-tag) { min-width: 48px; margin-top: 2px; }
+    .crows :global(.cside .btn), .crows :global(.crew-join-btn), .crows :global(.crew-pill) { height: 30px; min-height: 30px; padding: 0 10px; font-size: 12px; }
+    .cfoot { padding: 14px 6px 0; }
+
+    .dband-inner { flex-direction: column; align-items: stretch; gap: 18px; padding-top: 36px; padding-bottom: 36px; }
+    .dband-title { font-size: 24px; }
+    .dband-btn { width: 100%; }
   }
 </style>
-
-<script>
-  import { initVehicleTiles } from '../scripts/vehicle-tiles';
-  initVehicleTiles(document.getElementById('home-cars') ?? document);
-</script>
-
-<script>
-  import '../scripts/launch-countdown';
-  import { backendConfigured, getSupabase } from '../scripts/supabase-client';
-  import { fetchLiveCrews, fetchLiveEvents, pickFeaturedCrews } from '../scripts/hub-live';
-  import { homeCrewCard, homeEventCard } from '../data/home';
-  import { localizeTimes } from '../data/hub';
-
-  localizeTimes(document.getElementById('home-events')!);
-
-  const join = document.getElementById('home-join') as HTMLButtonElement;
-  const account = document.getElementById('home-account')!;
-
-  if (backendConfigured) {
-    const sb = getSupabase();
-    const bandJoin = document.getElementById('band-join')!;
-    const bandAccount = document.getElementById('band-account')!;
-    const show = (signedIn: boolean) => { join.hidden = signedIn; account.hidden = !signedIn; bandJoin.hidden = signedIn; bandAccount.hidden = !signedIn; };
-    const login = () => sb.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: window.location.origin + window.location.pathname, scopes: 'identify email guilds.join' } });
-    bandJoin.addEventListener('click', login);
-    sb.auth.getSession().then(({ data }) => show(Boolean(data?.session)));
-    sb.auth.onAuthStateChange((_e, s) => show(Boolean(s)));
-    join.addEventListener('click', () => {
-      sb.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: window.location.origin + window.location.pathname, scopes: 'identify email guilds.join' } });
-    });
-  } else {
-    join.addEventListener('click', () => { window.open('https://discord.gg/hPGuBwXRqT', '_blank', 'noopener'); });
-  }
-
-  fetchLiveCrews().then((live) => {
-    if (!live || !live.length) return;
-    document.getElementById('home-crews')!.innerHTML = pickFeaturedCrews(live, 4).map(homeCrewCard).join('');
-    document.getElementById('home-crew-flag')!.hidden = true;
-  });
-  fetchLiveEvents().then((live) => {
-    // Next events by start time (Fausto, 2026-10-03); running ones stay until they end, cancelled/finished drop out
-    const endOf = (e: { starts_at: string; ends_at: string | null }) => new Date(e.ends_at ?? new Date(new Date(e.starts_at).getTime() + 3 * 3600e3).toISOString()).getTime();
-    const next = (live ?? []).filter((e) => e.status !== 'cancelled' && endOf(e) > Date.now()).sort((a, b) => a.starts_at.localeCompare(b.starts_at)).slice(0, 4);
-    if (!next.length) return;
-    const root = document.getElementById('home-events')!;
-    root.innerHTML = next.map(homeEventCard).join('');
-    localizeTimes(root);
-    document.getElementById('home-ev-flag')!.hidden = true;
-  });
-</script>

@@ -1,0 +1,145 @@
+---
+// Vehicle card of the redesign (DEC-0116 "Fastest at Gellhorn", DEC-0117 card).
+// Mockup class .vcard: image with class pill + compare "+", brand line, model,
+// "Price · Top speed", "Based on …", foot with the Gellhorn rank. The whole
+// card links to the vehicle page; the compare button sits above that link.
+// COPY STATUS: "TBA" / "No Gellhorn lap yet" are Claude placeholders -> Codex (DEC-0088).
+import { vehicleValues, type VehicleOption } from '../data/vehicles';
+import { lapTime } from '../data/leaderboard';
+
+interface Props {
+  vehicle: VehicleOption;
+  /** class shown in the pill (default: first class) */
+  cls?: string;
+  /** Gellhorn foot: rank + time in that class, or null = no lap yet */
+  lap?: { rank: number; ms: number } | null;
+  /** extra attributes for client-side rotation */
+  rotate?: string;
+  /** 'cars' = Cars page card (DEC-0117): availability/New pills, "Gellhorn #N" foot, garage button */
+  variant?: 'home' | 'cars';
+  /** data-* attributes for filtering/sorting on the Cars page */
+  data?: Record<string, string | number>;
+  isNew?: boolean;
+}
+const { vehicle: v, cls = v.classes[0], lap = null, rotate, variant = 'home', data = {}, isNew = false } = Astro.props;
+const cars = variant === 'cars';
+const acqLabels: Record<string, string> = { 'pre-order': 'Pre-Order bonus', 'ultimate-edition': 'Ultimate Edition', 'gta-plus': 'GTA+' };
+const acq = v.acquisition ? acqLabels[v.acquisition] : null;
+const dataAttrs = Object.fromEntries(Object.entries(data).map(([k, val]) => [`data-${k}`, String(val)]));
+const base = import.meta.env.BASE_URL;
+const href = `${base}cars/vehicles/${v.id}/`;
+const price = vehicleValues[v.id]?.price_gtad?.value;
+const speed = vehicleValues[v.id]?.top_speed_mph?.value;
+const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
+---
+<article class:list={['card vcard', { 'vc-cars': cars }]} data-id={v.id} data-rotate={rotate} {...dataAttrs}>
+  <a href={href} class="vc-img" tabindex="-1" aria-hidden="true">
+    {v.photo ? (
+      <img src={`${base}images/vehicles/${v.id}-640.webp`} srcset={`${base}images/vehicles/${v.id}-640.webp 640w, ${base}images/vehicles/${v.id}-1280.webp 1280w`} sizes="(max-width: 760px) 272px, 320px" alt="" width="640" height="360" loading="lazy" />
+    ) : (
+      <span class="vc-ph">
+        <img class="vc-ph-bg" src={`${base}images/garage/garage-hero-placeholder-640.webp`} alt="" width="640" height="360" loading="lazy" />
+        <img class="vc-ph-logo" src={`${base}images/logos/${v.logoSlug}-gta-6-logo.webp`} alt="" width="92" height="92" loading="lazy" />
+        <span class="vc-ph-pill">Photo coming</span>
+      </span>
+    )}
+    <span class="vc-pills">
+      <span class="vc-cls" data-cls-pill>{cls}</span>
+      {cars && isNew && <span class="vc-cls vc-new">New</span>}
+      {cars && acq && <span class="vc-cls vc-acq">{acq}</span>}
+    </span>
+  </a>
+  <button type="button" class="vc-cmp" data-compare={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to compare`}>
+    <svg class="vc-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    <svg class="vc-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+  </button>
+  <div class="vc-body">
+    <div class="vc-brand"><img src={`${base}images/logos/${v.logoSlug}-gta-6-logo.webp`} alt="" width="20" height="20" loading="lazy" />{v.make}</div>
+    <a href={href} class="vc-name">{v.model}</a>
+    <div class="vc-stats">
+      <span class:list={[{ 'vc-tba': !price }]}>{price ? fmtPrice(price) : 'Price TBA'}</span>{' · '}<span class:list={[{ 'vc-tba': !speed }]}>{speed ? `${speed} mph` : 'Top speed TBA'}</span>
+    </div>
+    {cars && acq && <div class="vc-edition">{acq}</div>}
+    <div class="vc-based">{v.realLifeInspiration ? `Based on ${v.realLifeInspiration}` : ' '}</div>
+    <div class="vc-foot">
+      <span class="vc-rank" title={cars && lap ? `Gellhorn rank in ${cls}` : 'Gellhorn International Raceway'}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>
+        {lap ? (cars ? <>Gellhorn #{lap.rank}{'\u2002·\u2002'}<span class="tnum">{lapTime(lap.ms)}</span></> : <>#{lap.rank} in {cls}{'\u2002·\u2002'}<span class="tnum">{lapTime(lap.ms)}</span></>) : 'No Gellhorn lap yet'}
+      </span>
+      {cars ? (
+        <button type="button" class="vc-garage" data-garage={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to My Garage`} title="Mark as owned · Adds the car to My Garage">
+          <svg class="vc-g-house" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12M7 21v-7h10v7"/></svg>
+          <svg class="vc-g-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+        </button>
+      ) : <span class="vc-arrow" aria-hidden="true">→</span>}
+    </div>
+  </div>
+</article>
+
+<style>
+  .vcard { position: relative; display: flex; flex-direction: column; transition: border-color .15s; }
+  .vcard:hover { border-color: var(--lr-orange); }
+  .vc-img { position: relative; display: block; aspect-ratio: 16 / 10; background: var(--lr-raised); overflow: hidden; }
+  .vc-img > img, .vc-ph-bg { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .vc-ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .vc-ph-bg { position: absolute; inset: 0; filter: grayscale(.6) brightness(.35); }
+  .vc-ph-logo { position: relative; width: 92px; height: 92px; object-fit: contain; filter: brightness(0) invert(1); }
+  .vc-ph-pill { position: absolute; right: 12px; bottom: 12px; height: 24px; padding: 0 10px; border-radius: 999px; background: rgba(11,11,20,.78); font-size: 11px; font-weight: 600; color: var(--lr-muted); display: inline-flex; align-items: center; }
+  .vc-pills { position: absolute; left: 12px; top: 12px; right: 56px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .vc-cls { height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(11,11,20,.78); backdrop-filter: blur(4px); font-size: 12px; font-weight: 600; color: var(--lr-text); display: inline-flex; align-items: center; }
+  .vc-new { background: var(--lr-lime); color: #14141F; font-weight: 700; }
+  .vc-acq { color: var(--lr-orange); }
+  .vc-edition { display: none; font-size: 13px; font-weight: 600; color: var(--lr-orange); }
+  .vc-garage { position: relative; z-index: 2; flex: none; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid rgba(251,247,234,.22); background: transparent; color: var(--lr-text); cursor: pointer; }
+  .vc-garage:hover { border-color: var(--lr-text); }
+  .vc-garage:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+  .vc-garage svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .vc-g-check { display: none; }
+  .vc-garage[aria-pressed="true"] { background: rgba(217,245,142,.12); border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
+  .vc-garage[aria-pressed="true"] .vc-g-house { display: none; }
+  .vc-garage[aria-pressed="true"] .vc-g-check { display: block; }
+  .vc-cmp { position: absolute; z-index: 2; right: 12px; top: 12px; width: 34px; height: 34px; padding: 0; border-radius: 999px; border: 1px solid rgba(251,247,234,.35); background: rgba(11,11,20,.65); color: var(--lr-text); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+  .vc-cmp:hover { border-color: var(--lr-pink); color: var(--lr-pink); }
+  .vc-cmp svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .vc-check { display: none; }
+  .vc-cmp[aria-pressed="true"] { background: var(--lr-pink); border-color: var(--lr-pink); color: var(--lr-on-pink); }
+  .vc-cmp[aria-pressed="true"] .vc-plus { display: none; }
+  .vc-cmp[aria-pressed="true"] .vc-check { display: block; }
+  .vc-cmp:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+  .vc-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
+  .vc-brand { display: flex; align-items: center; gap: 8px; min-height: 20px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--lr-muted); }
+  .vc-brand img { width: 20px; height: 20px; object-fit: contain; filter: brightness(0) invert(1); opacity: .75; }
+  .vc-name { font-size: 18px; font-weight: 700; line-height: 1.2; color: var(--lr-text); text-decoration: none; }
+  .vc-name::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+  .vc-name:focus-visible { outline: none; }
+  .vcard:has(.vc-name:focus-visible) { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+  .vc-stats { margin-top: 2px; font-size: 14px; color: var(--lr-soft); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vc-tba { color: var(--lr-muted); }
+  .vc-based { font-size: 14px; color: var(--lr-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vc-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--lr-line); font-size: 14px; color: var(--lr-soft); }
+  .vc-rank { display: inline-flex; align-items: center; gap: 8px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vc-rank svg { width: 16px; height: 16px; flex: none; stroke: var(--lr-orange); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .vc-arrow { color: var(--lr-muted); font-weight: 600; transition: color .15s, transform .15s; }
+  .vcard:hover .vc-arrow { color: var(--lr-orange); transform: translateX(3px); }
+
+  /* Phone: Cars page as a list (DEC-0117): image 118px, text, compare + garage stacked right */
+  @media (max-width: 760px) {
+    .vc-cars { flex-direction: row; align-items: stretch; min-height: 118px; }
+    .vc-cars .vc-img { width: 118px; flex: none; aspect-ratio: auto; }
+    .vc-cars .vc-pills { left: 6px; top: 6px; right: 6px; gap: 4px; }
+    .vc-cars .vc-cls { height: 22px; padding: 0 7px; font-size: 11px; }
+    .vc-cars .vc-acq { display: none; }
+    .vc-cars .vc-ph-logo { width: 48px; height: 48px; }
+    .vc-cars .vc-ph-pill { display: none; }
+    .vc-cars .vc-body { flex: 1; min-width: 0; padding: 10px 52px 10px 12px; gap: 2px; }
+    .vc-cars .vc-brand { font-size: 11px; min-height: 16px; }
+    .vc-cars .vc-brand img { width: 16px; height: 16px; }
+    .vc-cars .vc-name { font-size: 16px; }
+    .vc-cars .vc-stats { font-size: 13px; }
+    .vc-cars .vc-based { display: none; }
+    .vc-cars .vc-edition { display: block; }
+    .vc-cars .vc-foot { margin-top: 4px; padding-top: 0; border-top: 0; font-size: 13px; }
+    .vc-cars .vc-cmp { top: 10px; right: 8px; width: 40px; height: 40px; }
+    .vc-cars .vc-garage { position: absolute; right: 8px; bottom: 10px; width: 40px; height: 40px; }
+  }
+</style>

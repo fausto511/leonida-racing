@@ -626,7 +626,7 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
         <textarea id="decision-reason" placeholder="Moderator reason / internal note"></textarea>
         <div class="decision-actions">
           ${!isAccepted ? `<button type="button" class="btn btn-outline" data-action="request_correction">Request Correction</button>` : ''}
-          ${!isAccepted ? `<button type="button" class="btn btn-red" data-action="reject">Reject</button>` : ''}
+          ${!isAccepted ? `<button type="button" class="btn btn-danger" data-action="reject">Reject</button>` : ''}
           ${!isAccepted ? `<button type="button" class="btn btn-primary" data-action="accept_provisional">Accept</button>` : ''}
           <button type="button" class="btn btn-primary" data-action="verify" ${canVerify ? '' : 'disabled'}>Verify (Official)</button>
           ${isAccepted ? `<button type="button" class="btn btn-outline-red" data-action="invalidate">Invalidate</button>` : ''}

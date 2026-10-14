@@ -81,7 +81,7 @@ a { color: inherit; }
 
 .panel {
   background: var(--gh-surface);
-  border-radius: var(--gh-radius);
+  border-radius: var(--gh-radius-lg);
   border: 1px solid var(--gh-line);
 }
 
@@ -104,49 +104,60 @@ a { color: inherit; }
   letter-spacing: 0.005em;
 }
 
+/* ---- Buttons (Redesign Phase 2, mockup .btn/.btn-p/.btn-s/.btn-t) ----------
+   One family for the whole site: text font, 600, sentence case, 48px high,
+   6px radius. Legacy class names map onto it so existing markup switches:
+     .btn-primary / .btn-red   -> pink, the one main action of a block
+     .btn-outline              -> outlined secondary
+     .btn-white-tonal          -> tonal secondary (light fill)
+     .btn-danger / .btn-outline-red -> destructive (delete, reject): outlined coral,
+                                  never pink, so it can't be confused with "go".
+   Orange is not a button colour (DEC-0114: secondary accent for text/hover). */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 22px;
   border-radius: var(--gh-radius);
-  padding: 0.85rem 1.5rem;
-  font-family: var(--gh-font-display);
-  font-weight: 800;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  border: 1px solid transparent;
+  font-family: var(--gh-font-body);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-transform: none;
   text-decoration: none;
-  border: 2px solid transparent;
+  white-space: nowrap;
   cursor: pointer;
+  background: rgba(251,247,234,.08);
+  color: var(--lr-text);
+  transition: background-color .12s, border-color .12s, color .12s;
 }
-.btn-primary { background: var(--lr-orange); color: #1A0E06; }
-.btn-primary:hover { filter: brightness(1.06); }
-.btn-red { background: var(--lr-pink); color: var(--lr-on-pink); }
-.btn-red:hover { background: var(--lr-pink-hover); }
-.btn-outline { background: transparent; border-color: var(--gh-line); color: var(--gh-text); }
-.btn-outline:hover, .outline-hover:hover { background: rgba(251,247,234,.08); border-color: var(--gh-muted); }
+.btn:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+.btn:disabled, .btn.is-disabled, .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+.btn-sm { min-height: 36px; padding: 0 14px; font-size: 13px; gap: 6px; }
 
-/* Secondary button family (2026-09-20, Fausto's Referenzbeispiele):
-   tonal = muted background at low opacity, text in the full-strength
-   accent color; outline-<color> = transparent bg, colored border + text.
-   Solid .btn-red/.btn-primary stay "100% Kraft" for primary actions;
-   these are for secondary actions that still carry brand color. */
-.btn-red-tonal { background: rgba(242,75,157,.14); color: var(--gh-red); }
-.btn-red-tonal:hover { background: rgba(242,75,157,.22); }
-.btn-yellow-tonal { background: rgba(255,149,90,.14); color: var(--gh-yellow); }
-.btn-yellow-tonal:hover { background: rgba(255,149,90,.22); }
-.btn-white-tonal { background: rgba(251,247,234,.12); color: var(--gh-text); }
-.btn-white-tonal:hover { background: rgba(251,247,234,.2); }
-.btn-outline-red { background: transparent; border-color: var(--gh-red); color: var(--gh-red); }
-.btn-outline-red:hover { background: rgba(242,75,157,.1); }
-.btn-outline-yellow { background: transparent; border-color: var(--gh-yellow); color: var(--gh-yellow); }
-.btn-outline-yellow:hover { background: rgba(255,149,90,.1); }
-/* Solid, but in our second-darkest surface color rather than an accent --
-   for secondary chrome (e.g. the header's Discord link) that should read
-   as a real button, not compete with red/yellow accent CTAs. */
-.btn-surface { background: var(--gh-surface); color: var(--gh-text); }
-.btn-surface:hover { filter: brightness(1.25); }
+.btn-primary, .btn-red, .btn-p { background: var(--lr-pink); border-color: var(--lr-pink); color: var(--lr-on-pink); }
+.btn-primary:hover, .btn-red:hover, .btn-p:hover { background: var(--lr-pink-hover); border-color: var(--lr-pink-hover); color: var(--lr-on-pink); }
+.btn-outline, .btn-s { background: transparent; border-color: rgba(251,247,234,.26); color: var(--lr-text); }
+.btn-outline:hover, .btn-s:hover, .outline-hover:hover { background: transparent; border-color: var(--lr-text); color: var(--lr-text); }
+.btn-white-tonal, .btn-t, .btn-surface { background: rgba(251,247,234,.08); color: var(--lr-text); }
+.btn-white-tonal:hover, .btn-t:hover, .btn-surface:hover { background: rgba(251,247,234,.14); }
+.btn-red-tonal { background: transparent; border-color: rgba(242,75,157,.55); color: var(--lr-pink); }
+.btn-red-tonal:hover { background: rgba(242,75,157,.1); border-color: var(--lr-pink); }
+/* legacy tonal/outline yellow -> orange text, kept for any leftover markup */
+.btn-yellow-tonal { background: rgba(255,149,90,.12); color: var(--lr-orange); }
+.btn-outline-yellow { background: transparent; border-color: rgba(255,149,90,.55); color: var(--lr-orange); }
+.btn-danger, .btn-outline-red { background: transparent; border-color: rgba(255,122,122,.55); color: #FF8A8A; }
+.btn-danger:hover, .btn-outline-red:hover { background: rgba(255,122,122,.1); border-color: #FF8A8A; }
+/* arrow text link (mockup .arrow): "Open the Guide →" */
+.arrow { font-size: 14px; font-weight: 600; color: var(--lr-orange); text-decoration: none; }
+.arrow:hover { color: var(--lr-pink); }
+
+/* ---- Cards (mockup .card) ---- */
+.card { background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: var(--gh-radius-lg); overflow: hidden; }
 
 .status-ok, .status-pending {
   display: inline-flex;
