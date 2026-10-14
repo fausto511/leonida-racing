@@ -114,6 +114,10 @@ const initialHtml = sampleCrews.map((c) => crewCardHtml(c, undefined, { sample: 
     flagEl.hidden = true;
     rosterMap = await fetchRoster();
     renderCards();
+    // Deep link target for the redesigned home (DEC-0116): /community/crews/#crew-<id>.
+    // Anchor + scroll only; the visual highlight comes with the redesign.
+    const target = location.hash.startsWith('#crew-') ? document.getElementById(location.hash.slice(1)) : null;
+    if (target) target.scrollIntoView({ block: 'center' });
     await membership.setCrews(liveCrews, true);
   }
   init();

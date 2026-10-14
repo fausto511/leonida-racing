@@ -89,6 +89,25 @@ for (const val of generated.values as VehicleValue[]) {
   (target[val.vehicle_id] ??= {})[val.metric] = { ...val, value: Number(val.value) };
 }
 
+// Fastest accepted Gellhorn lap per car (from public_leaderboard_ranks, fetched
+// before the build; empty until real laps exist). Port phase 0, 2026-10-14.
+const GELLHORN = 'gellhorn-international-raceway';
+const fastestLap = new Map<string, number>();
+for (const l of ((generated as { laps?: { track_id: string; vehicle_id: string; lap_time_ms: number }[] }).laps ?? [])) {
+  if (l.track_id === GELLHORN) fastestLap.set(l.vehicle_id, Number(l.lap_time_ms));
+}
+export const fastestGellhornLapMs = (id: string): number | null => fastestLap.get(id) ?? null;
+
+/** Image band motif for class / manufacturer / ranking pages (Fausto 2026-10-14):
+ *  the car with the fastest Gellhorn lap among `list` that has a photo; else the
+ *  first car with a photo; null = use the garage placeholder image.
+ *  Prepared for the redesign, not rendered anywhere yet. */
+export function bandVehicle(list: VehicleOption[]): VehicleOption | null {
+  const withPhoto = list.filter((v) => v.photo);
+  const timed = withPhoto.filter((v) => fastestLap.has(v.id)).sort((a, b) => fastestLap.get(a.id)! - fastestLap.get(b.id)!);
+  return timed[0] ?? withPhoto[0] ?? null;
+}
+
 // Model families (Fausto 2026-10-08): other members of the same family, any class.
 // A family gets its own page from FAMILY_PAGE_MIN models on.
 export const FAMILY_PAGE_MIN = 5;

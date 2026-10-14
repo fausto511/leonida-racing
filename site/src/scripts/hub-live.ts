@@ -11,17 +11,31 @@ export async function fetchLiveCrews(): Promise<HubCrew[] | null> {
   try {
     const { data, error } = await getSupabase()
       .from('crews')
-      .select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_featured,is_official')
+      .select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_featured,is_official,sort_order')
       .eq('is_published', true)
-      // Fausto 2026-10-07: featured crews first, then by sort order (lower = earlier), then name
+      // Featured crews first, then by sort order (lower = earlier) -- Fausto 2026-10-07.
       .order('is_featured', { ascending: false })
-      .order('sort_order', { ascending: true })
-      .order('name', { ascending: true });
+      .order('sort_order', { ascending: true });
     if (error || !data || data.length === 0) return null;
-    return data as HubCrew[];
+    // Same featured flag + same sort order: random on every page load instead of
+    // by name (Fausto 2026-10-13, port phase 0), so no crew is always on top by alphabet.
+    const rows = data as (HubCrew & { sort_order: number | null })[];
+    const groups: (typeof rows)[] = [];
+    for (const r of rows) {
+      const last = groups[groups.length - 1];
+      if (last && last[0].is_featured === r.is_featured && (last[0].sort_order ?? 0) === (r.sort_order ?? 0)) last.push(r);
+      else groups.push([r]);
+    }
+    return groups.flatMap(shuffleCopy) as HubCrew[];
   } catch {
     return null;
   }
+}
+
+function shuffleCopy<T>(a: T[]): T[] {
+  const b = [...a];
+  for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; }
+  return b;
 }
 
 /** Featured crews for Hub overview + home (Fausto, 2026-10-03): n crews,

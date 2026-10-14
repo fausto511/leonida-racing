@@ -278,7 +278,7 @@ export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: bo
   const dcLink = discord ? `<a class="crew-icon-link crew-icon-dc" href="${esc(discord)}" target="_blank" rel="noopener" title="Discord" aria-label="Discord">${iconDiscord}</a>`
     : opts.sample ? `<span class="crew-icon-link crew-icon-dc is-disabled" title="Sample crew — no Discord server">${iconDiscord}</span>` : '';
   const report = c.crew_id ? `<a class="crew-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?crew=${encodeURIComponent(c.crew_id)}`)}" title="Report this crew to the moderators" aria-label="Report this crew"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/></svg></a>` : '';
-  return `<article class="crew-card"${joinId ? ` data-crew-id="${esc(joinId)}"` : ''} data-platforms="${esc(c.platforms.join('|'))}" data-focus="${esc(c.focus.join('|'))}" data-languages="${esc((c.languages ?? []).join('|'))}" data-search="${esc(`${c.name} ${c.tag}`.toLowerCase())}" style="--crew-color:${safeColor(c.color)}">
+  return `<article class="crew-card"${c.crew_id && !opts.sample ? ` id="crew-${esc(c.crew_id)}"` : ''}${joinId ? ` data-crew-id="${esc(joinId)}"` : ''} data-platforms="${esc(c.platforms.join('|'))}" data-focus="${esc(c.focus.join('|'))}" data-languages="${esc((c.languages ?? []).join('|'))}" data-search="${esc(`${c.name} ${c.tag}`.toLowerCase())}" style="--crew-color:${safeColor(c.color)}">
   ${report}
   <div class="crew-card-head">
     ${crewEmblemHtml(c.color)}
