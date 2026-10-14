@@ -36,8 +36,8 @@ type Pick = { cls: string; v: VehicleOption; ms: number | null };
 const picks: Pick[] = classNames.map((cls) => {
   const inClass = vehicleOptions.filter((v) => v.classes.includes(cls));
   const timed = inClass.filter((v) => fastestGellhornLapMs(v.id) != null).sort((a, b) => fastestGellhornLapMs(a.id)! - fastestGellhornLapMs(b.id)!);
-  // before any lap exists: photo car first, else the first car (placeholder card) -- Super/Sports must always show
-  const v = timed[0] ?? (anyLap ? null : bandVehicle(inClass) ?? inClass[0] ?? null);
+  // before any lap exists: only classes that have a car with a photo (Fausto 15.10.: no placeholder cards here)
+  const v = timed[0] ?? (anyLap ? null : bandVehicle(inClass));
   return v ? { cls, v, ms: fastestGellhornLapMs(v.id) } : null;
 }).filter((p): p is Pick => p !== null);
 const fixed = ['Super', 'Sports'];
@@ -50,20 +50,22 @@ const eventsHtml = sampleEv.map(homeEventRow).join('') + Array.from({ length: Ma
 const crewsHtml = sampleCrews.slice(0, 4).map((c) => homeCrewRow(c, true)).join('');
 
 // ---- Guide: "Racing in GTA VI" fixed, two rotating (never "not-confirmed") ----
-const GUIDE_CARD: Record<string, { img: string; line: string }> = {
-  racing: { img: 'guide/circuit-race', line: 'Circuit, off-road and street racing, each shown with a live race HUD.' },
-  vehicles: { img: 'vehicles/dundreary-sirius', line: 'Which cars Rockstar has named, and which ones are community identifications.' },
+const GUIDE_CARD: Record<string, { img: string; line: string; title?: string }> = {
+  // racing / vehicles / customization: image, title and sentence from the mockup (DEC-0116 board Home)
+  racing: { img: 'guide/street-race', title: 'Racing in GTA VI', line: 'Circuit, off-road, and street racing, each shown with a live race HUD.' },
+  vehicles: { img: 'guide/classic-collection-car', title: 'Vehicles in GTA VI', line: '298 vehicles spotted in official material. Which names Rockstar confirmed, and which are community IDs.' },
+  customization: { img: 'guide/rideout-customs', title: 'Customization and mod shops', line: 'Two named mod shops, from detailed interiors and donk builds to lifted off-road rigs.' },
   driving: { img: 'guide/driving', line: 'What Rockstar has said about the rebuilt driving physics so far.' },
   theft: { img: 'guide/slim-jim', line: 'Stealing, scanning, selling and registering cars, as Rockstar described it.' },
   ownership: { img: 'guide/safehouse', line: 'Garages, storage spaces and the safehouse vehicles shown so far.' },
-  customization: { img: 'guide/rideout-customs', line: 'Two named mod shops, from detailed interiors to lifted off-road rigs.' },
   classics: { img: 'guide/classic-collection-wyman', line: 'Classic cars, restoration and special builds from the Ultimate Edition.' },
   gellhorn: { img: 'guide/circuit-empty', line: 'The paved circuit behind Gellhorn Time Attack, and what is known about it.' },
   'car-culture': { img: 'guide/car-meet', line: 'Car meets and street takeovers as they appear in official footage.' },
 };
 const guideCards = guideSections.filter((s) => s.id !== 'not-confirmed' && GUIDE_CARD[s.id]);
 const guideFixed = guideCards.find((s) => s.id === 'racing')!;
-const guideRest = guideCards.filter((s) => s.id !== 'racing');
+const MOCKUP_DEFAULT = ['vehicles', 'customization'];
+const guideRest = [...guideCards.filter((s) => MOCKUP_DEFAULT.includes(s.id)), ...guideCards.filter((s) => s.id !== 'racing' && !MOCKUP_DEFAULT.includes(s.id))];
 const guideUpdated = new Date(`${GUIDE_UPDATED}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
 const home = new URL(base, Astro.site).href;
@@ -119,7 +121,7 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
             { href: `${base}cars/`, img: 'vehicles/declasse-mamba-gt', eb: 'Database', name: 'Cars', line: 'Check the specs. Find your next car.' },
             { href: TA, img: 'gellhorn-raceway', eb: 'Gellhorn', name: 'Time Attack', line: 'Submit a lap. Move up the leaderboard.' },
             { href: `${base}community/`, img: 'hub/hub-carmeet', eb: 'Events & Crews', name: 'Community', line: 'Find races, crews, and car meets.' },
-            { href: `${base}guide/`, img: 'guide/guide-hero', eb: 'Sourced', name: 'Guide', line: 'Facts, not rumors. All sourced.' },
+            { href: `${base}guide/`, img: 'home/guide-tile', eb: 'Sourced', name: 'Guide', line: 'Facts, not rumors. All sourced.' },
           ].map((t) => (
             <a href={t.href} class="htile">
               <span class="htile-img"><img src={`${base}images/${t.img}-640.webp`} alt="" width="640" height="360" loading="eager" /><span class="htile-go" set:html={arrowSvg} /></span>
@@ -178,7 +180,7 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
         </div>
       </div>
       <div class="tband-board">
-        <div class="tband-head"><h3 id="tband-title">Top 5 · overall</h3><span class="muted" id="tband-flag">sample until launch</span></div>
+        <div class="tband-head"><h3 id="tband-title">Top 5 · overall</h3><span class="muted" id="tband-flag">sample until launch</span></div>
         <div class="tband-rows" id="tband-rows" set:html={sampleTopHtml} />
         <div class="tband-chips">
           <span class="tband-chips-label">By class</span>
@@ -216,7 +218,7 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
     </div>
     <div class="ccards">
       <article class="card ccard">
-        <div class="cimg"><img src={`${base}images/hub/hub-entry-events-640.webp`} srcset={`${base}images/hub/hub-entry-events-640.webp 640w, ${base}images/hub/hub-entry-events-1280.webp 1280w`} sizes="(max-width: 760px) 100vw, 640px" alt="" width="640" height="360" loading="lazy" /></div>
+        <div class="cimg"><img src={`${base}images/hub/hub-carmeet-640.webp`} srcset={`${base}images/hub/hub-carmeet-640.webp 640w, ${base}images/hub/hub-carmeet-1080.webp 1080w`} sizes="(max-width: 760px) 100vw, 640px" alt="" width="640" height="360" loading="lazy" /></div>
         <div class="cbody">
           <h3><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>Next events<span class="ctz">Your local time</span></h3>
           <div class="crows" id="home-events" set:html={eventsHtml} />
@@ -224,7 +226,7 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
         </div>
       </article>
       <article class="card ccard">
-        <div class="cimg"><img src={`${base}images/hub/hub-entry-crews-640.webp`} srcset={`${base}images/hub/hub-entry-crews-640.webp 640w, ${base}images/hub/hub-entry-crews-1280.webp 1280w`} sizes="(max-width: 760px) 100vw, 640px" alt="" width="640" height="360" loading="lazy" /></div>
+        <div class="cimg cimg-crews"><img src={`${base}images/hub/hub-crews-640.webp`} srcset={`${base}images/hub/hub-crews-640.webp 640w, ${base}images/hub/hub-crews-1080.webp 1080w`} sizes="(max-width: 760px) 100vw, 640px" alt="" width="640" height="360" loading="lazy" /></div>
         <div class="cbody">
           <h3><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Featured crews</h3>
           <div class="crows" id="home-crews" set:html={crewsHtml} />
@@ -252,7 +254,7 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
             {s.status && <span class="g-status"><i aria-hidden="true"></i>{s.status}</span>}
           </div>
           <div class="g-body">
-            <a href={`${base}guide/#${s.id}`} class="g-name">{s.title}</a>
+            <a href={`${base}guide/#${s.id}`} class="g-name">{GUIDE_CARD[s.id].title ?? s.title}</a>
             <span class="g-txt">{GUIDE_CARD[s.id].line}</span>
             <div class="g-foot"><span class="g-src"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>{s.sources.length} {s.sources.length === 1 ? 'source' : 'sources'}</span><span class="g-arrow" aria-hidden="true">→</span></div>
           </div>
@@ -297,10 +299,11 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
   .hero-tint-2 { background: linear-gradient(115deg, rgba(242,75,157,.22) 0%, rgba(242,75,157,0) 42%, rgba(255,122,61,0) 58%, rgba(255,122,61,.22) 100%); }
   .hero-tint-3 { background: linear-gradient(90deg, rgba(11,11,20,.86) 0%, rgba(11,11,20,.6) 40%, rgba(11,11,20,.15) 100%); }
   .hero-tint-4 { background: linear-gradient(180deg, rgba(11,11,20,0) 40%, rgba(11,11,20,.82) 100%), radial-gradient(55% 60% at 22% 42%, rgba(11,11,20,.55) 0%, rgba(11,11,20,0) 100%); }
-  .hero-inner { position: relative; width: 100%; padding-top: 44px; padding-bottom: 28px; }
+  .hero-inner { position: relative; width: 100%; padding-top: 30px; padding-bottom: 26px; }
   .hero-guest, .hero-dash { display: flex; flex-direction: column; gap: 22px; }
   :global(html.lr-authed) .hero-guest { visibility: hidden; }
   .hero-head { display: flex; flex-direction: column; gap: 16px; }
+  .hero-inner .eyebrow { margin: 0; font-size: 12px; font-weight: 600; }
   .hero-title { margin: 0; font-size: clamp(38px, 5.4vw, 68px); line-height: .98; text-shadow: 0 2px 24px rgba(11,11,20,.55); }
   .hero-title-dash { font-size: clamp(30px, 4.4vw, 56px); line-height: 1; }
   .hero-sub { margin: 0; max-width: 760px; font-size: 18px; line-height: 1.6; color: #EDEBF2; font-weight: 500; text-wrap: balance; text-shadow: 0 1px 12px rgba(11,11,20,.9), 0 0 2px rgba(11,11,20,.6); }
@@ -390,6 +393,7 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
   .ccard { display: flex; flex-direction: column; }
   .cimg { height: 130px; overflow: hidden; }
   .cimg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cimg-crews img { object-position: 50% 18%; }
   .cbody { flex: 1; display: flex; flex-direction: column; padding: 18px 22px 20px; }
   .ccard h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; padding: 0 10px; font-size: 20px; font-weight: 700; }
   .ccard h3 .ico { width: 20px; height: 20px; color: var(--lr-orange); }
@@ -407,6 +411,7 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
   .crows :global(.cmain > span) { font-size: 13px; color: var(--lr-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .crows :global(.cmain .crew-tag) { margin-left: 4px; vertical-align: 1px; }
   .crows :global(.crow > .crew-tag) { flex: none; min-width: 54px; }
+  .crows :global(.ctag-inline) { display: none; }
   .crows :global(.cside) { position: relative; z-index: 2; flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
   /* sign-up slot content from event-rsvp.ts / crew-membership.ts, in the row style */
   .crows :global(.cside .btn), .crows :global(.crew-join-btn), .crows :global(.crew-withdraw) { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; height: 32px; padding: 0 13px; border-radius: 6px; font-family: var(--gh-font-body); font-size: 13px; font-weight: 600; border: 1px solid rgba(251,247,234,.26); color: var(--lr-text); background: transparent; cursor: pointer; white-space: nowrap; text-decoration: none; }
@@ -421,7 +426,7 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
   .crows :global(.crew-join-slot) { flex-direction: row; align-items: center; gap: 8px; }
   .crows :global(.crew-pill) { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 6px; background: rgba(251,247,234,.08); color: var(--lr-muted); font-size: 13px; font-weight: 600; white-space: nowrap; }
   .crows :global(.crew-withdraw) { border-color: transparent; color: var(--lr-muted); padding: 0 6px; }
-  .crows :global(.crew-link) { font-size: 12px; color: var(--lr-muted); }
+  .crows :global(.crew-link:not(.crew-join-btn):not(.crew-withdraw)) { font-size: 12px; color: var(--lr-muted); }
   .crows :global(.crow.cfree) { border: 1px dashed rgba(200,200,222,.24); margin-top: 8px; }
   .crows :global(.crow.cfree:hover) { border-color: rgba(251,247,234,.5); }
   .crows :global(.crow.cfree .cdate) { display: flex; align-items: center; justify-content: center; height: 44px; }
@@ -526,7 +531,8 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
     .crows :global(.cmain > span) { white-space: normal; }
     .crows :global(.cdate) { width: 34px; }
     .crows :global(.cdate b) { font-size: 18px; }
-    .crows :global(.crow > .crew-tag) { min-width: 48px; margin-top: 2px; }
+    .crows :global(.crow > .crew-tag) { display: none; }
+    .crows :global(.ctag-inline) { display: inline-flex; margin-left: 8px; vertical-align: 2px; }
     .crows :global(.cside .btn), .crows :global(.crew-join-btn), .crows :global(.crew-pill) { height: 30px; min-height: 30px; padding: 0 10px; font-size: 12px; }
     .cfoot { padding: 14px 6px 0; }
 

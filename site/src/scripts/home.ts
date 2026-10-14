@@ -115,7 +115,7 @@ async function renderBand(rows: RankRow[], title: string, me: string | null) {
 async function bandOverall() {
   const { data, error } = await ranks().eq('scope', 'overall').lte('rank', 5).order('rank');
   if (error || !data?.length) return;
-  await renderBand(data as RankRow[], 'Top 5 · overall', null);
+  await renderBand(data as RankRow[], 'Top 5 · overall', null);
 }
 
 /** Active driver: Top 3 of ONE class + the driver ahead, own row, the driver behind.
@@ -142,7 +142,7 @@ async function bandPersonal(me: string, myClassRows: RankRow[]) {
   const byRank = new Map<number, RankRow>();
   [...((top ?? []) as RankRow[]), ...nearRows].forEach((x) => { if (wanted.has(x.rank)) byRank.set(x.rank, x); });
   const rows = [...byRank.values()].sort((a, b) => a.rank - b.rank);
-  await renderBand(rows, `Top 3 · ${pick.scope_key}`, me);
+  await renderBand(rows, `Top 3 · ${pick.scope_key}`, me);
 }
 
 // ---------------------------------------------------------------------------
@@ -192,7 +192,7 @@ async function loadDashboard(session: any) {
     active = true;
     const inClass = classRows.filter((r) => r.run_id === overall.run_id).sort((a, b) => a.rank - b.rank)[0];
     const cls = inClass?.scope_key ?? null;
-    tile('dash-lap', lapTime(overall.lap_time_ms), `${inClass ? `#${inClass.rank} in ${cls} · ` : ''}#${overall.rank} overall`, { href: `${base}time-attack/gellhorn-international-raceway/` });
+    tile('dash-lap', lapTime(overall.lap_time_ms), `${inClass ? `#${inClass.rank} in ${cls} · ` : ''}#${overall.rank} overall`, { href: `${base}time-attack/gellhorn-international-raceway/` });
   } else tile('dash-lap', 'No lap yet', 'Set your first time →', { cta: true, href: `${base}time-attack/submit/` });
 
   // My Garage: X / N cars + bar + latest
@@ -216,7 +216,7 @@ async function loadDashboard(session: any) {
     ]);
     const next = ev.data?.[0];
     const members = cr.data?.member_count;
-    tile('dash-crew', esc(main.crew_name), next ? `Next: ${next.title} · ${shortDate(next.starts_at)}` : members != null ? `${members} ${members === 1 ? 'member' : 'members'}` : 'Crew page →');
+    tile('dash-crew', esc(main.crew_name), next ? `Next: ${next.title} · ${shortDate(next.starts_at)}` : members != null ? `${members} ${members === 1 ? 'member' : 'members'}` : 'Crew page →');
   } else tile('dash-crew', 'No crew', 'Find a crew →', { cta: true, href: `${base}community/crews/` });
 
   // Events: next event I'm going to
@@ -228,7 +228,7 @@ async function loadDashboard(session: any) {
   }
   if (nextEv) {
     active = true;
-    tile('dash-events', esc(nextEv.title), `${eventTypeLabels[nextEv.event_type as keyof typeof eventTypeLabels] ?? ''} · ${shortDate(nextEv.starts_at)}`, { href: `${base}community/events/#event-${encodeURIComponent(nextEv.event_id)}` });
+    tile('dash-events', esc(nextEv.title), `${eventTypeLabels[nextEv.event_type as keyof typeof eventTypeLabels] ?? ''} · ${shortDate(nextEv.starts_at)}`, { href: `${base}community/events/#event-${encodeURIComponent(nextEv.event_id)}` });
   } else tile('dash-events', 'No events planned', 'Host one →', { cta: true, href: `${base}account/events/` });
 
   $('dash-title')!.textContent = `${active ? 'Welcome back' : 'Welcome'}, ${name}`;

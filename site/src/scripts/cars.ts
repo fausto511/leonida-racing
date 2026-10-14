@@ -376,7 +376,7 @@ function paintDraft() {
   const n = countWith(draft);
   $('dsp-show').textContent = `Show ${n} ${n === 1 ? 'car' : 'cars'}`;
   const parts = activeKeys(draft).filter((k) => k !== 'q' && k !== 'own').map((k) => (k === 'max' ? `Max ${fmtMoney(draft.max!)}` : [...draft.sets[k as Group]].map((v) => valueLabel(k as Group, v)).join(', ')));
-  $('dsp-sum').textContent = parts.join(' · ');
+  $('dsp-sum').textContent = parts.join(' · ');
 }
 function openSheet(id: string) {
   $('dsp-back').hidden = false;
