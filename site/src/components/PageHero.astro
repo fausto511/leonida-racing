@@ -53,11 +53,11 @@ const img = images[image];
   /* Crop per image (see `images` above). Car meet: faces of the group on
      the left + both wrapped cars stay in view; sky/tarmac get cut. */
   .hero img { object-position: var(--pos); }
-  .hero-veil { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(20,20,26,.97) 15%, rgba(20,20,26,.6) 60%, rgba(20,20,26,.85)); }
+  .hero-veil { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(11,11,20,.97) 15%, rgba(11,11,20,.6) 60%, rgba(11,11,20,.85)); }
   .hero-grid { position: relative; display: grid; grid-template-columns: 1fr; /* no right-hand aside on hub pages */ align-items: center; gap: 2rem; min-height: 21rem; padding-block: 2rem; }
   .hero-grid.has-aside { grid-template-columns: 1.5fr 1fr; } /* same split as Garage/Gellhorn (RS-0050) */
   .hero-copy { max-width: 46rem; align-self: start; }
-  .hero-title { font-size: 2.5rem; margin: .5rem 0 .8rem; }
+  .hero-title { font-size: clamp(1.75rem, 7.4vw, 2.5rem); margin: .5rem 0 .8rem; }
   .hero-lede { color: var(--gh-muted); font-size: 1rem; margin: 0; max-width: 56ch; }
   @media (max-width: 860px) {
     .hero-grid, .hero-grid.has-aside { grid-template-columns: 1fr; min-height: 35rem; padding-block: 2.5rem; }

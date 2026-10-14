@@ -97,16 +97,16 @@ const base = import.meta.env.BASE_URL;
 <style>
   .hero { position: relative; overflow: hidden; }
   .hero picture, .hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .hero-veil { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(20,20,26,.97) 8%, rgba(20,20,26,.55) 55%, rgba(20,20,26,.8)); }
+  .hero-veil { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(11,11,20,.97) 8%, rgba(11,11,20,.55) 55%, rgba(11,11,20,.8)); }
   /* Fixed hero height -- kept in sync, literally, with cars/index.astro's .hero-grid so the header band is identical on every page that has one. Not viewport-fluid (clamp/vw) on purpose: it must not vary by content or screen width the way the old per-page clamp() values did. */
   .hero-grid { position: relative; display: grid; grid-template-columns: 1.5fr 1fr; align-items: center; gap: 2rem; min-height: 21rem; padding-block: 2rem; }
-  .hero-title { font-size: 2.5rem; margin: .5rem 0 .8rem; }
+  .hero-title { font-size: clamp(1.75rem, 7.4vw, 2.5rem); margin: .5rem 0 .8rem; }
   .hero-lede { max-width: 56ch; color: var(--gh-muted); font-size: 1rem; margin: 0 0 1.1rem; } /* same width as Garage/Hub (RS-0050) */ /* 1rem = same lede size as every other page hero (PageHero, Garage) */
   .hero-copy { max-width: 46rem; align-self: start; }
   .hero-actions { display: flex; gap: .7rem; flex-wrap: wrap; }
   .hero-actions .btn { gap: .5rem; }
 
-  .jump-nav { position: sticky; top: var(--gh-header-h); z-index: 30; background: rgba(20,20,26,.95); backdrop-filter: blur(10px); border-block: 1px solid var(--gh-line); }
+  .jump-nav { position: sticky; top: var(--gh-header-h); z-index: 30; background: rgba(11,11,20,.95); backdrop-filter: blur(10px); border-block: 1px solid var(--gh-line); }
   .jump-row { display: flex; justify-content: center; gap: 1.75rem; overflow-x: auto; }
   .jump-row a { padding-block: .8rem; color: var(--gh-muted); font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
   .jump-row a:hover { color: var(--gh-text); }
@@ -116,7 +116,7 @@ const base = import.meta.env.BASE_URL;
   .story-photo { overflow: hidden; }
   .story-photo-media { position: absolute; inset: 0; }
   .story-photo-media img { width: 100%; height: 100%; object-fit: cover; opacity: .16; }
-  .story-photo-veil { position: absolute; inset: 0; background: linear-gradient(180deg, var(--gh-bg) 0%, rgba(20,20,26,.82) 45%, var(--gh-bg) 100%); }
+  .story-photo-veil { position: absolute; inset: 0; background: linear-gradient(180deg, var(--gh-bg) 0%, rgba(11,11,20,.82) 45%, var(--gh-bg) 100%); }
   .story-photo .story-grid { position: relative; }
   .story-grid { display: grid; grid-template-columns: minmax(16rem,.7fr) minmax(20rem,1.3fr); gap: clamp(2.5rem, 7vw, 7rem); }
   .story-title { font-size: clamp(1.8rem, 3vw, 2.5rem); margin: .5rem 0 0; }

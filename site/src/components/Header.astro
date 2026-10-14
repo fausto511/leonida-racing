@@ -1,174 +1,267 @@
 ---
+// Site header — Redesign Phase 1 (DEC-0114 point 3, DEC-0116 points 1–2,
+// mockup "Leonida Racing Redesign", boards Home guest / logged in / phone).
+// COPY STATUS: launch strip + menu labels are Claude placeholders from the
+// mockup -> Codex review (DEC-0088).
+import { LAUNCH_DATE, LAUNCH_AT } from '../data/launch';
+
 interface Props {
   section?: 'time-attack' | 'garage' | 'hub' | 'guide' | 'account' | 'moderator' | null;
 }
 const { section = null } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const DISCORD_INVITE_URL = 'https://discord.gg/hPGuBwXRqT';
 
-// Sub-pages show as a dropdown on hover/focus (desktop) and as an indented
-// list in the mobile panel (Fausto, 2026-10-01).
-const globalLinks = [
-  { key: 'garage', label: 'The Garage', href: `${base}cars/`, children: [
-    { label: 'Vehicles', href: `${base}cars/` },
-    { label: 'Compare', href: `${base}cars/#compare` },
-    { label: 'Classes', href: `${base}cars/classes/` },
-    { label: 'Manufacturers', href: `${base}cars/manufacturers/` },
-  ] },
-  // Direct to the track page: /time-attack/ is only a forwarding page (DEC-0047),
-  // linking it would add a pointless extra page load on every click.
-  { key: 'time-attack', label: 'Time Attack', href: `${base}time-attack/gellhorn-international-raceway/`, children: [
-    { label: 'Leaderboard', href: `${base}time-attack/gellhorn-international-raceway/` },
-    { label: 'How It Works', href: `${base}time-attack/how-it-works/` },
-    { label: 'Rules', href: `${base}time-attack/rules/` },
-    { label: 'Submit a Lap', href: `${base}time-attack/submit/` },
-  ] },
-  { key: 'hub', label: 'The Hub', href: `${base}community/`, children: [
-    { label: 'Overview', href: `${base}community/` },
-    { label: 'Events', href: `${base}community/events/` },
-    { label: 'Crews', href: `${base}community/crews/` },
-    { label: 'Tracks', href: `${base}community/tracks/` },
-  ] },
-  // The Guide (2026-10-03): one page, sub-items jump to its sections.
-  { key: 'guide', label: 'The Guide', href: `${base}guide/`, children: [
-    { label: 'GTA VI Vehicles', href: `${base}guide/#vehicles` },
-    { label: 'Customization', href: `${base}guide/#customization` },
-    { label: 'Racing', href: `${base}guide/#racing` },
-    { label: 'FAQ', href: `${base}guide/#faq` },
-  ] },
+// Cars · Time Attack · Community (DEC-0116: Guide only in footer + home).
+// Internal section keys stay 'garage'/'hub' (Base.astro props), only labels changed.
+const navLinks = [
+  { key: 'garage', label: 'Cars', href: `${base}cars/` },
+  // Straight to the track page: /time-attack/ only forwards (DEC-0047/0119).
+  { key: 'time-attack', label: 'Time Attack', href: `${base}time-attack/gellhorn-international-raceway/` },
+  { key: 'hub', label: 'Community', href: `${base}community/` },
 ];
+
+// Build-time day count so the strip has the right width before JS runs;
+// the script below corrects it to the visitor's local midnight.
+const launchMs = LAUNCH_AT ? Date.parse(LAUNCH_AT) : Date.parse(`${LAUNCH_DATE}T00:00:00Z`);
+const buildDays = Math.max(0, Math.ceil((launchMs - Date.now()) / 86400000));
+const stripKey = `lr-strip-${LAUNCH_DATE}`;
+
+const discordIcon = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z';
 ---
+<!-- Before first paint: hide a dismissed strip and guess the login state
+     from Supabase's stored session (avoids a guest->avatar flicker). The
+     header script below confirms or corrects both. -->
+<script is:inline define:vars={{ stripKey, launchMs }}>
+  (function () {
+    var h = document.documentElement;
+    try {
+      if (localStorage.getItem(stripKey) === '1') h.classList.add('lr-strip-off');
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && /^sb-.*-auth-token$/.test(k)) { h.classList.add('lr-authed'); break; }
+      }
+    } catch (e) {}
+    if (launchMs - Date.now() <= 0) h.classList.add('lr-strip-off');
+  })();
+</script>
+
+{buildDays > 0 && (
+  <div class="lr-strip" id="lr-strip" data-launch-date={LAUNCH_DATE} data-launch-at={LAUNCH_AT ?? ''}>
+    <div class="wrap lr-strip-row">
+      <strong class="lr-strip-count"><span class="lr-strip-long">GTA VI launches</span><span class="lr-strip-short">GTA VI</span> <span data-strip-when>in {buildDays} days</span></strong>
+      <span class="lr-strip-guest">
+        <span class="lr-strip-sep" aria-hidden="true"></span>
+        <a href={`${base}account/`} data-login-link>Create your driver profile<span class="lr-strip-long"> now</span> →</a>
+      </span>
+      <button type="button" class="lr-strip-close" id="lr-strip-close" aria-label="Dismiss">×</button>
+    </div>
+  </div>
+)}
+
 <header class="site-head" id="site-head">
-  <div class="wrap global-nav-row">
-    <a class="brand" href={base}>
-      <span class="brand-main">LEONIDA</span><span class="brand-sub">RACING</span><span class="brand-beta" title="Leonida Racing is in beta — we are still building it">Beta</span>
+  <div class="wrap head-row">
+    <a class="brand" href={base} aria-label="Leonida Racing — home">
+      <img src={`${base}images/brand/lr-logo-white.png`} alt="" width="85" height="26" />
+      <span class="brand-text">Leonida Racing</span>
     </a>
-    <nav class="global-nav" id="global-nav" aria-label="Global">
-      {globalLinks.map((l) => (
-        <div class="nav-item">
-          <a href={l.href} class:list={['global-link', { 'is-active': section === l.key }]}>{l.label}</a>
-          <div class="nav-sub">
-            {l.children.map((c) => <a class="nav-sub-link" href={c.href}>{c.label}</a>)}
-          </div>
-        </div>
+
+    <nav class="head-nav" id="head-nav" aria-label="Global">
+      {navLinks.map((l) => (
+        <a href={l.href} class:list={['head-link', { 'is-active': section === l.key }]} aria-current={section === l.key ? 'page' : undefined}>{l.label}</a>
       ))}
     </nav>
-    <div class="account-slot">
-      <!-- No separate logged-out "Account" text link anymore (see
-           04-Offene-Punkte.md, 2026-09-20 note): the Discord button to the
-           right now doubles as "Login with Discord" while logged out, so a
-           second entry point next to it was redundant. Logged-in users
-           still reach /account/ via this avatar dropdown. -->
-      <div id="account-menu" class="account-menu" hidden>
-        <button type="button" id="account-menu-trigger" class="account-menu-trigger" aria-haspopup="true" aria-expanded="false">
-          <img id="account-avatar-img" class="account-avatar" alt="" width="32" height="32" hidden />
-          <span id="account-avatar-fallback" class="account-avatar-fallback" hidden></span>
-        </button>
-        <div id="account-menu-dropdown" class="account-menu-dropdown" hidden role="menu">
-          <a href={`${base}account/`} role="menuitem" id="account-menu-account">Account</a>
-          <!-- Only shown to moderators (checked after login). Hiding it is
-               cosmetic -- the moderator pages and the database (RLS) do
-               their own access check. -->
-          <a href={`${base}moderator/`} role="menuitem" id="account-menu-moderator" hidden>Moderator</a>
-          <button type="button" id="account-menu-logout" role="menuitem">Logout</button>
-        </div>
+
+    <form class="head-search" role="search" action={`${base}cars/`} method="get">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" name="q" placeholder="Search cars" aria-label="Search cars" autocomplete="off" />
+    </form>
+    <a class="head-icon head-search-ico" href={`${base}cars/`} aria-label="Search cars">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </a>
+
+    <!-- Logged out: Supabase Discord login (guilds.join = auto server join).
+         No-JS / no backend: plain server invite. -->
+    <a id="discord-login" class="head-discord" href={DISCORD_INVITE_URL} target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d={discordIcon} /></svg>
+      <span>Log in with Discord</span>
+    </a>
+
+    <div id="account-menu" class="account-menu">
+      <button type="button" id="account-menu-trigger" class="account-trigger" aria-haspopup="true" aria-expanded="false" aria-label="Account menu">
+        <img id="account-avatar-img" class="account-avatar" alt="" width="36" height="36" hidden />
+        <span id="account-avatar-fallback" class="account-avatar account-avatar-fallback" aria-hidden="true"></span>
+        <svg class="ico chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div id="account-menu-dropdown" class="account-dropdown" hidden role="menu">
+        <a href={`${base}account/garage/`} role="menuitem">My garage</a>
+        <a href={`${base}account/`} role="menuitem">My laps</a>
+        <a href={`${base}account/crew/`} role="menuitem" id="account-menu-crew">My crew</a>
+        <a href={DISCORD_INVITE_URL} role="menuitem" target="_blank" rel="noopener">Open Discord server</a>
+        <a href={`${base}account/settings/`} role="menuitem">Settings</a>
+        <!-- Only shown to moderators. Cosmetic: moderator pages and RLS check access themselves. -->
+        <a href={`${base}moderator/`} role="menuitem" id="account-menu-moderator" hidden>Moderator</a>
+        <button type="button" id="account-menu-logout" role="menuitem" class="account-logout">Log out</button>
       </div>
     </div>
-    <!-- Default/no-JS state: a plain link to the Discord server (same as
-         always). Logged out + backend configured: script below turns this
-         into a "Login with Discord" trigger. Logged in: script restores
-         the plain server-invite link, since sign-in isn't needed anymore. -->
-    <a id="discord-btn" class="btn discord-btn" href="https://discord.gg/hPGuBwXRqT" target="_blank" rel="noopener">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 5.3A18 18 0 0 0 15.9 4l-.3.6a15 15 0 0 1 4 1.6 16 16 0 0 0-13.2 0 15 15 0 0 1 4-1.6L10.1 4a18 18 0 0 0-4.4 1.3C2.9 9 2.2 12.6 2.5 16.1a18 18 0 0 0 5.5 2.8l.8-1.3a11 11 0 0 1-1.9-.9l.5-.4a13 13 0 0 0 9.2 0l.5.4a11 11 0 0 1-1.9.9l.8 1.3a18 18 0 0 0 5.5-2.8c.4-4-.7-7.5-2.2-10.8ZM9.3 14c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Zm5.4 0c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Z"/></svg>
-      <span id="discord-btn-label">Join Discord</span>
-    </a>
-    <!-- Mobile only (<=760px): the global nav collapses into a panel below
-         the header row. Before 2026-09-25 the nav was simply hidden on
-         mobile with no replacement (Garage/Time Attack only reachable via
-         in-page links). -->
-    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="global-nav" aria-expanded="false" aria-label="Open menu">
-      <!-- SVG instead of three empty spans: iOS Safari collapsed the spans
-           to zero width, so the button looked blank (2026-10-01). -->
-      <svg class="nav-icon nav-icon-open" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
-      <svg class="nav-icon nav-icon-close" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+
+    <button type="button" class="head-icon head-burger" id="nav-toggle" aria-controls="head-panel" aria-expanded="false" aria-label="Open menu">
+      <svg class="ico nav-icon-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="ico nav-icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
+  </div>
+
+  <!-- Phone menu (<=760px). Not drawn in the mockup: search + the three
+       areas + Guide, same order as the footer. -->
+  <div class="head-panel" id="head-panel">
+    <div class="wrap">
+      <form class="head-search head-search-panel" role="search" action={`${base}cars/`} method="get">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" name="q" placeholder="Search cars" aria-label="Search cars" autocomplete="off" />
+      </form>
+      {navLinks.map((l) => (
+        <a href={l.href} class:list={['panel-link', { 'is-active': section === l.key }]}>{l.label}</a>
+      ))}
+      <a href={`${base}guide/`} class:list={['panel-link', { 'is-active': section === 'guide' }]}>Guide</a>
+    </div>
   </div>
 </header>
 
 <style>
-  .site-head { position: sticky; top: 0; z-index: 40; background: rgba(20,20,26,.96); backdrop-filter: blur(10px); border-bottom: 1px solid var(--gh-line); }
-  .global-nav-row { display: flex; align-items: center; gap: 1.75rem; height: 4.25rem; }
-  .brand { display: inline-flex; gap: .35rem; align-items: baseline; text-decoration: none; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; letter-spacing: .01em; }
-  .brand-main { color: var(--gh-text); font-size: 1.55rem; }
-  .brand-sub { color: var(--gh-red); font-size: 1.55rem; }
-  /* Beta marker (Fausto, 2026-09-28): the site is still being built. */
-  .brand-beta { align-self: center; margin-left: .35rem; padding: .12rem .4rem; border: 1px solid var(--gh-yellow); border-radius: 3px; color: var(--gh-yellow); font-family: var(--gh-font-body); font-style: normal; font-weight: 800; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; line-height: 1.2; }
-  /* nav + items stretch to the full bar height, so the dropdown (top: 100%) starts exactly at the bar's bottom line (2026-10-03) */
-  .global-nav { display: flex; gap: 1.75rem; margin-left: .75rem; flex: 1; align-self: stretch; }
-  .global-link { color: var(--gh-muted); text-decoration: none; font-family: var(--gh-font-display); font-style: italic; font-size: 1.05rem; font-weight: 900; letter-spacing: .01em; text-transform: uppercase; padding-block: .3rem; border-bottom: 2px solid transparent; }
-  .global-link:hover { color: var(--gh-text); }
-  .global-link.is-active { color: var(--gh-text); border-color: var(--gh-red); }
-  .nav-item { position: relative; display: flex; align-items: center; }
-  /* Dropdown looks like the header itself (Fausto, 2026-10-02): header
-     background, menu font, red underline follows the hovered entry. */
-  .nav-sub { position: absolute; top: 100%; left: -1rem; z-index: 50; min-width: 12rem; padding: .5rem 1rem .7rem; display: flex; flex-direction: column; align-items: flex-start; gap: .1rem; background: rgba(20,20,26,.98); backdrop-filter: blur(10px); border: 1px solid var(--gh-line); border-top: none; border-radius: 0 0 var(--gh-radius) var(--gh-radius); box-shadow: 0 14px 28px rgba(0,0,0,.45); opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity .12s, transform .12s, visibility .12s; }
-  /* invisible bridge so the menu stays open while the pointer moves down */
-  .nav-sub::before { content: ''; position: absolute; left: 0; right: 0; top: -1.2rem; height: 1.2rem; }
-  .nav-item:hover .nav-sub, .nav-item:focus-within .nav-sub { opacity: 1; visibility: visible; transform: none; }
-  .nav-sub-link { position: relative; padding: .45rem 0 .35rem; color: var(--gh-muted); font-family: var(--gh-font-display); font-style: italic; font-weight: 900; font-size: .95rem; letter-spacing: .01em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
-  .nav-sub-link::after { content: ''; position: absolute; left: 0; right: 0; bottom: .1rem; height: 2px; background: var(--gh-red); transform: scaleX(0); transform-origin: left; transition: transform .15s ease-out; }
-  .nav-sub-link:hover, .nav-sub-link:focus-visible { color: var(--gh-text); outline: none; }
-  .nav-sub-link:hover::after, .nav-sub-link:focus-visible::after { transform: scaleX(1); }
-  @media (prefers-reduced-motion: reduce) { .nav-sub-link::after { transition: none; } }
+  /* ---- launch strip (DEC-0116 point 2) ---- */
+  .lr-strip { background: var(--lr-pink); color: var(--lr-on-pink); font-size: 14px; }
+  :global(html.lr-strip-off) .lr-strip { display: none; }
+  .lr-strip-row { position: relative; display: flex; align-items: center; justify-content: center; gap: 14px; height: 38px; padding-right: 3rem; padding-left: 3rem; }
+  .lr-strip-count { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .lr-strip-short { display: none; }
+  .lr-strip-guest { display: inline-flex; align-items: center; gap: 14px; }
+  :global(html.lr-authed) .lr-strip-guest { display: none; }
+  .lr-strip-sep { width: 1px; height: 14px; background: rgba(42,15,34,.3); }
+  .lr-strip a { color: var(--lr-on-pink); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+  .lr-strip a:hover { text-decoration-thickness: 2px; }
+  .lr-strip-close { position: absolute; right: clamp(.5rem, 3vw, 2.5rem); top: 50%; transform: translateY(-50%); background: none; border: 0; color: var(--lr-on-pink); cursor: pointer; font-size: 20px; line-height: 1; padding: 6px 8px; }
+  .lr-strip-close:focus-visible { outline: 2px solid var(--lr-on-pink); outline-offset: 1px; border-radius: 4px; }
+
+  /* ---- header bar ---- */
+  .site-head { position: sticky; top: 0; z-index: 40; background: rgba(11,11,20,.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--lr-line); }
+  .head-row { display: flex; align-items: center; gap: 32px; height: 76px; }
+  .ico { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+  .brand { display: inline-flex; align-items: center; gap: 12px; flex: none; text-decoration: none; color: var(--lr-text); font-family: var(--gh-font-display); font-weight: 700; font-size: 19px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+  .brand img { height: 26px; width: auto; }
+
+  .head-nav { display: flex; align-items: center; gap: 26px; flex: none; }
+  .head-link { color: var(--lr-muted); text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; line-height: 1; padding: 8px 0; white-space: nowrap; }
+  .head-link:hover, .head-link:focus-visible { color: var(--lr-text); }
+  .head-link.is-active { color: var(--lr-text); font-weight: 600; }
+
+  .head-search { display: flex; align-items: center; gap: 10px; height: 44px; flex: 0 1 320px; min-width: 150px; margin: 0 0 0 auto; padding: 0 16px; border: 1px solid var(--lr-line-strong); border-radius: var(--gh-radius); color: var(--lr-muted); background: transparent; }
+  .head-search:focus-within { border-color: var(--lr-muted); }
+  .head-search input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; padding: 0; }
+  .head-search input::-webkit-search-cancel-button { filter: invert(1) opacity(.5); }
+
+  .head-icon { display: none; width: 44px; height: 44px; padding: 0; flex: none; align-items: center; justify-content: center; border: 0; border-radius: var(--gh-radius); background: rgba(251,247,234,.08); color: var(--lr-text); cursor: pointer; }
+  .head-icon:hover { background: rgba(251,247,234,.14); }
+  .head-icon:focus-visible, .account-trigger:focus-visible, .head-discord:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+
+  /* Discord blue only here (DEC-0114). */
+  .head-discord { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 44px; padding: 0 18px; flex: none; border-radius: var(--gh-radius); background: var(--lr-discord); color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .head-discord:hover { background: #6872F4; }
+  .head-discord svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+
+  .account-menu { position: relative; display: none; flex: none; }
+  :global(html.lr-authed) .account-menu { display: block; }
+  :global(html.lr-authed) .head-discord { display: none; }
+  .account-trigger { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 8px 0 4px; border: 0; border-radius: 999px; background: rgba(251,247,234,.08); color: var(--lr-text); cursor: pointer; }
+  .account-trigger:hover { background: rgba(251,247,234,.14); }
+  .account-trigger .chev { width: 14px; height: 14px; }
+  .account-avatar { width: 36px; height: 36px; border-radius: 999px; object-fit: cover; }
+  .account-avatar-fallback { display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #2A1F9E, #B12A8C 60%, #F26A3D); color: #fff; font-weight: 700; font-size: 13px; }
+  .account-avatar-fallback:empty::before { content: ''; }
+  .account-dropdown { position: absolute; top: calc(100% + 10px); right: 0; min-width: 13rem; padding: 6px; display: flex; flex-direction: column; background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: var(--gh-radius-lg); box-shadow: 0 16px 32px rgba(0,0,0,.45); }
+  .account-dropdown[hidden] { display: none; }
+  .account-dropdown a, .account-dropdown button { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: var(--gh-radius); background: none; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 500; text-align: left; text-decoration: none; cursor: pointer; }
+  .account-dropdown a:hover, .account-dropdown button:hover, .account-dropdown a:focus-visible, .account-dropdown button:focus-visible { background: var(--lr-raised); outline: none; }
+  .account-logout { margin-top: 4px; border-top: 1px solid var(--lr-line) !important; border-radius: 0 0 var(--gh-radius) var(--gh-radius) !important; color: var(--lr-muted) !important; }
   [hidden] { display: none !important; }
-  .account-slot { position: relative; }
-  .account-menu-trigger { display: flex; align-items: center; padding: 0; border: none; background: none; cursor: pointer; border-radius: 999px; }
-  .account-menu-trigger:focus-visible { outline: 2px solid var(--gh-yellow); outline-offset: 2px; }
-  .account-avatar { width: 2rem; height: 2rem; border-radius: 999px; object-fit: cover; border: 1px solid var(--gh-line); }
-  .account-avatar-fallback { width: 2rem; height: 2rem; border-radius: 999px; background: var(--gh-surface); color: var(--gh-text); border: 1px solid var(--gh-line); display: flex; align-items: center; justify-content: center; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; font-size: .85rem; }
-  .account-menu-dropdown { position: absolute; top: calc(100% + .6rem); right: 0; min-width: 9rem; padding: .4rem; display: flex; flex-direction: column; gap: .1rem; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
-  .account-menu-dropdown a, .account-menu-dropdown button { display: block; width: 100%; text-align: left; padding: .55rem .7rem; border-radius: var(--gh-radius); border: none; background: none; color: var(--gh-text); font-size: .85rem; font-weight: 600; text-decoration: none; cursor: pointer; font-family: var(--gh-font-body); }
-  .account-menu-dropdown a:hover, .account-menu-dropdown button:hover { background: var(--gh-surface-soft); }
-  .account-menu-dropdown > :not(:first-child) { margin-top: .3rem; padding-top: .6rem; border-top: 1px solid var(--gh-line); }
-  /* Discord's own brand color (#5865F2, "blurple"), not a Leonida Racing design
-     token -- kept local to this button so it stays instantly recognizable
-     as a Discord link. */
-  .discord-btn { padding: .55rem 1rem; gap: .45rem; font-size: .85rem; background: #5865f2; color: #fff; }
-  .discord-btn:hover { filter: brightness(1.1); }
-  .nav-toggle { display: none; }
+
+  .head-panel { display: none; }
+  .nav-icon-close { display: none; }
+
+  /* ---- breakpoints (mockup: 1100 / 760) ---- */
+  @media (max-width: 1100px) {
+    .head-row { gap: 24px; }
+    .head-row > .head-search { display: none; }
+    .head-search-ico { display: inline-flex; margin-left: auto; }
+    .head-discord { width: 44px; padding: 0; }
+    .head-discord span { display: none; }
+  }
+  @media (max-width: 900px) {
+    .head-row { gap: 18px; }
+    .head-nav { gap: 18px; }
+    .brand-text { display: none; }
+  }
   @media (max-width: 760px) {
-    .global-nav-row { gap: .75rem; }
-    .brand { margin-right: auto; }
-    .brand-main, .brand-sub { font-size: 1.2rem; }
-    .brand-beta { margin-left: .25rem; font-size: .52rem; padding: .1rem .3rem; }
-    .global-nav { display: none; position: absolute; top: 100%; left: 0; right: 0; margin: 0; flex-direction: column; gap: 0; padding: .25rem clamp(1.25rem, 4vw, 2.5rem) .75rem; background: var(--gh-bg); border-bottom: 1px solid var(--gh-line); box-shadow: 0 12px 24px rgba(0,0,0,.35); }
-    .site-head.nav-open .global-nav { display: flex; }
-    .nav-item { display: block; border-bottom: 1px solid var(--gh-line); }
-    .nav-item:last-child { border-bottom: none; }
-    .global-link { display: block; padding-block: .85rem .35rem; border-bottom: none; border-left: 2px solid transparent; padding-left: .75rem; }
-    .global-link.is-active { border-left-color: var(--gh-red); }
-    /* mobile: sub-pages always listed, no hover */
-    .nav-sub { position: static; min-width: 0; padding: 0 0 .6rem 1.5rem; flex-direction: row; flex-wrap: wrap; gap: .1rem .3rem; background: none; border: none; box-shadow: none; opacity: 1; visibility: visible; transform: none; transition: none; }
-    .nav-sub::before { display: none; }
-    .nav-sub-link { padding: .4rem .5rem; font-size: .82rem; }
-    .nav-sub-link::after { left: .5rem; right: .5rem; }
-    /* Icon-only Discord button on phones -- the label ("Login with
-       Discord") doesn't fit next to brand + menu button at 360px. */
-    .discord-btn { padding: .55rem .65rem; }
-    #discord-btn-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-    .nav-toggle { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; flex: none; width: 2.4rem; height: 2.4rem; padding: 0; -webkit-appearance: none; appearance: none; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius); color: var(--gh-text); cursor: pointer; }
-    .nav-toggle:focus-visible { outline: 2px solid var(--gh-yellow); outline-offset: 2px; }
-    .nav-icon { display: block; flex: none; }
-    .nav-icon-close { display: none; }
+    .lr-strip { font-size: 13px; }
+    .lr-strip-row { justify-content: flex-start; gap: 10px; height: 36px; padding-left: clamp(1.25rem, 4vw, 2.5rem); padding-right: 2.75rem; }
+    .lr-strip-long { display: none; }
+    .lr-strip-short { display: inline; }
+    .lr-strip-guest { gap: 10px; }
+    .head-row { height: 56px; gap: 8px; }
+    .brand img { height: 22px; }
+    .brand-text { display: none; }
+    .head-nav { display: none; }
+    .head-icon { width: 40px; height: 40px; }
+    .head-search-ico { margin-left: auto; }
+    .head-discord { width: 40px; height: 40px; }
+    .account-trigger { height: 40px; }
+    .account-avatar { width: 32px; height: 32px; }
+    .head-burger { display: inline-flex; }
+    .head-panel { position: absolute; top: 100%; left: 0; right: 0; background: var(--lr-bg); border-bottom: 1px solid var(--lr-line); box-shadow: 0 16px 28px rgba(0,0,0,.45); padding: 12px 0 8px; }
+    .site-head.nav-open .head-panel { display: block; }
     .site-head.nav-open .nav-icon-open { display: none; }
     .site-head.nav-open .nav-icon-close { display: block; }
+    .head-search-panel { margin: 0 0 8px; min-width: 0; }
+    .panel-link { display: block; padding: 14px 0; border-top: 1px solid var(--lr-line); color: var(--lr-muted); font-size: 15px; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; text-decoration: none; }
+    .panel-link:hover, .panel-link.is-active { color: var(--lr-text); }
+    .panel-link.is-active { font-weight: 600; }
+  }
+  @media (max-width: 360px) {
+    .lr-strip-guest .lr-strip-sep { display: none; }
   }
 </style>
 
 <script>
   import { getSupabase, backendConfigured, SUPABASE_URL, SUPABASE_ANON_KEY } from '../scripts/supabase-client';
 
-  // Mobile nav toggle -- independent of the backend, so it runs even
-  // without Supabase config.
+  const root = document.documentElement;
+
+  // ---- launch strip: local-midnight day count + dismiss ----
+  {
+    const strip = document.getElementById('lr-strip');
+    if (strip) {
+      const key = `lr-strip-${strip.dataset.launchDate}`;
+      const at = strip.dataset.launchAt;
+      const [y, m, d] = (strip.dataset.launchDate || '').split('-').map(Number);
+      const target = at ? Date.parse(at) : new Date(y, m - 1, d).getTime();
+      const when = strip.querySelector('[data-strip-when]');
+      const update = () => {
+        const ms = target - Date.now();
+        // After launch the strip goes away; its later content is not decided yet (DEC-0116).
+        if (ms <= 0) { root.classList.add('lr-strip-off'); return; }
+        const days = Math.ceil(ms / 86400000);
+        if (when) when.textContent = days === 1 ? 'tomorrow' : `in ${days} days`;
+      };
+      update();
+      setInterval(update, 60000);
+      document.getElementById('lr-strip-close')?.addEventListener('click', () => {
+        root.classList.add('lr-strip-off');
+        try { localStorage.setItem(key, '1'); } catch { /* private mode: closes for this page only */ }
+      });
+    }
+  }
+
+  // ---- phone menu ----
   {
     const headEl = document.getElementById('site-head');
     const toggleEl = document.getElementById('nav-toggle');
@@ -182,53 +275,54 @@ const globalLinks = [
     window.matchMedia('(min-width: 761px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
   }
 
-
-  // Without a configured backend there is no session to reflect, so the
-  // header just keeps showing the static Discord-server link and avatar
-  // menu stays hidden -- same fallback pattern as account/index.astro and
-  // time-attack/submit.
-  const DISCORD_INVITE_URL = 'https://discord.gg/hPGuBwXRqT';
+  // ---- login state ----
+  // Without a configured backend there is no session: the Discord button
+  // stays a plain server-invite link, the avatar menu stays hidden.
   const JOIN_DISCORD_GUILD_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/join-discord-guild` : '';
 
-  if (backendConfigured) {
+  if (!backendConfigured) {
+    root.classList.remove('lr-authed');
+  } else {
     const supabase = getSupabase();
+    const base = import.meta.env.BASE_URL;
 
-    const menuEl = document.getElementById('account-menu');
-    const triggerEl = document.getElementById('account-menu-trigger');
-    const dropdownEl = document.getElementById('account-menu-dropdown');
-    const avatarImgEl = document.getElementById('account-avatar-img');
-    const avatarFallbackEl = document.getElementById('account-avatar-fallback');
-    const logoutBtnEl = document.getElementById('account-menu-logout');
-    const moderatorLinkEl = document.getElementById('account-menu-moderator');
-    const accountLinkEl = document.getElementById('account-menu-account');
-    const discordBtnEl = document.getElementById('discord-btn');
-    const discordBtnLabelEl = document.getElementById('discord-btn-label');
-
-    // Logged out: this button doubles as the login entry point (DEC/
-    // 04-Offene-Punkte.md, 2026-09-20 note) -- no separate "Account" text
-    // link anymore. Logged in: it's just the normal community-invite link
-    // again, since signing in isn't the point anymore.
+    const menuEl = document.getElementById('account-menu')!;
+    const triggerEl = document.getElementById('account-menu-trigger')!;
+    const dropdownEl = document.getElementById('account-menu-dropdown')!;
+    const avatarImgEl = document.getElementById('account-avatar-img') as HTMLImageElement;
+    const avatarFallbackEl = document.getElementById('account-avatar-fallback')!;
+    const logoutBtnEl = document.getElementById('account-menu-logout')!;
+    const moderatorLinkEl = document.getElementById('account-menu-moderator') as HTMLAnchorElement;
+    const crewLinkEl = document.getElementById('account-menu-crew') as HTMLAnchorElement;
+    const discordBtnEl = document.getElementById('discord-login') as HTMLAnchorElement;
     let isLoggedIn = false;
+
+    const login = () => supabase.auth.signInWithOAuth({
+      provider: 'discord',
+      // identify + email + guilds.join: Supabase replaces (not extends) the
+      // default scope list, so all three are listed. guilds.join lets
+      // join-discord-guild add the driver to the server automatically.
+      options: { redirectTo: window.location.origin + window.location.pathname + window.location.search, scopes: 'identify email guilds.join' },
+    });
 
     function closeDropdown() {
       dropdownEl.hidden = true;
       triggerEl.setAttribute('aria-expanded', 'false');
     }
 
-    // `moderators` is only readable by moderators themselves (RLS), so any
-    // row coming back means "this user is a moderator".
-    let moderatorCheckedFor = null;
-    async function updateModeratorLink(session) {
-      if (!session) { moderatorLinkEl.hidden = true; moderatorCheckedFor = null; return; }
-      if (moderatorCheckedFor === session.user.id) return;
-      moderatorCheckedFor = session.user.id;
+    // Moderator link + "new" counts (moderation queue, crew invites/requests).
+    let checkedFor: string | null = null;
+    async function updateMenuCounts(session: any) {
+      if (!session) { moderatorLinkEl.hidden = true; checkedFor = null; return; }
+      if (checkedFor === session.user.id) return;
+      checkedFor = session.user.id;
+      moderatorLinkEl.textContent = 'Moderator';
+      moderatorLinkEl.setAttribute('href', `${base}moderator/`);
+      crewLinkEl.textContent = 'My crew';
+      // `moderators` is only readable by moderators themselves (RLS).
       const { data, error } = await supabase.from('moderators').select('driver_id').limit(1);
       const isMod = !error && Array.isArray(data) && data.length > 0;
       moderatorLinkEl.hidden = !isMod;
-      moderatorLinkEl.textContent = 'Moderator';
-      accountLinkEl.textContent = 'Account';
-      accountLinkEl.setAttribute('href', `${import.meta.env.BASE_URL}account/`);
-      // Moderators: open Crew Leader / Event Host requests (RS-0026).
       if (isMod) {
         const [rq, rp, cr, tr] = await Promise.all([
           supabase.from('hub_role_requests').select('request_id', { count: 'exact', head: true }).eq('status', 'pending'),
@@ -236,63 +330,50 @@ const globalLinks = [
           supabase.from('content_reports').select('report_id', { count: 'exact', head: true }).eq('status', 'open'),
           supabase.from('community_tracks').select('track_id', { count: 'exact', head: true }).eq('is_published', false),
         ]);
-        // tracks waiting for review (RS-0045) count too; they live in Hub Content
         const count = (rq.count ?? 0) + (rp.count ?? 0) + (cr.count ?? 0) + (tr.count ?? 0);
         if (count) moderatorLinkEl.textContent = `Moderator (${count} new)`;
         // Content reports first (possibly illegal content), then time reports.
-        if (!rq.count && cr.count) moderatorLinkEl.setAttribute('href', `${import.meta.env.BASE_URL}moderator/content/`);
-        else if (!rq.count && rp.count) moderatorLinkEl.setAttribute('href', `${import.meta.env.BASE_URL}moderator/reports/`);
-        else if (rq.count || tr.count) moderatorLinkEl.setAttribute('href', `${import.meta.env.BASE_URL}moderator/hub/`);
+        if (!rq.count && cr.count) moderatorLinkEl.setAttribute('href', `${base}moderator/content/`);
+        else if (!rq.count && rp.count) moderatorLinkEl.setAttribute('href', `${base}moderator/reports/`);
+        else if (rq.count || tr.count) moderatorLinkEl.setAttribute('href', `${base}moderator/hub/`);
       }
-      // Crew leaders: open join requests -> straight to My Account > Crew.
       const own = await supabase.from('drivers').select('driver_id').eq('auth_user_id', session.user.id).maybeSingle();
       const me = own.data?.driver_id;
       if (!me) return;
-      // Crew invites waiting for me (RS-0063) -> My Account > Crew
+      // Crew invites for me (RS-0063) + join requests for crews I lead.
       const inv = await supabase.from('crew_memberships').select('membership_id', { count: 'exact', head: true }).eq('driver_id', me).eq('status', 'invited');
-      if (inv.count) {
-        accountLinkEl.textContent = `Account (${inv.count} new)`;
-        accountLinkEl.setAttribute('href', `${import.meta.env.BASE_URL}account/crew/`);
-      }
+      let pending = 0;
       const roles = await supabase.from('hub_roles').select('crew_id').eq('driver_id', me).eq('role', 'crew_leader');
-      const crewIds = (roles.data ?? []).map((r) => r.crew_id).filter(Boolean);
-      if (!crewIds.length) return;
-      const { count } = await supabase.from('crew_membership_overview').select('membership_id', { count: 'exact', head: true }).eq('status', 'pending').in('crew_id', crewIds);
-      if (count) {
-        accountLinkEl.textContent = `Account (${count + (inv.count ?? 0)} new)`;
-        accountLinkEl.setAttribute('href', `${import.meta.env.BASE_URL}account/crew/`);
+      const crewIds = (roles.data ?? []).map((r: any) => r.crew_id).filter(Boolean);
+      if (crewIds.length) {
+        const { count } = await supabase.from('crew_membership_overview').select('membership_id', { count: 'exact', head: true }).eq('status', 'pending').in('crew_id', crewIds);
+        pending = count ?? 0;
       }
+      const total = (inv.count ?? 0) + pending;
+      if (total) crewLinkEl.textContent = `My crew (${total} new)`;
     }
 
-    function renderAuthState(session) {
+    function renderAuthState(session: any) {
       isLoggedIn = Boolean(session);
-      updateModeratorLink(session);
+      root.classList.toggle('lr-authed', isLoggedIn);
+      updateMenuCounts(session);
       if (session) {
-        menuEl.hidden = false;
-        discordBtnLabelEl.textContent = 'Join Discord';
-        discordBtnEl.href = DISCORD_INVITE_URL;
-        discordBtnEl.target = '_blank';
-        discordBtnEl.rel = 'noopener';
-        const avatarUrl = session.user.user_metadata?.avatar_url ?? null;
-        const label =
-          session.user.user_metadata?.full_name ??
-          session.user.user_metadata?.name ??
-          session.user.email ??
-          '?';
+        discordBtnEl.href = 'https://discord.gg/hPGuBwXRqT';
+        const meta = session.user.user_metadata ?? {};
+        const avatarUrl = meta.avatar_url ?? null;
+        const label = meta.full_name ?? meta.name ?? session.user.email ?? '?';
+        triggerEl.setAttribute('aria-label', `Account menu (${label})`);
         if (avatarUrl) {
           avatarImgEl.src = avatarUrl;
-          avatarImgEl.alt = label;
           avatarImgEl.hidden = false;
           avatarFallbackEl.hidden = true;
         } else {
-          avatarFallbackEl.textContent = label.charAt(0).toUpperCase();
+          avatarFallbackEl.textContent = String(label).charAt(0).toUpperCase();
           avatarFallbackEl.hidden = false;
           avatarImgEl.hidden = true;
         }
       } else {
-        menuEl.hidden = true;
         closeDropdown();
-        discordBtnLabelEl.textContent = 'Login with Discord';
         discordBtnEl.removeAttribute('target');
         discordBtnEl.removeAttribute('rel');
       }
@@ -301,55 +382,37 @@ const globalLinks = [
     supabase.auth.getSession().then(({ data }) => renderAuthState(data?.session ?? null));
     supabase.auth.onAuthStateChange((event, session) => {
       renderAuthState(session);
-      // provider_token (the driver's own short-lived Discord access token)
-      // is only ever present on this exact event, right after the OAuth
-      // redirect completes -- never on a later getSession()/refresh. This
-      // is therefore the only moment we can call join-discord-guild; if we
-      // miss it here it's gone. Never blocks the login itself -- a failed
-      // or skipped auto-join just means the driver joins Discord manually.
+      // provider_token only exists on this exact event right after the OAuth
+      // redirect -- the only moment join-discord-guild can run. Never blocks login.
       if (event === 'SIGNED_IN' && session?.provider_token && JOIN_DISCORD_GUILD_URL) {
         fetch(JOIN_DISCORD_GUILD_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-            apikey: SUPABASE_ANON_KEY,
-          },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, apikey: SUPABASE_ANON_KEY },
           body: JSON.stringify({ discord_access_token: session.provider_token }),
         }).catch((err) => console.warn('join-discord-guild failed (non-fatal):', err));
       }
     });
 
     discordBtnEl.addEventListener('click', (event) => {
-      if (isLoggedIn) return; // plain server-invite link, let it navigate
+      if (isLoggedIn) return;
       event.preventDefault();
-      supabase.auth.signInWithOAuth({
-        provider: 'discord',
-        // guilds.join on top of the usual identify+email -- lets
-        // join-discord-guild add the driver to our server automatically
-        // (see onAuthStateChange above). Supabase's default scope list
-        // is replaced, not extended, by this option, hence listing all
-        // three explicitly rather than just adding guilds.join.
-        options: { redirectTo: window.location.origin + window.location.pathname + window.location.search, scopes: 'identify email guilds.join' },
-      });
+      login();
     });
+    // Strip link "Create your driver profile" = the same login.
+    document.querySelectorAll('[data-login-link]').forEach((el) => el.addEventListener('click', (event) => {
+      if (isLoggedIn) return;
+      event.preventDefault();
+      login();
+    }));
 
     triggerEl.addEventListener('click', (event) => {
       event.stopPropagation();
-      const isOpen = !dropdownEl.hidden;
-      if (isOpen) {
-        closeDropdown();
-      } else {
-        dropdownEl.hidden = false;
-        triggerEl.setAttribute('aria-expanded', 'true');
-      }
+      if (!dropdownEl.hidden) { closeDropdown(); return; }
+      dropdownEl.hidden = false;
+      triggerEl.setAttribute('aria-expanded', 'true');
     });
-    document.addEventListener('click', (event) => {
-      if (!menuEl.contains(event.target)) closeDropdown();
-    });
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') closeDropdown();
-    });
+    document.addEventListener('click', (event) => { if (!menuEl.contains(event.target as Node)) closeDropdown(); });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeDropdown(); });
     logoutBtnEl.addEventListener('click', async () => {
       closeDropdown();
       await supabase.auth.signOut();

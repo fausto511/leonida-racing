@@ -101,7 +101,7 @@ const drives = [...new Set(vehicleOptions.map((v) => v.drive))].sort();
 
 <style>
   .garage-browse { display: grid; grid-template-columns: 1fr 2fr; gap: var(--gh-gap-card); margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gh-line); }
-  .garage-browse-title { font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: .95rem; margin: 0 0 .8rem; }
+  .garage-browse-title { font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: .95rem; margin: 0 0 .8rem; }
   .garage-browse .garage-browse-title a { display: inline; padding: 0; border: none; border-radius: 0; color: var(--gh-text); font-size: inherit; }
   .garage-browse .garage-browse-title a:hover { color: var(--gh-yellow); }
   .garage-browse ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .45rem; }
@@ -110,7 +110,7 @@ const drives = [...new Set(vehicleOptions.map((v) => v.drive))].sort();
   @media (max-width: 760px) { .garage-browse { grid-template-columns: 1fr; } }
   .hero { position: relative; overflow: hidden; }
   .hero picture, .hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .hero-veil { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(20,20,26,.97) 15%, rgba(20,20,26,.6) 60%, rgba(20,20,26,.85)); }
+  .hero-veil { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(11,11,20,.97) 15%, rgba(11,11,20,.6) 60%, rgba(11,11,20,.85)); }
   /* Fixed hero height -- kept in sync, literally, with time-attack/gellhorn-international-raceway/index.astro's .hero-grid so the header band is identical on every page that has one. Not viewport-fluid (clamp/vw) on purpose. */
   .hero-grid { position: relative; display: grid; grid-template-columns: 1.5fr 1fr; align-items: center; gap: 2rem; min-height: 21rem; padding-block: 2rem; }
   .hero-copy { max-width: 46rem; align-self: start; }
@@ -125,7 +125,7 @@ const drives = [...new Set(vehicleOptions.map((v) => v.drive))].sort();
      (content width), so it matches the main nav's full-bleed line. */
   .garage-tabs-bar { border-bottom: 1px solid var(--gh-line); margin-bottom: 1.5rem; }
   .garage-tabs { display: flex; gap: .5rem; }
-  .garage-tab { color: var(--gh-muted); background: none; text-decoration: none; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: .85rem; letter-spacing: .02em; padding: .7rem 1rem; border: none; border-top: 2px solid transparent; border-bottom: 2px solid transparent; cursor: pointer; }
+  .garage-tab { color: var(--gh-muted); background: none; text-decoration: none; font-family: var(--gh-font-body); font-weight: 600; text-transform: uppercase; font-size: .8rem; letter-spacing: .08em; padding: .7rem 1rem; border: none; border-top: 2px solid transparent; border-bottom: 2px solid transparent; cursor: pointer; }
   .garage-tab:hover { color: var(--gh-text); }
   .garage-tab.is-active { color: var(--gh-text); border-bottom-color: var(--gh-red); }
 
@@ -197,6 +197,14 @@ const drives = [...new Set(vehicleOptions.map((v) => v.drive))].sort();
   classFilter.addEventListener('change', applyFilter);
   makeFilter.addEventListener('change', applyFilter);
   driveFilter.addEventListener('change', applyFilter);
+
+  // Header search (Redesign Phase 1) submits to /cars/?q=… -> prefill + filter.
+  const initialQ = new URLSearchParams(window.location.search).get('q');
+  if (initialQ) {
+    search.value = initialQ;
+    applyFilter();
+    search.scrollIntoView({ block: 'center' });
+  }
 
   // Compare selection: persisted in localStorage (src/scripts/compare.ts) so
   // marking a vehicle here or on its own detail page stays in sync across

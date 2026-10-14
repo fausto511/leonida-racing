@@ -228,35 +228,35 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   .v-search-results { position: absolute; top: calc(100% + .35rem); left: 0; right: 0; z-index: 20; margin: 0; padding: .3rem; list-style: none; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius); max-height: 16rem; overflow-y: auto; }
   .v-search-results li + li { margin-top: .15rem; }
   .v-search-results a { display: block; padding: .5rem .6rem; border-radius: calc(var(--gh-radius) - .2rem); color: var(--gh-text); text-decoration: none; font-size: .85rem; }
-  .v-search-results a:hover, .v-search-results a:focus { background: rgba(160,160,198,.12); }
+  .v-search-results a:hover, .v-search-results a:focus { background: rgba(200,200,222,.12); }
   .garage-compare-btn { justify-self: end; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius); color: var(--gh-text); padding: .55rem 1rem; font-size: .8rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
   .garage-compare-btn:hover { border-color: var(--gh-muted); }
   .garage-compare-btn.has-selection { border-color: var(--gh-yellow); color: var(--gh-yellow); }
 
   .v-stage { display: grid; grid-template-columns: 1.5fr 1fr; gap: var(--gh-gap-card); padding-top: 1.5rem; }
-  .v-photo { position: relative; aspect-ratio: 16/9; background: rgba(160,160,198,.08); border-radius: var(--gh-radius-lg); overflow: hidden; }
+  .v-photo { position: relative; aspect-ratio: 16/9; background: rgba(200,200,222,.08); border-radius: var(--gh-radius-lg); overflow: hidden; }
   .v-photo > img { width: 100%; height: 100%; object-fit: cover; }
   .v-photo-fallback { opacity: .4; filter: saturate(.7); }
-  .v-photo-pending { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,20,26,.7); border: 1px solid rgba(252,250,247,.12); padding: .35rem .75rem; border-radius: 999px; color: var(--gh-muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+  .v-photo-pending { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(11,11,20,.7); border: 1px solid rgba(251,247,234,.12); padding: .35rem .75rem; border-radius: 999px; color: var(--gh-muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
   .v-badge { position: absolute; top: .7rem; left: .7rem; z-index: 2; padding: .3rem .65rem; border-radius: 999px; background: var(--gh-red); color: #fff; font-size: .64rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-  .v-compare-mark { position: absolute; top: .7rem; right: .7rem; z-index: 2; width: 2.1rem; height: 2.1rem; border-radius: 50%; border: 1px solid rgba(252,250,247,.35); background: rgba(20,20,26,.65); color: var(--gh-text); font-size: 1.2rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .v-compare-mark { position: absolute; top: .7rem; right: .7rem; z-index: 2; width: 2.1rem; height: 2.1rem; border-radius: 50%; border: 1px solid rgba(251,247,234,.35); background: rgba(11,11,20,.65); color: var(--gh-text); font-size: 1.2rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .v-compare-mark:hover { border-color: var(--gh-text); }
-  .v-compare-mark.is-selected { background: var(--gh-yellow); border-color: var(--gh-yellow); color: #1a1206; }
+  .v-compare-mark.is-selected { background: var(--gh-yellow); border-color: var(--gh-yellow); color: #2A0F22; }
 
   .v-identity { padding: var(--gh-pad-card); }
   /* "I own this" toggle (RS-0032) */
   .v-own-btn[hidden], .v-own-msg[hidden], .v-garage-link[hidden] { display: none; }
   .v-own-wrap { justify-self: end; display: flex; align-items: stretch; gap: .5rem; }
-  .v-garage-link { display: inline-flex; align-items: center; justify-content: center; width: 2.4rem; flex: none; border-radius: var(--gh-radius); border: 1px solid var(--gh-yellow); background: rgba(255,215,76,.08); color: var(--gh-yellow); }
-  .v-garage-link:hover { background: rgba(255,215,76,.16); }
+  .v-garage-link { display: inline-flex; align-items: center; justify-content: center; width: 2.4rem; flex: none; border-radius: var(--gh-radius); border: 1px solid var(--gh-yellow); background: rgba(255,149,90,.08); color: var(--gh-yellow); }
+  .v-garage-link:hover { background: rgba(255,149,90,.16); }
   .v-own-btn { display: inline-flex; align-items: center; gap: .5rem; padding: .55rem 1rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-surface); color: var(--gh-text); font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
   .v-own-btn:hover { border-color: var(--gh-muted); }
   /* Toggle switch instead of a checkbox (Fausto, 2026-10-02) */
-  .v-own-box { position: relative; flex: none; box-sizing: border-box; width: 2.1rem; height: 1.2rem; border-radius: 999px; background: rgba(160,160,198,.25); border: 1px solid var(--gh-line); transition: background .15s, border-color .15s; }
+  .v-own-box { position: relative; flex: none; box-sizing: border-box; width: 2.1rem; height: 1.2rem; border-radius: 999px; background: rgba(200,200,222,.25); border: 1px solid var(--gh-line); transition: background .15s, border-color .15s; }
   .v-own-box::after { content: ''; position: absolute; top: 50%; left: .15rem; width: .82rem; height: .82rem; border-radius: 50%; background: var(--gh-text); transform: translateY(-50%); transition: transform .15s; }
-  .v-own-btn[aria-pressed="true"] { border-color: var(--gh-yellow); background: rgba(255,215,76,.08); }
+  .v-own-btn[aria-pressed="true"] { border-color: var(--gh-yellow); background: rgba(255,149,90,.08); }
   .v-own-btn[aria-pressed="true"] .v-own-box { background: var(--gh-yellow); border-color: var(--gh-yellow); }
-  .v-own-btn[aria-pressed="true"] .v-own-box::after { background: #1a1206; transform: translate(.88rem, -50%); }
+  .v-own-btn[aria-pressed="true"] .v-own-box::after { background: #2A0F22; transform: translate(.88rem, -50%); }
   @media (prefers-reduced-motion: reduce) { .v-own-box, .v-own-box::after { transition: none; } }
   .v-own-btn:disabled { opacity: .6; cursor: progress; }
   .v-own-msg { grid-column: 1 / -1; justify-self: end; margin: -.4rem 0 0; font-size: .8rem; color: var(--gh-muted); }
@@ -273,16 +273,16 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   .v-key > div { display: flex; justify-content: space-between; border-top: 1px solid var(--gh-line); padding-top: .6rem; }
   .v-key dt { color: var(--gh-muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; margin: 0; }
   .v-key dd { margin: 0; font-size: .85rem; font-weight: 600; }
-  .v-lb-link { color: inherit; text-decoration: underline; text-decoration-color: rgba(160,160,198,.5); text-underline-offset: 3px; display: inline-flex; align-items: center; gap: .35rem; }
+  .v-lb-link { color: inherit; text-decoration: underline; text-decoration-color: rgba(200,200,222,.5); text-underline-offset: 3px; display: inline-flex; align-items: center; gap: .35rem; }
   .v-lb-link:hover { color: var(--gh-text); text-decoration-color: var(--gh-text); }
   .v-src { color: var(--gh-muted); font-size: .68rem; font-weight: 600; margin-left: .3rem; }
 
-  .v-similar h2 { font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin: 0 0 1rem; }
+  .v-similar h2 { font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin: 0 0 1rem; }
   .v-facts { padding-top: var(--gh-gap-card); }
   /* same column split as .v-stage, so the strips line up with photo and main panel */
   .v-facts-row, .v-origins { display: grid; grid-template-columns: 1.5fr 1fr; gap: var(--gh-gap-card); }
   .v-strip { display: flex; align-items: stretch; padding: 0; overflow: hidden; }
-  .v-strip-title { display: flex; align-items: center; margin: 0; padding: 0 1rem; border-right: 1px solid var(--gh-line); background: rgba(252,250,247,.03); font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: .8rem; white-space: nowrap; }
+  .v-strip-title { display: flex; align-items: center; margin: 0; padding: 0 1rem; border-right: 1px solid var(--gh-line); background: rgba(251,247,234,.03); font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: .8rem; white-space: nowrap; }
   .v-strip-f { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: .15rem; padding: .55rem 1.1rem; border-right: 1px solid var(--gh-line); }
   .v-strip-f:last-child { border-right: 0; }
   .v-strip-f span { color: var(--gh-muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
@@ -293,8 +293,8 @@ const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
   .v-origins dt { color: var(--gh-muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; margin: 0; }
   .v-origins dd { margin: 0; font-size: .84rem; font-weight: 600; }
   .v-hist { display: flex; flex-wrap: wrap; gap: .3rem; }
-  .v-hist-tag { display: inline-flex; padding: .12rem .5rem; border-radius: 999px; background: rgba(255,215,76,.14); color: var(--gh-yellow); font-size: .64rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
-  .v-hist-chip { display: inline-flex; padding: .12rem .5rem; border-radius: 999px; border: 1px solid var(--gh-line); background: rgba(252,250,247,.05); font-size: .66rem; font-weight: 700; }
+  .v-hist-tag { display: inline-flex; padding: .12rem .5rem; border-radius: 999px; background: rgba(255,149,90,.14); color: var(--gh-yellow); font-size: .64rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+  .v-hist-chip { display: inline-flex; padding: .12rem .5rem; border-radius: 999px; border: 1px solid var(--gh-line); background: rgba(251,247,234,.05); font-size: .66rem; font-weight: 700; }
   @media (max-width: 900px) {
     .v-facts-row, .v-origins { grid-template-columns: 1fr; }
     .v-strip { flex-wrap: wrap; }

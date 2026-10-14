@@ -86,17 +86,17 @@ const base = import.meta.env.BASE_URL;
   .rep-lede { margin: 0 0 1rem; color: var(--gh-muted); font-size: .92rem; }
   .rep-lede a { color: var(--gh-text); }
   .rep-alt { margin-bottom: 1.8rem; font-size: .85rem; }
-  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: rgba(255,215,76,.08); border-radius: var(--gh-radius); font-size: .85rem; }
+  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: rgba(255,149,90,.08); border-radius: var(--gh-radius); font-size: .85rem; }
   .rep-auth { padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .rep-auth p { margin: 0; font-size: .88rem; }
   .rep-form { padding: var(--gh-pad-card); display: grid; gap: 1.6rem; }
   .rep-step { display: grid; gap: .8rem; }
-  .rep-step-title { margin: 0; display: flex; align-items: center; gap: .6rem; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.05rem; }
+  .rep-step-title { margin: 0; display: flex; align-items: center; gap: .6rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.05rem; }
   .rep-step-title span { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 999px; background: var(--gh-yellow); color: #111; font-style: normal; font-size: .8rem; }
   .rep-reasons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
   @media (max-width: 560px) { .rep-reasons { grid-template-columns: 1fr; } }
   .rep-reasons label { display: flex; align-items: center; gap: .55rem; padding: .7rem .85rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); font-size: .88rem; font-weight: 600; cursor: pointer; }
-  .rep-reasons label:has(input:checked) { border-color: var(--gh-yellow); background: rgba(255,215,76,.06); }
+  .rep-reasons label:has(input:checked) { border-color: var(--gh-yellow); background: rgba(255,149,90,.06); }
   .rep-reasons input, .rep-check input { accent-color: var(--gh-yellow); }
   .rep-field, .rep-details { display: flex; flex-direction: column; gap: .35rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
   .rep-field small, .rep-details small { text-transform: none; letter-spacing: 0; font-weight: 500; }
@@ -110,15 +110,15 @@ const base = import.meta.env.BASE_URL;
   .rep-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; }
   .rep-msg { margin: 0; font-size: .86rem; }
   .rep-msg.is-error { color: var(--gh-red); }
-  .rep-msg.is-ok { color: #4fd1c5; }
+  .rep-msg.is-ok { color: #D9F58E; }
   .rep-mine { display: grid; gap: .5rem; margin-bottom: 1.5rem; }
   :global(.rep-mine-row) { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding: .7rem 1rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); background: var(--gh-surface); font-size: .86rem; }
   :global(.rep-mine-row .rm-main) { flex: 1 1 16rem; min-width: 0; overflow-wrap: anywhere; }
   :global(.rep-mine-row small) { display: block; color: var(--gh-muted); font-size: .78rem; margin-top: .1rem; }
   :global(.rep-mine-row .rm-decision) { color: var(--gh-text); }
   :global(.rep-status) { padding: .15rem .55rem; border-radius: 999px; font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; border: 1px solid var(--gh-line); color: var(--gh-muted); }
-  :global(.rep-status.open) { color: var(--gh-yellow); border-color: rgba(255,215,76,.45); }
-  :global(.rep-status.resolved) { color: #4fd1c5; border-color: rgba(79,209,197,.45); }
+  :global(.rep-status.open) { color: var(--gh-yellow); border-color: rgba(255,149,90,.45); }
+  :global(.rep-status.resolved) { color: #D9F58E; border-color: rgba(217,245,142,.45); }
   :global(.rep-mine-title) { margin: 0 0 .2rem; font-size: .72rem; color: var(--gh-muted); font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
 </style>
 

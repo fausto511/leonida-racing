@@ -1,39 +1,68 @@
 /*
-  Leonida Racing — design tokens.
-  Values are the confirmed palette from Gellhorn-Designsystem.md.
-  Do not introduce new colors here without user sign-off.
+  Leonida Racing — design tokens, "Vice Night" (Redesign Phase 1, DEC-0114).
+  Source of truth for the values: DEC-0114 point 1 and the redesign mockup
+  (Claude Design artifact "Leonida Racing Redesign"). No new colours without
+  Fausto's sign-off.
+
+  The --gh-* names are kept as aliases so the ~180 existing usages switch
+  to the new palette without touching every page:
+    --gh-red    -> pink accent (#F24B9D)      new name: --lr-pink
+    --gh-yellow -> orange secondary (#FF955A) new name: --lr-orange
+  New code should use the --lr-* names. Red, yellow, turquoise and purple
+  are gone (DEC-0114); "ok/done" states use lime.
 */
 :root {
   /* surfaces */
-  --gh-bg: #14141a;
-  --gh-surface: #242430;
-  --gh-surface-soft: rgba(36, 36, 48, 0.55);
-  --gh-line: rgba(160, 160, 198, 0.16);
+  --lr-bg: #0B0B14;          /* page, slight violet tint */
+  --lr-card: #14141F;        /* cards, panels */
+  --lr-raised: #1C1C2A;      /* image areas, hover, own row */
+  --lr-line: rgba(200, 200, 222, 0.16);
+  --lr-line-strong: rgba(200, 200, 222, 0.24);
 
   /* text */
-  --gh-text: #fcfaf7;
-  --gh-muted: #a0a0c6;
+  --lr-text: #FBF7EA;
+  --lr-muted: #9C9CAB;
+  --lr-soft: #B4B4C2;        /* other people's names/times next to "you" */
 
   /* accents */
-  --gh-red: #ed253d;
-  --gh-yellow: #ffd74c;
+  --lr-pink: #F24B9D;        /* primary */
+  --lr-pink-hover: #F766AE;
+  --lr-on-pink: #2A0F22;     /* text on pink */
+  --lr-orange: #FF955A;      /* secondary: eyebrows, arrows, hover */
+  --lr-lime: #D9F58E;        /* owned / new / ok */
+  --lr-discord: #5865F2;     /* ONLY the "Log in with Discord" button */
+  /* logo gradient — brand moments only (Discord band, logo, OG image) */
+  --lr-brand-gradient: linear-gradient(100deg, #2A1F9E 0%, #B12A8C 50%, #F26A3D 100%);
 
-  /* type */
-  --gh-font-display: 'Gellhorn Display', 'Gellhorn Display Fallback', 'Arial Narrow', sans-serif;
-  --gh-font-body: 'Gellhorn Text', 'Gellhorn Text Fallback', -apple-system, 'Segoe UI', sans-serif;
+  /* legacy aliases (see header comment) */
+  --gh-bg: var(--lr-bg);
+  --gh-surface: var(--lr-card);
+  --gh-surface-soft: rgba(28, 28, 42, 0.6);
+  --gh-line: var(--lr-line);
+  --gh-text: var(--lr-text);
+  --gh-muted: var(--lr-muted);
+  --gh-red: var(--lr-pink);
+  --gh-yellow: var(--lr-orange);
 
-  /* rhythm — 8px card radius per design system; section gaps 64-96px desktop */
-  --gh-radius: 4px;
-  --gh-radius-lg: 6px;
+  /* type: Archivo (display, width 112) + Instrument Sans (text) */
+  --gh-font-display: 'LR Display', 'LR Display Fallback', 'Arial Narrow', sans-serif;
+  --gh-font-body: 'LR Text', 'LR Text Fallback', -apple-system, 'Segoe UI', sans-serif;
+
+  /* rhythm */
+  --gh-radius: 6px;
+  --gh-radius-lg: 8px;
   --gh-gap-section: clamp(3.5rem, 7vw, 6rem);
   --gh-gap-card: 1.5rem;
   --gh-pad-card: clamp(1.4rem, 2.4vw, 2rem);
-  --gh-max: 74rem;
-  --gh-header-h: 3.5rem;
+  --gh-max: 80rem;           /* 1280px like the mockup */
+  --gh-header-h: 4.75rem;   /* sticky header bar (76px; 56px on phones) */
 }
+@media (max-width: 760px) { :root { --gh-header-h: 3.5rem; } }
 
 * { box-sizing: border-box; }
 html { color-scheme: dark; }
+/* No faked italics or bold anywhere: the fonts ship upright only. */
+html { font-synthesis: none; }
 body {
   margin: 0;
   background: var(--gh-bg);
@@ -68,8 +97,8 @@ a { color: inherit; }
 
 .display {
   font-family: var(--gh-font-display);
-  font-style: italic;
-  font-weight: 900;
+  font-weight: 800;
+  overflow-wrap: break-word; /* safety net: Archivo is wider than the old condensed face */
   text-transform: uppercase;
   line-height: 0.94;
   letter-spacing: 0.005em;
@@ -83,8 +112,7 @@ a { color: inherit; }
   border-radius: var(--gh-radius);
   padding: 0.85rem 1.5rem;
   font-family: var(--gh-font-display);
-  font-style: italic;
-  font-weight: 900;
+  font-weight: 800;
   font-size: 0.95rem;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -92,28 +120,28 @@ a { color: inherit; }
   border: 2px solid transparent;
   cursor: pointer;
 }
-.btn-primary { background: var(--gh-yellow); color: #1a1206; }
+.btn-primary { background: var(--lr-orange); color: #1A0E06; }
 .btn-primary:hover { filter: brightness(1.06); }
-.btn-red { background: var(--gh-red); color: var(--gh-text); }
-.btn-red:hover { filter: brightness(1.08); }
+.btn-red { background: var(--lr-pink); color: var(--lr-on-pink); }
+.btn-red:hover { background: var(--lr-pink-hover); }
 .btn-outline { background: transparent; border-color: var(--gh-line); color: var(--gh-text); }
-.btn-outline:hover, .outline-hover:hover { background: rgba(252,250,247,.08); border-color: var(--gh-muted); }
+.btn-outline:hover, .outline-hover:hover { background: rgba(251,247,234,.08); border-color: var(--gh-muted); }
 
 /* Secondary button family (2026-09-20, Fausto's Referenzbeispiele):
    tonal = muted background at low opacity, text in the full-strength
    accent color; outline-<color> = transparent bg, colored border + text.
    Solid .btn-red/.btn-primary stay "100% Kraft" for primary actions;
    these are for secondary actions that still carry brand color. */
-.btn-red-tonal { background: rgba(237,37,61,.14); color: var(--gh-red); }
-.btn-red-tonal:hover { background: rgba(237,37,61,.22); }
-.btn-yellow-tonal { background: rgba(255,215,76,.14); color: var(--gh-yellow); }
-.btn-yellow-tonal:hover { background: rgba(255,215,76,.22); }
-.btn-white-tonal { background: rgba(252,250,247,.12); color: var(--gh-text); }
-.btn-white-tonal:hover { background: rgba(252,250,247,.2); }
+.btn-red-tonal { background: rgba(242,75,157,.14); color: var(--gh-red); }
+.btn-red-tonal:hover { background: rgba(242,75,157,.22); }
+.btn-yellow-tonal { background: rgba(255,149,90,.14); color: var(--gh-yellow); }
+.btn-yellow-tonal:hover { background: rgba(255,149,90,.22); }
+.btn-white-tonal { background: rgba(251,247,234,.12); color: var(--gh-text); }
+.btn-white-tonal:hover { background: rgba(251,247,234,.2); }
 .btn-outline-red { background: transparent; border-color: var(--gh-red); color: var(--gh-red); }
-.btn-outline-red:hover { background: rgba(237,37,61,.1); }
+.btn-outline-red:hover { background: rgba(242,75,157,.1); }
 .btn-outline-yellow { background: transparent; border-color: var(--gh-yellow); color: var(--gh-yellow); }
-.btn-outline-yellow:hover { background: rgba(255,215,76,.1); }
+.btn-outline-yellow:hover { background: rgba(255,149,90,.1); }
 /* Solid, but in our second-darkest surface color rather than an accent --
    for secondary chrome (e.g. the header's Discord link) that should read
    as a real button, not compete with red/yellow accent CTAs. */
@@ -173,7 +201,7 @@ select optgroup option { background: var(--gh-surface); color: var(--gh-text); f
 /* ---- Crew tag plate (The Hub, DEC-0062) — global: hub pages + leaderboard */
 .crew-tag {
   display: inline-flex; align-items: center; justify-content: center;
-  background: #fcfaf7; color: #111;
+  background: #FBF7EA; color: #111;
   font-family: var(--gh-font-body); font-weight: 900; letter-spacing: .06em;
   text-transform: uppercase; line-height: 1;
   border-radius: 2px;

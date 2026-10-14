@@ -51,7 +51,7 @@ const { focus } = Astro.props;
         <div class="ra-grid" id="ra-new">
           <label class="ra-span2">Crew name * <small>max. 22 characters</small><input type="text" name="new_crew_name" maxlength="22" /></label>
           <label>Crew tag * <small>exactly 4 letters/digits</small><input type="text" name="new_crew_tag" maxlength="4" class="ra-tag" /></label>
-          <label>Crew color *<span class="ra-color"><input type="color" name="color_picker" value="#ed253d" /><input type="text" name="new_crew_color" value="#ed253d" maxlength="7" /></span></label>
+          <label>Crew color *<span class="ra-color"><input type="color" name="color_picker" value="#F24B9D" /><input type="text" name="new_crew_color" value="#F24B9D" maxlength="7" /></span></label>
           <label class="ra-span2">Short description <small>optional, max. 90 characters, no links</small><textarea name="new_crew_description" maxlength="90" rows="2"></textarea></label>
           <!-- Required crew profile (Fausto 07.10.): platform, focus, language, region. -->
           <fieldset class="ra-span2 ra-checks" data-field="new_crew_platforms"><legend>Platforms *</legend>
@@ -100,14 +100,14 @@ const { focus } = Astro.props;
   .ra[hidden], .ra [hidden] { display: none !important; }
   .ra { margin-top: 2.5rem; }
   .ra-panel { padding: var(--gh-pad-card); }
-  .ra-title { margin: 0 0 .4rem; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
+  .ra-title { margin: 0 0 .4rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
   .ra-kicker { margin: 0 0 .35rem; color: var(--gh-yellow); font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
-  .ra-form-note { margin: 0 0 1rem; padding: .6rem .8rem; border-left: 3px solid var(--gh-yellow); background: rgba(255,215,76,.06); font-size: .84rem; color: var(--gh-text); }
+  .ra-form-note { margin: 0 0 1rem; padding: .6rem .8rem; border-left: 3px solid var(--gh-yellow); background: rgba(255,149,90,.06); font-size: .84rem; color: var(--gh-text); }
   .ra-lede { margin: 0 0 1.2rem; color: var(--gh-muted); font-size: .88rem; max-width: 44rem; }
   .ra-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; margin-bottom: 1.2rem; }
   @media (max-width: 560px) { .ra-choices { grid-template-columns: 1fr; } }
   .ra-choice { display: flex; align-items: center; gap: .7rem; padding: .85rem 1rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); cursor: pointer; }
-  .ra-choice:has(input:checked) { border-color: var(--gh-yellow); background: rgba(255,215,76,.06); }
+  .ra-choice:has(input:checked) { border-color: var(--gh-yellow); background: rgba(255,149,90,.06); }
   .ra-choice input { width: 1.1rem; height: 1.1rem; accent-color: var(--gh-yellow); flex: none; }
   .ra-choice span { display: flex; flex-direction: column; gap: .1rem; }
   .ra-choice small { color: var(--gh-muted); font-size: .76rem; }
@@ -140,10 +140,10 @@ const { focus } = Astro.props;
   .ra-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; }
   .ra-msg { margin: 0; font-size: .85rem; }
   .ra-msg.is-error { color: var(--gh-red); }
-  .ra-msg.is-ok { color: #4fd1c5; }
+  .ra-msg.is-ok { color: #D9F58E; }
   .ra-requests { display: grid; gap: .6rem; margin-bottom: 1.2rem; }
   :global(.ra-req) { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; padding: .8rem 1rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); background: var(--gh-surface); font-size: .88rem; }
-  :global(.ra-req.is-pending) { border-color: rgba(255,215,76,.45); }
+  :global(.ra-req.is-pending) { border-color: rgba(255,149,90,.45); }
   :global(.ra-req-main) { flex: 1 1 16rem; min-width: 0; }
   :global(.ra-req-main small) { display: block; color: var(--gh-muted); font-size: .78rem; margin-top: .15rem; }
   :global(.ra-req .btn) { font-size: .78rem; padding: .45rem .8rem; }

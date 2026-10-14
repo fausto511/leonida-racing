@@ -84,13 +84,13 @@ const base = import.meta.env.BASE_URL;
   .consent-text strong { margin-right: .25rem; }
   .consent-text a { color: var(--gh-text); text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
   .consent-actions { display: flex; gap: .5rem; flex: none; }
-  .consent-btn { min-width: 6rem; padding: .38rem .9rem; border-radius: var(--gh-radius); font-family: var(--gh-font-display); font-style: italic; font-weight: 900; font-size: .74rem; letter-spacing: .02em; text-transform: uppercase; cursor: pointer; transition: transform .12s, filter .12s, background .12s; }
+  .consent-btn { min-width: 6rem; padding: .38rem .9rem; border-radius: var(--gh-radius); font-family: var(--gh-font-display); font-weight: 900; font-size: .74rem; letter-spacing: .02em; text-transform: uppercase; cursor: pointer; transition: transform .12s, filter .12s, background .12s; }
   .consent-btn:hover { transform: translateY(-1px); }
   .consent-btn:focus-visible { outline: 2px solid var(--gh-yellow); outline-offset: 2px; }
   /* Palette only (Fausto, 2026-10-02). Clearly a button (white text, full contrast) -- rejecting must stay as easy as allowing */
   .consent-no { background: var(--gh-surface); color: var(--gh-text); border: 2px solid var(--gh-muted); }
   .consent-no:hover { background: var(--gh-bg); }
-  .consent-yes { background: var(--gh-yellow); color: #1a1206; /* same as .btn-primary */ border: 2px solid var(--gh-yellow); }
+  .consent-yes { background: var(--gh-yellow); color: #2A0F22; /* same as .btn-primary */ border: 2px solid var(--gh-yellow); }
   .consent-yes:hover { filter: brightness(1.08); }
   @media (prefers-reduced-motion: reduce) { .consent-bar { transition: none; } }
   @media (max-width: 640px) {

@@ -62,7 +62,7 @@ const base = import.meta.env.BASE_URL;
             <div class="grid">
               <label class="span2">Crew name * <small>max. 22 characters</small><input type="text" name="name" maxlength="22" required /></label>
               <label>Crew tag * <small>exactly 4 letters/digits</small><input type="text" name="tag" maxlength="4" required class="tag-input" /></label>
-              <label>Crew color *<span class="color-row"><input type="color" name="color_picker" value="#ed253d" /><input type="text" name="color" value="#ed253d" maxlength="7" /></span></label>
+              <label>Crew color *<span class="color-row"><input type="color" name="color_picker" value="#F24B9D" /><input type="text" name="color" value="#F24B9D" maxlength="7" /></span></label>
               <label data-mod-only>URL slug * <small>auto from name</small><input type="text" name="slug" maxlength="48" required /></label>
               <fieldset class="span2 platforms-set"><legend>Platforms</legend>
                 {PLATFORMS.map((p) => p.active
@@ -225,13 +225,13 @@ const base = import.meta.env.BASE_URL;
 
 <style>
   [hidden] { display: none !important; }
-  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: rgba(255,215,76,.08); border-radius: var(--gh-radius); font-size: .85rem; }
+  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: rgba(255,149,90,.08); border-radius: var(--gh-radius); font-size: .85rem; }
   .notice strong { color: var(--gh-yellow); }
   .auth-box { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .auth-box p { margin: 0; font-size: .88rem; }
 
   .hc-tabs { display: flex; gap: .4rem; margin-bottom: 1rem; }
-  .hc-tab { padding: .55rem 1.1rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: transparent; color: var(--gh-muted); font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: .85rem; cursor: pointer; }
+  .hc-tab { padding: .55rem 1.1rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: transparent; color: var(--gh-muted); font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: .85rem; cursor: pointer; }
   .hc-tab.is-active { color: var(--gh-text); border-color: var(--gh-muted); background: var(--gh-surface-soft); }
 
   .mod-layout { display: grid; grid-template-columns: 20rem 1fr; gap: 1.5rem; align-items: start; }
@@ -239,7 +239,7 @@ const base = import.meta.env.BASE_URL;
   .list-panel { padding: 1.1rem; position: sticky; top: 5.5rem; }
   @media (max-width: 900px) { .list-panel { position: static; } }
   .list-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: 1rem; }
-  .list-title { margin: 0; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.15rem; }
+  .list-title { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.15rem; }
   .btn-sm { padding: .45rem .8rem; font-size: .78rem; }
   .list { display: flex; flex-direction: column; gap: .45rem; max-height: 34rem; overflow-y: auto; }
   .list-empty, .list-error { margin: 0; color: var(--gh-muted); font-size: .85rem; }
@@ -247,22 +247,22 @@ const base = import.meta.env.BASE_URL;
   /* built via innerHTML -> :global */
   :global(.li) { display: flex; align-items: center; gap: .6rem; width: 100%; text-align: left; padding: .6rem .7rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); border-left: 3px solid transparent; background: var(--gh-surface-soft); color: var(--gh-text); cursor: pointer; font-family: var(--gh-font-body); }
   :global(.li:hover) { border-color: var(--gh-muted); }
-  :global(.li.is-active) { border-left-color: var(--gh-yellow); background: rgba(255,215,76,.08); }
+  :global(.li.is-active) { border-left-color: var(--gh-yellow); background: rgba(255,149,90,.08); }
   :global(.li-main) { flex: 1; min-width: 0; }
   :global(.li-title) { display: block; font-weight: 700; font-size: .86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   :global(.li-sub) { display: block; color: var(--gh-muted); font-size: .74rem; margin-top: .15rem; }
   :global(.li-pill) { flex: none; padding: .12rem .45rem; border-radius: 999px; font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
-  :global(.li-pill.pub) { background: rgba(79,209,197,.14); color: #4fd1c5; }
+  :global(.li-pill.pub) { background: rgba(217,245,142,.14); color: #D9F58E; }
   :global(.li-pill.draft) { background: var(--gh-surface); color: var(--gh-muted); border: 1px solid var(--gh-line); }
 
   .editor-panel { padding: var(--gh-pad-card); min-height: 20rem; }
   .editor-placeholder { margin: 0; color: var(--gh-muted); font-size: .9rem; }
   .form-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--gh-line); }
-  .form-head h2 { margin: 0; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.35rem; }
+  .form-head h2 { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.35rem; }
   .hc-form .pub-toggle { flex-direction: row; text-transform: none; letter-spacing: 0; color: var(--gh-text); }
   .pub-toggle { display: inline-flex; align-items: center; gap: .5rem; padding: .45rem .8rem; border-radius: 999px; border: 1px solid var(--gh-line); font-size: .8rem; font-weight: 700; cursor: pointer; }
-  .pub-toggle input { width: 1rem; height: 1rem; accent-color: #4fd1c5; }
-  .pub-toggle:has(input:checked) { border-color: #4fd1c5; color: #4fd1c5; }
+  .pub-toggle input { width: 1rem; height: 1rem; accent-color: #D9F58E; }
+  .pub-toggle:has(input:checked) { border-color: #D9F58E; color: #D9F58E; }
 
   .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.1rem; }
   @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
@@ -295,12 +295,12 @@ const base = import.meta.env.BASE_URL;
   .check input { width: 1rem; height: 1rem; accent-color: var(--gh-red); }
 
   .pub-state { padding: .35rem .75rem; border-radius: 999px; border: 1px solid var(--gh-line); font-size: .75rem; font-weight: 700; color: var(--gh-muted); }
-  .role-selected { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: 1.4rem; padding: .9rem 1rem; border: 1px solid var(--gh-yellow); border-radius: var(--gh-radius); background: rgba(255,215,76,.06); }
+  .role-selected { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: 1.4rem; padding: .9rem 1rem; border: 1px solid var(--gh-yellow); border-radius: var(--gh-radius); background: rgba(255,149,90,.06); }
   .role-selected p { margin: 0; font-size: .9rem; }
   .driver-results { display: flex; flex-wrap: wrap; gap: .4rem; min-height: 0; }
   :global(.driver-pick) { padding: .4rem .7rem; border-radius: 999px; border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text); font: inherit; font-size: .82rem; cursor: pointer; }
   :global(.driver-pick.is-active) { border-color: var(--gh-yellow); color: var(--gh-yellow); }
-  :global(.li-role) { flex: none; padding: .12rem .45rem; border-radius: 999px; font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; background: rgba(255,215,76,.14); color: var(--gh-yellow); }
+  :global(.li-role) { flex: none; padding: .12rem .45rem; border-radius: 999px; font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; background: rgba(255,149,90,.14); color: var(--gh-yellow); }
   .preview-wrap { margin-top: 1.5rem; padding-top: 1.1rem; border-top: 1px solid var(--gh-line); }
   .preview-label { margin: 0 0 .7rem; color: var(--gh-muted); font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
   .crew-grid.preview { grid-template-columns: minmax(0, 24rem); }
@@ -310,7 +310,7 @@ const base = import.meta.env.BASE_URL;
   .form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin-top: 1.4rem; }
   .form-msg { margin: 0; font-size: .84rem; }
   .form-msg.is-error { color: var(--gh-red); }
-  .form-msg.is-ok { color: #4fd1c5; }
+  .form-msg.is-ok { color: #D9F58E; }
   .req-body { font-size: .9rem; }
   :global(.req-list) { display: grid; gap: .7rem; margin: 0; }
   :global(.req-row) { display: grid; grid-template-columns: 9rem 1fr; gap: .8rem; }
@@ -319,7 +319,7 @@ const base = import.meta.env.BASE_URL;
   :global(.req-row a) { color: var(--gh-text); }
   @media (max-width: 640px) { :global(.req-row) { grid-template-columns: 1fr; gap: .2rem; } }
   .req-note { margin-top: 1.2rem; }
-  .track-note { margin: -.4rem 0 1.1rem; padding: .6rem .8rem; border-left: 3px solid var(--gh-yellow); background: rgba(255,215,76,.06); font-size: .85rem; }
+  .track-note { margin: -.4rem 0 1.1rem; padding: .6rem .8rem; border-left: 3px solid var(--gh-yellow); background: rgba(255,149,90,.06); font-size: .85rem; }
 </style>
 
 <script>
@@ -643,7 +643,7 @@ const base = import.meta.env.BASE_URL;
   function renderCrewPreview() {
     const c = crewFromForm();
     // member count is counted by the DB (active members); the preview shows the saved value
-    const safe = { ...c, member_count: crews.find((x) => x.crew_id === selectedId)?.member_count ?? 1, tag: c.tag || '????', name: c.name || 'Crew name', color: /^#[0-9a-f]{6}$/.test(c.color) ? c.color : '#a0a0c6' };
+    const safe = { ...c, member_count: crews.find((x) => x.crew_id === selectedId)?.member_count ?? 1, tag: c.tag || '????', name: c.name || 'Crew name', color: /^#[0-9a-f]{6}$/.test(c.color) ? c.color : '#9C9CAB' };
     $('crew-preview').innerHTML = crewCardHtml(safe);
     $('crew-desc-count').textContent = String((cf.description.value || '').length);
   }
@@ -665,10 +665,10 @@ const base = import.meta.env.BASE_URL;
     crewForm.reset();
     slugTouched = Boolean(row);
     $('crew-form-title').textContent = row ? `Edit: ${row.name}` : 'New crew';
-    const r = row ?? { color: '#ed253d', platforms: [], focus: [], sort_order: 100 };
+    const r = row ?? { color: '#F24B9D', platforms: [], focus: [], sort_order: 100 };
     for (const k of ['name', 'tag', 'slug', 'region', 'description', 'discord_url', 'social_club_url']) cf[k].value = r[k] ?? '';
-    cf.color.value = r.color ?? '#ed253d';
-    cf.color_picker.value = r.color ?? '#ed253d';
+    cf.color.value = r.color ?? '#F24B9D';
+    cf.color_picker.value = r.color ?? '#F24B9D';
     cf.sort_order.value = r.sort_order ?? 100;
     cf.is_partner.checked = Boolean(r.is_partner);
     cf.is_featured.checked = Boolean(r.is_featured);

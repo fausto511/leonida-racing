@@ -40,7 +40,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   .mod-title { margin: .4rem 0 .6rem; font-size: clamp(2rem, 4vw, 2.8rem); }
   .mod-lede { margin: 0 0 1.5rem; color: var(--gh-muted); font-size: .92rem; max-width: 46rem; }
   .mod-lede strong { color: var(--gh-text); }
-  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: rgba(255,215,76,.08); border-radius: var(--gh-radius); font-size: .85rem; }
+  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: rgba(255,149,90,.08); border-radius: var(--gh-radius); font-size: .85rem; }
   .cr-box { padding: 1rem 1.2rem; }
   .cr-box p { margin: 0; font-size: .88rem; }
   .cr-tabs { display: flex; gap: .4rem; margin-bottom: 1rem; max-width: 22rem; }
@@ -48,11 +48,11 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   .cr-tab.is-active { background: var(--gh-surface-soft); color: var(--gh-text); border-color: var(--gh-muted); }
   .cr-error { color: var(--gh-red, #ff5a4f); font-size: .85rem; }
   :global(.cr-card) { border: 1px solid var(--gh-line); border-radius: var(--gh-radius); background: var(--gh-surface); padding: 1rem 1.1rem; margin-bottom: .75rem; }
-  :global(.cr-card.is-urgent) { border-color: rgba(237,37,61,.6); }
+  :global(.cr-card.is-urgent) { border-color: rgba(242,75,157,.6); }
   :global(.cr-card h3) { margin: 0 0 .25rem; font-size: 1rem; overflow-wrap: anywhere; }
   :global(.cr-meta) { margin: 0 0 .6rem; color: var(--gh-muted); font-size: .8rem; }
   :global(.cr-reason) { display: inline-block; margin-bottom: .5rem; padding: .15rem .55rem; border-radius: 999px; border: 1px solid var(--gh-line); font-size: .72rem; font-weight: 700; }
-  :global(.cr-card.is-urgent .cr-reason) { border-color: rgba(237,37,61,.6); color: #ff8a95; }
+  :global(.cr-card.is-urgent .cr-reason) { border-color: rgba(242,75,157,.6); color: #ff8a95; }
   :global(.cr-details) { margin: 0 0 .8rem; font-size: .88rem; white-space: pre-wrap; overflow-wrap: anywhere; }
   :global(.cr-actions) { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
   :global(.cr-actions input) { flex: 1 1 16rem; min-width: 0; padding: .45rem .6rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text); font: inherit; font-size: .85rem; }

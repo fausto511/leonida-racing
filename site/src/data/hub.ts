@@ -187,7 +187,7 @@ export function esc(value: unknown): string {
     .replace(/'/g, '&#39;');
 }
 
-const safeColor = (c: string) => (/^#[0-9a-fA-F]{6}$/.test(c) ? c : '#a0a0c6');
+const safeColor = (c: string) => (/^#[0-9a-fA-F]{6}$/.test(c) ? c : '#9C9CAB');
 const safeUrl = (u: string | null) => (u && /^https:\/\//.test(u) ? u : null);
 const DISCORD_RX = /^https:\/\/(discord\.gg|discord\.com\/invite)\/[A-Za-z0-9-]+$/;
 /** Where to meet the host: the event's own Discord invite, else the host crew's (RS-0034). */
@@ -240,7 +240,7 @@ function luminance(hex: string): number {
 }
 export function crewEmblemHtml(color: string): string {
   const c = safeColor(color);
-  const wheel = luminance(c) > 0.45 ? '#14141a' : '#ffffff';
+  const wheel = luminance(c) > 0.45 ? '#0B0B14' : '#ffffff';
   return `<span class="crew-emblem" aria-hidden="true"><svg viewBox="0 0 48 48" width="48" height="48"><path d="${EMBLEM_PANEL}" fill="${c}"/><g transform="translate(13.5 13.5) scale(0.041016) translate(0 512) scale(0.1 -0.1)"><path fill="${wheel}" d="${EMBLEM_WHEEL}"/></g></svg></span>`;
 }
 

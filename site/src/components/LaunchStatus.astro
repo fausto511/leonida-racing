@@ -42,13 +42,13 @@ const countdown = area !== 'tracks';
 </script>
 
 <style>
-  .launch-card { position: relative; justify-self: end; align-self: center; width: 100%; max-width: 19rem; padding: 1.15rem 1.25rem 1.1rem; border-radius: var(--gh-radius-lg); background: rgba(20,20,26,.72); border: 1px solid var(--gh-line); backdrop-filter: blur(8px); box-shadow: 0 10px 30px rgba(0,0,0,.35); overflow: hidden; }
+  .launch-card { position: relative; justify-self: end; align-self: center; width: 100%; max-width: 19rem; padding: 1.15rem 1.25rem 1.1rem; border-radius: var(--gh-radius-lg); background: rgba(11,11,20,.72); border: 1px solid var(--gh-line); backdrop-filter: blur(8px); box-shadow: 0 10px 30px rgba(0,0,0,.35); overflow: hidden; }
   .launch-card::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--gh-red), var(--gh-yellow)); }
   .launch-label { display: inline-flex; align-items: center; gap: .45rem; margin: 0 0 .55rem; color: var(--gh-yellow); font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-  .launch-dot { width: .45rem; height: .45rem; border-radius: 50%; background: var(--gh-yellow); box-shadow: 0 0 0 0 rgba(255,215,76,.6); animation: launch-pulse 2s infinite; }
-  @keyframes launch-pulse { 0% { box-shadow: 0 0 0 0 rgba(255,215,76,.55); } 70% { box-shadow: 0 0 0 .5rem rgba(255,215,76,0); } 100% { box-shadow: 0 0 0 0 rgba(255,215,76,0); } }
+  .launch-dot { width: .45rem; height: .45rem; border-radius: 50%; background: var(--gh-yellow); box-shadow: 0 0 0 0 rgba(255,149,90,.6); animation: launch-pulse 2s infinite; }
+  @keyframes launch-pulse { 0% { box-shadow: 0 0 0 0 rgba(255,149,90,.55); } 70% { box-shadow: 0 0 0 .5rem rgba(255,149,90,0); } 100% { box-shadow: 0 0 0 0 rgba(255,149,90,0); } }
   @media (prefers-reduced-motion: reduce) { .launch-dot { animation: none; } }
-  .launch-title { margin: 0 0 .45rem; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.15rem; line-height: 1.05; color: var(--gh-text); }
+  .launch-title { margin: 0 0 .45rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.15rem; line-height: 1.05; color: var(--gh-text); }
   .launch-text { margin: 0 0 .45rem; color: var(--gh-muted); font-size: .8rem; line-height: 1.45; }
   .launch-area { color: var(--gh-text); }
   .launch-count { margin: .75rem 0 .7rem; padding-top: .7rem; border-top: 1px solid var(--gh-line); }
@@ -56,7 +56,7 @@ const countdown = area !== 'tracks';
   .launch-count-row { display: flex; gap: .9rem; margin-top: .35rem; }
   .launch-count-row[hidden] { display: none; }
   .launch-count-row span { display: flex; align-items: baseline; gap: .25rem; color: var(--gh-muted); font-size: .66rem; text-transform: uppercase; letter-spacing: .05em; }
-  .launch-count-row strong { font-family: var(--gh-font-display); font-style: italic; font-weight: 900; font-size: 1.55rem; color: var(--gh-text); letter-spacing: 0; }
+  .launch-count-row strong { font-family: var(--gh-font-display); font-weight: 900; font-size: 1.55rem; color: var(--gh-text); letter-spacing: 0; }
   .launch-btn { display: flex; width: 100%; justify-content: center; margin-top: .15rem; font-size: .8rem; }
   @media (max-width: 860px) {
     .launch-card { justify-self: stretch; max-width: none; align-self: end; }

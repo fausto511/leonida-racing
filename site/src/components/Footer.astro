@@ -1,32 +1,102 @@
 ---
+// Site footer — Redesign Phase 1 (DEC-0116 "Footer", mockup boards Home desktop/phone).
+// New cars, Rankings and Tracks join the columns only once they are finished.
+// COPY STATUS: column labels from the mockup (Claude placeholders) -> Codex review (DEC-0088);
+// disclaimer unchanged (approved, DEC-0081).
 import { SITE_NAME, SITE_DISCLAIMER } from '../data/site';
 const base = import.meta.env.BASE_URL;
+const year = new Date().getFullYear();
+const DISCORD_INVITE_URL = 'https://discord.gg/hPGuBwXRqT';
+
+const columns: { head: string; href?: string; links: { label: string; href: string; consent?: boolean }[] }[] = [
+  { head: 'Cars', href: `${base}cars/`, links: [
+    { label: 'All cars', href: `${base}cars/` },
+    { label: 'Classes', href: `${base}cars/classes/` },
+    { label: 'Manufacturers', href: `${base}cars/manufacturers/` },
+  ] },
+  { head: 'Time Attack', href: `${base}time-attack/gellhorn-international-raceway/`, links: [
+    { label: 'Submit a lap', href: `${base}time-attack/submit/` },
+    { label: 'How it works', href: `${base}time-attack/how-it-works/` },
+    { label: 'Rules', href: `${base}time-attack/rules/` },
+  ] },
+  { head: 'Community', href: `${base}community/`, links: [
+    { label: 'Events', href: `${base}community/events/` },
+    { label: 'Crews', href: `${base}community/crews/` },
+  ] },
+  { head: 'More', links: [
+    { label: 'Guide', href: `${base}guide/` },
+    { label: 'About', href: `${base}about/` },
+    { label: 'Contact', href: `${base}legal/#contact` },
+    { label: 'Report a time', href: `${base}report/` },
+    { label: 'Report content', href: `${base}report-content/` },
+  ] },
+];
 ---
 <footer class="site-foot">
-  <div class="wrap site-foot-row">
-    <div>
-      <p class="foot-brand">{SITE_NAME}</p>
+  <div class="wrap foot-main">
+    <div class="foot-brand-col">
+      <a class="foot-brand" href={base}>
+        <img src={`${base}images/brand/lr-logo-white.png`} alt="" width="79" height="24" loading="lazy" />
+        {SITE_NAME}
+      </a>
       <p class="foot-note">{SITE_DISCLAIMER}</p>
+      <a class="foot-discord" href={DISCORD_INVITE_URL} target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z"/></svg>
+        Discord
+      </a>
     </div>
-    <nav aria-label="Footer">
-      <a href={`${base}about/`}>About</a>
-      <a href={`${base}terms/`}>Terms</a>
-      <a href={`${base}privacy/`}>Privacy</a>
-      <a href={`${base}privacy/#analytics`} data-consent-open>Privacy Settings</a>
-      <a href={`${base}legal/#contact`}>Contact</a>
-      <a href={`${base}legal/`}>Legal notice</a>
-      <a href={`${base}report/`}>Report a time</a>
-      <a href={`${base}report-content/`}>Report content</a>
+    <nav class="foot-cols" aria-label="Footer">
+      {columns.map((c) => (
+        <div class="foot-col">
+          {c.href ? <a class="foot-h" href={c.href}>{c.head}</a> : <span class="foot-h">{c.head}</span>}
+          {c.links.map((l) => <a href={l.href}>{l.label}</a>)}
+        </div>
+      ))}
     </nav>
+  </div>
+  <div class="foot-legal-bar">
+    <div class="wrap foot-legal">
+      <span>© {year} {SITE_NAME}</span>
+      <span class="foot-legal-links">
+        <a href={`${base}terms/`}>Terms</a>
+        <a href={`${base}privacy/`}>Privacy</a>
+        <a href={`${base}privacy/#analytics`} data-consent-open>Privacy settings</a>
+        <a href={`${base}legal/`}>Legal notice</a>
+      </span>
+    </div>
   </div>
 </footer>
 
 <style>
-  .site-foot { margin-top: var(--gh-gap-section); border-top: 1px solid var(--gh-line); padding-block: 2.5rem; }
-  .site-foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.5rem; }
-  .foot-brand { margin: 0 0 .35rem; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1rem; }
-  .foot-note { margin: 0; max-width: 34ch; color: var(--gh-muted); font-size: .8rem; }
-  nav { display: flex; flex-wrap: wrap; gap: 1.25rem; align-content: flex-start; }
-  nav a { color: var(--gh-muted); text-decoration: none; font-size: .8rem; font-weight: 600; }
-  nav a:hover { color: var(--gh-text); }
+  .site-foot { margin-top: var(--gh-gap-section); border-top: 1px solid var(--lr-line); font-size: 13px; }
+  .foot-main { display: flex; justify-content: space-between; gap: 48px; padding-top: 44px; padding-bottom: 36px; }
+  .foot-brand-col { display: flex; flex-direction: column; gap: 14px; max-width: 300px; }
+  .foot-brand { display: inline-flex; align-items: center; gap: 12px; color: var(--lr-text); text-decoration: none; font-family: var(--gh-font-display); font-weight: 700; font-size: 17px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+  .foot-brand img { height: 24px; width: auto; }
+  .foot-note { margin: 0; color: var(--lr-muted); line-height: 1.5; }
+  .foot-discord { display: inline-flex; align-items: center; gap: 8px; width: max-content; height: 34px; padding: 0 12px; border: 1px solid rgba(251,247,234,.22); border-radius: var(--gh-radius); color: var(--lr-text); font-weight: 600; font-size: 13px; text-decoration: none; }
+  .foot-discord:hover { border-color: var(--lr-text); }
+  .foot-discord svg { width: 16px; height: 16px; fill: currentColor; flex: none; }
+  .foot-cols { display: flex; gap: 48px; }
+  .foot-col { display: flex; flex-direction: column; gap: 9px; min-width: 130px; }
+  .foot-col a { color: var(--lr-muted); text-decoration: none; }
+  .foot-col .foot-h { margin-bottom: 3px; color: var(--lr-text); font-weight: 600; }
+  .foot-col a:hover, .foot-col a.foot-h:hover { color: var(--lr-orange); }
+  .foot-legal-bar { border-top: 1px solid rgba(200,200,222,.12); }
+  .foot-legal { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-top: 16px; padding-bottom: 18px; font-size: 12px; color: var(--lr-muted); }
+  .foot-legal-links { display: flex; gap: 20px; }
+  .foot-legal a { color: var(--lr-muted); text-decoration: none; }
+  .foot-legal a:hover { color: var(--lr-orange); }
+
+  @media (max-width: 1100px) {
+    .foot-main { flex-direction: column; gap: 32px; }
+    .foot-brand-col { max-width: 36rem; }
+    .foot-cols { flex-wrap: wrap; gap: 28px 40px; }
+  }
+  @media (max-width: 560px) {
+    .foot-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 24px; }
+    .foot-col { min-width: 0; }
+    .foot-legal { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .foot-legal-links { flex-wrap: wrap; gap: 8px 16px; }
+  }
 </style>

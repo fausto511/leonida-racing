@@ -61,7 +61,7 @@ const needed = vehiclesNeededHtml(sampleEntries);
 <style>
   .lb { padding-top: 1rem; padding-bottom: var(--gh-gap-section); }
   .lb-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1.5rem; margin-bottom: 1.5rem; }
-  .sample-flag { display: inline-block; margin-bottom: .7rem; padding: .3rem .65rem; border-radius: 999px; background: rgba(237,37,61,.14); color: var(--gh-red); font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .sample-flag { display: inline-block; margin-bottom: .7rem; padding: .3rem .65rem; border-radius: 999px; background: rgba(242,75,157,.14); color: var(--gh-red); font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
   /* JS sets [hidden] on this once live data loads; without this rule the
      UA default [hidden]{display:none} loses to the display:inline-block
      above (author CSS always beats UA CSS), so the badge stayed visible
@@ -76,7 +76,7 @@ const needed = vehiclesNeededHtml(sampleEntries);
   .lb-search { flex: 1 1 14rem; } /* look: site-wide .ui-search (tokens.css) */
   .lb-toggle { display: inline-flex; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); overflow: hidden; }
   .lb-toggle button { padding: .65rem 1.1rem; border: none; background: transparent; color: var(--gh-muted); font-weight: 700; font-size: .78rem; cursor: pointer; }
-  .lb-toggle button.is-active { background: var(--gh-yellow); color: #1a1206; }
+  .lb-toggle button.is-active { background: var(--gh-yellow); color: #2A0F22; }
 
   .lb-table-wrap { padding: 0; overflow-x: auto; }
   .lb-table { width: 100%; border-collapse: collapse; min-width: 46rem; }
@@ -92,8 +92,8 @@ const needed = vehiclesNeededHtml(sampleEntries);
      aus" / "Tabelle sieht nicht ordentlich aus" was. */
   :global(.lb-table td) { padding: .85rem 1.1rem; font-size: .88rem; border-bottom: 1px solid var(--gh-line); }
   :global(.lb-table tbody tr:last-child td) { border-bottom: none; }
-  :global(.lb-table tr.is-top3) { background: rgba(255,215,76,.05); }
-  :global(.lb-rank) { font-family: var(--gh-font-display); font-style: italic; font-weight: 900; color: var(--gh-muted); }
+  :global(.lb-table tr.is-top3) { background: rgba(255,149,90,.05); }
+  :global(.lb-rank) { font-family: var(--gh-font-display); font-weight: 900; color: var(--gh-muted); }
   :global(.is-top3 .lb-rank) { color: var(--gh-yellow); }
   :global(.lb-driver) { font-weight: 700; }
   :global(.lb-crew-tag) { margin-left: .45rem; vertical-align: 1px; }
@@ -110,7 +110,7 @@ const needed = vehiclesNeededHtml(sampleEntries);
   :global(.lb-time) { font-variant-numeric: tabular-nums; font-weight: 700; }
   :global(.lb-gap) { display: block; color: var(--gh-muted); font-size: .72rem; font-weight: 400; }
   :global(.status-ok) { color: var(--gh-yellow); }
-  :global(.check-circle) { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex: none; border-radius: 50%; background: var(--gh-yellow); color: #1a1206; }
+  :global(.check-circle) { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex: none; border-radius: 50%; background: var(--gh-yellow); color: #2A0F22; }
   :global(.watch-btn) { display: inline-flex; align-items: center; padding: .35rem .8rem; border-radius: var(--gh-radius); background: transparent; border: 1px solid var(--gh-line); color: var(--gh-text); font-size: .76rem; font-weight: 700; text-decoration: none; }
 
   /* Logos in white, no circle, a bit larger (Fausto, 2026-10-03). Source
@@ -123,7 +123,7 @@ const needed = vehiclesNeededHtml(sampleEntries);
   .needed { display: grid; grid-template-columns: minmax(12rem, 16rem) 1fr; gap: 1.5rem; align-items: start; margin-top: 1.25rem; padding: var(--gh-pad-card); }
   .needed-title { display: flex; align-items: center; gap: .5rem; }
   .needed-title svg { color: var(--gh-yellow); flex: none; }
-  .needed-head h3 { margin: 0; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
+  .needed-head h3 { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
   .needed-head p { margin: .3rem 0 0; max-width: 30ch; color: var(--gh-muted); font-size: .82rem; }
   .needed ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; list-style: none; margin: 0; padding: 0; }
   @media (max-width: 1100px) { .needed { grid-template-columns: 1fr; } }
@@ -156,7 +156,7 @@ const needed = vehiclesNeededHtml(sampleEntries);
   :global(.lb-more-btn) { margin-top: 1rem; }
   :global(.lb-context) { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.2rem; margin-bottom: 1rem; }
   :global(.lb-context-title) { display: flex; align-items: center; gap: .65rem; flex: 1 1 auto; }
-  :global(.lb-context-title h3) { margin: 0; font-family: var(--gh-font-display); font-style: italic; font-weight: 900; text-transform: uppercase; font-size: 1.25rem; }
+  :global(.lb-context-title h3) { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.25rem; }
   :global(.lb-context-kicker) { margin: 0; color: var(--gh-muted); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
   :global(.lb-context-link) { color: var(--gh-muted); font-size: .8rem; font-weight: 700; }
   :global(.lb-context-link:hover) { color: var(--gh-text); }

@@ -69,24 +69,24 @@ const acquisitionLabels: Record<string, string> = {
   .v-tile { position: relative; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg); overflow: hidden; transition: border-color .15s; }
   .v-tile:hover { border-color: var(--gh-muted); }
   .v-tile-link { position: absolute; inset: 0; z-index: 1; }
-  .v-photo { position: relative; aspect-ratio: 16/9; background: rgba(160,160,198,.08); overflow: hidden; }
+  .v-photo { position: relative; aspect-ratio: 16/9; background: rgba(200,200,222,.08); overflow: hidden; }
   .v-photo > img { width: 100%; height: 100%; object-fit: cover; }
   .v-photo-fallback { opacity: .4; filter: saturate(.7); }
   /* Pills top left: "Owned" always first (added by script), edition next to it (2026-09-30) */
   .v-badges { position: absolute; top: .6rem; left: .6rem; right: 3rem; z-index: 2; display: flex; flex-wrap: wrap; gap: .35rem; pointer-events: none; }
   .v-badge { padding: .25rem .6rem; border-radius: 999px; background: var(--gh-red); color: #fff; font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-  .v-badge-muted { background: rgba(20,20,26,.8); color: var(--gh-muted); border: 1px solid rgba(252,250,247,.18); }
-  .v-photo-pending { position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,20,26,.7); border: 1px solid rgba(252,250,247,.12); padding: .35rem .75rem; border-radius: 999px; color: var(--gh-muted); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
-  .v-name { position: absolute; left: 0; right: 0; bottom: 0; padding: .6rem .75rem; background: linear-gradient(to top, rgba(20,20,26,.95), transparent); display: flex; flex-direction: column; gap: .25rem; }
+  .v-badge-muted { background: rgba(11,11,20,.8); color: var(--gh-muted); border: 1px solid rgba(251,247,234,.18); }
+  .v-photo-pending { position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%); background: rgba(11,11,20,.7); border: 1px solid rgba(251,247,234,.12); padding: .35rem .75rem; border-radius: 999px; color: var(--gh-muted); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+  .v-name { position: absolute; left: 0; right: 0; bottom: 0; padding: .6rem .75rem; background: linear-gradient(to top, rgba(11,11,20,.95), transparent); display: flex; flex-direction: column; gap: .25rem; }
   .v-name strong { font-size: .92rem; }
   .v-name span { display: inline-flex; align-items: center; gap: .35rem; font-size: .7rem; color: var(--gh-muted); text-transform: uppercase; letter-spacing: .03em; }
   .v-logo { width: 18px; height: 18px; flex-shrink: 0; filter: brightness(0) invert(1); opacity: .85; object-fit: contain; }
 
   /* Fixed square box + no UA padding: iOS Safari adds button padding, which
      made the round button oval on phones (2026-10-01). */
-  .v-compare-mark { position: absolute; top: .6rem; right: .6rem; z-index: 2; box-sizing: border-box; flex: none; width: 1.9rem; height: 1.9rem; min-width: 0; padding: 0; margin: 0; -webkit-appearance: none; appearance: none; aspect-ratio: 1; border-radius: 50%; border: 1px solid rgba(252,250,247,.35); background: rgba(20,20,26,.65); color: var(--gh-text); line-height: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .v-compare-mark { position: absolute; top: .6rem; right: .6rem; z-index: 2; box-sizing: border-box; flex: none; width: 1.9rem; height: 1.9rem; min-width: 0; padding: 0; margin: 0; -webkit-appearance: none; appearance: none; aspect-ratio: 1; border-radius: 50%; border: 1px solid rgba(251,247,234,.35); background: rgba(11,11,20,.65); color: var(--gh-text); line-height: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .v-compare-mark:hover { border-color: var(--gh-text); }
-  .v-compare-mark.is-selected { background: var(--gh-yellow); border-color: var(--gh-yellow); color: #1a1206; }
+  .v-compare-mark.is-selected { background: var(--gh-yellow); border-color: var(--gh-yellow); color: #2A0F22; }
 
   .v-data { position: relative; z-index: 2; pointer-events: none; display: flex; justify-content: space-between; padding: .6rem .9rem; font-size: .72rem; border-top: 1px solid var(--gh-line); }
   .v-data span { display: flex; flex-direction: column; gap: .2rem; text-transform: uppercase; letter-spacing: .03em; color: var(--gh-muted); }
@@ -106,5 +106,5 @@ const acquisitionLabels: Record<string, string> = {
 
   /* Owned by the signed-in driver (RS-0032) */
   :global(.v-tile.is-owned) { border-color: var(--gh-yellow); }
-  :global(.v-owned) { padding: .25rem .6rem; border-radius: 999px; background: var(--gh-yellow); color: #1a1206; font-size: .6rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+  :global(.v-owned) { padding: .25rem .6rem; border-radius: 999px; background: var(--gh-yellow); color: #2A0F22; font-size: .6rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 </style>

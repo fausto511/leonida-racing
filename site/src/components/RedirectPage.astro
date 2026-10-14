@@ -11,7 +11,7 @@ const target = `${import.meta.env.BASE_URL}${to}`;
 const canonical = new URL(target, Astro.site).href;
 ---
 <!doctype html>
-<html lang="en" style="background:#14141a">
+<html lang="en" style="background:#0B0B14">
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="refresh" content={`0;url=${target}`} />
@@ -20,7 +20,7 @@ const canonical = new URL(target, Astro.site).href;
     <title>Leonida Racing</title>
     <script is:inline define:vars={{ target }}>location.replace(target + location.search + location.hash);</script>
   </head>
-  <body style="margin:0;background:#14141a;color:#a0a0c6;font:14px/1.5 system-ui,sans-serif">
-    <noscript><p style="padding:2rem"><a href={target} style="color:#fcfaf7">Continue</a></p></noscript>
+  <body style="margin:0;background:#0B0B14;color:#9C9CAB;font:14px/1.5 system-ui,sans-serif">
+    <noscript><p style="padding:2rem"><a href={target} style="color:#FBF7EA">Continue</a></p></noscript>
   </body>
 </html>

@@ -151,7 +151,7 @@ const byMake = new Map<string, typeof vehicleOptions>();
   .submit-lede { color: var(--gh-muted); max-width: 56ch; margin: 0 0 1.5rem; }
   .submit-lede code { color: var(--gh-text); }
 
-  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: rgba(255,215,76,.08); border-radius: var(--gh-radius); font-size: .85rem; }
+  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: rgba(255,149,90,.08); border-radius: var(--gh-radius); font-size: .85rem; }
   .notice strong { color: var(--gh-yellow); }
   .notice code { color: var(--gh-text); }
 
@@ -167,7 +167,7 @@ const byMake = new Map<string, typeof vehicleOptions>();
     font-size: 16px; /* >=16px: iOS Safari would otherwise zoom the page on focus */
   }
   .field select option, .field select optgroup { background: var(--gh-surface); }
-  #lap_time { font-family: var(--gh-font-display); font-style: italic; font-weight: 900; font-size: 1.35rem; letter-spacing: .03em; }
+  #lap_time { font-family: var(--gh-font-display); font-weight: 900; font-size: 1.35rem; letter-spacing: .03em; }
   .field select:focus, .field input:focus { outline: 2px solid var(--gh-yellow); outline-offset: 1px; }
   .field input[aria-invalid="true"], .field select[aria-invalid="true"] { border-color: var(--gh-red); }
   .hint { margin: 0; color: var(--gh-muted); font-size: .78rem; line-height: 1.5; }
@@ -176,9 +176,9 @@ const byMake = new Map<string, typeof vehicleOptions>();
   /* ---- screenshot drop zone: fixed 16:9 box, so nothing below moves when
      the preview appears (no layout jump on phones) ---- */
   .visually-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; clip: rect(0 0 0 0); }
-  .dropzone { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 16 / 9; border: 2px dashed rgba(160,160,198,.35); border-radius: var(--gh-radius-lg); background: var(--gh-bg); cursor: pointer; overflow: hidden; transition: border-color .15s, background .15s; -webkit-tap-highlight-color: transparent; }
+  .dropzone { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 16 / 9; border: 2px dashed rgba(200,200,222,.35); border-radius: var(--gh-radius-lg); background: var(--gh-bg); cursor: pointer; overflow: hidden; transition: border-color .15s, background .15s; -webkit-tap-highlight-color: transparent; }
   .dropzone:hover, .dropzone:focus-within { border-color: var(--gh-muted); }
-  .dropzone.is-over { border-color: var(--gh-yellow); background: rgba(255,215,76,.06); }
+  .dropzone.is-over { border-color: var(--gh-yellow); background: rgba(255,149,90,.06); }
   .dropzone.has-file { border-style: solid; border-color: var(--gh-line); }
   .dropzone[aria-invalid="true"] { border-color: var(--gh-red); }
   .dz-empty { display: flex; flex-direction: column; align-items: center; gap: .4rem; padding: 1rem; text-align: center; color: var(--gh-muted); }
@@ -190,7 +190,7 @@ const byMake = new Map<string, typeof vehicleOptions>();
   :global(html.is-touch) .dz-desk { display: none; }
   :global(html.is-touch) .dz-touch { display: inline; }
   .dz-preview { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
-  .dz-busy { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(20,20,26,.8); color: var(--gh-text); font-size: .85rem; font-weight: 700; }
+  .dz-busy { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(11,11,20,.8); color: var(--gh-text); font-size: .85rem; font-weight: 700; }
   .dz-meta { display: flex; align-items: center; justify-content: space-between; gap: .75rem; font-size: .78rem; color: var(--gh-muted); }
   .dz-actions { display: flex; gap: .9rem; }
   .link-btn { background: none; border: none; padding: .3rem 0; color: var(--gh-text); font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
@@ -200,7 +200,7 @@ const byMake = new Map<string, typeof vehicleOptions>();
   .seg-opt { position: relative; }
   .seg-opt input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
   .seg-opt span { display: flex; align-items: center; justify-content: center; min-height: 2.9rem; padding: .5rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-muted); font-weight: 700; font-size: .9rem; text-align: center; }
-  .seg-opt input:checked + span { border-color: var(--gh-yellow); color: var(--gh-text); background: rgba(255,215,76,.08); box-shadow: inset 0 0 0 1px var(--gh-yellow); }
+  .seg-opt input:checked + span { border-color: var(--gh-yellow); color: var(--gh-text); background: rgba(255,149,90,.08); box-shadow: inset 0 0 0 1px var(--gh-yellow); }
   .seg-opt span small { display: block; margin-top: .15rem; font-size: .64rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--gh-muted); }
   .seg-opt span { flex-direction: column; }
   .seg-opt.is-soon span { opacity: .5; border-style: dashed; }
@@ -218,7 +218,7 @@ const byMake = new Map<string, typeof vehicleOptions>();
   .consent { display: flex; align-items: flex-start; gap: .7rem; font-size: .9rem; cursor: pointer; }
   .consent input { width: 1.25rem; height: 1.25rem; margin: .05rem 0 0; flex: none; accent-color: var(--gh-red); }
 
-  .form-errors { padding: .8rem 1rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-red); background: rgba(237,37,61,.1); color: var(--gh-text); font-size: .85rem; }
+  .form-errors { padding: .8rem 1rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-red); background: rgba(242,75,157,.1); color: var(--gh-text); font-size: .85rem; }
   .form-errors ul { margin: .3rem 0 0; padding-left: 1.1rem; }
 
   .submit-btn { width: 100%; min-height: 3.2rem; font-size: 1.05rem; }
