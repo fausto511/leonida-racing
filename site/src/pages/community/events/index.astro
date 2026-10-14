@@ -20,7 +20,7 @@ const initialHtml = groups.map((g) => `<h2 class="ev-month">${g.label}</h2><div 
   title="GTA VI Event Calendar — Races, Playlists & Car Meets"
   description="Find GTA 6 races, league rounds, community playlists, and car meets. See who’s hosting and view every start time in your local time zone."
   section="hub"
-  noindex={true /* until real crews/events replace the sample data (RS-0022) */}
+  noindex={false /* indexable since 2026-10-14 (Fausto): real crews exist; Tracks stays noindex */}
 >
   <PageHero status="hub" image="hub-events" eyebrow="Find Your Next GTA VI Race" title="Event Calendar" lede="Races, league rounds, community playlists, and car meets from across the GTA VI racing scene. Find out who’s hosting and what’s happening next. All times are shown in your local time zone." />
 

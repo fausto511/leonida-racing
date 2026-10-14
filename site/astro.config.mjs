@@ -33,11 +33,11 @@ export default defineConfig({
       // /account/ and /moderator/ are private/internal, not content for
       // search -- excluded from the sitemap and separately set to
       // noindex on the page itself (see Base.astro).
-      // /community/ (formerly /hub/) stays out while it only shows sample data (noindex, RS-0022).
+      // /community/tracks/ stays out while it only shows sample data (noindex); overview, crews, events indexable since 2026-10-14 (Fausto).
       // Forwarding pages (/time-attack/, /tracks/…, the old /cars/vehicles/vapid-caracara/)
       // are not content either.
       filter: (page) =>
-        !page.includes('/account/') && !page.includes('/moderator/') && !page.includes('/community/') &&
+        !page.includes('/account/') && !page.includes('/moderator/') && !page.includes('/community/tracks/') &&
         !page.endsWith('/time-attack/') && !page.includes('/tracks/') && !page.includes('/report/') && !page.includes('/report-content/') && !page.endsWith('.txt') &&
         !page.endsWith('/cars/vehicles/vapid-caracara/') && !page.endsWith('/cars/vehicles/buckingham-jubilee/') && !page.endsWith('/cars/vehicles/karin-contender/') && !page.endsWith('/time-attack/submit/') &&
         !noindexVehiclePaths.some((p) => page.endsWith(p)) && !noindexDataPaths.some((p) => page.endsWith(p)),

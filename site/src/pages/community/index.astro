@@ -13,7 +13,7 @@ const crewsHtml = sampleCrews.slice(0, 3).map((c) => crewCardHtml(c, undefined, 
   title="The Hub — GTA VI Racing Community"
   description="Find GTA 6 races, league rounds, car meets, crews, hosts, and creators. Connect with the racing community and car culture in The Hub."
   section="hub"
-  noindex={true /* until real crews/events replace the sample data (RS-0022) */}
+  noindex={false /* indexable since 2026-10-14 (Fausto): real crews exist; Tracks stays noindex */}
 >
   <PageHero status="hub" image="hub" eyebrow="GTA VI Racing Community" title="The Hub" lede="Where the GTA VI racing scene meets. Find the next race, league round, or car meet. Connect with crews, hosts, and creators. Check out what the community is creating around GTA VI racing and car culture." />
 
