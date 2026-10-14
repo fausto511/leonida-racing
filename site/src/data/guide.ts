@@ -78,6 +78,8 @@ export const guideSections: GuideSection[] = [
       { label: 'Rockstar Games — GTA VI Media', url: R_MEDIA, note: 'official trailers and media library.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: 'official screenshot titles, including named Ultimate Edition vehicles.' },
       { label: 'Rockstar Support — GTA VI Platforms, Editions, and Versions', url: R_SUPPORT, note: 'named edition vehicles and content.' },
+      // Fausto 15.10.2026: source of the "298 vehicles" on the home Guide card. Note = Claude placeholder (Codex review, DEC-0088).
+      { label: 'GTABase — GTA 6 Cars & Vehicles List', url: 'https://www.gtabase.com/gta-6/vehicles/', note: 'community database listing 298 vehicles from official material (checked October 15, 2026).' },
     ],
   },
   {
