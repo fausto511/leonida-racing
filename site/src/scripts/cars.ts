@@ -153,14 +153,20 @@ function lev(a: string, b: string): number {
   return d[m][n];
 }
 function didYouMean(q: string): HTMLElement | null {
-  const w = q.toLowerCase();
+  // S3: word by word, like the search itself ("mamba gr" -> Mamba GT)
+  const qw = q.toLowerCase().split(/\s+/).filter(Boolean);
+  if (!qw.length) return null;
+  const wordDist = (w: string, x: string) => Math.min(lev(w, x), w.length >= 3 ? lev(w, x.slice(0, w.length)) : Infinity);
   let best: { c: HTMLElement; s: number } | null = null;
   for (const c of cards) {
     const words = c.dataset.name!.split(/\s+/);
-    const s = Math.min(lev(w, c.dataset.name!), ...words.map((x) => lev(w, x)), ...words.map((x) => lev(w, x.slice(0, w.length))));
-    if (!best || s < best.s) best = { c, s };
+    const perWord = qw.reduce((sum, w) => sum + Math.min(...words.map((x) => wordDist(w, x))), 0);
+    const s = Math.min(perWord, lev(qw.join(' '), c.dataset.name!));
+    // tie -> shorter name ("vapid dominatr" -> Dominator, not Dominator '67 Buggy)
+    if (!best || s < best.s || (s === best.s && words.length < best.c.dataset.name!.split(/\s+/).length)) best = { c, s };
   }
-  return best && best.s <= Math.max(2, Math.floor(w.length / 3)) ? best.c : null;
+  const len = qw.join('').length;
+  return best && best.s > 0 && best.s <= Math.max(2, Math.floor(len / 3)) ? best.c : null;
 }
 
 // ---- range sliders (C5/C6) ------------------------------------------------------
@@ -265,10 +271,14 @@ function render() {
       const n = countWith(without(state, k));
       return n ? `<button type="button" class="btn btn-s btn-sm" data-drop="${k}">Without ${esc(filterLabel(k))} → ${n} ${n === 1 ? 'car' : 'cars'}</button>` : '';
     }).join('');
-    const dym = state.q ? didYouMean(state.q) : null;
-    $('empty-dym').innerHTML = state.q
-      ? `No car named <b>“${esc(state.q)}”</b>.${dym ? ` Did you mean <a href="#" data-dym="${esc(dym.dataset.name!)}">${esc(dym.querySelector('.vc-brand')!.textContent!.trim())} ${esc(dym.querySelector('.vc-name')!.textContent!.trim())}</a>?` : ''}`
-      : 'Try removing a filter.';
+    // S1: only say "no car named …" when the search text alone finds nothing
+    const qHits = state.q ? cards.filter((c) => !fails(c, state).includes('q')).length : 0;
+    const dym = state.q && !qHits ? didYouMean(state.q) : null;
+    $('empty-dym').innerHTML = !state.q
+      ? 'Try removing a filter.'
+      : qHits
+        ? `<b>“${esc(state.q)}”</b> matches ${qHits} ${qHits === 1 ? 'car' : 'cars'}, but none with your other filters.`
+        : `No car named <b>“${esc(state.q)}”</b>.${dym ? ` Did you mean <a href="#" data-dym="${esc(dym.dataset.name!)}">${esc(dym.querySelector('.vc-brand')!.textContent!.trim())} ${esc(dym.querySelector('.vc-name')!.textContent!.trim())}</a>?` : ''}`;
     const near = cards.map((c) => ({ c, f: fails(c, state) })).filter((x) => x.f.length === 1 && x.f[0] !== 'q').sort((a, b) => sortKey(a.c, b.c)).slice(0, 4);
     $('closest-wrap').hidden = !near.length;
     $('closest').innerHTML = '';
@@ -551,7 +561,8 @@ dsp.addEventListener('click', (e) => {
   s.has(v) ? s.delete(v) : s.add(v);
   paintDraft();
 });
-$('dsp-reset').addEventListener('click', () => { draft = { ...cloneState(draft), sets: emptySets(), ranges: emptyRanges() }; paintDraft(); });
+// S4: same as "Clear all" on the page – also clears the search text
+$('dsp-reset').addEventListener('click', () => { draft = { ...cloneState(draft), q: '', sets: emptySets(), ranges: emptyRanges() }; paintDraft(); });
 $('dsp-show').addEventListener('click', () => { Object.assign(state, cloneState(draft)); closeSheet('dsp'); render(); });
 ($('dsp-msearch') as HTMLInputElement).addEventListener('input', (e) => {
   const q = (e.target as HTMLInputElement).value.trim().toLowerCase();
