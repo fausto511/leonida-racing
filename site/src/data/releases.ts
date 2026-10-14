@@ -21,3 +21,16 @@ export const releaseById = Object.fromEntries(gameReleases.map((r) => [r.id, r])
 export function formatReleaseDate(iso: string): string {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 }
+
+// "New" badge (Fausto 2026-10-14, DEC-0122): new *in the game*, not new on our site.
+// Only cars from a release that came out after launch (update/DLC dated later than
+// the base game, so launch-day editions don't count), for 30 days from that
+// release date. Base-game cars added to the database later are never "New".
+export const NEW_BADGE_DAYS = 30;
+export function isNewInGame(releaseId: string | undefined, now: Date = new Date()): boolean {
+  const r = releaseId ? releaseById[releaseId] : undefined;
+  const launch = gameReleases.find((g) => g.kind === 'base-game')?.date;
+  if (!r || r.kind === 'base-game' || !r.date || !launch || r.date <= launch) return false;
+  const start = Date.parse(`${r.date}T00:00:00Z`);
+  return now.getTime() >= start && now.getTime() < start + NEW_BADGE_DAYS * 86400e3;
+}
