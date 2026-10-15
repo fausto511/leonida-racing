@@ -48,35 +48,46 @@ document.querySelectorAll<HTMLButtonElement>('[data-compare]').forEach((btn) => 
 });
 
 // ---------------------------------------------------------------------------
-// Community: sample rows first (in the HTML), live rows when published ones exist
+// Community: loading rows in the HTML -> live rows; sample rows only as a fallback
+// when nothing live comes back (Fausto 15.10.: no flash of fake events/crews)
 // ---------------------------------------------------------------------------
 const evRoot = $('home-events')!;
 const crewRoot = $('home-crews')!;
-localizeTimes(evRoot);
 const rsvp = createEventRsvp(evRoot);
-rsvp.setEvents(sampleEventsUpcoming().filter((e) => e.status !== 'cancelled').slice(0, 3), false);
-rsvp.renderRsvps();
 const crewJoin = createCrewMembership(crewRoot, null);
-crewJoin.setCrews(sampleCrews, false);
+function sampleEvents() {
+  const ev = sampleEventsUpcoming().filter((e) => e.status !== 'cancelled').slice(0, 3);
+  evRoot.innerHTML = ev.map(homeEventRow).join('') + Array.from({ length: Math.max(0, 3 - ev.length) }, homeOpenSpotRow).join('');
+  localizeTimes(evRoot);
+  rsvp.setEvents(ev, false);
+  rsvp.renderRsvps();
+}
+function sampleCrewRows() {
+  crewRoot.innerHTML = sampleCrews.slice(0, 4).map((c) => homeCrewRow(c, true)).join('');
+  crewJoin.setCrews(sampleCrews, false);
+}
+if (!backendConfigured) { sampleEvents(); sampleCrewRows(); }
+// safety net: never leave the loading rows standing (slow or failed requests)
+window.setTimeout(() => { if (evRoot.querySelector('.crow-sk')) sampleEvents(); if (crewRoot.querySelector('.crow-sk')) sampleCrewRows(); }, 8000);
 
 const isOver = (e: HubEvent) => new Date(e.ends_at ?? new Date(new Date(e.starts_at).getTime() + 3 * 3600e3).toISOString()).getTime() < Date.now();
 
-fetchLiveEvents().then(async (live) => {
+if (backendConfigured) fetchLiveEvents().then(async (live) => {
   const next = (live ?? []).filter((e) => e.status !== 'cancelled' && !isOver(e)).slice(0, 3);
-  if (!next.length) return;
+  if (!next.length) { sampleEvents(); return; }
   evRoot.innerHTML = next.map(homeEventRow).join('') + Array.from({ length: 3 - next.length }, homeOpenSpotRow).join('');
   localizeTimes(evRoot);
   rsvp.setEvents(next, true);
   rsvp.renderRsvps();
   await rsvp.connect();
-});
+}).catch(() => sampleEvents());
 
 async function loadLiveCrews(ownCrewIds: Set<string>) {
-  const live = await fetchLiveCrews();
-  if (!live) return;
+  const live = await fetchLiveCrews().catch(() => null);
+  if (!live) { sampleCrewRows(); return; }
   // Eingeloggt: own crews (active or member) are left out (DEC-0116).
   const list = pickFeaturedCrews(live.filter((c) => !ownCrewIds.has(c.crew_id ?? '')), 4);
-  if (!list.length) return;
+  if (!list.length) { sampleCrewRows(); return; }
   crewRoot.innerHTML = list.map((c) => homeCrewRow(c, false)).join('');
   await crewJoin.setCrews(live, true);
 }

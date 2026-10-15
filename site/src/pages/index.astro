@@ -9,8 +9,7 @@
 import Base from '../layouts/Base.astro';
 import CarCard from '../components/CarCard.astro';
 import { SITE_NAME } from '../data/site';
-import { sampleCrews, sampleEventsUpcoming } from '../data/hub';
-import { homeEventRow, homeOpenSpotRow, homeCrewRow, homeLbRow } from '../data/home';
+import { homeLbRow } from '../data/home';
 import { sampleEntries, overallRows } from '../data/leaderboard';
 import { vehicleOptions, fastestGellhornLapMs, bandVehicle, type VehicleOption } from '../data/vehicles';
 import { classSlug } from '../data/garage-taxonomy';
@@ -44,10 +43,11 @@ const fixed = ['Super', 'Sports'];
 const fastFixed = fixed.map((c) => picks.find((p) => p.cls === c)).filter((p): p is Pick => Boolean(p));
 const fastRest = picks.filter((p) => !fixed.includes(p.cls));
 
-// ---- Community (sample rows; live rows replace them in the browser) ----
-const sampleEv = sampleEventsUpcoming().filter((e) => e.status !== 'cancelled').slice(0, 3);
-const eventsHtml = sampleEv.map(homeEventRow).join('') + Array.from({ length: Math.max(0, 3 - sampleEv.length) }, homeOpenSpotRow).join('');
-const crewsHtml = sampleCrews.slice(0, 4).map((c) => homeCrewRow(c, true)).join('');
+// ---- Community: loading rows in the HTML; the browser fills in live rows, and only
+// falls back to the sample rows when nothing live comes back (no flash of fake data, Fausto 15.10.)
+const skel = (n: number, tag: boolean) => Array.from({ length: n }, () => `<div class="crow crow-sk" aria-hidden="true"><span class="sk sk-${tag ? 'tag' : 'date'}"></span><span class="sk-main"><span class="sk sk-l1"></span><span class="sk sk-l2"></span></span></div>`).join('');
+const eventsHtml = skel(3, false);
+const crewsHtml = skel(4, true);
 
 // ---- Guide: "Racing in GTA VI" fixed, two rotating (never "not-confirmed") ----
 const GUIDE_CARD: Record<string, { img: string; line: string; title?: string }> = {
@@ -222,7 +222,7 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
         <div class="cbody">
           <h3><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>Next events<span class="ctz">Your local time</span></h3>
           <div class="crows" id="home-events" set:html={eventsHtml} />
-          <div class="cfoot"><a href={`${base}account/events/`} class="btn btn-s btn-sm">Become a host</a></div>
+          <div class="cfoot"><a href={`${base}account/events/`} class="btn btn-s btn-sm">Become a host</a><a href={`${base}community/events/`} class="arrow">All events →</a></div>
         </div>
       </article>
       <article class="card ccard">
@@ -230,7 +230,7 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
         <div class="cbody">
           <h3><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Featured crews</h3>
           <div class="crows" id="home-crews" set:html={crewsHtml} />
-          <div class="cfoot"><a href={`${base}account/crew/`} class="btn btn-s btn-sm">Start a crew</a></div>
+          <div class="cfoot"><a href={`${base}account/crew/`} class="btn btn-s btn-sm">Start a crew</a><a href={`${base}community/crews/`} class="arrow">All crews →</a></div>
         </div>
       </article>
     </div>
@@ -432,7 +432,17 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
   .crows :global(.crow.cfree .cdate) { display: flex; align-items: center; justify-content: center; height: 44px; }
   .crows :global(.cplus) { width: 32px; height: 32px; border-radius: 999px; border: 1px dashed rgba(200,200,222,.4); display: inline-flex; align-items: center; justify-content: center; color: var(--lr-muted); font-size: 18px; line-height: 1; }
   .crows :global(.crow.cfree .cmain b) { color: var(--lr-muted); }
-  .cfoot { margin-top: auto; padding: 16px 10px 0; }
+  .cfoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding: 16px 10px 0; }
+  /* loading rows (no flash of sample data) */
+  .crows :global(.crow-sk) { pointer-events: none; }
+  .crows :global(.sk) { display: block; border-radius: 4px; background: rgba(251,247,234,.07); animation: sk 1.4s ease-in-out infinite; }
+  .crows :global(.sk-date) { width: 44px; height: 44px; flex: none; }
+  .crows :global(.sk-tag) { width: 44px; height: 24px; flex: none; }
+  .crows :global(.sk-main) { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+  .crows :global(.sk-l1) { width: 55%; height: 14px; }
+  .crows :global(.sk-l2) { width: 75%; height: 12px; }
+  @keyframes sk { 50% { opacity: .45; } }
+  @media (prefers-reduced-motion: reduce) { .crows :global(.sk) { animation: none; } }
 
   /* ---- guide cards ---- */
   .gcard { position: relative; display: flex; flex-direction: column; transition: border-color .15s; }
