@@ -3,6 +3,8 @@
 // no dead path above the class/manufacturer pages, and a landing page for
 // "GTA 6 vehicle classes" / "GTA 6 car manufacturers" searches.
 // COPY STATUS: intro + meta approved (Codex 2026-10-02, Fausto).
+// Redesign 2026-10-16 (DEC-0129): no own mockup, built from the class-page parts
+// (image band, card look, link rows). Assumption, check with Fausto.
 import Base from '../layouts/Base.astro';
 import { compareGarageOrder, type VehicleOption } from '../data/vehicles';
 import type { TaxonomyPage } from '../data/garage-taxonomy';
@@ -48,15 +50,19 @@ const jsonLd = [{
   description={description}
   section="garage"
   jsonLd={jsonLd}
-  breadcrumbs={[{ name: 'The Garage', path: 'cars/' }, { name: kind === 'class' ? 'Classes' : 'Manufacturers', path }]}
+  breadcrumbs={[{ name: 'Cars', path: 'cars/' }, { name: kind === 'class' ? 'Classes' : 'Manufacturers', path }]}
 >
-  <section class="wrap ti-head">
-    <nav class="ti-crumbs" aria-label="Breadcrumb">
-      <a href={`${base}cars/`}>The Garage</a><span aria-hidden="true">/</span><span>{kind === 'class' ? 'Classes' : 'Manufacturers'}</span>
-    </nav>
-    <p class="eyebrow">GTA VI Vehicle Database</p>
-    <h1 class="display ti-title">{heading}</h1>
-    <p class="ti-intro">{intro}</p>
+  <section class="tb">
+    <img class="tb-bg" src={`${base}images/garage/cars-band-1280.webp`} srcset={`${base}images/garage/cars-band-640.webp 640w, ${base}images/garage/cars-band-1280.webp 1280w, ${base}images/garage/cars-band-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="600" fetchpriority="high" />
+    <span class="tb-t tb-t1" aria-hidden="true"></span><span class="tb-t tb-t2" aria-hidden="true"></span>
+    <div class="wrap tb-inner">
+      <nav class="tb-crumbs" aria-label="Breadcrumb">
+        <a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><span aria-current="page">{kind === 'class' ? 'Classes' : 'Manufacturers'}</span>
+      </nav>
+      <p class="eyebrow">GTA VI Vehicle Database</p>
+      <h1 class="display tb-title">{heading}</h1>
+      <p class="tb-intro">{intro}</p>
+    </div>
   </section>
 
   <section class:list={['wrap', 'ti-grid', { 'ti-grid-logos': kind === 'manufacturer' }]} aria-label={heading}>
@@ -68,14 +74,13 @@ const jsonLd = [{
             : <img class="ti-fallback" src={`${base}images/garage/garage-hero-placeholder-640.webp`} alt="" width="640" height="360" loading="lazy" />}
           {/* Manufacturers: darkened photo + big white logo (Fausto, 2026-10-03; classes stay plain). Logos: logos/tile/, equal visual area per logo. */}
           {kind === 'manufacturer' && c.logo && <img class="ti-badge" src={`${base}images/logos/tile/${c.logo}.webp`} alt="" width="600" height="360" loading="lazy" />}
+          <span class="ti-count">{c.count} {c.count === 1 ? 'car' : 'cars'}</span>
         </span>
         <span class="ti-body">
-          <span class="ti-name">
-            <strong>{c.page.name}</strong>
-          </span>
-          <span class="ti-count">{c.count} {c.count === 1 ? 'vehicle' : 'vehicles'}</span>
+          <strong class="ti-name">{c.page.name}</strong>
           {c.page.inspiration?.length && <span class="ti-insp">Real-life inspiration: <b>{c.page.inspiration.join(' · ')}</b></span>}
           {c.page.teaser ? <span class="ti-teaser">{c.page.teaser}</span> : c.named.length > 0 && <span class="ti-models">{c.named.join(' · ')}</span>}
+          <span class="arrow ti-a">Open {c.page.name} →</span>
         </span>
       </a>
     ))}
@@ -89,38 +94,62 @@ const jsonLd = [{
   )}
 
   <nav class="wrap ti-more" aria-label="More in The Garage">
-    <a href={`${base}cars/${kind === 'class' ? 'manufacturers' : 'classes'}/`}>{kind === 'class' ? 'Browse by Manufacturer' : 'Browse by Class'} →</a>
-    <a href={`${base}cars/`}>All Vehicles in The Garage →</a>
+    <a class="arrow" href={`${base}cars/${kind === 'class' ? 'manufacturers' : 'classes'}/`}>{kind === 'class' ? 'Browse by manufacturer' : 'Browse by class'} →</a>
+    <a class="arrow" href={`${base}cars/`}>All cars →</a>
+    <a class="arrow" href={`${base}cars/compare/`}>Compare cars →</a>
   </nav>
 </Base>
 
 <style>
-  .ti-head { padding-top: 1.75rem; }
-  .ti-crumbs { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1.25rem; color: var(--gh-muted); font-size: .78rem; }
-  .ti-crumbs a { color: var(--gh-muted); }
-  .ti-crumbs a:hover { color: var(--gh-text); }
-  .ti-title { font-size: clamp(1.7rem, 4vw, 2.6rem); margin: .4rem 0 .9rem; }
-  .ti-intro { max-width: 62ch; margin: 0; color: var(--gh-muted); font-size: 1rem; line-height: 1.6; }
-  .ti-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr)); gap: var(--gh-gap-card); padding-top: 1.5rem; }
-  .ti-card { display: flex; flex-direction: column; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg); overflow: hidden; color: var(--gh-text); text-decoration: none; transition: border-color .15s; }
-  .ti-card:hover { border-color: var(--gh-muted); }
+  /* image band: same as class pages (GarageTaxonomy.astro) */
+  .tb { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
+  .tb-bg, .tb-t { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .tb-bg { object-fit: cover; object-position: 50% 60%; }
+  .tb-t1 { background: linear-gradient(90deg, rgba(11,11,20,.96) 0%, rgba(11,11,20,.86) 50%, rgba(11,11,20,.55) 100%); }
+  .tb-t2 { background: linear-gradient(115deg, rgba(242,75,157,.18) 0%, rgba(242,75,157,0) 45%, rgba(255,122,61,0) 60%, rgba(255,122,61,.18) 100%); }
+  .tb-inner { position: relative; display: flex; flex-direction: column; gap: 8px; padding-top: 32px; padding-bottom: 36px; }
+  .tb-crumbs { display: flex; flex-wrap: wrap; gap: 10px; font-size: 14px; color: var(--lr-soft); }
+  .tb-crumbs a { color: var(--lr-soft); text-decoration: none; }
+  .tb-crumbs a:hover { color: var(--lr-text); }
+  .tb-crumbs [aria-current] { color: var(--lr-text); font-weight: 500; }
+  .tb-inner .eyebrow { margin: 12px 0 0; font-size: 12px; font-weight: 600; }
+  .tb-title { margin: 0; font-size: clamp(40px, 5vw, 64px); }
+  .tb-intro { max-width: 700px; margin: 10px 0 0; font-size: 16px; line-height: 1.6; color: #EDEBF2; }
+
+  .ti-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; padding-top: 32px; }
+  .ti-card { display: flex; flex-direction: column; background: var(--lr-card); border: 1px solid var(--lr-line-strong); border-radius: 8px; overflow: hidden; color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
+  .ti-card:hover { border-color: var(--lr-pink); }
   .ti-photo { position: relative; aspect-ratio: 16/9; background: rgba(200,200,222,.08); }
   .ti-grid-logos .ti-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,11,20,.72), rgba(11,11,20,.88)); }
-  .ti-photo .ti-badge { position: absolute; inset: 0; margin: auto; z-index: 1; width: 100%; height: 100%; max-height: 150px; object-fit: contain; filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)); transition: transform .2s; }
+  .ti-photo .ti-badge { position: absolute; inset: 0; margin: auto; z-index: 1; width: 100%; height: 100%; max-height: 120px; object-fit: contain; filter: drop-shadow(0 2px 10px rgba(0,0,0,.55)); transition: transform .2s; }
   .ti-card:hover .ti-badge { transform: scale(1.04); }
   .ti-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .ti-fallback { opacity: .4; filter: saturate(.7); }
-  .ti-body { display: flex; flex-direction: column; gap: .25rem; padding: .8rem .95rem 1rem; }
-  .ti-name { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.15rem; }
-  .ti-insp { color: var(--gh-muted); font-size: .78rem; }
-  .ti-insp b { color: var(--gh-text); font-weight: 700; }
-  .ti-count { color: var(--gh-yellow); font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
-  .ti-models { color: var(--gh-muted); font-size: .78rem; line-height: 1.4; }
-  .ti-teaser { color: var(--gh-text); font-size: .86rem; line-height: 1.45; margin-top: .15rem; }
-  .ti-about { padding-top: 2.5rem; }
-  /* full container width like the grid above (Fausto, 2026-10-04: SEO text, no break in the layout) */
-  .ti-about-h { margin: 0 0 .7rem; padding-top: 1.75rem; border-top: 1px solid var(--gh-line); font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: clamp(1.3rem, 3vw, 1.6rem); line-height: 1.1; }
-  .ti-about p { margin: 0 0 .9rem; line-height: 1.7; }
-  .ti-more { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-block: 2.5rem var(--gh-gap-section); }
-  .ti-more a { color: var(--gh-yellow); font-weight: 700; font-size: .88rem; text-decoration: none; }
+  .ti-fallback { opacity: .45; filter: saturate(.7); }
+  .ti-count { position: absolute; z-index: 2; right: 10px; bottom: 10px; padding: 3px 9px; border-radius: 999px; background: rgba(11,11,20,.8); border: 1px solid rgba(200,200,222,.24); font-size: 12px; font-weight: 600; color: var(--lr-text); }
+  .ti-body { display: flex; flex-direction: column; gap: 6px; flex: 1; padding: 14px 16px 16px; }
+  .ti-name { font-size: 20px; font-weight: 700; line-height: 1.2; }
+  .ti-insp { color: var(--lr-soft); font-size: 14px; }
+  .ti-insp b { color: var(--lr-text); font-weight: 600; }
+  .ti-models { color: var(--lr-soft); font-size: 14px; line-height: 1.45; }
+  .ti-teaser { color: var(--lr-soft); font-size: 14px; line-height: 1.45; }
+  .ti-a { margin-top: auto; padding-top: 8px; font-size: 14px; }
+  .ti-about { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--lr-line); }
+  .ti-about-h { margin: 0 0 12px; font-size: clamp(22px, 3vw, 28px); font-weight: 700; line-height: 1.2; }
+  .ti-about p { max-width: 900px; margin: 0 0 14px; font-size: 16px; line-height: 1.7; color: #E4E4EC; }
+  .ti-more { display: flex; flex-wrap: wrap; gap: 8px 24px; padding-top: 24px; padding-bottom: 56px; font-size: 15px; }
+
+  @media (max-width: 1100px) { .ti-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 860px) { .ti-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; } }
+  @media (max-width: 760px) {
+    .tb-inner { padding-top: 18px; padding-bottom: 20px; }
+    .tb-crumbs { font-size: 13px; gap: 6px; }
+    .tb-title { font-size: clamp(32px, 9.5vw, 44px); }
+    .tb-intro { font-size: 15px; }
+    .ti-grid { padding-top: 20px; }
+    .ti-name { font-size: 17px; }
+    .ti-insp, .ti-models, .ti-teaser { font-size: 13px; }
+  }
+  @media (max-width: 520px) {
+    .ti-grid { grid-template-columns: 1fr; }
+  }
 </style>

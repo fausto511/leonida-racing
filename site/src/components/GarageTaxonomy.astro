@@ -1,11 +1,15 @@
 ---
-// Class / manufacturer landing page body (RS-0050, DEC-0087). Static,
-// crawlable list of vehicles plus a short intro. Intro copy: see the
-// copyStatus per page in data/garage-taxonomy.ts.
+// Class / manufacturer landing page (RS-0050, DEC-0087; redesign after the mockup
+// boards ClassPage / ClassPageActive / ClassPageMobile, DEC-0129). Image band with
+// intro + "at a glance" panel, class chips, the shared car list (CarsBrowser) and
+// "More on …" links. Manufacturer pages use the same layout (no own mockup, DEC-0129).
+// SEO title/description/JSON-LD unchanged (Codex copy 2026-10-01).
+// COPY STATUS: new labels ("at a glance", "More on …") are Claude placeholders -> Codex (DEC-0088).
 import Base from '../layouts/Base.astro';
-import VehicleTile from './VehicleTile.astro';
-import { compareGarageOrder, type VehicleOption } from '../data/vehicles';
-import { classPages, manufacturerPages, type TaxonomyPage } from '../data/garage-taxonomy';
+import CarsBrowser from './CarsBrowser.astro';
+import { compareGarageOrder, vehicleOptions, vehicleValues, fastestGellhornLapMs, bandVehicle, type VehicleOption } from '../data/vehicles';
+import { classPages, manufacturerPages, classSlug, type TaxonomyPage } from '../data/garage-taxonomy';
+import { lapTime } from '../data/leaderboard';
 
 interface Props {
   kind: 'class' | 'manufacturer';
@@ -16,15 +20,15 @@ interface Props {
 }
 const { kind, page, vehicles, label } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const isClass = kind === 'class';
 const list = [...vehicles].sort(compareGarageOrder);
-const path = `cars/${kind === 'class' ? 'classes' : 'manufacturers'}/${page.slug}/`;
-const metaTitle = kind === 'class' ? `GTA VI ${label}` : `${label} in GTA VI`;
-const heading = kind === 'class' ? `GTA VI ${label}` : `${label} in GTA VI`;
-const metaDescription = kind === 'class'
+const N = list.length;
+const path = `cars/${isClass ? 'classes' : 'manufacturers'}/${page.slug}/`;
+const metaTitle = isClass ? `GTA VI ${label}` : `${label} in GTA VI`;
+const heading = isClass ? `GTA VI ${label}` : `${label} in GTA VI`;
+const metaDescription = isClass
   ? `Browse GTA 6 ${page.name} vehicles in The Garage. Compare models, key vehicle characteristics, real-life inspirations, release details, and available performance data.`
   : `Explore ${page.name} vehicles in GTA 6. See the real-world inspiration behind each model and compare key characteristics and available performance data.`;
-const siblings = kind === 'class' ? classPages : manufacturerPages;
-// Structured data: the page is a collection of vehicle pages (SEO, 2026-10-01).
 const pageUrl = new URL(`${base}${path}`, Astro.site).href;
 const jsonLd = [{
   '@context': 'https://schema.org',
@@ -36,65 +40,215 @@ const jsonLd = [{
   mainEntity: {
     '@type': 'ItemList',
     numberOfItems: list.length,
-    itemListElement: list.map((v, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: `${v.make} ${v.model}`,
-      url: new URL(`${base}cars/vehicles/${v.id}/`, Astro.site).href,
-    })),
+    itemListElement: list.map((v, i) => ({ '@type': 'ListItem', position: i + 1, name: `${v.make} ${v.model}`, url: new URL(`${base}cars/vehicles/${v.id}/`, Astro.site).href })),
   },
 }];
+
+// ---- image band: fastest car with a photo, else first photo, else the garage ----
+const bandCar = bandVehicle(list);
+const bandSrc = bandCar ? `${base}images/vehicles/${bandCar.id}` : null;
+
+// ---- at a glance ----
+const lapOf = (v: VehicleOption) => fastestGellhornLapMs(v.id);
+const fastest = list.filter((v) => lapOf(v) != null).sort((a, b) => lapOf(a)! - lapOf(b)!)[0] ?? null;
+const speedOf = (v: VehicleOption) => vehicleValues[v.id]?.top_speed_mph?.value ?? null;
+const topSpeed = list.filter((v) => speedOf(v) != null).sort((a, b) => speedOf(b)! - speedOf(a)!)[0] ?? null;
+const shortName = (v: VehicleOption) => (isClass ? `${v.make} ${v.model}` : v.model);
+
+// ---- chips + links ----
+const classCount = (slug: string) => vehicleOptions.filter((v) => v.classes.some((c) => classSlug(c) === slug)).length;
+const makeCount = (slug: string) => vehicleOptions.filter((v) => v.logoSlug === slug).length;
+const makesHere = [...new Map(list.map((v) => [v.logoSlug, v.make])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+const classesHere = [...new Set(list.flatMap((v) => v.classes))].sort();
+const makeHere = (slug: string) => list.filter((v) => v.logoSlug === slug).length;
+const classHere = (name: string) => list.filter((v) => v.classes.includes(name)).length;
+const noun = isClass ? `${page.name} cars` : `${page.name} cars`;
+const lbClass = isClass ? page.name : null;
+
+const ico = {
+  trophy: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M9 20h6"/></svg>',
+  timer: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>',
+  plus: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+};
+const more = isClass
+  ? [
+      { ico: ico.trophy, eb: 'Ranking', t: `Fastest ${page.name} cars in GTA 6`, s: 'Recorded top speeds in stock form, with the source of each value.', a: 'See the ranking', href: `${base}cars/rankings/fastest/${page.slug}/` },
+      { ico: ico.timer, eb: 'Time Attack', t: `${page.name} leaderboard at Gellhorn`, s: `The fastest verified laps in a ${page.name} car at Gellhorn.`, a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/?class=${encodeURIComponent(page.name)}` },
+      { ico: ico.plus, eb: 'Compare', t: `Compare ${page.name} cars`, s: 'Pick up to four cars and see specs and lap times side by side.', a: 'Start comparing', href: `${base}cars/compare/` },
+    ]
+  : [
+      { ico: ico.trophy, eb: 'Ranking', t: 'Fastest cars in GTA 6', s: 'Recorded top speeds in stock form, with the source of each value.', a: 'See the ranking', href: `${base}cars/rankings/fastest/` },
+      { ico: ico.timer, eb: 'Time Attack', t: 'Gellhorn leaderboard', s: `See where ${page.name} cars stand against every other car at Gellhorn.`, a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/` },
+      { ico: ico.plus, eb: 'Compare', t: `Compare ${page.name} cars`, s: 'Pick up to four cars and see specs and lap times side by side.', a: 'Start comparing', href: `${base}cars/compare/` },
+    ];
 ---
 <Base
   title={metaTitle}
   description={metaDescription}
   section="garage"
   jsonLd={jsonLd}
-  breadcrumbs={[{ name: 'The Garage', path: 'cars/' }, { name: kind === 'class' ? 'Classes' : 'Manufacturers', path: `cars/${kind === 'class' ? 'classes' : 'manufacturers'}/` }, { name: page.name, path }]}
+  breadcrumbs={[{ name: 'Cars', path: 'cars/' }, { name: isClass ? 'Classes' : 'Manufacturers', path: `cars/${isClass ? 'classes' : 'manufacturers'}/` }, { name: page.name, path }]}
 >
-  <section class="wrap tax-head">
-    <nav class="tax-crumbs" aria-label="Breadcrumb">
-      <a href={`${base}cars/`}>The Garage</a><span aria-hidden="true">/</span><a href={`${base}cars/${kind === 'class' ? 'classes' : 'manufacturers'}/`}>{kind === 'class' ? 'Classes' : 'Manufacturers'}</a><span aria-hidden="true">/</span><span>{page.name}</span>
-    </nav>
-    <p class="eyebrow">{kind === 'class' ? 'GTA VI Vehicle Class' : 'GTA VI Manufacturer'}</p>
-    <h1 class="display tax-title">{heading}</h1>
-    <div class="tax-intro">
-      {page.intro.map((p) => <p>{p}</p>)}
-      <p class="tax-count">{list.length} vehicles · Compare models and find your next car</p>
+  <section class="tb">
+    {bandSrc
+      ? <img class="tb-bg" src={`${bandSrc}-1280.webp`} srcset={`${bandSrc}-640.webp 640w, ${bandSrc}-1280.webp 1280w, ${bandSrc}-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="1080" fetchpriority="high" />
+      : <img class="tb-bg tb-ph" src={`${base}images/garage/garage-hero-placeholder-1080.webp`} alt="" width="1080" height="608" fetchpriority="high" />}
+    <span class="tb-t tb-t1" aria-hidden="true"></span><span class="tb-t tb-t2" aria-hidden="true"></span>
+    <div class="wrap tb-inner">
+      <div class="tb-copy">
+        <nav class="tb-crumbs" aria-label="Breadcrumb">
+          <a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><a href={`${base}cars/${isClass ? 'classes' : 'manufacturers'}/`}>{isClass ? 'Classes' : 'Manufacturers'}</a><span aria-hidden="true">/</span><span aria-current="page">{page.name}</span>
+        </nav>
+        <p class="eyebrow">{isClass ? 'GTA VI Vehicle Class' : 'GTA VI Manufacturer'}</p>
+        <h1 class="display tb-title">{!isClass && <img class="tb-logo" src={`${base}images/logos/${page.slug}-gta-6-logo.webp`} alt="" width="56" height="56" />}{heading}</h1>
+        <div class="tb-intro">{page.intro.map((p) => <p>{p}</p>)}</div>
+      </div>
+      <div class="glance">
+        <p class="glance-eb">{page.name} at a glance</p>
+        <div class="gl-row"><span>{isClass ? 'Cars in this class' : `Cars from ${page.name}`}</span><b class="tnum">{N}</b></div>
+        <div class="gl-row"><span>Fastest at Gellhorn</span>{fastest
+          ? <b><a href={`${base}cars/vehicles/${fastest.id}/`}>{shortName(fastest)}</a>{' · '}<span class="tnum">{lapTime(lapOf(fastest)!)}</span></b>
+          : <b class="is-tba">After launch</b>}</div>
+        <div class="gl-row"><span>Highest top speed</span>{topSpeed
+          ? <b><a href={`${base}cars/vehicles/${topSpeed.id}/`}>{shortName(topSpeed)}</a>{' · '}<span class="tnum">{speedOf(topSpeed)} mph</span></b>
+          : <b class="is-tba">After launch</b>}</div>
+        <a class="gl-row gl-garage" id="garage-tile" data-glance href={`${base}account/garage/`}>
+          <span>In your garage</span><span class="arrow gt-cta" id="gt-cta">Log in to track →</span>
+          <span id="gt-owned" hidden>0</span>
+          <span class="mbar"><i id="gt-bar" style="width:0%"></i></span>
+        </a>
+      </div>
     </div>
   </section>
 
-  <section class="wrap tax-grid" aria-label={`${page.name} vehicles`}>
-    {list.map((v) => <VehicleTile vehicle={v} />)}
-  </section>
+  {isClass && (
+    <nav class="wrap tchips" aria-label="Classes">
+      {classPages.map((c) => <a class:list={['tchip', { on: c.slug === page.slug }]} href={`${base}cars/classes/${c.slug}/`} aria-current={c.slug === page.slug ? 'page' : undefined}>{c.name}<span>{classCount(c.slug)}</span></a>)}
+      <a class="tchip" href={`${base}cars/`}>All cars<span>{vehicleOptions.length}</span></a>
+    </nav>
+  )}
 
-  <nav class="wrap tax-more" aria-label={kind === 'class' ? 'Other classes' : 'Other manufacturers'}>
-    <h2 class="tax-more-title">{kind === 'class' ? 'Other classes' : 'Other manufacturers'}</h2>
-    <ul>{siblings.filter((s) => s.slug !== page.slug).map((s) => <li><a href={`${base}cars/${kind === 'class' ? 'classes' : 'manufacturers'}/${s.slug}/`}>{s.name}</a></li>)}</ul>
-    <a class="tax-all" href={`${base}cars/${kind === 'class' ? 'classes' : 'manufacturers'}/`}>{kind === 'class' ? 'All classes' : 'All manufacturers'} →</a>
-    <a class="tax-all" href={`${base}cars/`}>All vehicles in The Garage →</a>
-  </nav>
+  <CarsBrowser vehicles={list} scope={isClass ? 'class' : 'make'} noun={noun} defaultSort="name">
+    <Fragment slot="after-grid">
+      <section class="wrap tmore">
+        <p class="tsec-eb">More on {page.name} cars</p>
+        <div class="tmore-grid">
+          {more.map((m) => (
+            <a class="tm" href={m.href}>
+              <span class="tm-eb"><Fragment set:html={m.ico} />{m.eb}</span>
+              <b class="tm-t">{m.t}</b>
+              <span class="tm-s">{m.s}</span>
+              <span class="arrow tm-a">{m.a} →</span>
+            </a>
+          ))}
+        </div>
+      </section>
+      <section class="wrap tlinks">
+        {isClass ? (
+          <>
+            <div>
+              <p class="tsec-eb">Other classes</p>
+              <div class="tls">{classPages.filter((c) => c.slug !== page.slug).map((c) => <a href={`${base}cars/classes/${c.slug}/`}>{c.name}</a>)}<a class="arrow" href={`${base}cars/classes/`}>All classes →</a></div>
+            </div>
+            <div>
+              <p class="tsec-eb">{page.name} cars by manufacturer</p>
+              <div class="tls">{makesHere.filter(([slug]) => manufacturerPages.some((m) => m.slug === slug)).map(([slug, name]) => <a href={`${base}cars/manufacturers/${slug}/`}>{name}<span>{makeHere(slug)}</span></a>)}<a class="arrow" href={`${base}cars/manufacturers/`}>All manufacturers →</a></div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <p class="tsec-eb">{page.name} cars by class</p>
+              <div class="tls">{classesHere.map((c) => classPages.some((p) => p.slug === classSlug(c)) ? <a href={`${base}cars/classes/${classSlug(c)}/`}>{c}<span>{classHere(c)}</span></a> : <span>{c}<span>{classHere(c)}</span></span>)}<a class="arrow" href={`${base}cars/classes/`}>All classes →</a></div>
+            </div>
+            <div>
+              <p class="tsec-eb">Other manufacturers</p>
+              <div class="tls">{manufacturerPages.filter((m) => m.slug !== page.slug).map((m) => <a href={`${base}cars/manufacturers/${m.slug}/`}>{m.name}<span>{makeCount(m.slug)}</span></a>)}<a class="arrow" href={`${base}cars/manufacturers/`}>All manufacturers →</a></div>
+            </div>
+          </>
+        )}
+      </section>
+    </Fragment>
+  </CarsBrowser>
 </Base>
 
 <style>
-  .tax-head { padding-top: 1.75rem; }
-  .tax-crumbs { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1.25rem; color: var(--gh-muted); font-size: .78rem; }
-  .tax-crumbs a { color: var(--gh-muted); }
-  .tax-crumbs a:hover { color: var(--gh-text); }
-  .tax-title { font-size: clamp(1.9rem, 4vw, 2.6rem); margin: .4rem 0 .9rem; }
-  .tax-intro { max-width: 62ch; color: var(--gh-muted); font-size: 1rem; line-height: 1.6; }
-  .tax-intro p { margin: 0 0 .8rem; }
-  .tax-count { font-size: .82rem; }
-  .tax-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr)); gap: var(--gh-gap-card); padding-top: 1.25rem; }
-  .tax-more { padding-block: 2.5rem var(--gh-gap-section); }
-  .tax-more-title { font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: .95rem; margin: 0 0 .8rem; }
-  .tax-more ul { list-style: none; margin: 0 0 1.1rem; padding: 0; display: flex; flex-wrap: wrap; gap: .45rem; }
-  .tax-more li a { display: inline-block; padding: .4rem .75rem; border: 1px solid var(--gh-line); border-radius: 999px; color: var(--gh-muted); font-size: .78rem; font-weight: 700; text-decoration: none; }
-  .tax-more li a:hover { color: var(--gh-text); border-color: var(--gh-muted); }
-  .tax-all { display: inline-block; margin-right: 1.25rem; color: var(--gh-yellow); font-weight: 700; font-size: .88rem; text-decoration: none; }
-</style>
+  .ico, .tm :global(.ico) { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .is-tba { color: var(--lr-muted) !important; font-weight: 500 !important; }
 
-<script>
-  import { initVehicleTiles } from '../scripts/vehicle-tiles';
-  initVehicleTiles(document);
-</script>
+  /* ---- image band ---- */
+  .tb { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
+  .tb-bg, .tb-t { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .tb-bg { object-fit: cover; object-position: 50% 55%; }
+  .tb-ph { filter: grayscale(.5); }
+  .tb-t1 { background: linear-gradient(90deg, rgba(11,11,20,.96) 0%, rgba(11,11,20,.86) 50%, rgba(11,11,20,.55) 100%); }
+  .tb-t2 { background: linear-gradient(115deg, rgba(242,75,157,.18) 0%, rgba(242,75,157,0) 45%, rgba(255,122,61,0) 60%, rgba(255,122,61,.18) 100%); }
+  .tb-inner { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; padding-top: 32px; padding-bottom: 36px; }
+  .tb-copy { display: flex; flex-direction: column; gap: 8px; min-width: 0; max-width: 700px; }
+  .tb-crumbs { display: flex; flex-wrap: wrap; gap: 10px; font-size: 14px; color: var(--lr-soft); }
+  .tb-crumbs a { color: var(--lr-soft); text-decoration: none; }
+  .tb-crumbs a:hover { color: var(--lr-text); }
+  .tb-crumbs [aria-current] { color: var(--lr-text); font-weight: 500; }
+  .tb-copy .eyebrow { margin: 12px 0 0; font-size: 12px; font-weight: 600; }
+  .tb-title { display: flex; align-items: center; gap: 16px; margin: 0; font-size: clamp(40px, 5vw, 64px); }
+  .tb-logo { width: 56px; height: 56px; flex: none; object-fit: contain; filter: brightness(0) invert(1); }
+  .tb-intro p { margin: 10px 0 0; font-size: 16px; line-height: 1.6; color: #EDEBF2; }
+
+  .glance { flex: none; width: 380px; margin-top: 30px; padding: 18px 18px 14px; border: 1px solid rgba(200,200,222,.2); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
+  .glance-eb { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+  .gl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 9px 0; border-top: 1px solid var(--lr-line); font-size: 15px; color: var(--lr-soft); }
+  .gl-row:first-of-type { border-top: 0; }
+  .gl-row b { color: var(--lr-text); font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .gl-row b a { color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(251,247,234,.4); }
+  .gl-row b a:hover { color: var(--lr-pink); }
+  .gl-garage { flex-wrap: wrap; text-decoration: none; }
+  .gl-garage .gt-cta { font-size: 14px; }
+  .gl-garage :global(.gt-cta.is-count) { color: var(--lr-lime); font-weight: 700; }
+  .gl-garage .mbar { display: block; flex-basis: 100%; height: 4px; margin-top: 8px; border-radius: 999px; background: rgba(251,247,234,.1); overflow: hidden; }
+  .gl-garage .mbar i { display: block; height: 100%; background: var(--lr-lime); border-radius: 999px; }
+
+  /* ---- class chips ---- */
+  .tchips { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 24px; }
+  .tchip { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(200,200,222,.24); color: #E4E4EC; font-size: 15px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+  .tchip span { color: var(--lr-muted); font-size: 13px; }
+  .tchip:hover { border-color: var(--lr-pink); color: var(--lr-text); }
+  .tchip.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 600; }
+  .tchip.on span { color: #55556A; }
+
+  /* ---- more + links (slot content, page scope) ---- */
+  .tsec-eb { margin: 0 0 14px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lr-soft); }
+  .tmore { padding-top: 48px; }
+  .tmore-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .tm { display: flex; flex-direction: column; gap: 6px; padding: 18px 20px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
+  .tm:hover { border-color: var(--lr-orange); }
+  .tm-eb { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-soft); }
+  .tm-t { font-size: 19px; font-weight: 700; line-height: 1.25; }
+  .tm-s { font-size: 15px; line-height: 1.45; color: var(--lr-soft); }
+  .tm-a { margin-top: 6px; }
+  .tlinks { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; margin-top: 40px; padding-top: 32px; padding-bottom: 32px; border-top: 1px solid var(--lr-line); }
+  .tls { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 15px; }
+  .tls a, .tls > span { color: #E4E4EC; text-decoration: none; }
+  .tls a:hover { color: var(--lr-orange); }
+  .tls a span, .tls > span span { margin-left: 4px; color: var(--lr-muted); font-size: 13px; }
+  .tls a.arrow { color: var(--lr-orange); }
+
+  @media (max-width: 1100px) {
+    .tb-inner { flex-direction: column; gap: 20px; }
+    .glance { width: 100%; max-width: 560px; margin-top: 0; }
+    .tmore-grid { grid-template-columns: 1fr; gap: 12px; }
+  }
+  @media (max-width: 760px) {
+    .tb-inner { padding-top: 18px; padding-bottom: 20px; }
+    .tb-crumbs { font-size: 13px; gap: 6px; }
+    .tb-title { font-size: clamp(32px, 9.5vw, 44px); gap: 10px; }
+    .tb-logo { width: 36px; height: 36px; }
+    .tb-intro p { font-size: 15px; }
+    .gl-row { font-size: 14px; }
+    .tchips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-top: 16px; }
+    .tchip { height: 36px; font-size: 14px; }
+    .tmore { padding-top: 32px; }
+    .tm { padding: 14px 16px; }
+    .tm-s { display: none; }
+    .tlinks { grid-template-columns: 1fr; gap: 24px; }
+  }
+</style>

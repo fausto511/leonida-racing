@@ -15,6 +15,10 @@ const $ = (id: string) => document.getElementById(id)!;
 const grid = $('cars-grid');
 const cards = [...grid.querySelectorAll<HTMLElement>('.vcard')];
 const N = cards.length;
+// page settings (CarsBrowser.astro): class/manufacturer pages sort by name and say "Sports cars"
+const tools = document.getElementById('tools');
+const DEFAULT_SORT = tools?.dataset.defaultSort ?? 'class';
+const NOUN = tools?.dataset.noun ?? 'cars';
 
 type Group = 'class' | 'make' | 'drive' | 'seats' | 'avail' | 'origin';
 type RangeKey = 'price' | 'speed' | 'lap';
@@ -23,7 +27,7 @@ type Range = [number | null, number | null];
 interface State { q: string; own: '' | 'owned' | 'not'; sort: string; sets: Record<Group, Set<string>>; ranges: Record<RangeKey, Range> }
 const emptySets = (): Record<Group, Set<string>> => ({ class: new Set(), make: new Set(), drive: new Set(), seats: new Set(), avail: new Set(), origin: new Set() });
 const emptyRanges = (): Record<RangeKey, Range> => ({ price: [null, null], speed: [null, null], lap: [null, null] });
-const state: State = { q: '', own: '', sort: 'class', sets: emptySets(), ranges: emptyRanges() };
+const state: State = { q: '', own: '', sort: DEFAULT_SORT, sets: emptySets(), ranges: emptyRanges() };
 let showAll = false;
 let owned = new Set<string>();
 let driverId: string | null = null;
@@ -236,17 +240,17 @@ function render() {
   grid.classList.toggle('one-class', state.sets.class.size === 1);
   // C7: one click shows everything
   ($('show-more') as HTMLButtonElement).hidden = matches.length <= limit;
-  $('show-more').textContent = `Show all ${matches.length} cars`;
+  $('show-more').textContent = `Show all ${matches.length} ${matches.length === N ? NOUN : 'cars'}`;
 
   const chips = $('chips');
-  if (!keys.length) chips.innerHTML = `<span class="muted">Showing ${matches.length} cars</span>`;
+  if (!keys.length) chips.innerHTML = `<span class="muted">Showing ${matches.length} ${matches.length === N ? NOUN : 'cars'}</span>`;
   else chips.innerHTML = `<span class="muted">${matches.length} ${matches.length === 1 ? 'car' : 'cars'}</span>`
     + keys.map((k) => `<button type="button" class="fchip" data-drop="${k}" aria-label="Remove filter ${esc(filterLabel(k))}">${esc(filterLabel(k))}<b aria-hidden="true">×</b></button>`).join('')
     + `<button type="button" class="clear-all" data-clear>Clear all</button>`;
 
   const one = (g: Group, all: string) => (state.sets[g].size === 0 ? all : state.sets[g].size === 1 ? valueLabel(g, [...state.sets[g]][0]) : `${state.sets[g].size} selected`);
-  document.querySelector('[data-dd-label="class"]')!.textContent = one('class', 'All');
-  document.querySelector('[data-dd-label="make"]')!.textContent = one('make', 'All');
+  const ddc = document.querySelector('[data-dd-label="class"]'); if (ddc) ddc.textContent = one('class', 'All');
+  const ddm = document.querySelector('[data-dd-label="make"]'); if (ddm) ddm.textContent = one('make', 'All');
   document.querySelectorAll<HTMLElement>('[data-pick-class]').forEach((b) => b.classList.toggle('on', b.dataset.pickClass ? state.sets.class.has(b.dataset.pickClass) : !state.sets.class.size));
   document.querySelectorAll<HTMLElement>('[data-pick-make]').forEach((b) => b.classList.toggle('on', b.dataset.pickMake ? state.sets.make.has(b.dataset.pickMake) : !state.sets.make.size));
   document.querySelectorAll<HTMLElement>('[data-sort]').forEach((b) => b.classList.toggle('on', b.dataset.sort === state.sort));
@@ -305,7 +309,7 @@ function syncUrl() {
   else if (rangeActive(pr)) p.set('price', rangeParam(pr));
   if (rangeActive(state.ranges.speed)) p.set('speed', rangeParam(state.ranges.speed));
   if (rangeActive(state.ranges.lap)) p.set('lap', rangeParam(state.ranges.lap));
-  if (state.sort !== 'class') p.set('sort', state.sort);
+  if (state.sort !== DEFAULT_SORT) p.set('sort', state.sort);
   const qs = p.toString();
   history.replaceState(null, '', location.pathname + (qs ? `?${qs}` : '') + location.hash);
 }
@@ -378,9 +382,13 @@ function renderOwned() {
   });
   paintOwnCounts();
   if (driverId) {
-    $('gt-owned').textContent = String(owned.size);
-    ($('gt-bar') as HTMLElement).style.width = `${(owned.size / N) * 100}%`;
-    $('gt-cta').textContent = 'Open →';
+    // count only the cars on this page (class / manufacturer pages show "3 / 29")
+    const here = cards.filter((c) => owned.has(c.dataset.id!)).length;
+    $('gt-owned').textContent = String(here);
+    ($('gt-bar') as HTMLElement).style.width = `${(here / N) * 100}%`;
+    const tile = $('garage-tile');
+    if (tile.dataset.glance != null) { $('gt-cta').textContent = `${here} / ${N}`; $('gt-cta').classList.add('is-count'); }
+    else $('gt-cta').textContent = 'Open →';
   }
 }
 // G2: Owned / Not owned count within the current search + filters (not the whole list)
@@ -576,7 +584,7 @@ dsp.addEventListener('click', (e) => {
 // S4: same as "Clear all" on the page – also clears the search text
 $('dsp-reset').addEventListener('click', () => { draft = { ...cloneState(draft), q: '', sets: emptySets(), ranges: emptyRanges() }; paintDraft(); });
 $('dsp-show').addEventListener('click', () => { Object.assign(state, cloneState(draft)); closeSheet('dsp'); render(); });
-($('dsp-msearch') as HTMLInputElement).addEventListener('input', (e) => {
+(document.getElementById('dsp-msearch') as HTMLInputElement | null)?.addEventListener('input', (e) => {
   const q = (e.target as HTMLInputElement).value.trim().toLowerCase();
   dsp.querySelectorAll<HTMLElement>('.mlist .mc').forEach((b) => { b.hidden = Boolean(q) && !b.textContent!.toLowerCase().includes(q); });
 });

@@ -1,63 +1,14 @@
 ---
-// Cars — Redesign Phase 4 (DEC-0117, mockup boards Cars guest / logged in /
-// detailed search / no results / placeholder / phone). Every card is in the
-// HTML (SEO); search, filters, sort, "Show more", owned and compare run in the
-// browser (scripts/cars.ts).
+// Cars — Redesign Phase 4 (DEC-0117). Image band + My Garage tile; the list itself
+// is components/CarsBrowser.astro (shared with class and manufacturer pages, DEC-0129).
 // COPY STATUS: all new texts are Claude placeholders from the mockup -> Codex (DEC-0088).
 import Base from '../../layouts/Base.astro';
-import CarCard from '../../components/CarCard.astro';
-import { vehicleOptions, garageOrderedVehicles, vehicleValues, fastestGellhornLapMs, type VehicleOption } from '../../data/vehicles';
+import CarsBrowser from '../../components/CarsBrowser.astro';
+import { vehicleOptions } from '../../data/vehicles';
 import { classPages, manufacturerPages } from '../../data/garage-taxonomy';
-import { isNewInGame } from '../../data/releases';
 
 const base = import.meta.env.BASE_URL;
 const N = vehicleOptions.length;
-
-// Gellhorn rank of each car inside its (first) class, from the fastest laps.
-const rankInClass = new Map<string, number>();
-for (const cls of new Set(vehicleOptions.flatMap((v) => v.classes))) {
-  vehicleOptions.filter((v) => v.classes[0] === cls && fastestGellhornLapMs(v.id) != null)
-    .sort((a, b) => fastestGellhornLapMs(a.id)! - fastestGellhornLapMs(b.id)!)
-    .forEach((v, i) => rankInClass.set(v.id, i + 1));
-}
-const availability = (v: VehicleOption) => v.acquisition ?? 'base';
-const origin = (v: VehicleOption) => (!v.previousGames ? '' : v.previousGames.length ? 'returning' : 'new');
-const cardData = (v: VehicleOption, i: number) => ({
-  order: i,
-  name: `${v.make} ${v.model}`.toLowerCase(),
-  search: `${v.make} ${v.model} ${v.realLifeInspiration ?? ''} ${v.classes.join(' ')}`.toLowerCase(),
-  classes: v.classes.join('|'),
-  make: v.logoSlug,
-  drive: v.drive,
-  seats: v.seats,
-  avail: availability(v),
-  origin: origin(v),
-  price: vehicleValues[v.id]?.price_gtad?.value ?? '',
-  speed: vehicleValues[v.id]?.top_speed_mph?.value ?? '',
-  lap: fastestGellhornLapMs(v.id) ?? '',
-  release: v.releaseId ?? '',
-});
-
-const count = (list: (string | number)[]) => { const m = new Map(); for (const k of list) m.set(k, (m.get(k) ?? 0) + 1); return m as Map<any, number>; };
-const classCounts = count(vehicleOptions.flatMap((v) => v.classes));
-const classesSorted = [...classCounts.entries()].sort((a, b) => b[1] - a[1]);
-const makes = [...new Map(vehicleOptions.map((v) => [v.logoSlug, v.make])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
-const makeCounts = count(vehicleOptions.map((v) => v.logoSlug));
-const driveCounts = count(vehicleOptions.map((v) => v.drive).filter((d) => d && d !== 'n/a'));
-const seatCounts = count(vehicleOptions.map((v) => v.seats).filter((s) => s > 0));
-const availCounts = count(vehicleOptions.map(availability));
-const originCounts = count(vehicleOptions.map(origin).filter(Boolean));
-const AVAIL: [string, string][] = [['base', 'Base game'], ['pre-order', 'Pre-Order bonus'], ['ultimate-edition', 'Ultimate Edition'], ['gta-plus', 'GTA+']];
-const ORIGIN: [string, string][] = [['new', 'New in GTA VI'], ['returning', 'Returning from earlier games']];
-const PRICE_PRESETS = [['250k', 250000], ['500k', 500000], ['1M', 1000000], ['2M', 2000000], ['5M', 5000000]] as const;
-
-const chev = '<svg class="ico ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
-const check = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
-function mc(group: string, value: string | number, label: string, n: number | undefined): string {
-  const count = n != null ? ' <span>' + n + '</span>' : '';
-  const dis = n ? '' : ' disabled';
-  return '<button type="button" class="mc" data-group="' + group + '" data-value="' + value + '" aria-pressed="false"' + dis + '><i>' + check + '</i>' + label + count + '</button>';
-}
 ---
 <Base
   title="GTA VI Cars — Vehicle Database"
@@ -83,99 +34,8 @@ function mc(group: string, value: string | number, label: string, n: number | un
     </div>
   </section>
 
-  <!-- ===== Toolbar ===== -->
-  <section class="wrap tools" id="tools">
-    <div class="tools-row">
-      <label class="ctl ctl-search">
-        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input type="search" id="f-q" placeholder="Search cars" aria-label="Search cars" autocomplete="off" />
-      </label>
-      <div class="dd dd-l">
-        <button type="button" class="ctl dd-btn" data-dd="class" aria-haspopup="true" aria-expanded="false">Class: <b data-dd-label="class">All</b><Fragment set:html={chev} /></button>
-        <div class="menu" data-menu="class" hidden>
-          <button type="button" class="menu-i" data-pick-class="">All classes</button>
-          {classesSorted.map(([c, n]) => <button type="button" class="menu-i" data-pick-class={c}>{c}<span>{n}</span></button>)}
-        </div>
-      </div>
-      <div class="dd dd-l">
-        <button type="button" class="ctl dd-btn" data-dd="make" aria-haspopup="true" aria-expanded="false">Manufacturer: <b data-dd-label="make">All</b><Fragment set:html={chev} /></button>
-        <div class="menu menu-scroll" data-menu="make" hidden>
-          <button type="button" class="menu-i" data-pick-make="">All manufacturers</button>
-          {makes.map(([slug, name]) => <button type="button" class="menu-i" data-pick-make={slug}>{name}<span>{makeCounts.get(slug)}</span></button>)}
-        </div>
-      </div>
-      <span class="ctl ctl-off" title="Tiers arrive after launch" aria-disabled="true">Tier<Fragment set:html={chev} /></span>
-      <div class="dd dd-l">
-        <label class="ctl ctl-price" id="ctl-price">Max $<input type="text" id="f-max" inputmode="decimal" placeholder="e.g. 750k" aria-label="Maximum price" autocomplete="off" /></label>
-        <div class="menu menu-price" data-menu="max" hidden>
-          <span class="menu-h">Max price</span>
-          <div class="rng rng-single" data-range="price" data-single>
-            <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum price" /></div>
-            <div class="rng-vals"><span data-hi>Any</span></div>
-          </div>
-          <span class="menu-sep"></span>
-          {PRICE_PRESETS.map(([l, v]) => <button type="button" class="menu-i" data-pick-max={v}>{'$' + l}</button>)}
-          <span class="menu-sep"></span>
-          <span class="menu-h menu-hint">Or type: 750k, 1.5m</span>
-        </div>
-      </div>
-      <button type="button" class="ctl ctl-detail" id="open-detail">
-        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
-        Detailed search<b class="ctl-count" id="detail-count" hidden></b>
-      </button>
-    </div>
-    <!-- phone: search full width, then Filters + Sort -->
-    <div class="tools-phone">
-      <button type="button" class="ctl" id="open-filters"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filters<b class="ctl-count" id="filter-count" hidden></b></button>
-      <button type="button" class="ctl" id="open-sort-phone"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg>Sort: <b data-sort-label>Class</b></button>
-    </div>
-    <div class="tools-row2">
-      <div class="chips" id="chips" aria-live="polite"><span class="muted" id="result-count">Showing {N} cars</span></div>
-      <span class="seg" id="own-seg" hidden>
-        <button type="button" class="on" data-own="">All</button>
-        <button type="button" data-own="owned">Owned <span id="own-n">0</span></button>
-        <button type="button" data-own="not">Not owned <span id="notown-n">{N}</span></button>
-      </span>
-      <button type="button" class="ctl cmpb" id="cmp-btn" title="Open the comparison">Compare <span id="cmp-n">0 / 4</span></button>
-      <div class="dd dd-sort">
-        <button type="button" class="ctl dd-btn" data-dd="sort" aria-haspopup="true" aria-expanded="false">Sort: <b data-sort-label>Class</b><Fragment set:html={chev} /></button>
-        <div class="menu" data-menu="sort" hidden>
-          <button type="button" class="menu-i on" data-sort="class">Class</button>
-          <button type="button" class="menu-i" data-sort="name">Name A–Z</button>
-          <button type="button" class="menu-i" data-sort="price" data-needs="price">Price</button>
-          <button type="button" class="menu-i" data-sort="speed" data-needs="speed">Top speed</button>
-          <button type="button" class="menu-i" data-sort="lap" data-needs="lap">Gellhorn lap time</button>
-          <span class="menu-sep"></span>
-          <button type="button" class="menu-i" disabled title="After launch">Most owned<span>after launch</span></button>
-          <button type="button" class="menu-i" data-sort="recent">Recently added</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Grid ===== -->
-  <section class="wrap grid-wrap">
-    <div class="cars-grid" id="cars-grid">
-      {garageOrderedVehicles.map((v, i) => (
-        <CarCard vehicle={v} variant="cars" data={cardData(v, i)} isNew={isNewInGame(v.releaseId)}
-          lap={rankInClass.has(v.id) ? { rank: rankInClass.get(v.id)!, ms: fastestGellhornLapMs(v.id)! } : null} />
-      ))}
-    </div>
-    <div class="more"><button type="button" class="btn btn-s" id="show-more" hidden>Show all cars</button></div>
-
-    <!-- no results (DEC-0117): drop one filter, closest matches, did you mean -->
-    <div class="empty" id="empty" hidden>
-      <h2 class="display empty-title">No cars match</h2>
-      <p class="muted" id="empty-dym"></p>
-      <div class="empty-drops" id="empty-drops"></div>
-      <div id="closest-wrap" hidden>
-        <h3 class="closest-title">Closest matches</h3>
-        <p class="muted closest-sub">These miss one of your filters. The difference is marked on each card.</p>
-        <div class="cars-grid" id="closest"></div>
-      </div>
-    </div>
-  </section>
-
+  <CarsBrowser>
+    <Fragment slot="after-grid">
   <!-- Crawlable class + manufacturer pages (RS-0050, DEC-0087) -->
   <section class="wrap browse">
     <div>
@@ -188,80 +48,11 @@ function mc(group: string, value: string | number, label: string, n: number | un
     </div>
   </section>
 
-  <!-- ===== Compare bar (sticky from 1 selection, max 4) ===== -->
-  <div class="cmpbar" id="cmpbar" hidden>
-    <div class="wrap cmpbar-inner">
-      <div class="cmpbar-cars" id="cmpbar-cars"></div>
-      <button type="button" class="cmpbar-clear" id="cmpbar-clear">Clear</button>
-      <a class="btn btn-p cmpbar-go" href={`${base}cars/compare/`} id="cmpbar-go">Compare <span id="cmpbar-n">0</span> cars →</a>
-    </div>
-  </div>
-
-  <!-- ===== Detailed search (desktop overlay, phone bottom sheet) ===== -->
-  <div class="dsp-back" id="dsp-back" hidden></div>
-  <div class="dsp" id="dsp" role="dialog" aria-modal="true" aria-labelledby="dsp-title" hidden>
-    <div class="dsp-h">
-      <span class="dsp-ht"><b id="dsp-title">Detailed search</b><span class="muted">Combine as many filters as you like. Within a group any match counts.</span></span>
-      <button type="button" class="dsp-x" id="dsp-close" aria-label="Close">×</button>
-    </div>
-    <div class="dsp-q" id="dsp-q" hidden><span class="muted">Search</span><button type="button" class="dsp-qchip" id="dsp-qchip" aria-label="Remove search"><span id="dsp-qtext"></span><b aria-hidden="true">×</b></button><span class="muted dsp-qhint">The search text counts together with these filters.</span></div>
-    <div class="dsp-body">
-      <div class="dsg"><h4>Class <em data-sel="class"></em></h4><div class="mchips" set:html={classesSorted.map(([c, n]) => mc('class', c, c, n)).join('')} /></div>
-<div class="dsg rng" data-range="price"><h4>Price <em data-sel="price"></em></h4>
-        <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum price" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum price" /></div>
-        <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
-        <p class="rng-off">Prices arrive after launch.</p>
-      </div>
-      <div class="dsg rng" data-range="speed"><h4>Top speed <em data-sel="speed"></em></h4>
-        <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum top speed" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum top speed" /></div>
-        <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
-        <p class="rng-off">Top speeds arrive with measured data after launch.</p>
-      </div>
-      <div class="dsg rng" data-range="lap"><h4>Gellhorn lap time <em data-sel="lap"></em></h4>
-        <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum gellhorn lap time" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum gellhorn lap time" /></div>
-        <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
-        <p class="rng-off">Lap times arrive after launch.</p>
-      </div>
-      <div class="dsg"><h4>Dealer</h4><div class="mchips"><span class="mc off">Dealer names after launch</span></div></div>
-      <div class="dsg dsg-wide">
-        <h4>Manufacturer <em data-sel="make"></em><input type="search" class="dsp-msearch" id="dsp-msearch" placeholder={`Search ${makes.length} brands`} aria-label="Search manufacturers" /></h4>
-        <div class="mlist" set:html={makes.map(([slug, name]) => mc('make', slug, name, makeCounts.get(slug))).join('')} />
-      </div>
-    </div>
-    <div class="dsp-f">
-      <span class="muted dsp-sum" id="dsp-sum"></span>
-      <button type="button" class="dsp-reset" id="dsp-reset">Clear all</button>
-      <button type="button" class="btn btn-p" id="dsp-show">Show {N} cars</button>
-    </div>
-  </div>
-
-  <!-- phone sort sheet -->
-  <div class="dsp dsp-sort" id="sort-sheet" role="dialog" aria-modal="true" aria-label="Sort cars" hidden>
-    <div class="dsp-h"><b>Sort</b><button type="button" class="dsp-x" data-close-sort aria-label="Close">×</button></div>
-    <div class="dsp-body sort-list">
-      <button type="button" class="menu-i on" data-sort="class">Class</button>
-      <button type="button" class="menu-i" data-sort="name">Name A–Z</button>
-      <button type="button" class="menu-i" data-sort="price" data-needs="price">Price</button>
-      <button type="button" class="menu-i" data-sort="speed" data-needs="speed">Top speed</button>
-      <button type="button" class="menu-i" data-sort="lap" data-needs="lap">Gellhorn lap time</button>
-      <button type="button" class="menu-i" data-sort="recent">Recently added</button>
-    </div>
-  </div>
-
-  <div class="toast" id="toast" role="status" hidden></div>
+    </Fragment>
+  </CarsBrowser>
 </Base>
 
-<script>
-  import '../../scripts/cars';
-</script>
-
 <style>
-  [hidden] { display: none !important; }
-  .ico { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
-  .ctl :global(svg.ico) { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
-  .ctl :global(svg.ico-sm) { width: 14px; height: 14px; margin-left: 2px; }
-  .muted { color: var(--lr-muted); }
-
   /* ---- band ---- */
   .band { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
   .band-bg, .band-t { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -285,65 +76,6 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .mbar { display: block; height: 4px; border-radius: 999px; background: rgba(251,247,234,.1); overflow: hidden; }
   .mbar i { display: block; height: 100%; background: var(--lr-orange); border-radius: 999px; }
 
-  /* ---- toolbar ---- */
-  .tools { display: flex; flex-direction: column; gap: 14px; padding-top: 24px; }
-  .tools-row, .tools-row2 { display: flex; align-items: center; gap: 10px; }
-  .tools-row2 { gap: 14px; padding-top: 4px; }
-  .tools-phone { display: none; }
-  .ctl { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border: 1px solid rgba(200,200,222,.24); border-radius: 6px; background: transparent; color: var(--lr-muted); font: inherit; font-size: 14px; white-space: nowrap; cursor: pointer; }
-  .ctl:hover { border-color: rgba(251,247,234,.5); }
-  .ctl:focus-within, .ctl:focus-visible { border-color: var(--lr-muted); outline: none; }
-  .ctl b { color: var(--lr-text); font-weight: 500; }
-  .ctl input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--lr-text); font: inherit; padding: 0; }
-  .ctl-search { flex: 1 1 auto; min-width: 0; cursor: text; }
-  .ctl-price { width: 150px; cursor: text; }
-  .ctl-off { opacity: .4; cursor: not-allowed; }
-  .ctl-off:hover { border-color: rgba(200,200,222,.24); }
-  .ctl-detail { color: var(--lr-text); border-color: rgba(251,247,234,.4); }
-  .ctl-detail:hover { border-color: var(--lr-text); }
-  .ctl-count { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--lr-pink); color: var(--lr-on-pink) !important; font-size: 12px; font-weight: 700 !important; }
-  .dd { position: relative; }
-  .menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 248px; padding: 6px; border-radius: 8px; background: var(--lr-raised); border: 1px solid rgba(200,200,222,.22); box-shadow: 0 16px 40px rgba(0,0,0,.5); display: flex; flex-direction: column; }
-  .dd-l .menu { left: 0; right: auto; }
-  .menu-scroll { max-height: 360px; overflow-y: auto; }
-  .menu-i { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; padding: 0 10px; border: 0; border-radius: 5px; background: none; color: #E4E4EC; font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
-  .menu-i :global(span) { color: #77778A; font-size: 12px; white-space: nowrap; }
-  .menu-i { white-space: nowrap; }
-  .menu-i:hover:not(:disabled) { background: rgba(251,247,234,.06); }
-  .menu-i.on { color: var(--lr-text); font-weight: 600; }
-  .menu-i.on::after { content: '✓'; color: var(--lr-pink); }
-  .menu-i:disabled { color: #77778A; cursor: not-allowed; }
-  .menu-h { display: flex; align-items: center; height: 28px; padding: 0 10px; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #77778A; }
-  .menu-hint { text-transform: none; letter-spacing: 0; font-weight: 500; }
-  .menu-sep { height: 1px; background: rgba(200,200,222,.14); margin: 4px 0; }
-  .chips { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; }
-  .chips :global(.fchip) { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 6px 0 12px; border-radius: 999px; border: 1px solid rgba(200,200,222,.3); background: rgba(251,247,234,.04); color: var(--lr-text); font: inherit; font-size: 13px; cursor: pointer; }
-  .chips :global(.fchip b) { font-weight: 400; color: var(--lr-muted); font-size: 15px; width: 18px; }
-  .chips :global(.fchip:hover) { border-color: var(--lr-pink); }
-  .chips :global(.clear-all) { border: 0; background: none; color: var(--lr-orange); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .seg { display: inline-flex; padding: 3px; border-radius: 8px; background: rgba(251,247,234,.06); border: 1px solid rgba(200,200,222,.16); }
-  .seg button { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border: 0; border-radius: 6px; background: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--lr-muted); cursor: pointer; }
-  .seg button span { font-weight: 500; color: #77778A; }
-  .seg button.on { background: var(--lr-raised); color: var(--lr-text); }
-  .cmpb span { color: #77778A; }
-  .cmpb.on { border-color: var(--lr-pink); color: var(--lr-text); }
-  .cmpb.on span { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--lr-pink); color: var(--lr-on-pink); font-size: 12px; font-weight: 700; }
-
-  /* ---- grid ---- */
-  .grid-wrap { padding-top: 22px; padding-bottom: 24px; }
-  .cars-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
-  .cars-grid > :global(.is-hidden) { display: none; }
-  /* one class filtered -> class pill hidden (DEC-0117) */
-  .cars-grid.one-class :global([data-cls-pill]) { display: none; }
-  .more { display: flex; justify-content: center; padding-top: 28px; }
-  :global(.miss) { display: block; margin-top: 2px; font-size: 13px; font-weight: 600; color: var(--lr-orange); }
-  .empty { display: flex; flex-direction: column; gap: 14px; padding: 24px 0 8px; }
-  .empty-title { margin: 0; font-size: 28px; }
-  .empty-drops { display: flex; flex-wrap: wrap; gap: 10px; }
-  .closest-title { margin: 24px 0 0; font-size: 20px; }
-  .closest-sub { margin: 0 0 6px; font-size: 14px; }
-  :global(#empty-dym a) { color: var(--lr-orange); font-weight: 600; }
-
   /* ---- browse lists ---- */
   .browse { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding-top: 40px; padding-bottom: 24px; border-top: 1px solid var(--lr-line); margin-top: 32px; }
   .browse h2 { margin: 0 0 12px; font-size: 16px; font-weight: 700; }
@@ -353,95 +85,6 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .ls a { color: var(--lr-muted); text-decoration: none; }
   .ls a:hover { color: var(--lr-orange); }
 
-  /* ---- compare bar ---- */
-  .cmpbar { position: sticky; bottom: 0; z-index: 35; background: rgba(20,20,31,.96); backdrop-filter: blur(10px); border-top: 1px solid rgba(200,200,222,.22); box-shadow: 0 -12px 30px rgba(0,0,0,.4); }
-  .cmpbar-inner { display: flex; align-items: center; gap: 16px; min-height: 72px; }
-  .cmpbar-cars { flex: 1; min-width: 0; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
-  .cmpbar-cars :global(.cb) { position: relative; flex: none; display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 30px 0 4px; border-radius: 6px; background: var(--lr-raised); font-size: 13px; font-weight: 600; white-space: nowrap; }
-  .cmpbar-cars :global(.cb img) { width: 64px; height: 40px; object-fit: cover; border-radius: 4px; background: #0B0B14; }
-  .cmpbar-cars :global(.cb button) { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border: 0; border-radius: 999px; background: none; color: var(--lr-muted); font-size: 16px; cursor: pointer; }
-  .cmpbar-cars :global(.cb button:hover) { color: var(--lr-text); }
-  .cmpbar-clear { border: 0; background: none; color: var(--lr-muted); font: inherit; font-size: 14px; cursor: pointer; }
-  .cmpbar-clear:hover { color: var(--lr-text); }
-  .cmpbar-go { flex: none; gap: .3em; }
-
-  /* ---- detailed search ---- */
-  .dsp-back { position: fixed; inset: 0; z-index: 60; background: rgba(5,5,10,.6); backdrop-filter: blur(2px); }
-  .dsp { position: fixed; z-index: 61; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(960px, calc(100vw - 40px)); max-height: calc(100vh - 60px); display: flex; flex-direction: column; background: var(--lr-card); border: 1px solid rgba(200,200,222,.22); border-radius: 12px; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
-  .dsp-sort { width: min(420px, calc(100vw - 40px)); }
-  .dsp-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 22px 24px 16px; border-bottom: 1px solid var(--lr-line); }
-  .dsp-ht { display: flex; flex-direction: column; gap: 4px; }
-  .dsp-ht b { font-size: 20px; }
-  .dsp-ht .muted { font-size: 13px; }
-  .dsp-x { flex: none; width: 40px; height: 40px; border-radius: 6px; border: 0; background: rgba(251,247,234,.08); color: var(--lr-text); font-size: 22px; line-height: 1; cursor: pointer; }
-  .dsp-body { flex: 1; overflow-y: auto; padding: 18px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px 32px; }
-  .dsg h4 { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); }
-  .dsg h4 em { font-style: normal; text-transform: none; letter-spacing: 0; color: var(--lr-pink); font-weight: 600; }
-  .dsg-wide { grid-column: 1 / -1; }
-  .dsp-msearch { margin-left: auto; width: 220px; height: 32px; padding: 0 10px; border: 1px solid rgba(200,200,222,.24); border-radius: 6px; background: transparent; color: var(--lr-text); font: inherit; font-size: 13px; letter-spacing: 0; text-transform: none; outline: none; }
-  .mchips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .mlist { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 12px; }
-  .dsp :global(.mc) { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px 0 8px; border-radius: 6px; border: 1px solid rgba(200,200,222,.24); background: transparent; color: #E4E4EC; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
-  .dsp :global(.mlist .mc) { border-color: transparent; }
-  .dsp :global(.mc i) { width: 16px; height: 16px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; border: 1.5px solid rgba(200,200,222,.4); }
-  .dsp :global(.mc i svg) { width: 12px; height: 12px; stroke: var(--lr-on-pink); fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
-  .dsp :global(.mc span) { color: #77778A; font-size: 12px; }
-  .dsp :global(.mc[aria-pressed="true"]) { border-color: var(--lr-pink); color: var(--lr-text); }
-  .dsp :global(.mc[aria-pressed="true"] i) { background: var(--lr-pink); border-color: var(--lr-pink); }
-  .dsp :global(.mc[aria-pressed="true"] i svg) { visibility: visible; }
-  .dsp :global(.mc:disabled), .dsp :global(.mc.off) { opacity: .45; cursor: not-allowed; }
-  .dsp :global(.mc.off) { padding: 0 12px; border-style: dashed; }
-  .dsp-f { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-top: 1px solid var(--lr-line); }
-  .dsp-sum { flex: 1; min-width: 0; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .dsp-reset { border: 0; background: none; color: var(--lr-muted); font: inherit; font-size: 14px; cursor: pointer; }
-  .dsp-reset:hover { color: var(--lr-text); }
-  .sort-list { display: flex; flex-direction: column; gap: 2px; }
-
-  /* range sliders (C5/C6, mockup .rng) */
-  .rng-track { position: relative; height: 22px; margin: 4px 9px 10px; }
-  .rng-track::before { content: ''; position: absolute; left: 0; right: 0; top: 9px; height: 4px; border-radius: 999px; background: rgba(251,247,234,.12); }
-  .rng-fill { position: absolute; top: 9px; height: 4px; border-radius: 999px; background: var(--lr-pink); left: 0; right: 0; }
-  .rng-track input { position: absolute; left: -9px; right: -9px; top: 0; width: calc(100% + 18px); height: 22px; margin: 0; background: none; -webkit-appearance: none; appearance: none; pointer-events: none; }
-  .rng-track input::-webkit-slider-runnable-track { background: none; height: 22px; }
-  .rng-track input::-moz-range-track { background: none; }
-  .rng-track input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 18px; height: 18px; margin-top: 2px; border-radius: 999px; background: var(--lr-text); box-shadow: 0 0 0 3px var(--lr-pink); cursor: grab; }
-  .rng-track input::-moz-range-thumb { pointer-events: auto; width: 18px; height: 18px; border: 0; border-radius: 999px; background: var(--lr-text); box-shadow: 0 0 0 3px var(--lr-pink); cursor: grab; }
-  .rng-track input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--lr-pink), 0 0 0 6px rgba(255,149,90,.6); }
-  .rng-vals { display: flex; gap: 10px; align-items: center; }
-  .rng-vals span { flex: 1; height: 38px; display: flex; align-items: center; padding: 0 12px; border: 1px solid rgba(200,200,222,.24); border-radius: 6px; font-size: 13px; font-variant-numeric: tabular-nums; }
-  .rng-vals em { font-style: normal; color: #77778A; }
-  .rng-off { display: none; margin: 8px 0 0; font-size: 12px; color: #77778A; }
-  .rng.is-off { opacity: .5; }
-  .rng.is-off .rng-off { display: block; }
-  .rng.is-off input { pointer-events: none; }
-  .rng.is-off input::-webkit-slider-thumb { pointer-events: none; cursor: not-allowed; box-shadow: 0 0 0 3px #55556A; }
-  .rng.is-off input::-moz-range-thumb { pointer-events: none; box-shadow: 0 0 0 3px #55556A; }
-  .rng.is-off .rng-fill { background: #55556A; }
-  .menu-price { min-width: 260px; }
-  .menu-price .rng-single { padding: 2px 10px 6px; }
-  .menu-price .rng-vals span { height: 32px; }
-  .ctl-price.ctl-off input { cursor: not-allowed; font-size: 12px; }
-  .ctl-price.ctl-off input::placeholder { color: #77778A; }
-  .dsp-q { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; padding: 12px 24px 0; font-size: 13px; }
-  .dsp-qchip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 6px 0 12px; border-radius: 999px; border: 1px solid var(--lr-pink); background: rgba(242,75,157,.08); color: var(--lr-text); font: inherit; font-size: 13px; cursor: pointer; }
-  .dsp-qchip b { font-weight: 400; color: var(--lr-muted); font-size: 15px; width: 18px; }
-  .dsp-qhint { font-size: 12px; }
-  /* C1: hint bubble at the clicked control (mockup: white speech bubble) */
-  .toast { position: fixed; z-index: 70; width: max-content; max-width: min(280px, calc(100vw - 24px)); padding: 12px 14px; border-radius: 8px; background: var(--lr-text); color: #14141F; box-shadow: 0 16px 40px rgba(0,0,0,.5); font-size: 13px; line-height: 1.45; }
-  .toast::after { content: ''; position: absolute; left: var(--arrow-x, 50%); width: 12px; height: 12px; margin-left: -6px; background: var(--lr-text); transform: rotate(45deg); bottom: -6px; }
-  .toast.below::after { bottom: auto; top: -6px; }
-  .toast :global(b) { font-weight: 700; }
-  .toast :global(.btn) { margin-top: 10px; display: flex; width: 100%; }
-
-  @media (max-width: 1100px) {
-    .cars-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .tools-row { flex-wrap: wrap; }
-    .ctl-search { flex-basis: 100%; }
-  }
-  @media (max-width: 900px) {
-    .cars-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .tools-row2 { flex-wrap: wrap; }
-  }
   @media (max-width: 760px) {
     .band-inner { flex-direction: column; align-items: stretch; gap: 16px; padding-top: 26px; padding-bottom: 18px; }
     .band-title { font-size: 40px; }
@@ -451,31 +94,6 @@ function mc(group: string, value: string | number, label: string, n: number | un
     .gt-val { order: 0; font-size: 18px; }
     .gt-val small { font-size: 13px; }
     .mbar { order: 2; flex-basis: 100%; }
-    .tools { gap: 10px; padding-top: 16px; }
-    .tools-row > :not(.ctl-search) { display: none; }
-    .tools-phone { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .tools-phone .ctl { justify-content: center; color: var(--lr-text); }
-    .tools-row2 { gap: 10px; }
-    .tools-row2 .dd-sort { display: none; }
-    .cmpb { margin-left: auto; height: 36px; font-size: 13px; }
-    .seg { order: 3; width: 100%; }
-    .seg button { flex: 1; justify-content: center; }
-    .cars-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-    .grid-wrap { padding-top: 14px; }
     .browse { grid-template-columns: 1fr; gap: 24px; }
-    .cmpbar-inner { gap: 10px; min-height: 64px; }
-    .cmpbar-cars :global(.cb span) { display: none; }
-    .cmpbar-cars :global(.cb) { padding: 0 26px 0 4px; }
-    .cmpbar-go { min-height: 44px; padding: 0 14px; font-size: 14px; }
-    /* bottom sheets */
-    .dsp { left: 0; right: 0; top: auto; bottom: 0; transform: none; width: 100%; max-height: 88vh; border-radius: 14px 14px 0 0; }
-    .dsp-sort { width: 100%; }
-    .dsp-h { padding: 16px 16px 12px; }
-    .dsp-body { grid-template-columns: minmax(0, 1fr); padding: 14px 16px; gap: 18px; }
-    .mlist { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .dsp-msearch { width: 140px; }
-    .dsp-f { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
-    .dsp-sum { display: none; }
-    .dsp-f .btn { flex: 1; }
   }
 </style>
