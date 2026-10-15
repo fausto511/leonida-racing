@@ -107,10 +107,10 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   description={metaDescription}
   section="garage"
   noindex={!vehicle.releaseId}
-  ogImage={vehicle.photo ? `images/vehicles/${vehicle.id}-1280.webp` : `images/og/cars/${vehicle.id}.jpg`}
-  ogImageAlt={vehicle.photo ? photoAlt : `${fullName} data card: ${vehicle.classes.join(' / ')} in GTA VI`}
-  ogImageWidth={vehicle.photo ? 1280 : 1200}
-  ogImageHeight={vehicle.photo ? 720 : 630}
+  ogImage={vehicle.photo ? `images/vehicles/${vehicle.id}-1280.webp` : undefined}
+  ogImageAlt={vehicle.photo ? photoAlt : undefined}
+  ogImageWidth={vehicle.photo ? 1280 : undefined}
+  ogImageHeight={vehicle.photo ? 720 : undefined}
   breadcrumbs={[{ name: 'Cars', path: 'cars/' }, ...(classLink ? [{ name: cls, path: classLink }] : []), { name: fullName, path: `cars/vehicles/${vehicle.id}/` }]}
 >
   <div class="vp" id="vp" data-id={vehicle.id} data-model={vehicle.model} data-class={cls} data-class-ids={classCars.map((v) => v.id).join(' ')} data-rateable={vehicle.releaseId ? '1' : ''}>

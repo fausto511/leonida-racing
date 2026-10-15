@@ -16,9 +16,7 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
     "@supabase/supabase-js": "^2.116.0",
-    "astro": "^7.3.2",
-    "satori": "^0.57.2",
-    "sharp": "^0.35.5"
+    "astro": "^7.3.2"
   },
   "allowScripts": {
     "esbuild": true

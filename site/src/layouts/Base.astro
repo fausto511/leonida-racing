@@ -27,23 +27,15 @@ interface Props {
   /** schema.org objects rendered as JSON-LD (home page: WebSite + Organization). */
   jsonLd?: Record<string, unknown>[];
 }
-// Share/preview images, 1200x630 (Fausto, 2026-10-15): each section uses its own
-// header image with the pink-orange tint and the LR mark, so Google results and
-// Discord embeds are recognizable. Chosen by URL path (most specific first);
-// vehicle pages pass their photo or generated card (scripts/og-cards.mjs).
-const ogByPath: { prefix: string; path: string; alt: string }[] = [
-  { prefix: '/community/events/', path: 'images/og/og-events.jpg', alt: 'Leonida Racing logo over a GTA VI car meet scene' },
-  { prefix: '/community/crews/', path: 'images/og/og-crews.jpg', alt: 'Leonida Racing logo over a GTA VI crew scene' },
-  { prefix: '/community/tracks/', path: 'images/og/og-tracks.jpg', alt: 'Leonida Racing logo over a race car on a GTA VI circuit' },
-  { prefix: '/community/', path: 'images/og/og-community.jpg', alt: 'Leonida Racing logo over a GTA VI car meet' },
-  { prefix: '/cars/', path: 'images/og/og-cars.jpg', alt: 'Leonida Racing logo over cars on a Vice City street in GTA VI' },
-  { prefix: '/time-attack/', path: 'images/og/og-time-attack.jpg', alt: 'Leonida Racing logo over the palm-lined Gellhorn circuit in GTA VI' },
-  { prefix: '/tracks/', path: 'images/og/og-time-attack.jpg', alt: 'Leonida Racing logo over the palm-lined Gellhorn circuit in GTA VI' },
-  { prefix: '/guide/', path: 'images/og/og-guide-v2.jpg', alt: 'Leonida Racing logo over a white Grotti Cheetah in GTA VI' },
-];
-const ogDefault = { path: 'images/og/og-home.jpg', alt: 'Leonida Racing logo over GTA VI race cars on a palm-lined circuit' };
+// Share images per section, 1200x630 (RS-0050). Vehicle pages with a photo pass their own.
+const sectionOg: Record<string, { path: string; alt: string }> = {
+  garage: { path: 'images/og/og-garage.jpg', alt: 'Two cars raised on lifts inside an auto repair garage' },
+  'time-attack': { path: 'images/og/og-gellhorn.jpg', alt: 'Palm-lined Gellhorn International Raceway circuit in GTA VI' },
+  hub: { path: 'images/og/og-hub.jpg', alt: 'GTA VI car meet with customized cars and drivers' },
+  default: { path: 'images/og/og-home.jpg', alt: 'GTA VI race cars on Gellhorn International Raceway' },
+};
 const { title, description, section = null, noindex = false, jsonLd = [], breadcrumbs = [], brandSuffix = true } = Astro.props;
-const og = ogByPath.find((o) => Astro.url.pathname.startsWith(o.prefix)) ?? ogDefault;
+const og = sectionOg[section ?? 'default'] ?? sectionOg.default;
 const ogImage = Astro.props.ogImage ?? og.path;
 const ogImageAlt = Astro.props.ogImageAlt ?? og.alt;
 const ogImageWidth = Astro.props.ogImageWidth ?? (Astro.props.ogImage ? undefined : 1200);
