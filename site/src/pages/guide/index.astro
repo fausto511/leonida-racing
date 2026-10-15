@@ -32,7 +32,7 @@ const jsonLd = [
     dateModified: `${GUIDE_UPDATED}T12:00:00Z`,
     author: org,
     publisher: org,
-    image: new URL(`${base}images/guide/og-guide.jpg`, Astro.site).href,
+    image: new URL(`${base}images/og/og-guide-v2.jpg`, Astro.site).href,
     about: { '@type': 'VideoGame', name: 'Grand Theft Auto VI', alternateName: ['GTA VI', 'GTA 6'] },
   },
   {
@@ -42,7 +42,7 @@ const jsonLd = [
   },
 ];
 ---
-<Base title={title} description={description} section="guide" jsonLd={jsonLd} breadcrumbs={[{ name: 'The Guide', path: 'guide/' }]} ogImage="images/guide/og-guide.jpg" ogImageAlt={guideHeroImage.alt} ogImageWidth={1200} ogImageHeight={630}>
+<Base title={title} description={description} section="guide" jsonLd={jsonLd} breadcrumbs={[{ name: 'The Guide', path: 'guide/' }]} ogImage="images/og/og-guide-v2.jpg" ogImageAlt="Leonida Racing logo over a white Grotti Cheetah in GTA VI" ogImageWidth={1200} ogImageHeight={630}>
   <PageHero status="guide" image="guide" eyebrow="GTA VI Vehicle Knowledge" title="The Guide" lede="The sourced guide to GTA VI cars, driving, customization, garages, racing, and car culture. See what Rockstar has confirmed, what official footage shows, and which details are still open." />
   <GuideSubnav />
 
