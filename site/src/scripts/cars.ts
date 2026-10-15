@@ -481,8 +481,8 @@ function closeMenus() {
 }
 $('show-more').addEventListener('click', () => { showAll = true; render(); });
 $('cmp-btn').addEventListener('click', () => {
-  if (!getSelected().length) bubble($('cmp-btn'), `Pick up to ${MAX_COMPARE} cars with + on the cards.`);
-  else location.href = `${import.meta.env.BASE_URL}cars/compare/?cars=${getSelected().map(encodeURIComponent).join(',')}`;
+  // K1 (Fausto 15.10.): always open the compare page; with nothing picked you add cars there
+  location.href = `${import.meta.env.BASE_URL}cars/compare/?cars=${getSelected().map(encodeURIComponent).join(',')}`;
 });
 $('cmpbar-clear').addEventListener('click', () => { getSelected().forEach((id) => toggleSelected(id)); renderCompare(); });
 

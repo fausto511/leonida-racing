@@ -8,7 +8,7 @@ import { getSelected, setSelectedList } from './compare';
 import { bubble, hideBubble } from './bubble';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
 import { lapTime } from '../data/leaderboard';
-import { COMPARE_MAX, verdict, alternatives, forSale, money, moneyShort, secs, ALT_MAX_SLOWER_MS, ALT_MIN_CHEAPER, VALUE_MAX_SLOWER_MS, VALUE_MIN_CHEAPER, type CmpCar } from '../data/compare';
+import { COMPARE_MAX, verdict, alternatives, limited, limitedNote, money, moneyShort, secs, ALT_MAX_SLOWER_MS, ALT_MIN_CHEAPER, VALUE_MAX_SLOWER_MS, VALUE_MIN_CHEAPER, type CmpCar } from '../data/compare';
 
 const base = import.meta.env.BASE_URL;
 const TRACK = 'gellhorn-international-raceway';
@@ -87,7 +87,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
   function slot(): string {
     const s = suggestions();
     return `<div class="ct ct-slot${slotOpen ? ' is-open' : ''}" id="ct-slot">
-  <div class="ct-slot-top"><span class="ct-slot-plus" aria-hidden="true">+</span>Add a car</div>
+  <button type="button" class="ct-slot-top" data-open-search><span class="ct-slot-plus" aria-hidden="true">+</span>Add a car</button>
   <div class="ct-search"><input type="search" id="ct-q" placeholder="Search cars" aria-label="Search a car to add" autocomplete="off" /><ul class="ct-res" id="ct-res" hidden></ul></div>
   ${s.list.length ? `<div class="ct-sugg"><p>${esc(s.label)}</p><div class="ct-chips">${s.list.map((c) => `<button type="button" class="ct-chip" data-add="${c.id}">+ ${esc(c.model)}</button>`).join('')}</div></div>` : ''}
 </div>`;
@@ -117,14 +117,24 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     const q = document.getElementById('ct-q') as HTMLInputElement | null;
     const res = document.getElementById('ct-res');
     if (!q || !res) return;
-    q.addEventListener('input', () => {
+    const showList = () => {
       const t = q.value.trim().toLowerCase();
-      if (!t) { res.hidden = true; return; }
+      if (!t) {
+        // empty field: offer cars right away (same class first), no typing needed (K2, Fausto 15.10.)
+        const cls = cars()[0]?.cls ?? null;
+        const pool = ALL.filter((c) => !ids.includes(c.id) && c.release)
+          .sort((a, b) => Number(cls != null && b.classes.includes(cls)) - Number(cls != null && a.classes.includes(cls)) || Number(b.photo) - Number(a.photo) || a.model.localeCompare(b.model)).slice(0, 8);
+        res.innerHTML = pool.map((c) => `<li><button type="button" data-add="${c.id}">${esc(c.make)} ${esc(c.model)} <small>${esc(c.cls)}</small></button></li>`).join('') + '<li class="ct-res-more"><small>Type to search all cars</small></li>';
+        res.hidden = false;
+        return;
+      }
       const words = t.split(/\s+/);
       const hits = ALL.filter((c) => !ids.includes(c.id) && words.every((w) => `${c.make} ${c.model} ${c.cls}`.toLowerCase().includes(w))).slice(0, 8);
       res.innerHTML = hits.length ? hits.map((c) => `<li><button type="button" data-add="${c.id}">${esc(c.make)} ${esc(c.model)} <small>${esc(c.cls)}</small></button></li>`).join('') : '<li><button type="button" disabled>No car found</button></li>';
       res.hidden = false;
-    });
+    };
+    q.addEventListener('input', showList);
+    q.addEventListener('focus', showList);
     q.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const b = res.querySelector<HTMLElement>('[data-add]'); if (b) { e.preventDefault(); add(b.dataset.add!, q); } } });
   }
 
@@ -137,7 +147,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     const rules = `<div class="tk-rules" id="tk-rules" hidden><b>How we judge</b><ul>
 <li>Only our stock Gellhorn reference lap and the in-game price count. Community laps depend on the driver, so they never decide.</li>
 <li>Best value: a car that is at most ${(VALUE_MAX_SLOWER_MS / 1000).toFixed(1)} s slower than the fastest pick and at least ${Math.round(VALUE_MIN_CHEAPER * 100)} % cheaper. Faster and cheaper at once is a clear pick.</li>
-<li>Cars you can't buy (edition and bonus cars) get no value verdict.</li>
+<li>Edition, bonus and GTA+ cars count like any other car. We only mark that they can't be bought later.</li>
 <li>Top speed is its own category and doesn't decide the value.</li></ul></div>`;
     if (!v) {
       const miss = list.map((c) => {
@@ -195,8 +205,8 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     ];
     const price: Row[] = [
       { label: 'Price', dir: 'min', cells: (c) => c.price != null
-        ? { m: money(c.price), s: c.price === minPrice ? (prices.length > 1 ? 'Cheapest' : '') : cheapest ? `+${moneyShort(c.price - minPrice!)} vs ${cheapest.model}` : '', v: c.price }
-        : { m: c.acq && !forSale(c) ? 'Not for sale' : tb('Not announced yet', 'Not announced'), raw: c.acq ? 'nfs' : 'na', tba: true } },
+        ? { m: money(c.price), s: [c.price === minPrice ? (prices.length > 1 ? 'Cheapest' : '') : cheapest ? `+${moneyShort(c.price - minPrice!)} vs ${cheapest.model}` : '', limited(c) ? "Can't be bought later" : ''].filter(Boolean).join('\u2002·\u2002'), v: c.price }
+        : { m: tb('Not announced yet', 'Not announced'), raw: 'na', tba: true } },
       { label: 'Sell value', sub: 'Base price, no upgrades', dir: 'max', cells: (c) => c.sellable === 'no' ? { m: "Can't be sold" }
         : c.sell != null ? { m: money(c.sell), v: c.sell } : { m: 'After launch', tba: true } },
     ];
@@ -204,7 +214,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
       { label: 'Class', cells: (c) => ({ m: esc(c.classes.join(' / ')) }) },
       { label: 'Drive', cells: (c) => ({ m: esc(c.drive) }) },
       { label: 'Seats', cells: (c) => ({ m: String(c.seats) }) },
-      { label: 'Where to get', cells: (c) => c.acq ? { m: acqNote[c.acq] ?? esc(c.acq) } : { m: 'After launch', tba: true } },
+      { label: 'Where to get', cells: (c) => c.acq ? { m: acqNote[c.acq] ?? esc(c.acq), s: "Can't be bought later" } : { m: 'After launch', tba: true } },
       { label: 'Based on', cells: (c) => c.based ? { m: esc(c.based) } : { m: 'Under review', tba: true } },
     ];
     const comm: Row[] = [
@@ -283,7 +293,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     const f = list.filter((c) => c.ref != null && c.price != null).sort((a, b) => a.ref! - b.ref!)[0];
     const cls = f?.cls ?? list[0].cls;
     const left = alts.length
-      ? `<div class="al">${alts.map((a) => `<div class="al-r">${a.car.photo ? `<img class="al-img" src="${img(a.car)}" alt="" loading="lazy" />` : `<span class="al-img al-ph"><img src="${ph}" alt="" loading="lazy" /><img class="al-logo" src="${logo(a.car)}" alt="" loading="lazy" /></span>`}<div class="al-m"><b>${esc(a.car.make)} ${esc(a.car.model)}</b><span>${a.slower < 5 ? `As fast as the ${esc(f.model)}` : `${secs(a.slower)} slower than the ${esc(f.model)}`} · <em>${money(a.cheaper)} cheaper</em></span></div><button type="button" class="al-add" data-add="${a.car.id}">+ Compare</button></div>`).join('')}
+      ? `<div class="al">${alts.map((a) => `<div class="al-r">${a.car.photo ? `<img class="al-img" src="${img(a.car)}" alt="" loading="lazy" />` : `<span class="al-img al-ph"><img src="${ph}" alt="" loading="lazy" /><img class="al-logo" src="${logo(a.car)}" alt="" loading="lazy" /></span>`}<div class="al-m"><b>${esc(a.car.make)} ${esc(a.car.model)}</b>${limited(a.car) ? `<small class="al-lim">${esc(limitedNote(a.car))}</small>` : ''}<span>${a.slower < 5 ? `As fast as the ${esc(f.model)}` : `${secs(a.slower)} slower than the ${esc(f.model)}`} · <em>${money(a.cheaper)} cheaper</em></span></div><button type="button" class="al-add" data-add="${a.car.id}">+ Compare</button></div>`).join('')}
 <p class="al-note">Same class, within ${(ALT_MAX_SLOWER_MS / 1000).toFixed(1)} s of your fastest pick and at least ${Math.round(ALT_MIN_CHEAPER * 100)} % cheaper.</p></div>`
       : f
         ? `<div class="lock"><div class="lock-m"><h3>No cheaper alternative</h3><p>No ${esc(cls)} car is close enough at Gellhorn and clearly cheaper.</p></div></div>`
@@ -311,6 +321,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     const t = e.target as HTMLElement;
     const rm = t.closest<HTMLElement>('[data-remove]');
     if (rm) { remove(rm.dataset.remove!); return; }
+    if (t.closest('[data-open-search]')) { (document.getElementById('ct-q') as HTMLInputElement | null)?.focus(); return; }
     const ad = t.closest<HTMLElement>('[data-add]');
     if (ad) { add(ad.dataset.add!, ad); return; }
     if (t.closest('[data-show-hidden]')) { showHidden = true; renderTable(); return; }

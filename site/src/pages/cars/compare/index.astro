@@ -113,8 +113,13 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp :global(.ct-gar .g2), .cp :global(.ct-gar[aria-pressed="true"] .g1) { display: none; }
   .cp :global(.ct-gar[aria-pressed="true"] .g2) { display: block; }
   .cp :global(.ct-gar[aria-pressed="true"]) { background: rgba(217,245,142,.12); border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
-  .cp :global(.ct-slot) { border-style: dashed; background: transparent; }
-  .cp :global(.ct-slot-top) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; aspect-ratio: 16 / 9; color: var(--lr-soft); font-size: 15px; font-weight: 600; }
+  .cp :global(.ct-slot) { border-style: dashed; background: transparent; overflow: visible; z-index: 5; }
+  .cp-tgl[hidden], .cp-clear[hidden] { display: none; }
+  .cp :global(.ct-slot-top) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; background: none; color: var(--lr-soft); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .cp :global(.ct-slot-top:hover) { color: var(--lr-text); }
+  .cp :global(.ct-slot-top:hover .ct-slot-plus) { border-color: var(--lr-pink); color: var(--lr-pink); }
+  .cp :global(.ct-res-more) { padding: 6px 10px 4px; color: var(--lr-muted); }
+  .cp :global(.al-lim) { display: block; font-size: 12px; color: var(--lr-orange); }
   .cp :global(.ct-slot-plus) { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; border: 1px dashed rgba(251,247,234,.35); font-size: 20px; }
   .cp :global(.ct-search) { position: relative; padding: 0 12px; }
   .cp :global(.ct-search input) { width: 100%; height: 36px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: var(--lr-bg); color: var(--lr-text); font: inherit; font-size: 14px; }

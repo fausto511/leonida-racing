@@ -20,8 +20,11 @@ export interface CmpCar {
   price: number | null; sell: number | null; speed: number | null; ref: number | null;
 }
 
-/** Not purchasable for money (edition-exclusive, pre-order bonus, GTA+) -> no value verdict */
-export const forSale = (c: CmpCar) => !c.acq;
+/** Edition / bonus / GTA+ cars: judged like every other car (Fausto 15.10.), only marked
+ *  because they can't be bought later. */
+export const limited = (c: CmpCar) => Boolean(c.acq);
+const LIMITED_NOTE: Record<string, string> = { 'ultimate-edition': 'Ultimate Edition only', 'pre-order': 'Pre-order bonus only', 'gta-plus': 'GTA+ only' };
+export const limitedNote = (c: CmpCar) => (c.acq ? `${LIMITED_NOTE[c.acq] ?? 'Limited'}: can't be bought later.` : '');
 
 export const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 export const moneyShort = (n: number) => (n >= 1e6 ? `$${(n / 1e6).toFixed(n % 1e6 ? 1 : 0)}M` : `$${Math.round(n / 1000)}k`);
@@ -44,9 +47,9 @@ export function verdict(cars: CmpCar[]): Verdict | null {
   const fastestOut = { car: fastest, text: `Quickest reference lap of the ${n}. Worth it if you chase every tenth.` };
 
   // value: only cars you can buy
-  const buyable = priced.filter(forSale).sort((a, b) => a.ref! - b.ref!);
+  const buyable = [...priced].sort((a, b) => a.ref! - b.ref!);
   let value: Verdict['value'] = null;
-  let valueNote: string | null = null;
+  const valueNote: string | null = null;
   if (buyable.length >= 2) {
     const f = buyable[0];
     const cheapest = [...buyable].sort((a, b) => a.price! - b.price!)[0];
@@ -59,7 +62,8 @@ export function verdict(cars: CmpCar[]): Verdict | null {
       if (pick) value = { car: pick, text: `Only ${secs(pick.ref! - f.ref!)} slower than the ${f.model} at Gellhorn, but ${money(f.price! - pick.price!)} cheaper. Our pick for most drivers.` };
       else value = { car: f, text: `None of the cheaper cars stays close enough at Gellhorn. The ${f.model} is worth its price.` };
     }
-  } else valueNote = 'Not for sale: edition and bonus cars get no value verdict.';
+  }
+  if (value && limited(value.car)) value = { ...value, text: `${value.text} ${limitedNote(value.car)}` };
 
   const withSpeed = cars.filter((c) => c.speed != null).sort((a, b) => b.speed! - a.speed!);
   let speed: Verdict['speed'] = null;
@@ -77,7 +81,7 @@ export function alternatives(cars: CmpCar[], all: CmpCar[]): { car: CmpCar; slow
   if (!f) return [];
   const chosen = new Set(cars.map((c) => c.id));
   return all
-    .filter((c) => !chosen.has(c.id) && c.release && forSale(c) && c.classes.includes(f.cls) && c.ref != null && c.price != null)
+    .filter((c) => !chosen.has(c.id) && c.release && c.classes.includes(f.cls) && c.ref != null && c.price != null)
     .filter((c) => c.ref! - f.ref! <= ALT_MAX_SLOWER_MS && c.price! <= f.price! * (1 - ALT_MIN_CHEAPER))
     .map((c) => ({ car: c, slower: Math.max(0, c.ref! - f.ref!), cheaper: f.price! - c.price! }))
     .sort((a, b) => a.slower - b.slower || b.cheaper - a.cheaper)
