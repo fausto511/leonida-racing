@@ -96,7 +96,6 @@ const ico = {
   house: '<svg class="ico vh-g-house" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M7 21v-8h10v8M7 17h10"/></svg>',
   houseCheck: '<svg class="ico vh-g-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/></svg>',
   timer: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>',
-  cols: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="6" height="14" rx="1"/><rect x="14" y="5" width="6" height="14" rx="1"/></svg>',
 };
 const star = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L3.4 9.8l6-.7z"/></svg>';
 const starsHtml = [1, 2, 3, 4, 5].map((n) => '<button type="button" class="vr-star" data-star="' + n + '" aria-label="' + n + (n === 1 ? ' star' : ' stars') + '">' + star + '</button>').join('');
@@ -216,7 +215,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <div class="vg-cols vg-cols-c"><span>#</span><span>Car</span><span>Gap</span><span>Best lap</span></div>
           <div class="vg-rows" id="vg-class" set:html={classHtml} />
           <div class="vg-btns">
-            <a class="btn btn-s" href={`${base}cars/`} id="vg-vsleader" data-vs-leader><Fragment set:html={ico.cols} />Compare with the class leader</a>
+            <a class="btn btn-s" href={`${base}cars/`} id="vg-vsleader" data-vs-leader>Compare with the class leader</a>
           </div>
         </div>
       </div>
@@ -414,8 +413,10 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vg-rows :global(.vg-crow.no-lap) { color: var(--lr-muted); }
   .vg-rows :global(.vg-crow .vg-nolap) { grid-column: 4 / 6; }
   .vg-rows :global(.vg-thumb) { width: 64px; height: 36px; border-radius: 4px; object-fit: cover; background: var(--lr-raised); }
-  .vg-rows :global(.vg-thumb-logo) { display: flex; align-items: center; justify-content: center; }
-  .vg-rows :global(.vg-thumb-logo img) { width: 22px; height: 22px; object-fit: contain; filter: brightness(0) invert(1); opacity: .7; }
+  .vg-rows :global(.vg-thumb-logo), .vh2h :global(.vg-thumb-logo) { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .vg-rows :global(.vg-thumb-logo .vg-thumb-bg), .vh2h :global(.vg-thumb-logo .vg-thumb-bg) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(.6) brightness(.35); opacity: 1; }
+  .vg-rows :global(.vg-thumb-logo .vg-thumb-l), .vh2h :global(.vg-thumb-logo .vg-thumb-l) { position: relative; }
+  .vg-rows :global(.vg-thumb-logo .vg-thumb-l) { width: 22px; height: 22px; object-fit: contain; filter: brightness(0) invert(1); opacity: .7; }
   .vg-rows :global(.vg-gap) { text-align: right; font-size: 14px; }
   .vg-rows :global(.vg-lead) { color: var(--lr-lime); font-weight: 600; }
   .vg-rows :global(.vg-start) { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 14px; padding: 28px 24px; border: 1px dashed rgba(242,75,157,.45); border-radius: 8px; background: rgba(242,75,157,.05); }
@@ -452,8 +453,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vh2h :global(.vh-rival) { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 6px; background: rgba(251,247,234,.05); text-decoration: none; color: var(--lr-text); }
   .vh2h :global(.vh-rival:hover) { background: rgba(251,247,234,.09); }
   .vh2h :global(.vg-thumb) { width: 64px; height: 36px; flex: none; border-radius: 4px; object-fit: cover; background: var(--lr-raised); }
-  .vh2h :global(.vg-thumb-logo) { display: flex; align-items: center; justify-content: center; }
-  .vh2h :global(.vg-thumb-logo img) { width: 22px; height: 22px; object-fit: contain; filter: brightness(0) invert(1); opacity: .7; }
+    .vh2h :global(.vg-thumb-logo .vg-thumb-l) { width: 22px; height: 22px; object-fit: contain; filter: brightness(0) invert(1); opacity: .7; }
   .vh2h :global(.vh-rival-t) { display: flex; flex-direction: column; min-width: 0; flex: 1; }
   .vh2h :global(.vh-rival-t b) { font-size: 15px; line-height: 1.25; }
   .vh2h :global(.vh-rival-t span) { font-size: 12px; color: var(--lr-soft); }

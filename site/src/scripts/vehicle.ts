@@ -91,7 +91,7 @@ function init(root: HTMLElement) {
       await setOwned(me, carId, next);
       next ? owned.add(carId) : owned.delete(carId);
       paintGarage();
-      if (carId === id) paintOwners();
+      if (carId === id) { ownerCount = Math.max(0, ownerCount + (next ? 1 : -1)); paintOwners(); }
       if (next) {
         let seen = false;
         try { seen = localStorage.getItem('lr-garage-hint') === '1'; localStorage.setItem('lr-garage-hint', '1'); } catch { /* ignore */ }
@@ -109,8 +109,9 @@ function init(root: HTMLElement) {
   function paintOwners() {
     const t = $('vs-own-t')!;
     const mine = owned.has(id);
-    if (ownerCount >= 3) t.innerHTML = `<b>${ownerCount}</b> drivers have it in their garage${mine ? ' (you too)' : ''}`;
-    else if (mine) t.innerHTML = `It's in <a class="vs-own-btn" href="${base}account/garage/">your garage</a>`;
+    // V3 (Fausto 15.10.): number from the first other driver on; only you -> "It's in your garage"
+    if (mine && ownerCount <= 1) t.innerHTML = `It's in <a class="vs-own-btn" href="${base}account/garage/">your garage</a>`;
+    else if (ownerCount >= 1) t.innerHTML = `<b>${ownerCount}</b> ${ownerCount === 1 ? 'driver has' : 'drivers have'} it in their garage${mine ? ' (you too)' : ''}`;
     else t.innerHTML = 'Be the first to add it to <button type="button" class="vs-own-btn" data-add-garage>your garage</button>';
   }
 
