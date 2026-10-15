@@ -20,8 +20,10 @@ interface Props {
   /** data-* attributes for filtering/sorting on the Cars page */
   data?: Record<string, string | number>;
   isNew?: boolean;
+  /** Cars page: phone shows the card as a list row (default). false = keep the card shape (vehicle page, swipe row) */
+  list?: boolean;
 }
-const { vehicle: v, cls = v.classes[0], lap = null, rotate, variant = 'home', data = {}, isNew = false } = Astro.props;
+const { vehicle: v, cls = v.classes[0], lap = null, rotate, variant = 'home', data = {}, isNew = false, list = true } = Astro.props;
 const cars = variant === 'cars';
 const acqLabels: Record<string, string> = { 'pre-order': 'Pre-Order bonus', 'ultimate-edition': 'Ultimate Edition', 'gta-plus': 'GTA+' };
 const acq = v.acquisition ? acqLabels[v.acquisition] : null;
@@ -32,7 +34,7 @@ const price = vehicleValues[v.id]?.price_gtad?.value;
 const speed = vehicleValues[v.id]?.top_speed_mph?.value;
 const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 ---
-<article class:list={['card vcard', { 'vc-cars': cars }]} data-id={v.id} data-rotate={rotate} {...dataAttrs}>
+<article class:list={['card vcard', { 'vc-cars': cars, 'vc-list': cars && list }]} data-id={v.id} data-rotate={rotate} {...dataAttrs}>
   <a href={href} class="vc-img" tabindex="-1" aria-hidden="true">
     {v.photo ? (
       <img src={`${base}images/vehicles/${v.id}-640.webp`} srcset={`${base}images/vehicles/${v.id}-640.webp 640w, ${base}images/vehicles/${v.id}-1280.webp 1280w`} sizes="(max-width: 760px) 272px, 320px" alt="" width="640" height="360" loading="lazy" />
@@ -124,20 +126,20 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 
   /* Phone: Cars page as a list (DEC-0117): image 118px, text, compare + garage stacked right */
   @media (max-width: 760px) {
-    .vc-cars { flex-direction: row; align-items: stretch; min-height: 118px; }
-    .vc-cars .vc-img { width: 118px; flex: none; aspect-ratio: auto; }
-    .vc-cars .vc-pills { left: 6px; top: 6px; right: 6px; gap: 4px; }
-    .vc-cars .vc-cls { height: 22px; padding: 0 7px; font-size: 11px; }
-    .vc-cars .vc-ph-logo { width: 48px; height: 48px; }
-    .vc-cars .vc-ph-pill { display: none; }
-    .vc-cars .vc-body { flex: 1; min-width: 0; padding: 10px 52px 10px 12px; gap: 2px; }
-    .vc-cars .vc-brand { font-size: 11px; min-height: 16px; }
-    .vc-cars .vc-brand img { width: 16px; height: 16px; }
-    .vc-cars .vc-name { font-size: 16px; }
-    .vc-cars .vc-stats { font-size: 13px; }
-    .vc-cars .vc-based { display: none; }
-    .vc-cars .vc-foot { margin-top: 4px; padding-top: 0; border-top: 0; font-size: 13px; }
-    .vc-cars .vc-cmp { top: 10px; right: 8px; width: 40px; height: 40px; }
-    .vc-cars .vc-garage { position: absolute; right: 8px; bottom: 10px; width: 40px; height: 40px; }
+    .vc-list { flex-direction: row; align-items: stretch; min-height: 118px; }
+    .vc-list .vc-img { width: 118px; flex: none; aspect-ratio: auto; }
+    .vc-list .vc-pills { left: 6px; top: 6px; right: 6px; gap: 4px; }
+    .vc-list .vc-cls { height: 22px; padding: 0 7px; font-size: 11px; }
+    .vc-list .vc-ph-logo { width: 48px; height: 48px; }
+    .vc-list .vc-ph-pill { display: none; }
+    .vc-list .vc-body { flex: 1; min-width: 0; padding: 10px 52px 10px 12px; gap: 2px; }
+    .vc-list .vc-brand { font-size: 11px; min-height: 16px; }
+    .vc-list .vc-brand img { width: 16px; height: 16px; }
+    .vc-list .vc-name { font-size: 16px; }
+    .vc-list .vc-stats { font-size: 13px; }
+    .vc-list .vc-based { display: none; }
+    .vc-list .vc-foot { margin-top: 4px; padding-top: 0; border-top: 0; font-size: 13px; }
+    .vc-list .vc-cmp { top: 10px; right: 8px; width: 40px; height: 40px; }
+    .vc-list .vc-garage { position: absolute; right: 8px; bottom: 10px; width: 40px; height: 40px; }
   }
 </style>

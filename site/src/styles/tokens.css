@@ -229,3 +229,12 @@ select optgroup option { background: var(--gh-surface); color: var(--gh-text); f
 .skip-link:focus { top: .75rem; }
 main:focus { outline: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Speech bubble next to the clicked element (scripts/bubble.ts, DEC-0126 C1) */
+.lr-bubble { position: fixed; z-index: 70; width: max-content; max-width: min(280px, calc(100vw - 24px)); padding: 12px 14px; border-radius: 8px; background: var(--lr-text); color: #14141F; box-shadow: 0 16px 40px rgba(0,0,0,.5); font-size: 13px; line-height: 1.45; }
+.lr-bubble::after { content: ''; position: absolute; left: var(--arrow-x, 50%); width: 12px; height: 12px; margin-left: -6px; background: var(--lr-text); transform: rotate(45deg); bottom: -6px; }
+.lr-bubble.below::after { bottom: auto; top: -6px; }
+.lr-bubble[hidden] { display: none; }
+.lr-bubble b { font-weight: 700; }
+.lr-bubble a { color: #14141F; text-decoration: underline; }
+.lr-bubble .btn { margin-top: 10px; display: flex; width: 100%; }
