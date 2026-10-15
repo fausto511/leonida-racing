@@ -57,6 +57,12 @@ jobs:
           PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: node scripts/fetch-vehicles.mjs
 
+      # Share/preview cards for vehicles without a photo (2026-10-15); needs the
+      # fresh vehicles.generated.json from the step above.
+      - name: Generate vehicle share cards
+        working-directory: site
+        run: node scripts/og-cards.mjs
+
       - name: Build
         working-directory: site
         env:
