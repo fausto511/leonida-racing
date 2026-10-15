@@ -194,7 +194,8 @@ const discordIcon = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
     .head-row > .head-search { display: none; }
     .head-search-ico { display: inline-flex; margin-left: auto; }
     .head-discord { width: 44px; padding: 0; }
-    .head-discord span { display: none; }
+    /* icon-only on small screens, but the label stays for screen readers (Lighthouse: link without name) */
+    .head-discord span { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
   }
   @media (max-width: 900px) {
     .head-row { gap: 18px; }
