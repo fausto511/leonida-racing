@@ -67,8 +67,8 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
       </span>
       {cars ? (
         <button type="button" class="vc-garage" data-garage={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to My Garage`} title="Mark as owned · Adds the car to My Garage">
-          <svg class="vc-g-house" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12M7 21v-7h10v7"/></svg>
-          <svg class="vc-g-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+          <svg class="vc-g-house" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M7 21v-8h10v8M7 17h10"/></svg>
+          <svg class="vc-g-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/></svg>
         </button>
       ) : <span class="vc-arrow" aria-hidden="true">→</span>}
     </div>
@@ -93,11 +93,11 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   .vc-garage { position: relative; z-index: 2; flex: none; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid rgba(251,247,234,.22); background: transparent; color: var(--lr-text); cursor: pointer; }
   .vc-garage:hover { border-color: var(--lr-text); }
   .vc-garage:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
-  .vc-garage svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .vc-garage svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .vc-g-check { display: none; }
   .vc-garage[aria-pressed="true"] { background: rgba(217,245,142,.12); border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
   .vc-garage[aria-pressed="true"] .vc-g-house { display: none; }
-  .vc-garage[aria-pressed="true"] .vc-g-check { display: block; }
+  .vc-garage[aria-pressed="true"] .vc-g-check { display: block; stroke-width: 2; }
   .vc-cmp { position: absolute; z-index: 2; right: 12px; top: 12px; width: 34px; height: 34px; padding: 0; border-radius: 999px; border: 1px solid rgba(251,247,234,.35); background: rgba(11,11,20,.65); color: var(--lr-text); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
   .vc-cmp:hover { border-color: var(--lr-pink); color: var(--lr-pink); }
   .vc-cmp svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }

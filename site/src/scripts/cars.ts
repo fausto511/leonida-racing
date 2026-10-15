@@ -289,6 +289,7 @@ function render() {
       $('closest').appendChild(cl);
     });
   }
+  paintOwnCounts();
   syncUrl();
 }
 
@@ -374,13 +375,23 @@ function renderOwned() {
     b.setAttribute('aria-pressed', String(on));
     b.title = on ? 'In My Garage · click to remove' : 'Mark as owned · Adds the car to My Garage';
   });
-  $('own-n').textContent = String(owned.size);
-  $('notown-n').textContent = String(N - owned.size);
+  paintOwnCounts();
   if (driverId) {
     $('gt-owned').textContent = String(owned.size);
     ($('gt-bar') as HTMLElement).style.width = `${(owned.size / N) * 100}%`;
     $('gt-cta').textContent = 'Open →';
   }
+}
+// G2: Owned / Not owned count within the current search + filters (not the whole list)
+function paintOwnCounts() {
+  if (!driverId) return;
+  let o = 0, n = 0;
+  for (const c of cards) {
+    if (fails(c, state).some((k) => k !== 'own')) continue;
+    owned.has(c.dataset.id!) ? o++ : n++;
+  }
+  $('own-n').textContent = String(o);
+  $('notown-n').textContent = String(n);
 }
 async function loadOwned() {
   driverId = await currentDriverId();
