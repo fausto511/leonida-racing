@@ -82,7 +82,7 @@ export function rivalsFromClass(rows: ClassRow[], currentId: string): { id: stri
 export function rivalHtml(id: string, note: string, currentId: string): string {
   const v = byId.get(id);
   if (!v) return '';
-  return `<a class="vh-rival" href="${base}cars/" data-vs="${esc(id)}" data-self="${esc(currentId)}">
+  return `<a class="vh-rival" href="${base}cars/compare/?cars=${esc(currentId)},${esc(id)}" data-vs="${esc(id)}" data-self="${esc(currentId)}">
   ${thumb(v)}
   <span class="vh-rival-t"><b>${esc(v.model)}</b><span>${esc(note)}</span></span>
   <span class="vh-vs">vs →</span>

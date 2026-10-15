@@ -358,6 +358,7 @@ function renderCompare() {
   $('cmp-n').textContent = sel.length ? String(sel.length) : `0 / ${MAX_COMPARE}`;
   $('cmpbar').hidden = sel.length === 0;
   $('cmpbar-n').textContent = String(sel.length);
+  ($('cmpbar-go') as HTMLAnchorElement).href = `${import.meta.env.BASE_URL}cars/compare/?cars=${sel.map(encodeURIComponent).join(',')}`;
   $('cmpbar-cars').innerHTML = sel.map((id) => {
     const c = cards.find((x) => x.dataset.id === id);
     if (!c) return '';
@@ -481,7 +482,7 @@ function closeMenus() {
 $('show-more').addEventListener('click', () => { showAll = true; render(); });
 $('cmp-btn').addEventListener('click', () => {
   if (!getSelected().length) bubble($('cmp-btn'), `Pick up to ${MAX_COMPARE} cars with + on the cards.`);
-  else $('cmpbar').scrollIntoView({ block: 'end', behavior: 'smooth' });
+  else location.href = `${import.meta.env.BASE_URL}cars/compare/?cars=${getSelected().map(encodeURIComponent).join(',')}`;
 });
 $('cmpbar-clear').addEventListener('click', () => { getSelected().forEach((id) => toggleSelected(id)); renderCompare(); });
 
@@ -592,4 +593,5 @@ readUrl();
 render();
 renderCompare();
 loadOwned();
-if (location.hash === '#compare') $('cmp-btn').scrollIntoView({ block: 'center' });
+// old /garage/#compare links (via the /garage -> /cars redirect) open the compare page (handoff 15.10.)
+if (location.hash === '#compare') location.replace(`${import.meta.env.BASE_URL}cars/compare/`);

@@ -215,7 +215,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <div class="vg-cols vg-cols-c"><span>#</span><span>Car</span><span>Gap</span><span>Best lap</span></div>
           <div class="vg-rows" id="vg-class" set:html={classHtml} />
           <div class="vg-btns">
-            <a class="btn btn-s" href={`${base}cars/`} id="vg-vsleader" data-vs-leader>Compare with the class leader</a>
+            <a class="btn btn-s" href={`${base}cars/compare/`} id="vg-vsleader" data-vs-leader>Compare with the class leader</a>
           </div>
         </div>
       </div>
@@ -262,7 +262,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
             <h3>Compare the {vehicle.model}</h3>
             <p class="vh2h-sub" id="vh2h-sub">{rivalsSub}</p>
             <div class="vh2h-list" id="vh2h-list" set:html={rivalsHtml} />
-            <a class="btn btn-s" href={`${base}cars/`} data-pick-any><Fragment set:html={ico.plus} />Pick any car</a>
+            <a class="btn btn-s" href={`${base}cars/compare/`} data-pick-any><Fragment set:html={ico.plus} />Pick any car</a>
           </div>
         </div>
       </section>

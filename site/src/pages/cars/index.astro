@@ -193,7 +193,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
     <div class="wrap cmpbar-inner">
       <div class="cmpbar-cars" id="cmpbar-cars"></div>
       <button type="button" class="cmpbar-clear" id="cmpbar-clear">Clear</button>
-      <span class="btn btn-p cmpbar-go is-disabled" aria-disabled="true" title="The comparison page is coming soon" id="cmpbar-go">Compare <span id="cmpbar-n">0</span> cars →</span>
+      <a class="btn btn-p cmpbar-go" href={`${base}cars/compare/`} id="cmpbar-go">Compare <span id="cmpbar-n">0</span> cars →</a>
     </div>
   </div>
 

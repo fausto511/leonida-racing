@@ -37,3 +37,8 @@ export function toggleSelected(id: string): boolean {
   setSelected(next);
   return next.includes(id);
 }
+
+/** Replace the whole selection (compare page: ?cars=, remove, clear). */
+export function setSelectedList(ids: string[]) {
+  setSelected([...new Set(ids)]);
+}

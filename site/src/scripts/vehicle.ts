@@ -49,19 +49,22 @@ function init(root: HTMLElement) {
   }
   function toggleCompare(carId: string, anchor: HTMLElement) {
     const sel = getSelected();
-    if (!sel.includes(carId) && sel.length >= MAX_COMPARE) { bubble(anchor, `You can compare up to ${MAX_COMPARE} cars. Remove one on the <a href="${base}cars/">Cars page</a> first.`); return; }
+    if (!sel.includes(carId) && sel.length >= MAX_COMPARE) { bubble(anchor, `You can compare up to ${MAX_COMPARE} cars. Remove one on the <a href="${base}cars/compare/">compare page</a> first.`); return; }
     const now = toggleSelected(carId);
     paintCompare();
-    if (now) bubble(anchor, `Added to compare (${getSelected().length}/${MAX_COMPARE}). Your selection waits on the <a href="${base}cars/">Cars page</a>.`);
+    if (now) bubble(anchor, `Added to compare (${getSelected().length}/${MAX_COMPARE}). <a href="${base}cars/compare/">Open the comparison →</a>`);
     else hideBubble();
   }
-  /** "vs →", "Compare with the class leader", "Pick any car": select the cars, then open the Cars page with the compare bar */
+  /** "vs →" / "Compare with the class leader": head to head on the compare page (just these two);
+   *  "Pick any car": the stored selection plus this car (DEC-0128). */
   function compareWith(ids: string[], anchor: HTMLElement) {
-    const sel = getSelected();
-    const missing = ids.filter((x) => !sel.includes(x));
-    if (sel.length + missing.length > MAX_COMPARE) { bubble(anchor, `You can compare up to ${MAX_COMPARE} cars. Remove one on the <a href="${base}cars/">Cars page</a> first.`); return; }
-    missing.forEach((x) => toggleSelected(x));
-    location.href = `${base}cars/`;
+    let list = ids;
+    if (ids.length === 1) {
+      const sel = getSelected();
+      if (!sel.includes(ids[0]) && sel.length >= MAX_COMPARE) { bubble(anchor, `You can compare up to ${MAX_COMPARE} cars. Remove one on the <a href="${base}cars/compare/">compare page</a> first.`); return; }
+      list = sel.includes(ids[0]) ? sel : [...sel, ids[0]];
+    }
+    location.href = `${base}cars/compare/?cars=${list.map(encodeURIComponent).join(',')}`;
   }
   cmpBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleCompare(id, cmpBtn); });
   paintCompare();
