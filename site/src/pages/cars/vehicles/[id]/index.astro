@@ -9,6 +9,7 @@ import CarCard from '../../../../components/CarCard.astro';
 import { vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs } from '../../../../data/vehicles';
 import { groupedTitles } from '../../../../data/gta-titles';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
+import { vehicleSources } from '../../../../data/vehicle-sources';
 import { releaseById, formatReleaseDate } from '../../../../data/releases';
 import { classHref, makeHref, classSlug, vehiclesByMake } from '../../../../data/garage-taxonomy';
 import { vehiclePhotoAlt } from '../../../../data/vehicle-photo-alt';
@@ -22,6 +23,7 @@ export function getStaticPaths() {
 const { vehicle } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const copy = vehicleCopy[vehicle.id];
+const sources = vehicleSources[vehicle.id] ?? [];
 const cls = vehicle.classes[0];
 const fullName = `${vehicle.make} ${vehicle.model}`;
 const photoAlt = vehiclePhotoAlt[vehicle.id] ?? `${fullName} in GTA VI`;
@@ -227,6 +229,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         <p class="eyebrow">About</p>
         <h2 class="vsec-title display">The {fullName}</h2>
         {copy ? copy.map((p) => <p class="va-p">{p}</p>) : <p class="va-p is-tba">A description of this car follows soon.</p>}
+        {sources.length > 0 && <p class="va-sources">Sources: {sources.map((x, i) => <>{i > 0 && ' · '}<a href={x.url} target="_blank" rel="noopener">{x.label}</a></>)}</p>}
       </div>
       <div class="va-orig">
         <p class="eyebrow">Origins</p>
@@ -430,6 +433,9 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .va { display: grid; grid-template-columns: minmax(0, 1.42fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
   .va-about, .va-orig { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
   .va-about .vsec-title { margin-bottom: 10px; }
+  .va-sources { margin: 4px 0 0; font-size: 14px; line-height: 1.5; color: var(--lr-muted); }
+  .va-sources a { color: var(--lr-soft); text-decoration: underline; text-underline-offset: 3px; }
+  .va-sources a:hover { color: var(--lr-text); }
   .va-p { margin: 0 0 14px; font-size: 18px; line-height: 1.6; color: #E4E4EC; }
   .va-card { flex: 1; display: flex; flex-direction: column; justify-content: space-around; margin: 8px 0 0; padding: 4px 20px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }
   .va-card > div { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0; font-size: 15px; }
