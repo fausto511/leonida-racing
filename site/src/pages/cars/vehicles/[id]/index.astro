@@ -6,10 +6,11 @@
 // from the mockup -> Codex review (DEC-0088). About texts: data/vehicle-copy.ts (Codex).
 import Base from '../../../../layouts/Base.astro';
 import CarCard from '../../../../components/CarCard.astro';
-import { vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs } from '../../../../data/vehicles';
+import { MAKES_WITHOUT_LOGO, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs } from '../../../../data/vehicles';
 import { groupedTitles } from '../../../../data/gta-titles';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
 import { vehicleSources } from '../../../../data/vehicle-sources';
+import { vehicleSeeAlso } from '../../../../data/vehicle-see-also';
 import { releaseById, formatReleaseDate } from '../../../../data/releases';
 import { classHref, makeHref, classSlug, vehiclesByMake } from '../../../../data/garage-taxonomy';
 import { vehiclePhotoAlt } from '../../../../data/vehicle-photo-alt';
@@ -24,6 +25,7 @@ const { vehicle } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const copy = vehicleCopy[vehicle.id];
 const sources = vehicleSources[vehicle.id] ?? [];
+const seeAlso = vehicleSeeAlso[vehicle.id];
 const cls = vehicle.classes[0];
 const fullName = `${vehicle.make} ${vehicle.model}`;
 const photoAlt = vehiclePhotoAlt[vehicle.id] ?? `${fullName} in GTA VI`;
@@ -127,7 +129,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
       <div class="vh-grid">
         <div class="vh-id">
           <div class="vh-make">
-            <img src={logo} alt="" width="22" height="22" />
+            {!MAKES_WITHOUT_LOGO.has(vehicle.logoSlug) && <img src={logo} alt="" width="22" height="22" />}
             <span class="vh-make-n">{vehicle.make}</span>
             {makeLink && <><span class="vh-dot" aria-hidden="true">·</span><a class="vh-all" href={`${base}${makeLink}`}>All {makeCars.length} {vehicle.make} cars →</a></>}
           </div>
@@ -184,7 +186,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         <dl class="vs-rows">
           <div><dt>Where to get</dt><dd class:list={{ 'is-tba': !vehicle.acquisition }}>{vehicle.acquisition ? acqNotes[vehicle.acquisition] : 'After launch'}</dd></div>
           <div><dt>Sell value</dt><dd class:list={{ 'is-tba': vehicle.sellable !== 'no' && sell == null }}>{vehicle.sellable === 'no' ? "Can't be sold" : sell != null ? money(sell) : 'After launch'}</dd></div>
-          <div><dt>Drive{' · '}Seats</dt><dd>{vehicle.drive}{' · '}{vehicle.seats} {vehicle.seats === 1 ? 'seat' : 'seats'}</dd></div>
+          <div><dt>Drive{' · '}Seats</dt><dd>{vehicle.drive === 'n/a' && !vehicle.seats ? 'TBA' : <>{vehicle.drive}{' · '}{vehicle.seats} {vehicle.seats === 1 ? 'seat' : 'seats'}</>}</dd></div>
           <div><dt>Release</dt><dd class:list={{ 'is-tba': !release }}>{release?.date ? <>{release.name}{' · '}<time datetime={release.date}>{releaseDate}</time></> : releaseText}</dd></div>
         </dl>
         <p class="vs-own" id="vs-own"><Fragment set:html={ico.house} /><span id="vs-own-t">Be the first to add it to <button type="button" class="vs-own-btn" data-add-garage>your garage</button></span></p>
@@ -229,6 +231,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         <p class="eyebrow">About</p>
         <h2 class="vsec-title display">The {fullName}</h2>
         {copy ? copy.map((p) => <p class="va-p">{p}</p>) : <p class="va-p is-tba">A description of this car follows soon.</p>}
+        {seeAlso && <p class="va-p va-see">{seeAlso.before}<a href={`${base}cars/vehicles/${seeAlso.id}/`}>{seeAlso.linkText}</a>{seeAlso.after}</p>}
         {sources.length > 0 && <p class="va-sources">Sources: {sources.map((x, i) => <>{i > 0 && ' · '}<a href={x.url} target="_blank" rel="noopener">{x.label}</a></>)}</p>}
       </div>
       <div class="va-orig">

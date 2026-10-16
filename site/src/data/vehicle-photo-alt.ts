@@ -4,6 +4,7 @@
 // overviews the same photos stay decorative (alt=""), the name is right there.
 // New photo: "[Color] [Make Model] [view/action] [setting]" -- only what is visible.
 export const vehiclePhotoAlt: Record<string, string> = {
+  'granforma-zorrusso': 'Green Zorrusso with GranForma lettering and emblem above the taillights, rear view at night',
   // Added 2026-10-06 (Claude, from the photos; Fausto allowed alt texts without Codex):
   'albany-manana': 'Yellow Albany Manana on jack stands in a workshop, a mechanic underneath',
   'annis-elegy-retro-custom': 'Annis Elegy Retro Custom with graphic livery and glowing taillights at night, rear view',

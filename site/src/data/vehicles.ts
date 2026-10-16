@@ -153,3 +153,8 @@ export function formatVehicleValue(v: VehicleValue): string {
   const ms = Math.round(v.value); const m = Math.floor(ms / 60000); const s = (ms % 60000) / 1000;
   return `${m}:${s.toFixed(3).padStart(6, '0')}`;
 }
+
+// Makes without a usable logo yet (RS-0073: GranForma, only a small emblem in
+// the Bloomberg screenshot). Their logo file is a transparent placeholder so
+// tiles never show a broken image; the vehicle page header hides it.
+export const MAKES_WITHOUT_LOGO = new Set(['granforma']);
