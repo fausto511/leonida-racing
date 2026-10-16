@@ -12,7 +12,7 @@
 // Never add leak information here. Visible text: "GTA VI"; meta: "GTA 6".
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
-export const GUIDE_UPDATED = '2026-10-04';
+export const GUIDE_UPDATED = '2026-10-16';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -24,6 +24,8 @@ const W3 = [640, 1280, 1920];
 const RS = 'Official screenshot — Rockstar Games.';
 const img = (key: string, widths: number[], w: number, h: number, alt: string, caption: string): GuideImage => ({ key, widths, w, h, alt, caption });
 const IMG = {
+  // Visual/Cars/Garage/granforma-zorrusso.png, 2000x1125 (web exports = vehicles/granforma-zorrusso-*.webp).
+  granforma: img('granforma', W3, 2000, 1125, 'Rear three-quarter view of a green sports car in GTA VI, with GranForma lettering and an emblem above the rear grille.', 'New rear branding on the car identified as the GranForma Zorrusso. The name’s exact role remains unconfirmed. Rockstar Games image published with Bloomberg’s October 14 feature.'),
   driving: img('driving', [640, 1280], 1280, 720, 'A dark sedan turns across a city street with smoke around its tires in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
   slimJim: img('slim-jim', [640, 1280], 1280, 720, 'A character stands beside a red parked car with “Slim Jim” and “Smash Window” prompts on screen in GTA VI.', 'On-screen theft options in GTA VI gameplay — Rockstar Games.'),
   // Ownership pair (Fausto, 2026-10-04): safehouse with Jason's Ganado + Buggy at a garage. Alt/captions: Claude placeholders, Codex review pending.
@@ -53,6 +55,9 @@ export interface GuideSection {
   sources: GuideSource[];
 }
 
+const IGN_FULL = 'https://www.ign.com/articles/gta-6-the-big-interview';
+const LAUNCH = 'https://www.rockstargames.com/VI/launch-trailer';
+const MUSIC = 'https://www.rockstargames.com/VI/music';
 const R_MEDIA = 'https://www.rockstargames.com/VI/media';
 const R_SHOTS = 'https://www.rockstargames.com/VI/media/screenshots';
 const R_EDITIONS = 'https://www.rockstargames.com/VI/editions?ps5=1';
@@ -72,14 +77,30 @@ export const guideSections: GuideSection[] = [
       `GTA VI brings back familiar in-game manufacturers and models while adding vehicles created specifically for Leonida. Rockstar has named only part of the lineup, while many vehicles shown in official trailers and screenshots are identified by their design and badges. Those are community identifications, not Rockstar-confirmed names. <a href="{base}cars/">The Garage</a> focuses on racing-relevant cars and is not a complete list of every vehicle shown for GTA VI.`,
       `Official footage also shows motorcycles, watercraft, and aircraft, but this guide focuses on cars and racing. A car appearing on screen does not by itself establish how it can be owned, stored, or customized.`,
       `Open The Garage for individual models, <a href="{base}cars/classes/">GTA classes</a>, <a href="{base}cars/manufacturers/">manufacturers</a>, first appearances, release information, and real-life inspirations. Prices and tested performance data will be added when they can be verified in the released game.`,
+      `Rockstar released the Launch Trailer on October 15, 2026. It joins the official footage used to document vehicles, while model identifications remain separate from Rockstar-confirmed names.`,
     ],
     cta: { label: 'Explore The Garage', href: 'cars/' },
     sources: [
+      { label: 'Rockstar Games — GTA VI Launch Trailer', url: LAUNCH, note: 'October 15, 2026: new official trailer; not a complete vehicle list.' },
       { label: 'Rockstar Games — GTA VI Media', url: R_MEDIA, note: 'official trailers and media library.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: 'official screenshot titles, including named Ultimate Edition vehicles.' },
       { label: 'Rockstar Support — GTA VI Platforms, Editions, and Versions', url: R_SUPPORT, note: 'named edition vehicles and content.' },
       // Fausto 15.10.2026: source of the "298 vehicles" on the home Guide card. Note = Claude placeholder (Codex review, DEC-0088).
-      { label: 'GTABase — GTA 6 Cars & Vehicles List', url: 'https://www.gtabase.com/gta-6/vehicles/', note: 'community database listing 298 vehicles from official material (checked October 15, 2026).' },
+      { label: 'GTABase — GTA 6 Cars & Vehicles List', url: 'https://www.gtabase.com/gta-6/vehicles/', note: 'community database listing 298 vehicles from official material (checked October 16, 2026).' },
+    ],
+  },
+  {
+    id: 'granforma',
+    images: [IMG.granforma],
+    title: 'GranForma, the Zorrusso, and Changing Car Brands',
+    status: 'Community Identification',
+    paragraphs: [
+      `A familiar exotic with unfamiliar lettering: coverage of the screenshots accompanying Bloomberg’s October 14 feature identifies a Zorrusso-like car with rear branding read as <strong>GranForma</strong>. The GTA Online Zorrusso wears Pegassi branding, making this a detail worth watching.`,
+      `Does GranForma mean a new GTA VI manufacturer, a vehicle customizer, or a different version of a familiar car? That remains unresolved. The image raises the possibility of changed branding for returning designs; it does not confirm a wider reshuffle of manufacturers. A familiar body alone is not enough to carry an old manufacturer or model name into GTA VI.`,
+    ],
+    sources: [
+      { label: 'RockstarINTEL — 2 More GTA 6 Screenshots Released', url: 'https://rockstarintel.com/2-more-gta-6-screenshots-released/', note: 'October 14, 2026: reports Rockstar-supplied Bloomberg images and the GranForma reading; model and brand interpretation are not a Rockstar announcement.' },
+      { label: 'Bloomberg — The Making of Grand Theft Auto VI', url: 'https://www.bloomberg.com/features/2026-grand-theft-auto-6-making-of/', note: 'Original feature associated with the images.' },
     ],
   },
   {
@@ -90,8 +111,11 @@ export const guideSections: GuideSection[] = [
     paragraphs: [
       `GTA VI’s driving model was rebuilt for the current hardware. Rockstar North co-studio head Rob Nelson says drivetrain, tires, suspension, and steering all feed into the vehicle physics, with the team aiming to combine the weight and feel associated with GTA IV with the accessibility of GTA V.`,
       `Rockstar has also assembled a vehicle-handling team that includes real race-car drivers. That signals serious attention to how vehicles behave, but it is not proof that GTA VI is a full driving simulation. Exact grip levels, drivetrain advantages, damage behavior, and the fastest cars still need to be tested in the released game.`,
+      `Narrower streets and dense traffic put more demands on your driving, according to Nelson. You can also switch between Jason and Lucia while the other character takes the wheel. During a getaway, your partner can drive while you shoot behind you; Nelson describes moments where taking out a pursuing car’s tires blocks the cars following it.`,
+      `IGN’s demo also includes a ride with <strong>Ryde Me</strong>, the game’s ride-hailing service. Nelson describes it as a way to fast travel, with the option to ride along and chat.`,
     ],
     sources: [
+      { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration.' },
       { label: 'GamesRadar — Rob Nelson on GTA VI driving physics', url: 'https://www.gamesradar.com/games/grand-theft-auto/gta-6-driving-is-the-best-parts-of-gta-4-but-with-the-accessibility-of-gta-5-says-rockstar-boss/', note: 'September 4, 2026: direct Nelson quotation covering drivetrain, tires, suspension, steering, and the rebuilt physics model.' },
       { label: 'Dazed — GTA VI: An Exclusive Deep Dive', url: DAZED, note: 'September 6, 2026: vehicle-handling team described as including race-car drivers.' },
     ],
@@ -103,12 +127,27 @@ export const guideSections: GuideSection[] = [
     status: 'Rockstar Interview',
     paragraphs: [
       `Stealing a parked car in GTA VI is no longer described as the same one-button job for every vehicle. Nelson says some cars remain inaccessible early in the story until Jason or Lucia obtains the right tools. Drivers can still be carjacked, but unattended vehicles may demand a quieter or more technical approach.`,
-      `In a Rockstar-led demonstration, a phone scanner described by the preview as <strong>Waink</strong> displayed whether a car was locked, whether it had an alarm or tracker, what it could be worth, and how much it would cost to register. Nelson also named a Slim Jim and a key cloner as examples of tools used for different vehicles.`,
+      `Check the car before you commit. Nelson describes a <strong>phone scanner</strong> that shows whether a vehicle is locked, has an alarm, or carries a tracker. It also shows what the car is worth at a Pay ’n’ Spray or specialty car fence and how much it would cost to register it for yourself. A Slim Jim works for one car; another needs a key cloner.`,
       `Stolen cars can be sold or registered as personal vehicles. Nelson told Famitsu that an unregistered stolen vehicle remains available for a while, appears with a gray radar icon, and disappears when the game is restarted. Registration makes the vehicle yours, while the complete list of eligible vehicles and the later-game ownership limit remain unannounced.`,
+      `An <strong>advanced tracker</strong> can turn a slow getaway into a police alert: Nelson says it pings your location when you drive too slowly. Condition matters at delivery, too. A car fence pays less for damage, and you can repair the car before selling it.`,
+      `A car fence can also point you toward a specific job. In the demo, one has supplied a door code for a <strong>police impound lot</strong>, where Jason and Lucia can steal the requested car together or alone. This is a theft job, not an explanation of how to recover your own impounded vehicle. Nelson also says there are points in the story where earning money through activities such as stealing and selling cars is needed to advance the mission flow.`,
     ],
     sources: [
-      { label: 'MMO.net — “It’s a Step Forward in All Respects”: Interview with Rob Nelson', url: 'https://mmo.net/2026/08/27/its-a-step-forward-in-all-respects-exclusive-gta-6-interview/', note: 'August 27, 2026, section “You got a fast car…”: vehicle security, access tools, scanner information, sale value, and registration cost.' },
+      { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration.' },
       { label: 'Famitsu — Exclusive Interview with Rob Nelson', url: FAMITSU, note: 'August 28, 2026: vehicle registration, three initial storage spaces, purchasable garages, and the persistence rules for unregistered stolen vehicles.' },
+    ],
+  },
+  {
+    id: 'heat',
+    title: 'Heat, Police Recognition, and Getaways',
+    status: 'Rockstar Interview',
+    paragraphs: [
+      `The police response depends on what has been reported and what officers know. Nelson says a crime needs a witness or an alarm to reach the law. Police can know your appearance, your clothes, your vehicle, and that Jason and Lucia are traveling together. In the demonstration, switching to a car they do not recognize lowers their perception of you; splitting the pair up can help, too.`,
+      `A baseball cap is not a complete escape plan. Nelson puts on glasses and a cap, then points out that the police still know his outfit. The same limitation applies to a haircut. A clothing store or a spare outfit from your personal vehicle gives you another option; in the shopping demonstration, he says buying and wearing a new outfit removes his current heat.`,
+      `Sometimes the better exit is on foot. Nelson says a three-star pursuit in the city can be difficult to shake in a car unless it is very fast or you have a sports bike. His usual recommendation in that situation is to leave the streets and use the alleys. You can also wait for an area’s police search to die down instead of driving straight back into it.`,
+    ],
+    sources: [
+      { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration: reporting, recognition, outfit changes, vehicle swaps, splitting up, and escape advice.' },
     ],
   },
   {
@@ -120,8 +159,10 @@ export const guideSections: GuideSection[] = [
       `GTA VI has personal vehicles and expandable garage storage. Nelson told Famitsu that players begin with room for three vehicles. If all three spaces are occupied, one vehicle must be sold before another can be registered as personal. Buying garages around the map expands that capacity. Rockstar has not announced the later-game ownership limit, whether individual properties have different capacities, or how freely vehicles can be moved between garages.`,
       `Rockstar’s Ultimate Edition includes Jason’s Safehouse Vehicles and the Ganado Retro Build. It also includes the <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a> with a garage, while the Vintage Vice City Pack includes the <a href="{base}cars/vehicles/vapid-stanier-55/">’55 Vapid Stanier Sedan</a> with a garage.`,
       `The accompanying Rockstar press material identifies those locations as Paradise Garage in Watson Bay and Shore Court Garage near Ocean Beach. They are personal garages, not confirmed tuning shops.`,
+      `Your personal vehicle also acts as a mobile stash: Nelson says you can call it at any time and keep spare outfits and purchased weapons in the back.`,
     ],
     sources: [
+      { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration.' },
       { label: 'Famitsu — Exclusive Interview with Rob Nelson', url: FAMITSU, note: 'August 28, 2026: three initial vehicle spaces, the replacement rule when storage is full, and purchasable garages that expand ownership capacity.' },
       { label: 'Rockstar Games — GTA VI Editions', url: R_EDITIONS, note: 'Jason’s Safehouse Vehicles, Ganado Retro Build, and the named vehicle bonuses.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: '“Jason’s Safehouse Vehicles,” “Ganado Retro Build,” and “’67 Vapid Dominator Buggy.”' },
@@ -202,9 +243,11 @@ export const guideSections: GuideSection[] = [
       `Car culture is part of GTA VI’s world before the first garage door even opens. Trailer 1 shows a street takeover built around burnouts, crowds, and heavily customized cars. The Extended Look later shows a parking-lot meet with multiple builds gathered in one place.`,
       `Donks, lifted trucks, off-road builds, custom interiors, wheels, liveries, and painted graphics appear throughout Rockstar’s material. Rideout Customs branding was visible in Trailer 1 before Rockstar formally named the shop. <strong>Vice Vinyl</strong> appears in the same footage, but Rockstar has not explained whether it is a business, a product brand, or environmental detail.`,
       `These scenes establish the look and presence of Leonida’s car culture. They do not yet confirm player-hosted meets, takeover events, judging systems, or rewards.`,
+      `A good drive needs something on the radio, too. Rockstar’s October 8 reveal previews six stations, with styles ranging from Latin and country to metal, pop and southern hip-hop. Its official music page also describes in-game podcasts. Those previews are a taste of Leonida’s airwaves, not the complete radio lineup or a confirmed playlist for racing events.`,
     ],
     cta: { label: 'Find Community Events', href: 'community/events/' },
     sources: [
+      { label: 'Rockstar Games — The Music of GTA VI', url: MUSIC, note: 'Official station previews and in-game podcasts; announcement dated October 8, 2026 in Newswire.' },
       { label: 'Rockstar Games — GTA VI Trailer 1', url: 'https://www.youtube.com/watch?v=QdBZY2fkU-0', note: 'approximately 0:45–0:52: street takeover, customized vehicles, Rideout Customs and Vice Vinyl branding.' },
       { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: EXT_LOOK, note: 'approximately 26:06: parking-lot car-meet scene.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: 'official mod-shop and custom-vehicle imagery.' },
@@ -216,11 +259,12 @@ export const guideSections: GuideSection[] = [
     status: 'Not Confirmed',
     paragraphs: [
       `Several details players naturally want to know are still open. Rockstar has not published a complete vehicle list, dealership structure, later-game ownership limit, property-by-property garage capacities, tuning catalog, parts compatibility list, upgrade pricing, or final performance figures.`,
-      `Public material also leaves the full damage model, fuel use, EV charging, insurance, vehicle recovery, wheel support, manual shifting, race creation tools, and GTA VI online racing systems unresolved. Some of these subjects have appeared in preview reports or community analysis, but Leonida Racing will not present them as confirmed until the supporting source is strong enough.`,
+      `Public material also leaves the full damage model, fuel use, EV charging, insurance, the full recovery rules for owned vehicles, wheel support, manual shifting, race creation tools, and GTA VI online racing systems unresolved. Some of these subjects have appeared in preview reports or community analysis, but Leonida Racing will not present them as confirmed until the supporting source is strong enough.`,
       `This section will shrink as Rockstar releases more information and the finished game provides testable answers. Until then, “not confirmed” means exactly that—not impossible, not secretly ruled out, just not ready to call a fact.`,
     ],
     sourcesHeading: 'Official material checked for this section',
     sources: [
+      { label: 'Rockstar Games — GTA VI Launch Trailer', url: LAUNCH, note: 'October 15, 2026; no new racing rules inferred from trailer imagery.' },
       { label: 'Rockstar Games — Grand Theft Auto VI', url: 'https://www.rockstargames.com/VI', note: '' },
       { label: 'Rockstar Games — GTA VI Media', url: R_MEDIA, note: '' },
       { label: 'Rockstar Games — GTA VI Editions', url: R_EDITIONS, note: '' },
@@ -239,6 +283,10 @@ export const guideCoverage: { name: string; text: string }[] = [
 
 /** FAQ: the same text is used for the visible answers and FAQPage JSON-LD. */
 export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
+  { q: 'How does the vehicle scanner work in GTA VI?', a: 'Rob Nelson describes a phone scanner that shows whether a car is locked, has an alarm or tracker, what it is worth at a Pay ’n’ Spray or specialty car fence, and what it costs to register for yourself. Different vehicles can require tools such as a Slim Jim or key cloner.' },
+  { q: 'Can changing cars or clothes help you escape the police in GTA VI?', a: 'Yes. In Nelson’s demonstration, switching to a car the police do not recognize lowers their perception of you. He also says buying and wearing a new outfit removes his current heat. Glasses, a cap, or a haircut alone do not address clothing the police already recognize.' },
+  { q: 'Is GranForma replacing Pegassi for the Zorrusso in GTA VI?', a: 'Reports identify GranForma lettering on a Zorrusso-like car in the Bloomberg screenshots. Whether it denotes a manufacturer, customizer or variant remains unconfirmed; the image does not establish a wider Pegassi replacement.' },
+  { q: 'Can I call my personal vehicle in GTA VI?', a: 'Nelson says personal vehicles can be called and carry spare outfits and purchased weapons. Delivery conditions remain unspecified.' },
   { q: 'Which cars has Rockstar confirmed for GTA VI?', a: 'Rockstar has named cars including the ’95 Grotti Cheetah and ’67 Vapid Dominator Buggy. More cars appear in official footage without being named; their model names are often community identifications. Rockstar has not published a complete official lineup. The Garage focuses on racing-relevant cars.' },
   { q: 'How does stealing cars work in GTA VI?', a: 'Rockstar North’s Rob Nelson described a tiered system. Some parked vehicles require tools such as a Slim Jim or key cloner, while occupied vehicles can still be carjacked. A phone scanner can provide information about a vehicle’s security, tracker, value, and registration cost.' },
   { q: 'Can stolen cars become personal vehicles?', a: 'Yes. A stolen car can be registered as a personal vehicle. Unregistered stolen vehicles remain temporarily but disappear when the game is restarted. Players begin with storage for three vehicles and can buy garages to expand it; the complete list of eligible vehicles and the later-game ownership limit remain unannounced.' },
@@ -266,5 +314,5 @@ export const GUIDE_VEHICLES = {
   label: 'Vehicles Identified',
   sourceLabel: 'GTABase',
   sourceUrl: 'https://www.gtabase.com/gta-6/vehicles/',
-  note: 'count across all vehicle types shown in official Rockstar material, not just the cars covered here. Most names are community identifications. Rockstar has not published an official total. Checked October 3, 2026.',
+  note: 'count across all vehicle types shown in official Rockstar material, not just the cars covered here. Most names are community identifications. Rockstar has not published an official total. Checked October 16, 2026.',
 };
