@@ -8,6 +8,7 @@
 import Base from '../layouts/Base.astro';
 import { compareGarageOrder, type VehicleOption } from '../data/vehicles';
 import type { TaxonomyPage } from '../data/garage-taxonomy';
+import { taxonomyCopy } from '../data/taxonomy-copy';
 
 interface Props {
   kind: 'class' | 'manufacturer';
@@ -80,7 +81,7 @@ const jsonLd = [{
           <strong class="ti-name">{c.page.name}</strong>
           {c.page.inspiration?.length && <span class="ti-insp">Real-life inspiration: <b>{c.page.inspiration.join(' · ')}</b></span>}
           {c.page.teaser ? <span class="ti-teaser">{c.page.teaser}</span> : c.named.length > 0 && <span class="ti-models">{c.named.join(' · ')}</span>}
-          <span class="arrow ti-a">Open {c.page.name} →</span>
+          <span class="arrow ti-a">View {taxonomyCopy[c.page.slug]?.h1 ?? c.page.name} →</span>
         </span>
       </a>
     ))}

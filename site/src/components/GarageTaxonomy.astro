@@ -4,12 +4,14 @@
 // intro + "at a glance" panel, class chips, the shared car list (CarsBrowser) and
 // "More on …" links. Manufacturer pages use the same layout (no own mockup, DEC-0130).
 // SEO title/description/JSON-LD unchanged (Codex copy 2026-10-01).
-// COPY STATUS: new labels ("at a glance", "More on …") are Claude placeholders -> Codex (DEC-0088).
+// COPY STATUS: band + About from data/taxonomy-copy.ts (approved 16.10.); labels after Codex review (DEC-0130).
 import Base from '../layouts/Base.astro';
 import CarsBrowser from './CarsBrowser.astro';
 import { compareGarageOrder, vehicleOptions, vehicleValues, fastestGellhornLapMs, bandVehicle, type VehicleOption } from '../data/vehicles';
 import { classPages, manufacturerPages, classSlug, type TaxonomyPage } from '../data/garage-taxonomy';
 import { lapTime } from '../data/leaderboard';
+import { taxonomyCopy } from '../data/taxonomy-copy';
+import { LAUNCH_DATE, LAUNCH_AT } from '../data/launch';
 
 interface Props {
   kind: 'class' | 'manufacturer';
@@ -25,7 +27,13 @@ const list = [...vehicles].sort(compareGarageOrder);
 const N = list.length;
 const path = `cars/${isClass ? 'classes' : 'manufacturers'}/${page.slug}/`;
 const metaTitle = isClass ? `GTA VI ${label}` : `${label} in GTA VI`;
-const heading = isClass ? `GTA VI ${label}` : `${label} in GTA VI`;
+const copy = taxonomyCopy[page.slug];
+const heading = copy?.h1 ?? label; // visible H1 without "GTA VI" (DEC-0130); GTA VI stays in title, eyebrow, meta
+const seoName = isClass ? `GTA VI ${label}` : `${label} in GTA VI`;
+// before launch: "After launch"; after: field-specific empty state (Codex review 16.10.)
+const launched = Date.now() >= new Date(LAUNCH_AT ?? `${LAUNCH_DATE}T00:00:00Z`).getTime();
+const noLap = launched ? 'No lap recorded yet' : 'After launch';
+const noSpeed = launched ? 'No speed recorded yet' : 'After launch';
 const metaDescription = isClass
   ? `Browse GTA 6 ${page.name} vehicles in The Garage. Compare models, key vehicle characteristics, real-life inspirations, release details, and available performance data.`
   : `Explore ${page.name} vehicles in GTA 6. See the real-world inspiration behind each model and compare key characteristics and available performance data.`;
@@ -33,7 +41,7 @@ const pageUrl = new URL(`${base}${path}`, Astro.site).href;
 const jsonLd = [{
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: heading,
+  name: seoName,
   url: pageUrl,
   description: metaDescription,
   about: { '@type': 'VideoGame', name: 'Grand Theft Auto VI', alternateName: ['GTA VI', 'GTA 6'] },
@@ -72,14 +80,14 @@ const ico = {
 };
 const more = isClass
   ? [
-      { ico: ico.trophy, eb: 'Ranking', t: `Fastest ${page.name} cars in GTA 6`, s: 'Recorded top speeds in stock form, with the source of each value.', a: 'See the ranking', href: `${base}cars/rankings/fastest/${page.slug}/` },
-      { ico: ico.timer, eb: 'Time Attack', t: `${page.name} leaderboard at Gellhorn`, s: `The fastest verified laps in a ${page.name} car at Gellhorn.`, a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/?class=${encodeURIComponent(page.name)}` },
-      { ico: ico.plus, eb: 'Compare', t: `Compare ${page.name} cars`, s: 'Pick up to four cars and see specs and lap times side by side.', a: 'Start comparing', href: `${base}cars/compare/` },
+      { ico: ico.trophy, eb: 'Ranking', t: `Fastest ${heading} in GTA 6`, s: 'Recorded top speeds in stock form, with the source of each value.', a: 'See the ranking', href: `${base}cars/rankings/fastest/${page.slug}/` },
+      { ico: ico.timer, eb: 'Time Attack', t: `${page.name} leaderboard at Gellhorn`, s: 'Recorded driver laps at Gellhorn for this class.', a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/?class=${encodeURIComponent(page.name)}` },
+      { ico: ico.plus, eb: 'Compare', t: `Compare ${heading}`, s: 'Pick up to four cars and compare their available specs and lap times.', a: 'Start comparing', href: `${base}cars/compare/` },
     ]
   : [
       { ico: ico.trophy, eb: 'Ranking', t: 'Fastest cars in GTA 6', s: 'Recorded top speeds in stock form, with the source of each value.', a: 'See the ranking', href: `${base}cars/rankings/fastest/` },
-      { ico: ico.timer, eb: 'Time Attack', t: 'Gellhorn leaderboard', s: `See where ${page.name} cars stand against every other car at Gellhorn.`, a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/` },
-      { ico: ico.plus, eb: 'Compare', t: `Compare ${page.name} cars`, s: 'Pick up to four cars and see specs and lap times side by side.', a: 'Start comparing', href: `${base}cars/compare/` },
+      { ico: ico.timer, eb: 'Time Attack', t: 'Gellhorn leaderboard', s: 'Explore the driver leaderboard at Gellhorn.', a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/` },
+      { ico: ico.plus, eb: 'Compare', t: `Compare ${heading}`, s: 'Pick up to four cars and compare their available specs and lap times.', a: 'Start comparing', href: `${base}cars/compare/` },
     ];
 ---
 <Base
@@ -101,19 +109,19 @@ const more = isClass
         </nav>
         <p class="eyebrow">{isClass ? 'GTA VI Vehicle Class' : 'GTA VI Manufacturer'}</p>
         <h1 class="display tb-title">{!isClass && <img class="tb-logo" src={`${base}images/logos/${page.slug}-gta-6-logo.webp`} alt="" width="56" height="56" />}{heading}</h1>
-        <div class="tb-intro">{page.intro.map((p) => <p>{p}</p>)}</div>
+        <div class="tb-intro"><p>{copy?.band ?? page.intro[0]}</p></div>
       </div>
       <div class="glance">
         <p class="glance-eb">{page.name} at a glance</p>
         <div class="gl-row"><span>{isClass ? 'Cars in this class' : `Cars from ${page.name}`}</span><b class="tnum">{N}</b></div>
         <div class="gl-row"><span>Fastest at Gellhorn</span>{fastest
           ? <b><a href={`${base}cars/vehicles/${fastest.id}/`}>{shortName(fastest)}</a>{' · '}<span class="tnum">{lapTime(lapOf(fastest)!)}</span></b>
-          : <b class="is-tba">After launch</b>}</div>
+          : <b class="is-tba">{noLap}</b>}</div>
         <div class="gl-row"><span>Highest top speed</span>{topSpeed
           ? <b><a href={`${base}cars/vehicles/${topSpeed.id}/`}>{shortName(topSpeed)}</a>{' · '}<span class="tnum">{speedOf(topSpeed)} mph</span></b>
-          : <b class="is-tba">After launch</b>}</div>
+          : <b class="is-tba">{noSpeed}</b>}</div>
         <a class="gl-row gl-garage" id="garage-tile" data-glance href={`${base}account/garage/`}>
-          <span>In your garage</span><span class="arrow gt-cta" id="gt-cta">Log in to track →</span>
+          <span>In your garage</span><span class="arrow gt-cta" id="gt-cta">Log in to save cars →</span>
           <span id="gt-owned" hidden>0</span>
           <span class="mbar"><i id="gt-bar" style="width:0%"></i></span>
         </a>
@@ -131,7 +139,7 @@ const more = isClass
   <CarsBrowser vehicles={list} scope={isClass ? 'class' : 'make'} noun={noun} defaultSort="name">
     <Fragment slot="after-grid">
       <section class="wrap tmore">
-        <p class="tsec-eb">More on {page.name} cars</p>
+        <p class="tsec-eb">More on {heading}</p>
         <div class="tmore-grid">
           {more.map((m) => (
             <a class="tm" href={m.href}>
@@ -143,6 +151,12 @@ const more = isClass
           ))}
         </div>
       </section>
+      {copy && (
+        <section class="wrap tabout" aria-labelledby="tabout-h">
+          <h2 class="tabout-h" id="tabout-h">{copy.aboutTitle}</h2>
+          {copy.about.map((p) => <p>{p}</p>)}
+        </section>
+      )}
       <section class="wrap tlinks">
         {isClass ? (
           <>
@@ -151,7 +165,7 @@ const more = isClass
               <div class="tls">{classPages.filter((c) => c.slug !== page.slug).map((c) => <a href={`${base}cars/classes/${c.slug}/`}>{c.name}</a>)}<a class="arrow" href={`${base}cars/classes/`}>All classes →</a></div>
             </div>
             <div>
-              <p class="tsec-eb">{page.name} cars by manufacturer</p>
+              <p class="tsec-eb">{heading} by manufacturer</p>
               <div class="tls">{makesHere.filter(([slug]) => manufacturerPages.some((m) => m.slug === slug)).map(([slug, name]) => <a href={`${base}cars/manufacturers/${slug}/`}>{name}<span>{makeHere(slug)}</span></a>)}<a class="arrow" href={`${base}cars/manufacturers/`}>All manufacturers →</a></div>
             </div>
           </>
@@ -190,7 +204,7 @@ const more = isClass
   .tb-crumbs a:hover { color: var(--lr-text); }
   .tb-crumbs [aria-current] { color: var(--lr-text); font-weight: 500; }
   .tb-copy .eyebrow { margin: 12px 0 0; font-size: 12px; font-weight: 600; }
-  .tb-title { display: flex; align-items: center; gap: 16px; margin: 0; font-size: clamp(40px, 5vw, 64px); }
+  .tb-title { display: flex; align-items: center; gap: 16px; margin: 0; font-size: clamp(40px, 4.2vw, 52px); }
   .tb-logo { width: 56px; height: 56px; flex: none; object-fit: contain; filter: brightness(0) invert(1); }
   .tb-intro p { margin: 10px 0 0; font-size: 16px; line-height: 1.6; color: #EDEBF2; }
 
@@ -225,6 +239,9 @@ const more = isClass
   .tm-t { font-size: 19px; font-weight: 700; line-height: 1.25; }
   .tm-s { font-size: 15px; line-height: 1.45; color: var(--lr-soft); }
   .tm-a { margin-top: 6px; }
+  .tabout { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--lr-line); }
+  .tabout-h { margin: 0 0 12px; font-size: clamp(22px, 3vw, 28px); font-weight: 700; line-height: 1.2; }
+  .tabout p { max-width: 820px; margin: 0 0 14px; font-size: 17px; line-height: 1.7; color: #E4E4EC; }
   .tlinks { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; margin-top: 40px; padding-top: 32px; padding-bottom: 32px; border-top: 1px solid var(--lr-line); }
   .tls { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 15px; }
   .tls a, .tls > span { color: #E4E4EC; text-decoration: none; }
