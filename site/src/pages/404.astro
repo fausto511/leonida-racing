@@ -20,10 +20,10 @@ const data = {
   makes: manufacturerPages.map((p) => ({ slug: p.slug, name: p.name })),
 };
 const tiles = [
-  { href: `${base}cars/`, img: 'vehicles/declasse-mamba-gt', name: 'Cars', line: 'Specs, real-life inspirations and Gellhorn lap times for every car in GTA VI.' },
+  { href: `${base}cars/`, img: 'home/home-hero', name: 'Cars', line: 'Specs, real-life inspirations and Gellhorn lap times for every car in GTA VI.' },
   { href: `${base}time-attack/gellhorn-international-raceway/`, img: 'gellhorn-raceway', name: 'Time Attack', line: 'Set a lap at Gellhorn International Raceway and climb the leaderboard.' },
-  { href: `${base}community/`, img: 'hub/hub-carmeet', name: 'Community', line: 'Find races, car meets and crews that drive the way you do.' },
-  { href: `${base}guide/`, img: 'home/guide-tile', name: 'Guide', line: 'Everything confirmed about cars and racing in GTA VI, with sources.' },
+  { href: `${base}community/`, img: 'hub/hub-events', name: 'Community', line: 'Find races, car meets and crews that drive the way you do.' },
+  { href: `${base}guide/`, img: 'guide/guide-hero', name: 'Guide', line: 'Everything confirmed about cars and racing in GTA VI, with sources.' },
 ];
 const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 ---
@@ -82,7 +82,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   const D = JSON.parse(document.getElementById('nf-data')!.textContent!) as { base: string; cars: Car[]; classes: { slug: string; name: string }[]; makes: { slug: string; name: string }[] };
   const $ = (id: string) => document.getElementById(id)!;
   const path = decodeURIComponent(location.pathname);
-  if (path && path !== '/' && !path.endsWith('/404/') && !path.endsWith('404.html')) {
+  if (path && path !== '/' && !/^\/404(\.html|\/)?$/.test(path)) {
     $('nf-url').textContent = location.host + path;
     $('nf-url').hidden = false;
   }
@@ -198,7 +198,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .g4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 14px; }
   .g4 a { position: relative; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; background: var(--lr-card); border: 1px solid rgba(200,200,222,.16); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
   .g4 a:hover { border-color: var(--lr-orange); }
-  .g4 img { width: 100%; aspect-ratio: 16 / 8; object-fit: cover; display: block; }
+  .g4 img { width: 100%; height: auto; aspect-ratio: 16 / 8; object-fit: cover; display: block; }
   .g4 .b { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
   .g4-h { font-size: 22px; line-height: 1.05; }
   .g4-p { font-size: 13px; color: #B4B4C2; line-height: 1.5; min-height: 39px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
