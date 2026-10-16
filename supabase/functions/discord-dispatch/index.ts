@@ -34,6 +34,8 @@
 // (rebuild every 3 h), then posts to every feed with source 'vehicles': one card
 // per vehicle, or one summary when VEHICLE_DIGEST_FROM or more are ready at once.
 // Role sync (08.10.2026): see "Discord role sync" below.
+// Reminders (package 5, 15.10.2026): see "reminders" below.
+// LFG end (DEC-0111, 15.10.2026): see "LFG" below.
 // COPY STATUS: all user-facing texts are Claude placeholders, Codex review pending.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -443,14 +445,15 @@ async function handleBackfill(feedId: string) {
 }
 
 // ---------- Discord role sync (website -> official server, Fausto 07./08.10.2026) ----------
-// "Registered Driver" for every account, plus Crew Leader / Event Host / Creator from
-// hub_roles. One-way: Discord changes never reach the website. A role the bot granted
+// "Registered Driver" for every account, plus Verified Crew Leader / Verified Event Host /
+// Verified Creator from hub_roles (DEC-0129, 15.10.2026: the plain Crew Leader / Event Host /
+// Creator roles are self-selected on Discord and no longer managed by the bot). One-way: Discord changes never reach the website. A role the bot granted
 // that is now missing was removed by a Discord admin -> it stays off (suppressed) until
 // that role changes on the website (job.reset_role). Roles given by hand on Discord
 // are never removed by the bot. Jobs: table discord_role_jobs (DB triggers + daily
 // discord_role_reconcile()). Server: secret DISCORD_GUILD_ID (same as join-discord-guild).
 const ROLE_GUILD = Deno.env.get("DISCORD_GUILD_ID") ?? "";
-const ROLE_NAMES: Record<string, string> = { member: "Registered Driver", crew_leader: "Crew Leader", event_host: "Event Host", creator: "Creator" };
+const ROLE_NAMES: Record<string, string> = { member: "Registered Driver", crew_leader: "Verified Crew Leader", event_host: "Verified Event Host", creator: "Verified Creator" };
 const UNKNOWN_MEMBER = 10007;
 let roleIdsCache: Record<string, string> | null = null;
 async function roleStatus(msg: string | null) {
@@ -552,6 +555,74 @@ async function handleRoleJobs(started: number): Promise<number> {
   return n;
 }
 
+// ---------- reminders (package 5, 15.10.2026) ----------
+// Reply to the event card 24 h / 1 h before the start (feed option "reminders").
+// Optional mention of drivers who are in AND are members of that server (privacy:
+// attendees are never revealed to servers they are not on). Claimed via rpc
+// discord_claim_reminders (marks them sent); reset on failure so the next run retries
+// while the reminder window is open. Texts: Claude placeholders, Codex review pending.
+const MAX_REMINDER_MENTIONS = 50;
+async function attendeesOnServer(eventId: string, guildId: string): Promise<string[]> {
+  const { data } = await db.from("hub_event_rsvps").select("driver:drivers(discord_user_id,deleted_at)").eq("event_id", eventId).limit(MAX_REMINDER_MENTIONS);
+  const ids = (data ?? []).map((x: any) => x.driver).filter((d: any) => d && !d.deleted_at && d.discord_user_id).map((d: any) => String(d.discord_user_id));
+  const out: string[] = [];
+  for (const id of ids) { const m = await discord("GET", `/guilds/${guildId}/members/${id}`); if (m.ok) out.push(id); }
+  return out;
+}
+async function handleReminders(): Promise<number> {
+  const { data: rows, error } = await db.rpc("discord_claim_reminders");
+  if (error) { console.error("reminders", error.message); return 0; }
+  let n = 0;
+  for (const r of (rows ?? []) as any[]) {
+    const t = unix(r.starts_at);
+    const text = r.kind === "1h"
+      ? `\u23f1\ufe0f **${clip(r.title, 200)}** starts <t:${t}:R>. Get ready.`
+      : `\ud83d\udcc5 **${clip(r.title, 200)}** starts <t:${t}:R> \u00b7 <t:${t}:F>. Still in? Your spot is on the card above.`;
+    const users = r.mention_attendees ? await attendeesOnServer(r.event_id, r.guild_id) : [];
+    const res = await discord("POST", `/channels/${r.channel_id}/messages`, {
+      content: users.length ? `${text}\n${users.map((u) => `<@${u}>`).join(" ")}` : text,
+      message_reference: { message_id: r.message_id, fail_if_not_exists: false },
+      allowed_mentions: { parse: [], users, replied_user: false },
+    });
+    if (res.ok) { n++; continue; }
+    console.log("reminder failed", r.feed_id, r.event_id, res.status, res.text.slice(0, 200));
+    await db.from("discord_messages").update(r.kind === "1h" ? { reminded_1h_at: null } : { reminded_24h_at: null }).eq("feed_id", r.feed_id).eq("event_id", r.event_id);
+    const { data: f } = await db.from("discord_feeds").select("*").eq("feed_id", r.feed_id).maybeSingle();
+    if (f && !(await handleGone(f, res))) await feedError(f, describeFail(res, "post reminders in the channel"));
+  }
+  return n;
+}
+
+// ---------- LFG (DEC-0111) ----------
+// Searches that ran out (3 h), were closed or emptied: move the Join people who are still in the
+// LFG voice to voice-chat (only those, via their voice state), delete the voice, turn the card
+// into a short "ended" note without names, then delete the row (no Discord IDs kept).
+const LFG_END_VOICE = "878764019207516192"; // voice-chat (TALK), Fausto 15.10.
+const LFG_LABELS: Record<string, string> = { race: "Race", playlist: "Playlist", "car-meet": "Car Meet", cruise: "Cruise", photo: "Photo Session", job: "Job" };
+async function handleLfg(): Promise<number> {
+  const { data: rows, error } = await db.rpc("discord_lfg_claim_ended");
+  if (error) { console.error("lfg", error.message); return 0; }
+  let n = 0;
+  for (const l of (rows ?? []) as any[]) {
+    if (l.voice_channel_id) {
+      for (const u of (l.participants ?? []) as string[]) {
+        const vs = await discord("GET", `/guilds/${l.guild_id}/voice-states/${u}`);
+        if (vs.ok && vs.data?.channel_id === l.voice_channel_id) await discord("PATCH", `/guilds/${l.guild_id}/members/${u}`, { channel_id: LFG_END_VOICE });
+      }
+      const d = await discord("DELETE", `/channels/${l.voice_channel_id}`);
+      if (!d.ok && d.status !== 404) { console.log("lfg voice delete failed", d.status, d.text.slice(0, 200)); continue; } // retried later (claim again after 4 h)
+    }
+    if (l.message_id) {
+      const joined = (l.participants ?? []).length;
+      await discord("PATCH", `/channels/${l.channel_id}/messages/${l.message_id}`, { content: "", components: [], allowed_mentions: { parse: [] },
+        embeds: [{ color: GREY, title: `${LFG_LABELS[l.activity] ?? l.activity} \u00b7 ended`, description: `${joined} ${joined === 1 ? "driver was" : "drivers were"} in. Want another round? Hit Find Players.` }] });
+    }
+    await db.from("discord_lfg").delete().eq("lfg_id", l.lfg_id);
+    n++;
+  }
+  return n;
+}
+
 // ---------- entry ----------
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
@@ -565,6 +636,8 @@ Deno.serve(async (req) => {
   let done = 0, failed = 0;
   try { done += await handleVehicles(); } catch (err) { failed++; console.error("vehicles", err); }
   try { done += await handleRoleJobs(started); } catch (err) { failed++; console.error("roles", err); }
+  try { done += await handleReminders(); } catch (err) { failed++; console.error("reminders", err); }
+  try { done += await handleLfg(); } catch (err) { failed++; console.error("lfg", err); }
   while (Date.now() - started < TIME_BUDGET_MS) {
     const { data: rows, error } = await db.rpc("discord_claim_outbox", { p_limit: 10 });
     if (error) { console.error(error); break; }
