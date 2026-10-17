@@ -34,9 +34,12 @@ Vor Beginn der Historie (Einrichtung September 2026):
 - 20261002180000_crews_up_to_five_moderation_notes.sql
 - 20261002200000_crew_invites.sql
 - 20261004180000_hub_events_locations.sql
+- 20261006150000_discord_vehicle_feed.sql (am 17.10. aus `Claude outputs/` nachgetragen)
 - 20261006120000_discord_privacy_cleanup.sql
 - 20261008120000_discord_role_sync.sql
+- 20261008100000_crew_leader_leave_and_delete_crew.sql (am 17.10. aus der SQL-Editor-Datei nachgetragen)
 - 20261008150000_driver_psn_name.sql
+- 20261008160000_vehicle_values_sell_price_tuning_index.sql (am 17.10. aus der SQL-Editor-Datei nachgetragen; Zeitstempel nur zur Einordnung nach 20261008152155)
 - 20261014120000_redesign_phase0.sql
 - 20261014170000_crew_sort_order_default.sql
 
@@ -53,3 +56,6 @@ Projekt nicht zum Einspielen benutzt. Falls doch einmal nötig: vorher
   auch `discord_bot_state`). Die Einzelteile liegen jetzt als eigene Dateien vor.
 - 14 fehlende Dateien aus dem gespeicherten Live-SQL wiederhergestellt
   (byte-genau, per MD5 geprüft).
+- 3 Änderungen, die nur als Kopie in `Claude outputs/` lagen, aber live angewendet
+  sind, als Dateien ergänzt (siehe Sonderfälle).
+- Alte SQL-Kopien aus `Claude outputs/` liegen in `Claude outputs/_archiv-sql/` (nur `main`).
