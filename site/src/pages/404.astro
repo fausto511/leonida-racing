@@ -20,11 +20,13 @@ const data = {
   makes: manufacturerPages.map((p) => ({ slug: p.slug, name: p.name })),
 };
 const tiles = [
-  { href: `${base}cars/`, img: 'home/home-hero', name: 'Cars', line: 'Specs, real-life inspirations and Gellhorn lap times for every car in GTA VI.' },
-  { href: `${base}time-attack/gellhorn-international-raceway/`, img: 'gellhorn-raceway', name: 'Time Attack', line: 'Set a lap at Gellhorn International Raceway and climb the leaderboard.' },
-  { href: `${base}community/`, img: 'hub/hub-events', name: 'Community', line: 'Find races, car meets and crews that drive the way you do.' },
-  { href: `${base}guide/`, img: 'guide/guide-hero', name: 'Guide', line: 'Everything confirmed about cars and racing in GTA VI, with sources.' },
+  { href: `${base}cars/`, img: 'home/home-hero', name: 'Cars', cta: 'Browse all cars', line: 'Specs, real-life inspirations and Gellhorn lap times for every car in GTA VI.' },
+  { href: `${base}time-attack/gellhorn-international-raceway/`, img: 'gellhorn-raceway', name: 'Time Attack', cta: 'See the leaderboard', line: 'Set a lap at Gellhorn International Raceway and climb the leaderboard.' },
+  { href: `${base}community/`, img: 'hub/hub-events', name: 'Community', cta: 'Find events and crews', line: 'Find races, car meets and crews that drive the way you do.' },
+  { href: `${base}guide/`, img: 'guide/guide-hero', name: 'Guide', cta: 'Read the guide', line: 'Everything confirmed about cars and racing in GTA VI, with sources.' },
 ];
+const DISCORD_INVITE_URL = 'https://discord.gg/hPGuBwXRqT';
+const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z';
 const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 ---
 <Base title="Page not found" description="This page doesn't exist or has moved." noindex>
@@ -66,13 +68,26 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
           <span class="b">
             <span class="g4-h display">{t.name}</span>
             <span class="g4-p">{t.line}</span>
-            <span class="go">Go →</span>
+            <span class="go">{t.cta} →</span>
           </span>
           <span class="g4-arrow" set:html={arrow} />
         </a>
       ))}
     </div>
     <p class="rep">Followed a broken link on our site? <a href={`${base}legal/#contact`}>Let us know</a> and we’ll fix it.</p>
+  </section>
+  <!-- Discord band like the home page (Fausto 17.10.); here a plain invite link, no login flow -->
+  <section class="dband">
+    <div class="wrap dband-inner">
+      <div class="dband-copy">
+        <h2 class="display dband-title">The scene talks on Discord</h2>
+        <p class="dband-text">Find people to race with, catch the next event, talk cars, and discover new tracks and race jobs.</p>
+      </div>
+      <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn dband-btn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={discordPath} /></svg>
+        <span>Join the Discord</span>
+      </a>
+    </div>
   </section>
   <script type="application/json" id="nf-data" set:html={JSON.stringify(data)} />
 </Base>
@@ -153,7 +168,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   /* ---- band ---- */
   .nf { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.16); }
   .nf-bg, .nf-o { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .nf-bg { object-fit: cover; object-position: 50% 62%; }
+  .nf-bg { object-fit: cover; object-position: 50% 50%; } /* crop like the mockup: cars ahead at the top, KEMUKAWA wing low */
   .nf-o1 { background: linear-gradient(115deg, rgba(242,75,157,.75) 0%, rgba(242,75,157,.2) 42%, rgba(255,122,61,.2) 58%, rgba(255,122,61,.75) 100%); mix-blend-mode: color; }
   .nf-o2 { background: linear-gradient(90deg, rgba(11,11,20,.94) 0%, rgba(11,11,20,.7) 50%, rgba(11,11,20,.35) 100%); }
   .nf-in { position: relative; padding-top: 40px; padding-bottom: 36px; }
@@ -193,7 +208,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .dym-ch :global(small) { display: none; }
 
   /* ---- tiles ---- */
-  .nft { padding-top: 32px; padding-bottom: 72px; }
+  .nft { padding-top: 32px; padding-bottom: 56px; }
   .nft h2 { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); }
   .g4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 14px; }
   .g4 a { position: relative; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; background: var(--lr-card); border: 1px solid rgba(200,200,222,.16); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
@@ -206,6 +221,17 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .g4-arrow { display: none; }
   .rep { margin: 28px 0 0; font-size: 14px; color: var(--lr-muted); }
   .rep a { color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; }
+
+  /* Discord band (same look as home) */
+  .dband { background: var(--lr-brand-gradient); }
+  .dband-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding-top: 56px; padding-bottom: 56px; }
+  .dband-copy { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
+  .dband-title { margin: 0; font-size: 30px; }
+  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
+  .dband-btn { background: var(--lr-text); color: var(--lr-on-pink); flex: none; }
+  .dband-btn:hover { background: #fff; color: var(--lr-on-pink); }
+  .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+  :global(main:has(.dband) + .site-foot) { margin-top: 0; }
 
   @media (max-width: 1100px) {
     .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -247,5 +273,8 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
     .g4-arrow { display: inline-flex; flex: none; margin-right: 14px; color: var(--lr-orange); }
     .g4-arrow :global(svg) { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .rep { margin-top: 18px; }
+    .dband-inner { flex-direction: column; align-items: stretch; gap: 18px; padding-top: 36px; padding-bottom: 36px; }
+    .dband-title { font-size: 24px; }
+    .dband-btn { width: 100%; justify-content: center; }
   }
 </style>
