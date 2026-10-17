@@ -32,6 +32,7 @@ const base = import.meta.env.BASE_URL;
       <div id="lead-block" hidden>
         <h2 class="section-heading">Crew Management</h2>
         <p class="section-lede">Edit your crew card, accept join requests and manage members. Changes go live immediately.</p>
+        <p class="bot-hint">Want your crew’s events in your own Discord too? <a href={`${base}discord/bot/`}>Set up the Leonida Racing bot →</a></p>
         <HubEditor mode="crew" />
       </div>
 
@@ -42,6 +43,8 @@ const base = import.meta.env.BASE_URL;
 
 <style>
   [hidden] { display: none !important; }
+  .bot-hint { margin: -.4rem 0 1.2rem; font-size: .9rem; color: var(--gh-muted); }
+  .bot-hint a { color: var(--lr-orange); font-weight: 600; text-decoration: none; }
   .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
   .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
   .acc-auth { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }

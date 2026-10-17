@@ -269,6 +269,7 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
       <div class="dband-copy">
         <h2 class="display dband-title">The scene talks on Discord</h2>
         <p class="dband-text">Find people to race with, catch the next event, talk cars, and discover new tracks and race jobs.<span class="dband-guest"> Log in with Discord and you join the server automatically.</span></p>
+        <a class="dband-more" href={`${base}discord/`}>What’s on the server →</a>
       </div>
       <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn dband-btn" id="dband-btn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={discordPath} /></svg>
@@ -470,6 +471,8 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
   .dband-title { margin: 0; font-size: 30px; }
   .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
   :global(html.lr-authed) .dband-guest { display: none; }
+  .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: #fff; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.5); }
+  .dband-more:hover { text-decoration-color: #fff; }
   .dband-btn { background: var(--lr-text); color: var(--lr-on-pink); flex: none; }
   .dband-btn:hover { background: #fff; color: var(--lr-on-pink); }
   .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; }

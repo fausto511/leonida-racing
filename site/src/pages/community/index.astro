@@ -50,6 +50,18 @@ const crewsHtml = sampleCrews.slice(0, 3).map((c) => crewCardHtml(c, undefined, 
       </a>
     </div>
 
+    <!-- Discord strip (RS-0076): direct invite + the info page -->
+    <div class="hub-discord">
+      <div class="hub-discord-copy">
+        <strong>The community lives on Discord</strong>
+        <span>Find people to drive with, grab a spot in the next race and talk cars between events.</span>
+      </div>
+      <div class="hub-discord-act">
+        <a class="btn btn-p btn-sm" href="https://discord.gg/hPGuBwXRqT" target="_blank" rel="noopener">Join the Discord</a>
+        <a class="arrow" href={`${base}discord/`}>What’s on the server →</a>
+      </div>
+    </div>
+
     <div class="hub-block-head">
       <h2 class="display hub-block-title">Next Up</h2>
       <span class="hub-sample-flag" id="hub-ev-flag">Sample data</span>
@@ -77,6 +89,11 @@ const crewsHtml = sampleCrews.slice(0, 3).map((c) => crewCardHtml(c, undefined, 
   .hub-entry-title { font-size: 2rem; }
   .hub-entry-copy { color: var(--gh-muted); font-size: .92rem; line-height: 1.55; }
   .hub-entry-cta { margin-top: .4rem; color: var(--gh-red); font-weight: 800; font-size: .85rem; }
+  .hub-discord { display: flex; align-items: center; justify-content: space-between; gap: 1rem 2rem; flex-wrap: wrap; margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--gh-radius-lg); background: linear-gradient(100deg, rgba(42,31,158,.35), rgba(177,42,140,.22) 55%, rgba(242,106,61,.16)), var(--lr-card); border: 1px solid var(--lr-line-strong); }
+  .hub-discord-copy { display: flex; flex-direction: column; gap: .25rem; min-width: 0; flex: 1 1 22rem; }
+  .hub-discord-copy strong { font-size: 1.05rem; }
+  .hub-discord-copy span { color: var(--lr-soft); font-size: .92rem; line-height: 1.5; }
+  .hub-discord-act { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
   .hub-block-head { display: flex; align-items: center; gap: .75rem; margin: 2.75rem 0 1rem; }
   .hub-block-title { margin: 0; font-size: 1.5rem; }
   .hub-block-link { margin-left: auto; color: var(--gh-muted); font-size: .85rem; font-weight: 700; }

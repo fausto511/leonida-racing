@@ -1,0 +1,343 @@
+---
+// /discord/ — the Discord community page (RS-0076, Fausto 17.10.2026).
+// Purpose: be findable for "GTA 6 racing / car meet Discord" searches and explain the server.
+// Built from the redesign blocks (image band like the class pages, cards, Discord band), no own mockup.
+// Linking rule (Fausto 17.10.): action spots keep the direct invite; this page is linked as a small
+// "What's on the server" extra (footer, Discord bands, Community overview), never instead of the invite.
+// COPY STATUS: data/discord-copy.ts = Claude placeholders, Codex review pending (DEC-0088).
+import Base from '../../layouts/Base.astro';
+import { SITE_NAME, DISCORD_INVITE_URL, DISCORD_ICON_PATH } from '../../data/site';
+import { discordPage as P, discordGlance, discordAreas, discordLanguages, discordLanguagesText, discordLfg, discordSteps, discordTiers, discordRules, discordBotTeaser, discordFaq } from '../../data/discord-copy';
+
+const base = import.meta.env.BASE_URL;
+const pageUrl = new URL(`${base}discord/`, Astro.site).href;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: P.title,
+    url: pageUrl,
+    description: P.description,
+    isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: new URL(base, Astro.site).href },
+    about: { '@type': 'VideoGame', name: 'Grand Theft Auto VI', alternateName: ['GTA VI', 'GTA 6'] },
+    significantLink: DISCORD_INVITE_URL,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: discordFaq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+const img = `${base}images/hub/hub-carmeet`;
+const check = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const dash = '<span class="no" aria-label="No">–</span>';
+---
+<Base title={P.title} description={P.description} section="hub" jsonLd={jsonLd} breadcrumbs={[{ name: 'Discord', path: 'discord/' }]}>
+  <!-- ===== band ===== -->
+  <section class="db">
+    <picture>
+      <source type="image/webp" srcset={`${img}-640.webp 640w, ${img}-1080.webp 1080w, ${img}-1672.webp 1672w`} sizes="100vw" />
+      <img class="db-bg" src={`${img}-1672.jpg`} alt="" width="1672" height="940" fetchpriority="high" />
+    </picture>
+    <span class="db-t db-t1" aria-hidden="true"></span><span class="db-t db-t2" aria-hidden="true"></span>
+    <div class="wrap db-inner">
+      <div class="db-copy">
+        <p class="eyebrow">{P.eyebrow}</p>
+        <h1 class="display db-title">{P.h1}</h1>
+        <p class="db-intro">{P.intro}</p>
+        <div class="db-act">
+          <a class="btn btn-p" href={DISCORD_INVITE_URL} target="_blank" rel="noopener">
+            <svg class="dico" viewBox="0 0 24 24" aria-hidden="true"><path d={DISCORD_ICON_PATH} /></svg>
+            <span>Join the Discord</span>
+          </a>
+          <span class="db-note">{P.joinNote}</span>
+        </div>
+      </div>
+      <div class="glance">
+        <p class="glance-eb">On the server</p>
+        {discordGlance.map((r) => <div class="gl-row"><span>{r.k}</span><b>{r.v}</b></div>)}
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== what's on the server ===== -->
+  <section class="wrap dsec">
+    <p class="dsec-eb">What you’ll find</p>
+    <h2 class="dsec-h">More than a chat room</h2>
+    <div class="areas">
+      {discordAreas.map((a) => (
+        <article class="area">
+          <div class="chips">{a.channels.map((c) => <span class="chan">#{c}</span>)}</div>
+          <h3 class="area-t">{a.title}</h3>
+          <p class="area-p">{a.text}</p>
+        </article>
+      ))}
+    </div>
+    <div class="langs">
+      <div class="langs-l">{discordLanguages.map((l) => <span class="lang">{l}</span>)}</div>
+      <p class="langs-p">{discordLanguagesText}</p>
+    </div>
+  </section>
+
+  <!-- ===== LFG ===== -->
+  <section class="wrap dsec lfg">
+    <div class="lfg-copy">
+      <p class="dsec-eb">{discordLfg.eyebrow}</p>
+      <h2 class="dsec-h">{discordLfg.title}</h2>
+      <p class="dsec-p">{discordLfg.text}</p>
+      <ol class="lfg-steps">{discordLfg.steps.map((s) => <li>{s}</li>)}</ol>
+      <p class="dsec-small">{discordLfg.notes}</p>
+    </div>
+    <figure class="mock" aria-label="Example of an LFG card in Discord">
+      <div class="mock-msg">
+        <span class="mock-av" aria-hidden="true"><img src={`${base}images/brand/lr-logo-color.webp`} alt="" width="79" height="24" loading="lazy" /></span>
+        <div class="mock-body">
+          <p class="mock-name">Leonida Racing <span class="mock-app">APP</span></p>
+          <p class="mock-ping">@LFG Pings</p>
+          <div class="mock-embed">
+            <p class="mock-et">🚗 Car Meet · looking for 5–8 players</p>
+            <p class="mock-ed">Hop in <span class="mock-ch">🎮 LFG 1 · Car Meet</span> and say hi.<br />Ends in 3 hours.</p>
+            <div class="mock-fields">
+              <div><p class="mock-fk">Host</p><p class="mock-fv"><span class="mock-at">@you</span></p></div>
+              <div><p class="mock-fk">In (3)</p><p class="mock-fv"><span class="mock-at">@you</span> <span class="mock-at">@rivera</span> <span class="mock-at">@kz</span></p></div>
+            </div>
+            <p class="mock-foot">Leonida Racing · LFG 1 of 3</p>
+          </div>
+          <div class="mock-btns"><span class="mb mb-g">Join</span><span class="mb">Leave</span><span class="mb">Open voice ↗</span><span class="mb mb-r">Close</span></div>
+        </div>
+      </div>
+      <figcaption>Example card. Names are made up.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ===== three steps ===== -->
+  <section class="wrap dsec">
+    <p class="dsec-eb">Getting started</p>
+    <h2 class="dsec-h">On the grid in three steps</h2>
+    <ol class="steps">
+      {discordSteps.map((s, i) => (
+        <li class="step">
+          <span class="step-n" aria-hidden="true">{i + 1}</span>
+          <h3 class="step-t">{s.title}</h3>
+          <p class="step-p">{s.text}</p>
+          {i === 0 && <a class="arrow" href={DISCORD_INVITE_URL} target="_blank" rel="noopener">Open the invite →</a>}
+          {i === 2 && <a class="arrow" href={`${base}account/`}>Log in with Discord →</a>}
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- ===== tiers ===== -->
+  <section class="wrap dsec">
+    <p class="dsec-eb">Roles</p>
+    <h2 class="dsec-h">Guest, Registered Driver, Verified</h2>
+    <div class="tiers-wrap">
+      <table class="tiers">
+        <thead><tr><th scope="col"><span class="sr">What you can do</span></th>{discordTiers.cols.map((c) => <th scope="col">{c}</th>)}</tr></thead>
+        <tbody>
+          {discordTiers.rows.map((r) => (
+            <tr>
+              <th scope="row">{r.label}</th>
+              {r.v.map((v) => <td>{v === true ? <Fragment set:html={check} /> : v === false ? <Fragment set:html={dash} /> : <span class="cond">{v}</span>}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="dsec-small">{discordTiers.note}</p>
+  </section>
+
+  <!-- ===== rules + bot ===== -->
+  <section class="wrap dsec two">
+    <div class="rules">
+      <p class="dsec-eb">House rules, short version</p>
+      <ul>{discordRules.map((r) => <li>{r}</li>)}</ul>
+      <p class="dsec-small">The full list is pinned in #rules on the server.</p>
+    </div>
+    <a class="bot" href={`${base}discord/bot/`}>
+      <p class="dsec-eb">{discordBotTeaser.eyebrow}</p>
+      <h2 class="bot-t">{discordBotTeaser.title}</h2>
+      <p class="bot-p">{discordBotTeaser.text}</p>
+      <div class="bot-cmds"><code>/events</code><code>/event</code><code>/car</code><code>/compare</code><code>/crew</code><code>/leonida feed</code></div>
+      <span class="arrow">{discordBotTeaser.link} →</span>
+    </a>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="wrap dsec faq" aria-labelledby="faq-h">
+    <p class="dsec-eb">FAQ</p>
+    <h2 class="dsec-h" id="faq-h">Questions about the server</h2>
+    <div class="faq-list">
+      {discordFaq.map((f, i) => (
+        <details open={i === 0}>
+          <summary>{f.q}</summary>
+          <p>{f.a}{f.q.startsWith('Can I add the bot') && <> <a href={`${base}discord/bot/`}>Read the bot guide →</a></>}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <!-- ===== Discord band ===== -->
+  <section class="dband">
+    <div class="wrap dband-inner">
+      <div class="dband-copy">
+        <h2 class="display dband-title">Pull up a chair</h2>
+        <p class="dband-text">Say hi in #chat, grab your roles and see who’s around for a race tonight.</p>
+      </div>
+      <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn dband-btn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d={DISCORD_ICON_PATH} /></svg>
+        <span>Join the Discord</span>
+      </a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ---- band (same build as the class pages, DEC-0130) ---- */
+  .db { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
+  .db picture, .db-bg, .db-t { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .db-bg { object-fit: cover; object-position: 60% 45%; }
+  .db-t1 { background: linear-gradient(90deg, rgba(11,11,20,.97) 0%, rgba(11,11,20,.86) 50%, rgba(11,11,20,.5) 100%); }
+  .db-t2 { background: linear-gradient(115deg, rgba(242,75,157,.2) 0%, rgba(242,75,157,0) 45%, rgba(255,122,61,0) 60%, rgba(255,122,61,.2) 100%); }
+  .db-inner { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; padding-top: 44px; padding-bottom: 44px; }
+  .db-copy { display: flex; flex-direction: column; gap: 8px; min-width: 0; max-width: 680px; }
+  .db-copy .eyebrow { margin: 0; font-size: 12px; font-weight: 600; color: var(--lr-orange); }
+  .db-title { margin: 0; font-size: clamp(40px, 4.2vw, 56px); }
+  .db-intro { margin: 10px 0 0; font-size: 17px; line-height: 1.6; color: #EDEBF2; }
+  .db-act { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-top: 18px; }
+  .dico { width: 20px; height: 20px; fill: currentColor; flex: none; }
+  .db-note { font-size: 13px; color: var(--lr-soft); }
+  .glance { flex: none; width: 360px; margin-top: 8px; padding: 18px 18px 12px; border: 1px solid rgba(200,200,222,.2); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
+  .glance-eb { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+  .gl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 9px 0; border-top: 1px solid var(--lr-line); font-size: 15px; color: var(--lr-soft); }
+  .gl-row:first-of-type { border-top: 0; }
+  .gl-row b { color: var(--lr-text); font-weight: 600; text-align: right; }
+
+  /* ---- sections ---- */
+  .dsec { padding-top: 56px; }
+  .dsec-eb { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lr-orange); }
+  .dsec-h { margin: 0 0 20px; font-size: clamp(24px, 3vw, 32px); font-weight: 700; line-height: 1.15; }
+  .dsec-p { margin: 0; font-size: 17px; line-height: 1.65; color: #E4E4EC; max-width: 640px; }
+  .dsec-small { margin: 14px 0 0; font-size: 14px; line-height: 1.55; color: var(--lr-soft); max-width: 760px; }
+
+  .areas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .area { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 20px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chan { font-size: 13px; font-weight: 600; color: var(--lr-soft); background: var(--lr-raised); border-radius: 4px; padding: 3px 7px; }
+  .area-t { margin: 4px 0 0; font-size: 19px; font-weight: 700; line-height: 1.25; }
+  .area-p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--lr-soft); }
+  .langs { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 20px; padding: 16px 20px; border-radius: 8px; border: 1px dashed var(--lr-line-strong); }
+  .langs-l { display: flex; flex-wrap: wrap; gap: 8px; }
+  .lang { height: 32px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(200,200,222,.24); font-size: 14px; color: #E4E4EC; }
+  .langs-p { margin: 0; flex: 1; min-width: 260px; font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
+
+  /* ---- LFG + mock card ---- */
+  .lfg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); gap: 48px; align-items: center; }
+  .lfg-steps { margin: 18px 0 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; font-size: 16px; line-height: 1.5; color: #E4E4EC; }
+  .lfg-steps li::marker { color: var(--lr-orange); font-weight: 700; }
+  .mock { margin: 0; }
+  .mock-msg { display: flex; gap: 14px; padding: 16px; border-radius: 8px; background: #313338; color: #DBDEE1; font-family: 'gg sans', 'Noto Sans', system-ui, sans-serif; }
+  .mock-av { width: 40px; height: 40px; flex: none; border-radius: 50%; background: #1E1F22; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .mock-av img { width: 32px; height: auto; }
+  .mock-body { min-width: 0; flex: 1; }
+  .mock-msg p { margin: 0; }
+  .mock-name { font-weight: 600; color: #F2F3F5; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+  .mock-app { font-size: 10px; font-weight: 700; background: #5865F2; color: #fff; border-radius: 3px; padding: 1px 4px; }
+  .mock-ping { margin-top: 2px !important; display: inline-block; font-size: 14px; color: #C9CDFB; background: rgba(88,101,242,.3); border-radius: 3px; padding: 0 3px; }
+  .mock-embed { margin-top: 6px; padding: 10px 14px 12px; border-left: 4px solid #FFD74C; border-radius: 4px; background: #2B2D31; }
+  .mock-et { font-weight: 700; color: #F2F3F5; font-size: 15px; }
+  .mock-ed { margin-top: 6px !important; font-size: 14px; line-height: 1.45; }
+  .mock-ch { color: #C9CDFB; background: rgba(88,101,242,.3); border-radius: 3px; padding: 0 3px; }
+  .mock-fields { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; margin-top: 10px; }
+  .mock-fk { font-size: 13px; font-weight: 700; color: #F2F3F5; }
+  .mock-fv { font-size: 14px; margin-top: 2px !important; }
+  .mock-at { color: #C9CDFB; background: rgba(88,101,242,.3); border-radius: 3px; padding: 0 3px; }
+  .mock-foot { margin-top: 10px !important; font-size: 12px; color: #B5BAC1; }
+  .mock-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .mb { height: 32px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: 4px; background: #4E5058; color: #fff; font-size: 14px; font-weight: 500; }
+  .mb-g { background: #248046; }
+  .mb-r { background: #DA373C; }
+  .mock figcaption { margin-top: 8px; font-size: 13px; color: var(--lr-muted); }
+
+  /* ---- steps ---- */
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .step { display: flex; flex-direction: column; gap: 8px; padding: 20px; border-radius: 8px; background: var(--lr-card); border: 1px solid var(--lr-line-strong); }
+  .step-n { width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--lr-brand-gradient); color: #fff; font-weight: 800; font-size: 16px; }
+  .step-t { margin: 6px 0 0; font-size: 19px; font-weight: 700; }
+  .step-p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--lr-soft); flex: 1; }
+
+  /* ---- tiers table ---- */
+  .tiers-wrap { overflow-x: auto; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }
+  .tiers { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 560px; }
+  .tiers th, .tiers td { padding: 12px 16px; border-top: 1px solid var(--lr-line); text-align: center; }
+  .tiers thead th { border-top: 0; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--lr-soft); }
+  .tiers tbody th { text-align: left; font-weight: 500; color: #E4E4EC; }
+  .tiers td :global(svg) { width: 20px; height: 20px; stroke: var(--lr-lime); fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; display: inline-block; vertical-align: middle; }
+  .tiers td :global(.no) { color: var(--lr-muted); }
+  .cond { font-size: 13px; font-weight: 600; color: var(--lr-lime); white-space: nowrap; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---- rules + bot ---- */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
+  .rules { padding: 22px 24px; border-radius: 8px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); }
+  .rules ul { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.5; color: #E4E4EC; }
+  .bot { display: flex; flex-direction: column; gap: 8px; padding: 22px 24px; border-radius: 8px; border: 1px solid var(--lr-line-strong); background: linear-gradient(140deg, rgba(42,31,158,.35), rgba(177,42,140,.25) 55%, rgba(242,106,61,.18)), var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
+  .bot:hover { border-color: var(--lr-orange); }
+  .bot-t { margin: 0; font-size: 24px; font-weight: 700; line-height: 1.2; }
+  .bot-p { margin: 0; font-size: 15px; line-height: 1.55; color: #E4E4EC; }
+  .bot-cmds { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }
+  .bot-cmds code { font-size: 13px; padding: 3px 8px; border-radius: 4px; background: rgba(11,11,20,.6); color: var(--lr-text); }
+  .bot .arrow { margin-top: auto; }
+
+  /* ---- FAQ ---- */
+  .faq { padding-bottom: 64px; }
+  .faq-list { border-top: 1px solid var(--lr-line); max-width: 880px; }
+  .faq details { border-bottom: 1px solid var(--lr-line); }
+  .faq summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; font-size: 17px; font-weight: 600; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: '+'; color: var(--lr-orange); font-size: 22px; line-height: 1; }
+  .faq details[open] summary::after { content: '–'; }
+  .faq details p { margin: 0 0 18px; font-size: 16px; line-height: 1.65; color: #E4E4EC; max-width: 760px; }
+  .faq details a { color: var(--lr-orange); text-decoration: none; font-weight: 600; }
+
+  /* ---- Discord band (same look as home/404) ---- */
+  .dband { background: var(--lr-brand-gradient); }
+  .dband-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding-top: 56px; padding-bottom: 56px; }
+  .dband-copy { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
+  .dband-title { margin: 0; font-size: 30px; }
+  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
+  .dband-btn { background: var(--lr-text); color: var(--lr-on-pink); flex: none; }
+  .dband-btn:hover { background: #fff; color: var(--lr-on-pink); }
+  .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+  :global(main:has(.dband) + .site-foot) { margin-top: 0; }
+
+  @media (max-width: 1100px) {
+    .db-inner { flex-direction: column; gap: 22px; }
+    .glance { width: 100%; max-width: 560px; margin-top: 0; }
+    .areas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .lfg { grid-template-columns: 1fr; gap: 28px; }
+    .mock { max-width: 520px; }
+  }
+  @media (max-width: 760px) {
+    .db-inner { padding-top: 24px; padding-bottom: 26px; }
+    .db-title { font-size: clamp(32px, 9.5vw, 44px); }
+    .db-intro { font-size: 15px; }
+    .db-act .btn { width: 100%; }
+    .gl-row { font-size: 14px; }
+    .dsec { padding-top: 40px; }
+    .dsec-p { font-size: 16px; }
+    .areas, .steps, .two { grid-template-columns: 1fr; gap: 12px; }
+    .area, .step { padding: 16px; }
+    .mock-msg { padding: 12px; gap: 10px; }
+    .mock-fields { grid-template-columns: 1fr; }
+    .faq summary { font-size: 16px; }
+    .tiers { min-width: 0; font-size: 14px; }
+    .tiers th, .tiers td { padding: 10px 6px; }
+    .tiers tbody th { padding-left: 12px; }
+    .tiers thead th { font-size: 10px; letter-spacing: .04em; line-height: 1.25; }
+    .cond { white-space: normal; font-size: 12px; }
+    .dband-inner { flex-direction: column; align-items: stretch; gap: 18px; padding-top: 36px; padding-bottom: 36px; }
+    .dband-title { font-size: 24px; }
+    .dband-btn { width: 100%; justify-content: center; }
+  }
+</style>
