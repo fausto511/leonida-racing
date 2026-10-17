@@ -37,7 +37,8 @@ export function createEventRsvp(root: HTMLElement) {
       : discord
         ? 'Join the host\u2019s Discord so they can send your lobby invite.'
         : 'Add the host on PlayStation and message them for your lobby invite.';
-    return `<div class="ev-next"><p class="ev-next-text"><strong>You\u2019re in \u2014 one more step.</strong> ${text}</p>${buttons ? `<div class="ev-next-actions">${buttons}</div>` : ''}</div>`;
+    const cal = `<button type="button" class="ev-ics" data-ics="${esc(e.event_id)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Add to calendar</button>`;
+    return `<div class="ev-next"><p class="ev-next-text"><strong>You\u2019re in \u2014 one more step.</strong> ${text} ${cal}</p>${buttons ? `<div class="ev-next-actions">${buttons}</div>` : ''}</div>`;
   }
 
   function renderRsvps() {
@@ -120,12 +121,27 @@ export function createEventRsvp(root: HTMLElement) {
       navigator.clipboard?.writeText(c.dataset.copy!).then(() => { c.textContent = 'Copied'; setTimeout(() => { c.textContent = 'Copy'; }, 1500); }).catch(() => {});
       return;
     }
+    const ics = t.closest<HTMLButtonElement>('[data-ics]');
+    if (ics) { const e = events.find((x) => x.event_id === ics.dataset.ics); if (e) downloadIcs(e); return; }
     const j = t.closest<HTMLButtonElement>('[data-join]');
     const l = t.closest<HTMLButtonElement>('[data-leave]');
     if (j) { j.disabled = true; join(j.dataset.join!); }
     if (l) { l.disabled = true; leave(l.dataset.leave!); }
   });
 
+
+  // "Add to calendar": a one-event .ics file, start/end in UTC
+  function downloadIcs(e: HubEvent) {
+    const f = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const end = e.ends_at ?? new Date(new Date(e.starts_at).getTime() + 2 * 3600e3).toISOString();
+    const t = (x: string) => x.replace(/[\\;,]/g, (c) => `\\${c}`).replace(/\n/g, '\\n');
+    const url = `${location.origin}${import.meta.env.BASE_URL}community/events/#event-${e.event_id}`;
+    const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Leonida Racing//Events//EN', 'BEGIN:VEVENT', `UID:${e.event_id}@leonidaracing.com`, `DTSTAMP:${f(new Date().toISOString())}`, `DTSTART:${f(e.starts_at)}`, `DTEND:${f(end)}`, `SUMMARY:${t(e.title)}`, ...(e.location ? [`LOCATION:${t(e.location)}`] : []), `DESCRIPTION:${t(`${e.description ?? ''}\n${url}`.trim())}`, `URL:${url}`, 'END:VEVENT', 'END:VCALENDAR'];
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([lines.join('\r\n')], { type: 'text/calendar' }));
+    a.download = `${e.title.replace(/[^\w-]+/g, '-').slice(0, 60) || 'event'}.ics`;
+    document.body.appendChild(a); a.click(); a.remove();
+  }
 
   mine = sampleRsvps();
   if (backendConfigured) getSupabase().auth.getSession().then(({ data }) => { if (!live) session = data?.session ?? null; });
@@ -138,6 +154,8 @@ export function createEventRsvp(root: HTMLElement) {
       live = isLive;
     },
     renderRsvps,
+    /** event ids the visitor signed up for (sample: stored in this browser) */
+    mine: () => new Set(mine),
     /** After live events are loaded: session, own sign-ups, pending "I'm in" from the login redirect. */
     async connect() {
       if (!backendConfigured || !live) return;

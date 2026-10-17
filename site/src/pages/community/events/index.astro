@@ -1,20 +1,30 @@
 ---
+// Event calendar -- Redesign (boards Events / EventsActive / EventsMobile / EventsMobileActive):
+// image band with breadcrumb + "Host your own event" tile, type chips (+ "My events" when logged in),
+// events grouped by day in your local time, sidebar with Discord card + "Jump to a date" month view
+// (phone: day strip, Discord card after the first day), "Nothing on your night?" + "Show past events",
+// Discord band. No sub-nav. COPY STATUS: mockup placeholders -> Codex review (DEC-0088).
 import Base from '../../../layouts/Base.astro';
-import PageHero from '../../../components/PageHero.astro';
-import HubSubnav from '../../../components/HubSubnav.astro';
+import DiscordBand from '../../../components/DiscordBand.astro';
 import '../../../styles/hub.css';
-import { sampleEvents, eventRowHtml, eventTypeLabels, platformLabels, monthLabel } from '../../../data/hub';
-import { PLATFORMS, ACTIVE_PLATFORMS } from '../../../data/platforms';
+import { sampleEvents, eventRowHtml } from '../../../data/hub';
+import { DISCORD_INVITE_URL } from '../../../data/site';
 
-// Build-time render (UTC) of the flagged sample events, grouped by month.
-const groups: { label: string; rows: string[] }[] = [];
+const base = import.meta.env.BASE_URL;
+// Build-time render (UTC) of the flagged sample events, grouped by day; the browser re-renders in local time.
+const dayKey = (iso: string) => iso.slice(0, 10);
+const groups = new Map<string, string[]>();
 for (const e of sampleEvents) {
-  const label = monthLabel(e.starts_at, true);
-  const last = groups[groups.length - 1];
-  if (last && last.label === label) last.rows.push(eventRowHtml(e, { sample: true }));
-  else groups.push({ label, rows: [eventRowHtml(e, { sample: true })] });
+  const k = dayKey(e.starts_at);
+  if (!groups.has(k)) groups.set(k, []);
+  groups.get(k)!.push(eventRowHtml(e, { sample: true, full: true }));
 }
-const initialHtml = groups.map((g) => `<h2 class="ev-month">${g.label}</h2><div class="ev-list">${g.rows.join('')}</div>`).join('');
+const dayLabel = (k: string) => { const d = new Date(`${k}T12:00:00Z`); return `${d.toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' })}, ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' })}`; };
+const initialHtml = [...groups.entries()].map(([k, rows]) => `<section class="ev-day-g" id="day-${k}"><h2 class="ev-dh">${dayLabel(k)}<span class="n">${rows.length} event${rows.length === 1 ? '' : 's'}</span></h2><div class="ev-list">${rows.join('')}</div></section>`).join('');
+const chips: [string, string][] = [['', 'All events'], ['race', 'Races'], ['time-attack', 'Time Attack'], ['league', 'Leagues'], ['car-meet', 'Car meets'], ['cruise', 'Cruises']];
+const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+const dc = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 5.3A18 18 0 0 0 15.9 4l-.3.6a15 15 0 0 1 4 1.6 16 16 0 0 0-13.2 0 15 15 0 0 1 4-1.6L10.1 4a18 18 0 0 0-4.4 1.3C2.9 9 2.2 12.6 2.5 16.1a18 18 0 0 0 5.5 2.8l.8-1.3a11 11 0 0 1-1.9-.9l.5-.4a13 13 0 0 0 9.2 0l.5.4a11 11 0 0 1-1.9.9l.8 1.3a18 18 0 0 0 5.5-2.8c.4-4-.7-7.5-2.2-10.8ZM9.3 14c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Zm5.4 0c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Z"/></svg>';
+const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3><p data-dc-p>New events are announced on our Discord first. Ask for a lobby, find a crew, or get help with your first event.</p><p class="dc-free" data-dc-free><i></i>Free to join · no account needed here</p><a class="btn dc-btn" href="${DISCORD_INVITE_URL}" target="_blank" rel="noopener">${dc}<span data-dc-b>Join our Discord</span></a></div>`;
 ---
 <Base
   title="GTA VI Event Calendar — Races, Playlists & Car Meets"
@@ -22,86 +32,358 @@ const initialHtml = groups.map((g) => `<h2 class="ev-month">${g.label}</h2><div 
   section="hub"
   noindex={false /* indexable since 2026-10-14 (Fausto): real crews exist; Tracks stays noindex */}
 >
-  <PageHero status="hub" image="hub-events" eyebrow="Find Your Next GTA VI Race" title="Event Calendar" lede="Races, league rounds, community playlists, and car meets from across the GTA VI racing scene. Find out who’s hosting and what’s happening next. All times are shown in your local time zone." />
-
-  <HubSubnav active="events" />
-
-  <section class="wrap hub-body">
-    <div class="hub-toolbar">
-      <div class="hub-filters">
-        <select class="ui-select" id="ev-type" aria-label="Filter by event type">
-          <option value="">All event types</option>
-          {Object.entries(eventTypeLabels).map(([k, v]) => <option value={k}>{v}</option>)}
-        </select>
-        <select class="ui-select" id="ev-platform" aria-label="Filter by platform">
-          {PLATFORMS.map((p) => <option value={p.active && ACTIVE_PLATFORMS.length === 1 ? '' : p.id} disabled={!p.active} selected={p.id === 'ps5'}>{p.active ? p.label : `${p.label} — coming later`}</option>)}
-        </select>
+  <section class="ec-band">
+    <img class="ec-bg" src={`${base}images/hub/hub-events-1080.webp`} srcset={`${base}images/hub/hub-events-640.webp 640w, ${base}images/hub/hub-events-1080.webp 1080w, ${base}images/hub/hub-events-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="940" fetchpriority="high" />
+    <span class="ec-o ec-o1" aria-hidden="true"></span><span class="ec-o ec-o2" aria-hidden="true"></span>
+    <div class="wrap ec-hero">
+      <div>
+        <nav class="crumb" aria-label="Breadcrumb"><a href={`${base}community/`}>Community</a><span aria-hidden="true">/</span><span aria-current="page">Events</span></nav>
+        <p class="eyebrow">GTA VI Racing Community</p>
+        <h1 class="display">Event calendar</h1>
+        <p class="lede">Races, leagues, car meets and cruises hosted by the community. All times in your local time.</p>
       </div>
-      <span class="hub-sample-flag" id="ev-flag">Sample data — example events, not real</span>
+      <div class="ec-tile">
+        <div class="eb"><Fragment set:html={cal} />Host your own event</div>
+        <p class="t">Got a race, meet or cruise?</p>
+        <a class="btn btn-p" href={`${base}account/events/`}>Become a host</a>
+      </div>
     </div>
-
-    <div id="ev-root" set:html={initialHtml} />
-    <p class="hub-empty" id="ev-empty" hidden>No events match these filters.</p>
-
-    <p class="hub-note">Hosting events? Apply as event host in <a href={`${import.meta.env.BASE_URL}account/events/`}>My Account</a> — once a moderator approves it, you publish your events here yourself. Every event is open to everyone.</p>
   </section>
+
+  <section class="wrap"><div class="ec-bar">
+    <div class="chips" id="ev-chips" role="group" aria-label="Event type">
+      {chips.map(([v, l], i) => <button type="button" class={i === 0 ? 'on' : ''} data-type={v} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>)}
+      <button type="button" class="mine" data-type="mine" aria-pressed="false" id="ev-mine" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>My events</button>
+    </div>
+    <span class="tz"><Fragment set:html={cal} />Your local time: <b id="ev-tz">UTC</b></span>
+  </div></section>
+  <div class="wrap ec-strip-w"><div class="ec-strip" id="ev-strip" aria-label="Jump to a date"></div><p class="tz-m"><Fragment set:html={cal} />All times in your local time: <b id="ev-tz-m">UTC</b></p></div>
+
+  <div class="wrap ec-body">
+    <div class="ec-main">
+      <p class="ec-sample" id="ev-flag">Sample events until launch — they will not take place.</p>
+      <div id="ev-root" set:html={initialHtml} />
+      <p class="hub-empty" id="ev-empty" hidden>No events match this filter.</p>
+      <div class="ev-open ec-open"><span class="ev-open-plus" aria-hidden="true">+</span><span class="ev-open-t"><b>Nothing on your night?</b><span>Host a race, a meet, or a hotlap session. Hosts publish their events here themselves.</span></span><a class="btn btn-s ev-open-btn" href={`${base}account/events/`}>Become a host</a></div>
+      <div id="ev-past" hidden></div>
+      <div class="ec-more"><button type="button" class="btn btn-s" id="ev-past-btn" hidden>Show past events</button></div>
+    </div>
+    <aside class="ec-side">
+      <div class="side-dc">
+        <h2 class="sh"><span data-dc-h>Join the scene</span><small data-dc-k>Discord</small></h2>
+        <Fragment set:html={dcCard} />
+      </div>
+      <div>
+        <h2 class="sh">Jump to a date</h2>
+        <div class="mcal card" id="ev-cal"></div>
+      </div>
+    </aside>
+  </div>
+
+  <DiscordBand />
 </Base>
 
+<style>
+  [hidden] { display: none !important; }
+  :global(main) { overflow-x: clip; }
+  .ec-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
+  .ec-bg, .ec-o { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .ec-bg { object-fit: cover; object-position: 50% 45%; }
+  .ec-o1 { background: linear-gradient(115deg, rgba(242,75,157,.75) 0%, rgba(242,75,157,.2) 42%, rgba(255,122,61,.2) 58%, rgba(255,122,61,.75) 100%); mix-blend-mode: color; }
+  .ec-o2 { background: linear-gradient(90deg, rgba(11,11,20,.92) 0%, rgba(11,11,20,.62) 55%, rgba(11,11,20,.45) 100%); }
+  .ec-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; padding-top: 40px; padding-bottom: 40px; }
+  .crumb { display: flex; gap: 8px; font-size: 14px; color: var(--lr-muted); margin-bottom: 18px; }
+  .crumb a { color: var(--lr-muted); text-decoration: none; }
+  .crumb a:hover { color: var(--lr-text); }
+  .crumb [aria-current] { color: var(--lr-text); }
+  .ec-hero h1 { margin: 12px 0 0; font-size: 64px; line-height: .95; }
+  .lede { margin: 16px 0 0; max-width: 600px; font-size: 17px; line-height: 1.55; color: #EDEBF2; text-shadow: 0 1px 12px rgba(11,11,20,.9); }
+  .ec-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
+  .ec-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+  .ec-tile .t { margin: 8px 0 14px; font-family: var(--gh-font-display); font-weight: 800; font-size: 22px; text-transform: uppercase; line-height: 1.1; }
+  .ec-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--lr-line); }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 14px; font-weight: 500; color: #E4E4EC; cursor: pointer; white-space: nowrap; }
+  .chips button:hover:not(.on) { border-color: rgba(200,200,222,.5); }
+  .chips button.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
+  .chips button.mine { border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
+  .chips button.mine.on { background: var(--lr-lime); border-color: var(--lr-lime); color: #14141F; }
+  .chips button:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+  .tz, .tz-m { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--lr-muted); white-space: nowrap; }
+  .tz b, .tz-m b { color: var(--lr-text); font-weight: 600; }
+  .ec-strip-w { display: none; }
+
+  .ec-body { display: grid; grid-template-columns: minmax(0,1fr) 320px; gap: 28px; align-items: start; padding-top: 28px; padding-bottom: 72px; }
+  .ec-sample { margin: 0 0 14px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #6B6B80; }
+  #ev-root :global(.ev-day-g) { scroll-margin-top: 90px; }
+  #ev-root :global(.ev-day-g), #ev-past :global(.ev-day-g) { margin-top: 28px; }
+  #ev-root :global(.ev-day-g:first-child) { margin-top: 0; }
+  :global(.ev-dh) { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-family: var(--gh-font-body); font-size: 20px; font-weight: 700; text-transform: none; letter-spacing: 0; }
+  :global(.ev-dh .today) { height: 22px; padding: 0 8px; border-radius: 4px; background: rgba(255,149,90,.16); color: var(--lr-orange); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; display: inline-flex; align-items: center; }
+  :global(.ev-dh .n) { font-size: 14px; font-weight: 500; color: var(--lr-muted); }
+  :global(.ec-dc-inline) { display: none; }
+  .ec-open { margin: 20px 0 0; }
+  .ec-more { display: flex; justify-content: center; margin-top: 20px; }
+  .ec-more .btn { height: 44px; font-size: 15px; }
+  #ev-past :global(.ev-row) { opacity: .7; }
+
+  .ec-side { display: flex; flex-direction: column; gap: 28px; position: sticky; top: 90px; }
+  .sh { display: flex; align-items: baseline; gap: 10px; margin: 0 0 12px; font-family: var(--gh-font-body); font-size: 20px; font-weight: 700; text-transform: none; letter-spacing: 0; }
+  .sh small { font-size: 14px; font-weight: 500; color: var(--lr-muted); }
+  :global(.dc-card) { padding: 18px; border-radius: 8px; border: 1px solid rgba(88,101,242,.55); background: linear-gradient(160deg, rgba(88,101,242,.22), rgba(88,101,242,.06)); }
+  :global(.dc-card h3) { margin: 0; font-size: 20px; font-weight: 700; }
+  :global(.dc-card p) { margin: 8px 0 0; font-size: 14px; line-height: 1.55; color: var(--lr-soft); }
+  :global(.dc-card .dc-free) { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--lr-muted); }
+  :global(.dc-card .dc-free i) { width: 7px; height: 7px; border-radius: 999px; background: #3BA55D; }
+  :global(.dc-card .dc-btn) { width: 100%; margin-top: 14px; justify-content: center; gap: 8px; background: var(--lr-discord); border-color: var(--lr-discord); color: #fff; }
+  :global(.dc-card .dc-btn:hover) { background: #4752c4; border-color: #4752c4; color: #fff; }
+
+  .mcal { padding: 18px; }
+  .mcal :global(.mh) { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .mcal :global(.mh b) { font-size: 17px; }
+  .mcal :global(.mh button) { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); cursor: pointer; font-size: 15px; line-height: 1; }
+  .mcal :global(.mh button:hover) { border-color: var(--lr-text); }
+  .mcal :global(.mg) { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+  .mcal :global(.wd) { font-size: 11px; color: #6B6B80; padding-bottom: 6px; }
+  .mcal :global(.d) { position: relative; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 14px; color: var(--lr-soft); border: 1px solid transparent; background: none; font-family: inherit; padding: 0; }
+  .mcal :global(.d.o) { color: #45455A; }
+  .mcal :global(.d.has) { background: var(--lr-raised); color: var(--lr-text); font-weight: 700; cursor: pointer; }
+  .mcal :global(.d.has:hover) { border-color: var(--lr-line-strong); }
+  .mcal :global(.d.today) { border-color: var(--lr-orange); color: var(--lr-text); font-weight: 700; }
+  .mcal :global(.d i) { position: absolute; bottom: 4px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 999px; background: var(--lr-orange); }
+  .mcal :global(.d i.me) { background: var(--lr-lime); }
+  .mcal :global(.lg) { display: flex; gap: 14px; margin-top: 12px; font-size: 12px; color: var(--lr-muted); }
+  .mcal :global(.lg span) { display: inline-flex; align-items: center; gap: 6px; }
+  .mcal :global(.lg i) { width: 6px; height: 6px; border-radius: 999px; background: var(--lr-orange); }
+  .mcal :global(.lg i.me) { background: var(--lr-lime); }
+
+  @media (max-width: 1100px) {
+    .ec-hero { grid-template-columns: minmax(0,1fr) 340px; gap: 28px; }
+    .ec-hero h1 { font-size: 52px; }
+    .ec-body { grid-template-columns: minmax(0,1fr) 280px; }
+  }
+  @media (max-width: 900px) {
+    .ec-hero { grid-template-columns: 1fr; gap: 18px; padding-top: 24px; padding-bottom: 24px; }
+    .ec-hero h1 { font-size: 40px; }
+    .lede { font-size: 16px; }
+    .ec-tile { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 4px 14px; padding: 14px 16px; }
+    .ec-tile .t { grid-column: 1; margin: 0; font-family: var(--gh-font-body); font-size: 16px; font-weight: 700; text-transform: none; }
+    .ec-tile .btn { grid-column: 2; grid-row: 1 / span 2; }
+    .ec-bar { border-bottom: 0; padding-bottom: 0; }
+    .tz { display: none; }
+    .chips { flex-wrap: nowrap; overflow-x: auto; margin-right: -16px; padding-right: 16px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chips button.mine { order: -1; }
+    .chips button[data-type=""] { order: -2; }
+    .ec-strip-w { display: block; }
+    .ec-strip-w .tz-m { padding-bottom: 12px; border-bottom: 1px solid var(--lr-line); }
+    .ec-strip { display: flex; gap: 8px; overflow-x: auto; margin-right: -16px; padding-right: 16px; scrollbar-width: none; }
+    .ec-strip::-webkit-scrollbar { display: none; }
+    .ec-strip :global(button) { flex: none; width: 46px; height: 58px; border-radius: 6px; border: 1px solid var(--lr-line); background: var(--lr-card); color: var(--lr-soft); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font: inherit; position: relative; cursor: pointer; }
+    .ec-strip :global(button span) { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--lr-muted); }
+    .ec-strip :global(button b) { font-size: 17px; color: var(--lr-text); }
+    .ec-strip :global(button.today) { border-color: var(--lr-orange); }
+    .ec-strip :global(button i) { position: absolute; bottom: 5px; width: 5px; height: 5px; border-radius: 999px; background: var(--lr-orange); }
+    .ec-strip :global(button i.me) { background: var(--lr-lime); }
+    .ec-strip :global(button:disabled) { opacity: .45; cursor: default; }
+    .tz-m { margin: 12px 0 0; font-size: 13px; white-space: normal; }
+    .ec-body { grid-template-columns: 1fr; padding-top: 20px; }
+    .ec-side { display: none; }
+    :global(.ec-dc-inline) { display: block; margin-top: 20px; }
+    :global(.ev-dh) { font-size: 18px; }
+    .ec-open { flex-wrap: wrap; }
+    .ec-more .btn { width: 100%; }
+  }
+</style>
+
 <script>
-  import { sampleEventsUpcoming, eventRowHtml, localizeTimes, monthLabel, type HubEvent } from '../../../data/hub';
+  import { sampleEventsUpcoming, eventRowHtml, localizeTimes, esc, type HubEvent } from '../../../data/hub';
   import { fetchLiveEvents } from '../../../scripts/hub-live';
   import { createEventRsvp } from '../../../scripts/event-rsvp';
+  import { getSupabase, backendConfigured } from '../../../scripts/supabase-client';
 
-  const root = document.getElementById('ev-root')!;
-  const emptyEl = document.getElementById('ev-empty')!;
-  const flagEl = document.getElementById('ev-flag')!;
-  const typeSel = document.getElementById('ev-type') as HTMLSelectElement;
-  const platSel = document.getElementById('ev-platform') as HTMLSelectElement;
+  const $ = (id: string) => document.getElementById(id)!;
+  const root = $('ev-root');
+  const dcCardHtml = (document.querySelector('.side-dc .dc-card') as HTMLElement).outerHTML;
 
   // Sample events (flagged) until real ones exist -- moved to upcoming dates so
   // the sign-up demo keeps working after release (RS-0033).
   let events: HubEvent[] = sampleEventsUpcoming();
   let live = false;
+  let filter = '';
+  let monthShown: Date | null = null;
   const rsvp = createEventRsvp(root);
 
-  function render() {
-    const t = typeSel.value;
-    const p = platSel.value;
-    const list = events.filter((e) => (!t || e.event_type === t) && (!p || e.platforms.includes(p as never)));
-    let html = '';
-    let current = '';
-    for (const e of list) {
-      const label = monthLabel(e.starts_at);
-      if (label !== current) {
-        if (current) html += '</div>';
-        html += `<h2 class="ev-month">${label}</h2><div class="ev-list">`;
-        current = label;
-      }
-      html += eventRowHtml(e, { rsvp: true, sample: !live });
-    }
-    if (current) html += '</div>';
-    root.innerHTML = html;
-    localizeTimes(root);
-    emptyEl.hidden = list.length > 0;
-    rsvp.setEvents(events, live);
-    rsvp.renderRsvps();
+  // local calendar day of an ISO time
+  const keyOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const todayKey = keyOf(new Date());
+  const tzShort = new Intl.DateTimeFormat('en-GB', { timeZoneName: 'short' }).formatToParts(new Date()).find((p) => p.type === 'timeZoneName')?.value ?? 'UTC';
+  const off = -new Date().getTimezoneOffset();
+  const offTxt = `UTC${off >= 0 ? '+' : '−'}${Math.floor(Math.abs(off) / 60)}${Math.abs(off) % 60 ? `:${String(Math.abs(off) % 60).padStart(2, '0')}` : ''}`;
+  $('ev-tz').textContent = tzShort.startsWith('GMT') || tzShort.startsWith('UTC') ? offTxt : `${tzShort} (${offTxt})`;
+  $('ev-tz-m').textContent = $('ev-tz').textContent;
+
+  function visible(): HubEvent[] {
+    const mine = rsvp.mine();
+    return events.filter((e) => !filter || (filter === 'mine' ? mine.has(e.event_id) : e.event_type === filter));
+  }
+  function groupsOf(list: HubEvent[]) {
+    const g = new Map<string, HubEvent[]>();
+    for (const e of list) { const k = keyOf(new Date(e.starts_at)); if (!g.has(k)) g.set(k, []); g.get(k)!.push(e); }
+    return g;
+  }
+  const dayTitle = (k: string) => { const d = new Date(`${k}T12:00:00`); return `${d.toLocaleDateString('en-GB', { weekday: 'long' })}, ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`; };
+  function groupHtml(k: string, list: HubEvent[], rsvpOn: boolean) {
+    return `<section class="ev-day-g" id="day-${k}"><h2 class="ev-dh">${dayTitle(k)}${k === todayKey ? '<span class="today">Today</span>' : ''}<span class="n">${list.length} event${list.length === 1 ? '' : 's'}</span></h2><div class="ev-list">${list.map((e) => eventRowHtml(e, { rsvp: rsvpOn, sample: !live, full: true })).join('')}</div></section>`;
   }
 
-  typeSel.addEventListener('change', render);
-  platSel.addEventListener('change', render);
+  function render() {
+    const list = visible();
+    const g = groupsOf(list);
+    let html = '';
+    let i = 0;
+    for (const [k, l] of g) {
+      html += groupHtml(k, l, true);
+      if (i++ === 0) html += `<div class="ec-dc-inline">${dcCardHtml}</div>`; // phone: Discord card after the first day
+    }
+    root.innerHTML = html;
+    localizeTimes(root);
+    $('ev-empty').hidden = list.length > 0;
+    rsvp.setEvents(events, live);
+    rsvp.renderRsvps();
+    drawCal();
+    drawStrip();
+  }
+
+  // ---- "Jump to a date": month view (desktop) + day strip (phone) ----
+  function jump(k: string) {
+    const el = document.getElementById(`day-${k}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function dayInfo() {
+    const all = new Set(visible().map((e) => keyOf(new Date(e.starts_at))));
+    const mineIds = rsvp.mine();
+    const mine = new Set(events.filter((e) => mineIds.has(e.event_id)).map((e) => keyOf(new Date(e.starts_at))));
+    return { all, mine };
+  }
+  function drawCal() {
+    const { all, mine } = dayInfo();
+    if (!monthShown) {
+      const n = new Date();
+      const firstEv = visible().map((e) => new Date(e.starts_at)).find((d) => d >= new Date(n.getFullYear(), n.getMonth(), n.getDate()));
+      const ref = firstEv && !(firstEv.getFullYear() === n.getFullYear() && firstEv.getMonth() === n.getMonth()) && ![...all].some((k) => k.startsWith(keyOf(n).slice(0, 7))) ? firstEv : n;
+      monthShown = new Date(ref.getFullYear(), ref.getMonth(), 1);
+    }
+    const y = monthShown.getFullYear(), m = monthShown.getMonth();
+    const first = new Date(y, m, 1);
+    const lead = (first.getDay() + 6) % 7; // Monday first
+    const days = new Date(y, m + 1, 0).getDate();
+    let cells = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d) => `<span class="wd">${d}</span>`).join('');
+    for (let i = 0; i < lead; i++) cells += `<span class="d o">${new Date(y, m, i - lead + 1).getDate()}</span>`;
+    for (let d = 1; d <= days; d++) {
+      const k = keyOf(new Date(y, m, d));
+      const has = all.has(k);
+      const cls = ['d', has ? 'has' : '', k === todayKey ? 'today' : ''].filter(Boolean).join(' ');
+      const dot = has ? `<i class="${mine.has(k) ? 'me' : ''}"></i>` : '';
+      cells += has ? `<button type="button" class="${cls}" data-day="${k}" aria-label="${esc(dayTitle(k))}">${d}${dot}</button>` : `<span class="${cls}">${d}</span>`;
+    }
+    const label = first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    $('ev-cal').innerHTML = `<div class="mh"><b>${label}</b><span><button type="button" data-m="-1" aria-label="Previous month">‹</button> <button type="button" data-m="1" aria-label="Next month">›</button></span></div><div class="mg">${cells}</div><div class="lg"><span><i></i>Events</span>${mine.size ? '<span><i class="me"></i>You’re going</span>' : ''}</div>`;
+  }
+  function drawStrip() {
+    const { all, mine } = dayInfo();
+    const n = new Date();
+    const t0 = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime();
+    const lastEv = Math.max(0, ...[...all].map((k) => Math.round((new Date(`${k}T00:00:00`).getTime() - t0) / 864e5)));
+    const span = Math.min(60, Math.max(14, lastEv + 1));
+    let html = '';
+    for (let i = 0; i < span; i++) {
+      const d = new Date(n.getFullYear(), n.getMonth(), n.getDate() + i);
+      const k = keyOf(d);
+      const has = all.has(k);
+      html += `<button type="button" data-day="${k}" class="${k === todayKey ? 'today' : ''}"${has ? '' : ' disabled'} aria-label="${esc(dayTitle(k))}"><span>${d.toLocaleDateString('en-GB', { weekday: 'short' })}</span><b>${d.getDate()}</b>${has ? `<i class="${mine.has(k) ? 'me' : ''}"></i>` : ''}</button>`;
+    }
+    $('ev-strip').innerHTML = html;
+  }
+  $('ev-cal').addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const m = t.closest<HTMLButtonElement>('[data-m]');
+    if (m && monthShown) { monthShown = new Date(monthShown.getFullYear(), monthShown.getMonth() + Number(m.dataset.m), 1); drawCal(); return; }
+    const d = t.closest<HTMLButtonElement>('[data-day]');
+    if (d) jump(d.dataset.day!);
+  });
+  $('ev-strip').addEventListener('click', (e) => { const d = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-day]'); if (d) jump(d.dataset.day!); });
+
+  // ---- type chips (+ My events) ----
+  $('ev-chips').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-type]');
+    if (!b) return;
+    filter = b.dataset.type ?? '';
+    document.querySelectorAll<HTMLButtonElement>('#ev-chips button').forEach((x) => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+    render();
+  });
+  // re-draw the calendar dots after "I'm in" / cancel
+  root.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (t.closest('[data-join],[data-leave]')) setTimeout(() => { drawCal(); drawStrip(); }, 600);
+    const s = t.closest<HTMLButtonElement>('[data-share]');
+    if (s) {
+      const url = `${location.origin}${location.pathname}#event-${s.dataset.share}`;
+      if (navigator.share) navigator.share({ title: s.dataset.title, url }).catch(() => {});
+      else navigator.clipboard?.writeText(url).then(() => { const o = s.innerHTML; s.textContent = 'Link copied'; setTimeout(() => { s.innerHTML = o; }, 1500); }).catch(() => {});
+    }
+  });
+
   rsvp.setEvents(events, false);
   render();
+
+  // ---- logged in: "My events" chip, other Discord card text ----
+  if (backendConfigured) {
+    getSupabase().auth.getSession().then(({ data }) => {
+      if (!data?.session) return;
+      $('ev-mine').hidden = false;
+      document.querySelectorAll<HTMLElement>('[data-dc-h]').forEach((x) => { x.textContent = 'More on Discord'; });
+      document.querySelectorAll<HTMLElement>('[data-dc-k]').forEach((x) => { x.style.display = 'none'; });
+      const setAll = () => document.querySelectorAll<HTMLElement>('.dc-card').forEach((c) => {
+        c.querySelector('[data-dc-t]')!.textContent = 'Not every event is listed here';
+        c.querySelector('[data-dc-p]')!.textContent = 'Lobbies and meets also get posted straight on our Discord server. Haven’t checked in a while? Take a look.';
+        (c.querySelector('[data-dc-free]') as HTMLElement).style.display = 'none';
+        c.querySelector('[data-dc-b]')!.textContent = 'Open Discord';
+      });
+      setAll();
+      new MutationObserver(setAll).observe(root, { childList: true });
+    });
+  }
 
   fetchLiveEvents().then(async (data) => {
     if (!data) return;
     events = data;
     live = true;
     rsvp.setEvents(events, true);
-    flagEl.hidden = true;
+    $('ev-flag').hidden = true;
+    $('ev-past-btn').hidden = false;
     render();
     // Deep link from the Discord bot / shares: /community/events/#event-<id> (2026-10-04)
     const target = location.hash.startsWith('#event-') ? document.getElementById(location.hash.slice(1)) : null;
     if (target) { target.scrollIntoView({ block: 'center' }); target.classList.add('is-target'); }
     await rsvp.connect();
+    drawCal(); drawStrip();
+  });
+
+  // ---- past events (live only): last 30, newest first, no sign-up ----
+  $('ev-past-btn').addEventListener('click', async () => {
+    const btn = $('ev-past-btn') as HTMLButtonElement;
+    btn.disabled = true;
+    const since = new Date(Date.now() - 6 * 3600 * 1000).toISOString();
+    const { data } = await getSupabase().from('hub_events')
+      .select('event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)')
+      .eq('is_published', true).lt('starts_at', since).order('starts_at', { ascending: false }).limit(30);
+    const past = (data ?? []) as unknown as HubEvent[];
+    const g = groupsOf(past);
+    const box = $('ev-past');
+    box.innerHTML = past.length ? `<h2 class="ev-dh" style="margin-top:32px">Past events</h2>${[...g].map(([k, l]) => groupHtml(k, l, false)).join('')}` : '<p class="hub-empty">No past events yet.</p>';
+    localizeTimes(box);
+    box.hidden = false;
+    btn.hidden = true;
   });
 </script>

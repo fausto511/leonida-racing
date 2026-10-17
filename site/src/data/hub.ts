@@ -303,7 +303,7 @@ export function psnProfileUrl(name: string): string {
   return `https://profile.playstation.com/${encodeURIComponent(name)}`;
 }
 
-export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boolean } = {}): string {
+export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boolean; full?: boolean } = {}): string {
   // Redesign (boards Community / Events): date block · title · "type  time · place" ·
   // "Hosted by <PSN> TAG · Event Discord · PS5" · description; right: sign-up slot
   // (scripts/event-rsvp.ts). Times are rendered in UTC here and localised in the browser.
@@ -335,6 +335,41 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
     join && !cancelled ? `<a class="ev-info" href="${esc(join)}" target="_blank" rel="noopener">Event info ↗</a>` : '',
     !opts.sample ? `<a class="ev-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?event=${encodeURIComponent(e.event_id)}`)}" title="Report this event to the moderators">Report</a>` : '',
   ].filter(Boolean).join('<span class="dot" aria-hidden="true">·</span>');
+  const dateBlock = `<div class="ev-date" data-ts="${esc(e.starts_at)}">
+    <span class="ev-wd" data-fmt="wd">${esc(wd)}</span>
+    <span class="ev-day" data-fmt="dnum">${esc(day)}</span>
+    <span class="ev-mon" data-fmt="mon">${esc(mon)}</span>
+  </div>`;
+  const timeHtml = `<b class="ev-time"><span data-ts="${esc(e.starts_at)}" data-fmt="time">${esc(time)}</span>${end ? `–<span data-ts="${esc(e.ends_at)}" data-fmt="time">${esc(endTime)}</span>` : ''}</b>`;
+  if (opts.full) {
+    // Event calendar (board Events): chips · title · Hosted by · time + place · links · description;
+    // right: sign-up slot, Share + Report at the bottom.
+    const iconClock = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>';
+    const links = [
+      eventDiscordHtml(e, Boolean(opts.sample)),
+      eventStreamHtml(e, Boolean(opts.sample)),
+      e.event_type === 'time-attack' && !cancelled ? `<a class="ev-lb" href="${import.meta.env.BASE_URL}time-attack/gellhorn-international-raceway/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/></svg>Gellhorn leaderboard →</a>` : '',
+      join && !cancelled ? `<a class="ev-info" href="${esc(join)}" target="_blank" rel="noopener">Event info ↗</a>` : '',
+    ].filter(Boolean).join('<span class="dot" aria-hidden="true">·</span>');
+    const share = cancelled ? '' : `<button type="button" class="ev-share" data-share="${esc(e.event_id)}" data-title="${esc(e.title)}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Share</button>`;
+    const report = !opts.sample ? `<a class="ev-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?event=${encodeURIComponent(e.event_id)}`)}" title="Report this event to the moderators">Report</a>` : '<span class="ev-report is-off" title="Sample event">Report</span>';
+    return `<article class="ev-row ev-fullrow${cancelled ? ' is-cancelled' : ''}" id="event-${esc(e.event_id)}" data-type="${esc(e.event_type)}" data-platforms="${esc(e.platforms.join('|'))}" data-start="${esc(e.starts_at)}">
+  ${dateBlock}
+  <div class="ev-main">
+    <p class="ev-chips"><span class="ev-type">${esc(eventTypeLabels[e.event_type] ?? e.event_type)}</span>${plats ? `<span class="ev-type">${esc(plats)}</span>` : ''}${opts.sample ? '<span class="ev-flag" title="Example event — it will not take place">Sample</span>' : ''}</p>
+    <h3 class="ev-title">${esc(e.title)}</h3>
+    ${hostedBy ? `<p class="ev-l2">${hostedBy}</p>` : ''}
+    <p class="ev-l1"><span class="ev-clock">${iconClock}${timeHtml}</span>${e.location ? `<span class="dot" aria-hidden="true">·</span><span class="ev-loc">${iconPin}${esc(e.location)}</span>` : ''}</p>
+    ${links ? `<p class="ev-l3">${links}</p>` : ''}
+    ${e.description ? `<p class="ev-desc">${esc(e.description)}</p>` : ''}
+  </div>
+  <div class="ev-side">
+    ${cancelled ? '<span class="ev-flag ev-cancel">Cancelled</span>' : ''}
+    ${opts.rsvp ? `<div class="ev-rsvp" data-rsvp="${esc(e.event_id)}"></div>` : ''}
+    <div class="ev-tools">${share}${report}</div>
+  </div>
+</article>`;
+  }
   return `<article class="ev-row${cancelled ? ' is-cancelled' : ''}" id="event-${esc(e.event_id)}" data-type="${esc(e.event_type)}" data-platforms="${esc(e.platforms.join('|'))}" data-start="${esc(e.starts_at)}">
   <div class="ev-date" data-ts="${esc(e.starts_at)}">
     <span class="ev-wd" data-fmt="wd">${esc(wd)}</span>
