@@ -1,11 +1,13 @@
 ---
-// Gellhorn leaderboard (2026-09-26, DEC-0072): one vehicle dropdown --
+// Gellhorn leaderboard (2026-09-26, DEC-0072). Filters (Fausto 17.10.): Class, Manufacturer, Vehicle
+// (?class=Sports&make=grotti&vehicle=<id>). Class/Manufacturer rank every driver once by their best lap
+// on the matching vehicles. Older note: one vehicle dropdown --
 // "All vehicles" = Overall (across all vehicles and classes), or one
 // vehicle's own board -- plus driver/crew search and All times / Verified only.
 // The build renders the sample data with the same renderer the browser uses
 // (data/leaderboard.ts); the browser takes over and swaps in live rows as
 // soon as at least one real run is published.
-import { sampleEntries, initialState, render, vehiclesNeededHtml, vehicleSelectHtml } from '../data/leaderboard';
+import { sampleEntries, initialState, render, vehiclesNeededHtml, vehicleSelectHtml, classSelectHtml, makeSelectHtml } from '../data/leaderboard';
 const vehicleSelect = vehicleSelectHtml(sampleEntries, initialState);
 const first = render(sampleEntries, initialState, true);
 const needed = vehiclesNeededHtml(sampleEntries);
@@ -21,6 +23,14 @@ const needed = vehiclesNeededHtml(sampleEntries);
     </div>
 
     <div class="lb-controls">
+      <label class="lb-vehicle-select lb-filter-select">
+        <span class="sr-only">Class</span>
+        <select class="ui-select" id="lb-class" aria-label="Class" set:html={classSelectHtml(initialState)}></select>
+      </label>
+      <label class="lb-vehicle-select lb-filter-select">
+        <span class="sr-only">Manufacturer</span>
+        <select class="ui-select" id="lb-make" aria-label="Manufacturer" set:html={makeSelectHtml(initialState)}></select>
+      </label>
       <label class="lb-vehicle-select">
         <span class="sr-only">Vehicle</span>
         <select class="ui-select" id="lb-vehicle" aria-label="Vehicle: All vehicles (Overall) or one vehicle's leaderboard" set:html={vehicleSelect}></select>
@@ -72,6 +82,7 @@ const needed = vehiclesNeededHtml(sampleEntries);
 
   .lb-controls { display: flex; flex-wrap: wrap; gap: .85rem; margin-bottom: 1.25rem; }
   .lb-vehicle-select { flex: 1 1 16rem; display: flex; }
+  .lb-filter-select { flex: 1 1 11rem; }
   .lb-vehicle-select select { width: 100%; }
   .lb-search { flex: 1 1 14rem; } /* look: site-wide .ui-search (tokens.css) */
   .lb-toggle { display: inline-flex; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); overflow: hidden; }
@@ -173,7 +184,7 @@ const needed = vehiclesNeededHtml(sampleEntries);
   // TRACK_ID is fixed while Gellhorn is the only track.
   import { createClient } from '@supabase/supabase-js';
   import { LEADERBOARD_PLATFORM } from '../data/platforms';
-  import { sampleEntries, initialState, render, vehiclesNeededHtml, vehicleSelectHtml, type LbEntry, type LbState } from '../data/leaderboard';
+  import { sampleEntries, initialState, render, vehiclesNeededHtml, vehicleSelectHtml, classSelectHtml, makeSelectHtml, inFilter, lbClasses, lbMakes, type LbEntry, type LbState } from '../data/leaderboard';
 
   const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL ?? '';
   const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
@@ -192,17 +203,23 @@ const needed = vehiclesNeededHtml(sampleEntries);
   // Shareable state: ?vehicle=<id>&verified=1
   const params = new URLSearchParams(location.search);
   if (params.get('vehicle')) state.vehicle = params.get('vehicle');
+  const pc = params.get('class'); if (pc && lbClasses.includes(pc)) state.cls = pc;
+  const pm = params.get('make'); if (pm && lbMakes.some(([k]) => k === pm)) state.make = pm;
   if (params.get('verified') === '1') state.verifiedOnly = true;
 
   function syncUrl() {
     const u = new URL(location.href);
-    ['vehicle', 'verified', 'lb'].forEach((k) => u.searchParams.delete(k));
+    ['vehicle', 'class', 'make', 'verified', 'lb'].forEach((k) => u.searchParams.delete(k));
+    if (state.cls) u.searchParams.set('class', state.cls);
+    if (state.make) u.searchParams.set('make', state.make);
     if (state.vehicle) u.searchParams.set('vehicle', state.vehicle);
     if (state.verifiedOnly) u.searchParams.set('verified', '1');
     history.replaceState(null, '', u.pathname + u.search + u.hash);
   }
 
   const vehicleSel = $('lb-vehicle') as HTMLSelectElement;
+  const classSel = $('lb-class') as HTMLSelectElement;
+  const makeSel = $('lb-make') as HTMLSelectElement;
   function draw() {
     const r = render(current(), state, sample);
     $('lb-thead').innerHTML = r.head;
@@ -212,6 +229,8 @@ const needed = vehiclesNeededHtml(sampleEntries);
     $('lb-meta').textContent = r.meta;
     vehicleSel.innerHTML = vehicleSelectHtml(current(), state); // counts follow the verified filter
     vehicleSel.value = state.vehicle ?? '';
+    classSel.innerHTML = classSelectHtml(state); classSel.value = state.cls ?? '';
+    makeSel.innerHTML = makeSelectHtml(state); makeSel.value = state.make ?? '';
     document.querySelectorAll<HTMLButtonElement>('.lb-toggle button').forEach((b) => {
       const on = (b.dataset.verified === '1') === state.verifiedOnly;
       b.classList.toggle('is-active', on);
@@ -223,6 +242,10 @@ const needed = vehiclesNeededHtml(sampleEntries);
   const qDriver = $('lb-q-driver') as HTMLInputElement;
   qDriver.addEventListener('input', () => { state.qDriver = qDriver.value; draw(); });
   vehicleSel.addEventListener('change', () => { state.vehicle = vehicleSel.value || null; state.showAll = false; draw(); });
+  // a chosen vehicle outside the new class/manufacturer is dropped
+  const refilter = () => { if (state.vehicle && !inFilter(state.vehicle, null, state)) state.vehicle = null; state.showAll = false; draw(); };
+  classSel.addEventListener('change', () => { state.cls = classSel.value || null; refilter(); });
+  makeSel.addEventListener('change', () => { state.make = makeSel.value || null; refilter(); });
   document.querySelectorAll<HTMLButtonElement>('.lb-toggle button').forEach((b) => b.addEventListener('click', () => {
     state.verifiedOnly = b.dataset.verified === '1';
     draw();

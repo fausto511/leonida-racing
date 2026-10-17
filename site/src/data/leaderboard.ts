@@ -11,7 +11,8 @@
 // fictional sample crews of The Hub (data/hub.ts). Always shown with the
 // visible "Sample data" flag.
 import { vehicleOptions } from './vehicles';
-import { makeHref } from './garage-taxonomy';
+import { makeHref, classHref, classSlug } from './garage-taxonomy';
+import { taxonomyCopy } from './taxonomy-copy';
 import { sampleCrews, esc } from './hub';
 
 export interface LbEntry {
@@ -31,11 +32,15 @@ export interface LbEntry {
 
 export interface LbState {
   vehicle: string | null; // null = Overall (all vehicles), else one vehicle's board
+  /** Class filter (class name as in the data, e.g. "Sports"); null = all classes (Fausto 17.10.) */
+  cls: string | null;
+  /** Manufacturer filter (logo slug, e.g. "grotti"); null = all manufacturers */
+  make: string | null;
   qDriver: string;
   verifiedOnly: boolean;
   showAll: boolean;
 }
-export const initialState: LbState = { vehicle: null, qDriver: '', verifiedOnly: false, showAll: false };
+export const initialState: LbState = { vehicle: null, cls: null, make: null, qDriver: '', verifiedOnly: false, showAll: false };
 export const PAGE = 12;
 
 // ---------------------------------------------------------------------------
@@ -182,6 +187,27 @@ function videoCell(e: LbEntry, sample: boolean) {
 const gap = (ms: number, best: number) => (ms === best ? '' : `<span class="lb-gap">+${((ms - best) / 1000).toFixed(3)}</span>`);
 const empty = (cols: number, text: string) => `<tr class="lb-empty-row"><td colspan="${cols}">${text}</td></tr>`;
 
+const vById = new Map(vehicleOptions.map((v) => [v.id, v]));
+/** Does a vehicle id pass the class / manufacturer filters? */
+export function inFilter(id: string, logo: string | null, s: Pick<LbState, 'cls' | 'make'>): boolean {
+  const v = vById.get(id);
+  if (s.cls && !(v?.classes ?? []).includes(s.cls)) return false;
+  if (s.make && (v?.logoSlug ?? logo) !== s.make) return false;
+  return true;
+}
+/** Classes and manufacturers for the dropdowns (garage vehicles). */
+export const lbClasses = [...new Set(vehicleOptions.flatMap((v) => v.classes))].sort();
+export const lbMakes = [...new Map(vehicleOptions.map((v) => [v.logoSlug, v.make])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+const classLabel = (c: string) => taxonomyCopy[classSlug(c)]?.h1 ?? c;
+const makeName = (slug: string) => lbMakes.find(([k]) => k === slug)?.[1] ?? slug;
+
+export function classSelectHtml(s: LbState): string {
+  return `<option value=""${s.cls ? '' : ' selected'}>All classes</option>` + lbClasses.map((c) => `<option value="${esc(c)}"${s.cls === c ? ' selected' : ''}>${esc(classLabel(c))}</option>`).join('');
+}
+export function makeSelectHtml(s: LbState): string {
+  return `<option value=""${s.make ? '' : ' selected'}>All manufacturers</option>` + lbMakes.map(([slug, name]) => `<option value="${esc(slug)}"${s.make === slug ? ' selected' : ''}>${esc(name)}</option>`).join('');
+}
+
 export interface Rendered { head: string; body: string; context: string; more: string; meta: string }
 
 export function render(all: LbEntry[], s: LbState, sample: boolean): Rendered {
@@ -215,15 +241,29 @@ export function render(all: LbEntry[], s: LbState, sample: boolean): Rendered {
   }
 
   // --- overall: across all vehicles and classes, every driver once ---
-  const ranked = overallRows(all, s.verifiedOnly);
+  // Class / manufacturer filter: same ranking, only on the matching vehicles (each driver once, best lap).
+  const filtered = s.cls || s.make;
+  const pool = filtered ? all.filter((e) => inFilter(e.vehicle_id, e.logo, s)) : all;
+  const ranked = overallRows(pool, s.verifiedOnly);
   const rows = ranked.filter(({ e }) => matchDriver(e, qd));
   const shown = cap(rows);
   const best = ranked[0]?.e.lap_time_ms ?? 0;
   const head = '<tr><th scope="col">#</th><th scope="col">Driver</th><th scope="col">Vehicle</th><th scope="col" class="col-opt">Track Entries</th><th scope="col">Lap Time</th><th scope="col"><span class="st-txt">Status</span></th><th scope="col" class="col-opt">Video</th></tr>';
   const body = shown.length
     ? shown.map(({ e, rank }) => `<tr class="${rank <= 3 ? 'is-top3' : ''}"><td class="lb-rank">${rank}</td><td class="lb-driver">${esc(e.driver)}${crewTag(e.crew)}</td><td>${vehicleCell(e)}</td><td class="lb-num col-opt">${e.entries}</td><td class="lb-time">${lapTime(e.lap_time_ms)}${gap(e.lap_time_ms, best)}</td><td>${statusCell(e.verified)}</td><td class="lb-video col-opt">${videoCell(e, sample)}</td></tr>`).join('')
-    : empty(7, ranked.length ? 'No driver matches your search.' : `No ${vf}times yet.`);
-  return { head, body, context: '', more: moreBtn(shown.length, rows.length, 'drivers'), meta: metaBase };
+    : empty(7, ranked.length ? 'No driver matches your search.' : filtered ? `No ${vf}times in this selection yet. <a href="${base}time-attack/submit/">Be the first — submit a lap</a>.` : `No ${vf}times yet.`);
+  let context = '';
+  if (filtered) {
+    const title = s.make && s.cls ? `${esc(makeName(s.make))} · ${esc(classLabel(s.cls))}` : s.make ? `${esc(makeName(s.make))} Cars` : esc(classLabel(s.cls!));
+    const kicker = s.make && s.cls ? 'Manufacturer + Class Leaderboard' : s.make ? 'Manufacturer Leaderboard' : 'Class Leaderboard';
+    const pageHref = s.make && !s.cls ? (makeHref({ logoSlug: s.make }) ? `${base}${makeHref({ logoSlug: s.make })}` : '') : s.cls && !s.make ? (classHref(s.cls) ? `${base}${classHref(s.cls)}` : '') : '';
+    const chip = s.make ? logoChip({ make: makeName(s.make), logo: s.make }, true) : '';
+    context = `<div class="lb-context">
+      <div class="lb-context-title">${chip}<div><p class="lb-context-kicker">${kicker}</p><h3>${title}</h3></div></div>
+      ${pageHref ? `<a class="lb-context-link" href="${pageHref}">Open in The Garage</a>` : ''}
+    </div>`;
+  }
+  return { head, body, context, more: moreBtn(shown.length, rows.length, 'drivers'), meta: filtered ? `${metaBase} · ${ranked.length} driver${ranked.length === 1 ? '' : 's'} in this selection` : metaBase };
 }
 
 /** Vehicle dropdown: "All vehicles" (= Overall), then every garage vehicle
@@ -233,6 +273,7 @@ export function vehicleSelectHtml(all: LbEntry[], s: LbState): string {
   for (const e of all) if (!s.verifiedOnly || e.verified) count.set(e.vehicle_id, (count.get(e.vehicle_id) ?? 0) + 1);
   const groups = new Map<string, typeof vehicleOptions>();
   for (const v of vehicleOptions) {
+    if (!inFilter(v.id, v.logoSlug, s)) continue;
     const c = v.classes[0] ?? 'Other';
     if (!groups.has(c)) groups.set(c, []);
     groups.get(c)!.push(v);
@@ -242,7 +283,8 @@ export function vehicleSelectHtml(all: LbEntry[], s: LbState): string {
     return `<option value="${esc(v.id)}"${s.vehicle === v.id ? ' selected' : ''}>${esc(v.make)} ${esc(v.model)}${n ? ` (${n})` : ''}</option>`;
   };
   const sorted = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  return `<option value=""${s.vehicle ? '' : ' selected'}>All vehicles (Overall)</option>`
+  const allLabel = s.cls || s.make ? 'All matching vehicles' : 'All vehicles (Overall)';
+  return `<option value=""${s.vehicle ? '' : ' selected'}>${allLabel}</option>`
     + sorted.map(([c, vs]) => `<optgroup label="${esc(c)}">${vs.sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`)).map(opt).join('')}</optgroup>`).join('');
 }
 

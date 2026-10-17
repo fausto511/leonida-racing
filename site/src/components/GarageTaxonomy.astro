@@ -81,12 +81,12 @@ const ico = {
 const more = isClass
   ? [
       { ico: ico.trophy, eb: 'Ranking', t: `Fastest ${heading} in GTA 6`, s: 'Recorded top speeds in stock form, with the source of each value.', a: 'See the ranking', href: `${base}cars/rankings/fastest/${page.slug}/` },
-      { ico: ico.timer, eb: 'Time Attack', t: `${page.name} leaderboard at Gellhorn`, s: 'Recorded driver laps at Gellhorn for this class.', a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/?class=${encodeURIComponent(page.name)}` },
+      { ico: ico.timer, eb: 'Time Attack', t: `${page.name} leaderboard at Gellhorn`, s: 'Recorded driver laps at Gellhorn for this class.', a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/?class=${encodeURIComponent(page.name)}#leaderboard` },
       { ico: ico.plus, eb: 'Compare', t: `Compare ${heading}`, s: 'Pick up to four cars and compare their available specs and lap times.', a: 'Start comparing', href: `${base}cars/compare/` },
     ]
   : [
       { ico: ico.trophy, eb: 'Ranking', t: 'Fastest cars in GTA 6', s: 'Recorded top speeds in stock form, with the source of each value.', a: 'See the ranking', href: `${base}cars/rankings/fastest/` },
-      { ico: ico.timer, eb: 'Time Attack', t: 'Gellhorn leaderboard', s: 'Explore the driver leaderboard at Gellhorn.', a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/` },
+      { ico: ico.timer, eb: 'Time Attack', t: `${page.name} leaderboard at Gellhorn`, s: 'Recorded driver laps at Gellhorn for this manufacturer.', a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/?make=${encodeURIComponent(page.slug)}#leaderboard` },
       { ico: ico.plus, eb: 'Compare', t: `Compare ${heading}`, s: 'Pick up to four cars and compare their available specs and lap times.', a: 'Start comparing', href: `${base}cars/compare/` },
     ];
 ---

@@ -70,8 +70,8 @@ const driversHtml = driverRows.length
   ? driverRows.map(({ e, rank }) => driverRowHtml({ rank, driver: e.driver, ms: e.lap_time_ms })).join('') + openRowHtml()
   : startTileHtml(vehicle.model, submitHref);
 const classRows: ClassRow[] = sample ? sampleClassRows(sampleEntries, classCars.map((v) => v.id)) : classCars.map((v) => ({ id: v.id, ms: realBest(v.id) }));
-// "See all": the class page, sorted by Gellhorn lap once laps exist (the leaderboard has no class filter yet, Fausto 17.10.)
-const classMoreHref = classHref(cls) ? `${base}${classHref(cls)}?sort=lap` : `${base}cars/`;
+// "See all": the class leaderboard at Gellhorn (class filter, Fausto 17.10.)
+const classMoreHref = `${base}time-attack/gellhorn-international-raceway/?class=${encodeURIComponent(cls)}#leaderboard`;
 const classHtml = classRowsHtml(classRows, vehicle.id, classMoreHref);
 const classTimed = classRows.filter((r) => r.ms != null).length;
 
