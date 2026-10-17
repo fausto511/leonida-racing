@@ -17,7 +17,8 @@
    "first_seen_in": null,
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Cadillac ATS"
+   "real_life_inspiration": "Cadillac ATS",
+   "other_names": []
   },
   {
    "vehicle_id": "albany-buccaneer",
@@ -35,7 +36,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Fairlane"
+   "real_life_inspiration": "Ford Fairlane",
+   "other_names": []
   },
   {
    "vehicle_id": "albany-buccaneer-custom",
@@ -53,7 +55,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": "https://www.youtube.com/watch?v=QdBZY2fkU-0&t=28s",
    "first_seen_timestamp": "0:28",
-   "real_life_inspiration": "Ford Fairlane"
+   "real_life_inspiration": "Ford Fairlane",
+   "other_names": []
   },
   {
    "vehicle_id": "albany-cavalcade-xl",
@@ -71,7 +74,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Cadillac Escalade-V (2023)"
+   "real_life_inspiration": "Cadillac Escalade-V (2023)",
+   "other_names": []
   },
   {
    "vehicle_id": "albany-emperor",
@@ -89,7 +93,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Cadillac Sedan de Ville (1977–1980)"
+   "real_life_inspiration": "Cadillac Sedan de Ville (1977–1980)",
+   "other_names": []
   },
   {
    "vehicle_id": "albany-manana",
@@ -107,7 +112,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": "https://www.rockstargames.com/VI/media/screenshots",
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Buick LeSabre"
+   "real_life_inspiration": "Buick LeSabre",
+   "other_names": []
   },
   {
    "vehicle_id": "albany-primo",
@@ -125,7 +131,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Pontiac Bonneville (late 1980s)"
+   "real_life_inspiration": "Pontiac Bonneville (late 1980s)",
+   "other_names": []
   },
   {
    "vehicle_id": "albany-v-str",
@@ -143,7 +150,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": "https://www.rockstargames.com/VI/media/screenshots",
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Cadillac CTS-V (third generation)"
+   "real_life_inspiration": "Cadillac CTS-V (third generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "annis-elegy-retro-custom",
@@ -161,7 +169,10 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Nissan Skyline GT-R R32"
+   "real_life_inspiration": "Nissan Skyline GT-R R32",
+   "other_names": [
+    "'90 Elegy"
+   ]
   },
   {
    "vehicle_id": "annis-hellion",
@@ -179,7 +190,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Nissan Patrol Safari Y60"
+   "real_life_inspiration": "Nissan Patrol Safari Y60",
+   "other_names": []
   },
   {
    "vehicle_id": "benefactor-dubsta",
@@ -197,7 +209,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Mercedes-Benz G-Class"
+   "real_life_inspiration": "Mercedes-Benz G-Class",
+   "other_names": []
   },
   {
    "vehicle_id": "benefactor-schafter-v12",
@@ -216,7 +229,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Brabus E V12"
+   "real_life_inspiration": "Brabus E V12",
+   "other_names": []
   },
   {
    "vehicle_id": "benefactor-xls",
@@ -234,7 +248,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Mercedes-Benz GL-Class"
+   "real_life_inspiration": "Mercedes-Benz GL-Class",
+   "other_names": []
   },
   {
    "vehicle_id": "bravado-banshee",
@@ -252,7 +267,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Dodge Viper"
+   "real_life_inspiration": "Dodge Viper",
+   "other_names": []
   },
   {
    "vehicle_id": "bravado-buffalo",
@@ -270,7 +286,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Dodge Charger"
+   "real_life_inspiration": "Dodge Charger",
+   "other_names": []
   },
   {
    "vehicle_id": "bravado-buffalo-stx",
@@ -288,7 +305,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Dodge Charger (2015)"
+   "real_life_inspiration": "Dodge Charger (2015)",
+   "other_names": []
   },
   {
    "vehicle_id": "bravado-dorado",
@@ -306,7 +324,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Dodge Durango (first generation)"
+   "real_life_inspiration": "Dodge Durango (first generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "bravado-gauntlet-classic",
@@ -324,7 +343,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Dodge Challenger (first generation)"
+   "real_life_inspiration": "Dodge Challenger (first generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "bravado-gauntlet-hellfire",
@@ -342,7 +362,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Dodge Challenger SRT Demon (2018)"
+   "real_life_inspiration": "Dodge Challenger SRT Demon (2018)",
+   "other_names": []
   },
   {
    "vehicle_id": "canis-kamacho",
@@ -360,7 +381,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": "https://www.rockstargames.com/VI/media/screenshots",
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Jeep Crew Chief 715 concept"
+   "real_life_inspiration": "Jeep Crew Chief 715 concept",
+   "other_names": []
   },
   {
    "vehicle_id": "canis-mesa",
@@ -378,7 +400,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Jeep Wrangler"
+   "real_life_inspiration": "Jeep Wrangler",
+   "other_names": []
   },
   {
    "vehicle_id": "canis-seminole-frontier",
@@ -396,7 +419,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Jeep Cherokee (XJ)"
+   "real_life_inspiration": "Jeep Cherokee (XJ)",
+   "other_names": []
   },
   {
    "vehicle_id": "coil-raiden",
@@ -414,7 +438,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Tesla Model S"
+   "real_life_inspiration": "Tesla Model S",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-granger",
@@ -432,7 +457,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chevrolet Suburban"
+   "real_life_inspiration": "Chevrolet Suburban",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-granger-3600lx",
@@ -450,7 +476,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": "https://www.youtube.com/watch?v=QdBZY2fkU-0&t=28s",
    "first_seen_timestamp": "0:28",
-   "real_life_inspiration": "Chevrolet Suburban (2015–2020)"
+   "real_life_inspiration": "Chevrolet Suburban (2015–2020)",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-impaler-80",
@@ -468,7 +495,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chevrolet Impala (sixth generation)"
+   "real_life_inspiration": "Chevrolet Impala (sixth generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-impaler-sz",
@@ -486,7 +514,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chevrolet Impala SS (1994–1996)"
+   "real_life_inspiration": "Chevrolet Impala SS (1994–1996)",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-mamba-gt",
@@ -504,7 +533,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": "https://www.rockstargames.com/VI/media/screenshots",
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Shelby Daytona Coupe"
+   "real_life_inspiration": "Shelby Daytona Coupe",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-moonbeam",
@@ -522,7 +552,8 @@
    "first_seen_in": null,
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chevrolet Astro (1985–1994)"
+   "real_life_inspiration": "Chevrolet Astro (1985–1994)",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-sabre-turbo",
@@ -540,7 +571,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chevrolet Chevelle"
+   "real_life_inspiration": "Chevrolet Chevelle",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-tornado",
@@ -558,7 +590,8 @@
    "first_seen_in": null,
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chevrolet Bel Air"
+   "real_life_inspiration": "Chevrolet Bel Air",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-tulip",
@@ -576,7 +609,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": "https://www.youtube.com/watch?v=QdBZY2fkU-0&t=71s",
    "first_seen_timestamp": "1:11",
-   "real_life_inspiration": "Chevrolet Chevelle Malibu (1972)"
+   "real_life_inspiration": "Chevrolet Chevelle Malibu (1972)",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-tulip-m-100",
@@ -594,7 +628,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": "https://www.youtube.com/watch?v=QdBZY2fkU-0&t=28s",
    "first_seen_timestamp": "0:28",
-   "real_life_inspiration": "Chevrolet Malibu (fourth generation)"
+   "real_life_inspiration": "Chevrolet Malibu (fourth generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-vamos",
@@ -612,7 +647,8 @@
    "first_seen_in": null,
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chevrolet Nova"
+   "real_life_inspiration": "Chevrolet Nova",
+   "other_names": []
   },
   {
    "vehicle_id": "declasse-vigero-zx-convertible",
@@ -630,7 +666,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chevrolet Camaro (sixth generation)"
+   "real_life_inspiration": "Chevrolet Camaro (sixth generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "dinka-blista-compact",
@@ -648,7 +685,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Honda CR-X (first generation)"
+   "real_life_inspiration": "Honda CR-X (first generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "dinka-sugoi",
@@ -666,7 +704,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Honda Civic Type R FK8"
+   "real_life_inspiration": "Honda Civic Type R FK8",
+   "other_names": []
   },
   {
    "vehicle_id": "dundreary-landstalker-xl",
@@ -684,7 +723,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Lincoln Navigator (fourth generation)"
+   "real_life_inspiration": "Lincoln Navigator (fourth generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "dundreary-regina",
@@ -702,7 +742,8 @@
    "first_seen_in": null,
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chevrolet Caprice wagon"
+   "real_life_inspiration": "Chevrolet Caprice wagon",
+   "other_names": []
   },
   {
    "vehicle_id": "dundreary-sirius",
@@ -720,7 +761,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": "https://www.rockstargames.com/VI/media/screenshots",
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Mercury Cougar (1970)"
+   "real_life_inspiration": "Mercury Cougar (1970)",
+   "other_names": []
   },
   {
    "vehicle_id": "emperor-vectre",
@@ -738,7 +780,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": "https://www.youtube.com/watch?v=VQRLujxTm3c&t=30s",
    "first_seen_timestamp": "0:30",
-   "real_life_inspiration": "Lexus RC F"
+   "real_life_inspiration": "Lexus RC F",
+   "other_names": []
   },
   {
    "vehicle_id": "enus-jubilee",
@@ -756,7 +799,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Rolls-Royce Cullinan"
+   "real_life_inspiration": "Rolls-Royce Cullinan",
+   "other_names": []
   },
   {
    "vehicle_id": "enus-paragon-r",
@@ -774,7 +818,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Bentley Continental GT (third generation)"
+   "real_life_inspiration": "Bentley Continental GT (third generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "enus-windsor",
@@ -792,7 +837,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Rolls-Royce Wraith"
+   "real_life_inspiration": "Rolls-Royce Wraith",
+   "other_names": []
   },
   {
    "vehicle_id": "fathom-fr36",
@@ -810,7 +856,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Infiniti G35 Coupé (V35)"
+   "real_life_inspiration": "Infiniti G35 Coupé (V35)",
+   "other_names": []
   },
   {
    "vehicle_id": "gallivanter-baller-ii",
@@ -828,7 +875,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Range Rover Sport"
+   "real_life_inspiration": "Range Rover Sport",
+   "other_names": []
   },
   {
    "vehicle_id": "gallivanter-baller-st-d",
@@ -846,7 +894,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Range Rover (L460)"
+   "real_life_inspiration": "Range Rover (L460)",
+   "other_names": []
   },
   {
    "vehicle_id": "grotti-carbonizzare",
@@ -864,7 +913,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Aston Martin V12 Zagato"
+   "real_life_inspiration": "Aston Martin V12 Zagato",
+   "other_names": []
   },
   {
    "vehicle_id": "grotti-cheetah-95",
@@ -882,7 +932,11 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": "https://www.youtube.com/watch?v=QdBZY2fkU-0&t=33s",
    "first_seen_timestamp": "0:33",
-   "real_life_inspiration": "Ferrari Testarossa"
+   "real_life_inspiration": "Ferrari Testarossa",
+   "other_names": [
+    "Cheetah Classic",
+    "'95 Cheetah"
+   ]
   },
   {
    "vehicle_id": "grotti-furia",
@@ -900,7 +954,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Pininfarina Battista"
+   "real_life_inspiration": "Pininfarina Battista",
+   "other_names": []
   },
   {
    "vehicle_id": "grotti-itali-rsx",
@@ -918,7 +973,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ferrari SF90 Stradale"
+   "real_life_inspiration": "Ferrari SF90 Stradale",
+   "other_names": []
   },
   {
    "vehicle_id": "imponte-df8-90",
@@ -936,7 +992,8 @@
    "first_seen_in": null,
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Pontiac G6"
+   "real_life_inspiration": "Pontiac G6",
+   "other_names": []
   },
   {
    "vehicle_id": "imponte-phoenix",
@@ -954,7 +1011,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Pontiac Firebird (second generation)"
+   "real_life_inspiration": "Pontiac Firebird (second generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "imponte-ruiner",
@@ -972,7 +1030,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": "https://www.youtube.com/watch?v=QdBZY2fkU-0&t=52s",
    "first_seen_timestamp": "0:52",
-   "real_life_inspiration": "Pontiac Firebird Trans Am (third generation)"
+   "real_life_inspiration": "Pontiac Firebird Trans Am (third generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "invetero-coquette",
@@ -990,7 +1049,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chevrolet Corvette C7"
+   "real_life_inspiration": "Chevrolet Corvette C7",
+   "other_names": []
   },
   {
    "vehicle_id": "invetero-coquette-d10",
@@ -1008,7 +1068,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chevrolet Corvette C8"
+   "real_life_inspiration": "Chevrolet Corvette C8",
+   "other_names": []
   },
   {
    "vehicle_id": "karin-asterope-gz",
@@ -1026,7 +1087,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Toyota Camry (XV30)"
+   "real_life_inspiration": "Toyota Camry (XV30)",
+   "other_names": []
   },
   {
    "vehicle_id": "karin-contender",
@@ -1044,7 +1106,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Toyota Tundra"
+   "real_life_inspiration": "Toyota Tundra",
+   "other_names": []
   },
   {
    "vehicle_id": "karin-feroci",
@@ -1062,7 +1125,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Lexus GS 300 (S140)"
+   "real_life_inspiration": "Lexus GS 300 (S140)",
+   "other_names": []
   },
   {
    "vehicle_id": "karin-futo",
@@ -1080,7 +1144,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Toyota Corolla Levin AE86"
+   "real_life_inspiration": "Toyota Corolla Levin AE86",
+   "other_names": []
   },
   {
    "vehicle_id": "karin-intruder",
@@ -1098,7 +1163,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Infiniti Q45"
+   "real_life_inspiration": "Infiniti Q45",
+   "other_names": []
   },
   {
    "vehicle_id": "karin-rebel",
@@ -1116,7 +1182,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Toyota Hilux"
+   "real_life_inspiration": "Toyota Hilux",
+   "other_names": []
   },
   {
    "vehicle_id": "karin-sultan",
@@ -1134,7 +1201,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Lexus IS (XE10)"
+   "real_life_inspiration": "Lexus IS (XE10)",
+   "other_names": []
   },
   {
    "vehicle_id": "karin-vivanite",
@@ -1152,7 +1220,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Toyota Sienna (XL40)"
+   "real_life_inspiration": "Toyota Sienna (XL40)",
+   "other_names": []
   },
   {
    "vehicle_id": "lampadati-novak",
@@ -1170,7 +1239,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Maserati Levante"
+   "real_life_inspiration": "Maserati Levante",
+   "other_names": []
   },
   {
    "vehicle_id": "maibatsu-penumbra",
@@ -1188,7 +1258,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Mitsubishi Eclipse (fourth generation)"
+   "real_life_inspiration": "Mitsubishi Eclipse (fourth generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "maibatsu-penumbra-ff",
@@ -1206,7 +1277,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Mitsubishi Eclipse (second generation)"
+   "real_life_inspiration": "Mitsubishi Eclipse (second generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "mammoth-patriot-mil-spec",
@@ -1224,7 +1296,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Hummer H1"
+   "real_life_inspiration": "Hummer H1",
+   "other_names": []
   },
   {
    "vehicle_id": "obey-8f-drafter",
@@ -1242,7 +1315,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Audi RS5 Coupé (2018)"
+   "real_life_inspiration": "Audi RS5 Coupé (2018)",
+   "other_names": []
   },
   {
    "vehicle_id": "obey-omnis-e-gt",
@@ -1260,7 +1334,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Audi e-tron GT"
+   "real_life_inspiration": "Audi e-tron GT",
+   "other_names": []
   },
   {
    "vehicle_id": "obey-tailgater",
@@ -1278,7 +1353,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Audi A6"
+   "real_life_inspiration": "Audi A6",
+   "other_names": []
   },
   {
    "vehicle_id": "obey-tailgater-s",
@@ -1296,7 +1372,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Audi RS3 Sedan"
+   "real_life_inspiration": "Audi RS3 Sedan",
+   "other_names": []
   },
   {
    "vehicle_id": "ocelot-jugular",
@@ -1314,7 +1391,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Jaguar XE SV Project 8"
+   "real_life_inspiration": "Jaguar XE SV Project 8",
+   "other_names": []
   },
   {
    "vehicle_id": "ocelot-locust",
@@ -1332,7 +1410,8 @@
    "first_seen_in": null,
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Lotus 3-Eleven"
+   "real_life_inspiration": "Lotus 3-Eleven",
+   "other_names": []
   },
   {
    "vehicle_id": "pegassi-infernus-classic",
@@ -1350,7 +1429,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Lamborghini Diablo"
+   "real_life_inspiration": "Lamborghini Diablo",
+   "other_names": []
   },
   {
    "vehicle_id": "pegassi-tempesta",
@@ -1368,7 +1448,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Lamborghini Huracán"
+   "real_life_inspiration": "Lamborghini Huracán",
+   "other_names": []
   },
   {
    "vehicle_id": "pegassi-toros",
@@ -1386,7 +1467,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Lamborghini Urus"
+   "real_life_inspiration": "Lamborghini Urus",
+   "other_names": []
   },
   {
    "vehicle_id": "pegassi-zorrusso",
@@ -1404,7 +1486,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Italdesign Zerouno"
+   "real_life_inspiration": "Italdesign Zerouno",
+   "other_names": []
   },
   {
    "vehicle_id": "pfister-astron",
@@ -1422,7 +1505,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Porsche Macan"
+   "real_life_inspiration": "Porsche Macan",
+   "other_names": []
   },
   {
    "vehicle_id": "pfister-comet-retro-custom",
@@ -1440,7 +1524,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Porsche 911 Turbo (930) with RWB styling"
+   "real_life_inspiration": "Porsche 911 Turbo (930) with RWB styling",
+   "other_names": []
   },
   {
    "vehicle_id": "pfister-comet-s2-cabrio",
@@ -1458,7 +1543,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": "https://www.youtube.com/watch?v=QdBZY2fkU-0&t=33s",
    "first_seen_timestamp": "0:33",
-   "real_life_inspiration": "Porsche 911 Turbo S Cabriolet (992)"
+   "real_life_inspiration": "Porsche 911 Turbo S Cabriolet (992)",
+   "other_names": []
   },
   {
    "vehicle_id": "pfister-growler",
@@ -1476,7 +1562,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Porsche 718 Cayman"
+   "real_life_inspiration": "Porsche 718 Cayman",
+   "other_names": []
   },
   {
    "vehicle_id": "pfister-neon",
@@ -1494,7 +1581,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Porsche Taycan"
+   "real_life_inspiration": "Porsche Taycan",
+   "other_names": []
   },
   {
    "vehicle_id": "schyster-deviant",
@@ -1512,7 +1600,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": "https://www.rockstargames.com/VI/media/screenshots",
    "first_seen_timestamp": null,
-   "real_life_inspiration": "AMC Javelin (1972)"
+   "real_life_inspiration": "AMC Javelin (1972)",
+   "other_names": []
   },
   {
    "vehicle_id": "schyster-pmp-700",
@@ -1530,7 +1619,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Chrysler 300 (LD)"
+   "real_life_inspiration": "Chrysler 300 (LD)",
+   "other_names": []
   },
   {
    "vehicle_id": "truffade-thrax",
@@ -1548,7 +1638,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Bugatti Divo"
+   "real_life_inspiration": "Bugatti Divo",
+   "other_names": []
   },
   {
    "vehicle_id": "ubermacht-cypher",
@@ -1566,7 +1657,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "BMW M2 (F87)"
+   "real_life_inspiration": "BMW M2 (F87)",
+   "other_names": []
   },
   {
    "vehicle_id": "ubermacht-sentinel-classic",
@@ -1584,7 +1676,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "BMW M3 (E30)"
+   "real_life_inspiration": "BMW M3 (E30)",
+   "other_names": []
   },
   {
    "vehicle_id": "ubermacht-sentinel-classic-cabrio",
@@ -1602,7 +1695,8 @@
    "first_seen_in": "GTA VI promotional website",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "BMW 3 Series Cabriolet (E30)"
+   "real_life_inspiration": "BMW 3 Series Cabriolet (E30)",
+   "other_names": []
   },
   {
    "vehicle_id": "ubermacht-sentinel-xs",
@@ -1620,7 +1714,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "BMW M3 (E92)"
+   "real_life_inspiration": "BMW M3 (E92)",
+   "other_names": []
   },
   {
    "vehicle_id": "ubermacht-zion",
@@ -1638,7 +1733,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "BMW M6 (E63)"
+   "real_life_inspiration": "BMW M6 (E63)",
+   "other_names": []
   },
   {
    "vehicle_id": "ubermacht-zion-cabrio",
@@ -1656,7 +1752,8 @@
    "first_seen_in": "An Extended Look",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "BMW M6 Convertible (E64)"
+   "real_life_inspiration": "BMW M6 Convertible (E64)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-aleutian",
@@ -1674,7 +1771,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Expedition (U553)"
+   "real_life_inspiration": "Ford Expedition (U553)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-caracara-4x4",
@@ -1692,7 +1790,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": "https://www.youtube.com/watch?v=VQRLujxTm3c&t=10s",
    "first_seen_timestamp": "0:10",
-   "real_life_inspiration": "Ford F-150 Raptor (second generation)"
+   "real_life_inspiration": "Ford F-150 Raptor (second generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-chino",
@@ -1710,7 +1809,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Lincoln Continental (1965)"
+   "real_life_inspiration": "Lincoln Continental (1965)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-dominator",
@@ -1728,7 +1828,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Mustang (fifth generation)"
+   "real_life_inspiration": "Ford Mustang (fifth generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-dominator-67-buggy",
@@ -1746,7 +1847,8 @@
    "first_seen_in": "Ultimate Edition reveal",
    "first_seen_url": "https://www.rockstargames.com/VI/media/screenshots",
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Mustang (first generation)"
+   "real_life_inspiration": "Ford Mustang (first generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-dominator-asp",
@@ -1764,7 +1866,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Mustang SVT Cobra R (2000)"
+   "real_life_inspiration": "Ford Mustang SVT Cobra R (2000)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-dominator-gt",
@@ -1782,7 +1885,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Mustang Convertible (2018–2023)"
+   "real_life_inspiration": "Ford Mustang Convertible (2018–2023)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-dominator-gtx",
@@ -1800,7 +1904,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Mustang (sixth generation)"
+   "real_life_inspiration": "Ford Mustang (sixth generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-ganado-70",
@@ -1818,7 +1923,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Ranchero (1970)"
+   "real_life_inspiration": "Ford Ranchero (1970)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-montagne",
@@ -1836,7 +1942,8 @@
    "first_seen_in": "Trailer 2",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Explorer (sixth generation)"
+   "real_life_inspiration": "Ford Explorer (sixth generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-riata-classic",
@@ -1854,7 +1961,8 @@
    "first_seen_in": "Official screenshots",
    "first_seen_url": "https://www.rockstargames.com/VI/media/screenshots",
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Bronco (first generation)"
+   "real_life_inspiration": "Ford Bronco (first generation)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-slamvan",
@@ -1872,7 +1980,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford F-Series (1953–1956)"
+   "real_life_inspiration": "Ford F-Series (1953–1956)",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-stanier",
@@ -1890,7 +1999,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Crown Victoria"
+   "real_life_inspiration": "Ford Crown Victoria",
+   "other_names": []
   },
   {
    "vehicle_id": "vapid-stanier-55",
@@ -1908,7 +2018,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Ford Fairlane Club Sedan (1956)"
+   "real_life_inspiration": "Ford Fairlane Club Sedan (1956)",
+   "other_names": []
   },
   {
    "vehicle_id": "vulcar-ingot",
@@ -1926,7 +2037,8 @@
    "first_seen_in": null,
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Volkswagen Passat wagon"
+   "real_life_inspiration": "Volkswagen Passat wagon",
+   "other_names": []
   },
   {
    "vehicle_id": "zirconium-stratum",
@@ -1944,7 +2056,8 @@
    "first_seen_in": "Trailer 1",
    "first_seen_url": null,
    "first_seen_timestamp": null,
-   "real_life_inspiration": "Honda Accord wagon"
+   "real_life_inspiration": "Honda Accord wagon",
+   "other_names": []
   }
  ],
  "values": [],

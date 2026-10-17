@@ -17,7 +17,7 @@ const acquisitionLabels: Record<string, string> = {
 <article
   class="v-tile"
   data-id={v.id}
-  data-search={`${v.make} ${v.model}`.toLowerCase()}
+  data-search={`${v.make} ${v.model} ${(v.otherNames ?? []).join(' ')}`.toLowerCase()}
   data-classes={v.classes.join('|')}
   data-make={v.make}
   data-drive={v.drive}

@@ -34,7 +34,7 @@ const origin = (v: VehicleOption) => (!v.previousGames ? '' : v.previousGames.le
 const cardData = (v: VehicleOption, i: number) => ({
   order: i,
   name: `${v.make} ${v.model}`.toLowerCase(),
-  search: `${v.make} ${v.model} ${v.realLifeInspiration ?? ''} ${v.classes.join(' ')}`.toLowerCase(),
+  search: `${v.make} ${v.model} ${(v.otherNames ?? []).join(' ')} ${v.realLifeInspiration ?? ''} ${v.classes.join(' ')}`.toLowerCase(),
   classes: v.classes.join('|'),
   make: v.logoSlug,
   drive: v.drive,

@@ -30,6 +30,9 @@ export interface VehicleOption {
   previousGames?: string[];
   // Can it be sold in-game? undefined = unknown.
   sellable?: 'yes' | 'no';
+  // Other names (earlier games, unconfirmed names, spellings; RS-0074, DEC-0132).
+  // Search only -- never shown as the official name, which is always `model`.
+  otherNames?: string[];
 }
 
 // RULE (Fausto, 2026-09-30): vehicleOptions lists ONLY vehicles whose GTA VI
@@ -49,9 +52,13 @@ interface GeneratedVehicle {
   release_id: string | null; first_seen_in: string | null; real_life_inspiration: string | null;
   first_seen_url?: string | null; first_seen_timestamp?: string | null;
   family?: string | null; previous_games?: string[] | null; sellable?: string | null;
+  other_names?: string[] | null;
 }
+// In-game stats (0-10) and ratings shown in the GTA VI vehicle menu (RS-0074, DEC-0132).
+// Prepared before launch; no values yet, so nothing displays them so far.
+export type InGameMetric = 'stat_speed' | 'stat_acceleration' | 'stat_handling_asphalt' | 'stat_handling_offroad' | 'stat_strength' | 'rating_road' | 'rating_offroad';
 export interface VehicleValue {
-  vehicle_id: string; metric: 'price_gtad' | 'sell_price_gtad' | 'top_speed_mph' | 'gellhorn_reference_lap_ms'; value: number;
+  vehicle_id: string; metric: 'price_gtad' | 'sell_price_gtad' | 'top_speed_mph' | 'gellhorn_reference_lap_ms' | InGameMetric; value: number;
   /** 'stock' (default) or 'tuned' (Fausto 2026-10-08: measure stock first, tuned later). */
   tuning?: 'stock' | 'tuned';
   source_type: 'in_game' | 'rockstar' | 'controlled_test' | 'community' | 'derived'; method: string | null;
@@ -76,6 +83,7 @@ export const vehicleOptions: VehicleOption[] = (generated.vehicles as GeneratedV
   ...(v.family ? { family: v.family } : {}),
   ...(Array.isArray(v.previous_games) ? { previousGames: v.previous_games } : {}),
   ...(v.sellable === 'yes' || v.sellable === 'no' ? { sellable: v.sellable } : {}),
+  ...(v.other_names?.length ? { otherNames: v.other_names } : {}),
 }));
 
 // Current measured values per vehicle (price, top speed, reference lap), each
@@ -148,6 +156,8 @@ export const valueSourceLabels: Record<VehicleValue['source_type'], string> = {
   in_game: 'In-game', rockstar: 'Rockstar', controlled_test: 'Measured', community: 'Community', derived: 'Calculated',
 };
 export function formatVehicleValue(v: VehicleValue): string {
+  if (v.metric.startsWith('stat_')) return v.value.toFixed(1);
+  if (v.metric.startsWith('rating_')) return String(Math.round(v.value));
   if (v.metric === 'price_gtad' || v.metric === 'sell_price_gtad') return `GTA$ ${Math.round(v.value).toLocaleString('en-US')}`;
   if (v.metric === 'top_speed_mph') return `${v.value.toFixed(1)} mph`;
   const ms = Math.round(v.value); const m = Math.floor(ms / 60000); const s = (ms % 60000) / 1000;
