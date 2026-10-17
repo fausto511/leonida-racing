@@ -26,6 +26,9 @@ const img = (key: string, widths: number[], w: number, h: number, alt: string, c
 const IMG = {
   // Visual/Cars/Garage/granforma-zorrusso.png, 2000x1125 (web exports = vehicles/granforma-zorrusso-*.webp).
   granforma: img('granforma', W3, 2000, 1125, 'Rear three-quarter view of a green sports car in GTA VI, with GranForma lettering and an emblem above the rear grille.', 'New rear branding on the car identified as the GranForma Zorrusso. The name’s exact role remains unconfirmed. Rockstar Games image published with Bloomberg’s October 14 feature.'),
+  // Visual/Heat/heat.png + heat2.png, 1800x1013 (Fausto 17.10.). Alt/caption: Claude placeholders -> Codex (DEC-0088).
+  heatGarage: img('heat-garage', [640, 1280, 1800], 1800, 1013, 'View from the driver’s seat of a car waiting in a dark garage while a police car passes outside in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
+  heatPolice: img('heat-police', [640, 1280, 1800], 1800, 1013, 'Police cars with flashing lights block a sunny city intersection in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
   driving: img('driving', [640, 1280], 1280, 720, 'A dark sedan turns across a city street with smoke around its tires in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
   slimJim: img('slim-jim', [640, 1280], 1280, 720, 'A character stands beside a red parked car with “Slim Jim” and “Smash Window” prompts on screen in GTA VI.', 'On-screen theft options in GTA VI gameplay — Rockstar Games.'),
   // Ownership pair (Fausto, 2026-10-04): safehouse with Jason's Ganado + Buggy at a garage. Alt/captions: Claude placeholders, Codex review pending.
@@ -141,6 +144,7 @@ export const guideSections: GuideSection[] = [
     id: 'heat',
     title: 'Heat, Police Recognition, and Getaways',
     status: 'Rockstar Interview',
+    images: [IMG.heatGarage, IMG.heatPolice],
     paragraphs: [
       `The police response depends on what has been reported and what officers know. Nelson says a crime needs a witness or an alarm to reach the law. Police can know your appearance, your clothes, your vehicle, and that Jason and Lucia are traveling together. In the demonstration, switching to a car they do not recognize lowers their perception of you; splitting the pair up can help, too.`,
       `A baseball cap is not a complete escape plan. Nelson puts on glasses and a cap, then points out that the police still know his outfit. The same limitation applies to a haircut. A clothing store or a spare outfit from your personal vehicle gives you another option; in the shopping demonstration, he says buying and wearing a new outfit removes his current heat.`,
