@@ -5,6 +5,7 @@
 import Base from '../../../layouts/Base.astro';
 import AccountSubnav from '../../../components/AccountSubnav.astro';
 import HubEditor from '../../../components/HubEditor.astro';
+import DiscordFeedSteps from '../../../components/DiscordFeedSteps.astro';
 import RoleApply from '../../../components/RoleApply.astro';
 import '../../../styles/hub.css';
 const base = import.meta.env.BASE_URL;
@@ -37,7 +38,7 @@ const base = import.meta.env.BASE_URL;
       <div id="host-block" hidden>
         <h2 class="section-heading">My Events</h2>
         <p class="section-lede">Create and edit the events you run. Every event is public and shows up in the calendar right away — you can see who signed up in each event.</p>
-        <p class="bot-hint">Want these in your own Discord too? <a href={`${base}discord/bot/`}>Set up the Leonida Racing bot →</a></p>
+        <DiscordFeedSteps source="host" />
         <!-- Sign-ups overview for hosts (Fausto, 2026-10-01). Copy approved (Codex 2026-10-02, Fausto). -->
         <div class="panel host-signups" id="host-signups" hidden>
           <p class="host-signups-title">Sign-ups for Your Upcoming Events</p>
@@ -54,8 +55,6 @@ const base = import.meta.env.BASE_URL;
 
 <style>
   [hidden] { display: none !important; }
-  .bot-hint { margin: -.4rem 0 1.2rem; font-size: .9rem; color: var(--gh-muted); }
-  .bot-hint a { color: var(--lr-orange); font-weight: 600; text-decoration: none; }
   .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
   .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
   .acc-auth { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }

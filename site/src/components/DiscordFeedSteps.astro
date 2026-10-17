@@ -1,0 +1,62 @@
+---
+// "Show your events in your own Discord" (DEC-0137, 17.10.2026): replaces the one-line bot hint
+// on My Account > Events / Crew. Three steps, no tracking. Copy: Claude placeholder, Codex review pending.
+import { DISCORD_BOT_INVITE_URL, DISCORD_ICON_PATH } from '../data/site';
+interface Props { source: 'host' | 'crew'; }
+const { source } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const pick = source === 'crew' ? 'My crew' : 'My host profile';
+---
+<details class="dfs panel">
+  <summary>
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d={DISCORD_ICON_PATH} /></svg>
+    <span>{source === 'crew' ? 'Show your crew’s events in your own Discord server' : 'Show your events in your own Discord server'}</span>
+    <span class="dfs-chev" aria-hidden="true">▾</span>
+  </summary>
+  <div class="dfs-body">
+    <p class="dfs-note">No server of your own? Nothing to do – published events show up on the Leonida Racing Discord automatically.</p>
+    <ol class="dfs-steps">
+      <li>
+        <strong>Add the bot to your server</strong>
+        <span>You need the “Manage Server” permission there.</span>
+        <a class="btn btn-outline dfs-btn" href={DISCORD_BOT_INVITE_URL} target="_blank" rel="noopener">Add to Discord</a>
+      </li>
+      <li>
+        <strong>Type the command in the channel for your events</strong>
+        <span>Start typing <code>/leonida feed add</code>, pick it from the list, then choose <b>source: {pick}</b>. Discord shows every option as you go.</span>
+        <button type="button" class="btn btn-outline dfs-btn dfs-copy" data-copy="/leonida feed add">Copy command</button>
+      </li>
+      <li>
+        <strong>Done</strong>
+        <span>Every event you publish here appears in that channel, with sign-up buttons. Change or remove it any time with <code>/leonida feed edit</code> or <code>/leonida feed remove</code>.</span>
+      </li>
+    </ol>
+    <a class="dfs-more" href={`${base}discord/bot/`}>Full setup guide →</a>
+  </div>
+</details>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.dfs-copy').forEach((b) => {
+    b.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(b.dataset.copy ?? ''); const t = b.textContent; b.textContent = 'Copied'; setTimeout(() => { b.textContent = t; }, 1500); } catch { /* clipboard blocked: user can type it */ }
+    });
+  });
+</script>
+
+<style>
+  .dfs { margin: 0 0 1.4rem; padding: 0; }
+  .dfs summary { display: flex; align-items: center; gap: .6rem; padding: .85rem 1.1rem; cursor: pointer; list-style: none; font-weight: 700; font-size: .92rem; }
+  .dfs summary::-webkit-details-marker { display: none; }
+  .dfs summary svg { color: var(--lr-orange); flex: none; }
+  .dfs-chev { margin-left: auto; transition: transform .15s; color: var(--gh-muted); }
+  .dfs[open] .dfs-chev { transform: rotate(180deg); }
+  .dfs-body { padding: 0 1.1rem 1.1rem; }
+  .dfs-note { margin: 0 0 1rem; font-size: .86rem; color: var(--gh-muted); }
+  .dfs-steps { margin: 0; padding: 0; list-style: none; counter-reset: dfs; display: grid; gap: .9rem; }
+  .dfs-steps li { counter-increment: dfs; position: relative; padding-left: 2.4rem; display: grid; gap: .3rem; justify-items: start; font-size: .88rem; }
+  .dfs-steps li::before { content: counter(dfs); position: absolute; left: 0; top: 0; width: 1.7rem; height: 1.7rem; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: .8rem; background: var(--lr-orange); color: #111; }
+  .dfs-steps span { color: var(--gh-muted); }
+  .dfs-steps code { font-size: .84em; padding: .05rem .35rem; border-radius: 4px; background: var(--gh-line); color: var(--gh-text); }
+  .dfs-btn { margin-top: .2rem; font-size: .8rem; padding: .45rem .9rem; }
+  .dfs-more { display: inline-block; margin-top: 1rem; color: var(--lr-orange); font-weight: 600; font-size: .88rem; text-decoration: none; }
+</style>

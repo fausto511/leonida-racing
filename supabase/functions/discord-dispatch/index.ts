@@ -39,6 +39,10 @@
 // Retention cleanup (17.10.2026): see retention() below, part of the daily housekeeping call.
 // Card removal (17.10.2026): a reference is forgotten only after Discord confirmed the delete;
 // failed deletes are retried by the daily housekeeping (retryRemovals).
+// Mod alerts (DEC-0137, 17.10.2026): rows in discord_mod_alerts (DB triggers on runs, role requests,
+// reports, community tracks) are posted, bundled, to the private #mod-alerts channel (found by name).
+// Events panel (DEC-0137, 17.10.2026): body {"panel": "events", "channel_id": "..."} posts or updates the
+// "Host your own event" panel and pins it. Body {"channels": true} lists the official server's channels.
 // COPY STATUS: all user-facing texts are Claude placeholders, Codex review pending.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -213,7 +217,8 @@ async function retention() {
     const gone = chunk.filter((id) => !keep.has(id));
     if (gone.length) { const { count } = await db.from("discord_role_state").delete({ count: "exact" }).in("discord_user_id", gone); states += count ?? 0; }
   }
-  return { roleJobsRemoved: jobs ?? 0, pingStampsRemoved: pings ?? 0, roleStatesRemoved: states };
+  const { count: alerts } = await db.from("discord_mod_alerts").delete({ count: "exact" }).lt("created_at", new Date(Date.now() - 30 * 864e5).toISOString());
+  return { roleJobsRemoved: jobs ?? 0, pingStampsRemoved: pings ?? 0, roleStatesRemoved: states, modAlertsRemoved: alerts ?? 0 };
 }
 
 // ---------- new vehicles (DEC-0106) ----------
@@ -693,6 +698,68 @@ async function handleLfg(): Promise<number> {
   return n;
 }
 
+// ---------- mod alerts (DEC-0137) ----------
+const normName = (n: string) => String(n ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+async function modAlertsChannel(): Promise<string | null> {
+  const { data } = await db.from("discord_bot_state").select("value").eq("key", "mod_alerts_channel").maybeSingle();
+  if (data?.value) return data.value;
+  const r = await discord("GET", `/guilds/${ROLE_GUILD}/channels`);
+  if (!r.ok) { console.log("mod alerts: channel list failed", r.status); return null; }
+  const hit = (r.data as any[]).filter((c) => c.type === 0 && normName(c.name).includes("modalerts"));
+  if (hit.length !== 1) { console.log("mod alerts: channel not found or ambiguous", hit.length); return null; }
+  await db.from("discord_bot_state").upsert({ key: "mod_alerts_channel", value: hit[0].id, updated_at: new Date().toISOString() });
+  return hit[0].id;
+}
+async function handleModAlerts(): Promise<number> {
+  if (!ROLE_GUILD) return 0;
+  const { data: rows } = await db.from("discord_mod_alerts").select("*").is("sent_at", null).lt("attempts", 20).order("id").limit(25);
+  if (!rows?.length) return 0;
+  const channel = await modAlertsChannel();
+  const ids = rows.map((r: any) => r.id);
+  const fail = async () => { for (const r of rows as any[]) await db.from("discord_mod_alerts").update({ attempts: r.attempts + 1 }).eq("id", r.id); };
+  if (!channel) { await fail(); return 0; }
+  const line = (r: any) => `\u2022 **${r.kind}**${r.actor ? ` \u00b7 ${clip(r.actor, 40)}` : ""}${r.detail ? ` \u00b7 ${clip(r.detail, 80)}` : ""} \u00b7 [open](${SITE}/${r.link})`;
+  const links: string[] = [...new Set<string>(rows.map((r: any) => String(r.link)))];
+  const res = await discord("POST", `/channels/${channel}/messages`, {
+    allowed_mentions: { parse: [] },
+    embeds: [{ color: YELLOW, title: rows.length === 1 ? "Waiting for review" : `${rows.length} things waiting for review`,
+      description: clip(rows.map(line).join("\n"), 4000), footer: { text: "Leonida Racing \u00b7 mod alerts" }, timestamp: new Date().toISOString() }],
+    components: links.length <= 5 ? [row(...links.map((l) => linkButton(l === "moderator/" ? "Lap times" : l.includes("hub") ? "Hub requests" : l.includes("reports") ? "Lap reports" : l.includes("content") ? "Content reports" : "Open", `${SITE}/${l}`)))] : [],
+  });
+  if (res.ok) { await db.from("discord_mod_alerts").update({ sent_at: new Date().toISOString() }).in("id", ids); return rows.length; }
+  console.log("mod alert post failed", res.status, res.text.slice(0, 200));
+  if (res.status === 404 || res.status === 403) await db.from("discord_bot_state").delete().eq("key", "mod_alerts_channel"); // look the channel up again
+  await fail();
+  return 0;
+}
+
+// ---------- events panel (DEC-0137) ----------
+const EVENTS_PANEL = {
+  allowed_mentions: { parse: [] },
+  embeds: [{ color: YELLOW, title: "Host your own event",
+    description: "Race, car meet, cruise or league night \u2013 create it on leonidaracing.com. Once it's published, it shows up on this server automatically, with sign-up buttons.\n\n**First time?** Apply as event host on the same page. A mod confirms it within 24 hours, then you can publish.",
+    footer: { text: "Leonida Racing \u00b7 no commands needed" } }],
+  components: [row(linkButton("Create Event", `${SITE}/account/events/`), linkButton("Event calendar", `${SITE}/community/events/`))],
+};
+async function postEventsPanel(channelId: string) {
+  const { data } = await db.from("discord_bot_state").select("value").eq("key", "events_panel").maybeSingle();
+  let ref: { channel_id?: string; message_id?: string } = {};
+  try { ref = JSON.parse(data?.value ?? "{}"); } catch { /* none */ }
+  let msgId: string | null = null;
+  if (ref.message_id && ref.channel_id === channelId) {
+    const r = await discord("PATCH", `/channels/${channelId}/messages/${ref.message_id}`, EVENTS_PANEL);
+    if (r.ok) msgId = ref.message_id;
+  }
+  if (!msgId) {
+    const r = await discord("POST", `/channels/${channelId}/messages`, EVENTS_PANEL);
+    if (!r.ok) return { ok: false, step: "post", status: r.status, error: r.text.slice(0, 300) };
+    msgId = r.data.id;
+  }
+  const pin = await discord("PUT", `/channels/${channelId}/pins/${msgId}`);
+  await db.from("discord_bot_state").upsert({ key: "events_panel", value: JSON.stringify({ channel_id: channelId, message_id: msgId }), updated_at: new Date().toISOString() });
+  return { ok: true, message_id: msgId, pinned: pin.ok, pinStatus: pin.status };
+}
+
 // ---------- entry ----------
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
@@ -701,6 +768,11 @@ Deno.serve(async (req) => {
   if (!TOKEN) return json({ error: "DISCORD_BOT_TOKEN missing" }, 500);
   const body = await req.json().catch(() => ({}));
   if (body?.housekeeping === true) return json(await housekeeping());
+  if (body?.channels === true) {
+    const r = await discord("GET", `/guilds/${ROLE_GUILD}/channels`);
+    return json(r.ok ? (r.data as any[]).map((c) => ({ id: c.id, name: c.name, type: c.type, parent: c.parent_id })) : { error: r.status });
+  }
+  if (body?.panel === "events" && /^\d{15,25}$/.test(String(body.channel_id ?? ""))) return json(await postEventsPanel(String(body.channel_id)));
 
   const started = Date.now();
   let done = 0, failed = 0;
@@ -708,6 +780,7 @@ Deno.serve(async (req) => {
   try { done += await handleRoleJobs(started); } catch (err) { failed++; console.error("roles", err); }
   try { done += await handleReminders(); } catch (err) { failed++; console.error("reminders", err); }
   try { done += await handleLfg(); } catch (err) { failed++; console.error("lfg", err); }
+  try { done += await handleModAlerts(); } catch (err) { failed++; console.error("mod alerts", err); }
   while (Date.now() - started < TIME_BUDGET_MS) {
     const { data: rows, error } = await db.rpc("discord_claim_outbox", { p_limit: 10 });
     if (error) { console.error(error); break; }
