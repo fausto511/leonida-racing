@@ -407,8 +407,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vg-cols-c span:nth-child(2) { padding-left: 78px; }
   .vg-cols-c span:nth-child(3), .vg-cols-c span:nth-child(4) { text-align: right; }
   .vg-rows { display: flex; flex-direction: column; }
-  /* both cards: room for 10 rows + 1 extra row, so they always line up (Fausto 17.10.) */
-  .vg .vg-rows { min-height: calc(11 * 44px + 6px); }
+  /* both cards: at most 10 rows + 1 extra row; shorter lists make both cards shorter,
+     the grid keeps the two cards the same height (Fausto 17.10.) */
   .vg-rows :global(.vg-row) { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 14px; min-height: 44px; padding: 0 14px; border-top: 1px solid var(--lr-line); font-size: 15px; color: var(--lr-soft); text-decoration: none; }
   .vg-rows :global(.vg-pos) { color: var(--lr-muted); }
   .vg-rows :global(.vg-pos.is-first) { color: var(--lr-pink); font-weight: 700; }
@@ -495,7 +495,6 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   @media (max-width: 900px) {
     .vh-grid { flex-direction: column; align-items: stretch; }
     .vg, .va { grid-template-columns: 1fr; }
-    .vg .vg-rows { min-height: 0; }
   }
   /* ---- phone (DEC-0118): head -> photo edge to edge -> Compare + Garage -> 2x2 values -> ... ---- */
   @media (max-width: 760px) {
