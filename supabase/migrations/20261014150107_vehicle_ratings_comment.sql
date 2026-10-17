@@ -1,0 +1,1 @@
+comment on table public.vehicle_ratings is 'Driver rating per car, 1-5 stars, one per driver and car (DEC-0118). Public only via public_vehicle_ratings (from 3 ratings). Writable from ratings_open() (launch).';

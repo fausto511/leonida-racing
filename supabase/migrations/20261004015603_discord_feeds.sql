@@ -1,8 +1,3 @@
--- RS-0067 package 2 (DEC-0098): Discord server feeds.
--- A Discord server (guild) subscribes a channel to a source: a crew's events,
--- a host's own events, or the public calendar (platform filter mandatory).
--- Only the discord-interactions / discord-dispatch edge functions touch this
--- table (service role). RLS on, no policies -> no access via the public API.
 create table public.discord_feeds (
   feed_id uuid primary key default gen_random_uuid(),
   guild_id text not null check (guild_id ~ '^[0-9]{5,25}$'),
@@ -31,12 +26,3 @@ create index discord_feeds_crew on public.discord_feeds (crew_id) where crew_id 
 create index discord_feeds_host on public.discord_feeds (host_driver_id) where host_driver_id is not null;
 alter table public.discord_feeds enable row level security;
 revoke all on public.discord_feeds from anon, authenticated;
-
--- Small key/value store for the bot (e.g. which command-list version is registered at Discord).
-create table public.discord_bot_state (
-  key text primary key,
-  value text not null,
-  updated_at timestamptz not null default now()
-);
-alter table public.discord_bot_state enable row level security;
-revoke all on public.discord_bot_state from anon, authenticated;
