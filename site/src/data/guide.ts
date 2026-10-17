@@ -26,9 +26,9 @@ const img = (key: string, widths: number[], w: number, h: number, alt: string, c
 const IMG = {
   // Visual/Cars/Garage/granforma-zorrusso.png, 2000x1125 (web exports = vehicles/granforma-zorrusso-*.webp).
   granforma: img('granforma', W3, 2000, 1125, 'Rear three-quarter view of a green sports car in GTA VI, with GranForma lettering and an emblem above the rear grille.', 'New rear branding on the car identified as the GranForma Zorrusso. The name’s exact role remains unconfirmed. Rockstar Games image published with Bloomberg’s October 14 feature.'),
-  // Visual/Heat/heat.png + heat2.png, 1800x1013 (Fausto 17.10.). Alt/caption: Claude placeholders -> Codex (DEC-0088).
-  heatGarage: img('heat-garage', [640, 1280, 1800], 1800, 1013, 'View from the driver’s seat of a car waiting in a dark garage while a police car passes outside in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
-  heatPolice: img('heat-police', [640, 1280, 1800], 1800, 1013, 'Police cars with flashing lights block a sunny city intersection in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
+  // Visual/Heat/heat.png + heat2.png, 1800x1013, screenshots from the Extended Look (Fausto 17.10.). Alt/caption: Claude placeholders -> Codex (DEC-0088).
+  heatGarage: img('heat-garage', [640, 1280, 1800], 1800, 1013, 'View from the driver’s seat of a car waiting in a dark garage while a police car passes outside in GTA VI.', 'From Grand Theft Auto VI: An Extended Look — Rockstar Games.'),
+  heatPolice: img('heat-police', [640, 1280, 1800], 1800, 1013, 'Police cars with flashing lights block a sunny city intersection in GTA VI.', 'From Grand Theft Auto VI: An Extended Look — Rockstar Games.'),
   driving: img('driving', [640, 1280], 1280, 720, 'A dark sedan turns across a city street with smoke around its tires in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
   slimJim: img('slim-jim', [640, 1280], 1280, 720, 'A character stands beside a red parked car with “Slim Jim” and “Smash Window” prompts on screen in GTA VI.', 'On-screen theft options in GTA VI gameplay — Rockstar Games.'),
   // Ownership pair (Fausto, 2026-10-04): safehouse with Jason's Ganado + Buggy at a garage. Alt/captions: Claude placeholders, Codex review pending.
