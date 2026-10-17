@@ -1,211 +1,286 @@
 ---
-// Gellhorn leaderboard (2026-09-26, DEC-0072). Filters (Fausto 17.10.): Class, Manufacturer, Vehicle
-// (?class=Sports&make=grotti&vehicle=<id>). Class/Manufacturer rank every driver once by their best lap
-// on the matching vehicles. Older note: one vehicle dropdown --
-// "All vehicles" = Overall (across all vehicles and classes), or one
-// vehicle's own board -- plus driver/crew search and All times / Verified only.
-// The build renders the sample data with the same renderer the browser uses
-// (data/leaderboard.ts); the browser takes over and swaps in live rows as
-// soon as at least one real run is published.
-import { sampleEntries, initialState, render, vehiclesNeededHtml, vehicleSelectHtml, classSelectHtml, makeSelectHtml } from '../data/leaderboard';
-const vehicleSelect = vehicleSelectHtml(sampleEntries, initialState);
+// Gellhorn leaderboard -- Redesign (DEC-0119, boards TimeAttack / TimeAttackActive / TimeAttackMobile).
+// Segments Overall / By class / By manufacturer / By car (manufacturer: Fausto 17.10., not in the mockup),
+// class chips, driver/crew search, All times | Video verified only. URL: ?class=Sports&make=grotti&vehicle=<id>&verified=1.
+// Logged in: own row orange + driver ahead/behind, "Your position ↓", hero tile "Your best at Gellhorn" (#ta-tile).
+// The build renders the sample data with the same renderer the browser uses (data/leaderboard.ts); live rows
+// replace it as soon as at least one real run is published.
+// COPY STATUS: labels/sentences are placeholders until the Codex review (DEC-0088).
+import { sampleEntries, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars } from '../data/leaderboard';
 const first = render(sampleEntries, initialState, true);
-const needed = vehiclesNeededHtml(sampleEntries);
+const noLap = noLapCars(sampleEntries);
+const base = import.meta.env.BASE_URL;
+const search = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
+const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>';
 ---
-<section id="leaderboard" class="lb">
-  <div class="wrap">
-    <div class="lb-head">
-      <div>
-        <span class="sample-flag" id="lb-flag">Sample data — fictional drivers, crews and times</span>
-        <h2 class="display lb-title">Leaderboard</h2>
-        <p class="lb-meta" id="lb-meta">{first.meta}</p>
-      </div>
+<section id="leaderboard" class="wrap lb">
+  <div class="lb-head">
+    <div>
+      <h2 class="display">Leaderboard</h2>
+      <p id="lb-meta">{first.meta}</p>
     </div>
+    <span class="sample" id="lb-flag" title="Fictional drivers, crews and times until GTA VI is out">Sample until launch</span>
+  </div>
 
-    <div class="lb-controls">
-      <label class="lb-vehicle-select lb-filter-select">
-        <span class="sr-only">Class</span>
-        <select class="ui-select" id="lb-class" aria-label="Class" set:html={classSelectHtml(initialState)}></select>
-      </label>
-      <label class="lb-vehicle-select lb-filter-select">
-        <span class="sr-only">Manufacturer</span>
-        <select class="ui-select" id="lb-make" aria-label="Manufacturer" set:html={makeSelectHtml(initialState)}></select>
-      </label>
-      <label class="lb-vehicle-select">
-        <span class="sr-only">Vehicle</span>
-        <select class="ui-select" id="lb-vehicle" aria-label="Vehicle: All vehicles (Overall) or one vehicle's leaderboard" set:html={vehicleSelect}></select>
-      </label>
-      <label class="ui-search lb-search">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="search" id="lb-q-driver" placeholder="Search driver or crew tag" aria-label="Search driver or crew tag" autocomplete="off" />
-      </label>
-      <div class="lb-toggle" role="group" aria-label="Time filter">
-        <button type="button" class="is-active" aria-pressed="true" data-verified="0">All Times</button>
-        <button type="button" aria-pressed="false" data-verified="1">Verified Only</button>
-      </div>
+  <div class="lb-ctl">
+    <div class="vseg seg4" role="group" aria-label="Leaderboard view">
+      <button type="button" class="on" data-mode="overall" aria-pressed="true">Overall</button>
+      <button type="button" data-mode="class" aria-pressed="false"><span class="lg-l">By class</span><span class="sm-l">Class</span></button>
+      <button type="button" data-mode="make" aria-pressed="false"><span class="lg-l">By manufacturer</span><span class="sm-l">Make</span></button>
+      <button type="button" data-mode="car" aria-pressed="false"><span class="lg-l">By car</span><span class="sm-l">Car</span></button>
     </div>
-
-    <div id="lb-context" set:html={first.context} />
-
-    <div class="panel lb-table-wrap">
-      <table class="lb-table">
-        <thead id="lb-thead" set:html={first.head} />
-        <tbody id="lb-tbody" set:html={first.body} aria-live="polite" />
-      </table>
+    <label class="ctl lb-q">
+      <Fragment set:html={search} />
+      <span class="sr-only">Search driver or crew</span>
+      <input type="search" id="lb-q-driver" placeholder="Search driver or crew" autocomplete="off" />
+    </label>
+    <button type="button" class="mypos" id="lb-mypos" hidden><span class="lg-l">Your position</span><span class="sm-l">Me</span> ↓</button>
+    <span class="lbl">Show</span>
+    <div class="vseg sm lb-toggle" role="group" aria-label="Times shown">
+      <button type="button" class="on" aria-pressed="true" data-verified="0">All times</button>
+      <button type="button" class="v" aria-pressed="false" data-verified="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span class="lg-l">Video verified only</span><span class="sm-l">Verified</span></button>
     </div>
-    <div class="lb-more" id="lb-more" set:html={first.more} />
+  </div>
 
-    <div class="panel needed">
-      <div class="needed-head">
-        <div class="needed-title">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-          <h3>Vehicles Needed</h3>
-        </div>
-        <p>These vehicles don't have a verified record yet on Gellhorn. Be the first.</p>
+  <div class="lb-pick" id="lb-pick-make" hidden>
+    <label class="sel"><span class="sr-only">Manufacturer</span><select class="ui-select" id="lb-make" set:html={makeSelectHtml(initialState)}></select></label>
+  </div>
+  <div class="lb-pick" id="lb-pick-car" hidden>
+    <label class="sel"><span class="sr-only">Car</span><select class="ui-select" id="lb-vehicle" set:html={vehicleSelectHtml(sampleEntries, initialState)}></select></label>
+  </div>
+  <div class="chips" id="lb-chips" role="group" aria-label="Class" set:html={classChipsHtml(initialState)} />
+
+  <div id="lb-context" set:html={first.context} />
+
+  <div class="card tbl" id="lb-tbl" role="table" aria-label="Gellhorn leaderboard">
+    <div role="rowgroup" id="lb-thead" set:html={headHtml(true)} />
+    <div role="rowgroup" id="lb-tbody" aria-live="polite" set:html={first.body} />
+  </div>
+  <p class="lb-legend" aria-hidden="true"><span class="st ok"><i><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></i>Video verified</span><span class="st no"><i></i>Screenshot only</span><span class="vd-l"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg></span>Watch</p>
+  <div class="lb-more" id="lb-more" set:html={first.more} />
+
+  <div class="ta-2">
+    <div class="card need">
+      <h3>No lap yet in these cars</h3>
+      <p class="sub">Set the first time in any of them and you hold #1 for that car until someone beats it.</p>
+      <div class="grid" id="lb-need" set:html={noLap.picks} />
+      <div class="grid need-rest" id="lb-need-rest" hidden set:html={noLap.rest} />
+      <button type="button" class="need-all" id="lb-need-all" aria-expanded="false" aria-controls="lb-need-rest" hidden={!noLap.rest}>All <span id="lb-need-n">{noLap.count}</span> cars without a lap →</button>
+    </div>
+    <div class="card ta-box">
+      <h3>Put a time on the board</h3>
+      <p class="sub">Three steps. Any car, any class.</p>
+      <ol class="steps">
+        <li><b>1</b><span>Drive Gellhorn in GTA VI and take a screenshot of the results screen.</span></li>
+        <li><b>2</b><span>Submit the screenshot with the car you drove. Add a full-lap video if you want Video verified.</span></li>
+        <li><b>3</b><span>Once accepted, your lap shows up overall, in your class and on the car’s page.</span></li>
+      </ol>
+      <div class="box-cta">
+        <a href={`${base}time-attack/submit/`} class="btn btn-p"><Fragment set:html={stopwatch} />Submit a lap</a>
+        <a href={`${base}time-attack/rules/`} class="btn btn-s">Read the rules</a>
       </div>
-      <ul id="lb-needed" set:html={needed} />
     </div>
   </div>
 </section>
 
 <style>
-  .lb { padding-top: 1rem; padding-bottom: var(--gh-gap-section); }
-  .lb-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1.5rem; margin-bottom: 1.5rem; }
-  .sample-flag { display: inline-block; margin-bottom: .7rem; padding: .3rem .65rem; border-radius: 999px; background: rgba(242,75,157,.14); color: var(--gh-red); font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-  /* JS sets [hidden] on this once live data loads; without this rule the
-     UA default [hidden]{display:none} loses to the display:inline-block
-     above (author CSS always beats UA CSS), so the badge stayed visible
-     even though renderLiveRows() correctly hid it. */
-  .sample-flag[hidden] { display: none; }
-  .lb-title { font-size: clamp(1.9rem, 3vw, 2.6rem); margin: 0; }
-  .lb-meta { margin: .5rem 0 0; color: var(--gh-muted); font-size: .85rem; }
+  .lb { padding-top: 40px; }
+  .lb-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
+  .lb-head h2 { margin: 0; font-size: 40px; }
+  .lb-head p { margin: 8px 0 0; color: var(--lr-muted); font-size: 14px; }
+  .sample { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #6B6B80; white-space: nowrap; }
+  .sample[hidden] { display: none; }
 
-  .lb-controls { display: flex; flex-wrap: wrap; gap: .85rem; margin-bottom: 1.25rem; }
-  .lb-vehicle-select { flex: 1 1 16rem; display: flex; }
-  .lb-filter-select { flex: 1 1 11rem; }
-  .lb-vehicle-select select { width: 100%; }
-  .lb-search { flex: 1 1 14rem; } /* look: site-wide .ui-search (tokens.css) */
-  .lb-toggle { display: inline-flex; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); overflow: hidden; }
-  .lb-toggle button { padding: .65rem 1.1rem; border: none; background: transparent; color: var(--gh-muted); font-weight: 700; font-size: .78rem; cursor: pointer; }
-  .lb-toggle button.is-active { background: var(--gh-yellow); color: #2A0F22; }
+  .lb-ctl { display: flex; gap: 10px; align-items: center; margin-top: 20px; flex-wrap: wrap; }
+  .vseg { display: inline-flex; border: 1px solid var(--lr-line-strong); border-radius: 6px; overflow: hidden; height: 44px; flex: none; }
+  .vseg button { display: flex; align-items: center; gap: 6px; padding: 0 16px; font: inherit; font-size: 14px; font-weight: 600; color: var(--lr-muted); background: transparent; border: 0; border-right: 1px solid var(--lr-line); cursor: pointer; white-space: nowrap; }
+  .vseg button:last-child { border-right: 0; }
+  .vseg button:hover:not(.on) { color: var(--lr-text); }
+  .vseg button.on { background: var(--lr-text); color: #14141F; }
+  .vseg.sm button { padding: 0 14px; font-size: 13px; }
+  .vseg.sm button.on.v { background: var(--lr-lime); color: #14141F; }
+  .vseg button:focus-visible, .chips :global(button:focus-visible), .mypos:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: -2px; }
+  .sm-l { display: none; }
+  .ctl { height: 44px; display: inline-flex; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; color: var(--lr-muted); }
+  .lb-q { flex: 1 1 220px; max-width: 360px; }
+  .lb-q input { flex: 1; min-width: 0; height: 100%; background: transparent; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; }
+  .lb-q input::placeholder { color: var(--lr-muted); }
+  .lb-q:focus-within { border-color: var(--lr-orange); }
+  .mypos { height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 6px; border: 1px solid rgba(255,149,90,.5); background: transparent; color: var(--lr-orange); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .mypos[hidden] { display: none; }
+  .lbl { font-size: 13px; color: var(--lr-muted); margin-left: auto; }
 
-  .lb-table-wrap { padding: 0; overflow-x: auto; }
-  .lb-table { width: 100%; border-collapse: collapse; min-width: 46rem; }
-  :global(.lb-table th) { text-align: left; padding: .9rem 1.1rem; color: var(--gh-muted); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--gh-line); }
-  /* :global() throughout this block: #lb-tbody's real rows are inserted at
-     runtime via innerHTML from live Supabase data (renderLiveRows() below),
-     so Astro's scoped-CSS attribute never reaches them -- same bug class
-     already found and fixed on the account page's .records-table (see
-     e8ce020). Without :global() every one of these rules silently only
-     ever applied to the build-time sample rows, and live rows fell back to
-     bare browser defaults: ~1px cell padding, no rank/gap/logo/status
-     styling, no top3 highlight -- which is exactly what "sieht komisch
-     aus" / "Tabelle sieht nicht ordentlich aus" was. */
-  :global(.lb-table td) { padding: .85rem 1.1rem; font-size: .88rem; border-bottom: 1px solid var(--gh-line); }
-  :global(.lb-table tbody tr:last-child td) { border-bottom: none; }
-  :global(.lb-table tr.is-top3) { background: rgba(255,149,90,.05); }
-  :global(.lb-rank) { font-family: var(--gh-font-display); font-weight: 900; color: var(--gh-muted); }
-  :global(.is-top3 .lb-rank) { color: var(--gh-yellow); }
-  :global(.lb-driver) { font-weight: 700; }
-  :global(.lb-crew-tag) { margin-left: .45rem; vertical-align: 1px; }
-  :global(.lb-vehicle) { display: inline-flex; align-items: center; gap: .5rem; }
-  :global(.lb-link), :global(.lb-logo-link) { color: inherit; text-decoration: none; }
-  :global(.lb-link:hover), :global(.lb-link:focus-visible) { color: var(--gh-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--gh-red); }
-  /* same spacing between make and model as the non-link rows (flex gap) */
-  :global(.lb-vehicle-name) { display: inline-flex; align-items: baseline; gap: .5rem; }
-  :global(.needed-link) { color: inherit; text-decoration: none; }
-  :global(.needed-link:hover strong) { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--gh-muted); }
-  :global(.lb-make) { color: var(--gh-muted); }
-  :global(.lb-model) { color: var(--gh-text); }
-  :global(.lb-num) { color: var(--gh-muted); }
-  :global(.lb-time) { font-variant-numeric: tabular-nums; font-weight: 700; }
-  :global(.lb-gap) { display: block; color: var(--gh-muted); font-size: .72rem; font-weight: 400; }
-  :global(.status-ok) { color: var(--gh-yellow); }
-  :global(.check-circle) { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex: none; border-radius: 50%; background: var(--gh-yellow); color: #2A0F22; }
-  :global(.watch-btn) { display: inline-flex; align-items: center; padding: .35rem .8rem; border-radius: var(--gh-radius); background: transparent; border: 1px solid var(--gh-line); color: var(--gh-text); font-size: .76rem; font-weight: 700; text-decoration: none; }
+  .lb-pick { margin-top: 14px; }
+  .lb-pick[hidden] { display: none; }
+  .sel { display: flex; max-width: 360px; }
+  .sel select { width: 100%; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .chips[hidden] { display: none; }
+  .chips :global(.chip-c) { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; display: inline-flex; align-items: center; font: inherit; font-size: 13px; font-weight: 500; color: #E4E4EC; cursor: pointer; white-space: nowrap; }
+  .chips :global(.chip-c:hover:not(.on)) { border-color: rgba(200,200,222,.5); }
+  .chips :global(.chip-c.on) { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
 
-  /* Logos in white, no circle, a bit larger (Fausto, 2026-10-03). Source
-     files are black on transparent; invert(.97) ≈ the palette text white. */
-  :global(.logo-chip) { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex: none; }
-  :global(.logo-chip img) { width: 100%; height: 100%; object-fit: contain; display: block; filter: invert(.97); }
+  #lb-context :global(.lb-context) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-top: 18px; }
+  #lb-context :global(.lb-context-title) { display: flex; align-items: center; gap: 12px; }
+  #lb-context :global(.lb-context-title h3) { margin: 2px 0 0; font-size: 22px; font-weight: 700; }
+  #lb-context :global(.lb-context-kicker) { margin: 0; color: var(--lr-muted); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+  #lb-context :global(.lb-context-link) { color: var(--lr-orange); font-size: 14px; font-weight: 600; text-decoration: none; }
+
+  /* ---- table (div grid, rows inserted at runtime -> :global) ---- */
+  .tbl { margin-top: 16px; overflow: hidden; padding: 0; }
+  .tbl :global(.tr) { display: grid; grid-template-columns: 56px minmax(0,1.3fr) minmax(0,1.4fr) 80px 100px 150px 80px; align-items: center; column-gap: 12px; min-height: 56px; padding: 0 18px; border-top: 1px solid rgba(200,200,222,.1); font-size: 15px; color: var(--lr-soft); }
+  .tbl.nocar :global(.tr) { grid-template-columns: 56px minmax(0,2fr) 80px 100px 150px 80px; }
+  .tbl :global(.tr > *), .tbl :global(.mt > *) { grid-row: 1; }
+  .tbl :global(.mt) { display: contents; }
+  .tbl :global(.rk) { grid-column: 1; }
+  .tbl :global(.dr) { grid-column: 2; }
+  .tbl :global(.car) { grid-column: 3; }
+  .tbl :global(.gp) { grid-column: 4; }
+  .tbl :global(.tm) { grid-column: 5; }
+  .tbl :global(.st), .tbl :global(.tr.h .mt > :nth-child(2)) { grid-column: 6; }
+  .tbl :global(.vd), .tbl :global(.vd-h) { grid-column: 7; }
+  .tbl.nocar :global(.gp) { grid-column: 3; }
+  .tbl.nocar :global(.tm) { grid-column: 4; }
+  .tbl.nocar :global(.st), .tbl.nocar :global(.tr.h .mt > :nth-child(2)) { grid-column: 5; }
+  .tbl.nocar :global(.vd), .tbl.nocar :global(.vd-h) { grid-column: 6; }
+  .tbl :global(.tr.h) { min-height: 40px; border-top: 0; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #6B6B80; }
+  .tbl :global(.rk) { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--lr-muted); }
+  .tbl :global(.dr) { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--lr-text); font-weight: 600; }
+  .tbl :global(.dr .n) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tbl :global(.lb-crew-tag) { flex: none; text-decoration: none; color: #111; }
+  .tbl :global(.car) { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .tbl :global(.nm) { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+  .tbl :global(.nm b) { font-weight: 600; color: #E4E4EC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tbl :global(.nm a) { color: inherit; text-decoration: none; }
+  .tbl :global(.nm a:hover) { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--lr-pink); }
+  .tbl :global(.nm small) { font-size: 12px; color: var(--lr-muted); }
+  .tbl :global(.gp) { text-align: right; font-size: 13px; color: var(--lr-muted); font-variant-numeric: tabular-nums; }
+  .tbl :global(.tm) { text-align: right; font-weight: 700; color: var(--lr-text); font-variant-numeric: tabular-nums; font-size: 16px; }
+  .tbl :global(.tr.h .gp), .tbl :global(.tr.h .tm) { font-size: 11px; font-weight: 600; color: #6B6B80; }
+  .tbl :global(.vd), .tbl :global(.vd-h) { justify-self: end; }
+  .tbl :global(.tr.first) { background: linear-gradient(90deg, rgba(242,75,157,.12) 0%, rgba(242,75,157,.03) 55%, rgba(242,75,157,0) 100%); box-shadow: inset 3px 0 0 var(--lr-pink); }
+  .tbl :global(.tr.first .rk) { color: var(--lr-pink); }
+  .tbl :global(.tr.me) { background: linear-gradient(90deg, rgba(255,149,90,.14) 0%, rgba(255,149,90,.035) 55%, rgba(255,149,90,0) 100%); box-shadow: inset 3px 0 0 var(--lr-orange); scroll-margin-top: 120px; }
+  .tbl :global(.tr.me .rk) { color: var(--lr-orange); }
+  .tbl :global(.tr.brk) { border-top: 1px solid rgba(200,200,222,.35); margin-top: 10px; }
+  .tbl :global(.you) { flex: none; font-size: 10px; font-weight: 800; padding: 2px 5px; border-radius: 3px; background: rgba(255,149,90,.16); color: var(--lr-orange); }
+  .tbl :global(.lb-empty) { display: block; padding: 28px 18px; text-align: center; color: var(--lr-muted); }
+  .tbl :global(.lb-empty a) { color: var(--lr-orange); }
+  :global(.logo-chip) { width: 36px; height: 36px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
+  :global(.logo-chip img) { width: 30px; height: 30px; object-fit: contain; filter: brightness(0) invert(1); opacity: .9; }
   :global(.logo-chip-lg) { width: 48px; height: 48px; }
+  :global(.logo-chip-lg img) { width: 44px; height: 44px; }
+  .lb :global(.st) { display: flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
+  .lb :global(.st.ok) { color: var(--lr-lime); }
+  .lb :global(.st.ok i) { width: 18px; height: 18px; flex: none; border-radius: 999px; background: rgba(217,245,142,.16); display: inline-flex; align-items: center; justify-content: center; }
+  .lb :global(.st.no) { color: var(--lr-muted); }
+  .lb :global(.st.no i) { width: 7px; height: 7px; flex: none; border-radius: 999px; background: #55556A; margin: 0 5px; }
+  .tbl :global(.vd) { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid var(--lr-line-strong); border-radius: 5px; font-size: 12px; font-weight: 600; color: var(--lr-text); text-decoration: none; white-space: nowrap; }
+  .tbl :global(a.vd:hover) { border-color: var(--lr-orange); }
+  .tbl :global(.vd.is-off) { opacity: .5; cursor: not-allowed; }
+  .tbl :global(.vd.x) { border-color: transparent; color: #55556A; }
+  .lb-legend { display: none; }
+  .lb-more { display: flex; justify-content: center; padding: 16px 0 4px; }
+  .lb-more :global(.lb-more-btn) { height: 44px; font-size: 14px; }
 
-  /* 6 vehicles as a fixed grid next to the heading (Fausto, 2026-09-30): 3x2 desktop, 2 cols tablet, 1 col phone */
-  .needed { display: grid; grid-template-columns: minmax(12rem, 16rem) 1fr; gap: 1.5rem; align-items: start; margin-top: 1.25rem; padding: var(--gh-pad-card); }
-  .needed-title { display: flex; align-items: center; gap: .5rem; }
-  .needed-title svg { color: var(--gh-yellow); flex: none; }
-  .needed-head h3 { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
-  .needed-head p { margin: .3rem 0 0; max-width: 30ch; color: var(--gh-muted); font-size: .82rem; }
-  .needed ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; list-style: none; margin: 0; padding: 0; }
-  @media (max-width: 1100px) { .needed { grid-template-columns: 1fr; } }
-  @media (max-width: 760px) { .needed ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (max-width: 520px) { .needed ul { grid-template-columns: 1fr; } }
-  :global(.needed li) { display: flex; align-items: center; gap: .6rem; padding: .7rem .95rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); min-width: 0; }
-  :global(.needed-text) { display: flex; flex-direction: column; gap: .2rem; }
-  :global(.needed-text strong) { font-size: .82rem; }
-  :global(.needed-text span) { color: var(--gh-muted); font-size: .7rem; }
+  /* ---- cards under the table ---- */
+  .ta-2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 20px; margin-top: 20px; }
+  .need, .ta-box { padding: 20px; display: flex; flex-direction: column; }
+  .need h3, .ta-box h3 { margin: 0; font-size: 20px; font-weight: 700; }
+  .sub { font-size: 14px; color: var(--lr-muted); margin: 6px 0 14px; line-height: 1.5; }
+  .need .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+  .need .grid[hidden] { display: none; }
+  .need-rest { margin-top: 8px; max-height: 360px; overflow-y: auto; padding-right: 4px; }
+  .need .grid :global(a) { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 6px; background: var(--lr-raised); font-size: 14px; font-weight: 600; min-width: 0; color: var(--lr-text); text-decoration: none; }
+  .need .grid :global(a:hover) { background: #242436; }
+  .need .grid :global(.t) { display: flex; flex-direction: column; min-width: 0; }
+  .need .grid :global(.t b) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+  .need .grid :global(.t small) { font-size: 12px; color: var(--lr-pink); font-weight: 700; }
+  .need-all { align-self: flex-start; margin-top: 14px; padding: 0; background: none; border: 0; font: inherit; font-size: 14px; font-weight: 600; color: var(--lr-orange); cursor: pointer; text-align: left; }
+  .need-all[hidden] { display: none; }
+  .steps { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .steps li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: #E4E4EC; }
+  .steps b { flex: none; width: 26px; height: 26px; border-radius: 999px; background: var(--lr-raised); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; color: var(--lr-orange); }
+  .box-cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: auto; padding-top: 18px; }
+  .box-cta .btn { height: 44px; font-size: 14px; }
 
-  @media (max-width: 700px) {
-    /* phone: keep rank, driver, vehicle, lap time and a status icon on screen */
-    .lb-table { min-width: 0; }
-    :global(.lb-table .col-opt), :global(.lb-table .st-txt) { display: none; }
-    :global(.lb-table td), :global(.lb-table th) { padding-inline: .55rem; }
-    :global(.lb-table .lb-vehicle-name) { flex-direction: column; gap: 0; }
-    :global(.lb-table .lb-crew-tag) { margin-left: .3rem; }
-    :global(.lb-table .lb-vehicle .logo-chip) { display: none; }
-    .lb-head { align-items: flex-start; }
+  @media (max-width: 1100px) {
+    .lbl { margin-left: 0; }
+    .tbl :global(.tr) { grid-template-columns: 44px minmax(0,1.2fr) minmax(0,1.4fr) 64px 92px 40px 74px; }
+    .tbl.nocar :global(.tr) { grid-template-columns: 44px minmax(0,2fr) 64px 92px 40px 74px; }
+    .tbl :global(.st-t) { display: none; }
   }
-
-  :global(.sr-only) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-  :global(a.lb-crew-tag) { text-decoration: none; color: #111; }
-  :global(a.lb-crew-tag:hover) { filter: brightness(.9); }
-  :global(.watch-btn) { cursor: pointer; font-family: var(--gh-font-body); }
-  :global(.watch-btn.is-disabled) { opacity: .45; cursor: not-allowed; }
-  :global(.lb-empty-row td) { padding: 2rem 1.1rem; text-align: center; color: var(--gh-muted); }
-  .lb-toggle button:hover:not(.is-active) { color: var(--gh-text); }
-  .lb-more { display: flex; justify-content: center; }
-  :global(.lb-more-btn) { margin-top: 1rem; }
-  :global(.lb-context) { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.2rem; margin-bottom: 1rem; }
-  :global(.lb-context-title) { display: flex; align-items: center; gap: .65rem; flex: 1 1 auto; }
-  :global(.lb-context-title h3) { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.25rem; }
-  :global(.lb-context-kicker) { margin: 0; color: var(--gh-muted); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-  :global(.lb-context-link) { color: var(--gh-muted); font-size: .8rem; font-weight: 700; }
-  :global(.lb-context-link:hover) { color: var(--gh-text); }
-  @media (max-width: 380px) {
-    :global(.lb-table td), :global(.lb-table th) { padding-inline: .4rem; }
+  @media (max-width: 760px) {
+    .lb { padding-top: 32px; }
+    .lb-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .lb-head h2 { font-size: 32px; }
+    .lg-l { display: none; }
+    .sm-l { display: inline; }
+    .lb-ctl { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
+    .seg4 { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); }
+    .seg4 button { justify-content: center; padding: 0 6px; }
+    .lb-q { max-width: none; grid-column: 1; }
+    .mypos { grid-column: 2; }
+    .lb-q:has(+ .mypos[hidden]) { grid-column: 1 / -1; }
+    .lbl { display: none; }
+    .lb-toggle { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
+    .lb-toggle button { justify-content: center; }
+    .sel { max-width: none; }
+    .chips { flex-wrap: nowrap; overflow-x: auto; margin-right: -16px; padding-right: 16px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    /* two-line rows: rank | driver / car | time / gap, status, video */
+    .tbl :global(.tr), .tbl.nocar :global(.tr) { grid-template-columns: 30px minmax(0,1fr) auto; grid-template-rows: auto auto; column-gap: 10px; row-gap: 3px; padding: 11px 12px; min-height: 0; }
+    .tbl :global(.tr.h) { display: none; }
+    .tbl :global(.tr > *), .tbl :global(.mt > *) { grid-row: auto; grid-column: auto; }
+    .tbl :global(.rk) { grid-column: 1; grid-row: 1 / 3; align-self: center; }
+    .tbl :global(.dr) { grid-column: 2; grid-row: 1; }
+    .tbl :global(.tm) { grid-column: 3; grid-row: 1; }
+    .tbl :global(.car) { grid-column: 2; grid-row: 2; }
+    .tbl.nocar :global(.gp) { grid-column: auto; }
+    .tbl :global(.mt), .tbl.nocar :global(.mt) { display: flex; grid-column: 3; grid-row: 2; justify-content: flex-end; align-items: center; gap: 8px; }
+    .tbl.nocar :global(.mt) { grid-column: 2 / 4; }
+    .tbl :global(.car .logo-chip), .tbl :global(.nm small) { display: none; }
+    .tbl :global(.nm b) { font-size: 13px; font-weight: 400; color: var(--lr-muted); }
+    .tbl :global(.gp) { font-size: 12px; }
+    .tbl :global(.st-t), .tbl :global(.vd-t) { display: none; }
+    .tbl :global(.vd) { height: 22px; width: 22px; padding: 0; justify-content: center; }
+    .tbl :global(.vd.x) { display: none; }
+    .tbl :global(.st.no i) { margin: 0 4px; }
+    .tbl :global(.st.ok i) { width: 16px; height: 16px; }
+    .lb-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 10px 0 0; font-size: 12px; color: var(--lr-muted); }
+    .lb-legend .st { font-size: 12px; color: var(--lr-muted); }
+    .lb-legend .vd-l { width: 18px; height: 18px; border: 1px solid var(--lr-line-strong); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--lr-text); margin-right: -8px; }
+    .lb-more :global(.lb-more-btn) { width: 100%; }
+    .ta-2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 400px) {
+    .need .grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
 
 <script>
-  // Browser side: state + filters, and the live feed. The markup above is
-  // the sample data rendered at build time; this script re-renders with the
-  // same renderer. Live rows replace the sample as soon as public_leaderboard
-  // returns at least one row (pre-launch: zero rows -> sample stays, flagged).
-  // TRACK_ID is fixed while Gellhorn is the only track.
-  import { createClient } from '@supabase/supabase-js';
+  import { getSupabase, backendConfigured } from '../scripts/supabase-client';
   import { LEADERBOARD_PLATFORM } from '../data/platforms';
-  import { sampleEntries, initialState, render, vehiclesNeededHtml, vehicleSelectHtml, classSelectHtml, makeSelectHtml, inFilter, lbClasses, lbMakes, type LbEntry, type LbState } from '../data/leaderboard';
+  import { sampleEntries, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, type LbEntry, type LbState, type LbMode } from '../data/leaderboard';
 
-  const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL ?? '';
-  const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
   const TRACK_ID = 'gellhorn-international-raceway';
   const $ = (id: string) => document.getElementById(id)!;
+  const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 
   let data: LbEntry[] = sampleEntries;
-  // Best VERIFIED run per driver + vehicle (RS-0040). `data` holds only the
-  // fastest run, which may be unverified while a slower verified one exists;
-  // "Verified only" therefore uses its own view. Sample data: same list.
+  // Best VERIFIED run per driver + car (RS-0040); "Video verified only" uses its own view.
   let verifiedData: LbEntry[] = sampleEntries;
   let sample = true;
   const current = () => (state.verifiedOnly ? verifiedData : data);
   const state: LbState = { ...initialState };
 
-  // Shareable state: ?vehicle=<id>&verified=1
+  // Shareable state: ?class=&make=&vehicle=&verified=1
   const params = new URLSearchParams(location.search);
-  if (params.get('vehicle')) state.vehicle = params.get('vehicle');
   const pc = params.get('class'); if (pc && lbClasses.includes(pc)) state.cls = pc;
   const pm = params.get('make'); if (pm && lbMakes.some(([k]) => k === pm)) state.make = pm;
+  if (params.get('vehicle')) { state.vehicle = params.get('vehicle'); state.cls = null; state.make = null; }
   if (params.get('verified') === '1') state.verifiedOnly = true;
+  state.mode = state.vehicle ? 'car' : state.make ? 'make' : state.cls ? 'class' : 'overall';
 
   function syncUrl() {
     const u = new URL(location.href);
@@ -218,43 +293,114 @@ const needed = vehiclesNeededHtml(sampleEntries);
   }
 
   const vehicleSel = $('lb-vehicle') as HTMLSelectElement;
-  const classSel = $('lb-class') as HTMLSelectElement;
   const makeSel = $('lb-make') as HTMLSelectElement;
+  const tbl = $('lb-tbl');
   function draw() {
     const r = render(current(), state, sample);
-    $('lb-thead').innerHTML = r.head;
+    tbl.classList.toggle('nocar', Boolean(state.vehicle));
+    $('lb-thead').innerHTML = headHtml(!state.vehicle);
     $('lb-tbody').innerHTML = r.body;
     $('lb-context').innerHTML = r.context;
     $('lb-more').innerHTML = r.more;
     $('lb-meta').textContent = r.meta;
-    vehicleSel.innerHTML = vehicleSelectHtml(current(), state); // counts follow the verified filter
-    vehicleSel.value = state.vehicle ?? '';
-    classSel.innerHTML = classSelectHtml(state); classSel.value = state.cls ?? '';
+    $('lb-mypos').hidden = !r.hasMe;
+    vehicleSel.innerHTML = vehicleSelectHtml(current(), state); vehicleSel.value = state.vehicle ?? '';
     makeSel.innerHTML = makeSelectHtml(state); makeSel.value = state.make ?? '';
+    $('lb-chips').innerHTML = classChipsHtml(state);
+    $('lb-chips').hidden = state.mode === 'car';
+    $('lb-pick-make').hidden = state.mode !== 'make';
+    $('lb-pick-car').hidden = state.mode !== 'car';
+    document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((b) => {
+      const on = b.dataset.mode === state.mode;
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+    });
     document.querySelectorAll<HTMLButtonElement>('.lb-toggle button').forEach((b) => {
       const on = (b.dataset.verified === '1') === state.verifiedOnly;
-      b.classList.toggle('is-active', on);
-      b.setAttribute('aria-pressed', String(on));
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
     });
     syncUrl();
   }
 
   const qDriver = $('lb-q-driver') as HTMLInputElement;
   qDriver.addEventListener('input', () => { state.qDriver = qDriver.value; draw(); });
-  vehicleSel.addEventListener('change', () => { state.vehicle = vehicleSel.value || null; state.showAll = false; draw(); });
-  // a chosen vehicle outside the new class/manufacturer is dropped
-  const refilter = () => { if (state.vehicle && !inFilter(state.vehicle, null, state)) state.vehicle = null; state.showAll = false; draw(); };
-  classSel.addEventListener('change', () => { state.cls = classSel.value || null; refilter(); });
-  makeSel.addEventListener('change', () => { state.make = makeSel.value || null; refilter(); });
-  document.querySelectorAll<HTMLButtonElement>('.lb-toggle button').forEach((b) => b.addEventListener('click', () => {
-    state.verifiedOnly = b.dataset.verified === '1';
+  document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((b) => b.addEventListener('click', () => {
+    const m = b.dataset.mode as LbMode;
+    state.mode = m; state.showAll = false;
+    if (m === 'overall') { state.cls = null; state.make = null; state.vehicle = null; }
+    if (m === 'class') { state.make = null; state.vehicle = null; }
+    if (m === 'make') { state.vehicle = null; }
+    if (m === 'car') { state.cls = null; state.make = null; }
     draw();
+    if (m === 'make' && !state.make) makeSel.focus();
+    if (m === 'car' && !state.vehicle) vehicleSel.focus();
+  }));
+  $('lb-chips').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-cls]');
+    if (!b) return;
+    state.cls = b.dataset.cls || null; state.showAll = false;
+    if (state.mode === 'overall' && state.cls) state.mode = 'class';
+    draw();
+  });
+  vehicleSel.addEventListener('change', () => { state.vehicle = vehicleSel.value || null; state.showAll = false; draw(); });
+  makeSel.addEventListener('change', () => { state.make = makeSel.value || null; state.showAll = false; draw(); });
+  document.querySelectorAll<HTMLButtonElement>('.lb-toggle button').forEach((b) => b.addEventListener('click', () => {
+    state.verifiedOnly = b.dataset.verified === '1'; draw();
   }));
   $('leaderboard').addEventListener('click', (e) => {
     if ((e.target as HTMLElement).closest('[data-lb-more]')) { state.showAll = true; draw(); }
   });
+  $('lb-mypos').addEventListener('click', () => {
+    const row = document.getElementById('lb-me');
+    if (row) { row.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  });
+  const needAll = $('lb-need-all') as HTMLButtonElement;
+  needAll.addEventListener('click', () => {
+    const rest = $('lb-need-rest');
+    rest.hidden = !rest.hidden;
+    needAll.setAttribute('aria-expanded', String(!rest.hidden));
+  });
 
   draw();
+
+  // ---- hero tile + track facts (guest: verified track record; logged in with a lap: own best) ----
+  function guestTile() {
+    const s = trackStats(data, verifiedData);
+    const t = document.getElementById('ta-tile');
+    if (!t) return;
+    t.querySelector('[data-rec]')!.textContent = s.rec ? lapTime(s.rec.lap_time_ms) : '—';
+    t.querySelector('[data-who]')!.innerHTML = recordWhoHtml(s.rec);
+    t.querySelector('[data-drivers]')!.textContent = s.drivers.toLocaleString('en-US');
+    t.querySelector('[data-laps]')!.textContent = s.laps.toLocaleString('en-US');
+    t.querySelector('[data-cars]')!.textContent = s.cars.toLocaleString('en-US');
+    (t.querySelector('[data-sample]') as HTMLElement).hidden = !sample;
+    const f = document.getElementById('ta-fact-rec');
+    if (f) f.textContent = s.rec ? lapTime(s.rec.lap_time_ms) : 'No record yet';
+  }
+
+  type RankRow = { scope: string; scope_key: string; rank: number; run_id: string; driver_id: string; vehicle_id: string; make: string; model: string; lap_time_ms: number; gap_to_ahead_ms: number | null; ahead_driver: string | null };
+  async function meTile(me: string) {
+    const { data: rows } = await getSupabase().from('public_leaderboard_ranks')
+      .select('scope,scope_key,rank,run_id,driver_id,vehicle_id,make,model,lap_time_ms,gap_to_ahead_ms,ahead_driver')
+      .eq('track_id', TRACK_ID).eq('platform', LEADERBOARD_PLATFORM).eq('driver_id', me);
+    const mine = (rows ?? []) as RankRow[];
+    const overall = mine.find((r) => r.scope === 'overall');
+    if (!overall) return; // no lap yet -> the guest tile stays
+    const inClass = mine.filter((r) => r.scope === 'class' && r.run_id === overall.run_id).sort((a, b) => a.rank - b.rank)[0];
+    const inCar = mine.find((r) => r.scope === 'vehicle' && r.run_id === overall.run_id);
+    const gap = (ms: number | null) => `+${((ms ?? 0) / 1000).toFixed(3)}`;
+    let target = '';
+    if (inClass && inClass.rank > 1 && inClass.ahead_driver) target = `Next target: <b>${esc(inClass.ahead_driver)}</b> is <b>${gap(inClass.gap_to_ahead_ms)}</b> ahead of you in ${esc(inClass.scope_key)}.`;
+    else if (overall.rank > 1 && overall.ahead_driver) target = `Next target: <b>${esc(overall.ahead_driver)}</b> is <b>${gap(overall.gap_to_ahead_ms)}</b> ahead of you overall.`;
+    else target = 'You hold the fastest lap at Gellhorn.';
+    const stat = (v: string, l: string) => `<div><b>${v}</b><span>${l}</span></div>`;
+    const t = $('ta-tile');
+    t.classList.add('is-me');
+    t.innerHTML = `<div class="eb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>Your best at Gellhorn</div>
+      <div class="big">${lapTime(overall.lap_time_ms)}</div>
+      <div class="who"><span>in</span><b>${esc(overall.make)} ${esc(overall.model)}</b></div>
+      <div class="row3">${stat(`#${overall.rank}`, 'Overall')}${inClass ? stat(`#${inClass.rank}`, esc(inClass.scope_key)) : ''}${inCar ? stat(`#${inCar.rank}`, 'In this car') : ''}</div>
+      <div class="tgt"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg><span>${target}</span></div>`;
+  }
 
   interface LiveRow {
     driver: string; driver_id: string; vehicle_id: string; make: string; model: string;
@@ -262,7 +408,7 @@ const needed = vehiclesNeededHtml(sampleEntries);
     video_verified: boolean; video_url: string | null;
   }
   async function loadLive() {
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = getSupabase();
     const cols = 'driver, driver_id, vehicle_id, make, model, manufacturer_logo_slug, lap_time_ms, track_entries, video_verified, video_url';
     const query = (view: string) => sb.from(view).select(cols)
       .eq('track_id', TRACK_ID)
@@ -270,15 +416,13 @@ const needed = vehiclesNeededHtml(sampleEntries);
       .order('lap_time_ms', { ascending: true });
     const [allRes, verRes] = await Promise.all([query('public_leaderboard'), query('public_leaderboard_verified')]);
     const rows = allRes.data;
-    if (allRes.error || !rows || rows.length === 0) return;
+    if (allRes.error || !rows || rows.length === 0) return false;
     const live = rows as LiveRow[];
     const liveVerified = (verRes.error ? [] : (verRes.data ?? [])) as LiveRow[];
-    // Crew tag (RS-0024): active members of published crews, never anonymised drivers.
+    // Crew tag (RS-0024): main crew (is_primary) of active members of published crews.
     const tags = new Map<string, { tag: string; color: string }>();
     const ids = [...new Set([...live, ...liveVerified].map((r) => r.driver_id).filter(Boolean))];
     if (ids.length) {
-      // Up to 5 crews per driver (DEC-0093): show the main crew (is_primary).
-      // select('*') keeps working with or without the is_primary column.
       const roster = await sb.from('public_crew_roster').select('*').in('driver_id', ids.slice(0, 300));
       for (const r of (roster.data ?? []) as { driver_id: string; tag: string; color: string; is_primary?: boolean }[]) {
         if (!tags.has(r.driver_id) || r.is_primary) tags.set(r.driver_id, { tag: r.tag, color: r.color });
@@ -293,10 +437,29 @@ const needed = vehiclesNeededHtml(sampleEntries);
     data = live.map(toEntry);
     verifiedData = liveVerified.map(toEntry);
     sample = false;
-    ($('lb-flag') as HTMLElement).hidden = true;
-    // a vehicle counts as verified if ANY driver has a verified run on it
-    $('lb-needed').innerHTML = vehiclesNeededHtml([...data, ...verifiedData]);
-    draw();
+    $('lb-flag').hidden = true;
+    const nl = noLapCars([...data, ...verifiedData]);
+    $('lb-need').innerHTML = nl.picks;
+    $('lb-need-rest').innerHTML = nl.rest;
+    $('lb-need-n').textContent = String(nl.count);
+    $('lb-need-all').hidden = !nl.rest;
+    return true;
   }
-  if (SUPABASE_URL && SUPABASE_ANON_KEY) loadLive();
+
+  guestTile();
+  if (backendConfigured) {
+    (async () => {
+      const hasLive = await loadLive().catch(() => false);
+      if (hasLive) { guestTile(); draw(); }
+      const sb = getSupabase();
+      const { data: s } = await sb.auth.getSession();
+      if (!s?.session) return;
+      const own = await sb.from('drivers').select('driver_id').eq('auth_user_id', s.session.user.id).maybeSingle();
+      const me = own.data?.driver_id ?? null;
+      if (!me) return;
+      state.me = me;
+      draw();
+      if (hasLive) await meTile(me).catch(() => {});
+    })();
+  }
 </script>
