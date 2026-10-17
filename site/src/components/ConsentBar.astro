@@ -4,7 +4,10 @@
 // shrinks by its height instead of being covered; muted lilac tone from the
 // palette; clear switches. The beacon loads ONLY after "Allow".
 // Choice is stored in localStorage (technically necessary, Section 25(2) TDDDG).
-// Footer link "Privacy settings" reopens the bar.
+// Footer link "Privacy settings" reopens the bar; the stored choice stays until a button is pressed.
+// Withdrawal (No Thanks after Allow, Codex privacy review 16.10.2026): the choice is saved, any
+// further request of the already running beacon is blocked (incl. the pagehide send) and the page
+// reloads without it, so no visitor-statistics data is sent after withdrawal.
 // COPY STATUS: approved (Codex 2026-10-02, Fausto). No pulse on Allow: both
 // choices equally easy (Fausto, 2026-10-02).
 const base = import.meta.env.BASE_URL;
@@ -59,6 +62,17 @@ const base = import.meta.env.BASE_URL;
   if (choice === 'granted') loadBeacon();
   else if (choice !== 'denied') show();
 
+  // Block every request to Cloudflare Web Analytics from this document (sendBeacon, fetch, XHR).
+  function blockBeacon() {
+    const cf = (u: unknown) => String(u).includes('cloudflareinsights.com');
+    try { const sb = navigator.sendBeacon.bind(navigator); navigator.sendBeacon = (u, d) => (cf(u) ? true : sb(u, d)); } catch { /* not supported */ }
+    const f = window.fetch.bind(window);
+    window.fetch = (i, o) => (cf(typeof i === 'string' ? i : i instanceof Request ? i.url : i) ? Promise.resolve(new Response(null, { status: 204 })) : f(i, o));
+    const open = XMLHttpRequest.prototype.open, send = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.open = function (this: XMLHttpRequest & { _cf?: boolean }, m: string, u: string | URL, ...rest: unknown[]) { this._cf = cf(u); return (open as any).call(this, m, u, ...rest); } as any;
+    XMLHttpRequest.prototype.send = function (this: XMLHttpRequest & { _cf?: boolean }, b?: any) { if (this._cf) return; return send.call(this, b); };
+  }
+
   bar.addEventListener('click', (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-consent]');
     if (!b) return;
@@ -66,12 +80,12 @@ const base = import.meta.env.BASE_URL;
     write(v);
     hide();
     if (v === 'granted') loadBeacon();
+    else if (loaded) { blockBeacon(); location.reload(); }
   });
   window.addEventListener('resize', () => { if (!bar.hidden) syncSpace(); });
-  // "Privacy Settings" in the footer: ask again. A beacon that already ran
-  // stops counting with the next page load after "No thanks".
+  // "Privacy Settings" in the footer: show the choice again. Just opening it changes nothing.
   document.addEventListener('click', (e) => {
-    if ((e.target as HTMLElement).closest('[data-consent-open]')) { e.preventDefault(); write(null); show(); }
+    if ((e.target as HTMLElement).closest('[data-consent-open]')) { e.preventDefault(); show(); }
   });
 </script>
 

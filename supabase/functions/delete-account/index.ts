@@ -53,6 +53,10 @@ Deno.serve(async (req) => {
       const { error: rmErr } = await admin.storage.from(EVIDENCE_BUCKET).remove(paths.slice(i, i + BATCH));
       if (rmErr) return json({ error: "could not delete evidence files — nothing was deleted, please try again" }, 500);
     }
+    // 1b) Discord bot records tied to the Discord ID (17.10.2026): /ping cooldown stamp.
+    //     Role-sync state is cleared by the role job the drivers trigger queues; leftovers by the daily housekeeping.
+    const { data: dd } = await admin.from("drivers").select("discord_user_id").eq("driver_id", driver.driver_id).maybeSingle();
+    if (dd?.discord_user_id) await admin.from("discord_bot_state").delete().eq("key", `ping_last:${dd.discord_user_id}`);
     // 2) rows
     const { error: aErr } = await admin.rpc("anonymize_driver_account", { p_driver: driver.driver_id });
     if (aErr) return json({ error: "could not anonymise the account" }, 500);

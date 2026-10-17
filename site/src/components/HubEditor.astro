@@ -140,6 +140,8 @@ const base = import.meta.env.BASE_URL;
               <label>Sign-ups <small>Controls the “I'm in” button on the calendar</small><select name="registration"><option value="open">Open</option><option value="closed">Closed — Listed, No Sign-ups</option></select></label>
               <label class="span2">Stream link <small>Twitch, YouTube, or Kick. Required for events created with closed sign-ups. Shown even when sign-ups are full or closed.</small><input type="url" name="stream_url" placeholder="https://www.twitch.tv/…" /></label>
               <label class="span2">Description <small><span id="event-desc-count">0</span>/600</small><textarea name="description" maxlength="600" rows="3"></textarea></label>
+              <!-- Privacy notice for hosts (Codex privacy review 16.10.2026, RS-0076): events are also distributed by the Discord bot -->
+              <p class="span2 dist-note">Published events, including your host name and contact links, may also appear in Discord servers that follow the public calendar, your crew or your host profile.</p>
               <label class="span2" data-mod-only>Note to the host <small>optional, e.g. why the event is hidden or what to fix</small><textarea name="moderation_note" maxlength="300" rows="2"></textarea></label>
             </div>
             <div class="preview-wrap"><p class="preview-label">Preview</p><div class="ev-list preview" id="event-preview"></div></div>
@@ -265,6 +267,7 @@ const base = import.meta.env.BASE_URL;
 
   .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.1rem; }
   @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  .dist-note { margin: 0; font-size: .82rem; line-height: 1.5; color: var(--gh-muted); }
   .span2 { grid-column: 1 / -1; }
   .hc-form label, .hc-form legend { display: flex; flex-direction: column; gap: .35rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
   .hc-form small { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--gh-muted); opacity: .8; }

@@ -36,6 +36,7 @@
 // Role sync (08.10.2026): see "Discord role sync" below.
 // Reminders (package 5, 15.10.2026): see "reminders" below.
 // LFG end (DEC-0111, 15.10.2026): see "LFG" below.
+// Retention cleanup (17.10.2026): see retention() below, part of the daily housekeeping call.
 // COPY STATUS: all user-facing texts are Claude placeholders, Codex review pending.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -163,7 +164,29 @@ async function housekeeping() {
       if (c.status === 404 && c.data?.code === UNKNOWN_CHANNEL) { await dropFeed(f); feedsRemoved++; }
     }
   }
-  return { guilds: byGuild.size, guildsRemoved, feedsRemoved };
+  return { guilds: byGuild.size, guildsRemoved, feedsRemoved, ...(await retention()) };
+}
+// Retention (privacy review 16.10.2026): processed role-sync jobs after 7 days, /ping cooldown
+// stamps one day after the last ping, role-sync state of Discord IDs without an active account
+// once no job is pending for them. Runs with the daily housekeeping call.
+async function retention() {
+  const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString(), dayAgo = new Date(Date.now() - 864e5).toISOString();
+  const { count: jobs } = await db.from("discord_role_jobs").delete({ count: "exact" }).lt("processed_at", weekAgo);
+  const { count: pings } = await db.from("discord_bot_state").delete({ count: "exact" }).like("key", "ping_last:%").lt("updated_at", dayAgo);
+  const { data: st } = await db.from("discord_role_state").select("discord_user_id");
+  const ids: string[] = [...new Set<string>((st ?? []).map((r: any) => String(r.discord_user_id)))];
+  let states = 0;
+  for (let i = 0; i < ids.length; i += 100) {
+    const chunk = ids.slice(i, i + 100);
+    const [{ data: act }, { data: pend }] = await Promise.all([
+      db.from("drivers").select("discord_user_id").in("discord_user_id", chunk).is("deleted_at", null),
+      db.from("discord_role_jobs").select("discord_user_id").in("discord_user_id", chunk).is("processed_at", null),
+    ]);
+    const keep = new Set([...(act ?? []), ...(pend ?? [])].map((r: any) => String(r.discord_user_id)));
+    const gone = chunk.filter((id) => !keep.has(id));
+    if (gone.length) { const { count } = await db.from("discord_role_state").delete({ count: "exact" }).in("discord_user_id", gone); states += count ?? 0; }
+  }
+  return { roleJobsRemoved: jobs ?? 0, pingStampsRemoved: pings ?? 0, roleStatesRemoved: states };
 }
 
 // ---------- new vehicles (DEC-0106) ----------
@@ -614,8 +637,10 @@ async function handleLfg(): Promise<number> {
     }
     if (l.message_id) {
       const joined = (l.participants ?? []).length;
-      await discord("PATCH", `/channels/${l.channel_id}/messages/${l.message_id}`, { content: "", components: [], allowed_mentions: { parse: [] },
+      const e = await discord("PATCH", `/channels/${l.channel_id}/messages/${l.message_id}`, { content: "", components: [], allowed_mentions: { parse: [] },
         embeds: [{ color: GREY, title: `${LFG_LABELS[l.activity] ?? l.activity} \u00b7 ended`, description: `${joined} ${joined === 1 ? "driver was" : "drivers were"} in. Want another round? Hit Find Players.` }] });
+      // keep the row (and the participant IDs) until the card no longer shows names; retried later
+      if (!e.ok && e.status !== 404) { console.log("lfg card edit failed", e.status, e.text.slice(0, 200)); continue; }
     }
     await db.from("discord_lfg").delete().eq("lfg_id", l.lfg_id);
     n++;

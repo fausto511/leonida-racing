@@ -3,8 +3,8 @@
 // GitHub Pages serves dist/404.html for every unknown URL, so the requested path is
 // read in the browser (location.pathname) and matched against cars, classes and
 // manufacturers for "Did you mean". Old /garage/ and /hub/ paths are mapped too.
-// COPY STATUS: texts from the mockup = placeholders; Codex brief
-// "Claude outputs/CODEX-AUFTRAG-Texte-404-Seite-2026-10-16.md" is still open (DEC-0088).
+// COPY STATUS: Codex 404 texts (Codex Zuarbeit/404-Seite-Texte-2026-10-16.md) reviewed 17.10.: title + lede adopted;
+// search placeholder stays "Search cars" (search does not cover classes); H1 "Wrong turn", tile lines and band from the mockup kept (closer to TEXTSTIL).
 // Search: the mockup says "Search cars, tracks, crews", but only the car search exists,
 // so the field says "Search cars" and goes to /cars/?q= like the header.
 import Base from '../layouts/Base.astro';
@@ -29,13 +29,13 @@ const DISCORD_INVITE_URL = 'https://discord.gg/hPGuBwXRqT';
 const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z';
 const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 ---
-<Base title="Page not found" description="This page doesn't exist or has moved." noindex>
+<Base title="Page Not Found" description="This link may be out of date, or there may be a typo in the address." noindex>
   <section class="nf">
     <img class="nf-bg" src={`${base}images/guide/street-race-1280.webp`} srcset={`${base}images/guide/street-race-640.webp 640w, ${base}images/guide/street-race-1280.webp 1280w`} sizes="100vw" alt="" width="1280" height="720" fetchpriority="high" />
     <span class="nf-o nf-o1" aria-hidden="true"></span><span class="nf-o nf-o2" aria-hidden="true"></span>
     <div class="wrap nf-in">
       <div class="nf-tl"><span class="nf-code" aria-hidden="true">404</span><h1 class="display">Wrong turn</h1></div>
-      <p class="nf-s">This page doesn’t exist or has moved. Search for a car or pick up the racing line below.</p>
+      <p class="nf-s">This link may be out of date, or there may be a typo in the address. Search for a car or pick up the racing line below.</p>
       <span class="nf-url" id="nf-url" hidden></span>
       <form class="nf-srch" role="search" action={`${base}cars/`} method="get">
         <label class="nf-f">
