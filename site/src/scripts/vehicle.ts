@@ -8,7 +8,7 @@ import { getSelected, toggleSelected } from './compare';
 import { bubble, hideBubble } from './bubble';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
 import { lapTime } from '../data/leaderboard';
-import { classRowsHtml, driverRowHtml, openRowHtml, startTileHtml, rivalsFromClass, rivalHtml, sortClass, type ClassRow } from '../data/vehicle-page';
+import { classRowsHtml, driverRowHtml, openRowHtml, startTileHtml, rivalsFromClass, rivalHtml, sortClass, GELLHORN_ROWS, type ClassRow } from '../data/vehicle-page';
 
 const base = import.meta.env.BASE_URL;
 const TRACK = 'gellhorn-international-raceway';
@@ -201,7 +201,7 @@ function init(root: HTMLElement) {
     const bestBy = new Map((best as RankRow[]).map((r) => [r.scope_key, r.lap_time_ms]));
     classRows = classIds.map((cid) => ({ id: cid, ms: bestBy.get(cid) ?? null }));
     $('vg-flag')!.hidden = true;
-    $('vg-class')!.innerHTML = classRowsHtml(classRows, id);
+    $('vg-class')!.innerHTML = classRowsHtml(classRows, id, $('vg-class')!.dataset.more);
     const timed = classRows.filter((r) => r.ms != null).length;
     $('vg-csub')!.textContent = timed < classIds.length ? `${timed} of ${classIds.length} cars have a lap · tap a car to open it` : 'Best lap per car · tap a car to open it';
     // value tile
@@ -218,7 +218,7 @@ function init(root: HTMLElement) {
     if (rv) { $('vh2h-list') && ($('vh2h-list')!.innerHTML = rv.map((r) => rivalHtml(r.id, r.note, id)).join('')); $('vh2h-sub') && ($('vh2h-sub')!.textContent = 'Its closest rivals at Gellhorn'); }
     // drivers in this car
     const [{ data: top }, own] = await Promise.all([
-      ranks().eq('scope_key', id).lte('rank', 5).order('rank'),
+      ranks().eq('scope_key', id).lte('rank', GELLHORN_ROWS).order('rank'),
       me ? ranks().eq('scope_key', id).eq('driver_id', me).maybeSingle() : Promise.resolve({ data: null }),
     ]);
     const rows = (top ?? []) as RankRow[];
@@ -231,7 +231,7 @@ function init(root: HTMLElement) {
     ($('vg-how') as HTMLElement).hidden = has;
     if (!has) { box.innerHTML = startTileHtml(model, `${base}time-attack/submit/`); return; }
     let html = rows.map((r) => driverRowHtml({ rank: r.rank, driver: r.driver, ms: r.lap_time_ms, me: r.driver_id === me })).join('');
-    if (myRow && myRow.rank > 5) html += driverRowHtml({ rank: myRow.rank, driver: myRow.driver, ms: myRow.lap_time_ms, me: true });
+    if (myRow && myRow.rank > GELLHORN_ROWS) html += driverRowHtml({ rank: myRow.rank, driver: myRow.driver, ms: myRow.lap_time_ms, me: true });
     else if (!myRow) html += openRowHtml();
     box.innerHTML = html;
     $('vg-set')!.querySelector('[data-l]')!.textContent = myRow ? 'Beat your time' : 'Set a Gellhorn time';

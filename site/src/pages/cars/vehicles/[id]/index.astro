@@ -15,7 +15,7 @@ import { releaseById, formatReleaseDate } from '../../../../data/releases';
 import { classHref, makeHref, classSlug, vehiclesByMake } from '../../../../data/garage-taxonomy';
 import { vehiclePhotoAlt } from '../../../../data/vehicle-photo-alt';
 import { sampleEntries, vehicleRows, lapTime } from '../../../../data/leaderboard';
-import { driverRowHtml, openRowHtml, startTileHtml, classRowsHtml, sampleClassRows, rivalsFromClass, rivalHtml, type ClassRow } from '../../../../data/vehicle-page';
+import { driverRowHtml, openRowHtml, startTileHtml, classRowsHtml, sampleClassRows, rivalsFromClass, rivalHtml, GELLHORN_ROWS, type ClassRow } from '../../../../data/vehicle-page';
 
 export function getStaticPaths() {
   return vehicleOptions.map((v) => ({ params: { id: v.id }, props: { vehicle: v } }));
@@ -65,12 +65,13 @@ const haveRealLaps = vehicleOptions.some((v) => realBest(v.id) != null);
 const sample = !haveRealLaps;
 const submitHref = `${base}time-attack/submit/`;
 const lbHref = `${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(vehicle.id)}#leaderboard`;
-const driverRows = sample ? vehicleRows(sampleEntries, vehicle.id, false).slice(0, 5) : [];
+const driverRows = sample ? vehicleRows(sampleEntries, vehicle.id, false).slice(0, GELLHORN_ROWS) : [];
 const driversHtml = driverRows.length
   ? driverRows.map(({ e, rank }) => driverRowHtml({ rank, driver: e.driver, ms: e.lap_time_ms })).join('') + openRowHtml()
   : startTileHtml(vehicle.model, submitHref);
 const classRows: ClassRow[] = sample ? sampleClassRows(sampleEntries, classCars.map((v) => v.id)) : classCars.map((v) => ({ id: v.id, ms: realBest(v.id) }));
-const classHtml = classRowsHtml(classRows, vehicle.id);
+const classMoreHref = `${base}time-attack/gellhorn-international-raceway/?class=${encodeURIComponent(cls)}#leaderboard`;
+const classHtml = classRowsHtml(classRows, vehicle.id, classMoreHref);
 const classTimed = classRows.filter((r) => r.ms != null).length;
 
 // ---- Similar cars (Fausto 2026-10-06 scoring) + compare tile ----------------
@@ -217,7 +218,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         <div class="vg-card">
           <div class="vg-h"><h3>{cls} by best lap</h3><p id="vg-csub">{classTimed < classCars.length ? `${classTimed} of ${classCars.length} cars have a lap · tap a car to open it` : `Best lap per car · tap a car to open it`}</p></div>
           <div class="vg-cols vg-cols-c"><span>#</span><span>Car</span><span>Gap</span><span>Best lap</span></div>
-          <div class="vg-rows" id="vg-class" set:html={classHtml} />
+          <div class="vg-rows" id="vg-class" data-more={classMoreHref} set:html={classHtml} />
           <div class="vg-btns">
             <a class="btn btn-s" href={`${base}cars/compare/`} id="vg-vsleader" data-vs-leader>Compare with the class leader</a>
           </div>
@@ -405,6 +406,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vg-cols-c span:nth-child(2) { padding-left: 78px; }
   .vg-cols-c span:nth-child(3), .vg-cols-c span:nth-child(4) { text-align: right; }
   .vg-rows { display: flex; flex-direction: column; }
+  /* both cards: room for 10 rows + 1 extra row, so they always line up (Fausto 17.10.) */
+  .vg .vg-rows { min-height: calc(11 * 44px + 6px); }
   .vg-rows :global(.vg-row) { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 14px; min-height: 44px; padding: 0 14px; border-top: 1px solid var(--lr-line); font-size: 15px; color: var(--lr-soft); text-decoration: none; }
   .vg-rows :global(.vg-pos) { color: var(--lr-muted); }
   .vg-rows :global(.vg-pos.is-first) { color: var(--lr-pink); font-weight: 700; }
@@ -413,7 +416,9 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vg-rows :global(.vg-row.me) { background: var(--lr-raised); border-radius: 6px; color: var(--lr-text); font-weight: 600; }
   .vg-rows :global(.vg-you) { display: inline-flex; margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: rgba(242,75,157,.18); color: var(--lr-pink); font-size: 11px; font-weight: 700; font-style: normal; text-transform: uppercase; }
   .vg-rows :global(.vg-open) { margin-top: 6px; border-top: 1px solid var(--lr-line-strong); color: var(--lr-muted); }
-  .vg-rows :global(.vg-crow) { grid-template-columns: 40px 64px 1fr 66px 70px; min-height: 48px; }
+  .vg-rows :global(.vg-crow) { grid-template-columns: 40px 64px 1fr 66px 70px; min-height: 44px; }
+  .vg-rows :global(.vg-more) { grid-template-columns: 40px 1fr auto; text-decoration: none; }
+  .vg-rows :global(.vg-more:hover) { color: var(--lr-text); }
   .vg-rows :global(.vg-crow:hover) { background: rgba(251,247,234,.04); color: var(--lr-text); }
   .vg-rows :global(.vg-crow.is-this) { background: var(--lr-raised); border-radius: 6px; color: var(--lr-text); font-weight: 600; }
   .vg-rows :global(.vg-crow.no-lap) { color: var(--lr-muted); }
@@ -489,6 +494,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   @media (max-width: 900px) {
     .vh-grid { flex-direction: column; align-items: stretch; }
     .vg, .va { grid-template-columns: 1fr; }
+    .vg .vg-rows { min-height: 0; }
   }
   /* ---- phone (DEC-0118): head -> photo edge to edge -> Compare + Garage -> 2x2 values -> ... ---- */
   @media (max-width: 760px) {

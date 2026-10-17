@@ -7,6 +7,9 @@ import { lapTime, type LbEntry } from './leaderboard';
 import { vehicleOptions, type VehicleOption } from './vehicles';
 
 const base = import.meta.env.BASE_URL;
+/** Gellhorn section on the vehicle page (Fausto 17.10.): both lists show at most 10 rows
+ *  (+1 extra row: own lap / open spot, resp. "more cars"), both cards the same fixed height. */
+export const GELLHORN_ROWS = 10;
 const byId = new Map(vehicleOptions.map((v) => [v.id, v]));
 
 export interface DriverRow { rank: number; driver: string; ms: number; me?: boolean }
@@ -48,22 +51,29 @@ export function sortClass(rows: ClassRow[]): ClassRow[] {
     || (byId.get(a.id)?.model ?? '').localeCompare(byId.get(b.id)?.model ?? ''));
 }
 
-export function classRowsHtml(rows: ClassRow[], currentId: string): string {
+export function classRowsHtml(rows: ClassRow[], currentId: string, moreHref?: string): string {
   const sorted = sortClass(rows);
   const leader = sorted[0]?.ms ?? null;
-  let rank = 0;
-  return sorted.map((r) => {
+  // rank of every timed car in the full list
+  const ranked = new Map<string, number>();
+  sorted.filter((r) => r.ms != null).forEach((r, i) => ranked.set(r.id, i + 1));
+  // window: top 10; if this car is further down, top 9 + this car
+  let shown = sorted.slice(0, GELLHORN_ROWS);
+  const me = sorted.find((r) => r.id === currentId);
+  if (me && !shown.includes(me)) shown = [...sorted.slice(0, GELLHORN_ROWS - 1), me];
+  const rest = sorted.length - shown.length;
+  return shown.map((r) => {
     const v = byId.get(r.id);
     if (!v) return '';
-    if (r.ms != null) rank += 1;
-    const gap = r.ms == null ? '' : r.ms === leader && rank === 1 ? '<span class="vg-lead">Leader</span>' : `+${((r.ms - (leader ?? r.ms)) / 1000).toFixed(3)}`;
+    const rank = ranked.get(r.id);
+    const gap = r.ms == null ? '' : rank === 1 ? '<span class="vg-lead">Leader</span>' : `+${((r.ms - (leader ?? r.ms)) / 1000).toFixed(3)}`;
     return `<a class="vg-row vg-crow${r.id === currentId ? ' is-this' : ''}${r.ms == null ? ' no-lap' : ''}" href="${base}cars/vehicles/${v.id}/">
   <span class="vg-pos tnum">${r.ms == null ? '–' : rank}</span>
   ${thumb(v)}
   <span class="vg-name"><span class="vg-make">${esc(v.make)} </span>${esc(v.model)}</span>
   ${r.ms == null ? '<span class="vg-time vg-nolap">No lap</span>' : `<span class="vg-gap tnum">${gap}</span><span class="vg-time tnum">${lapTime(r.ms)}</span>`}
 </a>`;
-  }).join('');
+  }).join('') + (rest > 0 && moreHref ? `<a class="vg-row vg-open vg-more" href="${moreHref}"><span class="vg-pos">+${rest}</span><span class="vg-name">${rest === 1 ? '1 more car' : `${rest} more cars`} in this class</span><span class="vg-time arrow">See all →</span></a>` : '');
 }
 
 /** Rivals for the compare tile: the cars right ahead of / behind this one in the class list. */
