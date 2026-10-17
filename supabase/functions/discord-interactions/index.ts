@@ -37,6 +37,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const PUBLIC_KEY = "5aef5b94df1e1470f44ce3f5eac2e53618c6582759ebe295d9745eeceeb0cfe6";
 const APP_ID = "1552506662533861376";
 const SITE = "https://leonidaracing.com";
+const BOT_GUIDE = `${SITE}/discord/bot/`; // bot info page (DEC-0134)
 // Guild install with bot user + slash commands. Permissions: View Channels, Send Messages, Embed Links, Manage Events + Create Events (server events), Connect (needed to update server events an admin moved to a voice channel).
 const INVITE = `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot+applications.commands&permissions=17600777047040&integration_type=0`;
 const YELLOW = 0xffd74c;
@@ -93,7 +94,7 @@ const COMMANDS = [
     options: [{ type: 3, name: "crew", description: "Start typing a crew name or tag", required: true, autocomplete: true }] },
   // Setup command: always "Manage Server" only (also checked at runtime).
   { name: "leonida", description: "Set up Leonida Racing on this server", default_member_permissions: "32", dm_permission: false,
-    options: [{ type: 2, name: "feed", description: "Leonida Racing feeds for this server", options: [
+    options: [{ type: 1, name: "help", description: "How the Leonida Racing bot works" }, { type: 2, name: "feed", description: "Leonida Racing feeds for this server", options: [
       { type: 1, name: "add", description: "Post events from a source into a channel", options: [
         { type: 7, name: "channel", description: "Channel for the event posts", required: true, channel_types: [0, 5] },
         { type: 3, name: "source", description: "Which events", required: true, choices: [
@@ -122,7 +123,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-10-15.2"; // + /compare, /crew
+const COMMANDS_VERSION = "2026-10-17.1"; // + /leonida help
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
@@ -456,6 +457,7 @@ async function cmdLeonida(i: any) {
     case "feed list": return deferEphemeral(i, () => feedList(i));
     case "feed edit": return deferEphemeral(i, () => feedEdit(i));
     case "feed remove": return deferEphemeral(i, () => feedRemove(i));
+    case "help": return ephemeral("Leonida Racing posts GTA VI events, new vehicles and reminders into your channels.\n• **/leonida feed add** – events from the public calendar, your crew or your host profile\n• **/leonida feed vehicles** – new cars from The Garage\n• **/leonida feed list / edit / remove** – manage this server's feeds\nEveryone can use **/events**, **/event**, **/car**, **/compare** and **/crew**.\nSetup guide, permissions and FAQ are on the bot page.", [row(linkButton("Bot guide", BOT_GUIDE))]);
   }
   return ephemeral("This action isn't available yet.");
 }
@@ -520,7 +522,7 @@ async function feedAdd(i: any, forceSource?: string) {
   }
   if (source !== "vehicles" && nativeEvents && (BigInt(i.app_permissions ?? "0") & PERM_CREATE_EVENTS) === 0n) notes.push("Adding to server events is switched on, but Leonida Racing doesn't have the “Create Events” permission yet. Until it does, only the posts in the channel will appear.");
   if (source !== "vehicles" && mention && reminders === "off") notes.push("Mentions only apply to reminders, which are off for this feed.");
-  return { content: [`Feed added: <#${channelId}> · ${srcText}${source !== "vehicles" && filters ? ` · ${filters}` : ""}.`, ...notes].join("\n") };
+  return { content: [`Feed added: <#${channelId}> · ${srcText}${source !== "vehicles" && filters ? ` · ${filters}` : ""}.`, ...notes].join("\n"), components: [row(linkButton("Bot guide", BOT_GUIDE))] };
 }
 
 async function feedList(i: any) {

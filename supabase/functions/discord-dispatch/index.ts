@@ -37,6 +37,8 @@
 // Reminders (package 5, 15.10.2026): see "reminders" below.
 // LFG end (DEC-0111, 15.10.2026): see "LFG" below.
 // Retention cleanup (17.10.2026): see retention() below, part of the daily housekeeping call.
+// Card removal (17.10.2026): a reference is forgotten only after Discord confirmed the delete;
+// failed deletes are retried by the daily housekeeping (retryRemovals).
 // COPY STATUS: all user-facing texts are Claude placeholders, Codex review pending.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -164,7 +166,32 @@ async function housekeeping() {
       if (c.status === 404 && c.data?.code === UNKNOWN_CHANNEL) { await dropFeed(f); feedsRemoved++; }
     }
   }
-  return { guilds: byGuild.size, guildsRemoved, feedsRemoved, ...(await retention()) };
+  const removalsRetried = await retryRemovals();
+  return { guilds: byGuild.size, guildsRemoved, feedsRemoved, removalsRetried, ...(await retention()) };
+}
+// Cards/server events whose event is no longer published (or deleted) but whose delete
+// failed earlier: run sync() again, which deletes and only then forgets the reference.
+async function retryRemovals() {
+  const { data: refs } = await db.from("discord_messages").select("feed_id,event_id").limit(2000);
+  const ids = [...new Set((refs ?? []).map((r: any) => r.event_id as string))];
+  if (!ids.length) return 0;
+  const live = new Set<string>();
+  for (let n = 0; n < ids.length; n += 200) {
+    const { data } = await db.from("hub_events").select("event_id").eq("is_published", true).in("event_id", ids.slice(n, n + 200));
+    for (const e of data ?? []) live.add(e.event_id);
+  }
+  const stale = (refs ?? []).filter((r: any) => !live.has(r.event_id));
+  if (!stale.length) return 0;
+  const { data: feeds } = await db.from("discord_feeds").select("*").in("feed_id", [...new Set(stale.map((r: any) => r.feed_id as string))]);
+  const byId = new Map((feeds ?? []).map((f: any) => [f.feed_id, f]));
+  let n = 0;
+  for (const r of stale) {
+    const f = byId.get(r.feed_id);
+    if (!f) continue;
+    await sync(f, r.event_id, await loadEvent(r.event_id), 0);
+    n++;
+  }
+  return n;
 }
 // Retention (privacy review 16.10.2026): processed role-sync jobs after 7 days, /ping cooldown
 // stamps one day after the last ping, role-sync state of Discord IDs without an active account
@@ -358,8 +385,26 @@ async function sync(f: any, eventId: string, e: any | null, going: number, depth
 
   if (!want) {
     if (!ref) return;
-    if (ref.message_id) await discord("DELETE", `/channels/${ref.channel_id}/messages/${ref.message_id}`);
-    if (ref.scheduled_event_id && ref.scheduled_event_id !== REMOVED) await discord("DELETE", `/guilds/${f.guild_id}/scheduled-events/${ref.scheduled_event_id}`);
+    // Forget the reference only once Discord confirms the delete (or says it's already gone, 404).
+    // On any other failure the row stays and the daily housekeeping retries (retryRemovals).
+    if (ref.message_id) {
+      const d = await discord("DELETE", `/channels/${ref.channel_id}/messages/${ref.message_id}`);
+      if (!d.ok && d.status !== 404) {
+        if (await handleGone(f, d)) return;
+        await feedError(f, describeFail(d, "delete messages in the channel"));
+        console.log("card delete failed, will retry", f.feed_id, eventId, d.status, d.text.slice(0, 300));
+        return;
+      }
+    }
+    if (ref.scheduled_event_id && ref.scheduled_event_id !== REMOVED) {
+      const d = await discord("DELETE", `/guilds/${f.guild_id}/scheduled-events/${ref.scheduled_event_id}`);
+      if (!d.ok && d.status !== 404) {
+        // card is gone already; the retry gets a 404 for it and goes on to the server event
+        await feedError(f, describeFail(d, "delete server events"));
+        console.log("server event delete failed, will retry", f.feed_id, eventId, d.status, d.text.slice(0, 300));
+        return;
+      }
+    }
     await db.from("discord_messages").delete().eq("feed_id", f.feed_id).eq("event_id", eventId);
     return;
   }
