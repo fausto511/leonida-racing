@@ -16,7 +16,9 @@ const SAMPLE_KEY = 'lr-sample-crew-requests';
 function readSample(): string[] { try { return JSON.parse(localStorage.getItem(SAMPLE_KEY) || '[]'); } catch { return []; } }
 function writeSample(ids: string[]) { try { localStorage.setItem(SAMPLE_KEY, JSON.stringify(ids)); } catch { /* storage blocked */ } }
 
-export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null) {
+export type CrewMine = Mine;
+/** onRender: called after every render with the driver's memberships (Crews page "Your crews" tile). */
+export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null, onRender?: (mine: Mine[], crews: HubCrew[], live: boolean) => void) {
   let crews: HubCrew[] = [];
   let live = false;
   let session: any = null;
@@ -42,6 +44,7 @@ export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null
       else if (full) slot.innerHTML = `<span class="crew-pill is-pending" title="You can be in up to ${CREW_LIMIT} crews, open requests included">${CREW_LIMIT}-Crew Limit Reached</span>`;
       else slot.innerHTML = `<button type="button" class="crew-link crew-join-btn" data-join="${esc(id)}">Request Invite</button>`;
     });
+    onRender?.(mine, crews, live);
     if (!meEl) return;
     const active = mine.filter((m) => m.status === 'active');
     const pending = mine.filter((m) => m.status === 'pending');

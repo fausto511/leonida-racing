@@ -1,12 +1,22 @@
 ---
+// Crew directory -- Redesign (boards Crews / CrewsActive / CrewsMobile / CrewsMobileActive / CrewsMobileFilters):
+// image band with breadcrumb + tile (guest: "Start a crew"; with memberships: "Your crews" with status),
+// search + Language / Region / Platform / Has Discord (phone: "Filters" bottom sheet), focus chips,
+// count + 5-crew note, cards + "Start a crew", "Show more crews", Discord band. No sub-nav.
+// Deep links: ?q=TAG (leaderboard crew tag), #crew-<id> (home). COPY STATUS: mockup placeholders -> Codex review (DEC-0088).
 import Base from '../../../layouts/Base.astro';
-import PageHero from '../../../components/PageHero.astro';
-import HubSubnav from '../../../components/HubSubnav.astro';
+import DiscordBand from '../../../components/DiscordBand.astro';
 import '../../../styles/hub.css';
-import { sampleCrews, crewCardHtml, focusLabels, platformLabels } from '../../../data/hub';
-import { PLATFORMS, ACTIVE_PLATFORMS } from '../../../data/platforms';
+import { sampleCrews, crewCardHtml, crewRegionLabels } from '../../../data/hub';
+import { PLATFORMS } from '../../../data/platforms';
 
-const initialHtml = sampleCrews.map((c) => crewCardHtml(c, undefined, { sample: true })).join('');
+const base = import.meta.env.BASE_URL;
+const PAGE = 12;
+const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
+const initialHtml = sampleCrews.slice(0, PAGE).map((c) => crewCardHtml(c, undefined, { sample: true })).join('') + startCrew;
+const chips: [string, string][] = [['', 'All crews'], ['racing', 'Racing'], ['time-attack', 'Time Attack'], ['league', 'League'], ['drift', 'Drift'], ['car-meet', 'Car meets'], ['cruise', 'Cruises']];
+const users = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 5.3A18 18 0 0 0 15.9 4l-.3.6a15 15 0 0 1 4 1.6 16 16 0 0 0-13.2 0 15 15 0 0 1 4-1.6L10.1 4a18 18 0 0 0-4.4 1.3C2.9 9 2.2 12.6 2.5 16.1a18 18 0 0 0 5.5 2.8l.8-1.3a11 11 0 0 1-1.9-.9l.5-.4a13 13 0 0 0 9.2 0l.5.4a11 11 0 0 1-1.9.9l.8 1.3a18 18 0 0 0 5.5-2.8c.4-4-.7-7.5-2.2-10.8ZM9.3 14c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Zm5.4 0c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Z"/></svg>';
 ---
 <Base
   title="GTA VI Racing Crews — Crew Directory"
@@ -14,111 +24,267 @@ const initialHtml = sampleCrews.map((c) => crewCardHtml(c, undefined, { sample: 
   section="hub"
   noindex={false /* indexable since 2026-10-14 (Fausto): real crews exist; Tracks stays noindex */}
 >
-  <PageHero status="hub" image="hub-crews" eyebrow="Find Your GTA VI Racing Crew" title="Crews" lede="Racing crews and car meet communities from across the GTA VI car scene. Race for the win, run playlists for fun, or bring your best build to the meet. Find a crew that races the way you do." />
-
-  <HubSubnav active="crews" />
-
-  <section class="wrap hub-body">
-    <div class="hub-toolbar">
-      <div class="hub-filters">
-        <label class="ui-search hub-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input type="search" id="crew-search" placeholder="Search Crew" aria-label="Search crews by name or tag" /></label>
-        <select class="ui-select" id="crew-focus" aria-label="Filter by focus">
-          <option value="">All focus areas</option>
-          {Object.entries(focusLabels).map(([k, v]) => <option value={k}>{v}</option>)}
-        </select>
-        <select class="ui-select" id="crew-lang" aria-label="Filter by language">
-          <option value="">All languages</option>
-        </select>
-        <select class="ui-select" id="crew-platform" aria-label="Filter by platform">
-          {PLATFORMS.map((p) => <option value={p.active && ACTIVE_PLATFORMS.length === 1 ? '' : p.id} disabled={!p.active} selected={p.id === 'ps5'}>{p.active ? p.label : `${p.label} — coming later`}</option>)}
-        </select>
+  <section class="cr-band">
+    <img class="cr-bg" src={`${base}images/hub/hub-crews-1080.webp`} srcset={`${base}images/hub/hub-crews-640.webp 640w, ${base}images/hub/hub-crews-1080.webp 1080w, ${base}images/hub/hub-crews-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="940" fetchpriority="high" />
+    <span class="cr-o cr-o1" aria-hidden="true"></span><span class="cr-o cr-o2" aria-hidden="true"></span>
+    <div class="wrap cr-hero">
+      <div>
+        <nav class="crumb" aria-label="Breadcrumb"><a href={`${base}community/`}>Community</a><span aria-hidden="true">/</span><span aria-current="page">Crews</span></nav>
+        <p class="eyebrow">GTA VI Racing Community</p>
+        <h1 class="display">Crews</h1>
+        <p class="lede"><span class="lg">Racing crews and car meet communities from across the GTA VI scene. Find a crew that drives the way you do and request an invite.</span><span class="sm">Racing crews and car meet communities. Find a crew that drives the way you do.</span></p>
       </div>
-      <span class="hub-sample-flag" id="crew-flag">Sample data — example crews, not real</span>
+      <div class="cr-tile" id="cr-tile-guest">
+        <div class="eb"><Fragment set:html={users} />Lead a crew</div>
+        <p class="t">Got a crew already?</p>
+        <a class="btn btn-p" href={`${base}account/crew/`}>Start a crew</a>
+      </div>
+      <div class="cr-tile" id="cr-tile-me" hidden aria-live="polite">
+        <div class="eb"><Fragment set:html={users} />Your crews</div>
+        <ul class="mine" id="cr-mine"></ul>
+        <div class="mine-f"><span id="cr-mine-n"></span><a href={`${base}account/crew/`} id="cr-manage"><span class="lg">Manage in My Account</span><span class="sm">Manage</span> →</a></div>
+      </div>
     </div>
+  </section>
 
-    <div class="crew-me" id="crew-me" hidden aria-live="polite"></div>
+  <section class="wrap">
+    <div class="cr-bar">
+      <div class="cr-row">
+        <label class="ui-search cr-q"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input type="search" id="crew-search" placeholder="Search by crew name or tag" aria-label="Search crews by name or tag" autocomplete="off" /></label>
+        <button type="button" class="cr-fbtn" id="cr-fbtn" aria-expanded="false" aria-controls="cr-adv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="nb" id="cr-fn" hidden></span></button>
+        <div class="cr-adv" id="cr-adv" role="dialog" aria-label="Filters">
+          <div class="sh-head"><b>Filters</b><button type="button" class="x" id="cr-fclose" aria-label="Close filters">×</button></div>
+          <label class="sel"><span class="k">Language</span><select id="crew-lang" aria-label="Language"><option value="">All</option></select></label>
+          <label class="sel"><span class="k">Region</span><select id="crew-region" aria-label="Region"><option value="">All</option>{Object.entries(crewRegionLabels).map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
+          <label class="sel"><span class="k">Platform</span><select id="crew-platform" aria-label="Platform">{PLATFORMS.map((p) => <option value="" disabled={!p.active} selected={p.id === 'ps5'}>{p.active ? p.label.replace('PlayStation 5', 'PS5') : `${p.label} — later`}</option>)}</select></label>
+          <label class="chk"><input type="checkbox" id="crew-dc" /><Fragment set:html={dc} />Has Discord</label>
+          <div class="sh-foot"><button type="button" class="btn btn-s" id="cr-reset">Reset</button><button type="button" class="btn btn-p" id="cr-apply">Show crews</button></div>
+        </div>
+      </div>
+      <div class="chips" id="cr-chips" role="group" aria-label="Crew focus">
+        {chips.map(([v, l], i) => <button type="button" class={i === 0 ? 'on' : ''} data-focus={v} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>)}
+      </div>
+    </div>
+    <div class="cr-sheet-bg" id="cr-sheet-bg" hidden></div>
+
+    <div class="cr-count"><h2 id="cr-n">{sampleCrews.length} crews</h2><p>You can be in up to 5 crews. The crew leader approves every request.</p></div>
+    <p class="cr-sample" id="crew-flag">Sample crews until real crews are listed.</p>
     <div class="crew-grid" id="crew-root" set:html={initialHtml} />
     <p class="hub-empty" id="crew-empty" hidden>No crews match these filters.</p>
-
-    <p class="hub-note">Want your crew listed? Apply as crew leader in <a href={`${import.meta.env.BASE_URL}account/crew/`}>My Account</a> — a moderator reviews it. Drivers can ask to join up to 5 listed crews right here; the crew leader approves.</p>
+    <div class="cr-more"><button type="button" class="btn btn-s" id="cr-more" hidden>Show more crews</button></div>
   </section>
+
+  <DiscordBand />
 </Base>
 
+<style>
+  [hidden] { display: none !important; }
+  :global(main) { overflow-x: clip; }
+  .cr-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
+  .cr-bg, .cr-o { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .cr-bg { object-fit: cover; object-position: 50% 30%; }
+  .cr-o1 { background: linear-gradient(115deg, rgba(242,75,157,.75) 0%, rgba(242,75,157,.2) 42%, rgba(255,122,61,.2) 58%, rgba(255,122,61,.75) 100%); mix-blend-mode: color; }
+  .cr-o2 { background: linear-gradient(90deg, rgba(11,11,20,.92) 0%, rgba(11,11,20,.62) 55%, rgba(11,11,20,.45) 100%); }
+  .cr-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; padding-top: 40px; padding-bottom: 40px; }
+  .crumb { display: flex; gap: 8px; font-size: 14px; color: var(--lr-muted); margin-bottom: 18px; }
+  .crumb a { color: var(--lr-muted); text-decoration: none; }
+  .crumb a:hover { color: var(--lr-text); }
+  .crumb [aria-current] { color: var(--lr-text); }
+  .cr-hero h1 { margin: 12px 0 0; font-size: 64px; line-height: .95; }
+  .lede { margin: 16px 0 0; max-width: 600px; font-size: 17px; line-height: 1.55; color: #EDEBF2; text-shadow: 0 1px 12px rgba(11,11,20,.9); }
+  .sm { display: none; }
+  .cr-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
+  .cr-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+  .cr-tile .t { margin: 8px 0 14px; font-family: var(--gh-font-display); font-weight: 800; font-size: 22px; text-transform: uppercase; line-height: 1.1; }
+  .mine { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .mine :global(li) { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; min-width: 0; }
+  .mine :global(li .nm) { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mine :global(li .st) { flex: none; font-size: 13px; font-weight: 500; color: var(--lr-muted); display: inline-flex; align-items: center; gap: 5px; }
+  .mine :global(li .st.act) { color: var(--lr-lime); font-weight: 600; }
+  .mine :global(li .st.inv) { color: var(--lr-orange); }
+  .mine-f { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(200,200,222,.14); font-size: 13px; color: var(--lr-muted); }
+  .mine-f a { color: var(--lr-orange); font-weight: 700; text-decoration: none; white-space: nowrap; }
+
+  .cr-bar { padding: 22px 0 18px; border-bottom: 1px solid var(--lr-line); }
+  .cr-row { display: flex; gap: 10px; align-items: center; }
+  .cr-q { flex: 0 1 300px; min-width: 200px; height: 40px; }
+  .cr-q input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; }
+  .cr-fbtn { display: none; }
+  .cr-adv { display: flex; gap: 10px; align-items: center; }
+  .sh-head, .sh-foot { display: none; }
+  .sel { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 30px 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; cursor: pointer; }
+  .sel::after { content: '▾'; position: absolute; right: 11px; font-size: 11px; color: var(--lr-muted); pointer-events: none; }
+  .sel .k { font-size: 12px; color: var(--lr-muted); white-space: nowrap; }
+  .sel select { appearance: none; background: transparent; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; max-width: 11rem; field-sizing: content; }
+  .sel select option { background: var(--lr-card); color: var(--lr-text); }
+  .sel:focus-within { border-color: var(--lr-orange); }
+  .chk { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+  .chk input { width: 16px; height: 16px; accent-color: var(--lr-orange); margin: 0; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; font: inherit; font-size: 14px; font-weight: 500; color: #E4E4EC; cursor: pointer; white-space: nowrap; }
+  .chips button:hover:not(.on) { border-color: rgba(200,200,222,.5); }
+  .chips button.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
+  .chips button:focus-visible, .cr-fbtn:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+
+  .cr-count { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin: 24px 0 14px; }
+  .cr-count h2 { margin: 0; font-family: var(--gh-font-body); font-size: 20px; font-weight: 700; text-transform: none; letter-spacing: 0; }
+  .cr-count p { margin: 0; font-size: 14px; color: var(--lr-muted); }
+  .cr-sample { margin: -6px 0 14px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #6B6B80; }
+  #crew-root :global(.crew-card) { scroll-margin-top: 100px; }
+  #crew-root :global(.crew-card.is-target) { border-color: var(--lr-orange); box-shadow: 0 0 0 1px var(--lr-orange); }
+  .cr-more { display: flex; justify-content: center; padding: 24px 0 72px; }
+  .cr-more .btn { height: 44px; font-size: 15px; }
+
+  @media (max-width: 1100px) {
+    .cr-hero { grid-template-columns: minmax(0,1fr) 340px; gap: 28px; }
+    .cr-row { flex-wrap: wrap; }
+    .cr-adv { flex-wrap: wrap; }
+  }
+  @media (max-width: 860px) {
+    .cr-hero { grid-template-columns: 1fr; gap: 18px; padding-top: 24px; padding-bottom: 24px; }
+    .cr-hero h1 { font-size: 44px; }
+    .lede { font-size: 16px; }
+    .lede .lg, .mine-f .lg { display: none; }
+    .lede .sm, .mine-f .sm { display: inline; }
+    #cr-tile-guest { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 4px 14px; padding: 14px 16px; }
+    #cr-tile-guest .t { grid-column: 1; margin: 0; font-family: var(--gh-font-body); font-size: 16px; font-weight: 700; text-transform: none; }
+    #cr-tile-guest .btn { grid-column: 2; grid-row: 1 / span 2; }
+    .cr-bar { border-bottom: 0; padding-bottom: 0; }
+    .cr-row { flex-direction: column; align-items: stretch; flex-wrap: nowrap; }
+    .cr-q { flex: none; width: 100%; height: 44px; }
+    .cr-fbtn { display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; color: var(--lr-text); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .cr-fbtn .nb { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--lr-raised); font-size: 12px; display: inline-flex; align-items: center; justify-content: center; }
+    /* bottom sheet */
+    .cr-adv { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 80; flex-direction: column; align-items: stretch; gap: 0; max-height: 85vh; overflow-y: auto; padding: 0 16px 16px; background: var(--lr-card); border-top: 1px solid var(--lr-line-strong); border-radius: 14px 14px 0 0; }
+    .cr-adv.open { display: flex; }
+    .sh-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 0 12px; border-bottom: 1px solid var(--lr-line); margin: 0 -16px 8px; padding-inline: 16px; }
+    .sh-head b { font-size: 18px; }
+    .sh-head .x { width: 32px; height: 32px; border: 0; background: none; color: var(--lr-text); font-size: 24px; cursor: pointer; }
+    .sel, .chk { height: 48px; margin-top: 10px; width: 100%; }
+    .sel select { max-width: none; flex: 1; }
+    .chk { justify-content: flex-start; }
+    .sh-foot { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 16px; }
+    .sh-foot .btn { height: 48px; }
+    .cr-sheet-bg { position: fixed; inset: 0; z-index: 79; background: rgba(11,11,20,.6); }
+    .chips { flex-wrap: nowrap; overflow-x: auto; margin-right: -16px; padding-right: 16px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .cr-count { flex-direction: column; gap: 4px; margin-top: 20px; }
+    .cr-count p { font-size: 13px; }
+    .cr-more .btn { width: 100%; }
+  }
+</style>
+
 <script>
-  import { crewCardHtml, esc, sampleCrews, type HubCrew } from '../../../data/hub';
-  import { createCrewMembership } from '../../../scripts/crew-membership';
+  import { crewCardHtml, crewTagHtml, esc, sampleCrews, type HubCrew } from '../../../data/hub';
+  import { createCrewMembership, CREW_LIMIT, type CrewMine } from '../../../scripts/crew-membership';
   import { languageLabel } from '../../../data/languages';
   import { fetchLiveCrews, fetchRoster } from '../../../scripts/hub-live';
 
-  const root = document.getElementById('crew-root')!;
-  const emptyEl = document.getElementById('crew-empty')!;
-  const flagEl = document.getElementById('crew-flag')!;
-  const search = document.getElementById('crew-search') as HTMLInputElement;
-  const focusSel = document.getElementById('crew-focus') as HTMLSelectElement;
-  const platSel = document.getElementById('crew-platform') as HTMLSelectElement;
-  const langSel = document.getElementById('crew-lang') as HTMLSelectElement;
+  const base = import.meta.env.BASE_URL;
+  const PAGE = 12;
+  const $ = (id: string) => document.getElementById(id)!;
+  const root = $('crew-root');
+  const search = $('crew-search') as HTMLInputElement;
+  const langSel = $('crew-lang') as HTMLSelectElement;
+  const regionSel = $('crew-region') as HTMLSelectElement;
+  const dcChk = $('crew-dc') as HTMLInputElement;
+  const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
 
-  // Language filter lists only languages that at least one shown crew uses
-  // (fixed list of ~40 in data/languages.ts, 2026-09-30). Rebuilt whenever
-  // the cards change (sample -> live), keeping the current choice if possible.
+  let crews: HubCrew[] = sampleCrews;
+  let live = false;
+  let focus = '';
+  let limit = PAGE;
+  let roster = new Map<string, string[]>();
+
+  // Language list: only languages at least one crew uses (data/languages.ts).
   function buildLanguageOptions() {
     const codes = new Set<string>();
-    root.querySelectorAll<HTMLElement>('.crew-card').forEach((c) => (c.dataset.languages ?? '').split('|').filter(Boolean).forEach((x) => codes.add(x)));
+    crews.forEach((c) => (c.languages ?? []).forEach((x) => codes.add(x)));
     const keep = langSel.value;
     const sorted = [...codes].sort((a, b) => languageLabel(a).localeCompare(languageLabel(b)));
-    langSel.innerHTML = '<option value="">All languages</option>' + sorted.map((c) => `<option value="${esc(c)}">${esc(languageLabel(c))}</option>`).join('');
+    langSel.innerHTML = '<option value="">All</option>' + sorted.map((c) => `<option value="${esc(c)}">${esc(languageLabel(c))}</option>`).join('');
     langSel.value = codes.has(keep) ? keep : '';
-    langSel.hidden = codes.size === 0;
   }
-
-  function applyFilters() {
+  function matches(): HubCrew[] {
     const q = search.value.trim().toLowerCase();
-    const f = focusSel.value;
-    const p = platSel.value;
-    const l = langSel.value;
-    let shown = 0;
-    root.querySelectorAll<HTMLElement>('.crew-card').forEach((card) => {
-      const ok =
-        (!q || (card.dataset.search ?? '').includes(q)) &&
-        (!f || (card.dataset.focus ?? '').split('|').includes(f)) &&
-        (!l || (card.dataset.languages ?? '').split('|').includes(l)) &&
-        (!p || (card.dataset.platforms ?? '').split('|').includes(p));
-      card.hidden = !ok;
-      if (ok) shown++;
-    });
-    emptyEl.hidden = shown > 0;
+    return crews.filter((c) =>
+      (!q || `${c.name} ${c.tag}`.toLowerCase().includes(q)) &&
+      (!focus || (c.focus as string[]).includes(focus)) &&
+      (!langSel.value || (c.languages ?? []).includes(langSel.value)) &&
+      (!regionSel.value || c.region === regionSel.value) &&
+      (!dcChk.checked || Boolean(c.discord_url)));
+  }
+  function render() {
+    const list = matches();
+    const shown = list.slice(0, limit);
+    root.innerHTML = shown.map((c) => crewCardHtml(c, roster.get(c.crew_id ?? ''), { sample: !live })).join('') + (shown.length === list.length ? startCrew : '');
+    $('cr-n').textContent = `${list.length} crew${list.length === 1 ? '' : 's'}`;
+    $('crew-empty').hidden = list.length > 0;
+    $('cr-more').hidden = shown.length >= list.length;
+    const n = [langSel.value, regionSel.value, dcChk.checked ? '1' : ''].filter(Boolean).length;
+    $('cr-fn').textContent = String(n); $('cr-fn').hidden = n === 0;
+    ($('cr-apply') as HTMLButtonElement).textContent = `Show ${list.length} crew${list.length === 1 ? '' : 's'}`;
+    membership.render();
+  }
+  const refilter = () => { limit = PAGE; render(); };
+  [search, langSel, regionSel, dcChk].forEach((el) => el.addEventListener('input', refilter));
+  $('cr-chips').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-focus]');
+    if (!b) return;
+    focus = b.dataset.focus ?? '';
+    document.querySelectorAll<HTMLButtonElement>('#cr-chips button').forEach((x) => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+    refilter();
+  });
+  $('cr-more').addEventListener('click', () => { limit += PAGE; render(); });
+
+  // phone: filters as a bottom sheet
+  const sheet = $('cr-adv'); const bg = $('cr-sheet-bg'); const fbtn = $('cr-fbtn');
+  const openSheet = (o: boolean) => { sheet.classList.toggle('open', o); bg.hidden = !o; fbtn.setAttribute('aria-expanded', String(o)); };
+  fbtn.addEventListener('click', () => openSheet(true));
+  [$('cr-fclose'), $('cr-apply'), bg].forEach((el) => el.addEventListener('click', () => openSheet(false)));
+  $('cr-reset').addEventListener('click', () => { langSel.value = ''; regionSel.value = ''; dcChk.checked = false; refilter(); });
+
+  // "Your crews" tile: status per membership, n of 5
+  const STATUS: Record<string, [string, string]> = { active: ['Member', ''], pending: ['Request sent', ''], invited: ['Invited', 'inv'] };
+  function drawMine(mine: CrewMine[], list: HubCrew[], isLive: boolean) {
+    const byId = (id: string) => list.find((c) => (isLive ? c.crew_id : c.slug) === id);
+    const rows = [...mine].sort((a, b) => Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary)) || ['active', 'invited', 'pending'].indexOf(a.status) - ['active', 'invited', 'pending'].indexOf(b.status));
+    if (!rows.length) { $('cr-tile-me').hidden = true; $('cr-tile-guest').hidden = false; return; }
+    const check = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+    $('cr-mine').innerHTML = rows.map((m) => {
+      const c = byId(m.crew_id);
+      const [label, cls] = m.status === 'active' && m.is_primary ? ['Active crew', 'act'] : STATUS[m.status] ?? [m.status, ''];
+      return `<li>${c ? crewTagHtml(c.tag, c.color, 'sm') : ''}<span class="nm">${esc(c?.name ?? 'Crew')}</span><span class="st ${cls}">${m.status === 'active' ? check : ''}${label}</span></li>`;
+    }).join('');
+    const used = mine.filter((m) => m.status !== 'invited').length;
+    $('cr-mine-n').textContent = `${used} of ${CREW_LIMIT} crews${mine.some((m) => m.status === 'pending') ? ', requests included' : ''}`;
+    ($('cr-manage') as HTMLElement).hidden = !isLive;
+    $('cr-tile-me').hidden = false; $('cr-tile-guest').hidden = true;
   }
 
-  [search, focusSel, langSel, platSel].forEach((el) => el.addEventListener('input', applyFilters));
+  // Crew membership (RS-0024; up to 5 crews + main crew, DEC-0093): shared module.
+  const membership = createCrewMembership(root, null, drawMine);
   buildLanguageOptions();
   // Deep link from the leaderboard crew tag: /community/crews/?q=TAG
   const q0 = new URLSearchParams(location.search).get('q');
-  if (q0) { search.value = q0; applyFilters(); }
-
-  // Crew membership (RS-0024; up to 5 crews + main crew, DEC-0093): shared module.
-  let liveCrews: HubCrew[] = [];
-  const membership = createCrewMembership(root, document.getElementById('crew-me')!);
+  if (q0) search.value = q0;
+  render();
   membership.setCrews(sampleCrews, false);
 
-  let rosterMap = new Map<string, string[]>();
-  function renderCards() {
-    root.innerHTML = liveCrews.map((c) => crewCardHtml(c, rosterMap.get(c.crew_id!))).join('');
-    buildLanguageOptions();
-    applyFilters();
-    membership.render();
-  }
   async function init() {
-    const live = await fetchLiveCrews();
-    if (!live) return; // sample crews keep the demo membership UI
-    liveCrews = live;
-    flagEl.hidden = true;
-    rosterMap = await fetchRoster();
-    renderCards();
-    // Deep link target for the redesigned home (DEC-0116): /community/crews/#crew-<id>.
-    // Anchor + scroll only; the visual highlight comes with the redesign.
-    const target = location.hash.startsWith('#crew-') ? document.getElementById(location.hash.slice(1)) : null;
-    if (target) target.scrollIntoView({ block: 'center' });
-    await membership.setCrews(liveCrews, true);
+    const data = await fetchLiveCrews();
+    if (!data) return; // sample crews keep the demo membership UI
+    crews = data; live = true;
+    $('crew-flag').hidden = true;
+    roster = await fetchRoster();
+    buildLanguageOptions();
+    // Deep link from the home page: /community/crews/#crew-<id>
+    const hash = location.hash.startsWith('#crew-') ? location.hash.slice(6) : '';
+    if (hash) { const i = crews.findIndex((c) => c.crew_id === hash); if (i >= limit) limit = i + 1; }
+    render();
+    const target = hash ? document.getElementById(`crew-${hash}`) : null;
+    if (target) { target.scrollIntoView({ block: 'center' }); target.classList.add('is-target'); }
+    await membership.setCrews(crews, true);
   }
   init();
 </script>
