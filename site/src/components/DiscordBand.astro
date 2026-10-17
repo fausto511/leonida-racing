@@ -1,0 +1,59 @@
+---
+// Discord band at the end of a page (same look as the home page, DEC-0114/0116).
+// Guest: "Log in with Discord" -> Discord login, which joins the server automatically (guilds.join).
+// Logged in: "Open Discord" -> invite link. "What's on the server →" links /discord/ (DEC-0134).
+// COPY STATUS: same sentences as the home band.
+import { DISCORD_INVITE_URL } from '../data/site';
+const base = import.meta.env.BASE_URL;
+const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z';
+---
+<section class="dband">
+  <div class="wrap dband-inner">
+    <div class="dband-copy">
+      <h2 class="display dband-title">The scene talks on Discord</h2>
+      <p class="dband-text">Find people to race with, catch the next event, talk cars, and discover new tracks and race jobs.<span class="dband-guest"> Log in with Discord and you join the server automatically.</span></p>
+      <a class="dband-more" href={`${base}discord/`}>What’s on the server →</a>
+    </div>
+    <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn dband-btn" id="dband-btn">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d={discordPath} /></svg>
+      <span id="dband-label">Log in with Discord</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .dband { background: var(--lr-brand-gradient); }
+  .dband-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding-top: 56px; padding-bottom: 56px; }
+  .dband-copy { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
+  .dband-title { margin: 0; font-size: 30px; }
+  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
+  :global(html.lr-authed) .dband-guest { display: none; }
+  .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: #fff; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.5); }
+  .dband-more:hover { text-decoration-color: #fff; }
+  .dband-btn { background: var(--lr-text); color: var(--lr-on-pink); flex: none; }
+  .dband-btn:hover { background: #fff; color: var(--lr-on-pink); }
+  .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+  :global(main:has(.dband) + .site-foot) { margin-top: 0; }
+  @media (max-width: 760px) {
+    .dband-inner { flex-direction: column; align-items: stretch; gap: 18px; padding-top: 36px; padding-bottom: 36px; }
+    .dband-title { font-size: 24px; }
+    .dband-btn { width: 100%; }
+  }
+</style>
+
+<script>
+  import { getSupabase, backendConfigured } from '../scripts/supabase-client';
+  const btn = document.getElementById('dband-btn') as HTMLAnchorElement | null;
+  if (btn && backendConfigured) {
+    const sb = getSupabase();
+    sb.auth.getSession().then(({ data }) => {
+      if (data?.session) { document.getElementById('dband-label')!.textContent = 'Open Discord'; return; }
+      btn.removeAttribute('target');
+      btn.addEventListener('click', (e) => {
+        if (document.documentElement.classList.contains('lr-authed')) return;
+        e.preventDefault();
+        sb.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: window.location.origin + window.location.pathname, scopes: 'identify email guilds.join' } });
+      });
+    });
+  }
+</script>

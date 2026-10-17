@@ -21,84 +21,136 @@
 .hub-sample-flag[hidden] { display: none; }
 .hub-filters .ui-select[hidden] { display: none; }
 
-/* ---- Crew card ----------------------------------------------------------- */
-.crew-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); gap: var(--gh-gap-card); }
-.crew-card { position: relative; display: flex; flex-direction: column; gap: .9rem; padding: 1.2rem 1.2rem 1rem; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg); overflow: hidden; }
-.crew-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--crew-color); }
-.crew-card-head { display: flex; gap: .9rem; align-items: flex-start; }
-.crew-card-id { display: flex; flex-direction: column; align-items: flex-start; gap: .35rem; min-width: 0; }
-.crew-name { margin: 0; font-size: 1.1rem; font-weight: 800; line-height: 1.2; }
-.crew-id-row { display: flex; align-items: center; gap: .35rem; flex-wrap: nowrap; min-width: 0; }
-.crew-badge, .crew-partner { display: inline-block; vertical-align: middle; padding: .12rem .45rem; border-radius: 999px; background: var(--gh-yellow); color: #2A0F22; font-size: .58rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-.crew-members { display: inline-flex; align-items: center; gap: .35rem; margin: 0; color: var(--gh-muted); font-size: .8rem; }
-.crew-desc { margin: 0; color: var(--gh-muted); font-size: .86rem; line-height: 1.55; }
-.crew-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
-.crew-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding-top: .8rem; border-top: 1px solid var(--gh-line); }
-.crew-meta { color: var(--gh-muted); font-size: .75rem; }
-.crew-links { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: .4rem .5rem; }
-.crew-link { color: var(--gh-text); font-size: .75rem; font-weight: 700; text-decoration: none; padding: .35rem .6rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); }
-.crew-link:hover { border-color: var(--gh-muted); }
-.crew-link-discord { background: #5865f2; border-color: #5865f2; color: #fff; }
-/* Uniform crew cards (Fausto 2026-10-07): fixed-height blocks, so lines and strips
-   line up across cards. Name 1 line, description 2 lines, chips 1 row, meta + icons
-   1 row, actions strip 1 row. */
-.crew-card-head { padding-right: 1.4rem; }
-.crew-card-id { flex: 1; min-height: 4.6rem; }
-.crew-name { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.crew-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: calc(1.55em * 2); }
-.crew-chips { flex-wrap: nowrap; overflow: hidden; height: 1.75rem; align-items: center; }
-.crew-chips .chip { flex-shrink: 0; }
-.crew-foot { height: 2.9rem; padding-top: .8rem; }
-.crew-meta { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.crew-links { flex-shrink: 0; flex-wrap: nowrap; }
-.crew-icon-link { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); color: var(--gh-text); text-decoration: none; font-size: .7rem; font-weight: 800; letter-spacing: .03em; }
-.crew-icon-link:hover { border-color: var(--gh-muted); }
-.crew-icon-dc { background: #5865f2; border-color: #5865f2; color: #fff; }
+/* ---- Crew card (Redesign, boards Community / Crews) ----------------------- */
+.crew-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); gap: 20px; }
+.crew-card { position: relative; display: flex; flex-direction: column; padding: 20px; background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: 8px; overflow: hidden; }
+.crew-card::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--crew-color); }
+.crew-head { display: flex; align-items: center; gap: 10px; min-width: 0; padding-right: 1.4rem; }
+.crew-head .crew-tag { flex: none; }
+.crew-name { margin: 0; min-width: 0; font-size: 20px; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crew-badges { display: flex; gap: 6px; margin-top: 10px; height: 20px; }
+.crew-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 4px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; background: rgba(242,75,157,.16); color: var(--lr-pink); }
+.crew-badge.b-partner { background: rgba(255,149,90,.16); color: var(--lr-orange); }
+.crew-badge.b-official { background: rgba(217,245,142,.14); color: var(--lr-lime); }
+.crew-chips { display: flex; gap: 6px; margin-top: 12px; height: 26px; overflow: hidden; flex-wrap: nowrap; }
+.crew-chip { flex: none; display: inline-flex; align-items: center; height: 26px; padding: 0 9px; border-radius: 999px; background: var(--lr-raised); color: #E4E4EC; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.crew-desc { margin: 12px 0 0; color: #E4E4EC; font-size: 14px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 3em; }
+.crew-meta { display: flex; align-items: center; gap: 7px; margin: 10px 0 0; color: var(--lr-muted); font-size: 13px; min-width: 0; }
+.crew-meta svg { flex: none; }
+.crew-meta > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crew-meta .dot { margin: 0 6px; color: #55556A; }
+.ev-row .dot { color: #55556A; }
+.crew-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 51px; padding-top: 14px; border-top: 1px solid rgba(200,200,222,.12); }
+.crew-meta + .crew-foot { margin-top: 14px; }
+.crew-links { display: flex; align-items: center; gap: 6px; flex: none; }
+.crew-icon-link { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid var(--lr-line-strong); border-radius: 5px; color: var(--lr-text); text-decoration: none; font-size: 11px; font-weight: 800; letter-spacing: .03em; background: transparent; }
+.crew-icon-link:hover { border-color: var(--lr-muted); }
 .crew-icon-link.is-disabled { opacity: .45; pointer-events: none; }
-.crew-report { position: absolute; top: .75rem; right: .75rem; display: inline-flex; padding: .25rem; color: var(--gh-muted); opacity: .55; border-radius: var(--gh-radius); }
-.crew-report:hover { opacity: 1; color: var(--gh-text); }
-/* Membership actions in their own strip at the bottom of the card */
-.crew-actions { display: flex; flex-wrap: nowrap; align-items: center; gap: .5rem; height: 3.1rem; margin: 0 -1.2rem -1rem; padding: 0 1.2rem; border-top: 1px solid var(--gh-line); background: rgba(251,247,234,.03); }
-.crew-actions:has(.crew-join-slot:empty) { display: none; }
-.crew-join-slot { display: contents; }
-.crew-actions { gap: .35rem; }
-.crew-actions .crew-pill { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; padding: .3rem .45rem; letter-spacing: .02em; }
-.crew-actions .crew-link { padding: .3rem .45rem; }
-.crew-action-btn { font: inherit; font-size: .75rem; font-weight: 700; cursor: pointer; background: transparent; }
+.crew-report { position: absolute; top: 14px; right: 12px; display: inline-flex; padding: .25rem; color: var(--lr-muted); opacity: .55; border-radius: 4px; }
+.crew-report:hover { opacity: 1; color: var(--lr-text); }
+/* sign-up slot (crew-membership.ts) and account actions sit right in the foot */
+.crew-join-slot, .crew-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; flex-wrap: nowrap; }
+.crew-join-slot:empty { display: none; }
+.crew-actions .crew-pill { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.crew-action-btn { font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; background: transparent; }
 .crew-action-btn:disabled { opacity: .6; cursor: default; }
-.crew-action-btns { display: flex; flex-wrap: nowrap; justify-content: flex-end; gap: .35rem; margin-left: auto; flex-shrink: 0; }
+.crew-action-btns { display: flex; flex-wrap: nowrap; justify-content: flex-end; gap: 6px; margin-left: auto; flex-shrink: 0; }
+.crew-start { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 10px; padding: 20px; border: 1px dashed rgba(200,200,222,.24); border-radius: 8px; }
+.crew-start h3 { margin: 0; font-size: 20px; font-weight: 700; }
+.crew-start p { margin: 0; color: var(--lr-soft); font-size: 14px; line-height: 1.5; }
+.crew-start .btn { margin-top: 6px; }
 
-/* ---- Event rows ---------------------------------------------------------- */
-.ev-month { margin: 2rem 0 .75rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1rem; letter-spacing: .02em; color: var(--gh-muted); }
+/* ---- Event rows (Redesign, boards Community / Events) ---------------------- */
+.ev-month { margin: 2rem 0 .75rem; font-family: var(--gh-font-display); font-weight: 800; text-transform: uppercase; font-size: 1rem; letter-spacing: .02em; color: var(--gh-muted); }
 .ev-month:first-child { margin-top: 0; }
-.ev-list { display: flex; flex-direction: column; gap: .75rem; }
-.ev-row { display: grid; grid-template-columns: 4.5rem 1fr auto; gap: 1.1rem; align-items: stretch; padding: 1rem 1.1rem; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg); }
-.ev-row.is-target { border-color: var(--gh-yellow); box-shadow: 0 0 0 1px var(--gh-yellow); }
+.ev-list { display: flex; flex-direction: column; background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: 8px; overflow: hidden; }
+.ev-row { display: grid; grid-template-columns: 64px minmax(0,1fr) auto; column-gap: 18px; align-items: start; padding: 16px 18px; border-top: 1px solid rgba(200,200,222,.1); }
+.ev-row:first-child { border-top: 0; }
+.ev-row.is-target { box-shadow: inset 3px 0 0 var(--lr-orange); background: rgba(255,149,90,.05); }
 .ev-row.is-cancelled { opacity: .55; }
 .ev-row.is-cancelled .ev-title { text-decoration: line-through; }
-.ev-date { align-self: center; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: .5rem 0; border-radius: var(--gh-radius); background: rgba(251,247,234,.05); border: 1px solid var(--gh-line); line-height: 1; }
-.ev-wd, .ev-mon { font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gh-muted); }
-.ev-day { margin: .2rem 0; font-family: var(--gh-font-display); font-weight: 900; font-size: 1.7rem; color: var(--gh-text); }
-.ev-main { min-width: 0; align-self: center; }
-.ev-top { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .45rem; }
-.ev-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .7rem; margin: 0 0 .35rem; font-size: 1.05rem; font-weight: 800; }
-/* "Hosted by <PSN> <TAG>" behind the title (DEC-0077) */
-.ev-by { display: inline-flex; align-items: center; gap: .35rem; color: var(--gh-muted); font-size: .76rem; font-weight: 600; }
-.ev-by strong { color: var(--gh-text); font-weight: 700; }
-.ev-psn { padding: .05rem .3rem; border-radius: 3px; border: 1px solid var(--gh-line); font-size: .58rem; font-weight: 800; letter-spacing: .05em; color: var(--gh-muted); }
+.ev-date { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 64px; height: 68px; border-radius: 6px; background: var(--lr-raised); line-height: 1; }
+.ev-wd { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--lr-orange); }
+.ev-day { margin: 5px 0 4px; font-family: var(--gh-font-display); font-weight: 800; font-size: 26px; color: var(--lr-text); font-variant-numeric: tabular-nums; }
+.ev-mon { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--lr-muted); }
+.ev-main { min-width: 0; }
+.ev-title { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.3; }
+.ev-l1, .ev-l2 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 6px 0 0; font-size: 14px; color: var(--lr-soft); }
+.ev-type { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: var(--lr-raised); color: var(--lr-text); font-size: 12px; font-weight: 700; }
+.ev-flag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: rgba(242,75,157,.14); color: var(--lr-pink); font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.ev-flag.ev-cancel { background: rgba(242,75,157,.85); color: var(--lr-text); }
+.ev-time { color: var(--lr-text); font-weight: 700; font-variant-numeric: tabular-nums; }
+.ev-loc { display: inline-flex; align-items: center; gap: 6px; }
+.ev-by { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ev-by-l { color: var(--lr-muted); }
+.ev-by strong { color: var(--lr-text); font-weight: 600; }
+.ev-psn-link { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-decoration: none; }
+.ev-psn-link:hover strong { text-decoration: underline; text-underline-offset: 3px; }
+.ev-psn { padding: 2px 5px; border-radius: 3px; background: var(--lr-raised); font-size: 10px; font-weight: 800; letter-spacing: .05em; color: var(--lr-muted); }
 .ev-by .crew-tag { vertical-align: 0; }
+.ev-dc, .ev-watch { display: inline-flex; align-items: center; gap: 6px; color: var(--lr-text); font-weight: 600; text-decoration: none; }
+.ev-dc:hover, .ev-watch:hover { text-decoration: underline; text-underline-offset: 3px; }
+.ev-dc.is-disabled, .ev-watch.is-disabled { opacity: .5; cursor: not-allowed; }
+.ev-watch + .ev-watch { margin-left: 10px; }
+.ev-info { color: var(--lr-orange); font-weight: 600; }
+.ev-report { color: var(--lr-muted); font-size: 12px; }
+.ev-report:hover { color: var(--lr-text); }
+.ev-desc { margin: 6px 0 0; color: var(--lr-soft); font-size: 14px; line-height: 1.5; }
+.ev-side { min-width: 0; }
+.ev-rsvp { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; min-width: 7.5rem; }
+.ev-rsvp > .ev-rsvp-btn, .ev-rsvp > .ev-full { order: -1; }
+.ev-rsvp-btn { display: inline-flex; align-items: center; gap: 6px; height: 38px; min-height: 38px; padding: 0 15px; border-radius: 6px; border: 1px solid rgba(255,149,90,.6); background: rgba(255,149,90,.1); color: var(--lr-orange); font-family: var(--gh-font-body); font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.ev-rsvp-btn:hover { background: rgba(255,149,90,.18); border-color: var(--lr-orange); color: var(--lr-orange); }
+.ev-rsvp-btn.is-in { background: rgba(217,245,142,.12); border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
+.ev-rsvp-btn.is-in:hover { background: rgba(217,245,142,.18); color: var(--lr-lime); }
+.ev-full { display: inline-flex; align-items: center; height: 38px; padding: 0 15px; border-radius: 6px; border: 1px solid rgba(255,149,90,.25); color: rgba(255,149,90,.5); font-size: 14px; font-weight: 700; white-space: nowrap; }
+.ev-going summary, .ev-going-none { font-size: 13px; color: var(--lr-muted); cursor: pointer; white-space: nowrap; list-style: none; text-align: right; }
+.ev-going summary::-webkit-details-marker { display: none; }
+.ev-going[open] summary { color: var(--lr-text); }
+.ev-going p { margin: 6px 0 0; max-width: 16rem; font-size: 12px; color: var(--lr-soft); text-align: right; }
+.ev-going-none { cursor: default; }
+.ev-rsvp-msg { max-width: 12rem; font-size: 12px; color: var(--lr-lime); text-align: right; }
+.ev-rsvp-msg.is-error { color: var(--lr-pink); }
+/* next step after "I'm in": box under the row text */
+.ev-row > .ev-next { grid-column: 2 / -1; display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; margin-top: 14px; padding: 10px 12px; border-radius: 6px; border: 1px solid rgba(217,245,142,.3); background: rgba(217,245,142,.05); }
+.ev-next-text { margin: 0; font-size: 14px; color: #E4E4EC; line-height: 1.45; }
+.ev-next-text strong { color: var(--lr-lime); }
+.ev-next-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.ev-next-actions .btn { height: 36px; min-height: 36px; padding: 0 12px; font-size: 14px; gap: 7px; }
+.ev-next-dc { background: var(--lr-discord); border-color: var(--lr-discord); color: #fff; }
+.ev-next-dc:hover { background: #4752c4; border-color: #4752c4; color: #fff; }
+.ev-next-ps { background: transparent; border-color: var(--lr-line-strong); color: var(--lr-text); }
+.ev-next-ps:hover { border-color: var(--lr-text); color: var(--lr-text); }
+/* "Open spot" as the last row of a list */
+.ev-open { display: flex; align-items: center; gap: 16px; margin: 10px; padding: 14px 18px; border: 1px dashed rgba(200,200,222,.24); border-radius: 6px; }
+.ev-open-plus { flex: none; width: 44px; height: 44px; border-radius: 999px; border: 1px dashed rgba(200,200,222,.35); display: inline-flex; align-items: center; justify-content: center; font-size: 20px; color: var(--lr-muted); }
+.ev-open-t { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; font-size: 14px; color: var(--lr-soft); }
+.ev-open-t b { font-size: 16px; color: var(--lr-text); }
+.ev-open-btn { flex: none; height: 40px; font-size: 14px; }
+/* track rows (data/tracks.ts) still use the older chip / facts lines */
+.ev-top { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .45rem; }
 .ev-facts { display: flex; flex-wrap: wrap; gap: .35rem 1.1rem; margin: 0; color: var(--gh-muted); font-size: .8rem; }
 .ev-facts > span { display: inline-flex; align-items: center; gap: .35rem; }
-.ev-tz { color: var(--gh-muted); font-size: .7rem; }
-.ev-desc { margin: .45rem 0 0; color: var(--gh-muted); font-size: .82rem; line-height: 1.5; }
-.ev-side { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: .6rem; min-width: 8rem; }
-.ev-host { display: inline-flex; align-items: center; gap: .45rem; color: var(--gh-text); font-size: .78rem; font-weight: 600; white-space: nowrap; }
-.ev-join { padding: .5rem .9rem; font-size: .8rem; }
 
-@media (max-width: 640px) {
-  .ev-row { grid-template-columns: 3.6rem 1fr; gap: .8rem; padding: .85rem; }
-  .ev-side { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
-  .ev-day { font-size: 1.35rem; }
+@media (max-width: 700px) {
+  .ev-row { grid-template-columns: 52px minmax(0,1fr); column-gap: 14px; padding: 16px; }
+  .ev-date { width: 52px; height: 58px; }
+  .ev-day { font-size: 22px; }
+  .ev-title { font-size: 17px; }
+  .ev-l2 .ev-by-l { display: none; }
+  .ev-l1 .dot, .ev-l2 .ev-by + .dot { display: none; }
+  .ev-loc, .ev-l2 .ev-by { flex-basis: 100%; }
+  .ev-l2 .ev-by::before { content: 'by'; color: var(--lr-muted); }
+  .ev-l1, .ev-l2 { font-size: 13px; }
+  .ev-desc { grid-column: 1 / -1; }
+  .ev-side { grid-column: 1 / -1; margin-top: 12px; }
+  .ev-rsvp { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+  .ev-rsvp > .ev-rsvp-btn, .ev-rsvp > .ev-full { flex: 1; justify-content: center; }
+  .ev-rsvp-msg { text-align: left; }
+  .ev-row > .ev-next { grid-column: 1 / -1; }
+  .ev-open { flex-wrap: wrap; }
+  .ev-open-plus { display: none; }
+  .ev-open-btn { width: 100%; }
   .crew-grid { grid-template-columns: 1fr; }
 }
 
@@ -125,11 +177,14 @@
 .crew-card[hidden], .ev-row[hidden] { display: none; }
 
 /* ---- Crew membership (RS-0024) ------------------------------------------ */
-.crew-join-btn { font: inherit; cursor: pointer; background: var(--gh-yellow); border-color: var(--gh-yellow); color: #111; }
-.crew-join-btn:hover { border-color: var(--gh-text); }
+.crew-link.crew-join-btn, .crew-join-btn { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid rgba(255,149,90,.6); background: rgba(255,149,90,.1); color: var(--lr-orange); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.crew-link.crew-join-btn:hover, .crew-join-btn:hover { background: rgba(255,149,90,.18); border-color: var(--lr-orange); }
 .crew-join-btn:disabled { opacity: .6; cursor: default; }
-.crew-pill { display: inline-flex; align-items: center; padding: .3rem .6rem; border-radius: 999px; font-size: .7rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; border: 1px solid var(--gh-yellow); color: var(--gh-yellow); white-space: nowrap; }
-.crew-pill.is-pending { border-color: var(--gh-line); color: var(--gh-muted); }
+.crew-pill { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid rgba(217,245,142,.45); color: var(--lr-lime); font-size: 14px; font-weight: 600; white-space: nowrap; }
+.crew-pill.is-pending { border-color: var(--lr-line-strong); color: var(--lr-muted); }
+.crew-link { color: var(--lr-text); font-size: 13px; font-weight: 600; text-decoration: none; padding: 0; border: 0; background: none; }
+.crew-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.crew-link.crew-withdraw, .crew-withdraw { font: inherit; font-size: 12px; font-weight: 600; background: none; border: 0; padding: 0; color: var(--lr-muted); cursor: pointer; }
 .crew-roster { margin-top: .9rem; font-size: .8rem; }
 .crew-roster summary { cursor: pointer; color: var(--gh-muted); font-weight: 700; list-style: none; display: inline-flex; align-items: center; gap: .35rem; }
 .crew-roster summary::-webkit-details-marker { display: none; }
@@ -157,44 +212,17 @@
 .li-pill.req { color: #111; background: var(--gh-yellow); border-color: var(--gh-yellow); }
 .tab-count { display: inline-block; margin-left: .35rem; padding: 0 .4rem; border-radius: 999px; background: var(--gh-yellow); color: #111; font-style: normal; font-size: .7rem; }
 
-/* ---- Event sign-ups (RS-0027) ---------------------------------------------- */
-/* count top-right, button bottom-right (DEC-0077) */
-.ev-rsvp { flex: 1; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: .5rem; font-size: .8rem; }
-.ev-going summary { cursor: pointer; color: var(--gh-text); font-weight: 700; list-style: none; }
-.ev-going summary::-webkit-details-marker { display: none; }
-.ev-going summary::after { content: ' ▾'; color: var(--gh-muted); font-size: .7rem; }
-.ev-going[open] summary::after { content: ' ▴'; }
-.ev-going p { margin: .35rem 0 0; max-width: 16rem; color: var(--gh-muted); text-align: right; }
-.ev-going-none { color: var(--gh-muted); }
-.ev-rsvp-btn { padding: .45rem .9rem; font-size: .8rem; }
-.ev-rsvp-btn.is-in { background: rgba(217,245,142,.14); color: #D9F58E; border: 1px solid rgba(217,245,142,.5); }
-.ev-rsvp-btn.is-in:hover { background: rgba(242,75,157,.12); color: var(--gh-red); border-color: var(--gh-red); }
-.ev-full { padding: .3rem .7rem; border-radius: 999px; border: 1px solid var(--gh-line); color: var(--gh-muted); font-weight: 800; text-transform: uppercase; font-size: .7rem; letter-spacing: .05em; }
-.ev-rsvp-msg { color: #D9F58E; font-size: .76rem; }
-.ev-rsvp-msg.is-error { color: var(--gh-red); }
-@media (max-width: 760px) {
-  .ev-rsvp { flex-direction: row; flex-wrap: wrap; align-items: center; }
-  .ev-going p { text-align: left; }
-}
-
 /* Sample events (RS-0033): clearly marked, but sign-up works as a demo */
 .chip-sample { color: var(--gh-red); background: rgba(242,75,157,.14); border-color: transparent; }
 .ev-rsvp-note { max-width: 16rem; color: var(--gh-muted); font-size: .72rem; text-align: right; }
 
-/* Host Discord link in the info line (RS-0034, DEC-0077) */
-.ev-facts > .ev-dc, .ev-facts > .ev-info { display: inline-flex; align-items: center; gap: .35rem; font-weight: 700; text-decoration: none; }
-.ev-dc { color: #8b95ff; }
-a.ev-dc:hover { color: #aab2ff; text-decoration: underline; text-underline-offset: 3px; }
-.ev-dc.is-disabled { opacity: .5; cursor: not-allowed; }
-.ev-info { color: var(--gh-muted); }
-.ev-info:hover { color: var(--gh-text); }
 /* account list keeps a compact Discord button */
 .ev-discord { display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .9rem; font-size: .8rem; background: #5865f2; border: 1px solid #5865f2; color: #fff; text-decoration: none; }
 .ev-discord:hover { background: #4752c4; border-color: #4752c4; }
 .ev-rsvp-msg a { color: inherit; text-decoration: underline; }
 
 /* Report links (RS-0039): deliberately quiet -- visible, but not inviting. */
-.crew-report, .ev-report { color: var(--gh-muted); font-size: .72rem; font-weight: 600; text-decoration: underline; text-decoration-color: var(--gh-line); text-underline-offset: 2px; }
+.crew-report, .ev-report { color: var(--gh-muted); font-size: .72rem; font-weight: 600; }
 .crew-report:hover, .ev-report:hover { color: var(--gh-text); }
 
 /* ---- Community tracks (RS-0045) ----------------------------------------- */
@@ -214,37 +242,15 @@ a.ev-dc:hover { color: #aab2ff; text-decoration: underline; text-underline-offse
   .tr-sc { flex: 1; justify-content: center; text-align: center; }
 }
 
-/* Next step after "I'm in" (2026-10-01): reach the host for the invite */
-.ev-next { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; padding: .85rem 1rem; border: 1px solid rgba(88,101,242,.55); border-radius: var(--gh-radius); background: rgba(88,101,242,.12); }
-.ev-next-text { flex: 1 1 18rem; margin: 0; font-size: .86rem; color: var(--gh-text); }
-.ev-next-actions { display: flex; flex-wrap: wrap; gap: .6rem; }
-.ev-next-dc, .ev-next-ps { display: inline-flex; align-items: center; gap: .5rem; color: #fff; padding: .65rem 1.2rem; font-size: .85rem; text-decoration: none; }
-.ev-next-dc { background: #5865f2; }
-/* PlayStation blue (brand colour for links that lead to PlayStation) */
-.ev-next-ps { background: #0070d1; }
-.ev-next-ps:hover { filter: brightness(1.1); }
-.ev-next-dc:hover { filter: brightness(1.1); }
-.ev-next-dc.is-disabled { opacity: .45; cursor: default; filter: none; }
 .ev-next-psn { display: inline-flex; align-items: center; gap: .45rem; color: var(--gh-muted); font-size: .8rem; }
 .ev-next-psn strong { color: var(--gh-text); }
 .ev-next-copy { padding: .2rem .55rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); background: none; color: var(--gh-muted); font-size: .72rem; font-weight: 700; cursor: pointer; }
 .ev-next-copy:hover { color: var(--gh-text); border-color: var(--gh-muted); }
 a.ev-next-copy { text-decoration: none; }
-.ev-psn-link { color: inherit; text-decoration: none; }
-.ev-psn-link:hover strong { text-decoration: underline; text-decoration-color: var(--gh-red); text-underline-offset: 3px; }
-
-/* Stream link on events (RS-0058) */
-.ev-watch { display: inline-flex; align-items: center; gap: .35rem; color: #c9a7ff; font-weight: 700; text-decoration: none; }
-.ev-watch:hover { color: #fff; text-decoration: underline; }
-.ev-watch.is-disabled { opacity: .5; cursor: default; text-decoration: none; }
-
 /* Sample crews (2026-10-02): demo links, crew membership up to 5 (DEC-0093) */
 .crew-link.is-disabled { opacity: .45; cursor: default; pointer-events: none; }
-.crew-withdraw { font: inherit; font-size: .75rem; font-weight: 700; cursor: pointer; background: none; white-space: nowrap; }
 .crew-me-count { color: var(--gh-muted); font-size: .8rem; }
 
-/* buttons inside crew cards use the link size (2026-10-02) */
-.crew-join-btn { font-size: .75rem; font-weight: 700; white-space: nowrap; }
 .crew-link { white-space: nowrap; }
 
 /* Crew invites (RS-0063) */

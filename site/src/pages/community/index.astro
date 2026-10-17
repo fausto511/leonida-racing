@@ -1,134 +1,320 @@
 ---
+// Community overview -- Redesign (boards Community / CommunityActive / CommunityMobile):
+// image band (logged in: "Your next event" tile), three entry cards, "Next up" with type chips
+// and an "Open spot" row, "Featured crews" with focus chips and a "Start a crew" card, Discord band.
+// No sub-nav (same as Time Attack, DEC-0119). COPY STATUS: mockup placeholders -> Codex review (DEC-0088).
 import Base from '../../layouts/Base.astro';
-import PageHero from '../../components/PageHero.astro';
-import HubSubnav from '../../components/HubSubnav.astro';
+import DiscordBand from '../../components/DiscordBand.astro';
 import '../../styles/hub.css';
-import { sampleEventsUpcoming, sampleCrews, eventRowHtml, crewCardHtml } from '../../data/hub';
+import { sampleEventsUpcoming, sampleCrews, eventRowHtml, eventOpenSpotHtml, crewCardHtml } from '../../data/hub';
 
 const base = import.meta.env.BASE_URL;
-const nextEventsHtml = sampleEventsUpcoming().filter((e) => e.status !== 'cancelled').slice(0, 3).map((e) => eventRowHtml(e, { rsvp: true, sample: true })).join('');
-const crewsHtml = sampleCrews.slice(0, 3).map((c) => crewCardHtml(c, undefined, { sample: true })).join('');
+const EV_N = 4;
+const CREW_N = 5;
+const nextEventsHtml = sampleEventsUpcoming().filter((e) => e.status !== 'cancelled').slice(0, EV_N).map((e) => eventRowHtml(e, { rsvp: true, sample: true })).join('') + eventOpenSpotHtml();
+const featured = [...sampleCrews.filter((c) => c.is_featured), ...sampleCrews.filter((c) => !c.is_featured)].slice(0, CREW_N);
+const crewsHtml = featured.map((c) => crewCardHtml(c, undefined, { sample: true })).join('');
+const evChips: [string, string][] = [['', 'All events'], ['race', 'Races'], ['time-attack', 'Time Attack'], ['league', 'Leagues'], ['car-meet', 'Car meets'], ['cruise', 'Cruises']];
+const crewChips: [string, string][] = [['', 'Featured'], ['racing', 'Racing'], ['time-attack', 'Time Attack'], ['league', 'League'], ['drift', 'Drift'], ['car-meet', 'Car meet'], ['cruise', 'Cruise']];
+const entries = [
+  { href: `${base}community/events/`, img: 'events', eb: 'Calendar', title: 'Events', text: 'Races, leagues, car meets and cruises, all in your local time.', short: 'Races, leagues, meets and cruises', cta: 'Open calendar' },
+  { href: `${base}community/crews/`, img: 'crews', eb: 'Directory', title: 'Crews', text: 'Racing crews and car meet communities that fit the way you play.', short: 'Crews that fit the way you play', cta: 'Browse crews', pos: '50% 15%' },
+  { href: `${base}community/tracks/`, img: 'tracks', eb: 'Race jobs', title: 'Tracks', text: 'Community-built race jobs for your next playlist.', short: 'Community-built race jobs', cta: 'Find tracks' },
+];
+const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
+const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
 ---
 <Base
-  title="The Hub — GTA VI Racing Community"
-  description="Find GTA 6 races, league rounds, car meets, crews, hosts, and creators. Connect with the racing community and car culture in The Hub."
+  title="Community — GTA VI Racing Community"
+  description="Find GTA 6 races, league rounds, car meets, crews, hosts, and creators. Connect with the racing community and car culture."
   section="hub"
   noindex={false /* indexable since 2026-10-14 (Fausto): real crews exist; Tracks stays noindex */}
 >
-  <PageHero status="hub" image="hub" eyebrow="GTA VI Racing Community" title="The Hub" lede="Where the GTA VI racing scene meets. Find the next race, league round, or car meet. Connect with crews, hosts, and creators. Check out what the community is creating around GTA VI racing and car culture." />
-
-  <HubSubnav active="overview" />
-
-  <section class="wrap hub-body">
-    <div class="hub-entry-grid">
-      <a class="hub-entry" href={`${base}community/events/`}>
-        <img class="hub-entry-img" src={`${base}images/hub/hub-entry-events-640.webp`} srcset={`${base}images/hub/hub-entry-events-640.webp 640w, ${base}images/hub/hub-entry-events-1280.webp 1280w`} sizes="(max-width: 700px) 100vw, 400px" alt="" width="640" height="360" loading="lazy" />
-        <span class="hub-entry-body">
-          <span class="eyebrow">Calendar</span>
-          <strong class="display hub-entry-title">Events</strong>
-          <span class="hub-entry-copy">Find races, racing leagues, community playlists, and car meets—all shown in your local time.</span>
-          <span class="hub-entry-cta">Open calendar →</span>
-        </span>
-      </a>
-      <a class="hub-entry" href={`${base}community/crews/`}>
-        <img class="hub-entry-img" style="object-position: 50% 15%" src={`${base}images/hub/hub-entry-crews-640.webp`} srcset={`${base}images/hub/hub-entry-crews-640.webp 640w, ${base}images/hub/hub-entry-crews-1280.webp 1280w`} sizes="(max-width: 700px) 100vw, 400px" alt="" width="640" height="360" loading="lazy" />
-        <span class="hub-entry-body">
-          <span class="eyebrow">Directory</span>
-          <strong class="display hub-entry-title">Crews</strong>
-          <span class="hub-entry-copy">Find racing crews and car meet communities that fit the way you play.</span>
-          <span class="hub-entry-cta">Browse crews →</span>
-        </span>
-      </a>
-      <a class="hub-entry" href={`${base}community/tracks/`}>
-        <img class="hub-entry-img" src={`${base}images/hub/hub-entry-tracks-640.webp`} srcset={`${base}images/hub/hub-entry-tracks-640.webp 640w, ${base}images/hub/hub-entry-tracks-1280.webp 1280w`} sizes="(max-width: 700px) 100vw, 400px" alt="" width="640" height="360" loading="lazy" />
-        <span class="hub-entry-body">
-          <span class="eyebrow">Race jobs</span>
-          <strong class="display hub-entry-title">Tracks</strong>
-          <span class="hub-entry-copy">Find community-built race jobs for your next playlist, discover creators, or share your own when creation tools go live.</span>
-          <span class="hub-entry-cta">Find tracks →</span>
-        </span>
-      </a>
-    </div>
-
-    <!-- Discord strip (RS-0076): direct invite + the info page -->
-    <div class="hub-discord">
-      <div class="hub-discord-copy">
-        <strong>The community lives on Discord</strong>
-        <span>Find people to drive with, grab a spot in the next race and talk cars between events.</span>
+  <section class="cm-band">
+    <img class="cm-bg" src={`${base}images/hub/hub-carmeet-1080.webp`} srcset={`${base}images/hub/hub-carmeet-640.webp 640w, ${base}images/hub/hub-carmeet-1080.webp 1080w, ${base}images/hub/hub-carmeet-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="940" fetchpriority="high" />
+    <span class="cm-o cm-o1" aria-hidden="true"></span><span class="cm-o cm-o2" aria-hidden="true"></span>
+    <div class="wrap cm-hero">
+      <div>
+        <p class="eyebrow">GTA VI Racing Community</p>
+        <h1 class="display">Community</h1>
+        <p class="lede">Races, car meets and crews. Find your next event, sign up in one click, or join a crew that drives the way you do.</p>
       </div>
-      <div class="hub-discord-act">
-        <a class="btn btn-p btn-sm" href="https://discord.gg/hPGuBwXRqT" target="_blank" rel="noopener">Join the Discord</a>
-        <a class="arrow" href={`${base}discord/`}>What’s on the server →</a>
+      <div class="cm-tile" id="cm-tile" hidden>
+        <div class="eb"><Fragment set:html={cal} />Your next event</div>
+        <a class="cm-next" id="cm-next" href={`${base}community/events/`}></a>
+        <div class="cm-crews" id="cm-crews"></div>
       </div>
     </div>
+  </section>
 
-    <div class="hub-block-head">
-      <h2 class="display hub-block-title">Next Up</h2>
-      <span class="hub-sample-flag" id="hub-ev-flag">Sample data</span>
-      <a class="hub-block-link" href={`${base}community/events/`}>All events</a>
+  <section class="wrap cm-entries">
+    {entries.map((e) => (
+      <a class="cm-entry card" href={e.href}>
+        <img src={`${base}images/hub/hub-entry-${e.img}-640.webp`} srcset={`${base}images/hub/hub-entry-${e.img}-640.webp 640w, ${base}images/hub/hub-entry-${e.img}-1280.webp 1280w`} sizes="(max-width: 760px) 120px, 420px" alt="" width="640" height="360" loading="lazy" style={e.pos ? `object-position:${e.pos}` : undefined} />
+        <span class="cm-entry-b">
+          <span class="eyebrow">{e.eb}</span>
+          <strong class="display">{e.title}</strong>
+          <span class="t-long">{e.text}</span><span class="t-short">{e.short}</span>
+          <span class="cta">{e.cta} →</span>
+        </span>
+      </a>
+    ))}
+  </section>
+
+  <section class="wrap cm-sec" id="next-up">
+    <p class="eyebrow">Events</p>
+    <div class="cm-head">
+      <div>
+        <h2 class="display">Next up</h2>
+        <p class="sub"><span class="lg">Races, leagues, car meets and cruises hosted by the community.</span><span class="sm">Hosted by the community. All times in your local time.</span></p>
+      </div>
+      <div class="cm-head-r">
+        <span class="sample" id="cm-ev-flag" title="Fictional events until GTA VI is out">Sample until launch</span>
+        <a class="cm-more" href={`${base}community/events/`}>Open the full calendar →</a>
+      </div>
+    </div>
+    <div class="cm-bar">
+      <div class="chips" id="cm-ev-chips" role="group" aria-label="Event type">
+        {evChips.map(([v, l], i) => <button type="button" class={i === 0 ? 'on' : ''} data-type={v} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>)}
+      </div>
+      <span class="tz" id="cm-tz"><Fragment set:html={cal} />Your local time</span>
     </div>
     <div class="ev-list" id="hub-ev-root" set:html={nextEventsHtml} />
-
-    <div class="hub-block-head">
-      <h2 class="display hub-block-title">Featured Crews</h2>
-      <span class="hub-sample-flag" id="hub-crew-flag">Sample data</span>
-      <a class="hub-block-link" href={`${base}community/crews/`}>All crews</a>
-    </div>
-    <div class="crew-me" id="hub-crew-me" hidden aria-live="polite"></div>
-    <div class="crew-grid" id="hub-crew-root" set:html={crewsHtml} />
+    <a class="btn btn-s cm-more-btn" href={`${base}community/events/`}>Open the full calendar</a>
   </section>
+
+  <section class="wrap cm-sec cm-last" id="featured-crews">
+    <p class="eyebrow">Crews</p>
+    <div class="cm-head">
+      <div>
+        <h2 class="display">Featured crews</h2>
+        <p class="sub"><span class="lg">Find a crew that drives the way you do. Request an invite, the crew leader approves.</span><span class="sm">Request an invite, the crew leader approves.</span></p>
+      </div>
+      <div class="cm-head-r">
+        <span class="sample" id="cm-crew-flag" title="Fictional crews until real crews are listed">Sample until launch</span>
+        <a class="cm-more" href={`${base}community/crews/`}>Browse all crews →</a>
+      </div>
+    </div>
+    <div class="chips" id="cm-crew-chips" role="group" aria-label="Crew focus">
+      {crewChips.map(([v, l], i) => <button type="button" class={i === 0 ? 'on' : ''} data-focus={v} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>)}
+    </div>
+    <div class="crew-grid cm-crews-grid" id="hub-crew-root" set:html={crewsHtml + startCrew} />
+    <a class="btn btn-s cm-more-btn" href={`${base}community/crews/`}>Browse all crews</a>
+  </section>
+
+  <DiscordBand />
 </Base>
 
 <style>
-  .hub-entry-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gh-gap-card); margin-bottom: 1rem; }
-  .hub-entry { display: flex; flex-direction: column; overflow: hidden; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg); text-decoration: none; transition: border-color .15s; }
-  .hub-entry-img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 7; object-fit: cover; object-position: 50% 40%; background: rgba(200,200,222,.08); }
-  .hub-entry-body { display: flex; flex-direction: column; gap: .5rem; padding: var(--gh-pad-card); }
-  .hub-entry:hover { border-color: var(--gh-muted); }
-  @media (max-width: 900px) { .hub-entry-grid { grid-template-columns: 1fr; } }
-  .hub-entry-title { font-size: 2rem; }
-  .hub-entry-copy { color: var(--gh-muted); font-size: .92rem; line-height: 1.55; }
-  .hub-entry-cta { margin-top: .4rem; color: var(--gh-red); font-weight: 800; font-size: .85rem; }
-  .hub-discord { display: flex; align-items: center; justify-content: space-between; gap: 1rem 2rem; flex-wrap: wrap; margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--gh-radius-lg); background: linear-gradient(100deg, rgba(42,31,158,.35), rgba(177,42,140,.22) 55%, rgba(242,106,61,.16)), var(--lr-card); border: 1px solid var(--lr-line-strong); }
-  .hub-discord-copy { display: flex; flex-direction: column; gap: .25rem; min-width: 0; flex: 1 1 22rem; }
-  .hub-discord-copy strong { font-size: 1.05rem; }
-  .hub-discord-copy span { color: var(--lr-soft); font-size: .92rem; line-height: 1.5; }
-  .hub-discord-act { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
-  .hub-block-head { display: flex; align-items: center; gap: .75rem; margin: 2.75rem 0 1rem; }
-  .hub-block-title { margin: 0; font-size: 1.5rem; }
-  .hub-block-link { margin-left: auto; color: var(--gh-muted); font-size: .85rem; font-weight: 700; }
-  .hub-block-link:hover { color: var(--gh-text); }
+  [hidden] { display: none !important; }
+  :global(main) { overflow-x: clip; }
+  /* ---- band ---- */
+  .cm-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
+  .cm-bg, .cm-o { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .cm-bg { object-fit: cover; object-position: 60% 45%; }
+  .cm-o1 { background: linear-gradient(115deg, rgba(242,75,157,.75) 0%, rgba(242,75,157,.2) 42%, rgba(255,122,61,.2) 58%, rgba(255,122,61,.75) 100%); mix-blend-mode: color; }
+  .cm-o2 { background: linear-gradient(90deg, rgba(11,11,20,.92) 0%, rgba(11,11,20,.6) 55%, rgba(11,11,20,.4) 100%); }
+  .cm-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; min-height: 300px; padding-top: 56px; padding-bottom: 44px; }
+  .cm-hero h1 { margin: 12px 0 0; font-size: 64px; line-height: .95; }
+  .lede { margin: 16px 0 0; max-width: 600px; font-size: 17px; line-height: 1.55; color: #EDEBF2; text-shadow: 0 1px 12px rgba(11,11,20,.9); }
+  .cm-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
+  .cm-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+  .cm-next { display: flex; align-items: center; gap: 14px; margin-top: 14px; padding: 12px 14px; border-radius: 6px; border: 1px solid rgba(255,149,90,.3); background: rgba(255,149,90,.06); color: var(--lr-text); text-decoration: none; }
+  .cm-next[hidden] { display: none; }
+  .cm-next:hover { border-color: var(--lr-orange); }
+  .cm-next :global(.d) { flex: none; display: flex; flex-direction: column; align-items: center; line-height: 1; }
+  .cm-next :global(.d span) { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--lr-orange); }
+  .cm-next :global(.d b) { margin-top: 5px; font-family: var(--gh-font-display); font-size: 24px; font-weight: 800; }
+  .cm-next :global(.m) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .cm-next :global(.m b) { font-size: 15px; line-height: 1.3; }
+  .cm-next :global(.m span) { font-size: 12px; color: var(--lr-muted); }
+  .cm-next :global(.go) { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border-radius: 6px; border: 1px solid rgba(217,245,142,.5); background: rgba(217,245,142,.12); color: var(--lr-lime); font-size: 13px; font-weight: 700; }
+  .cm-crews { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: var(--lr-muted); }
+  .cm-crews:empty { display: none; }
+  .cm-crews :global(b) { color: var(--lr-text); font-weight: 600; }
+  .cm-crews :global(a) { margin-left: auto; color: var(--lr-orange); font-weight: 600; text-decoration: none; }
+
+  /* ---- entry cards ---- */
+  .cm-entries { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px; padding-top: 28px; }
+  .cm-entry { display: flex; flex-direction: column; overflow: hidden; padding: 0; text-decoration: none; color: var(--lr-text); transition: border-color .15s; }
+  .cm-entry:hover { border-color: rgba(200,200,222,.4); }
+  .cm-entry img { display: block; width: 100%; height: 170px; object-fit: cover; object-position: 50% 40%; background: var(--lr-raised); }
+  .cm-entry-b { display: flex; flex-direction: column; gap: 6px; padding: 18px; flex: 1; }
+  .cm-entry-b strong { font-size: 26px; line-height: 1; }
+  .cm-entry-b .t-long { font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
+  .cm-entry-b .t-short { display: none; }
+  .cm-entry-b .cta { margin-top: auto; padding-top: 6px; font-size: 14px; font-weight: 700; color: var(--lr-orange); }
+
+  /* ---- sections ---- */
+  .cm-sec { padding-top: 56px; }
+  .cm-last { padding-bottom: 72px; }
+  .cm-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-top: 8px; }
+  .cm-head h2 { margin: 0; font-size: 40px; }
+  .sub { margin: 8px 0 0; color: var(--lr-muted); font-size: 15px; }
+  .sub .sm { display: none; }
+  .cm-head-r { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex: none; }
+  .sample { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #6B6B80; white-space: nowrap; }
+  .cm-more { font-size: 15px; font-weight: 700; color: var(--lr-orange); text-decoration: none; white-space: nowrap; }
+  .cm-more:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .cm-more-btn { display: none; }
+  .cm-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 16px; }
+  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; font: inherit; font-size: 14px; font-weight: 500; color: #E4E4EC; cursor: pointer; white-space: nowrap; }
+  .chips button:hover:not(.on) { border-color: rgba(200,200,222,.5); }
+  .chips button.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
+  .chips button:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+  .tz { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--lr-muted); white-space: nowrap; }
+  #hub-ev-root :global(.ev-empty) { padding: 22px 18px; color: var(--lr-muted); font-size: 14px; }
+
+  @media (max-width: 1100px) {
+    .cm-hero { grid-template-columns: minmax(0,1fr) 340px; gap: 28px; }
+  }
+  @media (max-width: 860px) {
+    .cm-hero { grid-template-columns: 1fr; gap: 22px; min-height: 0; padding-top: 32px; padding-bottom: 28px; }
+    .cm-hero h1 { font-size: 44px; }
+    .lede { font-size: 16px; }
+    .cm-entries { grid-template-columns: 1fr; gap: 12px; padding-top: 20px; }
+    .cm-entry { flex-direction: row; align-items: stretch; }
+    .cm-entry img { width: 112px; height: auto; min-height: 84px; flex: none; }
+    .cm-entry-b { position: relative; gap: 4px; padding: 14px 44px 14px 16px; justify-content: center; }
+    .cm-entry-b .eyebrow, .cm-entry-b .t-long { display: none; }
+    .cm-entry-b .t-short { display: block; font-size: 14px; line-height: 1.4; color: var(--lr-soft); }
+    .cm-entry-b strong { font-size: 22px; }
+    .cm-entry-b .cta { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); margin: 0; padding: 0; font-size: 0; }
+    .cm-entry-b .cta::after { content: '→'; font-size: 20px; }
+  }
+  @media (max-width: 760px) {
+    .cm-sec { padding-top: 44px; }
+    .cm-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .cm-head h2 { font-size: 32px; }
+    .sub .lg { display: none; }
+    .sub .sm { display: inline; }
+    .cm-head-r { align-items: flex-start; }
+    .cm-more { display: none; }
+    .cm-more-btn { display: flex; width: 100%; margin-top: 14px; }
+    .tz { display: none; }
+    .chips { flex-wrap: nowrap; overflow-x: auto; margin-right: -16px; padding-right: 16px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .cm-crews-grid { display: flex; overflow-x: auto; gap: 12px; margin-right: -16px; padding-right: 16px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .cm-crews-grid::-webkit-scrollbar { display: none; }
+    .cm-crews-grid > :global(*) { flex: 0 0 86%; scroll-snap-align: start; }
+  }
 </style>
 
 <script>
-  import { eventRowHtml, crewCardHtml, localizeTimes, sampleEventsUpcoming, sampleCrews } from '../../data/hub';
+  import { eventRowHtml, eventOpenSpotHtml, crewCardHtml, crewTagHtml, localizeTimes, sampleEventsUpcoming, sampleCrews, esc, type HubEvent, type HubCrew } from '../../data/hub';
   import { createCrewMembership } from '../../scripts/crew-membership';
-  import { fetchLiveEvents, fetchLiveCrews, pickFeaturedCrews } from '../../scripts/hub-live';
+  import { fetchLiveEvents, fetchLiveCrews } from '../../scripts/hub-live';
   import { createEventRsvp } from '../../scripts/event-rsvp';
+  import { getSupabase, backendConfigured } from '../../scripts/supabase-client';
 
-  // "Next Up" with the same sign-up functions as the Event Calendar (2026-10-02)
-  const evRoot = document.getElementById('hub-ev-root')!;
+  const base = import.meta.env.BASE_URL;
+  const EV_N = 4, CREW_N = 5;
+  const $ = (id: string) => document.getElementById(id)!;
+
+  // ---- Next up: type chips over the upcoming events ----
+  const evRoot = $('hub-ev-root');
   const rsvp = createEventRsvp(evRoot);
-  localizeTimes(evRoot);
-  rsvp.setEvents(sampleEventsUpcoming().filter((e) => e.status !== 'cancelled').slice(0, 3), false);
-  rsvp.renderRsvps();
+  let events: HubEvent[] = sampleEventsUpcoming().filter((e) => e.status !== 'cancelled');
+  let evLive = false;
+  let evType = '';
+  const typeLabel: Record<string, string> = { race: 'races', 'time-attack': 'Time Attack events', league: 'league rounds', 'car-meet': 'car meets', cruise: 'cruises' };
+  function drawEvents() {
+    const list = events.filter((e) => !evType || e.event_type === evType).slice(0, EV_N);
+    evRoot.innerHTML = (list.length ? list.map((e) => eventRowHtml(e, { rsvp: true, sample: !evLive })).join('') : `<p class="ev-empty">No upcoming ${typeLabel[evType] ?? 'events'} yet.</p>`) + eventOpenSpotHtml();
+    localizeTimes(evRoot);
+    rsvp.setEvents(list, evLive);
+    rsvp.renderRsvps();
+  }
+  $('cm-ev-chips').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-type]');
+    if (!b) return;
+    evType = b.dataset.type ?? '';
+    document.querySelectorAll<HTMLButtonElement>('#cm-ev-chips button').forEach((x) => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+    drawEvents();
+  });
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  $('cm-tz').title = `Times are shown in your time zone (${tz})`;
+  drawEvents();
   fetchLiveEvents().then(async (live) => {
     if (!live) return;
-    const next = live.filter((e) => e.status !== 'cancelled').slice(0, 3);
-    evRoot.innerHTML = next.map((e) => eventRowHtml(e, { rsvp: true })).join('');
-    localizeTimes(evRoot);
-    document.getElementById('hub-ev-flag')!.hidden = true;
-    rsvp.setEvents(next, true);
-    rsvp.renderRsvps();
+    events = live.filter((e) => e.status !== 'cancelled');
+    evLive = true;
+    $('cm-ev-flag').hidden = true;
+    drawEvents();
     await rsvp.connect();
   });
-  // Crew cards with "Request to join" + Discord, same as The Hub > Crews (2026-10-02)
-  const crewMembership = createCrewMembership(document.getElementById('hub-crew-root')!, document.getElementById('hub-crew-me')!);
+
+  // ---- Featured crews: focus chips, 5 cards + "Start a crew" ----
+  const crewRoot = $('hub-crew-root');
+  const crewMembership = createCrewMembership(crewRoot, null);
+  let crews: HubCrew[] = sampleCrews;
+  let crewLive = false;
+  let focus = '';
+  const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
+  function drawCrews() {
+    const pool = focus ? crews.filter((c) => (c.focus as string[]).includes(focus)) : [...crews.filter((c) => c.is_featured), ...crews.filter((c) => !c.is_featured)];
+    const list = pool.slice(0, CREW_N);
+    crewRoot.innerHTML = (list.length ? list.map((c) => crewCardHtml(c, undefined, { sample: !crewLive })).join('') : '') + startCrew;
+    crewMembership.render();
+  }
+  $('cm-crew-chips').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-focus]');
+    if (!b) return;
+    focus = b.dataset.focus ?? '';
+    document.querySelectorAll<HTMLButtonElement>('#cm-crew-chips button').forEach((x) => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+    drawCrews();
+  });
   crewMembership.setCrews(sampleCrews, false);
   fetchLiveCrews().then((live) => {
     if (!live) return;
-    document.getElementById('hub-crew-root')!.innerHTML = pickFeaturedCrews(live, 3).map((c) => crewCardHtml(c)).join('');
-    document.getElementById('hub-crew-flag')!.hidden = true;
+    crews = live; crewLive = true;
+    $('cm-crew-flag').hidden = true;
+    drawCrews();
     crewMembership.setCrews(live, true);
   });
+
+  // ---- logged in: "Your next event" + own crews in the band ----
+  async function loadTile() {
+    if (!backendConfigured) return;
+    const sb = getSupabase();
+    const { data: s } = await sb.auth.getSession();
+    if (!s?.session) return;
+    const own = await sb.from('drivers').select('driver_id').eq('auth_user_id', s.session.user.id).maybeSingle();
+    const me = own.data?.driver_id;
+    if (!me) return;
+    const now = new Date().toISOString();
+    const [rs, cr] = await Promise.all([
+      sb.from('hub_event_rsvps').select('event_id').eq('driver_id', me),
+      sb.from('crew_membership_overview').select('crew_id, crew_name, status, is_primary').eq('driver_id', me).eq('status', 'active'),
+    ]);
+    const ids = ((rs.data ?? []) as { event_id: string }[]).map((r) => r.event_id);
+    let next: { event_id: string; title: string; starts_at: string; host_name: string | null; host: { name: string } | null } | undefined;
+    if (ids.length) {
+      const { data } = await sb.from('hub_events').select('event_id, title, starts_at, host_name, host:crews(name)').in('event_id', ids).eq('is_published', true).neq('status', 'cancelled').gte('starts_at', now).order('starts_at').limit(1);
+      next = (data ?? [])[0] as any;
+    }
+    const myCrews = ((cr.data ?? []) as { crew_id: string; crew_name: string; is_primary?: boolean }[]).sort((a, b) => Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary)));
+    if (!next && !myCrews.length) return;
+    const a = $('cm-next') as HTMLAnchorElement;
+    if (next) {
+      const d = new Date(next.starts_at);
+      const by = next.host?.name ?? next.host_name;
+      a.href = `${base}community/events/#event-${encodeURIComponent(next.event_id)}`;
+      a.innerHTML = `<span class="d"><span>${d.toLocaleDateString('en-GB', { weekday: 'short' })}</span><b>${d.getDate()}</b></span><span class="m"><b>${esc(next.title)}</b><span>${d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })} your time${by ? ` · by ${esc(by)}` : ''}</span></span><span class="go"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Going</span>`;
+    } else {
+      a.innerHTML = '<span class="m"><b>No event planned yet</b><span>Pick one from Next up below.</span></span>';
+      a.href = '#next-up';
+    }
+    if (myCrews.length) {
+      const tags = await sb.from('crews').select('crew_id, tag, color').in('crew_id', myCrews.map((c) => c.crew_id));
+      const tagBy = new Map(((tags.data ?? []) as { crew_id: string; tag: string; color: string }[]).map((t) => [t.crew_id, t]));
+      const shown = myCrews.slice(0, 2).map((c) => { const t = tagBy.get(c.crew_id); return `${t ? crewTagHtml(t.tag, t.color, 'sm') : ''} <b>${esc(c.crew_name)}</b>`; }).join(' ');
+      $('cm-crews').innerHTML = `Your crews: ${shown}${myCrews.length > 2 ? ` +${myCrews.length - 2}` : ''}<a href="${base}account/crew/">My crews →</a>`;
+    } else {
+      $('cm-crews').innerHTML = `<span>No crew yet</span><a href="${base}community/crews/">Find a crew →</a>`;
+    }
+    $('cm-tile').hidden = false;
+  }
+  loadTile().catch(() => {});
 </script>

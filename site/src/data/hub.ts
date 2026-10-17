@@ -134,11 +134,11 @@ export const eventTypeLabels: Record<EventType, string> = {
 // Sample data (fictional)
 // ---------------------------------------------------------------------------
 export const sampleCrews: HubCrew[] = [
-  { slug: 'sample-apex-syndicate', name: 'Apex Syndicate', tag: 'APEX', color: '#ed253d', platforms: ['ps5'], focus: ['racing', 'league'], region: 'europe', languages: ['en'], description: 'Clean, competitive circuit racing with weekly league nights. Sample entry.', member_count: 142, discord_url: null, social_club_url: null, is_partner: true },
-  { slug: 'sample-vice-drift-union', name: 'Vice Drift Union', tag: 'VDRU', color: '#ff7ab6', platforms: ['ps5'], focus: ['drift', 'car-meet'], region: 'north-america', languages: ['en'], description: 'Tandem drift sessions and themed car meets. Sample entry.', member_count: 88, discord_url: null, social_club_url: null, is_partner: false },
+  { slug: 'sample-apex-syndicate', name: 'Apex Syndicate', tag: 'APEX', color: '#ed253d', platforms: ['ps5'], focus: ['racing', 'league'], region: 'europe', languages: ['en'], description: 'Clean, competitive circuit racing with weekly league nights. Sample entry.', member_count: 142, discord_url: null, social_club_url: null, is_partner: true, is_featured: true },
+  { slug: 'sample-vice-drift-union', name: 'Vice Drift Union', tag: 'VDRU', color: '#ff7ab6', platforms: ['ps5'], focus: ['drift', 'car-meet'], region: 'north-america', languages: ['en'], description: 'Tandem drift sessions and themed car meets. Sample entry.', member_count: 88, discord_url: null, social_club_url: null, is_partner: false, is_featured: true },
   { slug: 'sample-leonida-lap-club', name: 'Leonida Lap Club', tag: 'LLAP', color: '#ffd74c', platforms: ['ps5'], focus: ['time-attack', 'racing'], region: 'international', languages: ['en'], description: 'Hotlap hunters chasing tenths on every board. Sample entry.', member_count: 37, discord_url: null, social_club_url: null, is_partner: false },
   { slug: 'sample-nordring-crew', name: 'Nordring Crew', tag: 'NRDC', color: '#3fa7ff', platforms: ['ps5'], focus: ['racing', 'cruise'], region: 'europe', languages: ['de'], description: 'German-speaking racing crew with relaxed Sunday cruises. Sample entry.', member_count: 64, discord_url: null, social_club_url: null, is_partner: false },
-  { slug: 'sample-gulf-coast-racing', name: 'Gulf Coast Racing', tag: 'GCRX', color: '#27c281', platforms: ['ps5'], focus: ['league'], region: 'north-america', languages: ['en'], description: 'Season-based league with fixed grids and stewarding. Sample entry.', member_count: 210, discord_url: null, social_club_url: null, is_partner: false },
+  { slug: 'sample-gulf-coast-racing', name: 'Gulf Coast Racing', tag: 'GCRX', color: '#27c281', platforms: ['ps5'], focus: ['league'], region: 'north-america', languages: ['en'], description: 'Season-based league with fixed grids and stewarding. Sample entry.', member_count: 210, discord_url: null, social_club_url: null, is_partner: false, is_featured: true },
   { slug: 'sample-midnight-meet', name: 'Midnight Meet', tag: 'MNMT', color: '#9b6bff', platforms: ['ps5'], focus: ['car-meet', 'cruise'], region: 'europe', languages: ['en'], description: 'Late-night meets, photo spots and convoy cruises. Sample entry.', member_count: 51, discord_url: null, social_club_url: null, is_partner: false },
 ];
 
@@ -200,9 +200,9 @@ export const iconDiscord = '<svg width="15" height="15" viewBox="0 0 24 24" fill
  *  greyed-out demo link. */
 export function eventDiscordHtml(e: HubEvent, sample = false): string {
   if (e.status === 'cancelled') return '';
-  if (sample) return `<span class="ev-dc is-disabled" title="Sample event — no real Discord server">${iconDiscord}Join the Host's Discord</span>`;
+  if (sample) return `<span class="ev-dc is-disabled" title="Sample event — no real Discord server">${iconDiscord}Event Discord</span>`;
   const u = eventDiscord(e);
-  return u ? `<a class="ev-dc" href="${esc(u)}" target="_blank" rel="noopener" title="Opens the host's Discord server">${iconDiscord}Join the host's Discord</a>` : '';
+  return u ? `<a class="ev-dc" href="${esc(u)}" target="_blank" rel="noopener" title="Opens the host's Discord server">${iconDiscord}Event Discord</a>` : '';
 }
 
 /** "Watch on Twitch/YouTube/Kick" links (RS-0058). Shown even when the
@@ -246,7 +246,6 @@ export function crewEmblemHtml(color: string): string {
 
 const iconUsers = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
 const iconPin = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
-const iconClock = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
 
 /** roster: display names of the crew's members on this site (live only,
  *  anonymised drivers are already excluded by the DB view). */
@@ -256,45 +255,38 @@ const iconClock = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" s
  *  status + Set as Active Crew / Leave Crew). Without it, cards that can be joined
  *  get an empty .crew-join-slot there, filled by scripts/crew-membership.ts (2026-10-07). */
 export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: boolean; actions?: string } = {}): string {
-  // Uniform card (Fausto 2026-10-07): every block has a fixed height, so lines and
-  // strips sit at the same place on every card. Name one line (max 22 chars), description
-  // two lines (max 90), chips one row, region/languages + link icons one row, actions strip.
-  // Roster hidden for now. COPY STATUS: titles/labels are Claude placeholders, Codex review pending.
+  // Redesign (boards Community / Crews): crew-colour bar on top, tag + name, badges, focus chips,
+  // two-line description, "region · languages · members", foot with Discord/SC + Request Invite.
+  // Blocks keep fixed heights so lines sit at the same place on every card (Fausto 2026-10-07).
+  // COPY STATUS: labels are Claude placeholders, Codex review pending.
   const discord = safeUrl(c.discord_url);
   const joinId = c.crew_id ?? (opts.sample ? c.slug : null);
   const sc = safeUrl(c.social_club_url);
   const langs = (c.languages ?? []).slice(0, 2);
-  const meta = [regionLabel(c.region), langs.map(languageLabel).join(', ')].filter(Boolean).map(esc).join(' · ');
-  const chipItems = [
-    ...c.platforms.filter((p) => (ACTIVE_PLATFORMS as readonly string[]).includes(p)).map((p) => ({ cls: 'chip chip-platform', label: platformShort[p] ?? p })),
-    ...c.focus.map((f) => ({ cls: 'chip', label: focusLabels[f] ?? f })),
-  ];
-  // one row: up to 4 chips, otherwise 3 + "+N" (the rest in the tooltip)
-  const shown = chipItems.length > 4 ? chipItems.slice(0, 3) : chipItems;
-  const rest = chipItems.slice(shown.length);
-  const chips = shown.map((x) => `<span class="${x.cls}">${esc(x.label)}</span>`).concat(rest.length ? [`<span class="chip chip-more" title="${esc(rest.map((x) => x.label).join(', '))}">+${rest.length}</span>`] : []);
-  const members = c.member_count != null ? `<p class="crew-members">${iconUsers}${esc(c.member_count)} ${c.member_count === 1 ? 'Member' : 'Members'}</p>` : '';
+  const members = c.member_count != null ? `${c.member_count} ${c.member_count === 1 ? 'member' : 'members'}` : '';
+  const meta = [regionLabel(c.region), langs.map(languageLabel).join(', '), members].filter(Boolean).map(esc).join('<span class="dot">·</span>');
+  const focus = c.focus.map((f) => focusLabels[f] ?? f);
+  const shown = focus.length > 3 ? focus.slice(0, 2) : focus;
+  const rest = focus.slice(shown.length);
+  const chips = shown.map((f) => `<span class="crew-chip">${esc(f)}</span>`).concat(rest.length ? [`<span class="crew-chip" title="${esc(rest.join(', '))}">+${rest.length}</span>`] : []).join('');
+  const badges = [
+    c.is_official ? '<span class="crew-badge b-official" title="Official crew of this site or of the original creators">Official</span>' : '',
+    c.is_featured ? '<span class="crew-badge b-featured">Featured</span>' : '',
+    c.is_partner ? '<span class="crew-badge b-partner">Partner</span>' : '',
+  ].join('');
   const scLink = sc ? `<a class="crew-icon-link crew-icon-sc" href="${esc(sc)}" target="_blank" rel="noopener" title="Social Club" aria-label="Social Club">SC</a>` : '';
   const dcLink = discord ? `<a class="crew-icon-link crew-icon-dc" href="${esc(discord)}" target="_blank" rel="noopener" title="Discord" aria-label="Discord">${iconDiscord}</a>`
     : opts.sample ? `<span class="crew-icon-link crew-icon-dc is-disabled" title="Sample crew — no Discord server">${iconDiscord}</span>` : '';
   const report = c.crew_id ? `<a class="crew-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?crew=${encodeURIComponent(c.crew_id)}`)}" title="Report this crew to the moderators" aria-label="Report this crew"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/></svg></a>` : '';
-  return `<article class="crew-card"${c.crew_id && !opts.sample ? ` id="crew-${esc(c.crew_id)}"` : ''}${joinId ? ` data-crew-id="${esc(joinId)}"` : ''} data-platforms="${esc(c.platforms.join('|'))}" data-focus="${esc(c.focus.join('|'))}" data-languages="${esc((c.languages ?? []).join('|'))}" data-search="${esc(`${c.name} ${c.tag}`.toLowerCase())}" style="--crew-color:${safeColor(c.color)}">
+  const actions = opts.actions ? `<div class="crew-actions">${opts.actions}</div>` : joinId ? '<span class="crew-join-slot"></span>' : '';
+  return `<article class="crew-card"${c.crew_id && !opts.sample ? ` id="crew-${esc(c.crew_id)}"` : ''}${joinId ? ` data-crew-id="${esc(joinId)}"` : ''} data-platforms="${esc(c.platforms.join('|'))}" data-focus="${esc(c.focus.join('|'))}" data-featured="${c.is_featured ? '1' : '0'}" data-languages="${esc((c.languages ?? []).join('|'))}" data-search="${esc(`${c.name} ${c.tag}`.toLowerCase())}" style="--crew-color:${safeColor(c.color)}">
   ${report}
-  <div class="crew-card-head">
-    ${crewEmblemHtml(c.color)}
-    <div class="crew-card-id">
-      <h3 class="crew-name" title="${esc(c.name)}">${esc(c.name)}</h3>
-      ${members}
-      <div class="crew-id-row">${crewTagHtml(c.tag, c.color)}${c.is_official ? '<span class="crew-badge crew-official" title="Official crew of this site or of the original creators">Official</span>' : ''}${c.is_partner ? '<span class="crew-badge crew-partner">Partner</span>' : ''}</div>
-    </div>
-  </div>
+  <div class="crew-head">${crewTagHtml(c.tag, c.color)}<h3 class="crew-name" title="${esc(c.name)}">${esc(c.name)}</h3></div>
+  ${badges ? `<div class="crew-badges">${badges}</div>` : ''}
+  <div class="crew-chips">${chips}</div>
   <p class="crew-desc">${c.description ? esc(c.description) : ''}</p>
-  <div class="crew-chips">${chips.join('')}</div>
-  <div class="crew-foot">
-    <span class="crew-meta" title="${meta}">${meta}</span>
-    <span class="crew-links">${scLink}${dcLink}</span>
-  </div>
-  ${opts.actions ? `<div class="crew-actions">${opts.actions}</div>` : joinId ? '<div class="crew-actions"><span class="crew-join-slot"></span></div>' : ''}
+  <p class="crew-meta">${iconUsers}<span>${meta}</span></p>
+  <div class="crew-foot"><span class="crew-links">${dcLink}${scLink}</span>${actions}</div>
 </article>`;
 }
 
@@ -312,54 +304,58 @@ export function psnProfileUrl(name: string): string {
 }
 
 export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boolean } = {}): string {
+  // Redesign (boards Community / Events): date block · title · "type  time · place" ·
+  // "Hosted by <PSN> TAG · Event Discord · PS5" · description; right: sign-up slot
+  // (scripts/event-rsvp.ts). Times are rendered in UTC here and localised in the browser.
   const start = new Date(e.starts_at);
   const end = e.ends_at ? new Date(e.ends_at) : null;
-  const day = start.toLocaleDateString('en-GB', { day: '2-digit', timeZone: 'UTC' });
+  const day = start.toLocaleDateString('en-GB', { day: 'numeric', timeZone: 'UTC' });
   const mon = start.toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' });
   const wd = start.toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'UTC' });
   const time = start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
   const endTime = end ? end.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) : '';
   const join = safeUrl(e.join_url);
   const cancelled = e.status === 'cancelled';
-  // "Hosted by <PSN name> <crew tag>" right after the title (DEC-0077)
-  // PSN name (marked "PSN" so players know whom to add on PlayStation), else
-  // the creator's site display name as fallback (DEC-0077).
+  // PSN name (marked "PSN" so players know whom to add on PlayStation), else the
+  // creator's site display name as fallback (DEC-0077).
   const who = e.host_name
     ? (opts.sample
       ? `<strong title="PSN name — add the host on PlayStation">${esc(e.host_name)}</strong><span class="ev-psn">PSN</span>`
       : `<a class="ev-psn-link" href="${esc(psnProfileUrl(e.host_name))}" target="_blank" rel="noopener nofollow" title="Open the host's PSN profile to send a friend request"><strong>${esc(e.host_name)}</strong><span class="ev-psn">PSN</span></a>`)
     : e.host_account ? `<strong>${esc(e.host_account)}</strong>` : '';
   const hostedBy = who || e.host
-    ? `<span class="ev-by">Hosted by ${who}${e.host ? ` ${crewTagHtml(e.host.tag, e.host.color, 'sm')}` : ''}</span>`
+    ? `<span class="ev-by"><span class="ev-by-l">Hosted by</span> ${who}${e.host ? ` ${crewTagHtml(e.host.tag, e.host.color, 'sm')}` : ''}</span>`
     : '';
+  const plats = e.platforms.filter((p) => (ACTIVE_PLATFORMS as readonly string[]).includes(p)).map((p) => platformShort[p] ?? p).join(', ');
+  const l2 = [
+    hostedBy,
+    eventDiscordHtml(e, Boolean(opts.sample)),
+    eventStreamHtml(e, Boolean(opts.sample)),
+    plats ? `<span class="ev-plat">${esc(plats)}</span>` : '',
+    join && !cancelled ? `<a class="ev-info" href="${esc(join)}" target="_blank" rel="noopener">Event info ↗</a>` : '',
+    !opts.sample ? `<a class="ev-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?event=${encodeURIComponent(e.event_id)}`)}" title="Report this event to the moderators">Report</a>` : '',
+  ].filter(Boolean).join('<span class="dot" aria-hidden="true">·</span>');
   return `<article class="ev-row${cancelled ? ' is-cancelled' : ''}" id="event-${esc(e.event_id)}" data-type="${esc(e.event_type)}" data-platforms="${esc(e.platforms.join('|'))}" data-start="${esc(e.starts_at)}">
   <div class="ev-date" data-ts="${esc(e.starts_at)}">
     <span class="ev-wd" data-fmt="wd">${esc(wd)}</span>
-    <span class="ev-day" data-fmt="day">${esc(day)}</span>
+    <span class="ev-day" data-fmt="dnum">${esc(day)}</span>
     <span class="ev-mon" data-fmt="mon">${esc(mon)}</span>
   </div>
   <div class="ev-main">
-    <div class="ev-top">
-      <span class="chip chip-type chip-${esc(e.event_type)}">${esc(eventTypeLabels[e.event_type] ?? e.event_type)}</span>
-      ${cancelled ? '<span class="chip chip-cancelled">Cancelled</span>' : ''}
-      ${opts.sample ? '<span class="chip chip-sample" title="Example event — it will not take place">Sample</span>' : ''}
-      ${platformChips(e.platforms)}
-    </div>
-    <h3 class="ev-title"><span class="ev-title-text">${esc(e.title)}</span>${hostedBy}</h3>
-    <p class="ev-facts">
-      <span class="ev-time">${iconClock}<span data-ts="${esc(e.starts_at)}" data-fmt="time">${esc(time)}</span>${end ? `–<span data-ts="${esc(e.ends_at)}" data-fmt="time">${esc(endTime)}</span>` : ''} <span class="ev-tz" data-tz="${esc(e.starts_at)}">UTC</span></span>
-      ${e.location ? `<span class="ev-loc">${iconPin}${esc(e.location)}</span>` : ''}
-      ${eventDiscordHtml(e, Boolean(opts.sample))}
-      ${eventStreamHtml(e, Boolean(opts.sample))}
-      ${join && !cancelled ? `<a class="ev-info" href="${esc(join)}" target="_blank" rel="noopener">Event info ↗</a>` : ''}
-      ${!opts.sample ? `<a class="ev-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?event=${encodeURIComponent(e.event_id)}`)}" title="Report this event to the moderators">Report</a>` : ''}
-    </p>
+    <h3 class="ev-title">${esc(e.title)}</h3>
+    <p class="ev-l1"><span class="ev-type">${esc(eventTypeLabels[e.event_type] ?? e.event_type)}</span>${cancelled ? '<span class="ev-flag ev-cancel">Cancelled</span>' : ''}${opts.sample ? '<span class="ev-flag" title="Example event — it will not take place">Sample</span>' : ''}<b class="ev-time"><span data-ts="${esc(e.starts_at)}" data-fmt="time">${esc(time)}</span>${end ? `–<span data-ts="${esc(e.ends_at)}" data-fmt="time">${esc(endTime)}</span>` : ''}</b>${e.location ? `<span class="dot" aria-hidden="true">·</span><span class="ev-loc">${iconPin}${esc(e.location)}</span>` : ''}</p>
+    ${l2 ? `<p class="ev-l2">${l2}</p>` : ''}
     ${e.description ? `<p class="ev-desc">${esc(e.description)}</p>` : ''}
   </div>
   <div class="ev-side">
     ${opts.rsvp ? `<div class="ev-rsvp" data-rsvp="${esc(e.event_id)}"></div>` : ''}
   </div>
 </article>`;
+}
+
+/** Last row of an event list: invitation to host (boards Community / Events). */
+export function eventOpenSpotHtml(): string {
+  return `<div class="ev-open"><span class="ev-open-plus" aria-hidden="true">+</span><span class="ev-open-t"><b>Open spot</b><span>Host a race, a meet, or a hotlap session.</span></span><a class="btn btn-s ev-open-btn" href="${import.meta.env.BASE_URL}account/events/">Become a host</a></div>`;
 }
 
 /** Re-formats all [data-ts] nodes inside `root` into the visitor's local time. */
