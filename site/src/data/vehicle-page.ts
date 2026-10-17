@@ -8,7 +8,7 @@ import { vehicleOptions, type VehicleOption } from './vehicles';
 
 const base = import.meta.env.BASE_URL;
 /** Gellhorn section on the vehicle page (Fausto 17.10.): both lists show at most 10 rows
- *  (+1 extra row: own lap / open spot, resp. "more cars"), both cards the same fixed height. */
+ *  (+1 extra row: own lap / open spot, resp. "See all" to the class page), both cards the same fixed height. */
 export const GELLHORN_ROWS = 10;
 const byId = new Map(vehicleOptions.map((v) => [v.id, v]));
 
@@ -73,7 +73,7 @@ export function classRowsHtml(rows: ClassRow[], currentId: string, moreHref?: st
   <span class="vg-name"><span class="vg-make">${esc(v.make)} </span>${esc(v.model)}</span>
   ${r.ms == null ? '<span class="vg-time vg-nolap">No lap</span>' : `<span class="vg-gap tnum">${gap}</span><span class="vg-time tnum">${lapTime(r.ms)}</span>`}
 </a>`;
-  }).join('') + (rest > 0 && moreHref ? `<a class="vg-row vg-open vg-more" href="${moreHref}"><span class="vg-pos">+${rest}</span><span class="vg-name">${rest === 1 ? '1 more car' : `${rest} more cars`} in this class</span><span class="vg-time arrow">See all →</span></a>` : '');
+  }).join('') + (rest > 0 && moreHref ? `<a class="vg-row vg-open vg-more" href="${moreHref}"><span class="vg-pos"></span><span class="vg-name"></span><span class="vg-time arrow">See all →</span></a>` : '');
 }
 
 /** Rivals for the compare tile: the cars right ahead of / behind this one in the class list. */
