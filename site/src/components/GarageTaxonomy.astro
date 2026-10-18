@@ -130,14 +130,14 @@ const more = isClass
   </section>
 
   {isClass && (
-    <nav class="wrap tchips" aria-label="Classes">
+    <nav class="wrap tchips" aria-label="Classes" data-collapse>
       {classPages.map((c) => <a class:list={['tchip', { on: c.slug === page.slug }]} href={`${base}cars/classes/${c.slug}/`} aria-current={c.slug === page.slug ? 'page' : undefined}>{c.name}<span>{classCount(c.slug)}</span></a>)}
       <a class="tchip" href={`${base}cars/`}>All cars<span>{vehicleOptions.length}</span></a>
     </nav>
   )}
 
   {!isClass && (
-    <nav class="wrap tchips tchips-make" aria-label="Manufacturers" id="mchips">
+    <nav class="wrap tchips tchips-make" aria-label="Manufacturers" id="mchips" data-collapse>
       {manufacturerPages.map((m) => <a class:list={['tchip', { on: m.slug === page.slug }]} href={`${base}cars/manufacturers/${m.slug}/`} aria-current={m.slug === page.slug ? 'page' : undefined}><img class="tchip-logo" src={`${base}images/logos/${m.slug}-gta-6-logo.webp`} alt="" width="20" height="20" loading="lazy" />{m.name}<span>{makeCount(m.slug)}</span></a>)}
       <a class="tchip" href={`${base}cars/manufacturers/`}>All manufacturers</a>
     </nav>
@@ -194,10 +194,52 @@ const more = isClass
 </Base>
 
 <script>
-  // manufacturer chips: bring the current manufacturer into view (row scrolls sideways)
-  const row = document.getElementById('mchips');
-  const on = row?.querySelector<HTMLElement>('.tchip.on');
-  if (row && on) row.scrollLeft = Math.max(0, on.offsetLeft - row.offsetLeft - 16);
+  // Chip rows (Fausto 18.10.): desktop shows one row; the current chip moves to the front and a
+  // "+N more" chip at the end of the row opens the rest underneath. Phone: one swipeable row with
+  // the current chip in view. Without JS all chips show (wrapped), so every link stays crawlable.
+  const rows = [...document.querySelectorAll<HTMLElement>('[data-collapse]')];
+  const mq = window.matchMedia('(max-width: 860px)');
+  function layout(row: HTMLElement) {
+    const chips = [...row.querySelectorAll<HTMLElement>('.tchip')];
+    row.querySelector('.tchip-more')?.remove();
+    chips.forEach((c) => c.classList.remove('is-x'));
+    const on = row.querySelector<HTMLElement>('.tchip.on');
+    if (mq.matches) {
+      if (on) row.scrollLeft = Math.max(0, on.offsetLeft - row.offsetLeft - 16);
+      return;
+    }
+    if (on && row.firstElementChild !== on) row.prepend(on);
+    if (row.dataset.open === '1') return addToggle(row, 0, true);
+    const ordered = [...row.querySelectorAll<HTMLElement>('.tchip')];
+    const top = ordered[0].offsetTop;
+    let hidden = ordered.filter((c) => c.offsetTop > top);
+    if (!hidden.length) return;
+    hidden.forEach((c) => c.classList.add('is-x'));
+    const btn = addToggle(row, hidden.length, false);
+    // make room for the toggle at the end of the first row
+    const visible = ordered.filter((c) => !hidden.includes(c));
+    while (btn.offsetTop > top && visible.length > 1) {
+      const last = visible.pop()!;
+      last.classList.add('is-x');
+      hidden = [last, ...hidden];
+      btn.textContent = `+${hidden.length} more`;
+    }
+  }
+  function addToggle(row: HTMLElement, n: number, open: boolean) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tchip tchip-more';
+    b.setAttribute('aria-expanded', String(open));
+    b.textContent = open ? 'Show less' : `+${n} more`;
+    b.addEventListener('click', () => { row.dataset.open = open ? '0' : '1'; layout(row); });
+    row.append(b);
+    return b;
+  }
+  const run = () => rows.forEach(layout);
+  run();
+  let t = 0;
+  window.addEventListener('resize', () => { clearTimeout(t); t = window.setTimeout(run, 120); });
+  document.fonts?.ready.then(run);
 </script>
 
 <style>
@@ -238,6 +280,9 @@ const more = isClass
   @media (max-width: 860px) {
     .tchips-make .tchip { flex: none; }
   }
+  .tchip.is-x { display: none; }
+  :global(.tchip-more) { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(255,149,90,.5); background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: var(--lr-orange); cursor: pointer; white-space: nowrap; }
+  :global(.tchip-more:hover) { border-color: var(--lr-orange); }
   .tchip-logo { width: 20px; height: 20px; object-fit: contain; filter: brightness(0) invert(1); opacity: .85; }
   .tchip.on .tchip-logo { filter: brightness(0); opacity: .8; }
 
