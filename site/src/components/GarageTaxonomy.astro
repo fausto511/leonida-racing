@@ -136,6 +136,13 @@ const more = isClass
     </nav>
   )}
 
+  {!isClass && (
+    <nav class="wrap tchips tchips-make" aria-label="Manufacturers" id="mchips">
+      {manufacturerPages.map((m) => <a class:list={['tchip', { on: m.slug === page.slug }]} href={`${base}cars/manufacturers/${m.slug}/`} aria-current={m.slug === page.slug ? 'page' : undefined}><img class="tchip-logo" src={`${base}images/logos/${m.slug}-gta-6-logo.webp`} alt="" width="20" height="20" loading="lazy" />{m.name}<span>{makeCount(m.slug)}</span></a>)}
+      <a class="tchip" href={`${base}cars/manufacturers/`}>All manufacturers</a>
+    </nav>
+  )}
+
   <CarsBrowser vehicles={list} scope={isClass ? 'class' : 'make'} noun={noun} defaultSort="name">
     <Fragment slot="after-grid">
       <section class="wrap tmore">
@@ -186,6 +193,13 @@ const more = isClass
   </CarsBrowser>
 </Base>
 
+<script>
+  // manufacturer chips: bring the current manufacturer into view (row scrolls sideways)
+  const row = document.getElementById('mchips');
+  const on = row?.querySelector<HTMLElement>('.tchip.on');
+  if (row && on) row.scrollLeft = Math.max(0, on.offsetLeft - row.offsetLeft - 16);
+</script>
+
 <style>
   .ico, .tm :global(.ico) { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
   .is-tba { color: var(--lr-muted) !important; font-weight: 500 !important; }
@@ -220,6 +234,12 @@ const more = isClass
   .tchip:hover { border-color: var(--lr-pink); color: var(--lr-text); }
   .tchip.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 600; }
   .tchip.on span { color: #55556A; }
+  /* manufacturer chips (Fausto 18.10.): logo + name + count; wrap on desktop, one swipeable row on the phone */
+  @media (max-width: 860px) {
+    .tchips-make .tchip { flex: none; }
+  }
+  .tchip-logo { width: 20px; height: 20px; object-fit: contain; filter: brightness(0) invert(1); opacity: .85; }
+  .tchip.on .tchip-logo { filter: brightness(0); opacity: .8; }
 
   /* ---- more + links (slot content, page scope) ---- */
   .tsec-eb { margin: 0 0 14px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lr-soft); }
