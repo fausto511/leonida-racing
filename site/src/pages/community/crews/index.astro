@@ -27,12 +27,12 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
   <section class="cr-band">
     <img class="cr-bg" src={`${base}images/hub/crews-band-1080.webp`} srcset={`${base}images/hub/crews-band-640.webp 640w, ${base}images/hub/crews-band-1080.webp 1080w, ${base}images/hub/crews-band-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="941" fetchpriority="high" />
     <span class="cr-o cr-o1" aria-hidden="true"></span><span class="cr-o cr-o2" aria-hidden="true"></span>
-    <div class="wrap cr-hero">
+    <div class="wrap cr-hero lr-band-in">
       <div>
-        <nav class="crumb" aria-label="Breadcrumb"><a href={`${base}community/`}>Community</a><span aria-hidden="true">/</span><span aria-current="page">Crews</span></nav>
+        <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}community/`}>Community</a><span aria-hidden="true">/</span><span aria-current="page">Crews</span></nav>
         <p class="eyebrow">GTA VI Racing Community</p>
-        <h1 class="display">Crews</h1>
-        <p class="lede"><span class="lg">Racing crews and car meet communities from across the GTA VI scene. Find a crew that drives the way you do and request an invite.</span><span class="sm">Racing crews and car meet communities. Find a crew that drives the way you do.</span></p>
+        <h1 class="display lr-t1">Crews</h1>
+        <p class="lr-lede"><span class="lg">Racing crews and car meet communities from across the GTA VI scene. Find a crew that drives the way you do and request an invite.</span><span class="sm">Racing crews and car meet communities. Find a crew that drives the way you do.</span></p>
       </div>
       <div class="cr-tile" id="cr-tile-guest">
         <div class="eb"><Fragment set:html={users} />Lead a crew</div>
@@ -85,13 +85,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
   .cr-bg { object-fit: cover; object-position: 45% 60%; }
   .cr-o1 { background: linear-gradient(115deg, rgba(242,75,157,.75) 0%, rgba(242,75,157,.2) 42%, rgba(255,122,61,.2) 58%, rgba(255,122,61,.75) 100%); mix-blend-mode: color; }
   .cr-o2 { background: linear-gradient(90deg, rgba(11,11,20,.92) 0%, rgba(11,11,20,.62) 55%, rgba(11,11,20,.45) 100%); }
-  .cr-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; padding-top: 40px; padding-bottom: 40px; }
-  .crumb { display: flex; gap: 8px; font-size: 14px; color: var(--lr-muted); margin-bottom: 18px; }
-  .crumb a { color: var(--lr-muted); text-decoration: none; }
-  .crumb a:hover { color: var(--lr-text); }
-  .crumb [aria-current] { color: var(--lr-text); }
-  .cr-hero h1 { margin: 12px 0 0; font-size: 64px; line-height: .95; }
-  .lede { margin: 16px 0 0; max-width: 600px; font-size: 17px; line-height: 1.55; color: #EDEBF2; text-shadow: 0 1px 12px rgba(11,11,20,.9); }
+  .cr-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; }
   .sm { display: none; }
   .cr-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
   .cr-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
@@ -141,11 +135,9 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
     .cr-adv { flex-wrap: wrap; }
   }
   @media (max-width: 860px) {
-    .cr-hero { grid-template-columns: 1fr; gap: 18px; padding-top: 24px; padding-bottom: 24px; }
-    .cr-hero h1 { font-size: 44px; }
-    .lede { font-size: 16px; }
-    .lede .lg, .mine-f .lg { display: none; }
-    .lede .sm, .mine-f .sm { display: inline; }
+    .cr-hero { grid-template-columns: 1fr; gap: 18px; }
+    .lr-lede .lg, .mine-f .lg { display: none; }
+    .lr-lede .sm, .mine-f .sm { display: inline; }
     #cr-tile-guest { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 4px 14px; padding: 14px 16px; }
     #cr-tile-guest .t { grid-column: 1; margin: 0; font-family: var(--gh-font-body); font-size: 16px; font-weight: 700; text-transform: none; }
     #cr-tile-guest .btn { grid-column: 2; grid-row: 1 / span 2; }

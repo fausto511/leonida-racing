@@ -102,14 +102,14 @@ const more = isClass
       ? <img class="tb-bg" src={`${bandSrc}-1280.webp`} srcset={`${bandSrc}-640.webp 640w, ${bandSrc}-1280.webp 1280w, ${bandSrc}-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="1080" fetchpriority="high" />
       : <img class="tb-bg tb-ph" src={`${base}images/garage/garage-hero-placeholder-1080.webp`} alt="" width="1080" height="608" fetchpriority="high" />}
     <span class="tb-t tb-t1" aria-hidden="true"></span><span class="tb-t tb-t2" aria-hidden="true"></span>
-    <div class="wrap tb-inner">
+    <div class="wrap tb-inner lr-band-in">
       <div class="tb-copy">
-        <nav class="tb-crumbs" aria-label="Breadcrumb">
+        <nav class="lr-crumb" aria-label="Breadcrumb">
           <a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><a href={`${base}cars/${isClass ? 'classes' : 'manufacturers'}/`}>{isClass ? 'Classes' : 'Manufacturers'}</a><span aria-hidden="true">/</span><span aria-current="page">{page.name}</span>
         </nav>
         <p class="eyebrow">{isClass ? 'GTA VI Vehicle Class' : 'GTA VI Manufacturer'}</p>
-        <h1 class="display tb-title">{!isClass && <img class="tb-logo" src={`${base}images/logos/${page.slug}-gta-6-logo.webp`} alt="" width="56" height="56" />}{heading}</h1>
-        <div class="tb-intro"><p>{copy?.band ?? page.intro[0]}</p></div>
+        <h1 class="display lr-t2 tb-title">{!isClass && <img class="tb-logo" src={`${base}images/logos/${page.slug}-gta-6-logo.webp`} alt="" width="56" height="56" />}{heading}</h1>
+        <p class="lr-lede">{copy?.band ?? page.intro[0]}</p>
       </div>
       <div class="glance">
         <p class="glance-eb">{page.name} at a glance</p>
@@ -197,16 +197,10 @@ const more = isClass
   .tb-ph { filter: grayscale(.5); }
   .tb-t1 { background: linear-gradient(90deg, rgba(11,11,20,.96) 0%, rgba(11,11,20,.86) 50%, rgba(11,11,20,.55) 100%); }
   .tb-t2 { background: linear-gradient(115deg, rgba(242,75,157,.18) 0%, rgba(242,75,157,0) 45%, rgba(255,122,61,0) 60%, rgba(255,122,61,.18) 100%); }
-  .tb-inner { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; padding-top: 32px; padding-bottom: 36px; }
-  .tb-copy { display: flex; flex-direction: column; gap: 8px; min-width: 0; max-width: 700px; }
-  .tb-crumbs { display: flex; flex-wrap: wrap; gap: 10px; font-size: 14px; color: var(--lr-soft); }
-  .tb-crumbs a { color: var(--lr-soft); text-decoration: none; }
-  .tb-crumbs a:hover { color: var(--lr-text); }
-  .tb-crumbs [aria-current] { color: var(--lr-text); font-weight: 500; }
-  .tb-copy .eyebrow { margin: 12px 0 0; font-size: 12px; font-weight: 600; }
-  .tb-title { display: flex; align-items: center; gap: 16px; margin: 0; font-size: clamp(40px, 4.2vw, 52px); }
+  .tb-inner { display: flex; align-items: center; justify-content: space-between; gap: 48px; }
+  .tb-copy { min-width: 0; max-width: 700px; }
+  .tb-title { display: flex; align-items: center; gap: 16px; }
   .tb-logo { width: 56px; height: 56px; flex: none; object-fit: contain; filter: brightness(0) invert(1); }
-  .tb-intro p { margin: 10px 0 0; font-size: 16px; line-height: 1.6; color: #EDEBF2; }
 
   .glance { flex: none; width: 380px; margin-top: 30px; padding: 18px 18px 14px; border: 1px solid rgba(200,200,222,.2); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
   .glance-eb { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
@@ -255,11 +249,8 @@ const more = isClass
     .tmore-grid { grid-template-columns: 1fr; gap: 12px; }
   }
   @media (max-width: 760px) {
-    .tb-inner { padding-top: 18px; padding-bottom: 20px; }
-    .tb-crumbs { font-size: 13px; gap: 6px; }
-    .tb-title { font-size: clamp(32px, 9.5vw, 44px); gap: 10px; }
+    .tb-title { gap: 10px; }
     .tb-logo { width: 36px; height: 36px; }
-    .tb-intro p { font-size: 15px; }
     .gl-row { font-size: 14px; }
     .tchips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-top: 16px; }
     .tchip { height: 36px; font-size: 14px; }

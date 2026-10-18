@@ -56,13 +56,13 @@ const jsonLd = [{
   <section class="tb">
     <img class="tb-bg" src={`${base}images/garage/cars-band-1280.webp`} srcset={`${base}images/garage/cars-band-640.webp 640w, ${base}images/garage/cars-band-1280.webp 1280w, ${base}images/garage/cars-band-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="600" fetchpriority="high" />
     <span class="tb-t tb-t1" aria-hidden="true"></span><span class="tb-t tb-t2" aria-hidden="true"></span>
-    <div class="wrap tb-inner">
-      <nav class="tb-crumbs" aria-label="Breadcrumb">
+    <div class="wrap tb-inner lr-band-in">
+      <nav class="lr-crumb" aria-label="Breadcrumb">
         <a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><span aria-current="page">{kind === 'class' ? 'Classes' : 'Manufacturers'}</span>
       </nav>
       <p class="eyebrow">GTA VI Vehicle Database</p>
-      <h1 class="display tb-title">{heading}</h1>
-      <p class="tb-intro">{intro}</p>
+      <h1 class="display lr-t1">{heading}</h1>
+      <p class="lr-lede">{intro}</p>
     </div>
   </section>
 
@@ -108,14 +108,7 @@ const jsonLd = [{
   .tb-bg { object-fit: cover; object-position: 50% 60%; }
   .tb-t1 { background: linear-gradient(90deg, rgba(11,11,20,.96) 0%, rgba(11,11,20,.86) 50%, rgba(11,11,20,.55) 100%); }
   .tb-t2 { background: linear-gradient(115deg, rgba(242,75,157,.18) 0%, rgba(242,75,157,0) 45%, rgba(255,122,61,0) 60%, rgba(255,122,61,.18) 100%); }
-  .tb-inner { position: relative; display: flex; flex-direction: column; gap: 8px; padding-top: 32px; padding-bottom: 36px; }
-  .tb-crumbs { display: flex; flex-wrap: wrap; gap: 10px; font-size: 14px; color: var(--lr-soft); }
-  .tb-crumbs a { color: var(--lr-soft); text-decoration: none; }
-  .tb-crumbs a:hover { color: var(--lr-text); }
-  .tb-crumbs [aria-current] { color: var(--lr-text); font-weight: 500; }
-  .tb-inner .eyebrow { margin: 12px 0 0; font-size: 12px; font-weight: 600; }
-  .tb-title { margin: 0; font-size: clamp(40px, 5vw, 64px); }
-  .tb-intro { max-width: 700px; margin: 10px 0 0; font-size: 16px; line-height: 1.6; color: #EDEBF2; }
+  .tb-inner { display: flex; flex-direction: column; justify-content: center; }
 
   .ti-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; padding-top: 32px; }
   .ti-card { display: flex; flex-direction: column; background: var(--lr-card); border: 1px solid var(--lr-line-strong); border-radius: 8px; overflow: hidden; color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
@@ -142,10 +135,6 @@ const jsonLd = [{
   @media (max-width: 1100px) { .ti-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (max-width: 860px) { .ti-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; } }
   @media (max-width: 760px) {
-    .tb-inner { padding-top: 18px; padding-bottom: 20px; }
-    .tb-crumbs { font-size: 13px; gap: 6px; }
-    .tb-title { font-size: clamp(32px, 9.5vw, 44px); }
-    .tb-intro { font-size: 15px; }
     .ti-grid { padding-top: 20px; }
     .ti-name { font-size: 17px; }
     .ti-insp, .ti-models, .ti-teaser { font-size: 13px; }

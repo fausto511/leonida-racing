@@ -40,11 +40,11 @@ const dash = '<span class="no" aria-label="No">–</span>';
       <img class="db-bg" src={`${img}-1672.jpg`} alt="" width="1672" height="940" fetchpriority="high" />
     </picture>
     <span class="db-t db-t1" aria-hidden="true"></span><span class="db-t db-t2" aria-hidden="true"></span>
-    <div class="wrap db-inner">
+    <div class="wrap db-inner lr-band-in">
       <div class="db-copy">
         <p class="eyebrow">{P.eyebrow}</p>
-        <h1 class="display db-title">{P.h1}</h1>
-        <p class="db-intro">{P.intro}</p>
+        <h1 class="display lr-t2">{P.h1}</h1>
+        <p class="lr-lede">{P.intro}</p>
         <div class="db-act">
           <a class="btn btn-p" href={DISCORD_INVITE_URL} target="_blank" rel="noopener">
             <svg class="dico" viewBox="0 0 24 24" aria-hidden="true"><path d={DISCORD_ICON_PATH} /></svg>
@@ -199,11 +199,8 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .db-bg { object-fit: cover; object-position: 60% 45%; }
   .db-t1 { background: linear-gradient(90deg, rgba(11,11,20,.97) 0%, rgba(11,11,20,.86) 50%, rgba(11,11,20,.5) 100%); }
   .db-t2 { background: linear-gradient(115deg, rgba(242,75,157,.2) 0%, rgba(242,75,157,0) 45%, rgba(255,122,61,0) 60%, rgba(255,122,61,.2) 100%); }
-  .db-inner { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; padding-top: 44px; padding-bottom: 44px; }
-  .db-copy { display: flex; flex-direction: column; gap: 8px; min-width: 0; max-width: 680px; }
-  .db-copy .eyebrow { margin: 0; font-size: 12px; font-weight: 600; color: var(--lr-orange); }
-  .db-title { margin: 0; font-size: clamp(40px, 4.2vw, 56px); }
-  .db-intro { margin: 10px 0 0; font-size: 17px; line-height: 1.6; color: #EDEBF2; }
+  .db-inner { display: flex; align-items: center; justify-content: space-between; gap: 48px; }
+  .db-copy { min-width: 0; max-width: 680px; }
   .db-act { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-top: 18px; }
   .dico { width: 20px; height: 20px; fill: currentColor; flex: none; }
   .db-note { font-size: 13px; color: var(--lr-soft); }
@@ -319,9 +316,6 @@ const dash = '<span class="no" aria-label="No">–</span>';
     .mock { max-width: 520px; }
   }
   @media (max-width: 760px) {
-    .db-inner { padding-top: 24px; padding-bottom: 26px; }
-    .db-title { font-size: clamp(32px, 9.5vw, 44px); }
-    .db-intro { font-size: 15px; }
     .db-act .btn { width: 100%; }
     .gl-row { font-size: 14px; }
     .dsec { padding-top: 40px; }

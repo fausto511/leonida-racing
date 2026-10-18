@@ -238,3 +238,27 @@ main:focus { outline: none; }
 .lr-bubble b { font-weight: 700; }
 .lr-bubble a { color: #14141F; text-decoration: underline; }
 .lr-bubble .btn { margin-top: 10px; display: flex; width: 100%; }
+
+/* ---- Image band system (DEC-0139) ------------------------------------------
+   Container: .lr-band-in (Standard, min 340px) / + .is-compact (min 220px).
+   Layout inside (flex/grid, tile) stays with the page; this only fixes height,
+   padding and the text block: .lr-crumb → .eyebrow → .lr-t1|.lr-t2 → .lr-lede.
+   Special pages (home, Time Attack/Gellhorn, vehicle, compare) don't use it. */
+.lr-band-in { position: relative; box-sizing: border-box; min-height: 340px; padding-top: 40px; padding-bottom: 40px; }
+.lr-band-in.is-compact { min-height: 220px; padding-bottom: 32px; }
+.lr-crumb { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; font-size: 14px; color: var(--lr-muted); }
+.lr-crumb a { color: var(--lr-muted); text-decoration: none; }
+.lr-crumb a:hover { color: var(--lr-text); }
+.lr-crumb [aria-current] { color: var(--lr-text); }
+.lr-band-in .eyebrow { margin: 0; }
+.lr-t1, .lr-t2 { margin: 12px 0 0; line-height: .95; }
+.lr-t1 { font-size: 64px; }
+.lr-t2 { font-size: 52px; }
+.lr-lede { margin: 16px 0 0; max-width: 600px; font-size: 17px; line-height: 1.55; color: #EDEBF2; text-shadow: 0 1px 12px rgba(11,11,20,.9); }
+@media (max-width: 860px) {
+  .lr-band-in, .lr-band-in.is-compact { min-height: 0; padding-top: 24px; padding-bottom: 24px; }
+  .lr-crumb { font-size: 13px; margin-bottom: 14px; }
+  .lr-t1 { font-size: 40px; }
+  .lr-t2 { font-size: 34px; }
+  .lr-lede { margin-top: 14px; font-size: 16px; }
+}

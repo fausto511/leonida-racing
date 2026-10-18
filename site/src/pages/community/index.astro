@@ -34,11 +34,11 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   <section class="cm-band">
     <img class="cm-bg" src={`${base}images/hub/community-band-1080.webp`} srcset={`${base}images/hub/community-band-640.webp 640w, ${base}images/hub/community-band-1080.webp 1080w, ${base}images/hub/community-band-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="941" fetchpriority="high" />
     <span class="cm-o cm-o1" aria-hidden="true"></span><span class="cm-o cm-o2" aria-hidden="true"></span>
-    <div class="wrap cm-hero">
+    <div class="wrap cm-hero lr-band-in">
       <div>
         <p class="eyebrow">GTA VI Racing Community</p>
-        <h1 class="display">Community</h1>
-        <p class="lede">Races, car meets and crews. Find your next event, sign up in one click, or join a crew that drives the way you do.</p>
+        <h1 class="display lr-t1">Community</h1>
+        <p class="lr-lede">Races, car meets and crews. Find your next event, sign up in one click, or join a crew that drives the way you do.</p>
       </div>
       <div class="cm-tile" id="cm-tile" hidden>
         <div class="eb"><Fragment set:html={cal} />Your next event</div>
@@ -115,9 +115,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   .cm-bg { object-fit: cover; object-position: 50% 50%; }
   .cm-o1 { background: linear-gradient(115deg, rgba(242,75,157,.75) 0%, rgba(242,75,157,.2) 42%, rgba(255,122,61,.2) 58%, rgba(255,122,61,.75) 100%); mix-blend-mode: color; }
   .cm-o2 { background: linear-gradient(90deg, rgba(11,11,20,.92) 0%, rgba(11,11,20,.6) 55%, rgba(11,11,20,.4) 100%); }
-  .cm-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; min-height: 300px; padding-top: 56px; padding-bottom: 44px; }
-  .cm-hero h1 { margin: 12px 0 0; font-size: 64px; line-height: .95; }
-  .lede { margin: 16px 0 0; max-width: 600px; font-size: 17px; line-height: 1.55; color: #EDEBF2; text-shadow: 0 1px 12px rgba(11,11,20,.9); }
+  .cm-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; }
   .cm-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
   .cm-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .cm-next { display: flex; align-items: center; gap: 14px; margin-top: 14px; padding: 12px 14px; border-radius: 6px; border: 1px solid rgba(255,149,90,.3); background: rgba(255,149,90,.06); color: var(--lr-text); text-decoration: none; }
@@ -171,10 +169,8 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
     .cm-hero { grid-template-columns: minmax(0,1fr) 340px; gap: 28px; }
   }
   @media (max-width: 860px) {
-    .cm-hero { grid-template-columns: 1fr; gap: 22px; min-height: 0; padding-top: 32px; padding-bottom: 28px; }
-    .cm-hero h1 { font-size: 44px; }
-    .lede { font-size: 16px; }
-    .cm-entries { grid-template-columns: 1fr; gap: 12px; padding-top: 20px; }
+    .cm-hero { grid-template-columns: 1fr; gap: 22px; }
+      .cm-entries { grid-template-columns: 1fr; gap: 12px; padding-top: 20px; }
     .cm-entry { flex-direction: row; align-items: stretch; }
     .cm-entry img { width: 112px; height: auto; min-height: 84px; flex: none; }
     .cm-entry-b { position: relative; gap: 4px; padding: 14px 44px 14px 16px; justify-content: center; }

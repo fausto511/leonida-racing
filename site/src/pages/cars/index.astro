@@ -20,11 +20,11 @@ const N = vehicleOptions.length;
   <section class="band">
     <img class="band-bg" src={`${base}images/garage/cars-band-1280.webp`} srcset={`${base}images/garage/cars-band-640.webp 640w, ${base}images/garage/cars-band-1280.webp 1280w, ${base}images/garage/cars-band-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="1072" fetchpriority="high" />
     <span class="band-t band-t1" aria-hidden="true"></span><span class="band-t band-t2" aria-hidden="true"></span><span class="band-t band-t3" aria-hidden="true"></span><span class="band-t band-t4" aria-hidden="true"></span>
-    <div class="wrap band-inner">
+    <div class="wrap band-inner lr-band-in is-compact">
       <div class="band-copy">
         <p class="eyebrow">GTA VI Vehicle Database</p>
-        <h1 class="display band-title">Cars</h1>
-        <p class="band-sub">Specs, real-life inspirations and Gellhorn times for every car in GTA VI. Compare them side by side and track the ones you own.</p>
+        <h1 class="display lr-t2">Cars</h1>
+        <p class="lr-lede">Specs, real-life inspirations and Gellhorn times for every car in GTA VI. Compare them side by side and track the ones you own.</p>
       </div>
       <a class="garage-tile" id="garage-tile" href={`${base}account/garage/`}>
         <span class="gt-top"><span class="gt-eb">My Garage</span><span class="arrow gt-cta" id="gt-cta">Log in to start →</span></span>
@@ -61,11 +61,8 @@ const N = vehicleOptions.length;
   .band-t2 { background: linear-gradient(115deg, rgba(242,75,157,.22) 0%, rgba(242,75,157,0) 42%, rgba(255,122,61,0) 58%, rgba(255,122,61,.22) 100%); }
   .band-t3 { background: linear-gradient(90deg, rgba(11,11,20,.9) 0%, rgba(11,11,20,.65) 45%, rgba(11,11,20,.25) 100%); }
   .band-t4 { background: linear-gradient(180deg, rgba(11,11,20,.1) 0%, rgba(11,11,20,.7) 100%); }
-  .band-inner { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; padding-top: 44px; padding-bottom: 36px; }
-  .band-copy { display: flex; flex-direction: column; gap: 8px; }
-  .band-copy .eyebrow { margin: 0; font-size: 12px; font-weight: 600; }
-  .band-title { margin: 0; font-size: 56px; }
-  .band-sub { margin: 0; max-width: 640px; font-size: 16px; line-height: 1.5; color: #EDEBF2; text-shadow: 0 1px 12px rgba(11,11,20,.9); }
+  .band-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+  .band-copy { min-width: 0; }
   .garage-tile { flex: none; display: flex; flex-direction: column; gap: 8px; min-width: 260px; padding: 14px 16px; border: 1px solid rgba(200,200,222,.18); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
   .garage-tile:hover { border-color: var(--lr-orange); }
   .gt-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
@@ -86,9 +83,7 @@ const N = vehicleOptions.length;
   .ls a:hover { color: var(--lr-orange); }
 
   @media (max-width: 760px) {
-    .band-inner { flex-direction: column; align-items: stretch; gap: 16px; padding-top: 26px; padding-bottom: 18px; }
-    .band-title { font-size: 40px; }
-    .band-sub { font-size: 14px; }
+    .band-inner { flex-direction: column; align-items: stretch; gap: 16px; }
     .garage-tile { min-width: 0; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding: 10px 12px; }
     .gt-top { order: 1; flex: 1; }
     .gt-val { order: 0; font-size: 18px; }
