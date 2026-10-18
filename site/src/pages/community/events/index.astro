@@ -34,7 +34,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
 >
   <section class="ec-band">
     <img class="ec-bg" src={`${base}images/hub/events-band-1080.webp`} srcset={`${base}images/hub/events-band-640.webp 640w, ${base}images/hub/events-band-1080.webp 1080w, ${base}images/hub/events-band-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="941" fetchpriority="high" />
-    <span class="ec-o ec-o1" aria-hidden="true"></span><span class="ec-o ec-o2" aria-hidden="true"></span>
+    <span class="lr-shade" aria-hidden="true"></span>
     <div class="wrap ec-hero lr-band-in">
       <div>
         <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}community/`}>Community</a><span aria-hidden="true">/</span><span aria-current="page">Events</span></nav>
@@ -89,8 +89,6 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   .ec-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
   .ec-bg, .ec-o { position: absolute; inset: 0; width: 100%; height: 100%; }
   .ec-bg { object-fit: cover; object-position: 50% 55%; }
-  .ec-o1 { background: linear-gradient(115deg, rgba(242,75,157,.75) 0%, rgba(242,75,157,.2) 42%, rgba(255,122,61,.2) 58%, rgba(255,122,61,.75) 100%); mix-blend-mode: color; }
-  .ec-o2 { background: linear-gradient(90deg, rgba(11,11,20,.92) 0%, rgba(11,11,20,.62) 55%, rgba(11,11,20,.45) 100%); }
   .ec-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; }
   .ec-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
   .ec-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }

@@ -32,7 +32,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
 <Base title="Page Not Found" description="This link may be out of date, or there may be a typo in the address." noindex>
   <section class="nf">
     <img class="nf-bg" src={`${base}images/guide/street-race-1280.webp`} srcset={`${base}images/guide/street-race-640.webp 640w, ${base}images/guide/street-race-1280.webp 1280w`} sizes="100vw" alt="" width="1280" height="720" fetchpriority="high" />
-    <span class="nf-o nf-o1" aria-hidden="true"></span><span class="nf-o nf-o2" aria-hidden="true"></span>
+    <span class="lr-shade" aria-hidden="true"></span>
     <div class="wrap nf-in lr-band-in">
       <div class="nf-tl"><span class="nf-code" aria-hidden="true">404</span><h1 class="display lr-t2">Wrong turn</h1></div>
       <p class="lr-lede nf-s">This link may be out of date, or there may be a typo in the address. Search for a car or pick up the racing line below.</p>
@@ -170,8 +170,6 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .nf { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.16); }
   .nf-bg, .nf-o { position: absolute; inset: 0; width: 100%; height: 100%; }
   .nf-bg { object-fit: cover; object-position: 50% 62%; }
-  .nf-o1 { background: linear-gradient(115deg, rgba(242,75,157,.75) 0%, rgba(242,75,157,.2) 42%, rgba(255,122,61,.2) 58%, rgba(255,122,61,.75) 100%); mix-blend-mode: color; }
-  .nf-o2 { background: linear-gradient(90deg, rgba(11,11,20,.94) 0%, rgba(11,11,20,.7) 50%, rgba(11,11,20,.35) 100%); }
   .nf-in { display: flex; flex-direction: column; justify-content: center; }
   .nf-tl { display: flex; align-items: flex-end; gap: 22px; flex-wrap: wrap; }
   .nf-code { font-family: 'Archivo', sans-serif; font-variation-settings: 'wdth' 112; font-weight: 800; font-size: 96px; line-height: .8; letter-spacing: -.02em; background: linear-gradient(115deg, #F24B9D, #FF955A); -webkit-background-clip: text; background-clip: text; color: transparent; }

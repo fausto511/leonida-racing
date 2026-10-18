@@ -33,7 +33,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
 >
   <section class="cm-band">
     <img class="cm-bg" src={`${base}images/hub/community-band-1080.webp`} srcset={`${base}images/hub/community-band-640.webp 640w, ${base}images/hub/community-band-1080.webp 1080w, ${base}images/hub/community-band-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="941" fetchpriority="high" />
-    <span class="cm-o cm-o1" aria-hidden="true"></span><span class="cm-o cm-o2" aria-hidden="true"></span>
+    <span class="lr-shade" aria-hidden="true"></span>
     <div class="wrap cm-hero lr-band-in">
       <div>
         <p class="eyebrow">GTA VI Racing Community</p>
@@ -113,8 +113,6 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   .cm-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
   .cm-bg, .cm-o { position: absolute; inset: 0; width: 100%; height: 100%; }
   .cm-bg { object-fit: cover; object-position: 50% 50%; }
-  .cm-o1 { background: linear-gradient(115deg, rgba(242,75,157,.75) 0%, rgba(242,75,157,.2) 42%, rgba(255,122,61,.2) 58%, rgba(255,122,61,.75) 100%); mix-blend-mode: color; }
-  .cm-o2 { background: linear-gradient(90deg, rgba(11,11,20,.92) 0%, rgba(11,11,20,.6) 55%, rgba(11,11,20,.4) 100%); }
   .cm-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; }
   .cm-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
   .cm-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }

@@ -101,7 +101,7 @@ const more = isClass
     {bandSrc
       ? <img class="tb-bg" src={`${bandSrc}-1280.webp`} srcset={`${bandSrc}-640.webp 640w, ${bandSrc}-1280.webp 1280w, ${bandSrc}-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="1080" fetchpriority="high" />
       : <img class="tb-bg tb-ph" src={`${base}images/garage/garage-hero-placeholder-1080.webp`} alt="" width="1080" height="608" fetchpriority="high" />}
-    <span class="tb-t tb-t1" aria-hidden="true"></span><span class="tb-t tb-t2" aria-hidden="true"></span>
+    <span class="lr-shade is-strong" aria-hidden="true"></span>
     <div class="wrap tb-inner lr-band-in">
       <div class="tb-copy">
         <nav class="lr-crumb" aria-label="Breadcrumb">
@@ -195,8 +195,6 @@ const more = isClass
   .tb-bg, .tb-t { position: absolute; inset: 0; width: 100%; height: 100%; }
   .tb-bg { object-fit: cover; object-position: 50% 55%; }
   .tb-ph { filter: grayscale(.5); }
-  .tb-t1 { background: linear-gradient(90deg, rgba(11,11,20,.96) 0%, rgba(11,11,20,.86) 50%, rgba(11,11,20,.55) 100%); }
-  .tb-t2 { background: linear-gradient(115deg, rgba(242,75,157,.18) 0%, rgba(242,75,157,0) 45%, rgba(255,122,61,0) 60%, rgba(255,122,61,.18) 100%); }
   .tb-inner { display: flex; align-items: center; justify-content: space-between; gap: 48px; }
   .tb-copy { min-width: 0; max-width: 700px; }
   .tb-title { display: flex; align-items: center; gap: 16px; }

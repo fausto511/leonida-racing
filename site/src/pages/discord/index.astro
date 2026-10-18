@@ -39,7 +39,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
       <source type="image/webp" srcset={`${img}-640.webp 640w, ${img}-1080.webp 1080w, ${img}-1672.webp 1672w`} sizes="100vw" />
       <img class="db-bg" src={`${img}-1672.jpg`} alt="" width="1672" height="940" fetchpriority="high" />
     </picture>
-    <span class="db-t db-t1" aria-hidden="true"></span><span class="db-t db-t2" aria-hidden="true"></span>
+    <span class="lr-shade" aria-hidden="true"></span>
     <div class="wrap db-inner lr-band-in">
       <div class="db-copy">
         <p class="eyebrow">{P.eyebrow}</p>
@@ -197,8 +197,6 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .db { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
   .db picture, .db-bg, .db-t { position: absolute; inset: 0; width: 100%; height: 100%; }
   .db-bg { object-fit: cover; object-position: 60% 45%; }
-  .db-t1 { background: linear-gradient(90deg, rgba(11,11,20,.97) 0%, rgba(11,11,20,.86) 50%, rgba(11,11,20,.5) 100%); }
-  .db-t2 { background: linear-gradient(115deg, rgba(242,75,157,.2) 0%, rgba(242,75,157,0) 45%, rgba(255,122,61,0) 60%, rgba(255,122,61,.2) 100%); }
   .db-inner { display: flex; align-items: center; justify-content: space-between; gap: 48px; }
   .db-copy { min-width: 0; max-width: 680px; }
   .db-act { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-top: 18px; }

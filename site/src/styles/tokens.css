@@ -262,3 +262,18 @@ main:focus { outline: none; }
   .lr-t2 { font-size: 34px; }
   .lr-lede { margin-top: 14px; font-size: 16px; }
 }
+
+/* Band shade (DEC-0139, Fausto 18.10.): no pink/orange tint on the standard bands
+   (that stays on home + Time Attack/Gellhorn). Only darken towards the text side
+   in the page colour (#0B0B14) and a little at the bottom so tiles stand out.
+   .is-strong: pages where the photo matters less (class/manufacturer pages). */
+.lr-shade { position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(11,11,20,0) 50%, rgba(11,11,20,.7) 100%),
+    linear-gradient(90deg, rgba(11,11,20,.92) 0%, rgba(11,11,20,.7) 42%, rgba(11,11,20,.3) 100%); }
+.lr-shade.is-strong { background:
+    linear-gradient(180deg, rgba(11,11,20,0) 50%, rgba(11,11,20,.6) 100%),
+    linear-gradient(90deg, rgba(11,11,20,.96) 0%, rgba(11,11,20,.86) 50%, rgba(11,11,20,.55) 100%); }
+@media (max-width: 860px) {
+  .lr-shade, .lr-shade.is-strong { background: linear-gradient(180deg, rgba(11,11,20,.6) 0%, rgba(11,11,20,.78) 55%, rgba(11,11,20,.92) 100%); }
+}
