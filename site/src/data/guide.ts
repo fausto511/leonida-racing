@@ -9,6 +9,7 @@
 // one label set, Famitsu ownership facts, Garage scope, ~200 vehicle card.
 // Internal links FROM the Guide: Claude decides (Fausto, 2026-10-03, DEC-0095).
 // Links TO the Guide on other pages: Codex proposes, Fausto approves.
+// Redesign 18.10.2026: "The Garage" -> "Cars", "The Hub" -> "Community" in links/copy (Claude placeholders, Codex review, DEC-0088).
 // Never add leak information here. Visible text: "GTA VI"; meta: "GTA 6".
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
@@ -16,6 +17,24 @@ export const GUIDE_UPDATED = '2026-10-16';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
+/** Source card parts: label = "Publisher — Title". Origin pill derived from the publisher (Claude, 18.10.2026, DEC-0140):
+ *  Rockstar's own channels = official, fan sites/databases = community, everything else = press. */
+export type SourceKind = 'official' | 'press' | 'community';
+const OFFICIAL = ['Rockstar Games', 'Rockstar Newswire', 'Rockstar Support'];
+const COMMUNITY = ['GTABase', 'RockstarINTEL'];
+export function sourceParts(src: GuideSource): { publisher: string; title: string; kind: SourceKind } {
+  const i = src.label.indexOf(' — ');
+  const publisher = i > 0 ? src.label.slice(0, i) : src.label;
+  const title = i > 0 ? src.label.slice(i + 3) : src.label;
+  const kind: SourceKind = OFFICIAL.includes(publisher) ? 'official' : COMMUNITY.includes(publisher) ? 'community' : 'press';
+  return { publisher, title, kind };
+}
+/** Status pill colour per evidence level (DEC-0140): Rockstar-sourced = lime, identification/report = orange, open = grey. */
+export function statusTone(status: string): 'ok' | 'mid' | 'open' {
+  if (/^Not Confirmed/i.test(status)) return 'open';
+  if (/Community|Reported/i.test(status)) return 'mid';
+  return 'ok';
+}
 /** Images in public/images/guide/<key>-<width>.webp (Fausto's selection, Visual/Guide, 2026-10-03).
  *  Cars only, no boats or aircraft (Fausto). Alt texts/captions: Codex 2026-10-03, approved; Rideout alt names
  *  the Albany Manana (Fausto, 2026-10-04; Codex had 'convertible'). */
@@ -77,12 +96,12 @@ export const guideSections: GuideSection[] = [
     title: 'Vehicles in GTA VI',
     status: 'Shown by Rockstar',
     paragraphs: [
-      `GTA VI brings back familiar in-game manufacturers and models while adding vehicles created specifically for Leonida. Rockstar has named only part of the lineup, while many vehicles shown in official trailers and screenshots are identified by their design and badges. Those are community identifications, not Rockstar-confirmed names. <a href="{base}cars/">The Garage</a> focuses on racing-relevant cars and is not a complete list of every vehicle shown for GTA VI.`,
+      `GTA VI brings back familiar in-game manufacturers and models while adding vehicles created specifically for Leonida. Rockstar has named only part of the lineup, while many vehicles shown in official trailers and screenshots are identified by their design and badges. Those are community identifications, not Rockstar-confirmed names. Our <a href="{base}cars/">Cars section</a> focuses on racing-relevant cars and is not a complete list of every vehicle shown for GTA VI.`,
       `Official footage also shows motorcycles, watercraft, and aircraft, but this guide focuses on cars and racing. A car appearing on screen does not by itself establish how it can be owned, stored, or customized.`,
-      `Open The Garage for individual models, <a href="{base}cars/classes/">GTA classes</a>, <a href="{base}cars/manufacturers/">manufacturers</a>, first appearances, release information, and real-life inspirations. Prices and tested performance data will be added when they can be verified in the released game.`,
+      `Open Cars for individual models, <a href="{base}cars/classes/">GTA classes</a>, <a href="{base}cars/manufacturers/">manufacturers</a>, first appearances, release information, and real-life inspirations. Prices and tested performance data will be added when they can be verified in the released game.`,
       `Rockstar released the Launch Trailer on October 15, 2026. It joins the official footage used to document vehicles, while model identifications remain separate from Rockstar-confirmed names.`,
     ],
-    cta: { label: 'Explore The Garage', href: 'cars/' },
+    cta: { label: 'Explore Cars', href: 'cars/' },
     sources: [
       { label: 'Rockstar Games — GTA VI Launch Trailer', url: LAUNCH, note: 'October 15, 2026: new official trailer; not a complete vehicle list.' },
       { label: 'Rockstar Games — GTA VI Media', url: R_MEDIA, note: 'official trailers and media library.' },
@@ -279,9 +298,9 @@ export const guideSections: GuideSection[] = [
 
 /** "How Leonida Racing Covers ..." — The Lab line removed until the section exists. */
 export const guideCoverage: { name: string; text: string }[] = [
-  { name: 'The Garage', text: 'is the vehicle database: models, classes, manufacturers, real-life inspirations, release information, and available specs.' },
+  { name: 'Cars', text: 'is the vehicle database: models, classes, manufacturers, real-life inspirations, release information, and available specs.' },
   { name: 'Time Attack', text: 'puts drivers and cars on the same course, with proof-based lap submissions and leaderboards at Gellhorn.' },
-  { name: 'The Hub', text: 'connects the scene through races, league rounds, playlists, car meets, crews, hosts, and creators.' },
+  { name: 'Community', text: 'connects the scene through races, league rounds, playlists, car meets, crews, hosts, and creators.' },
   { name: 'The Guide', text: 'explains what is known, shows where the information came from, and keeps confirmed facts separate from strong identifications and open questions.' },
 ];
 
@@ -291,7 +310,7 @@ export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'Can changing cars or clothes help you escape the police in GTA VI?', a: 'Yes. In Nelson’s demonstration, switching to a car the police do not recognize lowers their perception of you. He also says buying and wearing a new outfit removes his current heat. Glasses, a cap, or a haircut alone do not address clothing the police already recognize.' },
   { q: 'Is GranForma replacing Pegassi for the Zorrusso in GTA VI?', a: 'Reports identify GranForma lettering on a Zorrusso-like car in the Bloomberg screenshots. Whether it denotes a manufacturer, customizer or variant remains unconfirmed; the image does not establish a wider Pegassi replacement.' },
   { q: 'Can I call my personal vehicle in GTA VI?', a: 'Nelson says personal vehicles can be called and carry spare outfits and purchased weapons. Delivery conditions remain unspecified.' },
-  { q: 'Which cars has Rockstar confirmed for GTA VI?', a: 'Rockstar has named cars including the ’95 Grotti Cheetah and ’67 Vapid Dominator Buggy. More cars appear in official footage without being named; their model names are often community identifications. Rockstar has not published a complete official lineup. The Garage focuses on racing-relevant cars.' },
+  { q: 'Which cars has Rockstar confirmed for GTA VI?', a: 'Rockstar has named cars including the ’95 Grotti Cheetah and ’67 Vapid Dominator Buggy. More cars appear in official footage without being named; their model names are often community identifications. Rockstar has not published a complete official lineup. Our Cars section focuses on racing-relevant cars.' },
   { q: 'How does stealing cars work in GTA VI?', a: 'Rockstar North’s Rob Nelson described a tiered system. Some parked vehicles require tools such as a Slim Jim or key cloner, while occupied vehicles can still be carjacked. A phone scanner can provide information about a vehicle’s security, tracker, value, and registration cost.' },
   { q: 'Can stolen cars become personal vehicles?', a: 'Yes. A stolen car can be registered as a personal vehicle. Unregistered stolen vehicles remain temporarily but disappear when the game is restarted. Players begin with storage for three vehicles and can buy garages to expand it; the complete list of eligible vehicles and the later-game ownership limit remain unannounced.' },
   { q: 'Does GTA VI have car customization?', a: 'Yes. Rockstar has confirmed specialist mod shops and described cosmetic and performance-oriented modifications. The complete parts catalog and standard-edition workshop options remain unknown.' },
@@ -300,8 +319,8 @@ export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'What kinds of racing are shown in GTA VI?', a: 'Official in-game footage shows circuit, off-road, and street racing with position and timing information on screen. Event access, rewards, classes, championships, and online support remain open.' },
   { q: 'Is Gellhorn International Raceway confirmed?', aHtml: 'Rockstar has shown a dedicated paved circuit and separate Gellhorn International racing branding. Leonida Racing uses the established name <a href="{base}time-attack/gellhorn-international-raceway/">Gellhorn International Raceway</a>, while noting that Rockstar’s public footage has not yet displayed the complete venue name beside the circuit.', a: 'Rockstar has shown a dedicated paved circuit and separate Gellhorn International racing branding. Leonida Racing uses the established name Gellhorn International Raceway, while noting that Rockstar’s public footage has not yet displayed the complete venue name beside the circuit.' },
   { q: 'Are car meets confirmed in GTA VI?', a: 'Rockstar has shown car-meet and street-takeover scenes. Those scenes confirm the culture and setting, but Rockstar has not yet announced a player-hosted car-meet system.' },
-  { q: 'Will GTA VI have a Race Creator?', a: 'Rockstar has not confirmed a Race Creator or player-built race jobs for GTA VI. The Hub will add community-created tracks when compatible creation tools become available.', aHtml: 'Rockstar has not confirmed a Race Creator or player-built race jobs for GTA VI. <a href="{base}community/tracks/">The Hub will add community-created tracks</a> when compatible creation tools become available.' },
-  { q: 'Where can I compare GTA VI cars?', a: 'The Garage lets you browse racing-relevant GTA VI cars by class and manufacturer and compare the details currently available. Verified prices, tested top speeds, and performance data will follow when the released game makes reliable testing possible.', aHtml: '<a href="{base}cars/">The Garage</a> lets you browse racing-relevant GTA VI cars by <a href="{base}cars/classes/">class</a> and <a href="{base}cars/manufacturers/">manufacturer</a> and <a href="{base}cars/compare/">compare</a> the details currently available. Verified prices, tested top speeds, and performance data will follow when the released game makes reliable testing possible.' },
+  { q: 'Will GTA VI have a Race Creator?', a: 'Rockstar has not confirmed a Race Creator or player-built race jobs for GTA VI. Community will add community-created tracks when compatible creation tools become available.', aHtml: 'Rockstar has not confirmed a Race Creator or player-built race jobs for GTA VI. <a href="{base}community/tracks/">Community will add community-created tracks</a> when compatible creation tools become available.' },
+  { q: 'Where can I compare GTA VI cars?', a: 'Cars lets you browse racing-relevant GTA VI cars by class and manufacturer and compare the details currently available. Verified prices, tested top speeds, and performance data will follow when the released game makes reliable testing possible.', aHtml: '<a href="{base}cars/">Cars</a> lets you browse racing-relevant GTA VI cars by <a href="{base}cars/classes/">class</a> and <a href="{base}cars/manufacturers/">manufacturer</a> and <a href="{base}cars/compare/">compare</a> the details currently available. Verified prices, tested top speeds, and performance data will follow when the released game makes reliable testing possible.' },
 ];
 
 export const guideMethodology: string[] = [

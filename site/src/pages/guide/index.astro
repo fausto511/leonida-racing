@@ -2,17 +2,19 @@
 // The Guide (/guide/): one sourced overview page. No /guide/... sub-pages
 // until they have enough own sourced content (Codex handoff 2026-10-02).
 // Copy and corrections: see data/guide.ts.
+// Redesign 18.10.2026 (DEC-0140): standard band (DEC-0139) with "At a glance" tile,
+// sticky "On this page" TOC (desktop) / chip strip (phone), status pills, source cards,
+// FAQ accordion, entry cards, Discord band. New UI labels = Claude placeholders (Codex, DEC-0088).
 import Base from '../../layouts/Base.astro';
-import PageHero from '../../components/PageHero.astro';
-import GuideSubnav from '../../components/GuideSubnav.astro';
+import DiscordBand from '../../components/DiscordBand.astro';
 import { SITE_NAME } from '../../data/site';
-import { GUIDE_PUBLISHED, GUIDE_UPDATED, GUIDE_VEHICLES, guideHeroImage, type GuideImage, guideCoverage, guideFaq, guideMethodology, guideSections } from '../../data/guide';
+import { GUIDE_PUBLISHED, GUIDE_UPDATED, GUIDE_VEHICLES, guideHeroImage, type GuideImage, guideCoverage, guideFaq, guideMethodology, guideSections, sourceParts, statusTone } from '../../data/guide';
 
 const base = import.meta.env.BASE_URL;
 const title = 'The Guide — GTA VI Cars, Tuning & Racing';
 const description = 'Explore sourced information on GTA 6 cars, driving physics, car theft, customization, mod shops, garages, racing, car meets, and Gellhorn.';
 const updatedLabel = new Date(`${GUIDE_UPDATED}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
-// Vehicle card = approximate GTA VI total (not the Garage count); note in Methodology.
+const updatedShort = new Date(`${GUIDE_UPDATED}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 const pageUrl = new URL(`${base}guide/`, Astro.site).href;
 // Internal links in the copy use {base}; JSON-LD uses the plain FAQ text.
 const withBase = (html: string) => html.replaceAll('{base}', base);
@@ -41,121 +43,315 @@ const jsonLd = [
     mainEntity: guideFaq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
   },
 ];
+
+// Short TOC labels (Claude placeholders).
+const tocLabel: Record<string, string> = {
+  vehicles: 'Vehicles', granforma: 'GranForma', driving: 'Driving & physics', theft: 'Stealing & registering', heat: 'Heat & police',
+  ownership: 'Ownership & garages', customization: 'Customization', classics: 'Classic cars', racing: 'Racing', gellhorn: 'Gellhorn',
+  'car-culture': 'Car culture', 'not-confirmed': 'Not confirmed yet',
+};
+const toc: [string, string][] = [
+  ...guideSections.map((s) => [s.id, tocLabel[s.id] ?? s.title] as [string, string]),
+  ['coverage', 'Explore the site'], ['faq', 'FAQ'], ['sources', 'Methodology'],
+];
+
+const glance = [
+  { v: GUIDE_VEHICLES.value, l: GUIDE_VEHICLES.label, href: '#vehicle-count' },
+  { v: '3', l: 'Racing formats shown', href: '#racing' },
+  { v: '2', l: 'Named mod shops', href: '#customization' },
+];
+
+const coverageNote = guideCoverage.find((c) => c.name === 'The Guide');
+const entryMeta: Record<string, { href: string; img: string; srcset: string; cta: string; pos?: string }> = {
+  'Cars': { href: 'cars/', img: 'images/garage/cars-band-640.webp', srcset: `${base}images/garage/cars-band-640.webp 640w, ${base}images/garage/cars-band-1280.webp 1280w`, cta: 'Explore Cars', pos: '50% 88%' },
+  'Time Attack': { href: 'time-attack/gellhorn-international-raceway/', img: 'images/gellhorn-raceway-640.webp', srcset: `${base}images/gellhorn-raceway-640.webp 640w, ${base}images/gellhorn-raceway-1080.webp 1080w`, cta: 'Visit Time Attack' },
+  'Community': { href: 'community/', img: 'images/hub/community-band-640.webp', srcset: `${base}images/hub/community-band-640.webp 640w, ${base}images/hub/community-band-1080.webp 1080w`, cta: 'Open Community' },
+};
+const entries = guideCoverage.filter((c) => entryMeta[c.name]);
+const kindLabel = { official: 'Official', press: 'Press', community: 'Community' } as const;
 ---
 <Base title={title} description={description} section="guide" jsonLd={jsonLd} breadcrumbs={[{ name: 'The Guide', path: 'guide/' }]} ogImage="images/guide/og-guide.jpg" ogImageAlt={guideHeroImage.alt} ogImageWidth={1200} ogImageHeight={630}>
-  <PageHero status="guide" image="guide" eyebrow="GTA VI Vehicle Knowledge" title="The Guide" lede="The sourced guide to GTA VI cars, driving, customization, garages, racing, and car culture. See what Rockstar has confirmed, what official footage shows, and which details are still open." />
-  <GuideSubnav />
-
-  <section class="wrap gd-head">
-    <div class="gd-stats">
-      <a class="panel gd-stat" href="#vehicle-count"><strong>{GUIDE_VEHICLES.value}</strong><span>{GUIDE_VEHICLES.label}</span></a>
-      <div class="panel gd-stat"><strong>3</strong><span>Racing Formats Shown</span></div>
-      <div class="panel gd-stat"><strong>2</strong><span>Named Mod Shops</span></div>
-      <div class="panel gd-stat"><strong class="gd-stat-date"><time datetime={GUIDE_UPDATED}>{updatedLabel}</time></strong><span>Updated</span></div>
+  <section class="gd-band">
+    <img class="gd-bg" src={`${base}images/guide/guide-band-1080.webp`} srcset={`${base}images/guide/guide-band-640.webp 640w, ${base}images/guide/guide-band-1080.webp 1080w, ${base}images/guide/guide-band-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="941" fetchpriority="high" />
+    <span class="lr-shade" aria-hidden="true"></span>
+    <div class="wrap gd-hero lr-band-in">
+      <div>
+        <p class="eyebrow">GTA VI Vehicle Knowledge</p>
+        <h1 class="display lr-t1">Guide</h1>
+        <p class="lr-lede">The sourced guide to GTA VI cars, driving, customization, garages, racing, and car culture. See what Rockstar has confirmed, what official footage shows, and which details are still open.</p>
+      </div>
+      <div class="gd-tile">
+        <p class="gd-tile-eb">At a glance</p>
+        <div class="gd-glance">
+          {glance.map((g) => <a href={g.href}><strong>{g.v}</strong><span>{g.l}</span></a>)}
+          <div><strong class="is-date"><time datetime={GUIDE_UPDATED}>{updatedShort}</time></strong><span>Last updated</span></div>
+        </div>
+      </div>
     </div>
-    <p class="gd-note">This page follows official Rockstar material and on-record developer interviews. Visible details are described as shown, without turning them into features Rockstar has not announced.</p>
-
   </section>
 
-  <div class="wrap gd-body">
-    {guideSections.map((s) => (
-      <section class="gd-sec" id={s.id} aria-labelledby={`${s.id}-h`}>
-        <h2 class="gd-h2" id={`${s.id}-h`}>{s.title}</h2>
-        {s.status && <p class="gd-status"><span class="gd-status-k">Status:</span> {s.status}</p>}
-        {s.paragraphs.map((p, i) => (
-          <Fragment>
-            <p class="gd-p" set:html={withBase(p)} />
-            {i === 0 && s.images && (
-              <div class:list={['gd-figs', { 'gd-figs-2': s.images.length > 1 }]}>
-                {s.images.map((im) => (
-                  <figure class="gd-fig">
-                    <img src={src(im)} srcset={srcset(im)} sizes={s.images!.length > 1 ? '(max-width: 760px) 100vw, 390px' : '(max-width: 860px) 100vw, 780px'} width={im.w} height={im.h} alt={im.alt} loading="lazy" decoding="async" />
-                    <figcaption>{im.caption}</figcaption>
-                  </figure>
-                ))}
-              </div>
-            )}
-          </Fragment>
-        ))}
-        {s.cta && <a class="btn btn-outline gd-cta" href={`${base}${s.cta.href}`}>{s.cta.label} →</a>}
-        <div class="gd-sources">
-          <p class="gd-sources-h">{s.sourcesHeading ?? 'Sources for this section'}</p>
-          <ul>
-            {s.sources.map((src) => (
-              <li><a href={src.url} target="_blank" rel="noopener">{src.label}</a>{src.note ? `: ${src.note}` : ''}</li>
-            ))}
-          </ul>
+  <nav class="gd-chips" aria-label="On this page">
+    <div class="gd-chips-in">
+      {toc.map(([id, label]) => <a href={`#${id}`} data-toc={id}>{label}</a>)}
+    </div>
+  </nav>
+
+  <div class="wrap gd-layout">
+    <aside class="gd-toc" aria-label="On this page">
+      <p class="gd-toc-h">On this page</p>
+      <ol>
+        {toc.map(([id, label]) => <li><a href={`#${id}`} data-toc={id}>{label}</a></li>)}
+      </ol>
+    </aside>
+
+    <div class="gd-main">
+      <p class="gd-intro">This page follows official Rockstar material and on-record developer interviews. Visible details are described as shown, without turning them into features Rockstar has not announced.</p>
+
+      {guideSections.map((s) => (
+        <section class="gd-sec" id={s.id} aria-labelledby={`${s.id}-h`}>
+          {s.status && <p class:list={['gd-pill', `is-${statusTone(s.status)}`]}><span class="gd-pill-dot" aria-hidden="true"></span><span class="sr-only">Status: </span>{s.status}</p>}
+          <h2 class="gd-h2" id={`${s.id}-h`}>{s.title}</h2>
+          {s.paragraphs.map((p, i) => (
+            <Fragment>
+              <p class="gd-p" set:html={withBase(p)} />
+              {i === 0 && s.images && (
+                <div class:list={['gd-figs', { 'gd-figs-2': s.images.length > 1 }]}>
+                  {s.images.map((im) => (
+                    <figure class="gd-fig">
+                      <img src={src(im)} srcset={srcset(im)} sizes={s.images!.length > 1 ? '(max-width: 760px) 100vw, 390px' : '(max-width: 860px) 100vw, 780px'} width={im.w} height={im.h} alt={im.alt} loading="lazy" decoding="async" />
+                      <figcaption>{im.caption}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+              )}
+            </Fragment>
+          ))}
+          {s.cta && <a class="btn btn-outline gd-cta" href={`${base}${s.cta.href}`}>{s.cta.label} →</a>}
+          <div class="gd-src">
+            <p class="gd-src-h">{s.sourcesHeading ?? 'Sources'} <span>· {s.sources.length}</span></p>
+            <ul>
+              {s.sources.map((x) => {
+                const sp = sourceParts(x);
+                return (
+                  <li>
+                    <a href={x.url} target="_blank" rel="noopener">
+                      <span class="gd-src-top"><span class:list={['gd-kind', `is-${sp.kind}`]}>{kindLabel[sp.kind]}</span><span class="gd-src-pub">{sp.publisher}</span></span>
+                      <span class="gd-src-t">{sp.title}<span class="gd-ext" aria-hidden="true"> ↗</span></span>
+                      {x.note && <span class="gd-src-n">{x.note}</span>}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      ))}
+
+      <section class="gd-sec" id="coverage" aria-labelledby="coverage-h">
+        <h2 class="gd-h2" id="coverage-h">How Leonida Racing Covers GTA VI Cars and Racing</h2>
+        {coverageNote && <p class="gd-p"><strong>{coverageNote.name}</strong> {coverageNote.text}</p>}
+        <div class="gd-entries">
+          {entries.map((c) => {
+            const m = entryMeta[c.name];
+            return (
+              <a class="gd-entry card" href={`${base}${m.href}`}>
+                <img src={`${base}${m.img}`} srcset={m.srcset} sizes="(max-width: 760px) 112px, 260px" alt="" width="640" height="360" loading="lazy" style={m.pos ? `object-position:${m.pos}` : undefined} />
+                <span class="gd-entry-b">
+                  <strong class="display">{c.name}</strong>
+                  <span class="t">{c.name} {c.text}</span>
+                  <span class="cta">{m.cta} →</span>
+                </span>
+              </a>
+            );
+          })}
         </div>
       </section>
-    ))}
 
-    <section class="gd-sec" id="coverage" aria-labelledby="coverage-h">
-      <h2 class="gd-h2" id="coverage-h">How Leonida Racing Covers GTA VI Cars and Racing</h2>
-      {guideCoverage.map((c) => <p class="gd-p"><strong>{c.name}</strong> {c.text}</p>)}
-      <div class="gd-ctas">
-        <a class="btn btn-outline" href={`${base}cars/`}>Explore The Garage</a>
-        <a class="btn btn-outline" href={`${base}time-attack/gellhorn-international-raceway/`}>Visit Time Attack</a>
-        <a class="btn btn-outline" href={`${base}community/`}>Open The Hub</a>
-      </div>
-    </section>
-
-    <section class="gd-sec" id="faq" aria-labelledby="faq-h">
-      <h2 class="gd-h2" id="faq-h">Frequently Asked Questions</h2>
-      {guideFaq.map((f) => (
-        <div class="gd-faq">
-          <h3 class="gd-h3">{f.q}</h3>
-          <p class="gd-p" set:html={withBase(f.aHtml ?? f.a)} />
+      <section class="gd-sec" id="faq" aria-labelledby="faq-h">
+        <h2 class="gd-h2" id="faq-h">Frequently Asked Questions</h2>
+        <div class="gd-faq card">
+          {guideFaq.map((f) => (
+            <details>
+              <summary><h3>{f.q}</h3><span class="gd-faq-i" aria-hidden="true"></span></summary>
+              <p class="gd-p" set:html={withBase(f.aHtml ?? f.a)} />
+            </details>
+          ))}
         </div>
-      ))}
-    </section>
+      </section>
 
-    <section class="gd-sec" id="sources" aria-labelledby="sources-h">
-      <h2 class="gd-h2" id="sources-h">Methodology and Source Note</h2>
-      {guideMethodology.map((p) => <p class="gd-p" set:html={p} />)}
-      <p class="gd-p" id="vehicle-count"><strong>{GUIDE_VEHICLES.value} {GUIDE_VEHICLES.label}:</strong> <a href={GUIDE_VEHICLES.sourceUrl} target="_blank" rel="noopener">{GUIDE_VEHICLES.sourceLabel}</a> {GUIDE_VEHICLES.note}</p>
-      <p class="gd-updated">Last updated: <time datetime={GUIDE_UPDATED}>{updatedLabel}</time></p>
-      <p class="gd-indep">Leonida Racing is an independent community project and is not affiliated with Rockstar Games or Take-Two Interactive.</p>
-    </section>
+      <section class="gd-sec" id="sources" aria-labelledby="sources-h">
+        <h2 class="gd-h2" id="sources-h">Methodology and Source Note</h2>
+        {guideMethodology.map((p) => <p class="gd-p" set:html={p} />)}
+        <div class="gd-count card" id="vehicle-count">
+          <strong class="display">{GUIDE_VEHICLES.value}</strong>
+          <p><b>{GUIDE_VEHICLES.label}:</b> <a href={GUIDE_VEHICLES.sourceUrl} target="_blank" rel="noopener">{GUIDE_VEHICLES.sourceLabel} ↗</a> {GUIDE_VEHICLES.note}</p>
+        </div>
+        <p class="gd-updated">Last updated: <time datetime={GUIDE_UPDATED}>{updatedLabel}</time></p>
+        <p class="gd-indep">Leonida Racing is an independent community project and is not affiliated with Rockstar Games or Take-Two Interactive.</p>
+      </section>
+    </div>
   </div>
+
+  <DiscordBand />
 </Base>
 
 <style>
-  .gd-fig { margin: 0; }
-  .gd-fig img { display: block; width: 100%; height: auto; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-surface); }
-  .gd-fig figcaption { margin-top: .4rem; color: var(--gh-muted); font-size: .76rem; line-height: 1.4; }
-  .gd-figs { margin: .4rem 0 1.2rem; }
-  .gd-figs-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  /* ---- band (DEC-0139 standard, T1) ---- */
+  .gd-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
+  .gd-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+  .gd-hero { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; }
+  .gd-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
+  .gd-tile-eb { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+  .gd-glance { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .gd-glance > * { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 6px; border: 1px solid var(--lr-line); background: rgba(11,11,20,.4); color: var(--lr-text); text-decoration: none; }
+  .gd-glance > a:hover { border-color: var(--lr-line-strong); background: rgba(28,28,42,.7); }
+  .gd-glance strong { font-family: var(--gh-font-display); font-size: 30px; font-weight: 800; line-height: 1; color: var(--lr-lime); }
+  .gd-glance strong.is-date { font-size: 22px; line-height: 30px; color: var(--lr-text); }
+  .gd-glance span { font-size: 12px; line-height: 1.3; color: var(--lr-muted); }
+
+  /* ---- layout + TOC ---- */
+  .gd-layout { display: grid; grid-template-columns: 210px minmax(0, 780px); gap: 64px; padding-top: 40px; padding-bottom: 72px; }
+  .gd-toc { position: sticky; top: calc(var(--gh-header-h) + 28px); align-self: start; max-height: calc(100vh - var(--gh-header-h) - 56px); overflow-y: auto; scrollbar-width: thin; }
+  .gd-toc-h { margin: 0 0 10px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-muted); }
+  .gd-toc ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--lr-line); }
+  .gd-toc a { display: block; margin-left: -1px; padding: 6px 0 6px 14px; border-left: 2px solid transparent; font-size: 14px; line-height: 1.35; color: var(--lr-muted); text-decoration: none; }
+  .gd-toc a:hover { color: var(--lr-text); }
+  .gd-toc a.is-on { color: var(--lr-text); font-weight: 600; border-left-color: var(--lr-orange); }
+  .gd-chips { display: none; }
+
+  .gd-main { min-width: 0; }
+  .gd-intro { margin: 0; padding: 14px 16px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); color: var(--lr-soft); font-size: 15px; line-height: 1.55; }
+
+  /* ---- sections ---- */
+  .gd-sec { padding-top: 56px; scroll-margin-top: calc(var(--gh-header-h) + 16px); }
+  .gd-h2 { margin: 0 0 14px; font-family: var(--gh-font-display); font-weight: 800; text-transform: uppercase; font-size: 30px; line-height: 1.05; }
+  .gd-pill { display: inline-flex; align-items: center; gap: 7px; margin: 0 0 12px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.3; }
+  .gd-pill-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .gd-pill.is-ok { color: var(--lr-lime); background: rgba(217,245,142,.1); border: 1px solid rgba(217,245,142,.35); }
+  .gd-pill.is-mid { color: var(--lr-orange); background: rgba(255,149,90,.1); border: 1px solid rgba(255,149,90,.38); }
+  .gd-pill.is-open { color: var(--lr-soft); background: rgba(200,200,222,.08); border: 1px solid var(--lr-line-strong); }
+  .gd-p { margin: 0 0 16px; font-size: 16px; line-height: 1.7; color: #E4E2EA; }
+  .gd-p :global(strong) { color: var(--lr-text); }
+  .gd-p :global(a) { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-underline-offset: 3px; }
+  .gd-p :global(a:hover) { color: var(--lr-orange); }
+  .gd-cta { margin: 4px 0 0; }
+
+  /* figures in card style */
+  .gd-figs { margin: 4px 0 20px; }
+  .gd-figs-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .gd-fig { margin: 0; overflow: hidden; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
+  .gd-fig img { display: block; width: 100%; height: auto; background: var(--lr-raised); }
   .gd-figs-2 img { aspect-ratio: 16 / 9; object-fit: cover; }
-  .gd-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin-top: 0; }
-  .gd-stat { display: flex; flex-direction: column; gap: .3rem; padding: 1rem 1.1rem; color: var(--gh-text); text-decoration: none; }
-  a.gd-stat:hover { border-color: var(--gh-muted); }
-  .gd-stat strong { font-family: var(--gh-font-display); font-weight: 900; font-size: 2rem; line-height: 1; color: var(--gh-yellow); }
-  .gd-stat strong.gd-stat-date { font-size: 1.15rem; line-height: 1.75rem; }
-  .gd-stat span { color: var(--gh-muted); font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
-  .gd-note { max-width: 70ch; margin: .9rem 0 0; color: var(--gh-muted); font-size: .85rem; line-height: 1.55; }
-  .gd-body > .gd-sec { max-width: 780px; }
-  .gd-sec { padding-top: 2.5rem; scroll-margin-top: 5rem; }
-  .gd-h2 { margin: 0 0 .6rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: clamp(1.35rem, 3vw, 1.75rem); line-height: 1.1; }
-  .gd-h3 { margin: 1.25rem 0 .35rem; font-size: 1.02rem; font-weight: 800; }
-  .gd-status { display: inline-block; margin: 0 0 .9rem; padding: .25rem .65rem; border: 1px solid var(--gh-yellow); border-radius: var(--gh-radius); color: var(--gh-yellow); font-size: .74rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
-  .gd-status-k { color: var(--gh-muted); }
-  .gd-p { margin: 0 0 .9rem; line-height: 1.7; font-size: 1rem; }
-  .gd-p :global(strong) { color: var(--gh-text); }
-  .gd-p :global(a) { color: var(--gh-text); text-decoration: underline; text-decoration-color: var(--gh-red); text-underline-offset: 3px; }
-  .gd-p :global(a:hover) { color: var(--gh-yellow); }
-  .gd-cta { margin: .2rem 0 .4rem; padding: .6rem 1.1rem; font-size: .85rem; }
-  .gd-ctas { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .4rem; }
-  .gd-ctas .btn { padding: .6rem 1.1rem; font-size: .85rem; }
-  .gd-sources { margin-top: 1rem; padding: .85rem 1rem; border-left: 2px solid var(--gh-line); background: color-mix(in srgb, var(--gh-surface) 55%, transparent); border-radius: 0 var(--gh-radius) var(--gh-radius) 0; }
-  .gd-sources-h { margin: 0 0 .4rem; color: var(--gh-muted); font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
-  .gd-sources ul { margin: 0; padding-left: 1.1rem; color: var(--gh-muted); font-size: .82rem; line-height: 1.55; }
-  .gd-sources li + li { margin-top: .3rem; }
-  .gd-sources a { color: var(--gh-text); text-underline-offset: 2px; }
-  .gd-faq + .gd-faq { border-top: 1px solid var(--gh-line); }
-  .gd-updated { margin: 1.25rem 0 .3rem; font-weight: 700; }
-  .gd-indep { margin: 0; color: var(--gh-muted); font-size: .85rem; }
+  .gd-fig figcaption { padding: 10px 12px; font-size: 13px; line-height: 1.45; color: var(--lr-muted); }
+
+  /* source cards */
+  .gd-src { margin-top: 24px; }
+  .gd-src-h { margin: 0 0 10px; font-size: 13px; font-weight: 600; color: var(--lr-soft); }
+  .gd-src-h span { color: var(--lr-muted); font-weight: 400; }
+  .gd-src ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .gd-src li { display: flex; }
+  .gd-src a { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
+  .gd-src a:hover { border-color: var(--lr-line-strong); }
+  .gd-src a:hover .gd-src-t { color: var(--lr-orange); }
+  .gd-src-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .gd-kind { padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .gd-kind.is-official { color: var(--lr-lime); background: rgba(217,245,142,.12); }
+  .gd-kind.is-press { color: var(--lr-soft); background: rgba(200,200,222,.1); }
+  .gd-kind.is-community { color: var(--lr-orange); background: rgba(255,149,90,.12); }
+  .gd-src-pub { font-size: 12px; color: var(--lr-muted); }
+  .gd-src-t { font-size: 14px; font-weight: 600; line-height: 1.35; }
+  .gd-ext { color: var(--lr-muted); font-weight: 400; }
+  .gd-src-n { font-size: 13px; line-height: 1.45; color: var(--lr-muted); }
+
+  /* entry cards */
+  .gd-entries { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 6px; }
+  .gd-entry { display: flex; flex-direction: column; padding: 0; color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
+  .gd-entry:hover { border-color: rgba(200,200,222,.4); }
+  .gd-entry img { display: block; width: 100%; height: 120px; object-fit: cover; background: var(--lr-raised); }
+  .gd-entry-b { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 16px; }
+  .gd-entry-b strong { font-size: 22px; line-height: 1; }
+  .gd-entry-b .t { font-size: 13px; line-height: 1.5; color: var(--lr-soft); }
+  .gd-entry-b .cta { margin-top: auto; padding-top: 6px; font-size: 14px; font-weight: 700; color: var(--lr-orange); }
+
+  /* FAQ accordion */
+  .gd-faq details + details { border-top: 1px solid var(--lr-line); }
+  .gd-faq summary { display: flex; align-items: center; gap: 16px; padding: 16px 18px; cursor: pointer; list-style: none; }
+  .gd-faq summary::-webkit-details-marker { display: none; }
+  .gd-faq summary:hover h3 { color: var(--lr-orange); }
+  .gd-faq h3 { flex: 1; margin: 0; font-size: 16px; font-weight: 600; line-height: 1.4; }
+  .gd-faq-i { position: relative; flex: none; width: 14px; height: 14px; }
+  .gd-faq-i::before, .gd-faq-i::after { content: ''; position: absolute; left: 0; top: 6px; width: 14px; height: 2px; border-radius: 1px; background: var(--lr-muted); transition: transform .15s; }
+  .gd-faq-i::after { transform: rotate(90deg); }
+  .gd-faq details[open] .gd-faq-i::after { transform: rotate(0); }
+  .gd-faq details .gd-p { margin: -4px 0 0; padding: 0 18px 18px; font-size: 15px; }
+
+  /* methodology */
+  .gd-count { display: flex; align-items: flex-start; gap: 18px; margin: 4px 0 0; padding: 16px 18px; scroll-margin-top: calc(var(--gh-header-h) + 16px); }
+  .gd-count strong { font-size: 40px; line-height: 1; color: var(--lr-lime); }
+  .gd-count p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--lr-soft); }
+  .gd-count b { color: var(--lr-text); }
+  .gd-count a { color: var(--lr-text); text-underline-offset: 3px; text-decoration-color: var(--lr-orange); }
+  .gd-updated { margin: 20px 0 4px; font-size: 14px; font-weight: 600; }
+  .gd-indep { margin: 0; font-size: 13px; color: var(--lr-muted); }
+
+  @media (max-width: 1080px) {
+    .gd-layout { grid-template-columns: 180px minmax(0,1fr); gap: 40px; }
+  }
+  @media (max-width: 860px) {
+    .gd-hero { grid-template-columns: 1fr; gap: 20px; }
+    .gd-glance { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+    .gd-glance > * { padding: 10px; }
+    .gd-glance strong { font-size: 22px; }
+    .gd-glance strong.is-date { font-size: 16px; line-height: 22px; }
+    .gd-glance span { font-size: 11px; }
+    .gd-tile { padding: 14px; }
+    .gd-toc { display: none; }
+    .gd-layout { display: block; padding-top: 24px; }
+    .gd-chips { display: block; position: sticky; top: var(--gh-header-h); z-index: 20; background: rgba(11,11,20,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--lr-line); }
+    .gd-chips-in { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 10px 16px; }
+    .gd-chips-in::-webkit-scrollbar { display: none; }
+    .gd-chips a { flex: none; padding: 6px 12px; border: 1px solid var(--lr-line); border-radius: 999px; font-size: 13px; color: var(--lr-soft); text-decoration: none; white-space: nowrap; }
+    .gd-chips a.is-on { color: var(--lr-text); border-color: var(--lr-orange); background: rgba(255,149,90,.1); }
+    .gd-sec { padding-top: 44px; scroll-margin-top: calc(var(--gh-header-h) + 64px); }
+    .gd-count { scroll-margin-top: calc(var(--gh-header-h) + 64px); }
+  }
   @media (max-width: 760px) {
-    .gd-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .gd-glance { grid-template-columns: 1fr 1fr; }
+    .gd-h2 { font-size: 24px; }
     .gd-figs-2 { grid-template-columns: 1fr; }
+    .gd-src ul { grid-template-columns: 1fr; }
+    .gd-entries { grid-template-columns: 1fr; gap: 10px; }
+    .gd-entry { flex-direction: row; }
+    .gd-entry img { width: 112px; height: auto; min-height: 96px; flex: none; }
+    .gd-entry-b { padding: 12px 14px; }
+    .gd-entry-b strong { font-size: 20px; }
+    .gd-faq summary { padding: 14px; }
+    .gd-faq details .gd-p { padding: 0 14px 16px; }
+    .gd-count strong { font-size: 32px; }
   }
 </style>
+
+<script>
+  // Highlight the current section in the TOC and the phone chip strip.
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc]'));
+  const ids = Array.from(new Set(links.map((a) => a.dataset.toc!)));
+  const secs = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+  const strip = document.querySelector<HTMLElement>('.gd-chips-in');
+  let cur = '';
+  const set = (id: string) => {
+    if (id === cur) return;
+    cur = id;
+    links.forEach((a) => a.classList.toggle('is-on', a.dataset.toc === id));
+    const chip = strip?.querySelector<HTMLAnchorElement>(`[data-toc="${id}"]`);
+    if (strip && chip && strip.offsetParent) strip.scrollTo({ left: chip.offsetLeft - 16, behavior: 'smooth' });
+  };
+  const update = () => {
+    const line = window.innerHeight * 0.3;
+    let id = '';
+    for (const s of secs) { if (s.getBoundingClientRect().top <= line) id = s.id; else break; }
+    set(id);
+  };
+  let raf = 0;
+  window.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(update); }, { passive: true });
+  update();
+</script>
