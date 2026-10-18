@@ -35,7 +35,7 @@ const pageUrl = new URL(`${base}${path}`, Astro.site).href;
 const jsonLd = [{
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: heading,
+  name: `GTA VI ${heading}`, // SEO name keeps GTA VI; visible H1 without it (DEC-0130)
   url: pageUrl,
   description,
   about: { '@type': 'VideoGame', name: 'Grand Theft Auto VI', alternateName: ['GTA VI', 'GTA 6'] },
@@ -61,7 +61,7 @@ const jsonLd = [{
         <a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><span aria-current="page">{kind === 'class' ? 'Classes' : 'Manufacturers'}</span>
       </nav>
       <p class="eyebrow">GTA VI Vehicle Database</p>
-      <h1 class="display lr-t1">{heading}</h1>
+      <h1 class:list={['display', 'lr-t1', { 'lr-long-word': kind === 'manufacturer' }]}>{heading}</h1>
       <p class="lr-lede">{intro}</p>
     </div>
   </section>

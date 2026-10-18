@@ -260,6 +260,8 @@ main:focus { outline: none; }
   .lr-crumb { font-size: 13px; margin-bottom: 14px; }
   .lr-t1 { font-size: 40px; }
   .lr-t2 { font-size: 34px; }
+  /* T1 title with one very long word (e.g. MANUFACTURERS): T2 size on the phone so the word is not split */
+  .lr-t1.lr-long-word { font-size: min(34px, 7.8vw); }
   .lr-lede { margin-top: 14px; font-size: 16px; }
 }
 
