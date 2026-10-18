@@ -13,7 +13,7 @@
 // Never add leak information here. Visible text: "GTA VI"; meta: "GTA 6".
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
-export const GUIDE_UPDATED = '2026-10-16';
+export const GUIDE_UPDATED = '2026-10-18';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -107,8 +107,8 @@ export const guideSections: GuideSection[] = [
       { label: 'Rockstar Games — GTA VI Media', url: R_MEDIA, note: 'official trailers and media library.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: 'official screenshot titles, including named Ultimate Edition vehicles.' },
       { label: 'Rockstar Support — GTA VI Platforms, Editions, and Versions', url: R_SUPPORT, note: 'named edition vehicles and content.' },
-      // Fausto 15.10.2026: source of the "298 vehicles" on the home Guide card. Note = Claude placeholder (Codex review, DEC-0088).
-      { label: 'GTABase — GTA 6 Cars & Vehicles List', url: 'https://www.gtabase.com/gta-6/vehicles/', note: 'community database listing 298 vehicles from official material (checked October 16, 2026).' },
+      // Fausto 15.10.2026: source of the vehicle count on the home Guide card. Note: Codex 18.10. (Racing-Fahrzeug-News-2026-10-18.md), Fausto: show 311 with GTABase.
+      { label: 'GTABase — GTA 6 Cars & Vehicles List', url: 'https://www.gtabase.com/gta-6/vehicles/', note: 'Community database listing 311 entries across all vehicle types; entries do not all have the same evidence basis. Checked October 18, 2026.' },
     ],
   },
   {
@@ -333,9 +333,9 @@ export const guideMethodology: string[] = [
  *  Label from Codex; note adapted by Claude to name the source (Codex review pending).
  *  Update value + checked date together. */
 export const GUIDE_VEHICLES = {
-  value: '298',
-  label: 'Vehicles Identified',
+  value: '311',
+  label: 'GTABase Entries',
   sourceLabel: 'GTABase',
   sourceUrl: 'https://www.gtabase.com/gta-6/vehicles/',
-  note: 'count across all vehicle types shown in official Rockstar material, not just the cars covered here. Most names are community identifications. Rockstar has not published an official total. Checked October 16, 2026.',
+  note: 'Total across all vehicle types in GTABase’s database. This is not an official Rockstar vehicle count or a count of vehicles independently verified here. Checked October 18, 2026.',
 };
