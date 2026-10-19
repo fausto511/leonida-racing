@@ -13,7 +13,7 @@
 // Never add leak information here. Visible text: "GTA VI"; meta: "GTA 6".
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
-export const GUIDE_UPDATED = '2026-10-18';
+export const GUIDE_UPDATED = '2026-10-20';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -46,8 +46,8 @@ const IMG = {
   // Visual/Cars/Garage/granforma-zorrusso.png, 2000x1125 (web exports = vehicles/granforma-zorrusso-*.webp).
   granforma: img('granforma', W3, 2000, 1125, 'Rear three-quarter view of a green sports car in GTA VI, with GranForma lettering and an emblem above the rear grille.', 'New rear branding on the car identified as the GranForma Zorrusso. The name’s exact role remains unconfirmed. Rockstar Games image published with Bloomberg’s October 14 feature.'),
   // Visual/Heat/heat.png + heat2.png, 1800x1013, screenshots from the Extended Look (Fausto 17.10.). Alt/caption: Claude placeholders -> Codex (DEC-0088).
-  heatGarage: img('heat-garage', [640, 1280, 1800], 1800, 1013, 'View from the driver’s seat of a car waiting in a dark garage while a police car passes outside in GTA VI.', 'From Grand Theft Auto VI: An Extended Look — Rockstar Games.'),
-  heatPolice: img('heat-police', [640, 1280, 1800], 1800, 1013, 'Police cars with flashing lights block a sunny city intersection in GTA VI.', 'From Grand Theft Auto VI: An Extended Look — Rockstar Games.'),
+  heatGarage: img('heat-garage', [640, 1280, 1800], 1800, 1013, 'View from inside a dark garage, looking past a car’s dashboard toward a police car outside in GTA VI.', 'From Grand Theft Auto VI: An Extended Look — Rockstar Games.'),
+  heatPolice: img('heat-police', [640, 1280, 1800], 1800, 1013, 'Several police cars with flashing lights near a sunlit city intersection in GTA VI.', 'From Grand Theft Auto VI: An Extended Look — Rockstar Games.'),
   driving: img('driving', [640, 1280], 1280, 720, 'A dark sedan turns across a city street with smoke around its tires in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
   slimJim: img('slim-jim', [640, 1280], 1280, 720, 'A character stands beside a red parked car with “Slim Jim” and “Smash Window” prompts on screen in GTA VI.', 'On-screen theft options in GTA VI gameplay — Rockstar Games.'),
   // Ownership pair (Fausto, 2026-10-04): safehouse with Jason's Ganado + Buggy at a garage. Alt/captions: Claude placeholders, Codex review pending.
@@ -305,9 +305,9 @@ export const guideSections: GuideSection[] = [
 
 /** "How Leonida Racing Covers ..." — The Lab line removed until the section exists. */
 export const guideCoverage: { name: string; text: string }[] = [
-  { name: 'Cars', text: 'is the vehicle database: models, classes, manufacturers, real-life inspirations, release information, and available specs.' },
-  { name: 'Time Attack', text: 'puts drivers and cars on the same course, with proof-based lap submissions and leaderboards at Gellhorn.' },
-  { name: 'Community', text: 'connects the scene through races, league rounds, playlists, car meets, crews, hosts, and creators.' },
+  { name: 'Cars', text: 'brings models, classes, manufacturers and real-life inspirations together. Browse the available details and compare cars side by side.' },
+  { name: 'Time Attack', text: 'is where your driving meets the stopwatch: Gellhorn lap submissions and leaderboards, with the required proof, once GTA VI launches.' },
+  { name: 'Community', text: 'connects drivers, crews, hosts and creators through events, car meets, playlists and Discord.' },
   { name: 'The Guide', text: 'explains what is known, shows where the information came from, and keeps confirmed facts separate from strong identifications and open questions.' },
 ];
 
@@ -326,8 +326,9 @@ export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'What kinds of racing are shown in GTA VI?', a: 'Official in-game footage shows circuit, off-road, and street racing with position and timing information on screen. Event access, rewards, classes, championships, and online support remain open.' },
   { q: 'Is Gellhorn International Raceway confirmed?', aHtml: 'Rockstar has shown a dedicated paved circuit and separate Gellhorn International racing branding. Leonida Racing uses the established name <a href="{base}time-attack/gellhorn-international-raceway/">Gellhorn International Raceway</a>, while noting that Rockstar’s public footage has not yet displayed the complete venue name beside the circuit.', a: 'Rockstar has shown a dedicated paved circuit and separate Gellhorn International racing branding. Leonida Racing uses the established name Gellhorn International Raceway, while noting that Rockstar’s public footage has not yet displayed the complete venue name beside the circuit.' },
   { q: 'Are car meets confirmed in GTA VI?', a: 'Rockstar has shown car-meet and street-takeover scenes. Those scenes confirm the culture and setting, but Rockstar has not yet announced a player-hosted car-meet system.' },
-  { q: 'Will GTA VI have a Race Creator?', a: 'Rockstar has not confirmed a Race Creator or player-built race jobs for GTA VI. Community will add community-created tracks when compatible creation tools become available.', aHtml: 'Rockstar has not confirmed a Race Creator or player-built race jobs for GTA VI. <a href="{base}community/tracks/">Community will add community-created tracks</a> when compatible creation tools become available.' },
+  { q: 'Will GTA VI have a Race Creator?', a: 'Rockstar has not confirmed a Race Creator or player-built race jobs for GTA VI.' },
   { q: 'Where can I compare GTA VI cars?', a: 'Cars lets you browse racing-relevant GTA VI cars by class and manufacturer and compare the details currently available. Verified prices, tested top speeds, and performance data will follow when the released game makes reliable testing possible.', aHtml: '<a href="{base}cars/">Cars</a> lets you browse racing-relevant GTA VI cars by <a href="{base}cars/classes/">class</a> and <a href="{base}cars/manufacturers/">manufacturer</a> and <a href="{base}cars/compare/">compare</a> the details currently available. Verified prices, tested top speeds, and performance data will follow when the released game makes reliable testing possible.' },
+  { q: 'Is there a Leonida Racing Discord for GTA VI racing?', a: 'Yes. Our Discord brings GTA racers, crews and car enthusiasts together to talk cars, share their work and find groups. You can join without a Leonida Racing account. A linked website account is needed for calendar event sign-ups and starting an LFG search.', aHtml: 'Yes. <a href="{base}discord/">Our Discord</a> brings GTA racers, crews and car enthusiasts together to talk cars, share their work and find groups. You can join without a Leonida Racing account. A linked website account is needed for calendar event sign-ups and starting an LFG search.' },
 ];
 
 export const guideMethodology: string[] = [

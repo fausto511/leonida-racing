@@ -11,7 +11,7 @@ import { SITE_NAME } from '../../data/site';
 import { GUIDE_PUBLISHED, GUIDE_UPDATED, GUIDE_VEHICLES, guideHeroImage, type GuideImage, guideCoverage, guideFaq, guideMethodology, guideSections, sourceParts, statusTone } from '../../data/guide';
 
 const base = import.meta.env.BASE_URL;
-const title = 'The Guide — GTA VI Cars, Tuning & Racing';
+const title = 'The Guide — GTA 6 Cars, Tuning & Racing';
 const description = 'Explore sourced information on GTA 6 cars, driving physics, car theft, customization, mod shops, garages, racing, car meets, and Gellhorn.';
 const updatedLabel = new Date(`${GUIDE_UPDATED}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 const updatedShort = new Date(`${GUIDE_UPDATED}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
@@ -46,13 +46,13 @@ const jsonLd = [
 
 // Short TOC labels (Claude placeholders).
 const tocLabel: Record<string, string> = {
-  vehicles: 'Vehicles', granforma: 'Brands & rebadging', driving: 'Driving & physics', theft: 'Stealing & registering', heat: 'Heat & police',
+  vehicles: 'Vehicles', granforma: 'Brands & rebadging', driving: 'Driving & physics', theft: 'Theft & registration', heat: 'Heat & police',
   ownership: 'Ownership & garages', customization: 'Customization', classics: 'Classic cars', racing: 'Racing', gellhorn: 'Gellhorn',
-  'car-culture': 'Car culture', 'not-confirmed': 'Not confirmed yet',
+  'car-culture': 'Car culture', 'not-confirmed': 'Open questions',
 };
 const toc: [string, string][] = [
   ...guideSections.map((s) => [s.id, tocLabel[s.id] ?? s.title] as [string, string]),
-  ['coverage', 'Explore the site'], ['faq', 'FAQ'], ['sources', 'Methodology'],
+  ['coverage', 'Explore the site'], ['faq', 'FAQ'], ['sources', 'How we check sources'],
 ];
 
 const glance = [
@@ -76,9 +76,9 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
     <span class="lr-shade" aria-hidden="true"></span>
     <div class="wrap gd-hero lr-band-in">
       <div>
-        <p class="eyebrow">GTA VI Vehicle Knowledge</p>
+        <p class="eyebrow">GTA VI Cars &amp; Racing</p>
         <h1 class="display lr-t1">Guide</h1>
-        <p class="lr-lede">The sourced guide to GTA VI cars, driving, customization, garages, racing, and car culture. See what Rockstar has confirmed, what official footage shows, and which details are still open.</p>
+        <p class="lr-lede">Cars, garages, race grids and the details worth a closer look. Follow what’s known about GTA VI driving and car culture, with sources alongside the facts and room for the questions still open.</p>
       </div>
       <div class="gd-tile">
         <p class="gd-tile-eb">At a glance</p>
@@ -105,7 +105,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
     </aside>
 
     <div class="gd-main">
-      <p class="gd-intro">This page follows official Rockstar material and on-record developer interviews. Visible details are described as shown, without turning them into features Rockstar has not announced.</p>
+      <p class="gd-intro">Start with the topic you’re here for. Each section links to its sources and makes clear what has been confirmed, identified by the community or left unresolved.</p>
 
       {guideSections.map((s) => (
         <section class="gd-sec" id={s.id} aria-labelledby={`${s.id}-h`}>
@@ -148,7 +148,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
       ))}
 
       <section class="gd-sec" id="coverage" aria-labelledby="coverage-h">
-        <h2 class="gd-h2" id="coverage-h">How Leonida Racing Covers GTA VI Cars and Racing</h2>
+        <h2 class="gd-h2" id="coverage-h">Explore Leonida Racing</h2>
         {coverageNote && <p class="gd-p"><strong>{coverageNote.name}</strong> {coverageNote.text}</p>}
         <div class="gd-entries">
           {entries.map((c) => {
@@ -168,7 +168,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
       </section>
 
       <section class="gd-sec" id="faq" aria-labelledby="faq-h">
-        <h2 class="gd-h2" id="faq-h">Frequently Asked Questions</h2>
+        <h2 class="gd-h2" id="faq-h">GTA VI cars and racing FAQ</h2>
         <div class="gd-faq card">
           {guideFaq.map((f) => (
             <details>
@@ -180,7 +180,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
       </section>
 
       <section class="gd-sec" id="sources" aria-labelledby="sources-h">
-        <h2 class="gd-h2" id="sources-h">Methodology and Source Note</h2>
+        <h2 class="gd-h2" id="sources-h">How we check sources</h2>
         {guideMethodology.map((p) => <p class="gd-p" set:html={p} />)}
         <div class="gd-count card" id="vehicle-count">
           <strong class="display">{GUIDE_VEHICLES.value}</strong>

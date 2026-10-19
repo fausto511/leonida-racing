@@ -45,7 +45,7 @@ const img = `${base}images/hub/hub-events`;
         <div class="db-act">
           <a class="btn btn-p" href={DISCORD_BOT_INVITE_URL} target="_blank" rel="noopener">
             <svg class="dico" viewBox="0 0 24 24" aria-hidden="true"><path d={DISCORD_ICON_PATH} /></svg>
-            <span>Add to your server</span>
+            <span>Add to Discord</span>
           </a>
           <span class="db-note">{P.addNote}</span>
         </div>
@@ -78,7 +78,7 @@ const img = `${base}images/hub/hub-events`;
           <li><span class="step-n" aria-hidden="true">{i + 1}</span><div><h3 class="step-t">{s.title}</h3><p class="step-p">{s.text}</p></div></li>
         ))}
       </ol>
-      <a class="btn btn-s" href={DISCORD_BOT_INVITE_URL} target="_blank" rel="noopener">Open the bot invite</a>
+      <a class="btn btn-s" href={DISCORD_BOT_INVITE_URL} target="_blank" rel="noopener">Open bot invite</a>
     </div>
     <figure class="mock" aria-label="Example of an event card posted by the bot">
       <div class="mock-msg">
@@ -86,7 +86,7 @@ const img = `${base}images/hub/hub-events`;
         <div class="mock-body">
           <p class="mock-name">Leonida Racing <span class="mock-app">APP</span></p>
           <div class="mock-embed">
-            <p class="mock-au">Race · PS5</p>
+            <p class="mock-au">Race · PlayStation</p>
             <p class="mock-et">Friday Night Sprint</p>
             <div class="mock-fields three">
               <div><p class="mock-fk">Starts</p><p class="mock-fv">Friday 8:00 PM<br /><span class="mock-dim">in 2 days</span></p></div>
@@ -99,13 +99,13 @@ const img = `${base}images/hub/hub-events`;
           <div class="mock-btns"><span class="mb mb-g">I’m in</span><span class="mb">Withdraw</span><span class="mb">Details ↗</span><span class="mb">Host Discord ↗</span></div>
         </div>
       </div>
-      <figcaption>Example card. Event and names are made up.</figcaption>
+      <figcaption>Example event card with fictional names and details.</figcaption>
     </figure>
   </section>
 
   <section class="wrap dsec">
     <p class="dsec-eb">Commands</p>
-    <h2 class="dsec-h">Every command</h2>
+    <h2 class="dsec-h">Commands for your server</h2>
     <div class="tiers-wrap">
       <table class="cmds">
         <thead><tr><th scope="col">Command</th><th scope="col">What it does</th><th scope="col">Who</th></tr></thead>
@@ -114,7 +114,7 @@ const img = `${base}images/hub/hub-events`;
         </tbody>
       </table>
     </div>
-    <p class="dsec-small">On the official Leonida Racing server there’s more: role menus, LFG lobbies and /ping for Verified Event Hosts. <a class="arrow" href={`${base}discord/`}>What’s on the server →</a></p>
+    <p class="dsec-small">Role menus and LFG searches are available on the official Leonida Racing server. There, Verified Event Hosts can use /ping for the permitted notification groups. <a class="arrow" href={`${base}discord/`}>What’s on the server →</a></p>
   </section>
 
   <section class="wrap dsec">
@@ -123,7 +123,7 @@ const img = `${base}images/hub/hub-events`;
     <ul class="perms">
       {botPerms.map((p) => <li><b>{p.p}</b><span>{p.why}</span></li>)}
     </ul>
-    <p class="dsec-small">Missing a permission later? Open the invite again: the bot stays and only the permissions get added. In private channels, allow the Leonida Racing role in the channel settings.</p>
+    <p class="dsec-small">If cards are not posting, check the bot’s server and channel permissions. Private channels need explicit access. Reopening the bot invite can help update server-level permissions, but it does not replace channel settings.</p>
   </section>
 
   <section class="wrap dsec faq" aria-labelledby="faq-h">
@@ -140,7 +140,7 @@ const img = `${base}images/hub/hub-events`;
     <div class="wrap dband-inner">
       <div class="dband-copy">
         <h2 class="display dband-title">See it in action first</h2>
-        <p class="dband-text">The bot runs on our own server. Join, try /car or /compare, and watch event cards update live.</p>
+        <p class="dband-text">Try /car or /compare on our Discord and see how the event cards work before adding the bot to your own server.</p>
       </div>
       <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn dband-btn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={DISCORD_ICON_PATH} /></svg>

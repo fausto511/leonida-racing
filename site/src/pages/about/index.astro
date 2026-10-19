@@ -1,42 +1,44 @@
 ---
 import Base from '../../layouts/Base.astro';
+import { DISCORD_INVITE_URL } from '../../data/site';
 const base = import.meta.env.BASE_URL;
 ---
 <Base
-  title="About Leonida Racing — GTA VI Racing Database & Community"
-  description="See how Leonida Racing brings GTA 6 car data, lap times, racing crews, events, hosts, and creators together in one community."
+  title="About Leonida Racing — GTA 6 Cars & Community"
+  description="Meet Leonida Racing: a GTA 6 car database and community connecting vehicle research, Gellhorn Time Attack, crews, events and Discord."
 >
+  <!-- COPY STATUS: approved Codex copy 18.10.2026 (Codex Zuarbeit/About-Seite-Texte-2026-10-18.md), DEC-0088. -->
   <section class="page-head">
     <div class="wrap">
       <p class="eyebrow">GTA VI Racing Database &amp; Community</p>
       <h1 class="display page-title">About Leonida Racing</h1>
-      <p class="page-lede">Leonida Racing is a GTA VI racing database and community. Check car specs and lap times, find races and crews, and connect with drivers, hosts, and creators across the scene.</p>
+      <p class="page-lede">You do not have to chase an overall record to belong here. Leonida Racing brings GTA VI car research, racing and the people behind the builds together. Find your next car, your next crew or a reason to stay in the conversation.</p>
     </div>
   </section>
 
   <section class="prose">
     <div class="wrap prose-body">
-      <h2>The Database</h2>
-      <p>The Garage is Leonida Racing’s GTA VI vehicle database. It brings specs, key vehicle details, real-life inspirations, and your own collection together in one place. Use it to compare cars, choose your next one, and keep track of what you own.</p>
-      <p>Time Attack adds the driver to the equation: submit a lap at Gellhorn International Raceway, follow the leaderboard, and see what each car can do in the hands of the community.</p>
+      <h2>Cars</h2>
+      <p><a href={`${base}cars/`}>Cars</a> is Leonida Racing’s GTA VI vehicle database. Browse <a href={`${base}cars/classes/`}>classes</a> and <a href={`${base}cars/manufacturers/`}>manufacturers</a>, explore real-life inspirations and <a href={`${base}cars/compare/`}>compare</a> the available details side by side. <a href={`${base}account/garage/`}>My Garage</a> keeps your own collection in one place. Community car ratings open at launch, alongside the chance to find out which favorites live up to their looks.</p>
 
-      <h2>The Community</h2>
-      <p>The Hub is where the GTA VI racing scene comes together. Find races, league rounds, community playlists, car meets, and crews.</p>
-      <p>Connect with drivers, hosts, and creators, see what the scene is organizing, or bring something of your own.</p>
+      <h2>Time Attack</h2>
+      <p><a href={`${base}time-attack/gellhorn-international-raceway/`}>Time Attack</a> adds the driver to the equation. Once GTA VI launches, submit a lap at Gellhorn International Raceway with the required proof and see where it puts you on the leaderboard. You might be chasing an overall record, a class rival or a better time in a car you refuse to give up on.</p>
 
-      <h2>Built for Racers and Car People</h2>
-      <p>You do not have to chase an overall record to be part of Leonida Racing. You might be looking for the right car, a better time, a competitive crew, a relaxed car meet, or simply a full grid.</p>
-      <p>If GTA VI cars and racing matter to you, this is your scene.</p>
+      <h2>The Guide</h2>
+      <p><a href={`${base}guide/`}>The Guide</a> follows what is known about GTA VI cars, driving, customization, garages, racing and car culture. Sources sit alongside the claims they support, with confirmed information, community identifications and open questions kept apart. Start there when you want more than another screenshot with a confident caption.</p>
+
+      <h2>Community and Discord</h2>
+      <p><a href={`${base}community/`}>Community</a> is where drivers, hosts and creators meet. Find races, league rounds, playlists, car meets and crews. Join a crew through the website or use I’m in to sign up for an event. Crew Leader, Event Host and Creator roles are confirmed on the website; choosing a Discord role alone does not grant them.</p>
+      <p>The conversation carries on in <a href={`${base}discord/`}>our Discord</a>: car talk, photos, videos and groups looking for players. The <a href={`${base}discord/bot/`}>Leonida Racing bot</a> also lets server administrators bring event and vehicle feeds into their own servers. You can bring something of your own without running a league or being the quickest person in the room.</p>
 
       <h2>Independent</h2>
       <p>Leonida Racing is an independent community project built for GTA VI racers and car enthusiasts. It is not affiliated with Rockstar Games or Take-Two Interactive.</p>
 
       <h2>Contact</h2>
-      <p>Found incorrect vehicle data, have a question about a lap submission, or need help with a listing? Reach us on <a href="https://discord.gg/hPGuBwXRqT" target="_blank" rel="noopener">Discord</a> or use the email address in the <a href={`${base}legal/`}>legal notice</a>.</p>
+      <p>Found incorrect vehicle data, have a question about a lap submission or need help with a listing? Reach us on <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener">Discord</a> or use the email address in the <a href={`${base}legal/`}>Legal Notice</a>. To flag a lap or other content for review, use <a href={`${base}report/`}>Report a time</a> or <a href={`${base}report-content/`}>Report content</a>.</p>
 
       <h2>How Your Data Is Used</h2>
-      <p>Signing in uses Discord. We store the account details needed for your profile and the lap information and evidence needed to review and display your submissions.</p>
-      <p>The <a href={`${base}privacy/`}>Privacy Policy</a> explains what is collected, why, and for how long.</p>
+      <p>Signing in uses Discord. The features you use can involve account details, your garage, crew memberships, event sign-ups, lap submissions and proof, and role syncing with our official Discord server. The <a href={`${base}privacy/`}>Privacy Policy</a> explains what is processed, why, how long it is kept and how to exercise your rights.</p>
     </div>
   </section>
 
@@ -44,11 +46,11 @@ const base = import.meta.env.BASE_URL;
     <div class="wrap cta-row">
       <div>
         <h2 class="display cta-title">Join the Community</h2>
-        <p class="cta-copy">Talk cars, meet racers, find events, and bring something of your own to Leonida Racing.</p>
+        <p class="cta-copy">Talk cars, meet racers, find events and bring something of your own to Leonida Racing.</p>
       </div>
       <div class="cta-actions">
-        <a class="btn btn-outline" href={`${base}cars/`}>Explore The Garage</a>
-        <a class="btn btn-red" href="https://discord.gg/hPGuBwXRqT" target="_blank" rel="noopener">Join Discord</a>
+        <a class="btn btn-outline" href={`${base}cars/`}>Explore Cars</a>
+        <a class="btn btn-red" href={DISCORD_INVITE_URL} target="_blank" rel="noopener">Join Discord</a>
       </div>
     </div>
   </section>

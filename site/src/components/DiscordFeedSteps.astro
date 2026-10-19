@@ -14,7 +14,7 @@ const pick = source === 'crew' ? 'My crew' : 'My host profile';
     <span class="dfs-chev" aria-hidden="true">▾</span>
   </summary>
   <div class="dfs-body">
-    <p class="dfs-note">No server of your own? Nothing to do – published events show up on the Leonida Racing Discord automatically.</p>
+    <p class="dfs-note">No server of your own? Published events can still appear in the Leonida Racing Discord calendar feed.</p>
     <ol class="dfs-steps">
       <li>
         <strong>Add the bot to your server</strong>
@@ -22,13 +22,13 @@ const pick = source === 'crew' ? 'My crew' : 'My host profile';
         <a class="btn btn-outline dfs-btn" href={DISCORD_BOT_INVITE_URL} target="_blank" rel="noopener">Add to Discord</a>
       </li>
       <li>
-        <strong>Type the command in the channel for your events</strong>
-        <span>Start typing <code>/leonida feed add</code>, pick it from the list, then choose <b>source: {pick}</b>. Discord shows every option as you go.</span>
+        <strong>Choose an event feed</strong>
+        <span>Run <code>/leonida feed add</code> in your server. Choose the destination channel, then select <b>{pick}</b> as the source. You need the matching website role for that source.</span>
         <button type="button" class="btn btn-outline dfs-btn dfs-copy" data-copy="/leonida feed add">Copy command</button>
       </li>
       <li>
-        <strong>Done</strong>
-        <span>Every event you publish here appears in that channel, with sign-up buttons. Change or remove it any time with <code>/leonida feed edit</code> or <code>/leonida feed remove</code>.</span>
+        <strong>Check the feed</strong>
+        <span>Matching published events appear in that channel with sign-up buttons. Edit event details on Leonida Racing. Use <code>/leonida feed edit</code> to change feed settings, or <code>/leonida feed remove</code> to stop the feed.</span>
       </li>
     </ol>
     <a class="dfs-more" href={`${base}discord/bot/`}>Full setup guide →</a>

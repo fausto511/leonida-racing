@@ -63,7 +63,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   <!-- ===== what's on the server ===== -->
   <section class="wrap dsec">
     <p class="dsec-eb">What you’ll find</p>
-    <h2 class="dsec-h">More than a chat room</h2>
+    <h2 class="dsec-h">Find your people</h2>
     <div class="areas">
       {discordAreas.map((a) => (
         <article class="area">
@@ -88,7 +88,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
       <ol class="lfg-steps">{discordLfg.steps.map((s) => <li>{s}</li>)}</ol>
       <p class="dsec-small">{discordLfg.notes}</p>
     </div>
-    <figure class="mock" aria-label="Example of an LFG card in Discord">
+    <figure class="mock" aria-label="Example LFG search card in Discord">
       <div class="mock-msg">
         <span class="mock-av" aria-hidden="true"><img src={`${base}images/brand/lr-logo-color.webp`} alt="" width="79" height="24" loading="lazy" /></span>
         <div class="mock-body">
@@ -106,14 +106,14 @@ const dash = '<span class="no" aria-label="No">–</span>';
           <div class="mock-btns"><span class="mb mb-g">Join</span><span class="mb">Leave</span><span class="mb">Open voice ↗</span><span class="mb mb-r">Close</span></div>
         </div>
       </div>
-      <figcaption>Example card. Names are made up.</figcaption>
+      <figcaption>Example LFG card with fictional names.</figcaption>
     </figure>
   </section>
 
   <!-- ===== three steps ===== -->
   <section class="wrap dsec">
     <p class="dsec-eb">Getting started</p>
-    <h2 class="dsec-h">On the grid in three steps</h2>
+    <h2 class="dsec-h">Make yourself at home</h2>
     <ol class="steps">
       {discordSteps.map((s, i) => (
         <li class="step">
@@ -152,7 +152,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
     <div class="rules">
       <p class="dsec-eb">House rules, short version</p>
       <ul>{discordRules.map((r) => <li>{r}</li>)}</ul>
-      <p class="dsec-small">The full list is pinned in #rules on the server.</p>
+      <p class="dsec-small">Read the full rules in #rules on the server.</p>
     </div>
     <a class="bot" href={`${base}discord/bot/`}>
       <p class="dsec-eb">{discordBotTeaser.eyebrow}</p>
@@ -182,7 +182,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
     <div class="wrap dband-inner">
       <div class="dband-copy">
         <h2 class="display dband-title">Pull up a chair</h2>
-        <p class="dband-text">Say hi in #chat, grab your roles and see who’s around for a race tonight.</p>
+        <p class="dband-text">Say hi in #chat, pick your roles and meet the people behind the builds.</p>
       </div>
       <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn dband-btn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={DISCORD_ICON_PATH} /></svg>
