@@ -84,7 +84,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
         <p class="dband-text">Find people to race with, catch the next event, talk cars, and discover new tracks and race jobs.</p>
         <a class="dband-more" href={`${base}discord/`}>What’s on the server →</a>
       </div>
-      <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn btn-discord dband-btn">
+      <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn dband-btn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={discordPath} /></svg>
         <span>Join the Discord</span>
       </a>
@@ -230,7 +230,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .dband-more:hover { text-decoration-color: #fff; }
   .dband-btn { background: var(--lr-text); color: var(--lr-on-pink); flex: none; }
   .dband-btn:hover { background: #fff; color: var(--lr-on-pink); }
-  .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+  .dband-btn svg { width: 20px; height: 20px; fill: var(--lr-discord); flex: none; } /* white button, blurple logo (Fausto 20.10.) */
   :global(main:has(.dband) + .site-foot) { margin-top: 0; }
 
   @media (max-width: 1100px) {

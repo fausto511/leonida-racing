@@ -184,7 +184,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
         <h2 class="display dband-title">Pull up a chair</h2>
         <p class="dband-text">Say hi in #chat, pick your roles and meet the people behind the builds.</p>
       </div>
-      <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn btn-discord dband-btn">
+      <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn dband-btn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={DISCORD_ICON_PATH} /></svg>
         <span>Join the Discord</span>
       </a>
@@ -303,7 +303,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
   .dband-btn { background: var(--lr-text); color: var(--lr-on-pink); flex: none; }
   .dband-btn:hover { background: #fff; color: var(--lr-on-pink); }
-  .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+  .dband-btn svg { width: 20px; height: 20px; fill: var(--lr-discord); flex: none; } /* white button, blurple logo (Fausto 20.10.) */
   :global(main:has(.dband) + .site-foot) { margin-top: 0; }
 
   @media (max-width: 1100px) {
