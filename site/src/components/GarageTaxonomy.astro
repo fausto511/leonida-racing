@@ -108,7 +108,7 @@ const more = isClass
           <a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><a href={`${base}cars/${isClass ? 'classes' : 'manufacturers'}/`}>{isClass ? 'Classes' : 'Manufacturers'}</a><span aria-hidden="true">/</span><span aria-current="page">{page.name}</span>
         </nav>
         <p class="eyebrow">{isClass ? 'GTA VI Vehicle Class' : 'GTA VI Manufacturer'}</p>
-        <h1 class="display lr-t2 tb-title">{!isClass && <img class="tb-logo" src={`${base}images/logos/${page.slug}-gta-6-logo.webp`} alt="" width="56" height="56" />}{heading}</h1>
+        <h1 class="display lr-t2 tb-title">{!isClass && <img class="tb-logo" src={`${base}images/logos/${page.slug}-gta-6-logo.svg`} alt="" width="56" height="56" />}{heading}</h1>
         <p class="lr-lede">{copy?.band ?? page.intro[0]}</p>
       </div>
       <div class="glance">
@@ -138,7 +138,7 @@ const more = isClass
 
   {!isClass && (
     <nav class="wrap tchips tchips-make" aria-label="Manufacturers" id="mchips" data-collapse>
-      {manufacturerPages.map((m) => <a class:list={['tchip', { on: m.slug === page.slug }]} href={`${base}cars/manufacturers/${m.slug}/`} aria-current={m.slug === page.slug ? 'page' : undefined}><img class="tchip-logo" src={`${base}images/logos/${m.slug}-gta-6-logo.webp`} alt="" width="20" height="20" loading="lazy" />{m.name}<span>{makeCount(m.slug)}</span></a>)}
+      {manufacturerPages.map((m) => <a class:list={['tchip', { on: m.slug === page.slug }]} href={`${base}cars/manufacturers/${m.slug}/`} aria-current={m.slug === page.slug ? 'page' : undefined}><img class="tchip-logo" src={`${base}images/logos/${m.slug}-gta-6-logo.svg`} alt="" width="20" height="20" loading="lazy" />{m.name}<span>{makeCount(m.slug)}</span></a>)}
       <a class="tchip" href={`${base}cars/manufacturers/`}>All manufacturers</a>
     </nav>
   )}

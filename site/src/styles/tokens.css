@@ -30,7 +30,7 @@
   --lr-on-pink: #2A0F22;     /* text on pink */
   --lr-orange: #FF955A;      /* secondary: eyebrows, arrows, hover */
   --lr-lime: #D9F58E;        /* owned / new / ok */
-  --lr-discord: #5865F2;     /* ONLY the "Log in with Discord" button */
+  --lr-discord: #5865F2;     /* Discord blurple: every Discord button and Discord icon (Discord brand rules, Fausto 20.10.) */
   /* logo gradient — brand moments only (Discord band, logo, OG image) */
   --lr-brand-gradient: linear-gradient(100deg, #2A1F9E 0%, #B12A8C 50%, #F26A3D 100%);
 
@@ -279,3 +279,11 @@ main:focus { outline: none; }
 @media (max-width: 860px) {
   .lr-shade, .lr-shade.is-open { background: linear-gradient(180deg, rgba(11,11,20,.6) 0%, rgba(11,11,20,.78) 55%, rgba(11,11,20,.92) 100%); }
 }
+
+/* Discord (Fausto 20.10., Discord brand rules: logo only in its own colours, black or white, never recoloured).
+   Every Discord button: blurple with white logo + text. A logo without its own svg gets one via ::before. */
+.btn.btn-discord.btn-discord { background: var(--lr-discord); border-color: var(--lr-discord); color: #fff; gap: 8px; }
+.btn.btn-discord.btn-discord:hover { background: #4752C4; border-color: #4752C4; color: #fff; }
+.btn-discord svg { fill: currentColor; color: #fff; flex: none; }
+.btn-discord:not(:has(svg))::before { content: ''; width: 18px; height: 18px; flex: none; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z'/%3E%3C/svg%3E") center / contain no-repeat; }
+.ico-discord, .ico-discord svg { color: var(--lr-discord); fill: var(--lr-discord); }

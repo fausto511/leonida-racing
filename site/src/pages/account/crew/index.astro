@@ -23,7 +23,7 @@ const base = import.meta.env.BASE_URL;
 
     <div id="acc-auth" class="panel acc-auth" hidden>
       <p>Sign in with Discord to see your crew.</p>
-      <button type="button" id="acc-signin" class="btn btn-outline">Sign in with Discord</button>
+      <button type="button" id="acc-signin" class="btn btn-discord">Sign in with Discord</button>
     </div>
 
     <div id="acc-body" hidden>
@@ -144,11 +144,12 @@ const base = import.meta.env.BASE_URL;
       const c = crewData.get(m.crew_id);
       if (!c) return '';
       const leads = leaderIds.includes(m.crew_id);
-      const actions = `<span class="crew-pill${m.is_primary ? '' : ' is-pending'}">${m.is_primary ? 'Active Crew' : 'Crew Member'}</span>${leads ? '<span class="crew-pill">Crew Leader</span>' : commissionerIds.includes(m.crew_id) ? '<span class="crew-pill">Commissioner</span>' : ''}`
-        + '<span class="crew-action-btns">'
-        + (m.is_primary || active.length < 2 ? '' : `<button type="button" class="crew-link crew-action-btn" data-primary="${esc(m.crew_id)}">Set as Active Crew</button>`)
-        + `<button type="button" class="crew-link crew-action-btn" data-leave="${esc(m.membership_id)}" data-kind="${leads ? 'leave-leader' : 'leave'}">Leave Crew</button></span>`;
-      return crewCardHtml(c, undefined, { actions });
+      // Fausto 20.10.: one row, only real buttons; roles are a status -> badges at the top. COPY: Claude placeholder.
+      const role = leads ? '<span class="crew-badge b-role">Crew Leader</span>' : commissionerIds.includes(m.crew_id) ? '<span class="crew-badge b-role">Commissioner</span>' : '';
+      const actions = (m.is_primary ? '<span class="crew-pill" title="Your tag appears next to your name">Active crew</span>'
+          : active.length < 2 ? '' : `<button type="button" class="crew-btn crew-action-btn" data-primary="${esc(m.crew_id)}" title="Show this crew's tag next to your name">Set active</button>`)
+        + `<button type="button" class="crew-btn crew-btn-leave crew-action-btn" data-leave="${esc(m.membership_id)}" data-kind="${leads ? 'leave-leader' : 'leave'}"${leads ? ' title="Leaving also ends your leader role"' : ''}>Leave</button>`;
+      return crewCardHtml(c, undefined, { actions, badges: role });
     }).join('')}</div>`;
     const reqs = pending.length ? `<div class="mem-pending">${pending.map((m) => `<div class="panel mem-empty-card"><p>Your request to join ${crewTagHtml(m.tag, m.color, 'sm')} <strong>${esc(m.crew_name)}</strong> is waiting for the crew to approve it.</p><button type="button" class="btn btn-outline" data-leave="${esc(m.membership_id)}" data-kind="withdraw">Withdraw</button></div>`).join('')}</div>` : '';
     memEl.innerHTML = invHtml + head + msg + cards + reqs;
@@ -186,7 +187,8 @@ const base = import.meta.env.BASE_URL;
     if (b.dataset.armed !== '1') {
       b.dataset.armed = '1';
       // Leaving as crew leader also ends the leader role; the crew stays (Fausto 2026-10-07). COPY: Claude placeholder.
-      b.textContent = b.dataset.kind === 'leave-leader' ? 'Click again — you also lose the leader role' : b.dataset.kind === 'leave' ? 'Click again to leave' : 'Click again to withdraw';
+      b.textContent = b.dataset.kind === 'leave-leader' ? 'Leave and end leader role' : b.dataset.kind === 'leave' ? 'Click again to leave' : 'Click again to withdraw';
+      b.classList.add('is-armed');
       setTimeout(() => { if (b.isConnected && b.dataset.armed === '1') render(); }, 4000);
       return;
     }

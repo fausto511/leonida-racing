@@ -84,7 +84,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
         <p class="dband-text">Find people to race with, catch the next event, talk cars, and discover new tracks and race jobs.</p>
         <a class="dband-more" href={`${base}discord/`}>What’s on the server →</a>
       </div>
-      <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn dband-btn">
+      <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn btn-discord dband-btn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d={discordPath} /></svg>
         <span>Join the Discord</span>
       </a>
@@ -146,15 +146,15 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
       const c = hit.car;
       const ph = c.photo
         ? `<img src="${B}images/vehicles/${c.id}-640.webp" alt="">`
-        : `<img class="ph-bg" src="${B}images/garage/garage-hero-placeholder-640.webp" alt=""><img class="ph-logo" src="${B}images/logos/${c.logo}-gta-6-logo.webp" alt="">`;
+        : `<img class="ph-bg" src="${B}images/garage/garage-hero-placeholder-640.webp" alt=""><img class="ph-logo" src="${B}images/logos/${c.logo}-gta-6-logo.svg" alt="">`;
       const mk = D.makes.find((m) => m.slug === c.logo);
       const cl = D.classes.find((p) => p.slug === c.clsSlug);
-      show(`${B}cars/vehicles/${c.id}/`, c.model, `<img src="${B}images/logos/${c.logo}-gta-6-logo.webp" alt="">${esc(c.make)}`, ph, 'the car',
+      show(`${B}cars/vehicles/${c.id}/`, c.model, `<img src="${B}images/logos/${c.logo}-gta-6-logo.svg" alt="">${esc(c.make)}`, ph, 'the car',
         (mk ? chip(`${B}cars/manufacturers/${mk.slug}/`, `All ${esc(mk.name)} cars`, 'Manufacturer') : '') + (cl ? chip(`${B}cars/classes/${cl.slug}/`, esc(cl.name), 'Class') : ''));
     } else if (hit.slug && hit.name) {
       const isMake = hit.kind === 'make';
       const href = `${B}cars/${isMake ? 'manufacturers' : 'classes'}/${hit.slug}/`;
-      const ph = isMake ? `<img class="ph-bg" src="${B}images/garage/garage-hero-placeholder-640.webp" alt=""><img class="ph-logo" src="${B}images/logos/${hit.slug}-gta-6-logo.webp" alt="">` : `<img src="${B}images/garage/cars-band-640.webp" alt="">`;
+      const ph = isMake ? `<img class="ph-bg" src="${B}images/garage/garage-hero-placeholder-640.webp" alt=""><img class="ph-logo" src="${B}images/logos/${hit.slug}-gta-6-logo.svg" alt="">` : `<img src="${B}images/garage/cars-band-640.webp" alt="">`;
       show(href, isMake ? `${hit.name} Cars` : hit.name, isMake ? 'Manufacturer' : 'Class', ph, 'the page', '');
     }
   } else if (first && legacy[first]) {

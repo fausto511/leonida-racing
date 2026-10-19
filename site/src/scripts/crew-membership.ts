@@ -24,6 +24,9 @@ export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null
   let session: any = null;
   let ownDriverId: string | null = null;
   let mine: Mine[] = [];
+  let leads = new Set<string>();
+  let armed: string | null = null;
+  let armTimer: ReturnType<typeof setTimeout> | undefined;
   let busy = false;
   const base = import.meta.env.BASE_URL;
 
@@ -39,8 +42,13 @@ export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null
       const id = card.dataset.crewId!;
       const m = mine.find((x) => x.crew_id === id);
       if (m?.status === 'invited') slot.innerHTML = `<span class="crew-pill">Invited</span><a class="crew-link" href="${base}account/crew/">Accept in My Account</a>`;
-      else if (m?.status === 'active') slot.innerHTML = `<span class="crew-pill">${m.is_primary ? 'Active Crew' : 'Crew Member'}</span>`;
-      else if (m) slot.innerHTML = `<span class="crew-pill is-pending">Request Sent</span><button type="button" class="crew-link crew-withdraw" data-withdraw="${esc(id)}">Withdraw</button>`;
+      // Fausto 20.10.: the status button itself toggles back (no second button).
+      // Leaders leave via My Account (leadership handover, DEC-0144). COPY: Claude placeholder.
+      else if (m?.status === 'active' && leads.has(id)) slot.innerHTML = `<a class="crew-pill" href="${base}account/crew/" title="Manage your crew in My Account">Crew Leader</a>`;
+      else if (m?.status === 'active') slot.innerHTML = armed === id
+        ? `<button type="button" class="crew-pill crew-toggle is-armed" data-leave="${esc(id)}">Click again to leave</button>`
+        : `<button type="button" class="crew-pill crew-toggle" data-leave="${esc(id)}" aria-label="${m.is_primary ? 'Active Crew' : 'Crew Member'} — leave crew"><span class="t-def">${m.is_primary ? 'Active Crew' : 'Crew Member'}</span><span class="t-hov" aria-hidden="true">Leave crew</span></button>`;
+      else if (m) slot.innerHTML = `<button type="button" class="crew-pill is-pending crew-toggle" data-withdraw="${esc(id)}" aria-label="Request sent — withdraw"><span class="t-def">Request Sent</span><span class="t-hov" aria-hidden="true">Withdraw</span></button>`;
       else if (full) slot.innerHTML = `<span class="crew-pill is-pending" title="You can be in up to ${CREW_LIMIT} crews, open requests included">${CREW_LIMIT}-Crew Limit Reached</span>`;
       // DEC-0144: open crews -> join at once; request crews -> leader/commissioner approves. COPY: Claude placeholder.
       else slot.innerHTML = crewById(id)?.join_mode === 'open'
@@ -65,6 +73,7 @@ export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null
 
   async function loadMine() {
     mine = [];
+    leads = new Set();
     if (!live) { mine = readSample().map((id) => ({ membership_id: id, crew_id: id, status: 'pending' as const })); return; }
     ownDriverId = null;
     if (!session) return;
@@ -72,6 +81,8 @@ export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null
     const own = await sb.from('drivers').select('driver_id').eq('auth_user_id', session.user.id).maybeSingle();
     ownDriverId = own.data?.driver_id ?? null;
     if (!ownDriverId) return;
+    const roles = await sb.from('hub_roles').select('role, crew_id').eq('driver_id', ownDriverId).eq('role', 'crew_leader');
+    leads = new Set(((roles.data ?? []) as { crew_id: string }[]).map((r) => r.crew_id));
     let res: any = await sb.from('crew_memberships').select('membership_id, crew_id, status, is_primary').eq('driver_id', ownDriverId);
     if (res.error) res = await sb.from('crew_memberships').select('membership_id, crew_id, status').eq('driver_id', ownDriverId);
     mine = (res.data ?? []) as Mine[];
@@ -115,12 +126,32 @@ export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null
     render(error ? 'That did not work. Please try again.' : 'Request withdrawn.', Boolean(error));
   }
 
+  // Leave = two clicks (first arms the button for 4 s), same pattern as My Account.
+  async function leave(id: string) {
+    if (busy) return;
+    if (armed !== id) {
+      armed = id; render();
+      clearTimeout(armTimer); armTimer = setTimeout(() => { armed = null; render(); }, 4000);
+      return;
+    }
+    clearTimeout(armTimer); armed = null;
+    const m = mine.find((x) => x.crew_id === id);
+    if (!m) return;
+    busy = true;
+    const { error } = await getSupabase().from('crew_memberships').delete().eq('membership_id', m.membership_id);
+    busy = false;
+    await loadMine();
+    render(error ? 'That did not work. Please try again.' : 'You left the crew.', Boolean(error));
+  }
+
   root.addEventListener('click', (ev) => {
     const t = ev.target as HTMLElement;
     const j = t.closest<HTMLButtonElement>('[data-join]');
     const w = t.closest<HTMLButtonElement>('[data-withdraw]');
     if (j) { j.disabled = true; requestJoin(j.dataset.join!).finally(() => { j.disabled = false; }); }
+    const l = t.closest<HTMLButtonElement>('[data-leave]');
     if (w) { w.disabled = true; withdraw(w.dataset.withdraw!).finally(() => { w.disabled = false; }); }
+    if (l) leave(l.dataset.leave!);
   });
 
   return {

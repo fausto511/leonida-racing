@@ -11,9 +11,9 @@ import { readdirSync } from 'node:fs';
 import { gtaTitles } from '../../../data/gta-titles';
 import path from 'node:path';
 
-// Manufacturer logos that exist in public/images/logos (<slug>-gta-6-logo.webp)
+// Manufacturer logos that exist in public/images/logos (<slug>-gta-6-logo.svg)
 const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
-  .filter((f) => f.endsWith('-gta-6-logo.webp')).map((f) => f.replace('-gta-6-logo.webp', '')).sort();
+  .filter((f) => f.endsWith('-gta-6-logo.svg')).map((f) => f.replace('-gta-6-logo.svg', '')).sort();
 ---
 <Base title="Vehicles — Moderator" description="Internal: maintain vehicle data." section="moderator" noindex>
   <section class="wrap mod-wrap">

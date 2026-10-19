@@ -157,7 +157,7 @@ export function lapTime(ms: number) {
   const m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000), t = ms % 1000;
   return `${m}:${String(s).padStart(2, '0')}.${String(t).padStart(3, '0')}`;
 }
-const logoUrl = (slug: string | null) => (slug ? `${base}images/logos/${slug}-gta-6-logo.webp` : null);
+const logoUrl = (slug: string | null) => (slug ? `${base}images/logos/${slug}-gta-6-logo.svg` : null);
 const inGarage = (id: string) => vehicleOptions.some((v) => v.id === id);
 const garageUrl = (id: string) => `${base}cars/vehicles/${encodeURIComponent(id)}/`;
 const vById = new Map(vehicleOptions.map((v) => [v.id, v]));

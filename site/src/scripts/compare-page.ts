@@ -22,7 +22,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
   const byId = new Map(ALL.map((c) => [c.id, c]));
   const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
   const img = (c: CmpCar, w = 640) => `${base}images/vehicles/${c.id}-${w}.webp`;
-  const logo = (c: CmpCar) => `${base}images/logos/${c.logo}-gta-6-logo.webp`;
+  const logo = (c: CmpCar) => `${base}images/logos/${c.logo}-gta-6-logo.svg`;
   const ph = `${base}images/garage/garage-hero-placeholder-640.webp`;
   const vhref = (c: CmpCar) => `${base}cars/vehicles/${c.id}/`;
   const classSlug = (n: string) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -332,7 +332,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     const g = t.closest<HTMLButtonElement>('[data-gar]');
     if (g) {
       e.stopPropagation();
-      if (!me) { bubble(g, `Log in to track the cars you own.${backendConfigured ? '<button type="button" class="btn btn-p btn-sm" data-login>Log in with Discord</button>' : ''}`, 6000); return; }
+      if (!me) { bubble(g, `Log in to track the cars you own.${backendConfigured ? '<button type="button" class="btn btn-discord btn-sm" data-login>Log in with Discord</button>' : ''}`, 6000); return; }
       const id = g.dataset.gar!, next = !owned.has(id);
       g.disabled = true;
       try { await setOwned(me, id, next); next ? owned.add(id) : owned.delete(id); owners.set(id, Math.max(0, (owners.get(id) ?? 0) + (next ? 1 : -1))); render(); }

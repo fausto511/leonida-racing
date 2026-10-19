@@ -54,7 +54,7 @@ const jsonLd = entries.length ? [{
             {entries.map((e, i) => (
               <tr>
                 <td class="rk-pos">{i + 1}</td>
-                <td><a class="rk-car" href={`${base}cars/vehicles/${e.vehicle.id}/`}><img src={`${base}images/logos/${e.vehicle.logoSlug}-gta-6-logo.webp`} alt="" width="18" height="18" loading="lazy" /><span><small>{e.vehicle.make}</small> {e.vehicle.model}</span></a></td>
+                <td><a class="rk-car" href={`${base}cars/vehicles/${e.vehicle.id}/`}><img src={`${base}images/logos/${e.vehicle.logoSlug}-gta-6-logo.svg`} alt="" width="18" height="18" loading="lazy" /><span><small>{e.vehicle.make}</small> {e.vehicle.model}</span></a></td>
                 <td class="rk-muted">{e.vehicle.classes[0]}</td>
                 <td class="rk-val">{formatVehicleValue(e.value)}</td>
                 <td class="rk-muted">{valueSourceLabels[e.value.source_type]}{e.value.game_release_id && releaseById[e.value.game_release_id] ? ` · ${releaseById[e.value.game_release_id].name}` : ''}</td>

@@ -435,7 +435,7 @@ document.addEventListener('click', async (e) => {
   if (gar) {
     e.preventDefault();
     if (!driverId) {
-      bubble(gar, backendConfigured ? 'Log in to track the cars you own.<button type="button" class="btn btn-p btn-sm" data-login>Log in with Discord</button>' : 'Log in to track the cars you own.', 6000);
+      bubble(gar, backendConfigured ? 'Log in to track the cars you own.<button type="button" class="btn btn-discord btn-sm" data-login>Log in with Discord</button>' : 'Log in to track the cars you own.', 6000);
       return;
     }
     const id = gar.dataset.garage!;

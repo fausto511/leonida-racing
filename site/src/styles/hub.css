@@ -31,6 +31,7 @@
 .crew-badges { display: flex; gap: 6px; margin-top: 10px; height: 20px; }
 .crew-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 4px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; background: rgba(242,75,157,.16); color: var(--lr-pink); }
 .crew-badge.b-partner { background: rgba(255,149,90,.16); color: var(--lr-orange); }
+.crew-badge.b-role { background: rgba(200,200,222,.12); color: var(--lr-text); }
 .crew-badge.b-official { background: rgba(217,245,142,.14); color: var(--lr-lime); }
 .crew-chips { display: flex; gap: 6px; margin-top: 12px; height: 26px; overflow: hidden; flex-wrap: nowrap; }
 .crew-chip { flex: none; display: inline-flex; align-items: center; height: 26px; padding: 0 9px; border-radius: 999px; background: var(--lr-raised); color: #E4E4EC; font-size: 12px; font-weight: 600; white-space: nowrap; }
@@ -89,6 +90,7 @@
 .ev-by .crew-tag { vertical-align: 0; }
 .ev-dc, .ev-watch { display: inline-flex; align-items: center; gap: 6px; color: var(--lr-text); font-weight: 600; text-decoration: none; }
 .ev-dc:hover, .ev-watch:hover { text-decoration: underline; text-underline-offset: 3px; }
+.ev-dc svg, .crew-icon-dc svg { color: var(--lr-discord); fill: var(--lr-discord); }
 .ev-dc.is-disabled, .ev-watch.is-disabled { opacity: .5; cursor: not-allowed; }
 .ev-watch + .ev-watch { margin-left: 10px; }
 .ev-info { color: var(--lr-orange); font-weight: 600; }
@@ -221,6 +223,15 @@
 .crew-join-btn:disabled { opacity: .6; cursor: default; }
 .crew-pill { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid rgba(217,245,142,.45); color: var(--lr-lime); font-size: 14px; font-weight: 600; white-space: nowrap; }
 .crew-pill.is-pending { border-color: var(--lr-line-strong); color: var(--lr-muted); }
+/* Status button that toggles back (Fausto 20.10.): hover shows the undo action */
+a.crew-pill { text-decoration: none; }
+.crew-toggle { font: inherit; font-size: 14px; font-weight: 600; background: transparent; cursor: pointer; }
+.crew-toggle .t-hov { display: none; }
+.crew-toggle:hover .t-def, .crew-toggle:focus-visible .t-def { display: none; }
+.crew-toggle:hover .t-hov, .crew-toggle:focus-visible .t-hov { display: inline; }
+.crew-toggle:hover, .crew-toggle:focus-visible { border-color: rgba(255,122,122,.55); color: #FF8A8A; }
+.crew-toggle.is-armed { border-color: #FF8A8A; background: rgba(255,122,122,.1); color: #FF8A8A; }
+.crew-toggle:disabled { opacity: .6; cursor: default; }
 .crew-link { color: var(--lr-text); font-size: 13px; font-weight: 600; text-decoration: none; padding: 0; border: 0; background: none; }
 .crew-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .crew-link.crew-withdraw, .crew-withdraw { font: inherit; font-size: 12px; font-weight: 600; background: none; border: 0; padding: 0; color: var(--lr-muted); cursor: pointer; }
@@ -303,3 +314,11 @@ a.ev-next-copy { text-decoration: none; }
 .mem-role { display: inline-block; margin-left: .35rem; padding: .05rem .4rem; border: 1px solid var(--gh-line); border-radius: 999px; font-size: .66rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--gh-muted); vertical-align: middle; }
 .mem-actions { flex-wrap: wrap; }
 .req-solo { color: var(--gh-yellow); }
+
+/* Account crew cards (Fausto 20.10.): one row of real buttons, no wrapping */
+.crew-btn { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid rgba(251,247,234,.26); background: transparent; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; flex: none; }
+.crew-btn:hover { border-color: var(--lr-text); }
+.crew-btn-leave { border-color: rgba(255,122,122,.45); color: #FF8A8A; }
+.crew-btn-leave:hover, .crew-btn-leave.is-armed { border-color: #FF8A8A; background: rgba(255,122,122,.1); }
+.crew-actions:has(.is-armed) > :not(.is-armed) { display: none; }
+.crew-actions .crew-pill { flex: none; }

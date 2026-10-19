@@ -37,7 +37,7 @@ function init(root: HTMLElement) {
     url.hash = '';
     getSupabase().auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: url.toString(), scopes: 'identify email guilds.join' } });
   };
-  const loginBtn = (what: string) => backendConfigured ? `<button type="button" class="btn btn-p btn-sm" data-login="${what}">Log in with Discord</button>` : '';
+  const loginBtn = (what: string) => backendConfigured ? `<button type="button" class="btn btn-discord btn-sm" data-login="${what}">Log in with Discord</button>` : '';
 
   // ---- compare ---------------------------------------------------------------
   const cmpBtn = $('vh-cmp') as HTMLButtonElement;

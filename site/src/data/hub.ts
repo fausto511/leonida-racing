@@ -229,7 +229,7 @@ const iconPin = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" str
 /** opts.actions: HTML for the action area at the bottom of the card (My Account:
  *  status + Set as Active Crew / Leave Crew). Without it, cards that can be joined
  *  get an empty .crew-join-slot there, filled by scripts/crew-membership.ts (2026-10-07). */
-export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: boolean; actions?: string } = {}): string {
+export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: boolean; actions?: string; badges?: string } = {}): string {
   // Redesign (boards Community / Crews): crew-colour bar on top, tag + name, badges, focus chips,
   // two-line description, "region · languages · members", foot with Discord/SC + Request Invite.
   // Blocks keep fixed heights so lines sit at the same place on every card (Fausto 2026-10-07).
@@ -248,6 +248,7 @@ export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: bo
     c.is_official ? '<span class="crew-badge b-official" title="Official crew of this site or of the original creators">Official</span>' : '',
     c.is_featured ? '<span class="crew-badge b-featured">Featured</span>' : '',
     c.is_partner ? '<span class="crew-badge b-partner">Partner</span>' : '',
+    opts.badges ?? '',
   ].join('');
   const scLink = sc ? `<a class="crew-icon-link crew-icon-sc" href="${esc(sc)}" target="_blank" rel="noopener" title="Social Club" aria-label="Social Club">SC</a>` : '';
   const dcLink = discord ? `<a class="crew-icon-link crew-icon-dc" href="${esc(discord)}" target="_blank" rel="noopener" title="Discord" aria-label="Discord">${iconDiscord}</a>`

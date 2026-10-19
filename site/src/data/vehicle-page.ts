@@ -42,7 +42,7 @@ export function startTileHtml(model: string, submitHref: string): string {
 function thumb(v: VehicleOption): string {
   return v.photo
     ? `<img class="vg-thumb" src="${base}images/vehicles/${v.id}-640.webp" alt="" width="64" height="36" loading="lazy" />`
-    : `<span class="vg-thumb vg-thumb-logo"><img class="vg-thumb-bg" src="${base}images/garage/garage-hero-placeholder-640.webp" alt="" width="64" height="36" loading="lazy" /><img class="vg-thumb-l" src="${base}images/logos/${v.logoSlug}-gta-6-logo.webp" alt="" width="22" height="22" loading="lazy" /></span>`;
+    : `<span class="vg-thumb vg-thumb-logo"><img class="vg-thumb-bg" src="${base}images/garage/garage-hero-placeholder-640.webp" alt="" width="64" height="36" loading="lazy" /><img class="vg-thumb-l" src="${base}images/logos/${v.logoSlug}-gta-6-logo.svg" alt="" width="22" height="22" loading="lazy" /></span>`;
 }
 
 /** Class list sorted by each car's best lap; cars without a lap at the bottom. */

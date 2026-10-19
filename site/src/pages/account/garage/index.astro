@@ -26,7 +26,7 @@ const vehicleIndex = [...vehicleOptions]
 
     <div id="acc-auth" class="panel acc-auth" hidden>
       <p>Sign in with Discord to see your garage.</p>
-      <button type="button" id="acc-signin" class="btn btn-outline">Sign in with Discord</button>
+      <button type="button" id="acc-signin" class="btn btn-discord">Sign in with Discord</button>
     </div>
 
     <div id="acc-body" hidden>
@@ -134,7 +134,7 @@ const vehicleIndex = [...vehicleOptions]
   let owned: string[] = []; // in the order they were added
   let fresh: string | null = null;
 
-  const logo = (v: V) => `<span class="mg-logo"><img src="${base}images/logos/${esc(v.logo)}-gta-6-logo.webp" alt="" width="22" height="22" loading="lazy" /></span>`;
+  const logo = (v: V) => `<span class="mg-logo"><img src="${base}images/logos/${esc(v.logo)}-gta-6-logo.svg" alt="" width="22" height="22" loading="lazy" /></span>`;
 
   function msg(text: string, error = false) {
     const el = $('mg-msg');
