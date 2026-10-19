@@ -114,15 +114,22 @@ export const guideSections: GuideSection[] = [
   {
     id: 'granforma',
     images: [IMG.granforma],
-    title: 'GranForma, the Zorrusso, and Changing Car Brands',
+    title: 'Familiar Cars, Different Badges: Buckingham and GranForma',
     status: 'Community Identification',
     paragraphs: [
-      `A familiar exotic with unfamiliar lettering: coverage of the screenshots accompanying Bloomberg’s October 14 feature identifies a Zorrusso-like car with rear branding read as <strong>GranForma</strong>. The GTA Online Zorrusso wears Pegassi branding, making this a detail worth watching.`,
-      `Does GranForma mean a new GTA VI manufacturer, a vehicle customizer, or a different version of a familiar car? That remains unresolved. The image raises the possibility of changed branding for returning designs; it does not confirm a wider reshuffle of manufacturers. A familiar body alone is not enough to carry an old manufacturer or model name into GTA VI.`,
+      `A familiar shape does not always come with a familiar badge. GTA VI is changing the branding on some returning cars, so the manufacturer you remember from GTA Online may no longer be the one on the bodywork.`,
+      `The Jubilee is a clear example. Known as the Enus Jubilee in GTA Online, the Rolls-Royce Cullinan-inspired SUV now wears Buckingham branding in GTA VI’s Extended Look. That brings a familiar luxury SUV under a marque previously known for aircraft and the Tug boat. The car returns; its place in GTA’s fictional industry changes.`,
+      `The Windsor family follows the same move. The closed Windsor and open Windsor Drop return as Buckingham models in GTA VI, after appearing in GTA Online as the Enus Windsor and Enus Windsor Drop. Their Rolls-Royce Wraith and Dawn inspirations put coupe and convertible alongside the Cullinan-inspired Jubilee. The Windsor Drop is visible in the Launch Trailer.`,
+      `A familiar exotic with unfamiliar lettering tells another part of the story. The Zorrusso-associated car in the Rockstar images published with Bloomberg’s October 14 feature carries <strong>GranForma</strong> lettering on the rear, replacing the familiar Pegassi branding. Its real-world inspiration is the Italdesign Zerouno. Whether GranForma denotes the manufacturer, a customizer or a particular version remains unresolved.`,
+      `The pattern suggests that Rockstar may be bringing some fictional marques into closer alignment with their real-world inspirations. It is a change worth following if you know the older cars—or organize your garage by manufacturer. Rockstar has not announced a rule for the full lineup, and a changed badge on one car does not mean every model under its old marque is moving with it.`,
     ],
     sources: [
       { label: 'RockstarINTEL — 2 More GTA 6 Screenshots Released', url: 'https://rockstarintel.com/2-more-gta-6-screenshots-released/', note: 'October 14, 2026: reports Rockstar-supplied Bloomberg images and the GranForma reading; model and brand interpretation are not a Rockstar announcement.' },
       { label: 'Bloomberg — The Making of Grand Theft Auto VI', url: 'https://www.bloomberg.com/features/2026-grand-theft-auto-6-making-of/', note: 'Original feature associated with the images.' },
+      { label: 'Rockstar Games — GTA VI: An Extended Look', url: 'https://www.youtube.com/watch?v=tJbzMqJGH4k', note: 'Official footage used for the Jubilee badge comparison; the manufacturer identification is not a written Rockstar announcement.' },
+      { label: 'GTABase — Jubilee in GTA VI', url: 'https://www.gtabase.com/gta-6/vehicles/jubilee', note: 'Community identification of the Buckingham Jubilee.' },
+      { label: 'GTABase — Jubilee in GTA Online', url: 'https://www.gtabase.com/grand-theft-auto-v/vehicles/enus-jubilee', note: 'The model’s earlier Enus identity.' },
+      { label: 'GTABase — Windsor Drop in GTA VI', url: 'https://www.gtabase.com/vehicles/gta-6/windsor-drop', note: 'Community identification of the returning convertible as a Buckingham; the open body is visible in Launch Trailer imagery.' },
     ],
   },
   {
@@ -308,7 +315,7 @@ export const guideCoverage: { name: string; text: string }[] = [
 export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'How does the vehicle scanner work in GTA VI?', a: 'Rob Nelson describes a phone scanner that shows whether a car is locked, has an alarm or tracker, what it is worth at a Pay ’n’ Spray or specialty car fence, and what it costs to register for yourself. Different vehicles can require tools such as a Slim Jim or key cloner.' },
   { q: 'Can changing cars or clothes help you escape the police in GTA VI?', a: 'Yes. In Nelson’s demonstration, switching to a car the police do not recognize lowers their perception of you. He also says buying and wearing a new outfit removes his current heat. Glasses, a cap, or a haircut alone do not address clothing the police already recognize.' },
-  { q: 'Is GranForma replacing Pegassi for the Zorrusso in GTA VI?', a: 'Reports identify GranForma lettering on a Zorrusso-like car in the Bloomberg screenshots. Whether it denotes a manufacturer, customizer or variant remains unconfirmed; the image does not establish a wider Pegassi replacement.' },
+  { q: 'Is GranForma replacing Pegassi for the Zorrusso in GTA VI?', a: 'The Zorrusso-associated car shown in Rockstar images published with Bloomberg’s October 14 feature carries GranForma lettering instead of the familiar Pegassi branding. Whether GranForma is the manufacturer, a customizer or a particular version remains unresolved. It does not establish a replacement for Pegassi across the lineup.' },
   { q: 'Can I call my personal vehicle in GTA VI?', a: 'Nelson says personal vehicles can be called and carry spare outfits and purchased weapons. Delivery conditions remain unspecified.' },
   { q: 'Which cars has Rockstar confirmed for GTA VI?', a: 'Rockstar has named cars including the ’95 Grotti Cheetah and ’67 Vapid Dominator Buggy. More cars appear in official footage without being named; their model names are often community identifications. Rockstar has not published a complete official lineup. Our Cars section focuses on racing-relevant cars.' },
   { q: 'How does stealing cars work in GTA VI?', a: 'Rockstar North’s Rob Nelson described a tiered system. Some parked vehicles require tools such as a Slim Jim or key cloner, while occupied vehicles can still be carjacked. A phone scanner can provide information about a vehicle’s security, tracker, value, and registration cost.' },
