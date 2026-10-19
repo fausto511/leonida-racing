@@ -473,9 +473,9 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
   :global(html.lr-authed) .dband-guest { display: none; }
   .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: #fff; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.5); }
   .dband-more:hover { text-decoration-color: #fff; }
-  .dband-btn { background: var(--lr-text); color: var(--lr-on-pink); flex: none; }
-  .dband-btn:hover { background: #fff; color: var(--lr-on-pink); }
-  .dband-btn svg { width: 20px; height: 20px; fill: var(--lr-discord); flex: none; } /* white button, blurple logo (Fausto 20.10.) */
+  .dband-btn { background: var(--lr-text); color: var(--lr-discord); flex: none; }
+  .dband-btn:hover { background: #fff; color: var(--lr-discord); }
+  .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; } /* white button, logo + text blurple (Fausto 20.10.) */
   /* the footer's top margin would leave a gap under the band */
   :global(main:has(.dband) + .site-foot) { margin-top: 0; }
 
