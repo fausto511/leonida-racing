@@ -6,7 +6,7 @@ import { fetchLiveCrews, fetchLiveEvents, pickFeaturedCrews } from './hub-live';
 import { createEventRsvp } from './event-rsvp';
 import { createCrewMembership } from './crew-membership';
 import { isSelected, toggleSelected } from './compare';
-import { localizeTimes, sampleCrews, sampleEventsUpcoming, eventTypeLabels, type HubEvent } from '../data/hub';
+import { localizeTimes, buildCrews, buildEvents, eventTypeLabels, type HubEvent } from '../data/hub';
 import { homeEventRow, homeOpenSpotRow, homeCrewRow, homeLbRow, type TRow } from '../data/home';
 import { lapTime } from '../data/leaderboard';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
@@ -51,26 +51,28 @@ document.querySelectorAll<HTMLButtonElement>('[data-compare]').forEach((btn) => 
 // Community: loading rows in the HTML -> live rows; sample rows only as a fallback
 // when nothing live comes back (Fausto 15.10.: no flash of fake events/crews)
 // ---------------------------------------------------------------------------
+const isOver = (e: HubEvent) => new Date(e.ends_at ?? new Date(new Date(e.starts_at).getTime() + 3 * 3600e3).toISOString()).getTime() < Date.now();
 const evRoot = $('home-events')!;
 const crewRoot = $('home-crews')!;
 const rsvp = createEventRsvp(evRoot);
 const crewJoin = createCrewMembership(crewRoot, null);
+// Fallback = build snapshot of the REAL events/crews (community.generated.json), no samples (Fausto 19.10.)
 function sampleEvents() {
-  const ev = sampleEventsUpcoming().filter((e) => e.status !== 'cancelled').slice(0, 3);
+  const ev = buildEvents.filter((e) => e.status !== 'cancelled' && !isOver(e)).slice(0, 3);
   evRoot.innerHTML = ev.map(homeEventRow).join('') + Array.from({ length: Math.max(0, 3 - ev.length) }, homeOpenSpotRow).join('');
   localizeTimes(evRoot);
-  rsvp.setEvents(ev, false);
+  rsvp.setEvents(ev, true);
   rsvp.renderRsvps();
 }
 function sampleCrewRows() {
-  crewRoot.innerHTML = sampleCrews.slice(0, 4).map((c) => homeCrewRow(c, true)).join('');
-  crewJoin.setCrews(sampleCrews, false);
+  const list = pickFeaturedCrews(buildCrews, 4);
+  crewRoot.innerHTML = list.map((c) => homeCrewRow(c, false)).join('');
+  crewJoin.setCrews(buildCrews, true);
 }
 if (!backendConfigured) { sampleEvents(); sampleCrewRows(); }
 // safety net: never leave the loading rows standing (slow or failed requests)
 window.setTimeout(() => { if (evRoot.querySelector('.crow-sk')) sampleEvents(); if (crewRoot.querySelector('.crow-sk')) sampleCrewRows(); }, 8000);
 
-const isOver = (e: HubEvent) => new Date(e.ends_at ?? new Date(new Date(e.starts_at).getTime() + 3 * 3600e3).toISOString()).getTime() < Date.now();
 
 if (backendConfigured) fetchLiveEvents().then(async (live) => {
   const next = (live ?? []).filter((e) => e.status !== 'cancelled' && !isOver(e)).slice(0, 3);

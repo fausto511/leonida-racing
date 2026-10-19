@@ -7,14 +7,15 @@
 import Base from '../../layouts/Base.astro';
 import DiscordBand from '../../components/DiscordBand.astro';
 import '../../styles/hub.css';
-import { sampleEventsUpcoming, sampleCrews, eventRowHtml, eventOpenSpotHtml, crewCardHtml } from '../../data/hub';
+import { buildEvents, buildCrews, eventRowHtml, eventOpenSpotHtml, crewCardHtml } from '../../data/hub';
 
 const base = import.meta.env.BASE_URL;
 const EV_N = 4;
 const CREW_N = 5;
-const nextEventsHtml = sampleEventsUpcoming().filter((e) => e.status !== 'cancelled').slice(0, EV_N).map((e) => eventRowHtml(e, { rsvp: true, sample: true })).join('') + eventOpenSpotHtml();
-const featured = [...sampleCrews.filter((c) => c.is_featured), ...sampleCrews.filter((c) => !c.is_featured)].slice(0, CREW_N);
-const crewsHtml = featured.map((c) => crewCardHtml(c, undefined, { sample: true })).join('');
+const upcoming = buildEvents.filter((e) => e.status !== 'cancelled').slice(0, EV_N);
+const nextEventsHtml = (upcoming.length ? upcoming.map((e) => eventRowHtml(e, { rsvp: true })).join('') : '<p class="ev-empty">No upcoming events yet.</p>') + eventOpenSpotHtml();
+const featured = [...buildCrews.filter((c) => c.is_featured), ...buildCrews.filter((c) => !c.is_featured)].slice(0, CREW_N);
+const crewsHtml = featured.map((c) => crewCardHtml(c)).join('');
 const evChips: [string, string][] = [['', 'All events'], ['race', 'Races'], ['time-attack', 'Time Attack'], ['league', 'Leagues'], ['car-meet', 'Car meets'], ['cruise', 'Cruises']];
 const crewChips: [string, string][] = [['', 'Featured'], ['racing', 'Racing'], ['time-attack', 'Time Attack'], ['league', 'League'], ['drift', 'Drift'], ['car-meet', 'Car meet'], ['cruise', 'Cruise']];
 const entries = [
@@ -70,7 +71,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
         <p class="sub"><span class="lg">Races, leagues, car meets and cruises hosted by the community.</span><span class="sm">Hosted by the community. All times in your local time.</span></p>
       </div>
       <div class="cm-head-r">
-        <span class="sample" id="cm-ev-flag" title="Fictional events until GTA VI is out">Sample until launch</span>
+        <span class="sample" id="cm-ev-flag" hidden></span>
         <a class="cm-more" href={`${base}community/events/`}>Open the full calendar →</a>
       </div>
     </div>
@@ -92,7 +93,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
         <p class="sub"><span class="lg">Find a crew that drives the way you do. Request an invite, the crew leader approves.</span><span class="sm">Request an invite, the crew leader approves.</span></p>
       </div>
       <div class="cm-head-r">
-        <span class="sample" id="cm-crew-flag" title="Fictional crews until real crews are listed">Sample until launch</span>
+        <span class="sample" id="cm-crew-flag" hidden></span>
         <a class="cm-more" href={`${base}community/crews/`}>Browse all crews →</a>
       </div>
     </div>
@@ -197,7 +198,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
 </style>
 
 <script>
-  import { eventRowHtml, eventOpenSpotHtml, crewCardHtml, crewTagHtml, localizeTimes, sampleEventsUpcoming, sampleCrews, esc, type HubEvent, type HubCrew } from '../../data/hub';
+  import { eventRowHtml, eventOpenSpotHtml, crewCardHtml, crewTagHtml, localizeTimes, buildEvents, buildCrews, esc, type HubEvent, type HubCrew } from '../../data/hub';
   import { createCrewMembership } from '../../scripts/crew-membership';
   import { fetchLiveEvents, fetchLiveCrews } from '../../scripts/hub-live';
   import { createEventRsvp } from '../../scripts/event-rsvp';
@@ -210,8 +211,8 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   // ---- Next up: type chips over the upcoming events ----
   const evRoot = $('hub-ev-root');
   const rsvp = createEventRsvp(evRoot);
-  let events: HubEvent[] = sampleEventsUpcoming().filter((e) => e.status !== 'cancelled');
-  let evLive = false;
+  let events: HubEvent[] = buildEvents.filter((e) => e.status !== 'cancelled'); // real events from the build
+  let evLive = true;
   let evType = '';
   const typeLabel: Record<string, string> = { race: 'races', 'time-attack': 'Time Attack events', league: 'league rounds', 'car-meet': 'car meets', cruise: 'cruises' };
   function drawEvents() {
@@ -232,19 +233,15 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   $('cm-tz').title = `Times are shown in your time zone (${tz})`;
   drawEvents();
   fetchLiveEvents().then(async (live) => {
-    if (!live) return;
-    events = live.filter((e) => e.status !== 'cancelled');
-    evLive = true;
-    $('cm-ev-flag').hidden = true;
-    drawEvents();
+    if (live) { events = live.filter((e) => e.status !== 'cancelled'); drawEvents(); }
     await rsvp.connect();
   });
 
   // ---- Featured crews: focus chips, 5 cards + "Start a crew" ----
   const crewRoot = $('hub-crew-root');
   const crewMembership = createCrewMembership(crewRoot, null);
-  let crews: HubCrew[] = sampleCrews;
-  let crewLive = false;
+  let crews: HubCrew[] = buildCrews; // real crews from the build
+  let crewLive = true;
   let focus = '';
   const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
   function drawCrews() {
@@ -260,7 +257,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
     document.querySelectorAll<HTMLButtonElement>('#cm-crew-chips button').forEach((x) => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
     drawCrews();
   });
-  crewMembership.setCrews(sampleCrews, false);
+  crewMembership.setCrews(buildCrews, true);
   fetchLiveCrews().then((live) => {
     if (!live) return;
     crews = live; crewLive = true;

@@ -7,17 +7,17 @@
 import Base from '../../../layouts/Base.astro';
 import DiscordBand from '../../../components/DiscordBand.astro';
 import '../../../styles/hub.css';
-import { sampleEvents, eventRowHtml } from '../../../data/hub';
+import { buildEvents, eventRowHtml } from '../../../data/hub';
 import { DISCORD_INVITE_URL } from '../../../data/site';
 
 const base = import.meta.env.BASE_URL;
-// Build-time render (UTC) of the flagged sample events, grouped by day; the browser re-renders in local time.
+// Build-time render (UTC) of the real published events (community.generated.json), grouped by day; the browser re-renders in local time.
 const dayKey = (iso: string) => iso.slice(0, 10);
 const groups = new Map<string, string[]>();
-for (const e of sampleEvents) {
+for (const e of buildEvents) {
   const k = dayKey(e.starts_at);
   if (!groups.has(k)) groups.set(k, []);
-  groups.get(k)!.push(eventRowHtml(e, { sample: true, full: true }));
+  groups.get(k)!.push(eventRowHtml(e, { full: true }));
 }
 const dayLabel = (k: string) => { const d = new Date(`${k}T12:00:00Z`); return `${d.toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' })}, ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' })}`; };
 const initialHtml = [...groups.entries()].map(([k, rows]) => `<section class="ev-day-g" id="day-${k}"><h2 class="ev-dh">${dayLabel(k)}<span class="n">${rows.length} event${rows.length === 1 ? '' : 's'}</span></h2><div class="ev-list">${rows.join('')}</div></section>`).join('');
@@ -61,7 +61,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
 
   <div class="wrap ec-body">
     <div class="ec-main">
-      <p class="ec-sample" id="ev-flag">Sample events until launch — they will not take place.</p>
+      <p class="ec-sample" id="ev-flag" hidden></p>
       <div id="ev-root" set:html={initialHtml} />
       <p class="hub-empty" id="ev-empty" hidden>No events match this filter.</p>
       <div class="ev-open ec-open"><span class="ev-open-plus" aria-hidden="true">+</span><span class="ev-open-t"><b>Nothing on your night?</b><span>Host a race, a meet, or a hotlap session. Hosts publish their events here themselves.</span></span><a class="btn btn-s ev-open-btn" href={`${base}account/events/`}>Become a host</a></div>
@@ -186,7 +186,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
 </style>
 
 <script>
-  import { sampleEventsUpcoming, eventRowHtml, localizeTimes, esc, type HubEvent } from '../../../data/hub';
+  import { buildEvents, eventRowHtml, localizeTimes, esc, type HubEvent } from '../../../data/hub';
   import { fetchLiveEvents } from '../../../scripts/hub-live';
   import { createEventRsvp } from '../../../scripts/event-rsvp';
   import { getSupabase, backendConfigured } from '../../../scripts/supabase-client';
@@ -197,8 +197,8 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
 
   // Sample events (flagged) until real ones exist -- moved to upcoming dates so
   // the sign-up demo keeps working after release (RS-0033).
-  let events: HubEvent[] = sampleEventsUpcoming();
-  let live = false;
+  let events: HubEvent[] = buildEvents.filter((e) => new Date(e.ends_at ?? e.starts_at).getTime() > Date.now());
+  let live = true;
   let filter = '';
   let monthShown: Date | null = null;
   const rsvp = createEventRsvp(root);
@@ -345,7 +345,8 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   }
 
   fetchLiveEvents().then(async (data) => {
-    if (!data) return;
+    // Live fetch failed -> keep the build snapshot (real events), still enable sign-up.
+    if (!data) { rsvp.setEvents(events, true); render(); await rsvp.connect(); drawCal(); drawStrip(); return; }
     events = data;
     live = true;
     rsvp.setEvents(events, true);

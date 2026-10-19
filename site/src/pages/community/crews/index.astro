@@ -7,13 +7,13 @@
 import Base from '../../../layouts/Base.astro';
 import DiscordBand from '../../../components/DiscordBand.astro';
 import '../../../styles/hub.css';
-import { sampleCrews, crewCardHtml, crewRegionLabels } from '../../../data/hub';
+import { buildCrews, crewCardHtml, crewRegionLabels } from '../../../data/hub';
 import { PLATFORMS } from '../../../data/platforms';
 
 const base = import.meta.env.BASE_URL;
 const PAGE = 12;
 const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
-const initialHtml = sampleCrews.slice(0, PAGE).map((c) => crewCardHtml(c, undefined, { sample: true })).join('') + startCrew;
+const initialHtml = buildCrews.slice(0, PAGE).map((c) => crewCardHtml(c)).join('') + startCrew;
 const chips: [string, string][] = [['', 'All crews'], ['racing', 'Racing'], ['time-attack', 'Time Attack'], ['league', 'League'], ['drift', 'Drift'], ['car-meet', 'Car meets'], ['cruise', 'Cruises']];
 const users = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
 const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 5.3A18 18 0 0 0 15.9 4l-.3.6a15 15 0 0 1 4 1.6 16 16 0 0 0-13.2 0 15 15 0 0 1 4-1.6L10.1 4a18 18 0 0 0-4.4 1.3C2.9 9 2.2 12.6 2.5 16.1a18 18 0 0 0 5.5 2.8l.8-1.3a11 11 0 0 1-1.9-.9l.5-.4a13 13 0 0 0 9.2 0l.5.4a11 11 0 0 1-1.9.9l.8 1.3a18 18 0 0 0 5.5-2.8c.4-4-.7-7.5-2.2-10.8ZM9.3 14c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Zm5.4 0c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Z"/></svg>';
@@ -67,8 +67,8 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
     </div>
     <div class="cr-sheet-bg" id="cr-sheet-bg" hidden></div>
 
-    <div class="cr-count"><h2 id="cr-n">{sampleCrews.length} crews</h2><p>You can be in up to 5 crews. The crew leader approves every request.</p></div>
-    <p class="cr-sample" id="crew-flag">Sample crews until real crews are listed.</p>
+    <div class="cr-count"><h2 id="cr-n">{buildCrews.length} crews</h2><p>You can be in up to 5 crews. The crew leader approves every request.</p></div>
+    <p class="cr-sample" id="crew-flag" hidden></p>
     <div class="crew-grid" id="crew-root" set:html={initialHtml} />
     <p class="hub-empty" id="crew-empty" hidden>No crews match these filters.</p>
     <div class="cr-more"><button type="button" class="btn btn-s" id="cr-more" hidden>Show more crews</button></div>
@@ -165,7 +165,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
 </style>
 
 <script>
-  import { crewCardHtml, crewTagHtml, esc, sampleCrews, type HubCrew } from '../../../data/hub';
+  import { crewCardHtml, crewTagHtml, esc, buildCrews, type HubCrew } from '../../../data/hub';
   import { createCrewMembership, CREW_LIMIT, type CrewMine } from '../../../scripts/crew-membership';
   import { languageLabel } from '../../../data/languages';
   import { fetchLiveCrews, fetchRoster } from '../../../scripts/hub-live';
@@ -180,8 +180,8 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
   const dcChk = $('crew-dc') as HTMLInputElement;
   const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
 
-  let crews: HubCrew[] = sampleCrews;
-  let live = false;
+  let crews: HubCrew[] = buildCrews; // real crews from the build; refreshed live below
+  let live = true;
   let focus = '';
   let limit = PAGE;
   let roster = new Map<string, string[]>();
@@ -259,11 +259,11 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
   const q0 = new URLSearchParams(location.search).get('q');
   if (q0) search.value = q0;
   render();
-  membership.setCrews(sampleCrews, false);
+  membership.setCrews(buildCrews, true);
 
   async function init() {
     const data = await fetchLiveCrews();
-    if (!data) return; // sample crews keep the demo membership UI
+    if (!data) { roster = await fetchRoster(); render(); return; } // keep the build-time crews
     crews = data; live = true;
     $('crew-flag').hidden = true;
     roster = await fetchRoster();

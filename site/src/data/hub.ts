@@ -131,49 +131,18 @@ export const eventTypeLabels: Record<EventType, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// Sample data (fictional)
+// Real data at build time (Fausto 19.10.2026): community.generated.json is written by
+// scripts/fetch-vehicles.mjs before every CI build (published crews, upcoming events).
 // ---------------------------------------------------------------------------
-export const sampleCrews: HubCrew[] = [
-  { slug: 'sample-apex-syndicate', name: 'Apex Syndicate', tag: 'APEX', color: '#ed253d', platforms: ['ps5'], focus: ['racing', 'league'], region: 'europe', languages: ['en'], description: 'Clean, competitive circuit racing with weekly league nights. Sample entry.', member_count: 142, discord_url: null, social_club_url: null, is_partner: true, is_featured: true },
-  { slug: 'sample-vice-drift-union', name: 'Vice Drift Union', tag: 'VDRU', color: '#ff7ab6', platforms: ['ps5'], focus: ['drift', 'car-meet'], region: 'north-america', languages: ['en'], description: 'Tandem drift sessions and themed car meets. Sample entry.', member_count: 88, discord_url: null, social_club_url: null, is_partner: false, is_featured: true },
-  { slug: 'sample-leonida-lap-club', name: 'Leonida Lap Club', tag: 'LLAP', color: '#ffd74c', platforms: ['ps5'], focus: ['time-attack', 'racing'], region: 'international', languages: ['en'], description: 'Hotlap hunters chasing tenths on every board. Sample entry.', member_count: 37, discord_url: null, social_club_url: null, is_partner: false },
-  { slug: 'sample-nordring-crew', name: 'Nordring Crew', tag: 'NRDC', color: '#3fa7ff', platforms: ['ps5'], focus: ['racing', 'cruise'], region: 'europe', languages: ['de'], description: 'German-speaking racing crew with relaxed Sunday cruises. Sample entry.', member_count: 64, discord_url: null, social_club_url: null, is_partner: false },
-  { slug: 'sample-gulf-coast-racing', name: 'Gulf Coast Racing', tag: 'GCRX', color: '#27c281', platforms: ['ps5'], focus: ['league'], region: 'north-america', languages: ['en'], description: 'Season-based league with fixed grids and stewarding. Sample entry.', member_count: 210, discord_url: null, social_club_url: null, is_partner: false, is_featured: true },
-  { slug: 'sample-midnight-meet', name: 'Midnight Meet', tag: 'MNMT', color: '#9b6bff', platforms: ['ps5'], focus: ['car-meet', 'cruise'], region: 'europe', languages: ['en'], description: 'Late-night meets, photo spots and convoy cruises. Sample entry.', member_count: 51, discord_url: null, social_club_url: null, is_partner: false },
-];
+import communityData from './community.generated.json';
+export const buildCrews: HubCrew[] = (communityData as { crews: HubCrew[] }).crews;
+export const buildEvents: HubEvent[] = (communityData as { events: HubEvent[] }).events;
+/** House crews run by Leonida Racing (Fausto 19.10.2026): used for the crew tags of the
+ *  sample leaderboard until launch. Site crews LERA/GRAC are deliberately not used there. */
+export const HOUSE_CREW_TAGS = ['BCRW', 'LOWN', 'VCSR'];
 
-const sampleHost = (slug: string) => {
-  const c = sampleCrews.find((x) => x.slug === slug)!;
-  return { name: c.name, tag: c.tag, color: c.color };
-};
-
-// Fixed dates are the build-time fallback only; in the browser the samples
-// are moved to upcoming dates (sampleEventsUpcoming) so they stay joinable
-// after release until real events replace them.
-export const sampleEvents: HubEvent[] = [
-  { event_id: 's1', title: 'Launch Night Grid Run', event_type: 'race', starts_at: '2026-11-21T19:00:00Z', ends_at: '2026-11-21T21:00:00Z', platforms: ['ps5'], host_name: 'Racer_01', location: 'Vice City', description: 'Open lobby, clean racing, stock vehicles. Sample event.', join_url: null, status: 'scheduled', host: sampleHost('sample-apex-syndicate'), max_participants: 16, sample_going: ['Racer_01', 'KerbHopper', 'ViceRacer', 'LateApex', 'SpeedyNomad', 'Nightshift', 'TurnInEarly'] },
-  { event_id: 's2', title: 'Ocean Drive Car Meet', event_type: 'car-meet', starts_at: '2026-11-22T20:30:00Z', ends_at: null, platforms: ['ps5'], host_name: 'GhostPedal', location: 'Vice City', description: 'Bring your best build. Photo session at sunset. Sample event.', join_url: null, status: 'scheduled', host: sampleHost('sample-midnight-meet'), sample_going: ['GhostPedal', 'Nightshift', 'NeonDrift', 'CoastalRun'] },
-  { event_id: 's3', title: 'Gellhorn Hotlap Session', event_type: 'time-attack', starts_at: '2026-11-25T18:00:00Z', ends_at: '2026-11-25T20:00:00Z', platforms: ['ps5'], host_name: 'SpeedyNomad', location: 'Port Gellhorn', description: 'Group hotlapping, times submitted to Time Attack afterwards. Sample event.', join_url: null, status: 'scheduled', host: sampleHost('sample-leonida-lap-club'), max_participants: 12, sample_going: ['SpeedyNomad', 'ApexLimit', 'LateApex', 'Racer_01', 'Hillclimb', 'SolarFlare', 'MintyTires', 'ShadowLine', 'TarmacTom'] },
-  { event_id: 's4', title: 'Season 1 — Round 1', event_type: 'league', starts_at: '2026-11-28T19:30:00Z', ends_at: null, platforms: ['ps5'], host_name: 'TurnInEarly', location: null, description: 'Qualifying and two races. The grid is set and sign-ups are closed—watch it live. Sample event.', join_url: null, status: 'scheduled', host: sampleHost('sample-gulf-coast-racing'), max_participants: 20, registration: 'closed', streams: [{ platform: 'twitch', url: 'https://www.twitch.tv/sample_channel' }], sample_going: ['TurnInEarly', 'RedlineRosa', 'OceanDriveOG', 'KerbHopper', 'BrakeLate99'] },
-  { event_id: 's5', title: 'Everglades Sunday Cruise', event_type: 'cruise', starts_at: '2026-11-29T16:00:00Z', ends_at: null, platforms: ['ps5'], host_name: 'LatteBrake', location: 'Leonida Keys', description: 'Slow convoy, no racing. Sample event.', join_url: null, status: 'cancelled', host: sampleHost('sample-nordring-crew'), sample_going: ['LatteBrake', 'Hillclimb'] },
-  { event_id: 's6', title: 'Community Drift Jam', event_type: 'other', starts_at: '2026-12-05T21:00:00Z', ends_at: null, platforms: ['ps5'], host_name: 'VelvetClutch', location: 'Port Gellhorn', description: 'Free-for-all drift session. Sample event.', join_url: null, status: 'scheduled', host: null, sample_going: ['SolarFlare', 'NeonDrift', 'VelvetClutch'] },
-];
-
-/** Sample events moved into the near future (first one 3 days from today,
- *  same spacing and time of day as the fixed dates). Deterministic per UTC
- *  day, so the events page and My Account show the same dates. Never earlier
- *  than the fixed dates, which start after the GTA VI launch (RS-0055: no
- *  event before Nov 19, 2026, samples included). */
-export function sampleEventsUpcoming(now = new Date()): HubEvent[] {
-  const DAY = 86400e3;
-  const first = Date.parse(sampleEvents[0].starts_at);
-  const firstDay = Math.floor(first / DAY) * DAY;
-  const targetDay = Math.max(Math.floor(now.getTime() / DAY) * DAY + 3 * DAY, firstDay);
-  const shift = targetDay - firstDay;
-  const mv = (iso: string | null) => (iso ? new Date(Date.parse(iso) + shift).toISOString() : null);
-  return sampleEvents.map((e) => ({ ...e, starts_at: mv(e.starts_at)!, ends_at: mv(e.ends_at) }));
-}
-
+// Fictional sample crews/events removed 19.10.2026 (Fausto): Community pages show only
+// real published crews/events (build snapshot + live).
 
 // ---------------------------------------------------------------------------
 // Rendering (shared by build time and runtime)

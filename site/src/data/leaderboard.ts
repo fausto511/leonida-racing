@@ -7,13 +7,13 @@
 // driver + vehicle search, All times / Verified only) work on both.
 //
 // SAMPLE DATA IS FICTIONAL. Drivers, times and crew memberships are invented;
-// only garage vehicles are used so every vehicle link resolves. Crews are the
-// fictional sample crews of The Hub (data/hub.ts). Always shown with the
+// only garage vehicles are used so every vehicle link resolves. Crews are the house
+// crews BCRW/LOWN/VCSR (data/hub.ts HOUSE_CREW_TAGS). Always shown with the
 // visible "Sample data" flag.
 import { vehicleOptions } from './vehicles';
 import { makeHref, classHref, classSlug } from './garage-taxonomy';
 import { taxonomyCopy } from './taxonomy-copy';
-import { sampleCrews, esc } from './hub';
+import { buildCrews, esc } from './hub';
 
 export interface LbEntry {
   /** best run of one driver on one vehicle (= one row of public_leaderboard) */
@@ -67,9 +67,16 @@ const SAMPLE_VEHICLES: [string, number][] = [
   ['ubermacht-sentinel-xs', 89300], ['grotti-cheetah-95', 89600], ['vapid-dominator-gtx', 90400], ['karin-futo', 91200],
   ['dinka-blista-compact', 93800],
 ];
+// Sample times carry the house crews (Fausto 19.10.: BCRW, LOWN, VCSR) -- never the
+// official site crews (LERA, GRAC) or third-party crews. Old sample slugs map to a tag.
+const SAMPLE_CREW_TAG: Record<string, string> = {
+  'sample-apex-syndicate': 'VCSR', 'sample-leonida-lap-club': 'VCSR',
+  'sample-nordring-crew': 'BCRW', 'sample-gulf-coast-racing': 'BCRW',
+  'sample-midnight-meet': 'LOWN', 'sample-vice-drift-union': 'LOWN',
+};
 const crewBySlug = (slug: string) => {
-  const c = sampleCrews.find((x) => x.slug === slug)!;
-  return { tag: c.tag, color: c.color };
+  const c = buildCrews.find((x) => x.tag === SAMPLE_CREW_TAG[slug]);
+  return c ? { tag: c.tag, color: c.color } : null;
 };
 // name, crew slug (or null), skill offset ms
 const SAMPLE_DRIVERS: [string, string | null, number][] = [
