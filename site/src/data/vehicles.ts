@@ -86,6 +86,12 @@ export const vehicleOptions: VehicleOption[] = (generated.vehicles as GeneratedV
   ...(v.other_names?.length ? { otherNames: v.other_names } : {}),
 }));
 
+/** Model name for tight spots (tiles, chips): adds the make when another car shares the model name,
+ *  e.g. Pegassi Zorrusso / GranForma Zorrusso (Fausto 20.10., DEC-0145). */
+const modelCount = new Map<string, number>();
+vehicleOptions.forEach((v) => modelCount.set(v.model, (modelCount.get(v.model) ?? 0) + 1));
+export const shortModelName = (v: { make: string; model: string }) => ((modelCount.get(v.model) ?? 0) > 1 ? `${v.make} ${v.model}` : v.model);
+
 // Current measured values per vehicle (price, top speed, reference lap), each
 // with its provenance. Missing = not measured yet ("Data pending").
 // vehicleValues = stock values (what pages and rankings show first);

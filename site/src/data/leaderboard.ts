@@ -10,7 +10,7 @@
 // only garage vehicles are used so every vehicle link resolves. Crews are the house
 // crews BCRW/LOWN/VCSR (data/hub.ts HOUSE_CREW_TAGS). Always shown with the
 // visible "Sample data" flag.
-import { vehicleOptions } from './vehicles';
+import { vehicleOptions, shortModelName } from './vehicles';
 import { makeHref, classHref, classSlug } from './garage-taxonomy';
 import { taxonomyCopy } from './taxonomy-copy';
 import { buildCrews, esc } from './hub';
@@ -315,7 +315,7 @@ export function noLapCars(all: LbEntry[]) {
     }
     if (!pool.some((v) => !picks.includes(v))) break;
   }
-  const item = (v: (typeof vehicleOptions)[number]) => `<a href="${garageUrl(v.id)}" title="${esc(v.make)} ${esc(v.model)}">${logoChip({ logo: v.logoSlug })}<span class="t"><b>${esc(v.model)}</b><small>Take #1 →</small></span></a>`;
+  const item = (v: (typeof vehicleOptions)[number]) => `<a href="${garageUrl(v.id)}" title="${esc(v.make)} ${esc(v.model)}">${logoChip({ logo: v.logoSlug })}<span class="t"><b>${esc(shortModelName(v))}</b><small>Take #1 →</small></span></a>`;
   const rest = none.filter((v) => !picks.includes(v)).sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`));
   return { count: none.length, picks: picks.map(item).join(''), rest: rest.map(item).join('') };
 }

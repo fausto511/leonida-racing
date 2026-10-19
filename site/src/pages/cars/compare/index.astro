@@ -141,6 +141,9 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp-mini :global(.cp-grid) { padding: 8px 0; }
   .cp :global(.cm) { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 14px; font-weight: 600; }
   .cp :global(.cm img), .cp :global(.cm .cm-ph) { width: 48px; height: 27px; flex: none; border-radius: 4px; object-fit: cover; background: var(--lr-raised); }
+  /* no photo: manufacturer logo on the placeholder (Fausto 20.10.) */
+  .cp :global(.cm .cm-ph) { display: inline-grid; place-items: center; }
+  .cp :global(.cm .cm-ph img.cm-logo) { width: 18px; height: 18px; border-radius: 0; object-fit: contain; background: none; filter: brightness(0) invert(1); opacity: .85; }
   .cp :global(.cm span) { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .cp :global(.cm-l) { font-size: 13px; color: var(--lr-soft); align-self: center; }
 
@@ -248,6 +251,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
     .cp-mini :global(.cp-grid) { padding: 6px 0; }
     .cp :global(.cm) { font-size: 12px; gap: 6px; }
     .cp :global(.cm img), .cp :global(.cm .cm-ph) { width: 36px; height: 20px; }
+    .cp :global(.cm .cm-ph img.cm-logo) { width: 14px; height: 14px; }
     .cp :global(.cm-l) { display: none; }
     .cp :global(.tk) { grid-template-columns: 1fr; gap: 10px; }
     .cp :global(.lock) { flex-direction: column; align-items: stretch; gap: 14px; padding: 18px 16px; }

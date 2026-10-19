@@ -110,7 +110,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     ($('cp-clear') as HTMLElement).hidden = !list.length;
     (document.querySelector('.cp-tgl') as HTMLElement).hidden = list.length < 2;
     // compact bar
-    $('cp-mini-row').innerHTML = `<span class="cm-l">${list.length} of ${COMPARE_MAX}</span>` + list.map((c) => `<span class="cm">${c.photo ? `<img src="${img(c)}" alt="" />` : '<i class="cm-ph"></i>'}<span>${esc(c.model)}</span></span>`).join('');
+    $('cp-mini-row').innerHTML = `<span class="cm-l">${list.length} of ${COMPARE_MAX}</span>` + list.map((c) => `<span class="cm">${c.photo ? `<img src="${img(c)}" alt="" />` : `<i class="cm-ph"><img class="cm-logo" src="${logo(c)}" alt="" /></i>`}<span>${esc(c.model)}</span></span>`).join('');
     wireSearch();
   }
   function wireSearch() {
