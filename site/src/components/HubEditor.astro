@@ -85,6 +85,9 @@ const base = import.meta.env.BASE_URL;
               <label class="span2">Description <small><span id="crew-desc-count">0</span>/90 · no links</small><textarea name="description" maxlength="90" rows="2"></textarea></label>
               <label>Discord invite<input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
               <label>Social Club page<input type="url" name="social_club_url" placeholder="https://socialclub.rockstargames.com/…" /></label>
+              <!-- DEC-0144. COPY: Claude placeholders, Codex review pending. -->
+              <label class="span2">Join mode<select name="join_mode"><option value="request">Request — you approve every request</option><option value="open">Open — anyone can join right away</option></select></label>
+              <p class="span2 track-note" id="crew-comm-note" hidden>As Commissioner you can change the crew color and the join mode. Everything else is up to the crew leader.</p>
               <label class="check" data-mod-only><input type="checkbox" name="is_official" /> Official crew <small>this site's own crews or the original creators</small></label>
               <label class="check" data-mod-only><input type="checkbox" name="is_partner" /> Partner crew</label>
               <label class="check" data-mod-only><input type="checkbox" name="is_featured" /> Featured crew <small>shown first on the home page, Hub overview and crew list</small></label>
@@ -111,6 +114,7 @@ const base = import.meta.env.BASE_URL;
               <div id="members-invited"></div>
             </div>
             <div id="members-active"></div>
+            <div id="members-bans"></div>
             <p class="form-msg" id="members-msg" aria-live="polite"></p>
           </div>
 
@@ -145,7 +149,7 @@ const base = import.meta.env.BASE_URL;
               <label class="span2" data-mod-only>Note to the host <small>optional, e.g. why the event is hidden or what to fix</small><textarea name="moderation_note" maxlength="300" rows="2"></textarea></label>
             </div>
             <div class="preview-wrap"><p class="preview-label">Preview</p><div class="ev-list preview" id="event-preview"></div></div>
-            <div class="rsvp-panel" id="rsvp-panel" hidden><p class="preview-label">Sign-ups</p><div id="rsvp-list"></div></div>
+            <div class="rsvp-panel" id="rsvp-panel" hidden><p class="preview-label">Sign-ups</p><div id="rsvp-list"></div><div id="rsvp-bans"></div><p class="form-msg" id="rsvp-msg" aria-live="polite"></p></div>
             <div class="form-actions">
               <button type="submit" class="btn btn-primary">Save</button>
               <button type="button" class="btn btn-outline-red" data-action="delete" hidden>Delete</button>
@@ -378,11 +382,16 @@ const base = import.meta.env.BASE_URL;
   let isHost = false;
   let isCreator = false;
   let leaderCrewIds = new Set<string>();
+  let commCrewIds = new Set<string>(); // crews where I'm Commissioner (DEC-0144)
+  const isStaffOf = (id: string) => leaderCrewIds.has(id) || commCrewIds.has(id);
+  const commOnly = (id: string | null) => Boolean(id) && !isMod && !leaderCrewIds.has(id!) && commCrewIds.has(id!);
+  let staffRoles = new Map<string, string>(); // driver_id -> crew_leader | crew_commissioner (selected crew)
+  let crewBans: any[] = [];
   let memberCrewIds = new Set<string>(); // crews I'm an active member of (host crew choice)
   let roles: any[] = [];
   let members: any[] = []; // crew_membership_overview rows visible to me
   const pendingFor = (crewId: string) => members.filter((m) => m.crew_id === crewId && m.status === 'pending').length;
-  const visibleCrews = () => (isMod ? crews : crews.filter((c) => leaderCrewIds.has(c.crew_id)));
+  const visibleCrews = () => (isMod ? crews : crews.filter((c) => isStaffOf(c.crew_id)));
   // RS-0027: events belong to event hosts only (crew leaders need the host role too).
   const visibleEvents = () => (isMod ? events : events.filter((e) => e.created_by === ownDriverId));
   const canCreateEvent = () => isMod || isHost;
@@ -393,7 +402,7 @@ const base = import.meta.env.BASE_URL;
     document.querySelectorAll<HTMLElement>('[data-leader-only]').forEach((el) => (el.hidden = isMod));
     document.querySelectorAll<HTMLElement>('[data-creator-only]').forEach((el) => (el.hidden = isMod));
     const crewTab = document.querySelector<HTMLElement>('.hc-tab[data-kind="crews"]')!;
-    crewTab.hidden = !isMod && leaderCrewIds.size === 0;
+    crewTab.hidden = !isMod && leaderCrewIds.size === 0 && commCrewIds.size === 0;
   }
 
   // ------------------------------------------------------------ helpers
@@ -423,6 +432,10 @@ const base = import.meta.env.BASE_URL;
     if (/hub_events_not_before_launch/.test(m)) return 'Events can start on Nov 19, 2026 (GTA VI launch day) at the earliest.';
     if (/crew_has_members/.test(m)) return 'Remove all other members first — then you can delete the crew.';
     if (/crew_leader_protected/.test(m)) return 'Only a moderator can remove a crew leader.';
+    if (/commissioner_protected/.test(m)) return 'Only the crew leader can remove a commissioner.';
+    if (/not_commissioner/.test(m)) return 'Make this member a commissioner first.';
+    if (/not_member/.test(m)) return 'This driver is not an active member of the crew.';
+    if (/crew_banned/.test(m)) return 'This driver is banned from your crew. Unban them first.';
     if (/row-level security/.test(m)) return 'Not allowed — your account is not a moderator.';
     if (/check constraint/.test(m)) return `The database rejected a value (${m.match(/"([^"]+)"/)?.[1] ?? 'check'}). Please review the fields.`;
     return m;
@@ -512,30 +525,58 @@ const base = import.meta.env.BASE_URL;
     if (res.error) res = await getSupabase().from('crew_membership_overview').select('membership_id, crew_id, driver_id, display_name, status, requested_at, decided_at').order('requested_at');
     const data = res.data;
     // Own membership in a crew I don't manage is not relevant here.
-    members = ((data ?? []) as any[]).filter((m) => isMod || leaderCrewIds.has(m.crew_id));
+    members = ((data ?? []) as any[]).filter((m) => isMod || isStaffOf(m.crew_id));
     const total = visibleCrews().reduce((n, c) => n + pendingFor(c.crew_id), 0);
     const tab = document.querySelector<HTMLElement>('.hc-tab[data-kind="crews"]')!;
     tab.innerHTML = `Crews${total ? `<span class="tab-count">${total}</span>` : ''}`;
   }
 
+  async function loadStaffAndBans() {
+    staffRoles = new Map(); crewBans = [];
+    if (!selectedId) return;
+    const sb = getSupabase();
+    const [st, bn] = await Promise.all([
+      sb.rpc('crew_staff', { p_crew: selectedId }),
+      sb.rpc('list_crew_bans', { p_crew: selectedId }),
+    ]);
+    for (const r of ((st.data ?? []) as any[])) staffRoles.set(r.driver_id, r.role);
+    crewBans = (bn.data ?? []) as any[];
+  }
+
   function renderMembers(message = '', isError = false) {
     if (!selectedId) return;
-    if (!isMod && !crewForm.hidden) resetDelete(crewForm, true); // delete only once no other member is left
+    if (!isMod && !crewForm.hidden) resetDelete(crewForm, !commOnly(selectedId)); // delete only once no other member is left
     const mine = members.filter((m) => m.crew_id === selectedId);
     const pending = mine.filter((m) => m.status === 'pending');
     const active = mine.filter((m) => m.status === 'active');
     const invited = mine.filter((m) => m.status === 'invited');
     const d = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' }) : '');
+    const iLead = isMod || leaderCrewIds.has(selectedId);
     $('members-invited').innerHTML = invited.length
       ? `<p class="mem-group-title">Open invites (${invited.length}/20)</p>` + invited.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">invited ${esc(d(m.requested_at))}${m.invited_by_name ? ` by ${esc(m.invited_by_name)}` : ''}</span><span class="mem-actions"><button type="button" class="btn btn-outline-red btn-sm" data-drop="${esc(m.membership_id)}" data-label="Withdraw">Withdraw</button></span></div>`).join('')
       : '';
     $('members-sub').textContent = `${active.length} member${active.length === 1 ? '' : 's'} on this site`;
     $('members-pending').innerHTML = `<p class="mem-group-title">Join requests</p>` + (pending.length
       ? pending.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">asked ${esc(d(m.requested_at))}</span><span class="mem-actions"><button type="button" class="btn btn-primary btn-sm" data-approve="${esc(m.membership_id)}">Approve</button><button type="button" class="btn btn-outline-red btn-sm" data-drop="${esc(m.membership_id)}" data-label="Decline">Decline</button></span></div>`).join('')
-      : '<p class="mem-empty">No open requests.</p>');
+      : `<p class="mem-empty">${crews.find((c) => c.crew_id === selectedId)?.join_mode === 'open' ? 'Your crew is open: drivers join right away, no requests to approve.' : 'No open requests.'}</p>`);
+    // DEC-0144: Kick (can rejoin / ask again) and Ban (blocked); commissioners can't act on the leader or other commissioners.
+    // COPY STATUS: Claude placeholders, Codex review pending.
+    const btn = (act: string, m: any, label: string, cls = 'btn-outline-red') => `<button type="button" class="btn ${cls} btn-sm" data-act="${act}" data-driver="${esc(m.driver_id)}" data-name="${esc(m.display_name)}" data-label="${esc(label)}">${esc(label)}</button>`;
+    const roleBadge = (r?: string) => (r === 'crew_leader' ? '<span class="mem-role">Leader</span>' : r === 'crew_commissioner' ? '<span class="mem-role">Commissioner</span>' : '');
     $('members-active').innerHTML = `<p class="mem-group-title">Members</p>` + (active.length
-      ? active.map((m) => `<div class="mem-row"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">since ${esc(d(m.decided_at))}</span><span class="mem-actions">${m.driver_id === ownDriverId ? '<span class="mem-date">you</span>' : `<button type="button" class="btn btn-outline-red btn-sm" data-drop="${esc(m.membership_id)}" data-label="Remove">Remove</button>`}</span></div>`).join('')
+      ? active.map((m) => {
+          const r = staffRoles.get(m.driver_id);
+          let acts = '';
+          if (m.driver_id === ownDriverId) acts = '<span class="mem-date">you</span>';
+          else if (r === 'crew_leader') acts = isMod ? btn('kick', m, 'Kick') + btn('ban', m, 'Ban') : '';
+          else if (r === 'crew_commissioner') acts = iLead ? btn('comm-off', m, 'Remove Commissioner', 'btn-outline') + btn('lead', m, 'Make Leader', 'btn-outline') + btn('kick', m, 'Kick') + btn('ban', m, 'Ban') : '';
+          else acts = (iLead ? btn('comm-on', m, 'Make Commissioner', 'btn-outline') : '') + btn('kick', m, 'Kick') + btn('ban', m, 'Ban');
+          return `<div class="mem-row"><span class="mem-name">${esc(m.display_name)} ${roleBadge(r)}</span><span class="mem-date">since ${esc(d(m.decided_at))}</span><span class="mem-actions">${acts}</span></div>`;
+        }).join('')
       : '<p class="mem-empty">No members yet. Drivers ask to join on the public Crews page.</p>');
+    $('members-bans').innerHTML = crewBans.length
+      ? `<p class="mem-group-title">Banned (${crewBans.length})</p>` + crewBans.map((b) => `<div class="mem-row"><span class="mem-name">${esc(b.display_name ?? 'Driver')}</span><span class="mem-date">banned ${esc(d(b.banned_at))}</span><span class="mem-actions">${btn('unban', b, 'Unban', 'btn-outline')}</span></div>`).join('')
+      : '';
     const msgEl = $('members-msg');
     msgEl.textContent = message;
     msgEl.className = `form-msg ${message ? (isError ? 'is-error' : 'is-ok') : ''}`;
@@ -566,6 +607,37 @@ const base = import.meta.env.BASE_URL;
       renderMembers(error ? (/crew_leader_protected/.test(error.message) ? 'Only a moderator can remove a crew leader.' : `That did not work: ${error.message}`) : drop.dataset.label === 'Decline' ? 'Request declined.' : drop.dataset.label === 'Withdraw' ? 'Invite withdrawn.' : 'Member removed.', Boolean(error));
       return;
     }
+    const act = t.closest<HTMLButtonElement>('[data-act]');
+    if (act && selectedId) {
+      const a = act.dataset.act!;
+      const name = act.dataset.name ?? 'the driver';
+      const confirmTxt: Record<string, string> = { kick: `Click again to kick ${name}`, ban: `Click again to ban ${name}`, lead: `Click again to hand the crew to ${name}` };
+      if (confirmTxt[a] && act.dataset.armed !== '1') {
+        act.dataset.armed = '1';
+        act.textContent = confirmTxt[a];
+        setTimeout(() => { if (act.isConnected && act.dataset.armed === '1') { act.dataset.armed = ''; act.textContent = act.dataset.label!; } }, 4000);
+        return;
+      }
+      act.disabled = true;
+      const p = { p_crew: selectedId, p_driver: act.dataset.driver };
+      const call = a === 'kick' ? sb.rpc('kick_crew_member', p)
+        : a === 'ban' ? sb.rpc('ban_crew_member', p)
+        : a === 'unban' ? sb.rpc('unban_crew_member', p)
+        : a === 'comm-on' ? sb.rpc('set_commissioner', { ...p, p_on: true })
+        : a === 'comm-off' ? sb.rpc('set_commissioner', { ...p, p_on: false })
+        : sb.rpc('transfer_crew_leadership', p);
+      const { error } = await call;
+      if (!error && a === 'lead' && !isMod) { location.reload(); return; } // I'm Commissioner now -> reload the access model
+      await loadMembers(); await loadStaffAndBans(); renderList();
+      const done: Record<string, string> = {
+        kick: `${name} was kicked. They can ${crews.find((c) => c.crew_id === selectedId)?.join_mode === 'open' ? 'join again right away — use Ban to keep them out' : 'ask to join again'}.`,
+        ban: `${name} is banned and can't join or ask to join again.`,
+        unban: `${name} is no longer banned.`,
+        'comm-on': `${name} is now Commissioner.`, 'comm-off': `${name} is no longer Commissioner.`, lead: `${name} is now the crew leader.`,
+      };
+      renderMembers(error ? dbError(error) : done[a], Boolean(error));
+      return;
+    }
     const inv = t.closest<HTMLButtonElement>('[data-invite]');
     if (inv && selectedId) {
       inv.disabled = true;
@@ -573,7 +645,7 @@ const base = import.meta.env.BASE_URL;
       ($('invite-q') as HTMLInputElement).value = '';
       $('invite-results').innerHTML = '';
       await loadMembers();
-      const why = error ? (/invite_limit/.test(error.message) ? 'Your crew already has 20 open invites.' : /invite_declined/.test(error.message) ? 'This driver declined an invite from your crew in the last 30 days.' : /duplicate|unique/i.test(error.message) ? 'This driver is already a member, invited or has asked to join.' : `Could not invite: ${error.message}`) : `Invite sent to ${inv.dataset.name}. They accept it in My Account.`;
+      const why = error ? (/crew_banned/.test(error.message) ? 'This driver is banned from your crew. Unban them first.' : /invite_limit/.test(error.message) ? 'Your crew already has 20 open invites.' : /invite_declined/.test(error.message) ? 'This driver declined an invite from your crew in the last 30 days.' : /duplicate|unique/i.test(error.message) ? 'This driver is already a member, invited or has asked to join.' : `Could not invite: ${error.message}`) : `Invite sent to ${inv.dataset.name}. They accept it in My Account.`;
       renderMembers(why, Boolean(error));
     }
   });
@@ -598,6 +670,7 @@ const base = import.meta.env.BASE_URL;
   // ------------------------------------------------------------ crew form
   const cf = crewForm.elements as any;
   let slugTouched = false;
+  crewForm.querySelectorAll<HTMLElement>(':disabled').forEach((el) => el.setAttribute('data-perm-disabled', '')); // "Coming later" platforms
 
   function crewFromForm(): HubCrew & { slug: string; sort_order: number; is_published: boolean } {
     const fd = new FormData(crewForm);
@@ -618,6 +691,7 @@ const base = import.meta.env.BASE_URL;
       is_official: fd.get('is_official') === 'on',
       sort_order: Math.round(Number(String(fd.get('sort_order') ?? '').trim() || 100)),  // empty = 100 = no fixed spot
       is_published: fd.get('is_published') === 'on',
+      join_mode: (fd.get('join_mode') === 'open' ? 'open' : 'request') as 'open' | 'request',
       ...(isMod ? { moderation_note: blank(fd.get('moderation_note')) } : {}),
     };
   }
@@ -677,6 +751,14 @@ const base = import.meta.env.BASE_URL;
     cf.is_official.checked = Boolean(r.is_official);
     cf.is_published.checked = Boolean(r.is_published);
     cf.moderation_note.value = r.moderation_note ?? '';
+    cf.join_mode.value = r.join_mode === 'open' ? 'open' : 'request';
+    // Commissioner (DEC-0144): colour + join mode only
+    const co = commOnly(selectedId);
+    crewForm.querySelectorAll<HTMLInputElement>('input, select, textarea').forEach((el) => {
+      if (el.hasAttribute('data-perm-disabled')) return;
+      el.disabled = co && !['color', 'color_picker', 'join_mode'].includes(el.name);
+    });
+    $('crew-comm-note').hidden = !co;
     showModNote('crew-mod-note', r, isMod);
     const ps = crewForm.querySelector<HTMLElement>('.pub-state')!;
     ps.textContent = r.is_published ? 'Live on the site' : 'Draft — a moderator publishes it';
@@ -685,13 +767,14 @@ const base = import.meta.env.BASE_URL;
     crewForm.querySelectorAll<HTMLInputElement>('input[name="languages"]').forEach((i) => (i.checked = (r.languages ?? []).includes(i.value)));
     // open "More languages" when one of them is already picked
     crewForm.querySelector<HTMLDetailsElement>('.lang-more')!.open = [...crewForm.querySelectorAll<HTMLInputElement>('.lang-more input')].some((i) => i.checked);
-    resetDelete(crewForm, Boolean(row));
+    resetDelete(crewForm, Boolean(row) && !co);
     markInvalid(crewForm, []);
     msg(crewForm, '');
     showForm('crews');
     renderCrewPreview();
     renderList();
     renderMembers();
+    loadStaffAndBans().then(() => { if (selectedId === (row?.crew_id ?? null)) renderMembers(); });
   }
 
   cf.name.addEventListener('input', () => { if (!slugTouched) cf.slug.value = slugify(cf.name.value); });
@@ -710,6 +793,17 @@ const base = import.meta.env.BASE_URL;
 
   crewForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
+    if (selectedId && commOnly(selectedId)) {
+      const f = crewFromForm();
+      if (!/^#[0-9a-f]{6}$/.test(f.color)) { markInvalid(crewForm, ['color']); msg(crewForm, 'Please fix: color (#rrggbb).', true); return; }
+      const { error } = await getSupabase().rpc('set_crew_settings', { p_crew: selectedId, p_color: f.color, p_join_mode: f.join_mode });
+      if (error) { msg(crewForm, dbError(error), true); return; }
+      const id = selectedId;
+      await loadAll();
+      openCrew(crews.find((x) => x.crew_id === id));
+      msg(crewForm, 'Saved — live on the site.');
+      return;
+    }
     const c: any = crewFromForm();
     if (!isMod) { delete c.slug; delete c.is_partner; delete c.is_featured; delete c.is_official; delete c.sort_order; delete c.is_published; }
     const bad = validateCrew({ ...crewFromForm(), ...(isMod ? {} : { slug: crews.find((x) => x.crew_id === selectedId)?.slug ?? 'x' }) });
@@ -832,20 +926,56 @@ const base = import.meta.env.BASE_URL;
     loadRsvps();
   }
 
-  // Sign-ups for the open event (same data the public page shows).
-  async function loadRsvps() {
+  // Sign-ups for the open event. Host (and moderators) get names with Kick / Ban (DEC-0144):
+  // Kick = out of this event, can't sign up for it again; Ban = out of all events by this host.
+  // COPY STATUS: Claude placeholders, Codex review pending.
+  async function loadRsvps(message = '', isError = false) {
     const panel = $('rsvp-panel');
     panel.hidden = !selectedId;
     if (!selectedId) return;
-    const { data } = await getSupabase().from('public_event_rsvps').select('display_name, created_at').eq('event_id', selectedId).order('created_at');
-    const rows = (data ?? []) as any[];
-    const named = rows.filter((r) => r.display_name).map((r) => esc(r.display_name));
-    const anon = rows.length - named.length;
+    const ev = events.find((x) => x.event_id === selectedId);
+    const isOwn = ev?.created_by === ownDriverId;
     const max = Number(ef.max_participants.value) || null;
-    $('rsvp-list').innerHTML = rows.length
-      ? `<p class="rsvp-count"><strong>${rows.length}${max ? ' / ' + max : ''}</strong> going</p><p class="rsvp-names">${named.join(', ')}${anon ? `${named.length ? ' + ' : ''}${anon} anonymous` : ''}</p>`
-      : `<p class="rsvp-count">No sign-ups yet${max ? ` (max. ${max})` : ''}.</p>`;
+    const sb = getSupabase();
+    const [pr, br] = await Promise.all([
+      sb.rpc('host_event_participants', { p_event: selectedId }),
+      isOwn ? sb.rpc('my_event_bans') : Promise.resolve({ data: [], error: null }),
+    ]);
+    const rows = ((pr.data ?? []) as any[]);
+    const going = rows.filter((r) => !r.kicked);
+    const kicked = rows.filter((r) => r.kicked);
+    const bans = ((br.data ?? []) as any[]);
+    const b = (act: string, r: any, label: string, cls = 'btn-outline-red') => `<button type="button" class="btn ${cls} btn-sm" data-ract="${act}" data-driver="${esc(r.driver_id)}" data-name="${esc(r.display_name ?? 'Driver')}" data-label="${esc(label)}">${esc(label)}</button>`;
+    const row = (r: any, acts: string, note = '') => `<div class="mem-row"><span class="mem-name">${esc(r.display_name ?? 'Driver')}</span>${note ? `<span class="mem-date">${esc(note)}</span>` : ''}<span class="mem-actions">${acts}</span></div>`;
+    $('rsvp-list').innerHTML = (pr.error
+      ? '<p class="rsvp-count">Sign-ups could not be loaded.</p>'
+      : going.length
+        ? `<p class="rsvp-count"><strong>${going.length}${max ? ' / ' + max : ''}</strong> going</p>` + going.map((r) => row(r, r.driver_id === ownDriverId ? '<span class="mem-date">you</span>' : b('kick', r, 'Kick') + b('ban', r, 'Ban'))).join('')
+        : `<p class="rsvp-count">No sign-ups yet${max ? ` (max. ${max})` : ''}.</p>`)
+      + (kicked.length ? `<p class="mem-group-title">Kicked from this event</p>` + kicked.map((r) => row(r, b('unkick', r, 'Allow Again', 'btn-outline'))).join('') : '');
+    $('rsvp-bans').innerHTML = bans.length ? `<p class="mem-group-title">Banned from all your events (${bans.length})</p>` + bans.map((r) => row(r, b('unban', r, 'Unban', 'btn-outline'), `since ${new Date(r.banned_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}`)).join('') : '';
+    const m = $('rsvp-msg'); m.textContent = message; m.className = `form-msg ${message ? (isError ? 'is-error' : 'is-ok') : ''}`;
   }
+  $('rsvp-panel').addEventListener('click', async (e) => {
+    const t = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-ract]');
+    if (!t || !selectedId) return;
+    const a = t.dataset.ract!; const name = t.dataset.name ?? 'the driver';
+    if ((a === 'kick' || a === 'ban') && t.dataset.armed !== '1') {
+      t.dataset.armed = '1';
+      t.textContent = a === 'kick' ? `Click again to kick ${name}` : `Click again to ban ${name} from all your events`;
+      setTimeout(() => { if (t.isConnected && t.dataset.armed === '1') { t.dataset.armed = ''; t.textContent = t.dataset.label!; } }, 4000);
+      return;
+    }
+    t.disabled = true;
+    const sb = getSupabase();
+    const d = t.dataset.driver;
+    const { error } = a === 'kick' ? await sb.rpc('kick_event_participant', { p_event: selectedId, p_driver: d })
+      : a === 'ban' ? await sb.rpc('ban_event_participant', { p_event: selectedId, p_driver: d })
+      : a === 'unkick' ? await sb.rpc('unkick_event_participant', { p_event: selectedId, p_driver: d })
+      : await sb.rpc('unban_event_participant', { p_driver: d });
+    const done: Record<string, string> = { kick: `${name} was removed from this event and can't sign up for it again.`, ban: `${name} is banned from all your events.`, unkick: `${name} can sign up for this event again.`, unban: `${name} is no longer banned from your events.` };
+    loadRsvps(error ? `That did not work: ${error.message}` : done[a], Boolean(error));
+  });
   eventForm.addEventListener('input', renderEventPreview);
   eventForm.addEventListener('change', renderEventPreview);
 
@@ -1019,8 +1149,8 @@ const base = import.meta.env.BASE_URL;
   });
 
   // ------------------------------------------------------------ roles (moderators)
-  const roleLabel = (r: string) => (r === 'crew_leader' ? 'Crew Leader' : r === 'creator' ? 'Creator' : 'Event Host');
-  const roleShort = (r: string) => (r === 'crew_leader' ? 'Leader' : r === 'creator' ? 'Creator' : 'Host');
+  const roleLabel = (r: string) => (r === 'crew_leader' ? 'Crew Leader' : r === 'crew_commissioner' ? 'Commissioner' : r === 'creator' ? 'Creator' : 'Event Host');
+  const roleShort = (r: string) => (r === 'crew_leader' ? 'Leader' : r === 'crew_commissioner' ? 'Comm.' : r === 'creator' ? 'Creator' : 'Host');
   let pickedDriver: { driver_id: string; display_name: string } | null = null;
 
   async function loadRoles() {
@@ -1161,12 +1291,34 @@ const base = import.meta.env.BASE_URL;
       row('Message', r.message),
       row('Link', link(r.link_url), true),
     ].join('') + '</dl>';
+    if (r.role === 'crew_leader') loadApplicantCrews(r);
     ($('req-note') as HTMLTextAreaElement).value = '';
     const rb = $<HTMLButtonElement>('req-reject'); rb.dataset.armed = ''; rb.textContent = 'Reject';
     $<HTMLButtonElement>('req-approve').disabled = false;
     reqMsg('');
     showForm('requests');
     renderList();
+  }
+  // Crew Leader request: which crews does the driver already lead / belong to? (Fausto 19.10., DEC-0144)
+  // No automatic block -- the moderator decides; a crew with only its leader is flagged "solo crew".
+  async function loadApplicantCrews(r: any) {
+    const sb = getSupabase();
+    const [lead, mem] = await Promise.all([
+      sb.from('hub_roles').select('crew:crews(crew_id, name, tag, color, member_count, created_at)').eq('driver_id', r.driver_id).eq('role', 'crew_leader'),
+      sb.from('crew_membership_overview').select('crew_id, crew_name, tag, color').eq('driver_id', r.driver_id).eq('status', 'active'),
+    ]);
+    if (selectedId !== r.request_id) return;
+    const led = ((lead.data ?? []) as any[]).map((x) => x.crew).filter(Boolean);
+    const ledIds = new Set(led.map((c: any) => c.crew_id));
+    const other = ((mem.data ?? []) as any[]).filter((m) => !ledIds.has(m.crew_id));
+    const d = (iso: string) => new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' });
+    const ledHtml = led.length
+      ? led.map((c: any) => `<div>${crewTagHtml(c.tag, c.color, 'sm')} ${esc(c.name)} · ${c.member_count ?? 0} member${c.member_count === 1 ? '' : 's'} · since ${esc(d(c.created_at))}${(c.member_count ?? 0) <= 1 ? ' <strong class="req-solo">solo crew</strong>' : ''}</div>`).join('')
+      : 'none';
+    const memHtml = other.length ? other.map((m) => `${crewTagHtml(m.tag, m.color, 'sm')} ${esc(m.crew_name)}`).join(' ') : 'none';
+    const dl = $('req-body').querySelector('.req-list');
+    if (!dl) return;
+    (dl.children[1] ?? dl.children[0])?.insertAdjacentHTML('afterend', `<div class="req-row"><dt>Already leads</dt><dd>${ledHtml}</dd></div><div class="req-row"><dt>Member of</dt><dd>${memHtml}</dd></div>`);
   }
   $('req-approve').addEventListener('click', async () => {
     if (!selectedId) return;
@@ -1236,14 +1388,15 @@ const base = import.meta.env.BASE_URL;
     isHost = myRoles.some((r) => r.role === 'event_host');
     isCreator = myRoles.some((r) => r.role === 'creator');
     leaderCrewIds = new Set(myRoles.filter((r) => r.role === 'crew_leader').map((r) => r.crew_id));
+    commCrewIds = new Set(myRoles.filter((r) => r.role === 'crew_commissioner').map((r) => r.crew_id));
     if (ownDriverId) {
       const mem = await sb.from('crew_memberships').select('crew_id').eq('driver_id', ownDriverId).eq('status', 'active');
       memberCrewIds = new Set(((mem.data ?? []) as any[]).map((m) => m.crew_id));
     }
-    const hasAccess = MODE === 'moderator' ? realMod : MODE === 'crew' ? leaderCrewIds.size > 0 : MODE === 'tracks' ? isCreator : isHost;
+    const hasAccess = MODE === 'moderator' ? realMod : MODE === 'crew' ? leaderCrewIds.size + commCrewIds.size > 0 : MODE === 'tracks' ? isCreator : isHost;
     if (notModEl) notModEl.hidden = hasAccess;
     contentEl.hidden = !hasAccess;
-    rootEl.dispatchEvent(new CustomEvent('hc-access', { bubbles: true, detail: { hasAccess, isHost, isCreator, leaderCrewIds: [...leaderCrewIds], isMod: realMod, ownDriverId } }));
+    rootEl.dispatchEvent(new CustomEvent('hc-access', { bubbles: true, detail: { hasAccess, isHost, isCreator, leaderCrewIds: [...leaderCrewIds], commissionerCrewIds: [...commCrewIds], isMod: realMod, ownDriverId } }));
     if (!hasAccess) return;
     applyRoleVisibility();
     if (PERSONAL) {

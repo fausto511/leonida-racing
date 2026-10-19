@@ -104,7 +104,9 @@ export function createEventRsvp(root: HTMLElement) {
     if (!me) return;
     const { error } = await getSupabase().from('hub_event_rsvps').insert({ event_id: id, driver_id: me });
     const ev = events.find((x) => x.event_id === id);
-    note = error ? { id, text: 'Could not sign up — the event may be full or already over.', err: true } : { id, text: 'You\u2019re in!', discord: ev ? eventDiscord(ev) : null };
+    // DEC-0144: kicked from this event / banned by the host -> say so (COPY: Claude placeholder)
+    const block = error ? (await getSupabase().rpc('my_event_block', { p_event: id })).data : null;
+    note = error ? { id, text: block === 'banned' ? 'The host has blocked you from their events.' : block === 'kicked' ? 'The host removed you from this event.' : 'Could not sign up — the event may be full or already over.', err: true } : { id, text: 'You\u2019re in!', discord: ev ? eventDiscord(ev) : null };
     await loadRsvps();
   }
   async function leave(id: string) {

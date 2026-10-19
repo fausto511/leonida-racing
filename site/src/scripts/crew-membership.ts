@@ -42,7 +42,10 @@ export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null
       else if (m?.status === 'active') slot.innerHTML = `<span class="crew-pill">${m.is_primary ? 'Active Crew' : 'Crew Member'}</span>`;
       else if (m) slot.innerHTML = `<span class="crew-pill is-pending">Request Sent</span><button type="button" class="crew-link crew-withdraw" data-withdraw="${esc(id)}">Withdraw</button>`;
       else if (full) slot.innerHTML = `<span class="crew-pill is-pending" title="You can be in up to ${CREW_LIMIT} crews, open requests included">${CREW_LIMIT}-Crew Limit Reached</span>`;
-      else slot.innerHTML = `<button type="button" class="crew-link crew-join-btn" data-join="${esc(id)}">Request Invite</button>`;
+      // DEC-0144: open crews -> join at once; request crews -> leader/commissioner approves. COPY: Claude placeholder.
+      else slot.innerHTML = crewById(id)?.join_mode === 'open'
+        ? `<button type="button" class="crew-link crew-join-btn" data-join="${esc(id)}">Join Crew</button>`
+        : `<button type="button" class="crew-link crew-join-btn" data-join="${esc(id)}">Request Invite</button>`;
     });
     onRender?.(mine, crews, live);
     if (!meEl) return;
@@ -96,8 +99,8 @@ export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null
     const { error } = await getSupabase().from('crew_memberships').insert({ crew_id: id, driver_id: ownDriverId });
     busy = false;
     await loadMine();
-    if (error) { render(/crew_limit/.test(error.message) ? `You can be in up to ${CREW_LIMIT} crews, open requests included.` : 'Could not send the request. Please try again.', true); return; }
-    render('Request sent. The crew leader will see it in My Account.');
+    if (error) { render(/crew_limit/.test(error.message) ? `You can be in up to ${CREW_LIMIT} crews, open requests included.` : /crew_banned/.test(error.message) ? 'You can\u2019t join this crew.' : 'Could not send the request. Please try again.', true); return; }
+    render(mine.find((m) => m.crew_id === id)?.status === 'active' ? 'You\u2019re in! Manage your crews in My Account.' : 'Request sent. The crew leader will see it in My Account.');
   }
 
   async function withdraw(id: string) {

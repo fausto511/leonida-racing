@@ -35,6 +35,8 @@ export interface HubCrew {
   is_featured?: boolean;
   /** set by moderators: "Official" badge (site crews, original creators; Fausto 2026-10-07) */
   is_official?: boolean;
+  /** DEC-0144: 'open' = join at once, 'request' = leader/commissioner approves (default) */
+  join_mode?: 'open' | 'request';
 }
 
 /** Crew regions (Fausto 2026-10-07): fixed list instead of free text, one per crew.
@@ -140,6 +142,10 @@ export const buildEvents: HubEvent[] = (communityData as { events: HubEvent[] })
 /** House crews run by Leonida Racing (Fausto 19.10.2026): used for the crew tags of the
  *  sample leaderboard until launch. Site crews LERA/GRAC are deliberately not used there. */
 export const HOUSE_CREW_TAGS = ['BCRW', 'LOWN', 'VCSR'];
+/** Flagship crews (DEC-0143): moderated, run events. */
+export const FLAGSHIP_CREW_TAGS = ['LERA', 'GRAC'];
+/** "Pick a crew" in My Account > Crew (DEC-0144): flagships first, then the side crews. */
+export const PICK_CREW_TAGS = [...FLAGSHIP_CREW_TAGS, ...HOUSE_CREW_TAGS];
 
 // Fictional sample crews/events removed 19.10.2026 (Fausto): Community pages show only
 // real published crews/events (build snapshot + live).

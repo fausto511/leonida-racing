@@ -298,3 +298,8 @@ a.ev-next-copy { text-decoration: none; }
 
 /* Official badge (Fausto 2026-10-07): own colour, shown before Partner */
 .crew-official { background: var(--gh-red, #F24B9D); color: #fff; }
+
+/* DEC-0144: crew roles + kick/ban (19.10.2026) */
+.mem-role { display: inline-block; margin-left: .35rem; padding: .05rem .4rem; border: 1px solid var(--gh-line); border-radius: 999px; font-size: .66rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--gh-muted); vertical-align: middle; }
+.mem-actions { flex-wrap: wrap; }
+.req-solo { color: var(--gh-yellow); }

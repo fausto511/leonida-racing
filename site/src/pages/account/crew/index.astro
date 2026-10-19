@@ -69,12 +69,16 @@ const base = import.meta.env.BASE_URL;
   :global(.mem-invites) { display: flex; flex-direction: column; gap: .7rem; margin-bottom: 1.2rem; }
   :global(.mem-invite-card) { border-color: var(--gh-yellow); }
   :global(.mem-invite-actions) { display: flex; gap: .5rem; }
+  :global(.mem-pick) { margin-top: 1.4rem; }
+  :global(.mem-pick-head) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8rem 1.2rem; margin-bottom: 1rem; }
+  :global(.mem-pick-head p) { margin: 0; color: var(--gh-muted); font-size: .9rem; max-width: 56ch; }
+  :global(.mem-pick-head strong) { color: var(--gh-text); }
   :global(.mem-pending) { display: flex; flex-direction: column; gap: .7rem; margin-top: 1.2rem; }
 </style>
 
 <script>
   import { backendConfigured, getSupabase } from '../../../scripts/supabase-client';
-  import { crewCardHtml, crewTagHtml, esc } from '../../../data/hub';
+  import { crewCardHtml, crewTagHtml, esc, PICK_CREW_TAGS } from '../../../data/hub';
 
   const base = import.meta.env.BASE_URL;
   const authEl = document.getElementById('acc-auth')!;
@@ -82,6 +86,8 @@ const base = import.meta.env.BASE_URL;
   const memEl = document.getElementById('membership')!;
   let me: string | null = null;
   let leaderIds: string[] = [];
+  let commissionerIds: string[] = [];
+  let pickCrews: any[] = []; // "Pick a crew" (DEC-0144)
   // Up to 5 crews incl. open requests; one active crew is the main crew (DEC-0093).
   // COPY STATUS: membership texts approved (Codex 2026-10-02, Fausto);
   // invite texts (RS-0063) are Claude placeholders, Codex review pending.
@@ -93,6 +99,7 @@ const base = import.meta.env.BASE_URL;
   document.addEventListener('hc-access', (e: any) => {
     document.getElementById('lead-block')!.hidden = !e.detail.hasAccess;
     leaderIds = e.detail.leaderCrewIds ?? [];
+    commissionerIds = e.detail.commissionerCrewIds ?? [];
     render();
   });
 
@@ -105,8 +112,13 @@ const base = import.meta.env.BASE_URL;
     const activeIds = mine.filter((m) => m.status === 'active').map((m) => m.crew_id);
     crewData = new Map();
     if (activeIds.length) {
-      const c = await sb.from('crews').select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_official').in('crew_id', activeIds);
+      const c = await sb.from('crews').select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_official,join_mode').in('crew_id', activeIds);
       for (const row of (c.data ?? []) as any[]) crewData.set(row.crew_id, row);
+    }
+    pickCrews = [];
+    if (!mine.some((m) => m.status === 'active' || m.status === 'pending')) {
+      const p = await sb.from('crews').select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_official,join_mode').eq('is_published', true).in('tag', PICK_CREW_TAGS);
+      pickCrews = ((p.data ?? []) as any[]).sort((a, b) => PICK_CREW_TAGS.indexOf(a.tag) - PICK_CREW_TAGS.indexOf(b.tag));
     }
     render();
   }
@@ -120,7 +132,10 @@ const base = import.meta.env.BASE_URL;
     const msg = note ? `<p class="mem-msg${isError ? ' is-error' : ''}">${esc(note)}</p>` : '';
     const find = used < LIMIT ? `<a class="btn btn-primary" href="${base}community/crews/">Find a Crew</a>` : '';
     if (!active.length && !pending.length) {
-      memEl.innerHTML = `${invHtml}<div class="panel mem-empty-card"><p><strong>You're not in a crew yet.</strong> Find one that fits how you play and request an invite. You can join or request up to five crews.</p>${find}</div>${msg}`;
+      // "Pick a crew" (DEC-0144): the five crews run by this site, one click to join, plus a clear way to all crews.
+      // COPY STATUS: Claude placeholders, Codex review pending.
+      const picks = pickCrews.length ? `<div class="mem-pick"><div class="mem-pick-head"><p><strong>Pick a crew to get started.</strong> These crews are open to everyone, one click and their tag is yours. You can switch or join other crews any time.</p><a class="btn btn-primary" href="${base}community/crews/">Find a Crew</a></div><div class="crew-grid">${pickCrews.map((c) => crewCardHtml(c, undefined, { actions: c.join_mode === 'open' ? `<button type="button" class="crew-link crew-action-btn" data-pick="${esc(c.crew_id)}">Join Crew</button>` : `<a class="crew-link crew-action-btn" href="${base}community/crews/#crew-${encodeURIComponent(c.crew_id)}">Request Invite</a>` })).join('')}</div></div>` : '';
+      memEl.innerHTML = `${invHtml}<div class="panel mem-empty-card"><p><strong>You're not in a crew yet.</strong> Find one that fits how you play. You can join or request up to five crews.</p>${picks ? '' : find}</div>${msg}${picks}`;
       return;
     }
     const head = `<div class="mem-head"><p>You're in <strong>${active.length}</strong> crew${active.length === 1 ? '' : 's'}${pending.length ? ` with <strong>${pending.length}</strong> request${pending.length === 1 ? '' : 's'} pending` : ''} (${used}/${LIMIT}). Your <strong>Active Crew</strong> tag appears next to your name, including on leaderboards.</p>${find}</div>`;
@@ -129,13 +144,13 @@ const base = import.meta.env.BASE_URL;
       const c = crewData.get(m.crew_id);
       if (!c) return '';
       const leads = leaderIds.includes(m.crew_id);
-      const actions = `<span class="crew-pill${m.is_primary ? '' : ' is-pending'}">${m.is_primary ? 'Active Crew' : 'Crew Member'}</span>${leads ? '<span class="crew-pill">Crew Leader</span>' : ''}`
+      const actions = `<span class="crew-pill${m.is_primary ? '' : ' is-pending'}">${m.is_primary ? 'Active Crew' : 'Crew Member'}</span>${leads ? '<span class="crew-pill">Crew Leader</span>' : commissionerIds.includes(m.crew_id) ? '<span class="crew-pill">Commissioner</span>' : ''}`
         + '<span class="crew-action-btns">'
         + (m.is_primary || active.length < 2 ? '' : `<button type="button" class="crew-link crew-action-btn" data-primary="${esc(m.crew_id)}">Set as Active Crew</button>`)
         + `<button type="button" class="crew-link crew-action-btn" data-leave="${esc(m.membership_id)}" data-kind="${leads ? 'leave-leader' : 'leave'}">Leave Crew</button></span>`;
       return crewCardHtml(c, undefined, { actions });
     }).join('')}</div>`;
-    const reqs = pending.length ? `<div class="mem-pending">${pending.map((m) => `<div class="panel mem-empty-card"><p>Your request to join ${crewTagHtml(m.tag, m.color, 'sm')} <strong>${esc(m.crew_name)}</strong> is waiting for the crew leader.</p><button type="button" class="btn btn-outline" data-leave="${esc(m.membership_id)}" data-kind="withdraw">Withdraw</button></div>`).join('')}</div>` : '';
+    const reqs = pending.length ? `<div class="mem-pending">${pending.map((m) => `<div class="panel mem-empty-card"><p>Your request to join ${crewTagHtml(m.tag, m.color, 'sm')} <strong>${esc(m.crew_name)}</strong> is waiting for the crew to approve it.</p><button type="button" class="btn btn-outline" data-leave="${esc(m.membership_id)}" data-kind="withdraw">Withdraw</button></div>`).join('')}</div>` : '';
     memEl.innerHTML = invHtml + head + msg + cards + reqs;
   }
 
@@ -148,6 +163,14 @@ const base = import.meta.env.BASE_URL;
       const { error } = await getSupabase().rpc(acc ? 'accept_crew_invite' : 'decline_crew_invite', { p_crew: (acc ?? dec)!.dataset[acc ? 'accept' : 'decline'] });
       await load();
       render(error ? (/crew_limit/.test(error.message) ? `You are already in ${LIMIT} crews (open requests included).` : 'That did not work. Please try again.') : acc ? 'Welcome to the crew!' : 'Invite declined.', Boolean(error));
+      return;
+    }
+    const pk = t.closest<HTMLButtonElement>('[data-pick]');
+    if (pk && me) {
+      pk.disabled = true;
+      const { error } = await getSupabase().from('crew_memberships').insert({ crew_id: pk.dataset.pick, driver_id: me });
+      await load();
+      render(error ? (/crew_banned/.test(error.message) ? 'You can\u2019t join this crew.' : 'That did not work. Please try again.') : 'Welcome to the crew!', Boolean(error));
       return;
     }
     const p = t.closest<HTMLButtonElement>('[data-primary]');
