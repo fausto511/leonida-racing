@@ -28,7 +28,6 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
       <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}time-attack/gellhorn-international-raceway/`}>Time Attack</a><span aria-hidden="true">/</span><span aria-current="page">Submit a lap</span></nav>
       <p class="eyebrow">Gellhorn International Raceway</p>
       <h1 class="display lr-t2">Submit a lap</h1>
-      <p class="lr-lede">Send a screenshot or a video of your lap. Three short steps, done in under a minute.</p>
     </div>
   </section>
 
@@ -55,7 +54,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
       </div>
 
       <!-- Wizard -->
-      <form id="submit-form" class="card sb-wiz" novalidate hidden>
+      <form id="submit-form" class="sb-wiz" novalidate hidden>
         <div class="sb-prog" aria-hidden="true">
           <p class="sb-prog-t">Step <span id="sb-stepno">1</span> of 3</p>
           <ol class="sb-prog-bar">
@@ -67,22 +66,22 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
 
         <!-- Step 1: proof -->
         <fieldset class="sb-step" data-step="1">
-          <legend class="sb-h2">How do you want to prove your lap?</legend>
+          <legend class="sb-h2">Prove your lap</legend>
           <p class="sb-ps"><span class="sb-plat">{active.label}</span>{active.label} only for now. {later} will follow.</p>
 
           <div class="sb-proof">
-            <div class="sb-tile" id="tile-shot">
-              <div class="sb-tile-h"><strong>Screenshot</strong><span>Fastest to send</span></div>
+            <div class="sb-box" id="tile-shot">
               <label class="dropzone" id="dropzone" for="screenshot">
                 <input id="screenshot" name="screenshot" type="file" accept="image/*" class="sr-only" />
                 <span class="dz-empty" id="dz-empty">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-                  <strong class="dz-title">Add screenshot</strong>
-                  <span class="dz-sub dz-touch">Tap to pick it from your photos</span>
-                  <span class="dz-sub dz-desk">Drop it here, click, or paste with Ctrl+V</span>
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                  <strong class="dz-title">Screenshot</strong>
+                  <span class="dz-sub dz-touch">Tap to choose</span>
+                  <span class="dz-sub dz-desk">Drop, click or paste</span>
                 </span>
                 <img id="dz-preview" class="dz-preview" alt="Preview of your results screenshot" hidden />
                 <span class="dz-busy" id="dz-busy" hidden>Preparing image…</span>
+                <span class="sb-ok" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
               </label>
               <div class="dz-meta" id="dz-meta" hidden>
                 <span id="dz-info"></span>
@@ -90,20 +89,50 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
               </div>
             </div>
 
-            <div class="sb-tile" id="tile-video">
-              <div class="sb-tile-h"><strong>Video</strong><span>Gets the Video verified badge</span></div>
-              <div class="sb-vid">
-                <img id="vid-thumb" class="sb-vid-thumb" alt="" hidden />
-                <span class="sb-vid-empty" id="vid-empty">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg>
-                  <span>Full, uncut lap on YouTube</span>
-                </span>
+            <div class="sb-box" id="tile-video">
+              <div class="sb-vbox">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg>
+                <strong class="dz-title">Video</strong>
+                <label class="dz-sub" for="video_url">Full lap on YouTube</label>
+                <input id="video_url" name="video_url" type="url" inputmode="url" autocomplete="off" placeholder="Paste YouTube link" />
+                <span class="sb-vok" id="vid-ok" hidden>YouTube link added</span>
+                <span class="sb-ok" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
               </div>
-              <label class="sr-only" for="video_url">YouTube link</label>
-              <input id="video_url" name="video_url" type="url" inputmode="url" autocomplete="off" placeholder="Paste YouTube link" />
             </div>
           </div>
-          <p class="sb-both">Got both? Add both.</p>
+          <details class="sb-need" id="sb-need">
+            <summary><span>What counts as proof?</span><i aria-hidden="true"></i></summary>
+            <div class="sb-need-b">
+              <div>
+<svg class="sb-sketch" viewBox="0 0 300 168" role="img" aria-label="Sketch of a results screen: your row with PSN name, car and lap time is highlighted.">
+                <rect x="1" y="1" width="298" height="166" rx="8" fill="#14141F" stroke="rgba(200,200,222,.25)"/>
+                <text x="14" y="22" fill="#9C9CAB" font-size="9" font-weight="700" letter-spacing="1.5">RESULTS</text>
+                <g font-size="10" fill="#B4B4C2">
+                  <text x="14" y="48">1</text><rect x="30" y="41" width="70" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="120" y="41" width="80" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="236" y="41" width="48" height="8" rx="2" fill="rgba(200,200,222,.18)"/>
+                  <text x="14" y="104">3</text><rect x="30" y="97" width="60" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="120" y="97" width="72" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="236" y="97" width="48" height="8" rx="2" fill="rgba(200,200,222,.18)"/>
+                  <text x="14" y="130">4</text><rect x="30" y="123" width="76" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="120" y="123" width="66" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="236" y="123" width="48" height="8" rx="2" fill="rgba(200,200,222,.18)"/>
+                </g>
+                <rect x="6" y="62" width="288" height="26" rx="5" fill="rgba(255,149,90,.12)" stroke="#FF955A"/>
+                <g font-size="10.5" font-weight="700" fill="#FBF7EA">
+                  <text x="14" y="79">2</text><text x="30" y="79">Racer_01</text><text x="120" y="79">Your car</text><text x="236" y="79">1:24.683</text>
+                </g>
+                <g font-size="8.5" font-weight="700" fill="#FF955A" letter-spacing=".5">
+                  <text x="30" y="160">PSN NAME</text><text x="120" y="160">CAR</text><text x="236" y="160">LAP TIME</text>
+                </g>
+                <g stroke="#FF955A" stroke-width="1" stroke-dasharray="2 2"><path d="M44 150V90M136 150V90M256 150V90"/></g>
+              </svg>
+              <p class="sb-need-cap">Sketch. The real GTA VI results screen will look different.</p>
+              </div>
+              <div>
+              <ul class="sb-need-l">
+                <li><strong>Screenshot:</strong> the results screen with your PSN name, car and lap time readable. Stored privately, never published.</li>
+                <li><strong>On PS5:</strong> share the screenshot to the PlayStation App, save it to your phone, add it here.</li>
+                <li><strong>Video:</strong> the full, uncut lap on YouTube. A moderator watches it before your time gets Video verified.</li>
+              </ul>
+              <a class="sb-need-a" href={`${base}time-attack/rules/`}>Rules and verification →</a>
+              </div>
+            </div>
+          </details>
           <div class="sb-err" data-err="1" hidden></div>
           <div class="sb-foot">
             <span></span>
@@ -118,9 +147,9 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
             <div class="sb-mini" id="mini-2"></div>
             <div class="sb-fields">
               <div class="field">
-                <label class="field-label" for="psn_name">PSN name</label>
+                <label class="field-label" for="psn_name">PSN name <span class="sb-lab-x">(as on the results screen)</span></label>
                 <input id="psn_name" name="psn_name" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="e.g. Racer_01" />
-                <p class="hint">As shown on the results screen, so we can find you.</p>
+                <p class="hint">So we can find you if more drivers are on the screenshot.</p>
               </div>
               <div class="field sb-combo" id="veh-combo">
                 <label class="field-label" for="veh-q">Car</label>
@@ -182,37 +211,6 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
     </div>
 
     <!-- What we need -->
-    <aside class="sb-aside">
-      <details class="sb-need" id="sb-need" open>
-        <summary><span>What counts as proof?</span><i aria-hidden="true"></i></summary>
-        <div class="sb-need-b">
-          <svg class="sb-sketch" viewBox="0 0 300 168" role="img" aria-label="Sketch of a results screen: your row with PSN name, car and lap time is highlighted.">
-            <rect x="1" y="1" width="298" height="166" rx="8" fill="#14141F" stroke="rgba(200,200,222,.25)"/>
-            <text x="14" y="22" fill="#9C9CAB" font-size="9" font-weight="700" letter-spacing="1.5">RESULTS</text>
-            <g font-size="10" fill="#B4B4C2">
-              <text x="14" y="48">1</text><rect x="30" y="41" width="70" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="120" y="41" width="80" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="236" y="41" width="48" height="8" rx="2" fill="rgba(200,200,222,.18)"/>
-              <text x="14" y="104">3</text><rect x="30" y="97" width="60" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="120" y="97" width="72" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="236" y="97" width="48" height="8" rx="2" fill="rgba(200,200,222,.18)"/>
-              <text x="14" y="130">4</text><rect x="30" y="123" width="76" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="120" y="123" width="66" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="236" y="123" width="48" height="8" rx="2" fill="rgba(200,200,222,.18)"/>
-            </g>
-            <rect x="6" y="62" width="288" height="26" rx="5" fill="rgba(255,149,90,.12)" stroke="#FF955A"/>
-            <g font-size="10.5" font-weight="700" fill="#FBF7EA">
-              <text x="14" y="79">2</text><text x="30" y="79">Racer_01</text><text x="120" y="79">Your car</text><text x="236" y="79">1:24.683</text>
-            </g>
-            <g font-size="8.5" font-weight="700" fill="#FF955A" letter-spacing=".5">
-              <text x="30" y="160">PSN NAME</text><text x="120" y="160">CAR</text><text x="236" y="160">LAP TIME</text>
-            </g>
-            <g stroke="#FF955A" stroke-width="1" stroke-dasharray="2 2"><path d="M44 150V90M136 150V90M256 150V90"/></g>
-          </svg>
-          <p class="sb-need-cap">Sketch. The real GTA VI results screen will look different.</p>
-          <ul class="sb-need-l">
-            <li><strong>Screenshot:</strong> the results screen with your PSN name, car and lap time readable. Stored privately, never published.</li>
-            <li><strong>On PS5:</strong> share the screenshot to the PlayStation App, save it to your phone, add it here.</li>
-            <li><strong>Video:</strong> the full, uncut lap on YouTube. A moderator watches it before your time gets Video verified.</li>
-          </ul>
-          <a class="sb-need-a" href={`${base}time-attack/rules/`}>Rules and verification →</a>
-        </div>
-      </details>
-    </aside>
   </div>
 
   <script type="application/json" id="veh-data" set:html={JSON.stringify(vehicles)} />
@@ -222,10 +220,10 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   [hidden] { display: none !important; }
   /* ---- band: "without image" variant (DEC-0139) ---- */
   .sb-band { border-bottom: 1px solid var(--lr-line); background: linear-gradient(180deg, rgba(28,28,42,.6), rgba(11,11,20,0)); }
-  .sb-band-in.lr-band-in { min-height: 0; padding-top: 48px; padding-bottom: 32px; }
+  .sb-band-in.lr-band-in { min-height: 0; padding-top: 32px; padding-bottom: 28px; }
 
-  .sb-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 32px; align-items: start; padding-top: 32px; padding-bottom: 72px; }
-  .sb-main { min-width: 0; }
+  .sb-layout { padding-top: 28px; padding-bottom: 72px; }
+  .sb-main { max-width: 760px; margin: 0 auto; min-width: 0; }
   .sb-notice { margin-bottom: 16px; padding: 12px 14px; border: 1px solid rgba(255,149,90,.4); border-radius: 8px; background: rgba(255,149,90,.08); font-size: 14px; color: var(--lr-soft); }
   .sb-notice strong { color: var(--lr-orange); }
 
@@ -247,7 +245,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   .sb-login svg { flex: none; }
 
   /* wizard */
-  .sb-wiz { padding: 24px 28px 28px; overflow: visible; }
+  .sb-wiz { padding: 0; }
   .sb-prog { margin-bottom: 22px; }
   .sb-prog-t { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--lr-muted); }
   .sb-prog-bar { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -257,19 +255,34 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   .sb-prog-bar li.is-on { color: var(--lr-text); font-weight: 600; }
   .sb-step { margin: 0; padding: 0; border: 0; min-width: 0; }
 
-  .sb-proof { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
-  .sb-tile { display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid var(--lr-line); border-radius: 8px; background: rgba(11,11,20,.35); min-width: 0; }
-  .sb-tile.is-set { border-color: rgba(217,245,142,.45); }
-  .sb-tile-h { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-  .sb-tile-h strong { font-size: 16px; }
-  .sb-tile-h span { font-size: 12px; color: var(--lr-muted); }
-  .dropzone { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; border: 1.5px dashed rgba(200,200,222,.3); border-radius: 6px; cursor: pointer; overflow: hidden; background: var(--lr-card); transition: border-color .15s, background .15s; }
+  .sb-proof { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+  .sb-box { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .sb-vbox, .dropzone { position: relative; min-height: 230px; border: 2px dashed rgba(200,200,222,.32); border-radius: 10px; background: rgba(28,28,42,.55); transition: border-color .15s, background .15s; }
+  .sb-vbox { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px; color: var(--lr-muted); text-align: center; }
+  .sb-vbox:focus-within { border-color: var(--lr-orange); }
+  .sb-vbox input { margin-top: 8px; max-width: 300px; text-align: center; }
+  .sb-vok { font-size: 13px; font-weight: 600; color: var(--lr-lime); }
+  .sb-ok { position: absolute; top: 10px; right: 10px; z-index: 2; display: none; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--lr-lime); color: #14141F; }
+  .sb-box.is-set .sb-ok { display: grid; }
+  .sb-box.is-set .sb-vbox, .sb-box.is-set .dropzone { border-style: solid; border-color: rgba(217,245,142,.55); }
+  .sb-need { margin-top: 18px; }
+  .sb-need summary { display: inline-flex; align-items: center; gap: 8px; list-style: none; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--lr-soft); }
+  .sb-need summary::-webkit-details-marker { display: none; }
+  .sb-need summary:hover { color: var(--lr-text); }
+  .sb-need summary i { width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .15s; }
+  .sb-need[open] summary i { transform: rotate(-135deg) translateY(-1px); }
+  .sb-need-b { display: grid; grid-template-columns: 300px minmax(0,1fr); gap: 20px; align-items: start; margin-top: 14px; padding: 16px; border-radius: 8px; background: var(--lr-card); }
+  .sb-sketch { display: block; width: 100%; height: auto; }
+  .sb-need-cap { margin: 6px 0 0; font-size: 11px; color: var(--lr-muted); }
+  .sb-need-l { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; font-size: 13px; line-height: 1.5; color: var(--lr-soft); }
+  .sb-need-l strong { color: var(--lr-text); }
+  .sb-need-a { display: inline-block; margin-top: 10px; font-size: 14px; font-weight: 700; color: var(--lr-orange); text-decoration: none; }
+  .dropzone { display: grid; place-items: center; cursor: pointer; overflow: hidden; }
   .dropzone:hover, .dropzone.is-over { border-color: var(--lr-orange); background: rgba(255,149,90,.06); }
-  .dropzone.has-file { border-style: solid; border-color: transparent; }
   .dropzone[aria-invalid] { border-color: var(--lr-pink); }
   .dz-empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px; text-align: center; color: var(--lr-muted); }
-  .dz-title { font-size: 15px; color: var(--lr-text); }
-  .dz-sub { font-size: 12px; }
+  .dz-title { font-size: 18px; color: var(--lr-text); }
+  .dz-sub { font-size: 13px; }
   .dz-touch { display: none; }
   :global(html.is-touch) .dz-touch { display: inline; }
   :global(html.is-touch) .dz-desk { display: none; }
@@ -279,23 +292,20 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   .dz-meta #dz-info { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dz-actions { display: flex; gap: 12px; flex: none; }
   .link-btn, .sb-sum-list :global(.link-btn) { padding: 0; border: 0; background: none; color: var(--lr-orange); font: inherit; font-weight: 600; cursor: pointer; }
-  .sb-vid { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; border-radius: 6px; background: var(--lr-card); border: 1.5px dashed rgba(200,200,222,.3); overflow: hidden; }
-  .sb-vid.has-vid { border-style: solid; border-color: transparent; }
-  .sb-vid-empty { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--lr-muted); text-align: center; padding: 12px; }
-  .sb-vid-thumb { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .sb-both { margin: 12px 0 0; font-size: 13px; color: var(--lr-muted); }
 
   input[type="text"], input[type="url"] { width: 100%; box-sizing: border-box; height: 46px; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-bg); color: var(--lr-text); font: inherit; font-size: 16px; }
   input:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 1px; border-color: transparent; }
   input[aria-invalid] { border-color: var(--lr-pink); }
   #lap_time { font-family: var(--gh-font-display); font-weight: 700; letter-spacing: .04em; font-size: 18px; }
   .field { display: flex; flex-direction: column; gap: 6px; }
+  .sb-lab-x { font-weight: 400; color: var(--lr-muted); }
   .field-label { margin: 0; font-size: 13px; font-weight: 600; color: var(--lr-soft); }
   .hint { margin: 0; font-size: 12px; line-height: 1.45; color: var(--lr-muted); }
 
   .sb-lap, .sb-sum { display: grid; grid-template-columns: 260px minmax(0,1fr); gap: 20px; margin-top: 20px; align-items: start; }
   .sb-mini { display: grid; gap: 8px; }
   .sb-mini :global(img) { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; background: #000; border-radius: 6px; border: 1px solid var(--lr-line); }
+  .sb-mini :global(.sb-mini-vid) { display: grid; place-items: center; aspect-ratio: 16 / 9; border-radius: 6px; border: 1px solid var(--lr-line); background: var(--lr-card); color: var(--lr-muted); }
   .sb-mini :global(span) { font-size: 12px; color: var(--lr-muted); }
   .sb-fields { display: grid; gap: 16px; }
 
@@ -343,38 +353,20 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   .sb-done-a { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 
   /* aside */
-  .sb-aside { position: sticky; top: calc(var(--gh-header-h) + 24px); }
-  .sb-need { border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
-  .sb-need summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 18px 0; list-style: none; font-size: 15px; font-weight: 700; cursor: default; pointer-events: none; }
-  .sb-need summary::-webkit-details-marker { display: none; }
-  .sb-need summary i { display: none; }
-  .sb-need-b { padding: 14px 18px 18px; }
-  .sb-sketch { display: block; width: 100%; height: auto; font-family: var(--gh-font-body, inherit); }
-  .sb-need-cap { margin: 6px 0 0; font-size: 11px; color: var(--lr-muted); }
-  .sb-need-l { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; font-size: 13px; line-height: 1.5; color: var(--lr-soft); }
-  .sb-need-l strong { color: var(--lr-text); }
-  .sb-need-a { display: inline-block; margin-top: 14px; font-size: 14px; font-weight: 700; color: var(--lr-orange); text-decoration: none; }
 
   @media (max-width: 1000px) {
-    .sb-layout { grid-template-columns: 1fr; gap: 16px; }
-    .sb-aside { position: static; order: -1; }
-    .sb-need summary { padding: 14px 16px; pointer-events: auto; cursor: pointer; }
-    .sb-need summary i { display: block; width: 10px; height: 10px; border-right: 2px solid var(--lr-muted); border-bottom: 2px solid var(--lr-muted); transform: rotate(45deg) translateY(-3px); transition: transform .15s; }
-    .sb-need[open] summary i { transform: rotate(-135deg); }
-    .sb-need-b { padding-top: 0; }
-    .sb-need-b .sb-sketch { max-width: 360px; }
   }
   @media (max-width: 860px) {
     .sb-band-in.lr-band-in { padding-top: 24px; padding-bottom: 24px; }
     .sb-layout { padding-top: 16px; }
-    .sb-wiz, .sb-guest, .sb-done { padding: 20px 16px; }
+    .sb-guest, .sb-done { padding: 20px 16px; }
     .sb-h2 { font-size: 22px; }
-    .sb-proof { grid-template-columns: 1fr; gap: 10px; margin-top: 16px; }
-    .dropzone, .sb-vid { aspect-ratio: 16 / 7; }
-    .sb-tile { padding: 12px; gap: 8px; }
+    .sb-proof { grid-template-columns: 1fr; gap: 12px; margin-top: 18px; }
+    .sb-vbox, .dropzone { min-height: 150px; }
+    .sb-need-b { grid-template-columns: 1fr; }
     .sb-lap, .sb-sum { grid-template-columns: 1fr; gap: 14px; }
     .sb-mini { grid-template-columns: 120px 1fr; align-items: center; }
-    .sb-foot { position: sticky; bottom: 0; z-index: 25; margin: 20px -16px -20px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(20,20,31,.97); backdrop-filter: blur(8px); border-radius: 0 0 8px 8px; }
+    .sb-foot { position: sticky; bottom: 0; z-index: 25; margin: 20px -16px 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(11,11,20,.96); backdrop-filter: blur(8px); }
     .sb-foot .sb-next, .sb-foot .sb-submit { flex: 1; }
     .sb-done-a .btn { flex: 1 1 100%; }
     .sb-login { width: 100%; }
@@ -400,7 +392,6 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
 
   if (navigator.maxTouchPoints > 0 && !window.matchMedia('(pointer: fine)').matches) document.documentElement.classList.add('is-touch');
   // Phone: the "what counts" box starts closed so the form is visible first.
-  if (window.matchMedia('(max-width: 1000px)').matches) $('sb-need').open = false;
 
   // ------------------------------------------------------------ state
   let session = null;
@@ -559,9 +550,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   }
   $('video_url').addEventListener('input', () => {
     videoId = ytId($('video_url').value);
-    const th = $('vid-thumb');
-    if (videoId) { th.src = `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`; th.hidden = false; $('vid-empty').hidden = true; th.parentElement.classList.add('has-vid'); }
-    else { th.hidden = true; th.removeAttribute('src'); $('vid-empty').hidden = false; th.parentElement.classList.remove('has-vid'); }
+    $('vid-ok').hidden = !videoId;
     refresh();
   });
 
@@ -710,7 +699,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
     const el = $(id);
     const parts = [];
     if (screenshot) parts.push(`<img src="${esc(screenshot.url)}" alt="Your screenshot" />`);
-    else if (videoId) parts.push(`<img src="https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg" alt="Your video" />`);
+    else if (videoId) parts.push('<i class="sb-mini-vid"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg></i>');
     parts.push(`<span>${screenshot && videoId ? 'Screenshot and video' : screenshot ? 'Screenshot' : 'Video'}</span>`);
     el.innerHTML = parts.join('');
   }
@@ -836,7 +825,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   $('submit-another').addEventListener('click', () => {
     // Keep PSN name and car; clear proof and time.
     clearScreenshot();
-    $('video_url').value = ''; videoId = null; $('vid-thumb').hidden = true; $('vid-empty').hidden = false; $('vid-thumb').parentElement.classList.remove('has-vid');
+    $('video_url').value = ''; videoId = null; $('vid-ok').hidden = true;
     $('lap_time').value = '';
     show('form'); go(1);
   });
