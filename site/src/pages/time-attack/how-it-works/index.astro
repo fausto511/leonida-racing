@@ -1,95 +1,218 @@
 ---
+// How it works (redesign 19.10.2026, DEC-0142): one page for "how to submit" and the rules.
+// Fausto: "How it works" invites, "Rules" deters -> /time-attack/rules/ redirects to #rules here.
+// Video-only submissions allowed (DEC-0141). Status flow matches submit-lap v7: every run is
+// hidden until a moderator accepts it (no automatic publishing).
+// Copy: kept Codex text where still true; new/changed lines = Claude placeholders (Codex, DEC-0088).
 import Base from '../../../layouts/Base.astro';
-import PageHero from '../../../components/PageHero.astro';
-import TimeAttackSubnav from '../../../components/TimeAttackSubnav.astro';
 const base = import.meta.env.BASE_URL;
 
 const steps = [
+  { t: 'Drive your lap', c: 'Put down your best time at Gellhorn International Raceway on PS5.' },
+  { t: 'Save your proof', c: 'A screenshot of the results screen, a full lap video on YouTube, or both.' },
+  { t: 'Submit in three steps', c: 'Add your proof, pick your car, type your time. Done in under a minute.' },
+  { t: 'We check it', c: 'A moderator compares your entry with the proof. Then it goes on the leaderboard.' },
+];
+const flow = [
+  { t: 'Pending review', c: 'Your lap is in. Only you can see it, in My laps.', tone: 'wait' },
+  { t: 'On the leaderboard', c: 'A moderator accepted it. Listed under All times as Provisional.', tone: 'ok' },
+  { t: 'Video verified', c: 'With a video: watched in full and marked Video verified. Can set an Official Record.', tone: 'top' },
+];
+const faq = [
   {
-    n: '01',
-    title: 'Drive Your Lap',
-    copy: 'Put down your best time at Gellhorn International Raceway.',
-    icon: 'M12 2 2 7l10 5 10-5-10-5Z M2 17l10 5 10-5 M2 12l10 5 10-5',
+    q: 'What counts as a valid lap?', draft: true,
+    a: [
+      'A lap is expected to count when it’s a single clean run — no crashes, no exploited glitches, no editing or splicing — that matches the vehicle you submitted it under. Anything that looks inconsistent gets flagged for a manual look before it’s accepted.',
+      'We haven’t been able to test any of this against real Gellhorn gameplay yet, so the specifics stay in draft until after launch and hands-on testing.',
+    ],
   },
   {
-    n: '02',
-    title: 'Save Your Proof',
-    copy: 'Save a screenshot of the results screen to list your time without video verification. Add a full, uncut lap video if you want the entry marked Video Verified.',
-    icon: 'M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
+    q: 'How do you check a submission?',
+    a: [
+      'Every submission is checked by a moderator before it appears on the leaderboard. A run only becomes <strong>Video verified</strong> and <strong>Official</strong> once a person has watched the full, unedited lap video — a moderator looking at just your screenshot never counts as verification.',
+      'If something doesn’t match, the moderator can ask you to correct it. You’ll see that in My laps.',
+    ],
   },
   {
-    n: '03',
-    title: 'Save It to Your Phone',
-    copy: 'Open Captures in PlayStation App and download the results screenshot to your phone.',
-    icon: 'M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z M11 18h2',
+    q: 'When do you ask for a video?',
+    a: ['Some runs get a video requested even without a rule violation — an unusually large jump over the current record, a mismatch between the evidence and the details you entered, or anything a moderator flags for a second look.'],
   },
   {
-    n: '04',
-    title: 'Submit Your Lap',
-    copy: 'Send us your results screenshot through Submit a Lap. For Video Verified status, upload the full lap to YouTube and add the link. It will appear publicly with your leaderboard entry.',
-    icon: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12',
+    q: 'What happens to my screenshot?',
+    a: [
+      'Screenshots you upload are stored privately for review — they’re never shown publicly, to other drivers, or on your run’s page. A video only becomes public if you choose to link one, and even then we link out to it rather than hosting a copy ourselves.',
+      `See the <a href="${base}privacy/">Privacy page</a> for how your data is stored and how to request a correction or removal.`,
+    ],
+  },
+  {
+    q: 'Can I submit from Xbox or PC?',
+    a: ['Not yet. Time Attack runs on PS5 for now. Xbox Series X|S and PC will follow later.'],
   },
 ];
+const camera = 'M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z';
+const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z M10 9l5 3-5 3Z';
 ---
 <Base
-  title="How to Submit a Lap — GTA VI Time Attack"
-  description="Learn how to submit a Gellhorn lap time with a results screenshot, add a full lap video, and follow your entry through review."
+  title="How Time Attack Works — Submit a GTA VI Lap"
+  description="How to submit a Gellhorn lap time in GTA 6: save a results screenshot or a full lap video, submit in three steps, and see how review and video verification work."
   section="time-attack"
-  breadcrumbs={[{ name: 'Gellhorn International Raceway', path: 'time-attack/gellhorn-international-raceway/' }, { name: 'How It Works', path: 'time-attack/how-it-works/' }]}
+  breadcrumbs={[{ name: 'Time Attack', path: 'time-attack/gellhorn-international-raceway/' }, { name: 'How It Works', path: 'time-attack/how-it-works/' }]}
 >
-  <PageHero status="time-attack" image="gellhorn" eyebrow="GTA VI Time Attack" title="How It Works" lede="From the track to the leaderboard in four steps. Set your fastest lap at Gellhorn International Raceway, save your proof, and send it in for review." />
-  <TimeAttackSubnav active="how-it-works" />
-
-  <section class="steps">
-    <div class="wrap steps-grid">
-      {steps.map((s) => (
-        <div class="step panel">
-          <div class="step-head">
-            <span class="step-n">{s.n}</span>
-            <svg class="step-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={s.icon} /></svg>
-          </div>
-          <h2 class="step-title">{s.title}</h2>
-          <p class="step-copy">{s.copy}</p>
-        </div>
-      ))}
-    </div>
-  </section>
-
-  <section class="cta-band">
-    <div class="wrap cta-row">
+  <section class="hw-band">
+    <div class="wrap lr-band-in hw-band-in">
       <div>
-        <h2 class="display cta-title">Ready to put a time on the board?</h2>
-        <p class="cta-copy">Check the rules, then submit your lap.</p>
+        <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}time-attack/gellhorn-international-raceway/`}>Time Attack</a><span aria-hidden="true">/</span><span aria-current="page">How it works</span></nav>
+        <p class="eyebrow">Gellhorn International Raceway</p>
+        <h1 class="display lr-t2">How it works</h1>
+        <p class="lr-lede">Drive a lap, save your proof, send it in. A moderator checks every time before it goes on the leaderboard.</p>
       </div>
-      <div class="cta-actions">
-        <a class="btn btn-red" href={`${base}time-attack/submit/`}>Submit a Lap</a>
-        <a class="btn btn-outline" href={`${base}time-attack/rules/`}>Read the Rules</a>
-      </div>
+      <a class="btn btn-primary hw-band-cta" href={`${base}time-attack/submit/`}>Submit a lap</a>
     </div>
   </section>
+
+  <div class="wrap hw">
+    <!-- 4 steps -->
+    <section class="hw-sec" aria-labelledby="hw-steps-h">
+      <h2 class="hw-h2" id="hw-steps-h">From the track to the leaderboard</h2>
+      <ol class="hw-steps">
+        {steps.map((s, i) => (
+          <li><span class="hw-n">{i + 1}</span><strong>{s.t}</strong><span class="hw-c">{s.c}</span></li>
+        ))}
+      </ol>
+    </section>
+
+    <!-- proof -->
+    <section class="hw-sec" aria-labelledby="hw-proof-h">
+      <h2 class="hw-h2" id="hw-proof-h">Two ways to prove your lap</h2>
+      <p class="hw-sub">Pick one or send both.</p>
+      <div class="hw-proof">
+        <div class="hw-card">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={camera} /></svg>
+          <h3>Screenshot</h3>
+          <p>The results screen with your PSN name, car and lap time readable.</p>
+          <ul>
+            <li>Listed under <strong>All times</strong> once accepted</li>
+            <li>Marked <strong>Not video verified</strong></li>
+            <li>Can’t set an <strong>Official Record</strong></li>
+          </ul>
+          <p class="hw-tip"><strong>On PS5:</strong> open Captures in the PlayStation App and save the screenshot to your phone.</p>
+        </div>
+        <div class="hw-card is-top">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={video} /></svg>
+          <h3>Video</h3>
+          <p>The full, uncut lap on YouTube. You only paste the link.</p>
+          <ul>
+            <li>Marked <strong>Video verified</strong> once watched</li>
+            <li>Listed under <strong>All times</strong> and <strong>Verified only</strong></li>
+            <li>Can set an <strong>Official Record</strong></li>
+            <li>Video link shown with your time</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- after submit -->
+    <section class="hw-sec" aria-labelledby="hw-flow-h">
+      <h2 class="hw-h2" id="hw-flow-h">After you submit</h2>
+      <ol class="hw-flow">
+        {flow.map((f) => <li class={`is-${f.tone}`}><i aria-hidden="true"></i><strong>{f.t}</strong><span>{f.c}</span></li>)}
+      </ol>
+      <p class="hw-sub">You’ll find the status of every lap in <a href={`${base}account/`}>My laps</a>.</p>
+    </section>
+
+    <!-- rules -->
+    <section class="hw-sec" id="rules" aria-labelledby="rules-h">
+      <h2 class="hw-h2" id="rules-h">Rules and verification</h2>
+      <div class="hw-faq card">
+        {faq.map((f, i) => (
+          <details open={i === 0}>
+            <summary><h3>{f.q}{f.draft && <span class="hw-draft">Draft</span>}</h3><span class="hw-i" aria-hidden="true"></span></summary>
+            <div class="hw-a">{f.a.map((p) => <p set:html={p} />)}</div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="hw-end">
+      <div>
+        <h2 class="display hw-end-t">Ready to put a time on the board?</h2>
+        <p>Three short steps. Screenshot or video.</p>
+      </div>
+      <a class="btn btn-primary" href={`${base}time-attack/submit/`}>Submit a lap</a>
+    </section>
+  </div>
 </Base>
 
 <style>
+  .hw-band { border-bottom: 1px solid var(--lr-line); background: linear-gradient(180deg, rgba(28,28,42,.6), rgba(11,11,20,0)); }
+  .hw-band-in.lr-band-in { min-height: 0; padding-top: 32px; padding-bottom: 32px; display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; }
+  .hw-band-cta { flex: none; }
 
-  .steps { padding-bottom: var(--gh-gap-section); }
-  .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
-  .step { padding: var(--gh-pad-card); display: flex; flex-direction: column; gap: .9rem; }
-  .step-head { display: flex; align-items: center; justify-content: space-between; }
-  .step-n { font-family: var(--gh-font-display); font-weight: 900; font-size: 1.6rem; color: var(--gh-line); }
-  .step-icon { color: var(--gh-yellow); flex: none; }
-  .step-title { margin: 0; font-size: 1.05rem; }
-  .step-copy { margin: 0; color: var(--gh-muted); font-size: .9rem; line-height: 1.5; }
+  .hw { padding-bottom: 72px; }
+  .hw > section { max-width: 960px; }
+  .hw-sec { padding-top: 48px; scroll-margin-top: calc(var(--gh-header-h) + 16px); }
+  .hw-h2 { margin: 0; font-family: var(--gh-font-display); font-size: 26px; font-weight: 800; text-transform: uppercase; line-height: 1.05; }
+  .hw-sub { margin: 8px 0 0; font-size: 15px; color: var(--lr-soft); }
+  .hw-sub a { color: var(--lr-text); text-decoration-color: var(--lr-orange); text-underline-offset: 3px; }
 
-  .cta-band { padding-block: var(--gh-gap-section); border-top: 1px solid var(--gh-line); background: var(--gh-surface-soft); }
-  .cta-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2rem; }
-  .cta-title { margin: 0 0 .5rem; font-size: clamp(1.5rem, 2.6vw, 2rem); }
-  .cta-copy { margin: 0; max-width: 42ch; color: var(--gh-muted); font-size: .95rem; }
-  .cta-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+  .hw-steps { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; counter-reset: s; }
+  .hw-steps li { position: relative; display: flex; flex-direction: column; gap: 6px; }
+  .hw-n { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 6px; border-radius: 50%; border: 1px solid rgba(255,149,90,.5); color: var(--lr-orange); font-weight: 700; font-size: 15px; }
+  .hw-steps li:not(:last-child)::after { content: ''; position: absolute; top: 17px; left: 46px; right: -12px; height: 1px; background: var(--lr-line-strong); }
+  .hw-steps strong { font-size: 16px; }
+  .hw-c { font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
 
-  @media (max-width: 900px) {
-    .steps-grid { grid-template-columns: 1fr 1fr; }
-  }
-  @media (max-width: 560px) {
-    .steps-grid { grid-template-columns: 1fr; }
+  .hw-proof { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+  .hw-card { display: flex; flex-direction: column; gap: 8px; padding: 20px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); color: var(--lr-muted); }
+  .hw-card.is-top { border-color: rgba(217,245,142,.4); }
+  .hw-card.is-top svg { color: var(--lr-lime); }
+  .hw-card h3 { margin: 4px 0 0; font-size: 18px; color: var(--lr-text); }
+  .hw-card p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
+  .hw-card ul { margin: 6px 0 0; padding-left: 18px; font-size: 14px; line-height: 1.7; color: var(--lr-soft); }
+  .hw-card strong { color: var(--lr-text); }
+  .hw-tip { margin-top: auto !important; padding-top: 10px; border-top: 1px solid var(--lr-line); font-size: 13px !important; }
+
+  .hw-flow { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .hw-flow li { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 8px; background: var(--lr-card); border: 1px solid var(--lr-line); }
+  .hw-flow i { width: 10px; height: 10px; border-radius: 50%; }
+  .hw-flow .is-wait i { background: var(--lr-orange); }
+  .hw-flow .is-ok i { background: var(--lr-soft); }
+  .hw-flow .is-top i { background: var(--lr-lime); }
+  .hw-flow strong { font-size: 15px; }
+  .hw-flow span { font-size: 13px; line-height: 1.5; color: var(--lr-soft); }
+
+  .hw-faq { margin-top: 18px; }
+  .hw-faq details + details { border-top: 1px solid var(--lr-line); }
+  .hw-faq summary { display: flex; align-items: center; gap: 16px; padding: 16px 18px; cursor: pointer; list-style: none; }
+  .hw-faq summary::-webkit-details-marker { display: none; }
+  .hw-faq summary:hover h3 { color: var(--lr-orange); }
+  .hw-faq h3 { flex: 1; display: flex; align-items: center; gap: 10px; margin: 0; font-size: 16px; font-weight: 600; line-height: 1.4; }
+  .hw-draft { padding: 2px 7px; border-radius: 4px; background: rgba(200,200,222,.1); color: var(--lr-soft); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .hw-i { position: relative; flex: none; width: 14px; height: 14px; }
+  .hw-i::before, .hw-i::after { content: ''; position: absolute; left: 0; top: 6px; width: 14px; height: 2px; border-radius: 1px; background: var(--lr-muted); transition: transform .15s; }
+  .hw-i::after { transform: rotate(90deg); }
+  .hw-faq details[open] .hw-i::after { transform: rotate(0); }
+  .hw-a { padding: 0 18px 16px; }
+  .hw-a p { margin: 0 0 10px; font-size: 15px; line-height: 1.6; color: var(--lr-soft); }
+  .hw-a p:last-child { margin-bottom: 0; }
+  .hw-a :global(strong) { color: var(--lr-text); }
+  .hw-a :global(a) { color: var(--lr-text); text-decoration-color: var(--lr-orange); text-underline-offset: 3px; }
+
+  .hw-end { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 56px; padding: 24px; border-radius: 8px; background: var(--lr-card); border: 1px solid var(--lr-line); }
+  .hw-end-t { margin: 0; font-size: 24px; }
+  .hw-end p { margin: 6px 0 0; font-size: 14px; color: var(--lr-soft); }
+
+  @media (max-width: 860px) {
+    .hw-band-in.lr-band-in { flex-direction: column; align-items: stretch; padding-top: 24px; padding-bottom: 24px; gap: 18px; }
+    .hw-sec { padding-top: 36px; }
+    .hw-h2 { font-size: 22px; }
+    .hw-steps { grid-template-columns: 1fr; gap: 14px; }
+    .hw-steps li { display: grid; grid-template-columns: 34px 1fr; column-gap: 14px; row-gap: 2px; }
+    .hw-n { grid-row: span 2; margin: 0; }
+    .hw-steps li:not(:last-child)::after { top: 40px; bottom: -12px; left: 17px; right: auto; width: 1px; height: auto; }
+    .hw-proof, .hw-flow { grid-template-columns: 1fr; }
+    .hw-faq summary { padding: 14px; }
+    .hw-a { padding: 0 14px 14px; }
+    .hw-end { flex-direction: column; align-items: stretch; }
   }
 </style>

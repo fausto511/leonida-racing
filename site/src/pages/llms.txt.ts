@@ -21,8 +21,7 @@ Status: GTA VI is scheduled for release on November 19, 2026. Leonida Racing is 
 ## Time Attack
 
 - [Gellhorn International Raceway](${u('time-attack/gellhorn-international-raceway/')}): track page with the leaderboard, filterable by vehicle, driver or crew, and by verification level
-- [How It Works](${u('time-attack/how-it-works/')}): how to submit a lap in four steps
-- [Rules & Verification](${u('time-attack/rules/')}): what counts as a valid lap; screenshot entry vs. video-verified times
+- [How It Works](${u('time-attack/how-it-works/')}): how to submit a lap (screenshot or full lap video), review, video verification and the rules
 
 ## The Hub
 
