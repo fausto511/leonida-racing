@@ -90,7 +90,8 @@
 .ev-by .crew-tag { vertical-align: 0; }
 .ev-dc, .ev-watch { display: inline-flex; align-items: center; gap: 6px; color: var(--lr-text); font-weight: 600; text-decoration: none; }
 .ev-dc:hover, .ev-watch:hover { text-decoration: underline; text-underline-offset: 3px; }
-.ev-dc svg, .crew-icon-dc svg { color: var(--lr-discord); fill: var(--lr-discord); }
+.ev-dc svg { color: var(--lr-discord); fill: var(--lr-discord); }
+.crew-icon-dc svg { color: #fff; fill: #fff; } /* white next to the "SC" button (Fausto 20.10.) */
 .ev-dc.is-disabled, .ev-watch.is-disabled { opacity: .5; cursor: not-allowed; }
 .ev-watch + .ev-watch { margin-left: 10px; }
 .ev-info { color: var(--lr-orange); font-weight: 600; }
