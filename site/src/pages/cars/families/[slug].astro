@@ -2,43 +2,50 @@
 // Model family pages (Fausto 2026-10-08): from FAMILY_PAGE_MIN models on, e.g. Dominator.
 // Members may span several classes. noindex until the family has its own copy
 // (familyCopy in data/rankings.ts) -- written from community experience after launch.
-// COPY STATUS: Codex 2026-10-08, approved by Fausto 2026-10-09.
-import Base from '../../../layouts/Base.astro';
-import VehicleTile from '../../../components/VehicleTile.astro';
-import { familyMembers, familyName, compareGarageOrder } from '../../../data/vehicles';
+// Redesign 20.10.2026 (DEC-0147): same layout as class / manufacturer pages (GarageTaxonomy, kind "custom");
+// Dominator band = '67 Buggy garage photo (Fausto). Family chips appear once there are two or more family pages.
+// COPY: band/glance labels = Claude placeholders (Codex, DEC-0088).
+import GarageTaxonomy from '../../../components/GarageTaxonomy.astro';
+import { familyMembers, familyName } from '../../../data/vehicles';
+import { classPages, classSlug } from '../../../data/garage-taxonomy';
 import { familyPageSlugs, familyIndexable, familyCopy } from '../../../data/rankings';
-
 export function getStaticPaths() {
   return familyPageSlugs().map((f) => ({ params: { slug: f }, props: { f } }));
 }
 const { f } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const name = familyName(f);
-const list = familyMembers(f).filter((v) => v.releaseId).sort(compareGarageOrder);
-const classes = [...new Set(list.flatMap((v) => v.classes))];
-const title = `${name} Models in GTA 6`;
-const description = `Explore the ${name} model family in GTA 6, with individual vehicle details, release information and available performance results.`;
+const list = familyMembers(f).filter((v) => v.releaseId);
+const classes = [...new Set(list.flatMap((v) => v.classes))].sort();
+const makes = [...new Map(list.map((v) => [v.logoSlug, v.make])).entries()];
+const families = familyPageSlugs();
+const BANDS: Record<string, { id: string; pos: string }> = { dominator: { id: 'vapid-dominator-67-buggy', pos: '50% 60%' } };
+const copy = familyCopy[f] ?? [];
+const page = { slug: f, name, intro: [], copyStatus: 'approved' as const };
 ---
-<Base title={title} description={description} section="garage" noindex={!familyIndexable(f)}
-  breadcrumbs={[{ name: 'The Garage', path: 'cars/' }, { name: `${name} family`, path: `cars/families/${f}/` }]}>
-  <section class="wrap fm-head">
-    <nav class="fm-crumbs" aria-label="Breadcrumb"><a href={`${base}cars/`}>The Garage</a><span aria-hidden="true">/</span><span>{name} family</span></nav>
-    <p class="eyebrow">GTA VI Model Family</p>
-    <h1 class="display fm-title">{title}</h1>
-    <div class="fm-intro">
-      {familyCopy[f]?.length ? familyCopy[f].map((p) => <p>{p}</p>) : <p>Explore the {name} model family and the vehicle details currently available for each model.</p>}
-    </div>
-  </section>
-  <section class="wrap fm-grid" aria-label={`${name} models`}>
-    {list.map((v) => <VehicleTile vehicle={v} />)}
-  </section>
-</Base>
-
-<style>
-  .fm-head { padding-top: 1.75rem; }
-  .fm-crumbs { display: flex; gap: .45rem; font-size: .78rem; color: var(--gh-muted); margin-bottom: 1rem; }
-  .fm-crumbs a { color: var(--gh-muted); }
-  .fm-title { margin: .3rem 0 .8rem; font-size: clamp(2rem, 4.5vw, 3rem); }
-  .fm-intro p { margin: 0 0 .6rem; color: var(--gh-muted); max-width: 46rem; }
-  .fm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: var(--gh-gap-card); padding-block: 1.5rem var(--gh-gap-section); }
-</style>
+<GarageTaxonomy kind="custom" page={page} vehicles={list} label={`${name} Models`} custom={{
+  path: `cars/families/${f}/`,
+  crumbs: [{ name: 'Cars', href: `${base}cars/` }, { name: `${name} family` }],
+  breadcrumbs: [{ name: 'Cars', path: 'cars/' }, { name: `${name} family`, path: `cars/families/${f}/` }],
+  eyebrow: 'GTA VI model family',
+  heading: `${name} family`,
+  lede: `Every ${name} model revealed for GTA VI, across all classes, with the details available for each car.`,
+  metaTitle: `${name} Models in GTA 6`,
+  metaDescription: `Explore the ${name} model family in GTA 6, with individual vehicle details, release information and available performance results.`,
+  noindex: !familyIndexable(f),
+  band: BANDS[f],
+  glanceTitle: `${name} at a glance`,
+  countLabel: 'Models',
+  glance: [
+    { k: makes.length === 1 ? 'Manufacturer' : 'Manufacturers', v: makes.map(([slug, m]) => `<a href="${base}cars/manufacturers/${slug}/">${m}</a>`).join(', ') },
+    { k: 'Classes', v: classes.join(', ') },
+  ],
+  chips: families.length > 1 ? { label: 'Model families', items: families.map((x) => ({ name: familyName(x), href: `${base}cars/families/${x}/`, count: familyMembers(x).filter((v) => v.releaseId).length, on: x === f })) } : undefined,
+  about: copy.length ? { title: `About the ${name} family`, paras: copy } : undefined,
+  scope: makes.length === 1 ? 'make' : null,
+  links: [
+    { title: `${name} models by class`, items: classes.map((c) => ({ name: c, href: classPages.some((p) => p.slug === classSlug(c)) ? `${base}cars/classes/${classSlug(c)}/` : `${base}cars/`, count: list.filter((v) => v.classes.includes(c)).length })), all: { name: 'All classes', href: `${base}cars/classes/` } },
+    { title: 'More in Cars', items: [{ name: 'New cars', href: `${base}cars/new-cars/` }, { name: 'Compare cars', href: `${base}cars/compare/` }, ...makes.map(([slug, m]) => ({ name: `${m} cars`, href: `${base}cars/manufacturers/${slug}/` }))], all: { name: 'All cars', href: `${base}cars/` } },
+  ],
+  noun: `${name} models`,
+}} />

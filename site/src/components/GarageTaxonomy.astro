@@ -13,19 +13,43 @@ import { lapTime } from '../data/leaderboard';
 import { taxonomyCopy } from '../data/taxonomy-copy';
 import { LAUNCH_DATE, LAUNCH_AT } from '../data/launch';
 
+/** New cars + model family pages use the same layout (DEC-0147, Fausto 20.10.2026). */
+export interface TaxonomyCustom {
+  path: string;
+  crumbs: { name: string; href?: string }[];
+  breadcrumbs: { name: string; path: string }[];
+  eyebrow: string;
+  heading: string;
+  lede: string;
+  metaTitle: string;
+  metaDescription: string;
+  noindex?: boolean;
+  /** vehicle id whose garage photo fills the band, plus object-position */
+  band?: { id: string; pos: string };
+  glanceTitle: string;
+  countLabel: string;
+  glance: { k: string; v: string }[]; // v: trusted HTML
+  about?: { title: string; paras: string[] };
+  chips?: { label: string; items: { name: string; href: string; count: number; on: boolean; logo?: string }[] };
+  links: { title: string; items: { name: string; href: string; count?: number }[]; all?: { name: string; href: string } }[];
+  noun: string;
+  /** hide the class or manufacturer filter (e.g. a one-make family) */
+  scope?: 'class' | 'make' | null;
+}
 interface Props {
-  kind: 'class' | 'manufacturer';
+  kind: 'class' | 'manufacturer' | 'custom';
   page: TaxonomyPage;
   vehicles: VehicleOption[];
   /** Search-facing name, e.g. "Sports Cars" / "Bravado Cars". */
   label: string;
+  custom?: TaxonomyCustom;
 }
-const { kind, page, vehicles, label } = Astro.props;
+const { kind, page, vehicles, label, custom } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const isClass = kind === 'class';
 const list = [...vehicles].sort(compareGarageOrder);
 const N = list.length;
-const path = `cars/${isClass ? 'classes' : 'manufacturers'}/${page.slug}/`;
+const path = custom?.path ?? `cars/${isClass ? 'classes' : 'manufacturers'}/${page.slug}/`;
 const metaTitle = isClass ? `GTA VI ${label}` : `${label} in GTA VI`;
 const copy = taxonomyCopy[page.slug];
 const heading = copy?.h1 ?? label; // visible H1 without "GTA VI" (DEC-0130); GTA VI stays in title, eyebrow, meta
@@ -53,8 +77,9 @@ const jsonLd = [{
 }];
 
 // ---- image band: fastest car with a photo, else first photo, else the garage ----
-const bandCar = bandVehicle(list);
+const bandCar = custom?.band ? list.find((v) => v.id === custom.band!.id) ?? bandVehicle(list) : bandVehicle(list);
 const bandSrc = bandCar ? `${base}images/vehicles/${bandCar.id}` : null;
+const bandPos = custom?.band && bandCar?.id === custom.band.id ? custom.band.pos : undefined;
 
 // ---- at a glance ----
 const lapOf = (v: VehicleOption) => fastestGellhornLapMs(v.id);
@@ -78,7 +103,13 @@ const ico = {
   timer: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>',
   plus: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
 };
-const more = isClass
+const more = custom
+  ? [
+      { ico: ico.trophy, eb: 'Ranking', t: 'Fastest cars in GTA 6', s: 'Recorded top speeds in stock form, with the source of each value.', a: 'See the ranking', href: `${base}cars/rankings/fastest/` },
+      { ico: ico.timer, eb: 'Time Attack', t: 'Gellhorn leaderboard', s: 'Recorded driver laps at Gellhorn, for every car.', a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/#leaderboard` },
+      { ico: ico.plus, eb: 'Compare', t: `Compare ${custom.heading}`, s: 'Pick up to four cars and compare their available specs and lap times.', a: 'Start comparing', href: `${base}cars/compare/` },
+    ]
+  : isClass
   ? [
       { ico: ico.trophy, eb: 'Ranking', t: `Fastest ${heading} in GTA 6`, s: 'Recorded top speeds in stock form, with the source of each value.', a: 'See the ranking', href: `${base}cars/rankings/fastest/${page.slug}/` },
       { ico: ico.timer, eb: 'Time Attack', t: `${page.name} leaderboard at Gellhorn`, s: 'Recorded driver laps at Gellhorn for this class.', a: 'Open leaderboard', href: `${base}time-attack/gellhorn-international-raceway/?class=${encodeURIComponent(page.name)}#leaderboard` },
@@ -91,18 +122,29 @@ const more = isClass
     ];
 ---
 <Base
-  title={metaTitle}
-  description={metaDescription}
+  title={custom?.metaTitle ?? metaTitle}
+  description={custom?.metaDescription ?? metaDescription}
   section="garage"
-  jsonLd={jsonLd}
-  breadcrumbs={[{ name: 'Cars', path: 'cars/' }, { name: isClass ? 'Classes' : 'Manufacturers', path: `cars/${isClass ? 'classes' : 'manufacturers'}/` }, { name: page.name, path }]}
+  jsonLd={custom ? undefined : jsonLd}
+  noindex={custom?.noindex}
+  breadcrumbs={custom?.breadcrumbs ?? [{ name: 'Cars', path: 'cars/' }, { name: isClass ? 'Classes' : 'Manufacturers', path: `cars/${isClass ? 'classes' : 'manufacturers'}/` }, { name: page.name, path }]}
 >
   <section class="tb">
     {bandSrc
-      ? <img class="tb-bg" src={`${bandSrc}-1280.webp`} srcset={`${bandSrc}-640.webp 640w, ${bandSrc}-1280.webp 1280w, ${bandSrc}-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="1080" fetchpriority="high" />
+      ? <img class="tb-bg" style={bandPos ? `object-position:${bandPos}` : undefined} src={`${bandSrc}-1280.webp`} srcset={`${bandSrc}-640.webp 640w, ${bandSrc}-1280.webp 1280w, ${bandSrc}-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="1080" fetchpriority="high" />
       : <img class="tb-bg tb-ph" src={`${base}images/garage/garage-hero-placeholder-1080.webp`} alt="" width="1080" height="608" fetchpriority="high" />}
     <span class="lr-shade is-open" aria-hidden="true"></span>
     <div class="wrap tb-inner lr-band-in">
+      {custom ? (
+        <div class="tb-copy">
+          <nav class="lr-crumb" aria-label="Breadcrumb">
+            {custom.crumbs.map((c, i) => <Fragment>{i > 0 && <span aria-hidden="true">/</span>}{c.href ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}</Fragment>)}
+          </nav>
+          <p class="eyebrow">{custom.eyebrow}</p>
+          <h1 class="display lr-t2 tb-title">{custom.heading}</h1>
+          <p class="lr-lede">{custom.lede}</p>
+        </div>
+      ) : (
       <div class="tb-copy">
         <nav class="lr-crumb" aria-label="Breadcrumb">
           <a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><a href={`${base}cars/${isClass ? 'classes' : 'manufacturers'}/`}>{isClass ? 'Classes' : 'Manufacturers'}</a><span aria-hidden="true">/</span><span aria-current="page">{page.name}</span>
@@ -111,6 +153,22 @@ const more = isClass
         <h1 class="display lr-t2 tb-title">{!isClass && <img class="tb-logo" src={`${base}images/logos/${page.slug}-gta-6-logo.svg`} alt="" width="56" height="56" />}{heading}</h1>
         <p class="lr-lede">{copy?.band ?? page.intro[0]}</p>
       </div>
+      )}
+      {custom ? (
+        <div class="glance">
+          <p class="glance-eb">{custom.glanceTitle}</p>
+          <div class="gl-row"><span>{custom.countLabel}</span><b class="tnum">{N}</b></div>
+          {custom.glance.map((g) => <div class="gl-row"><span>{g.k}</span><b set:html={g.v} /></div>)}
+          <div class="gl-row"><span>Fastest at Gellhorn</span>{fastest
+            ? <b><a href={`${base}cars/vehicles/${fastest.id}/`}>{fastest.model}</a>{' · '}<span class="tnum">{lapTime(lapOf(fastest)!)}</span></b>
+            : <b class="is-tba">{noLap}</b>}</div>
+          <a class="gl-row gl-garage" id="garage-tile" data-glance href={`${base}account/garage/`}>
+            <span>In your garage</span><span class="arrow gt-cta" id="gt-cta">Log in to save cars →</span>
+            <span id="gt-owned" hidden>0</span>
+            <span class="mbar"><i id="gt-bar" style="width:0%"></i></span>
+          </a>
+        </div>
+      ) : (
       <div class="glance">
         <p class="glance-eb">{page.name} at a glance</p>
         <div class="gl-row"><span>{isClass ? 'Cars in this class' : `Cars from ${page.name}`}</span><b class="tnum">{N}</b></div>
@@ -126,6 +184,7 @@ const more = isClass
           <span class="mbar"><i id="gt-bar" style="width:0%"></i></span>
         </a>
       </div>
+      )}
     </div>
   </section>
 
@@ -136,14 +195,20 @@ const more = isClass
     </nav>
   )}
 
-  {!isClass && (
+  {kind === 'manufacturer' && (
     <nav class="wrap tchips tchips-make" aria-label="Manufacturers" id="mchips" data-collapse>
       {manufacturerPages.map((m) => <a class:list={['tchip', { on: m.slug === page.slug }]} href={`${base}cars/manufacturers/${m.slug}/`} aria-current={m.slug === page.slug ? 'page' : undefined}><img class="tchip-logo" src={`${base}images/logos/${m.slug}-gta-6-logo.svg`} alt="" width="20" height="20" loading="lazy" />{m.name}<span>{makeCount(m.slug)}</span></a>)}
       <a class="tchip" href={`${base}cars/manufacturers/`}>All manufacturers</a>
     </nav>
   )}
 
-  <CarsBrowser vehicles={list} scope={isClass ? 'class' : 'make'} noun={noun} defaultSort="name">
+  {custom?.chips && (
+    <nav class="wrap tchips" aria-label={custom.chips.label} data-collapse>
+      {custom.chips.items.map((c) => <a class:list={['tchip', { on: c.on }]} href={c.href} aria-current={c.on ? 'page' : undefined}>{c.logo && <img class="tchip-logo" src={c.logo} alt="" width="20" height="20" loading="lazy" />}{c.name}<span>{c.count}</span></a>)}
+    </nav>
+  )}
+
+  <CarsBrowser vehicles={list} scope={custom ? (custom.scope ?? null) : isClass ? 'class' : 'make'} noun={custom?.noun ?? noun} defaultSort="name">
     <Fragment slot="after-grid">
       <section class="wrap tmore">
         <p class="tsec-eb">More on {heading}</p>
@@ -158,14 +223,25 @@ const more = isClass
           ))}
         </div>
       </section>
-      {copy && (
+      {custom?.about && (
+        <section class="wrap tabout" aria-labelledby="tabout-h">
+          <h2 class="tabout-h" id="tabout-h">{custom.about.title}</h2>
+          {custom.about.paras.map((p) => <p>{p}</p>)}
+        </section>
+      )}
+      {!custom && copy && (
         <section class="wrap tabout" aria-labelledby="tabout-h">
           <h2 class="tabout-h" id="tabout-h">{copy.aboutTitle}</h2>
           {copy.about.map((p) => <p>{p}</p>)}
         </section>
       )}
       <section class="wrap tlinks">
-        {isClass ? (
+        {custom ? custom.links.map((l) => (
+          <div>
+            <p class="tsec-eb">{l.title}</p>
+            <div class="tls">{l.items.map((it) => <a href={it.href}>{it.name}{it.count != null && <span>{it.count}</span>}</a>)}{l.all && <a class="arrow" href={l.all.href}>{l.all.name} →</a>}</div>
+          </div>
+        )) : isClass ? (
           <>
             <div>
               <p class="tsec-eb">Other classes</p>
