@@ -12,14 +12,14 @@ import { PLATFORMS } from '../../../data/platforms';
 
 const base = import.meta.env.BASE_URL;
 const PAGE = 12;
-const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
+const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and join or request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
 const initialHtml = buildCrews.slice(0, PAGE).map((c) => crewCardHtml(c)).join('') + startCrew;
 const chips: [string, string][] = [['', 'All crews'], ['racing', 'Racing'], ['time-attack', 'Time Attack'], ['league', 'League'], ['drift', 'Drift'], ['car-meet', 'Car meets'], ['cruise', 'Cruises']];
 const users = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
 const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 5.3A18 18 0 0 0 15.9 4l-.3.6a15 15 0 0 1 4 1.6 16 16 0 0 0-13.2 0 15 15 0 0 1 4-1.6L10.1 4a18 18 0 0 0-4.4 1.3C2.9 9 2.2 12.6 2.5 16.1a18 18 0 0 0 5.5 2.8l.8-1.3a11 11 0 0 1-1.9-.9l.5-.4a13 13 0 0 0 9.2 0l.5.4a11 11 0 0 1-1.9.9l.8 1.3a18 18 0 0 0 5.5-2.8c.4-4-.7-7.5-2.2-10.8ZM9.3 14c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Zm5.4 0c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Z"/></svg>';
 ---
 <Base
-  title="GTA VI Racing Crews — Crew Directory"
+  title="GTA 6 Racing Crews — Crew Directory"
   description="Find GTA 6 racing crews and car meet communities. Race competitively, run playlists for fun, and find a crew that races the way you do."
   section="hub"
   noindex={false /* indexable since 2026-10-14 (Fausto): real crews exist; Tracks stays noindex */}
@@ -32,7 +32,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
         <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}community/`}>Community</a><span aria-hidden="true">/</span><span aria-current="page">Crews</span></nav>
         <p class="eyebrow">GTA VI Racing Community</p>
         <h1 class="display lr-t1">Crews</h1>
-        <p class="lr-lede"><span class="lg">Racing crews and car meet communities from across the GTA VI scene. Find a crew that drives the way you do and request an invite.</span><span class="sm">Racing crews and car meet communities. Find a crew that drives the way you do.</span></p>
+        <p class="lr-lede"><span class="lg">Racing crews and car meet communities from across the GTA VI scene. Find a crew that drives the way you do, then join or request an invite.</span><span class="sm">Racing crews and car meet communities. Find a crew that drives the way you do.</span></p>
       </div>
       <div class="cr-tile" id="cr-tile-guest">
         <div class="eb"><Fragment set:html={users} />Lead a crew</div>
@@ -67,7 +67,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
     </div>
     <div class="cr-sheet-bg" id="cr-sheet-bg" hidden></div>
 
-    <div class="cr-count"><h2 id="cr-n">{buildCrews.length} crews</h2><p>You can be in up to 5 crews. Open crews: join right away. Other crews: the crew approves your request.</p></div>
+    <div class="cr-count"><h2 id="cr-n">{buildCrews.length} crews</h2><p>You can join up to 5 crews, including pending requests. Join open crews right away; other crews approve your request.</p></div>
     <p class="cr-sample" id="crew-flag" hidden></p>
     <div class="crew-grid" id="crew-root" set:html={initialHtml} />
     <p class="hub-empty" id="crew-empty" hidden>No crews match these filters.</p>
@@ -178,7 +178,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
   const langSel = $('crew-lang') as HTMLSelectElement;
   const regionSel = $('crew-region') as HTMLSelectElement;
   const dcChk = $('crew-dc') as HTMLInputElement;
-  const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
+  const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and join or request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
 
   let crews: HubCrew[] = buildCrews; // real crews from the build; refreshed live below
   let live = true;

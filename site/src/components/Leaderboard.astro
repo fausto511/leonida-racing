@@ -62,17 +62,17 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   <div class="ta-2">
     <div class="card need">
       <h3>No lap yet in these cars</h3>
-      <p class="sub">Set the first time in any of them and you hold #1 for that car until someone beats it.</p>
+      <p class="sub">Submit the first accepted lap for one of these cars and give the next driver a time to chase.</p>
       <div class="grid" id="lb-need" set:html={noLap.picks} />
       <div class="grid need-rest" id="lb-need-rest" hidden set:html={noLap.rest} />
       <button type="button" class="need-all" id="lb-need-all" aria-expanded="false" aria-controls="lb-need-rest" hidden={!noLap.rest}>All <span id="lb-need-n">{noLap.count}</span> cars without a lap →</button>
     </div>
     <div class="card ta-box">
       <h3>Put a time on the board</h3>
-      <p class="sub">Three steps. Any car, any class.</p>
+      <p class="sub">Three steps to get your lap listed.</p>
       <ol class="steps">
         <li><b>1</b><span>Drive Gellhorn in GTA VI and take a screenshot of the results screen.</span></li>
-        <li><b>2</b><span>Submit the screenshot with the car you drove. Add a full-lap video if you want Video verified.</span></li>
+        <li><b>2</b><span>Submit the screenshot and select the car you drove. Add a full, uncut lap video for video verification.</span></li>
         <li><b>3</b><span>Once accepted, your lap shows up overall, in your class and on the car’s page.</span></li>
       </ol>
       <div class="box-cta">
@@ -387,11 +387,11 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     if (!overall) return; // no lap yet -> the guest tile stays
     const inClass = mine.filter((r) => r.scope === 'class' && r.run_id === overall.run_id).sort((a, b) => a.rank - b.rank)[0];
     const inCar = mine.find((r) => r.scope === 'vehicle' && r.run_id === overall.run_id);
-    const gap = (ms: number | null) => `+${((ms ?? 0) / 1000).toFixed(3)}`;
+    const gap = (ms: number | null) => `${((ms ?? 0) / 1000).toFixed(3)}s`;
     let target = '';
-    if (inClass && inClass.rank > 1 && inClass.ahead_driver) target = `Next target: <b>${esc(inClass.ahead_driver)}</b> is <b>${gap(inClass.gap_to_ahead_ms)}</b> ahead of you in ${esc(inClass.scope_key)}.`;
-    else if (overall.rank > 1 && overall.ahead_driver) target = `Next target: <b>${esc(overall.ahead_driver)}</b> is <b>${gap(overall.gap_to_ahead_ms)}</b> ahead of you overall.`;
-    else target = 'You hold the fastest lap at Gellhorn.';
+    if (inClass && inClass.rank > 1 && inClass.ahead_driver) target = `Next target: <b>${esc(inClass.ahead_driver)}</b> is <b>${gap(inClass.gap_to_ahead_ms)}</b> faster in ${esc(inClass.scope_key)}.`;
+    else if (overall.rank > 1 && overall.ahead_driver) target = `Next target: <b>${esc(overall.ahead_driver)}</b> is <b>${gap(overall.gap_to_ahead_ms)}</b> faster overall.`;
+    else target = overall.rank === 1 ? 'You’re #1 on the overall leaderboard.' : 'Your best accepted lap at Gellhorn.';
     const stat = (v: string, l: string) => `<div><b>${v}</b><span>${l}</span></div>`;
     const t = $('ta-tile');
     t.classList.add('is-me');

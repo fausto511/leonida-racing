@@ -86,8 +86,8 @@ const base = import.meta.env.BASE_URL;
               <label>Discord invite<input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
               <label>Social Club page<input type="url" name="social_club_url" placeholder="https://socialclub.rockstargames.com/…" /></label>
               <!-- DEC-0144. COPY: Claude placeholders, Codex review pending. -->
-              <label class="span2">Join mode<select name="join_mode"><option value="request">Request — you approve every request</option><option value="open">Open — anyone can join right away</option></select></label>
-              <p class="span2 track-note" id="crew-comm-note" hidden>As Commissioner you can change the crew color and the join mode. Everything else is up to the crew leader.</p>
+              <label class="span2">Join mode<select name="join_mode"><option value="request">Request — approval required</option><option value="open">Open — join right away</option></select><small class="jm-hint" id="jm-hint" hidden>Switching to Open accepts all pending requests.</small></label>
+              <p class="span2 track-note" id="crew-comm-note" hidden>As a commissioner, you can manage requests, invitations and member bans, and change the crew color and join mode. You can’t remove the leader or other commissioners. Other crew settings and role changes are handled by the leader.</p>
               <label class="check" data-mod-only><input type="checkbox" name="is_official" /> Official crew <small>this site's own crews or the original creators</small></label>
               <label class="check" data-mod-only><input type="checkbox" name="is_partner" /> Partner crew</label>
               <label class="check" data-mod-only><input type="checkbox" name="is_featured" /> Featured crew <small>shown first on the home page, Hub overview and crew list</small></label>
@@ -611,10 +611,11 @@ const base = import.meta.env.BASE_URL;
     if (act && selectedId) {
       const a = act.dataset.act!;
       const name = act.dataset.name ?? 'the driver';
-      const confirmTxt: Record<string, string> = { kick: `Click again to kick ${name}`, ban: `Click again to ban ${name}`, lead: `Click again to hand the crew to ${name}` };
+      const confirmTxt: Record<string, string> = { kick: `Click again to kick ${name}`, ban: `Click again to ban ${name} from this crew`, lead: `Click again to make ${name} the crew leader` };
       if (confirmTxt[a] && act.dataset.armed !== '1') {
         act.dataset.armed = '1';
         act.textContent = confirmTxt[a];
+        if (a === 'lead') { const mm = $('members-msg'); mm.textContent = 'Transferring leadership makes you a commissioner. You can leave the crew afterward.'; mm.className = 'form-msg'; }
         setTimeout(() => { if (act.isConnected && act.dataset.armed === '1') { act.dataset.armed = ''; act.textContent = act.dataset.label!; } }, 4000);
         return;
       }
@@ -631,8 +632,8 @@ const base = import.meta.env.BASE_URL;
       await loadMembers(); await loadStaffAndBans(); renderList();
       const done: Record<string, string> = {
         kick: `${name} was kicked. They can ${crews.find((c) => c.crew_id === selectedId)?.join_mode === 'open' ? 'join again right away — use Ban to keep them out' : 'ask to join again'}.`,
-        ban: `${name} is banned and can't join or ask to join again.`,
-        unban: `${name} is no longer banned.`,
+        ban: `${name} is banned from this crew and can\u2019t join, request an invite or be invited until the ban is lifted.`,
+        unban: `${name} is no longer banned from this crew.`,
         'comm-on': `${name} is now Commissioner.`, 'comm-off': `${name} is no longer Commissioner.`, lead: `${name} is now the crew leader.`,
       };
       renderMembers(error ? dbError(error) : done[a], Boolean(error));
@@ -752,6 +753,8 @@ const base = import.meta.env.BASE_URL;
     cf.is_published.checked = Boolean(r.is_published);
     cf.moderation_note.value = r.moderation_note ?? '';
     cf.join_mode.value = r.join_mode === 'open' ? 'open' : 'request';
+    cf.join_mode.dataset.saved = cf.join_mode.value;
+    $('jm-hint').hidden = true;
     // Commissioner (DEC-0144): colour + join mode only
     const co = commOnly(selectedId);
     crewForm.querySelectorAll<HTMLInputElement>('input, select, textarea').forEach((el) => {
@@ -783,6 +786,7 @@ const base = import.meta.env.BASE_URL;
   cf.color_picker.addEventListener('input', () => { cf.color.value = cf.color_picker.value; renderCrewPreview(); });
   cf.color.addEventListener('input', () => { if (/^#[0-9a-fA-F]{6}$/.test(cf.color.value)) cf.color_picker.value = cf.color.value.toLowerCase(); });
   crewForm.addEventListener('input', renderCrewPreview);
+  cf.join_mode.addEventListener('change', () => { $('jm-hint').hidden = !(cf.join_mode.dataset.saved === 'request' && cf.join_mode.value === 'open' && selectedId); });
   crewForm.addEventListener('change', renderCrewPreview);
   // at most 2 languages (Fausto 2026-10-07): a third tick is undone right away
   crewForm.addEventListener('change', (ev) => {
@@ -950,9 +954,9 @@ const base = import.meta.env.BASE_URL;
     $('rsvp-list').innerHTML = (pr.error
       ? '<p class="rsvp-count">Sign-ups could not be loaded.</p>'
       : going.length
-        ? `<p class="rsvp-count"><strong>${going.length}${max ? ' / ' + max : ''}</strong> going</p>` + going.map((r) => row(r, r.driver_id === ownDriverId ? '<span class="mem-date">you</span>' : b('kick', r, 'Kick') + b('ban', r, 'Ban'))).join('')
+        ? `<p class="rsvp-count"><strong>${going.length}${max ? ' / ' + max : ''}</strong> going</p><p class="mem-empty">Kick removes a driver from this event and prevents them from signing up again. Ban applies to all events by this host, including future events.</p>` + going.map((r) => row(r, r.driver_id === ownDriverId ? '<span class="mem-date">you</span>' : b('kick', r, 'Kick') + b('ban', r, 'Ban'))).join('')
         : `<p class="rsvp-count">No sign-ups yet${max ? ` (max. ${max})` : ''}.</p>`)
-      + (kicked.length ? `<p class="mem-group-title">Kicked from this event</p>` + kicked.map((r) => row(r, b('unkick', r, 'Allow Again', 'btn-outline'))).join('') : '');
+      + (kicked.length ? `<p class="mem-group-title">Removed from this event</p>` + kicked.map((r) => row(r, b('unkick', r, 'Allow Again', 'btn-outline'))).join('') : '');
     $('rsvp-bans').innerHTML = bans.length ? `<p class="mem-group-title">Banned from all your events (${bans.length})</p>` + bans.map((r) => row(r, b('unban', r, 'Unban', 'btn-outline'), `since ${new Date(r.banned_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}`)).join('') : '';
     const m = $('rsvp-msg'); m.textContent = message; m.className = `form-msg ${message ? (isError ? 'is-error' : 'is-ok') : ''}`;
   }
@@ -962,7 +966,7 @@ const base = import.meta.env.BASE_URL;
     const a = t.dataset.ract!; const name = t.dataset.name ?? 'the driver';
     if ((a === 'kick' || a === 'ban') && t.dataset.armed !== '1') {
       t.dataset.armed = '1';
-      t.textContent = a === 'kick' ? `Click again to kick ${name}` : `Click again to ban ${name} from all your events`;
+      t.textContent = a === 'kick' ? `Click again to remove ${name} from this event` : `Click again to ban ${name} from all your events`;
       setTimeout(() => { if (t.isConnected && t.dataset.armed === '1') { t.dataset.armed = ''; t.textContent = t.dataset.label!; } }, 4000);
       return;
     }
@@ -973,7 +977,7 @@ const base = import.meta.env.BASE_URL;
       : a === 'ban' ? await sb.rpc('ban_event_participant', { p_event: selectedId, p_driver: d })
       : a === 'unkick' ? await sb.rpc('unkick_event_participant', { p_event: selectedId, p_driver: d })
       : await sb.rpc('unban_event_participant', { p_driver: d });
-    const done: Record<string, string> = { kick: `${name} was removed from this event and can't sign up for it again.`, ban: `${name} is banned from all your events.`, unkick: `${name} can sign up for this event again.`, unban: `${name} is no longer banned from your events.` };
+    const done: Record<string, string> = { kick: `${name} was removed from this event and can't sign up for it again.`, ban: `${name} is banned from all your events, including future events.`, unkick: `The event removal for ${name} was lifted.`, unban: `${name} is no longer banned from your events.` };
     loadRsvps(error ? `That did not work: ${error.message}` : done[a], Boolean(error));
   });
   eventForm.addEventListener('input', renderEventPreview);

@@ -23,11 +23,11 @@ const entries = [
   { href: `${base}community/crews/`, img: 'crews', eb: 'Directory', title: 'Crews', text: 'Racing crews and car meet communities that fit the way you play.', short: 'Crews that fit the way you play', cta: 'Browse crews', pos: '75% 30%' },
   { href: `${base}community/tracks/`, img: 'tracks', eb: 'Race jobs', title: 'Tracks', text: 'Community-built race jobs for your next playlist.', short: 'Community-built race jobs', cta: 'Find tracks', pos: '50% 75%' },
 ];
-const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
+const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and join or request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
 const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
 ---
 <Base
-  title="Community — GTA VI Racing Community"
+  title="Community — GTA 6 Racing Community"
   description="Find GTA 6 races, league rounds, car meets, crews, hosts, and creators. Connect with the racing community and car culture."
   section="hub"
   noindex={false /* indexable since 2026-10-14 (Fausto): real crews exist; Tracks stays noindex */}
@@ -82,7 +82,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
       <span class="tz" id="cm-tz"><Fragment set:html={cal} />Your local time</span>
     </div>
     <div class="ev-list" id="hub-ev-root" set:html={nextEventsHtml} />
-    <a class="btn btn-s cm-more-btn" href={`${base}community/events/`}>Open the full calendar</a>
+    <a class="btn btn-s cm-more-btn" href={`${base}community/events/`}>Open calendar</a>
   </section>
 
   <section class="wrap cm-sec cm-last" id="featured-crews">
@@ -243,7 +243,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   let crews: HubCrew[] = buildCrews; // real crews from the build
   let crewLive = true;
   let focus = '';
-  const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
+  const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and join or request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
   function drawCrews() {
     const pool = focus ? crews.filter((c) => (c.focus as string[]).includes(focus)) : [...crews.filter((c) => c.is_featured), ...crews.filter((c) => !c.is_featured)];
     const list = pool.slice(0, CREW_N);

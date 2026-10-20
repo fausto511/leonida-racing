@@ -315,7 +315,7 @@ export function noLapCars(all: LbEntry[]) {
     }
     if (!pool.some((v) => !picks.includes(v))) break;
   }
-  const item = (v: (typeof vehicleOptions)[number]) => `<a href="${garageUrl(v.id)}" title="${esc(v.make)} ${esc(v.model)}">${logoChip({ logo: v.logoSlug })}<span class="t"><b>${esc(shortModelName(v))}</b><small>Take #1 →</small></span></a>`;
+  const item = (v: (typeof vehicleOptions)[number]) => `<a href="${garageUrl(v.id)}" title="${esc(v.make)} ${esc(v.model)}">${logoChip({ logo: v.logoSlug })}<span class="t"><b>${esc(shortModelName(v))}</b><small>Set a time →</small></span></a>`;
   const rest = none.filter((v) => !picks.includes(v)).sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`));
   return { count: none.length, picks: picks.map(item).join(''), rest: rest.map(item).join('') };
 }

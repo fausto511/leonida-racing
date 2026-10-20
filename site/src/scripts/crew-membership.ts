@@ -110,8 +110,8 @@ export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null
     const { error } = await getSupabase().from('crew_memberships').insert({ crew_id: id, driver_id: ownDriverId });
     busy = false;
     await loadMine();
-    if (error) { render(/crew_limit/.test(error.message) ? `You can be in up to ${CREW_LIMIT} crews, open requests included.` : /crew_banned/.test(error.message) ? 'You can\u2019t join this crew.' : 'Could not send the request. Please try again.', true); return; }
-    render(mine.find((m) => m.crew_id === id)?.status === 'active' ? 'You\u2019re in! Manage your crews in My Account.' : 'Request sent. The crew leader will see it in My Account.');
+    if (error) { render(/crew_limit/.test(error.message) ? `You can be in up to ${CREW_LIMIT} crews, open requests included.` : /crew_banned/.test(error.message) ? 'You can\u2019t join this crew.' : crewById(id)?.join_mode === 'open' ? 'Could not join this crew. Please try again.' : 'Could not send the request. Please try again.', true); return; }
+    render(mine.find((m) => m.crew_id === id)?.status === 'active' ? 'You\u2019re in! Manage your crews in My Account.' : 'Request sent. The crew leader or a commissioner can approve it.');
   }
 
   async function withdraw(id: string) {

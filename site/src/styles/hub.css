@@ -353,3 +353,4 @@ a.ev-next-copy { text-decoration: none; }
 .crew-btn-leave:hover, .crew-btn-leave.is-armed { border-color: #FF8A8A; background: rgba(255,122,122,.1); }
 .crew-actions:has(.is-armed) > :not(.is-armed) { display: none; }
 .crew-actions .crew-pill { flex: none; }
+.jm-hint { display: block; margin-top: .35rem; color: var(--gh-yellow); font-size: .75rem; }

@@ -133,9 +133,9 @@ const base = import.meta.env.BASE_URL;
     const find = used < LIMIT ? `<a class="btn btn-primary" href="${base}community/crews/">Find a Crew</a>` : '';
     if (!active.length && !pending.length) {
       // "Pick a crew" (DEC-0144): the five crews run by this site, one click to join, plus a clear way to all crews.
-      // COPY STATUS: Claude placeholders, Codex review pending.
-      const picks = pickCrews.length ? `<div class="mem-pick"><div class="mem-pick-head"><p><strong>Pick a crew to get started.</strong> These crews are open to everyone, one click and their tag is yours. You can switch or join other crews any time.</p><a class="btn btn-primary" href="${base}community/crews/">Find a Crew</a></div><div class="crew-grid">${pickCrews.map((c) => crewCardHtml(c, undefined, { actions: c.join_mode === 'open' ? `<button type="button" class="crew-link crew-action-btn" data-pick="${esc(c.crew_id)}">Join Crew</button>` : `<a class="crew-link crew-action-btn" href="${base}community/crews/#crew-${encodeURIComponent(c.crew_id)}">Request Invite</a>` })).join('')}</div></div>` : '';
-      memEl.innerHTML = `${invHtml}<div class="panel mem-empty-card"><p><strong>You're not in a crew yet.</strong> Find one that fits how you play. You can join or request up to five crews.</p>${picks ? '' : find}</div>${msg}${picks}`;
+      // COPY STATUS: Codex 20.10. (Crew-Beitritt-Verwaltung-Events-Texte-2026-10-20.md).
+      const picks = pickCrews.length ? `<div class="mem-pick"><div class="mem-pick-head"><p><strong>Pick a crew to get started.</strong> Join one of these open crews right away, or browse the directory for more. Choose your Active Crew in My Account to display its tag next to your name.</p><a class="btn btn-primary" href="${base}community/crews/">Find a Crew</a></div><div class="crew-grid">${pickCrews.map((c) => crewCardHtml(c, undefined, { actions: c.join_mode === 'open' ? `<button type="button" class="crew-link crew-action-btn" data-pick="${esc(c.crew_id)}">Join Crew</button>` : `<a class="crew-link crew-action-btn" href="${base}community/crews/#crew-${encodeURIComponent(c.crew_id)}">Request Invite</a>` })).join('')}</div></div>` : '';
+      memEl.innerHTML = `${invHtml}<div class="panel mem-empty-card"><p><strong>You’re not in a crew yet.</strong> Find one that fits how you play. You can join up to five crews, including pending requests.</p>${picks ? '' : find}</div>${msg}${picks}`;
       return;
     }
     const head = `<div class="mem-head"><p>You're in <strong>${active.length}</strong> crew${active.length === 1 ? '' : 's'}${pending.length ? ` with <strong>${pending.length}</strong> request${pending.length === 1 ? '' : 's'} pending` : ''} (${used}/${LIMIT}). Your <strong>Active Crew</strong> tag appears next to your name, including on leaderboards.</p>${find}</div>`;
@@ -151,7 +151,7 @@ const base = import.meta.env.BASE_URL;
         + `<button type="button" class="crew-btn crew-btn-leave crew-action-btn" data-leave="${esc(m.membership_id)}" data-kind="${leads ? 'leave-leader' : 'leave'}"${leads ? ' title="Leaving also ends your leader role"' : ''}>Leave</button>`;
       return crewCardHtml(c, undefined, { actions, badges: role });
     }).join('')}</div>`;
-    const reqs = pending.length ? `<div class="mem-pending">${pending.map((m) => `<div class="panel mem-empty-card"><p>Your request to join ${crewTagHtml(m.tag, m.color, 'sm')} <strong>${esc(m.crew_name)}</strong> is waiting for the crew to approve it.</p><button type="button" class="btn btn-outline" data-leave="${esc(m.membership_id)}" data-kind="withdraw">Withdraw</button></div>`).join('')}</div>` : '';
+    const reqs = pending.length ? `<div class="mem-pending">${pending.map((m) => `<div class="panel mem-empty-card"><p>Your request to join ${crewTagHtml(m.tag, m.color, 'sm')} <strong>${esc(m.crew_name)}</strong> is awaiting approval.</p><button type="button" class="btn btn-outline" data-leave="${esc(m.membership_id)}" data-kind="withdraw">Withdraw</button></div>`).join('')}</div>` : '';
     memEl.innerHTML = invHtml + head + msg + cards + reqs;
   }
 

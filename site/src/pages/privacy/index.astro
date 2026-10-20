@@ -10,7 +10,7 @@ const base = import.meta.env.BASE_URL;
     <div class="wrap">
       <p class="eyebrow">Privacy</p>
       <h1 class="display page-title">Privacy Policy</h1>
-      <p class="page-lede">Last updated: 17 October 2026</p>
+      <p class="page-lede">Last updated: 21 October 2026</p>
     </div>
   </section>
 
@@ -43,16 +43,20 @@ const base = import.meta.env.BASE_URL;
       <h2>6. Your garage</h2>
       <p>You can mark vehicles you own in the game. This list is private: only you can see it. It is deleted when you delete your account. Legal basis: Art. 6(1)(b) GDPR.</p>
 
-      <h2>7. The Hub: crews and events</h2>
-      <p><strong>Crews:</strong> If you request to join a crew, the crew leader and the moderators see your request. Once you are a member, your display name is shown publicly in the crew roster. If you apply for a role (crew leader or event host), the moderators see your application including your message and links.</p>
-      <p><strong>Events:</strong> If you host an event, its details are shown publicly, including the host PSN name and Discord link you enter, and the host crew. If you sign up for an event, your display name can be shown publicly in the event's sign-up list. Sign-ups for sample events are only stored in your own browser (see section 12), not on our servers.</p>
+      <!-- Codex privacy review 20.10.2026 (Datenschutz-Crew-Commissioner-Events); retention in section 8 matches the cleanup built 21.10. (anonymize_driver_account, cron cleanup-event-kicks-daily). -->
+      <h2>7. Community: crews and events</h2>
+      <p><strong>Crews:</strong> When you join an open crew or request an invite, we store your crew membership or request and its status. The crew leader, commissioners of that crew and moderators can manage memberships, requests and invitations. Your display name is shown publicly in the crew roster once you are a member. We also store crew roles, including commissioner, to manage access to crew tools; your role may be shown with your membership. If you apply for a role such as crew leader or event host, moderators see your application, including your message and links.</p>
+      <p><strong>Events:</strong> If you host an event, its details are shown publicly, including the host PSN name and Discord link you enter, and the host crew. If you sign up for an event, your display name can be shown publicly in the event's sign-up list.</p>
       <p>Published events, including your host name and contact links, may also appear in Discord servers that follow the public calendar, your crew or your host profile (see section 9).</p>
-      <p>Legal basis: Art. 6(1)(b) GDPR. Retention: until you leave the crew, cancel the sign-up, delete the event or delete your account.</p>
+      <p>Legal basis for membership, crew-role and event participation features: Art. 6(1)(b) GDPR. Memberships, roles and sign-ups are removed when you leave or are removed from the crew, the relevant role ends, you cancel or are removed from an event, or you delete your account, as applicable. Event details remain until the event or your account is deleted. Records used to enforce crew or event restrictions are handled separately as described in section 8.</p>
 
       <h2>8. Reports and moderation</h2>
       <p>If you report a lap time or other content, we store your report (what you reported, the reason, your explanation) together with your account. Only moderators see who sent a report; the person or crew you reported is not told by us. You see the status and outcome of your own reports. We keep reports as long as we need them to document moderation decisions; reports you sent are deleted when you delete your account.</p>
       <p>If you report by e-mail, we process your name, e-mail address and message to handle the report and tell you the outcome.</p>
       <p>Legal basis: Art. 6(1)(c) GDPR in conjunction with Art. 16 of the EU Digital Services Act where it applies, and Art. 6(1)(f) GDPR (our legitimate interest in a safe, lawful community).</p>
+      <p><strong>Crew and event restrictions:</strong> To enforce crew and event access decisions, we store the affected account, the crew, event or host concerned, and the date of the restriction. Crew bans and event removals also record which account applied the restriction. A crew ban prevents joining, requesting an invite or being invited to that crew. An event removal prevents signing up again for that event; a host ban applies to that host’s events, including future events. These records are not public. Crew ban lists are available to the relevant crew leader, commissioners and moderators. Event removal and host ban lists are available to the relevant host and moderators. We do not send an automatic message when a restriction is applied; an attempted sign-up or crew join may show that access is restricted.</p>
+      <p>For these restrictions, we rely on Art. 6(1)(f) GDPR. Our legitimate interest is enforcing access decisions and protecting the community from repeated unwanted participation. You may object to this processing using the contact details above. The rights described in section 14 also apply to these records.</p>
+      <p>Retention: Event removals are deleted automatically seven days after the event has ended. Crew bans and host bans have no fixed expiry; they remain until the crew leader, a commissioner or the host lifts them, or the crew is deleted. Deleting a single event does not remove a host ban. If you delete your account, restrictions applied to your account and host bans you applied are deleted; restrictions you applied as a crew leader or commissioner remain without a link to your account.</p>
 
       <!-- Codex privacy review 16.10.2026 (Privacy-Discord-Bot-Nachtrag); retention paragraph matches the daily cleanup built 17.10. (discord-dispatch retention()). -->
       <h2 id="discord">9. Leonida Racing on Discord</h2>
@@ -83,7 +87,7 @@ const base = import.meta.env.BASE_URL;
       <p>Supabase also processes technical logs. Its current Free-plan documentation lists one day of API and database log retention; this is not a guarantee that every security log, backup or internal provider copy is erased after one day. Retention of the data we store for website features is described in the relevant sections above. Supabase’s DPA, privacy policy and logging documentation provide further information about provider processing.</p>
 
       <h2 id="analytics">12. Browser storage, cookies and visitor statistics</h2>
-      <p>When you sign in, your login session is stored in your browser's local storage so you stay signed in. Sign-ups for sample events are stored there too. Both are technically necessary for the functions you use and need no consent under Section 25(2) TDDDG. You can remove them at any time by signing out or clearing your browser data.</p>
+      <p>When you sign in, your login session is stored in your browser's local storage so you stay signed in. This is technically necessary for the functions you use and needs no consent under Section 25(2) TDDDG. You can remove it at any time by signing out or clearing your browser data.</p>
       <p><strong>Visitor statistics (only with your consent).</strong> If you click “Allow” in the notice at the bottom of the page, we use Cloudflare Web Analytics (Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA) to count visits. A script from Cloudflare then records, per page view, the page address, the referring page, the time, browser and device type, country (derived from the IP address) and loading times. Cloudflare Web Analytics sets no cookies, does not store anything in your browser for this purpose and does not create profiles across websites; the IP address is not used to identify you. We only see aggregated figures. Cloudflare is certified under the EU-U.S. Data Privacy Framework (Art. 45 GDPR). The no-cookie statement applies to Cloudflare Web Analytics; technical browser storage for sign-in and your privacy choice is described above.</p>
       <p>Legal basis: your consent, Art. 6(1)(a) GDPR and Section 25(1) TDDDG. Without consent, the script is not loaded. Your choice is stored in your browser's local storage (technically necessary, Section 25(2) TDDDG). You can change your choice or withdraw consent at any time through “Privacy Settings” in the footer. Withdrawing consent stops further collection for visitor statistics; it does not affect processing that was lawful before withdrawal.</p>
       <p>We use no other analytics, advertising or tracking services.</p>
@@ -93,11 +97,11 @@ const base = import.meta.env.BASE_URL;
 
       <h2>14. Your rights</h2>
       <p>You have the right to access the data we store about you (Art. 15 GDPR), to have incorrect data corrected (Art. 16 GDPR), to have your data deleted (Art. 17 GDPR), to restrict processing (Art. 18 GDPR), to data portability (Art. 20 GDPR), to object to processing based on Art. 6(1)(f) GDPR (Art. 21 GDPR), and to lodge a complaint with a data protection supervisory authority (Art. 77 GDPR). Please send requests to the contact e-mail above.</p>
-      <p><strong>Deleting your account:</strong> You can delete your account yourself at any time under My Account › Settings › Delete my account. This deletes your display name, your Discord link and login, your garage, crew membership and roles, events you created, event sign-ups, reports you sent, your screenshots and video links; submissions not yet reviewed are deleted too. Reviewed lap times remain on the leaderboard as "Deleted driver", without your display name, Discord ID or sign-in link in the retained driver record. Discord posts, bot records and provider copies are handled as described in sections 9 and 11. Deletion is permanent: signing in with Discord again creates a new, empty account.</p>
+      <p><strong>Deleting your account:</strong> You can delete your account yourself at any time under My Account › Settings › Delete my account. This deletes your display name, your Discord link and login, your garage, crew membership and roles, events you created, event sign-ups, crew and event restrictions applied to your account and host bans you applied, reports you sent, your screenshots and video links; submissions not yet reviewed are deleted too. Reviewed lap times remain on the leaderboard as "Deleted driver", without your display name, Discord ID or sign-in link in the retained driver record. Discord posts, bot records and provider copies are handled as described in sections 9 and 11. Deletion is permanent: signing in with Discord again creates a new, empty account.</p>
       <p>If you only remove our website from the authorized apps in your Discord settings, your account with us is not deleted; your data stays as it is until you sign in again and delete your account, or send us a deletion request.</p>
 
       <h2>15. Changes to this policy</h2>
-      <p>We update this privacy policy when the way we process data changes. The version published at the time of your visit applies. This version: 17 October 2026.</p>
+      <p>We update this privacy policy when the way we process data changes. The version published at the time of your visit applies. This version: 21 October 2026.</p>
     </div>
   </section>
 </Base>
