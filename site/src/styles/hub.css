@@ -276,21 +276,39 @@ a.crew-pill { text-decoration: none; }
 .crew-report, .ev-report { color: var(--gh-muted); font-size: .72rem; font-weight: 600; }
 .crew-report:hover, .ev-report:hover { color: var(--gh-text); }
 
-/* ---- Community tracks (RS-0045) ----------------------------------------- */
-.tr-list { display: flex; flex-direction: column; gap: .75rem; }
-.tr-row { display: grid; grid-template-columns: 1fr auto; gap: 1.1rem; align-items: center; padding: 1rem 1.1rem; background: var(--gh-surface); border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg); }
+/* ---- Community tracks (RS-0045; redesign 20.10.2026, DEC-0146) ---------- */
+.tr-list { display: flex; flex-direction: column; gap: 12px; }
+.tr-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 20px; align-items: center; padding: 18px 20px; background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: 8px; }
 .tr-row[hidden] { display: none; }
 .tr-main { min-width: 0; }
-.tr-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .7rem; margin: 0 0 .35rem; font-size: 1.05rem; font-weight: 800; }
-.tr-classes { color: var(--gh-text); }
-.tr-dates { margin: .4rem 0 0; color: var(--gh-muted); font-size: .72rem; }
-.tr-side { display: flex; flex-direction: column; align-items: flex-end; gap: .6rem; }
-.tr-sc { padding: .65rem 1.1rem; font-size: .82rem; white-space: nowrap; }
+.tr-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.tr-title { margin: 10px 0 0; font-size: 20px; font-weight: 700; line-height: 1.25; }
+.tr-by { margin: 4px 0 0; font-size: 14px; color: var(--lr-muted); }
+.tr-by strong { color: var(--lr-text); font-weight: 600; }
+.tr-facts { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 10px 0 0; font-size: 14px; color: var(--lr-soft); }
+.tr-facts > span { display: inline-flex; align-items: center; gap: 6px; }
+.tr-classes { color: var(--lr-text); }
+.tr-dates { margin: 8px 0 0; color: var(--lr-muted); font-size: 12px; }
+.tr-side { display: flex; align-items: center; gap: 10px; }
+.tr-sc { white-space: nowrap; }
 .tr-sc.is-disabled { opacity: .45; cursor: not-allowed; }
-@media (max-width: 640px) {
-  .tr-row { grid-template-columns: 1fr; gap: .7rem; padding: .85rem; }
-  .tr-side { flex-direction: row-reverse; justify-content: space-between; align-items: center; }
-  .tr-sc { flex: 1; justify-content: center; text-align: center; }
+.tr-report { align-self: center; }
+/* Save toggle: "Save" -> "Saved" (lime); hover on saved shows "Remove" (coral), same idea as the crew buttons */
+.tr-save { display: inline-flex; align-items: center; gap: 7px; height: 44px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.tr-save:hover { border-color: var(--lr-text); }
+.tr-save.is-saved { border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
+.tr-save.is-saved svg { fill: currentColor; }
+.tr-save .t-hov { display: none; }
+.tr-save.is-saved:hover, .tr-save.is-saved:focus-visible { border-color: rgba(255,122,122,.55); color: #FF8A8A; }
+.tr-save.is-saved:hover .t-def, .tr-save.is-saved:focus-visible .t-def { display: none; }
+.tr-save.is-saved:hover .t-hov, .tr-save.is-saved:focus-visible .t-hov { display: inline; }
+.tr-save:disabled { opacity: .6; cursor: default; }
+@media (max-width: 760px) {
+  .tr-row { grid-template-columns: 1fr; gap: 14px; padding: 16px; }
+  .tr-title { font-size: 18px; }
+  .tr-side { display: grid; grid-template-columns: auto minmax(0,1fr); }
+  .tr-sc { justify-content: center; }
+  .tr-report { grid-column: 1 / -1; justify-self: start; }
 }
 
 .ev-next-psn { display: inline-flex; align-items: center; gap: .45rem; color: var(--gh-muted); font-size: .8rem; }

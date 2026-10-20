@@ -1065,7 +1065,7 @@ const base = import.meta.env.BASE_URL;
       players_min: t.players_min || 1, players_max: t.players_max || t.players_min || 1, length_km: t.length_km || 0,
       created_at: row?.created_at ?? now, updated_at: now,
     };
-    $('track-preview').innerHTML = trackRowHtml(preview, { sample: true }).replace(/<span class="chip chip-sample"[^>]*>Sample<\/span>/, '');
+    $('track-preview').innerHTML = trackRowHtml(preview, { sample: true, preview: true }).replace(/<span class="chip chip-sample"[^>]*>Sample<\/span>/, '');
   }
 
   function openTrack(row: any | null) {

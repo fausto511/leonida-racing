@@ -1,79 +1,170 @@
 ---
-// Hub > Tracks (RS-0045, 2026-09-30): community race jobs. Same page
-// structure as the Event Calendar. Creators submit tracks in My Account >
-// Tracks; moderators check them against the Social Club link and publish.
-// Until real tracks are published, flagged sample tracks are shown.
+// Community > Tracks (RS-0045; redesign 20.10.2026, DEC-0146): community race jobs.
+// Same structure as Events / Crews: image band with breadcrumb + "For creators" tile, race-type chips
+// (+ "Saved"), layout / class / lobby / sort (phone: "Filters" bottom sheet), track rows with
+// Save toggle + "Open in Social Club" (outline), "How tracks get here", Discord band. No sub-nav.
+// Creators submit tracks in My Account > Tracks; moderators check them against Social Club and publish.
+// Until real tracks are published, flagged sample tracks are shown. COPY: Claude placeholders (Codex, DEC-0088).
 import Base from '../../../layouts/Base.astro';
-import PageHero from '../../../components/PageHero.astro';
-import HubSubnav from '../../../components/HubSubnav.astro';
+import DiscordBand from '../../../components/DiscordBand.astro';
 import '../../../styles/hub.css';
 import { sampleTracks, trackRowHtml, raceTypeLabels, layoutLabels, trackVehicleClasses } from '../../../data/tracks';
 const base = import.meta.env.BASE_URL;
 const initialHtml = sampleTracks.map((t) => trackRowHtml(t, { sample: true })).join('');
+const flag = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/></svg>';
+const steps = [
+  ['Apply as creator', 'In My Account → Tracks. A moderator confirms creators once.'],
+  ['Submit the job', 'Title, Social Club link, layout, classes and lobby size.'],
+  ['Checked and live', 'A moderator compares it with Social Club and publishes it here.'],
+];
 ---
 <Base
   title="GTA VI Community Tracks — Race Jobs by Creators"
-  description="Find GTA VI race jobs built by the community. Filter by race type, circuit or point to point, vehicle class and lobby size, and open each track on Social Club."
+  description="Find GTA VI race jobs built by the community. Filter by race type, circuit or point to point, vehicle class and lobby size, save tracks and open them on Social Club."
   section="hub"
   noindex={true /* until real tracks replace the sample data */}
 >
-  <PageHero status="tracks" image="hub-tracks" eyebrow="Community Race Jobs" title="Tracks" lede="Race jobs built by the GTA VI community. Find a circuit or a point-to-point run that fits your lobby and your cars, then open it on Social Club." />
-
-  <HubSubnav active="tracks" />
-
-  <section class="wrap hub-body">
-    <div class="hub-toolbar">
-      <div class="hub-filters">
-        <select class="ui-select" id="tr-type" aria-label="Filter by race type">
-          <option value="">All race types</option>
-          {Object.entries(raceTypeLabels).map(([k, v]) => <option value={k}>{v}</option>)}
-        </select>
-        <select class="ui-select" id="tr-layout" aria-label="Filter by layout">
-          <option value="">Circuit & point to point</option>
-          {Object.entries(layoutLabels).map(([k, v]) => <option value={k}>{v}</option>)}
-        </select>
-        <select class="ui-select" id="tr-class" aria-label="Filter by vehicle class">
-          <option value="">All vehicle classes</option>
-          {trackVehicleClasses.map((c) => <option value={c}>{c}</option>)}
-        </select>
-        <select class="ui-select" id="tr-players" aria-label="Filter by lobby size">
-          <option value="">Any lobby size</option>
-          {[2, 4, 8, 12, 16, 24, 30].map((n) => <option value={n}>{n} players</option>)}
-        </select>
-        <select class="ui-select" id="tr-sort" aria-label="Sort tracks">
-          <option value="updated">Recently updated</option>
-          <option value="new">Newest</option>
-          <option value="short">Shortest</option>
-          <option value="long">Longest</option>
-        </select>
+  <section class="tr-band">
+    <img class="tr-bg" src={`${base}images/hub/tracks-band-1080.webp`} srcset={`${base}images/hub/tracks-band-640.webp 640w, ${base}images/hub/tracks-band-1080.webp 1080w, ${base}images/hub/tracks-band-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="941" fetchpriority="high" />
+    <span class="lr-shade" aria-hidden="true"></span>
+    <div class="wrap tr-hero lr-band-in">
+      <div>
+        <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}community/`}>Community</a><span aria-hidden="true">/</span><span aria-current="page">Tracks</span></nav>
+        <p class="eyebrow">Community race jobs</p>
+        <h1 class="display lr-t1">Tracks</h1>
+        <p class="lr-lede">Race jobs built by the GTA VI community. Find a circuit or a point-to-point run for your lobby and your cars, save it and open it on Social Club.</p>
       </div>
-      <span class="hub-sample-flag" id="tr-flag">Sample data — example tracks, not real</span>
+      <div class="tr-tile">
+        <div class="eb"><Fragment set:html={flag} />For creators</div>
+        <p class="t">Built a race job?</p>
+        <p class="s">Race creation tools for GTA VI are not announced yet. Apply now and submit your tracks as soon as they are.</p>
+        <a class="btn btn-p" href={`${base}account/tracks/`}>Apply as creator</a>
+      </div>
     </div>
+  </section>
 
+  <section class="wrap">
+    <div class="tr-bar">
+      <div class="chips" id="tr-chips" role="group" aria-label="Race type">
+        <button type="button" class="on" data-type="" aria-pressed="true">All tracks</button>
+        {Object.entries(raceTypeLabels).map(([k, v]) => <button type="button" data-type={k} aria-pressed="false">{v}</button>)}
+        <button type="button" class="mine" data-type="saved" aria-pressed="false" id="tr-saved-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Saved<span class="n" id="tr-saved-n"></span></button>
+      </div>
+      <div class="tr-row2">
+        <button type="button" class="tr-fbtn" id="tr-fbtn" aria-expanded="false" aria-controls="tr-adv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="nb" id="tr-fn" hidden></span></button>
+        <div class="tr-adv" id="tr-adv" role="dialog" aria-label="Filters">
+          <div class="sh-head"><b>Filters</b><button type="button" class="x" id="tr-fclose" aria-label="Close filters">×</button></div>
+          <label class="sel"><span class="k">Layout</span><select id="tr-layout"><option value="">All</option>{Object.entries(layoutLabels).map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
+          <label class="sel"><span class="k">Class</span><select id="tr-class"><option value="">All</option>{trackVehicleClasses.map((c) => <option value={c}>{c}</option>)}</select></label>
+          <label class="sel"><span class="k">Lobby</span><select id="tr-players"><option value="">Any size</option>{[2, 4, 8, 12, 16, 24, 30].map((n) => <option value={n}>{n} players</option>)}</select></label>
+          <label class="sel"><span class="k">Sort</span><select id="tr-sort"><option value="updated">Recently updated</option><option value="new">Newest</option><option value="short">Shortest</option><option value="long">Longest</option></select></label>
+          <div class="sh-foot"><button type="button" class="btn btn-s" id="tr-reset">Reset</button><button type="button" class="btn btn-p" id="tr-apply">Show tracks</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="tr-sheet-bg" id="tr-sheet-bg" hidden></div>
+
+    <p class="tr-sample" id="tr-flag">Sample tracks — examples, not real race jobs</p>
+    <p class="tr-msg" id="tr-msg" role="status" hidden></p>
     <div class="tr-list" id="tr-root" set:html={initialHtml} />
     <p class="hub-empty" id="tr-empty" hidden>No tracks match these filters.</p>
 
-    <p class="hub-note">Building race jobs? Apply as creator in <a href={`${base}account/tracks/`}>My Account</a>. Creators submit their tracks with the Social Club link; a moderator checks the details and publishes them. Every edit goes back to a quick check.</p>
+    <section class="tr-how" aria-labelledby="tr-how-h">
+      <h2 class="tr-h2" id="tr-how-h">How tracks get here</h2>
+      <ol>
+        {steps.map(([t, c], i) => <li><span class="n">{i + 1}</span><strong>{t}</strong><span>{c}</span></li>)}
+      </ol>
+      <a class="tr-how-a" href={`${base}account/tracks/`}>Go to My Account → Tracks</a>
+    </section>
   </section>
+
+  <DiscordBand />
 </Base>
+
+<style>
+  .tr-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
+  .tr-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 70%; }
+  .tr-hero { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; }
+  .tr-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
+  .tr-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+  .tr-tile .t { margin: 8px 0 6px; font-family: var(--gh-font-display); font-weight: 800; font-size: 22px; text-transform: uppercase; line-height: 1.1; }
+  .tr-tile .s { margin: 0 0 14px; font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
+
+  .tr-bar { padding: 14px 0 16px; border-bottom: 1px solid var(--lr-line); }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 14px; font-weight: 500; color: #E4E4EC; cursor: pointer; white-space: nowrap; }
+  .chips button:hover:not(.on) { border-color: rgba(200,200,222,.5); }
+  .chips button.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
+  .chips button.mine { border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
+  .chips button.mine.on { background: var(--lr-lime); border-color: var(--lr-lime); color: #14141F; }
+  .chips button .n:not(:empty) { font-weight: 700; }
+  .chips button:focus-visible, .tr-fbtn:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+  .tr-row2 { margin-top: 12px; }
+  .tr-fbtn { display: none; }
+  .tr-adv { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .sh-head, .sh-foot { display: none; }
+  .sel { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 30px 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; cursor: pointer; }
+  .sel::after { content: '▾'; position: absolute; right: 11px; font-size: 11px; color: var(--lr-muted); pointer-events: none; }
+  .sel .k { font-size: 12px; color: var(--lr-muted); white-space: nowrap; }
+  .sel select { appearance: none; background: transparent; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; max-width: 12rem; field-sizing: content; }
+  .sel select option { background: var(--lr-card); color: var(--lr-text); }
+  .sel:focus-within { border-color: var(--lr-orange); }
+
+  .tr-sample { margin: 22px 0 12px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #6B6B80; }
+  .tr-msg { margin: 0 0 12px; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); font-size: 14px; color: var(--lr-soft); }
+  .tr-msg.is-error { border-color: rgba(255,122,122,.5); color: #FF8A8A; }
+  .tr-list:first-child { margin-top: 22px; }
+
+  .tr-how { margin: 48px 0 72px; }
+  .tr-h2 { margin: 0; font-family: var(--gh-font-display); font-size: 24px; font-weight: 800; text-transform: uppercase; }
+  .tr-how ol { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .tr-how li { display: flex; flex-direction: column; gap: 6px; padding: 16px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
+  .tr-how .n { display: grid; place-items: center; width: 30px; height: 30px; margin-bottom: 4px; border-radius: 50%; border: 1px solid rgba(255,149,90,.5); color: var(--lr-orange); font-weight: 700; font-size: 14px; }
+  .tr-how strong { font-size: 16px; }
+  .tr-how li > span:last-child { font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
+  .tr-how-a { display: inline-block; margin-top: 14px; font-size: 14px; font-weight: 700; color: var(--lr-orange); text-decoration: none; }
+
+  @media (max-width: 1100px) { .tr-hero { grid-template-columns: minmax(0,1fr) 340px; gap: 28px; } }
+  @media (max-width: 860px) {
+    .tr-hero { grid-template-columns: 1fr; gap: 18px; }
+    .tr-bg { object-position: 55% 70%; }
+    .tr-bar { border-bottom: 0; padding-bottom: 0; }
+    .chips { flex-wrap: nowrap; overflow-x: auto; margin-right: -16px; padding-right: 16px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .tr-fbtn { display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px; height: 44px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; color: var(--lr-text); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .tr-fbtn .nb[hidden] { display: none; }
+    .tr-fbtn .nb { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--lr-raised); font-size: 12px; display: inline-flex; align-items: center; justify-content: center; }
+    .tr-adv { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 80; flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: 0; max-height: 85vh; overflow-y: auto; padding: 0 16px 16px; background: var(--lr-card); border-top: 1px solid var(--lr-line-strong); border-radius: 14px 14px 0 0; }
+    .tr-adv.open { display: flex; }
+    .sh-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 16px 12px; border-bottom: 1px solid var(--lr-line); margin: 0 -16px 8px; }
+    .sh-head b { font-size: 18px; }
+    .sh-head .x { width: 32px; height: 32px; border: 0; background: none; color: var(--lr-text); font-size: 24px; cursor: pointer; }
+    .sel { height: 48px; margin-top: 10px; width: 100%; box-sizing: border-box; }
+    .sel select { max-width: none; flex: 1; }
+    .sh-foot { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 16px; }
+    .sh-foot .btn { height: 48px; }
+    .tr-sheet-bg { position: fixed; inset: 0; z-index: 79; background: rgba(11,11,20,.6); }
+    .tr-how ol { grid-template-columns: 1fr; }
+  }
+</style>
 
 <script>
   import { sampleTracks, trackRowHtml, type CommunityTrack } from '../../../data/tracks';
   import { fetchLiveTracks } from '../../../scripts/hub-live';
-
-  const root = document.getElementById('tr-root')!;
-  const emptyEl = document.getElementById('tr-empty')!;
-  const flagEl = document.getElementById('tr-flag')!;
-  const sel = (id: string) => document.getElementById(id) as HTMLSelectElement;
-  const typeSel = sel('tr-type'), layoutSel = sel('tr-layout'), classSel = sel('tr-class'), playersSel = sel('tr-players'), sortSel = sel('tr-sort');
-
+  import { loadSaved, toggleSaved, loginToSave, type SavedState } from '../../../scripts/track-saves';
+  const $ = (id: string) => document.getElementById(id)!;
+  const root = $('tr-root'), emptyEl = $('tr-empty'), flagEl = $('tr-flag'), msgEl = $('tr-msg');
+  const sel = (id: string) => $(id) as HTMLSelectElement;
+  const layoutSel = sel('tr-layout'), classSel = sel('tr-class'), playersSel = sel('tr-players'), sortSel = sel('tr-sort');
   let tracks: CommunityTrack[] = sampleTracks;
   let live = false;
+  let type = '';
+  let saved: SavedState = { ids: new Set(), driverId: null, signedIn: false, available: true };
 
   function render() {
-    const t = typeSel.value, l = layoutSel.value, c = classSel.value, n = Number(playersSel.value) || 0;
+    const l = layoutSel.value, c = classSel.value, n = Number(playersSel.value) || 0;
     const list = tracks.filter((x) =>
-      (!t || x.race_types.includes(t as never)) &&
+      (!type || (type === 'saved' ? saved.ids.has(x.track_id) : x.race_types.includes(type as never))) &&
       (!l || x.layout === l) &&
       (!c || x.vehicle_classes.includes(c)) &&
       (!n || (x.players_min <= n && n <= x.players_max)));
@@ -83,17 +174,65 @@ const initialHtml = sampleTracks.map((t) => trackRowHtml(t, { sample: true })).j
       : s === 'short' ? a.length_km - b.length_km
       : s === 'long' ? b.length_km - a.length_km
       : b.updated_at.localeCompare(a.updated_at));
-    root.innerHTML = list.map((x) => trackRowHtml(x, { sample: !live })).join('');
+    root.innerHTML = list.map((x) => trackRowHtml(x, { sample: !live, saved: saved.ids.has(x.track_id) })).join('');
+    emptyEl.textContent = type === 'saved' ? 'No saved tracks yet. Tap Save on a track to keep it here and in My Account.' : 'No tracks match these filters.';
     emptyEl.hidden = list.length > 0;
+    const count = tracks.filter((x) => saved.ids.has(x.track_id)).length;
+    $('tr-saved-n').textContent = count ? `· ${count}` : '';
+    const nf = [layoutSel.value, classSel.value, playersSel.value].filter(Boolean).length;
+    $('tr-fn').textContent = String(nf); $('tr-fn').hidden = nf === 0;
+  }
+  function msg(text: string, isError = false) {
+    msgEl.textContent = text; msgEl.hidden = !text; msgEl.classList.toggle('is-error', isError);
   }
 
-  [typeSel, layoutSel, classSel, playersSel, sortSel].forEach((el) => el.addEventListener('input', render));
-  render();
-  fetchLiveTracks().then((rows) => {
-    if (!rows) return;
-    tracks = rows;
-    live = true;
-    flagEl.hidden = true;
+  $('tr-chips').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-type]');
+    if (!b) return;
+    type = b.dataset.type ?? '';
+    $('tr-chips').querySelectorAll('button').forEach((x) => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
     render();
   });
+  [layoutSel, classSel, playersSel, sortSel].forEach((el) => el.addEventListener('input', render));
+
+  // Save toggle on the rows
+  root.addEventListener('click', async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-save]');
+    if (!b) return;
+    const id = b.dataset.save!;
+    b.disabled = true;
+    const r = await toggleSaved(saved, id, live);
+    b.disabled = false;
+    if (r.login) { loginToSave(id); return; }
+    if (r.error) { msg(r.error, true); return; }
+    msg(!live ? (r.saved ? 'Saved in this browser (sample track).' : 'Removed.') : (r.saved ? 'Saved. You find it in My Account → Tracks.' : 'Removed from your saved tracks.'));
+    render();
+  });
+
+  // phone: filters as a bottom sheet
+  const sheet = $('tr-adv'), bg = $('tr-sheet-bg'), fbtn = $('tr-fbtn');
+  const openSheet = (o: boolean) => { sheet.classList.toggle('open', o); bg.hidden = !o; fbtn.setAttribute('aria-expanded', String(o)); };
+  fbtn.addEventListener('click', () => openSheet(true));
+  [$('tr-fclose'), $('tr-apply'), bg].forEach((el) => el.addEventListener('click', () => openSheet(false)));
+  $('tr-reset').addEventListener('click', () => { layoutSel.value = ''; classSel.value = ''; playersSel.value = ''; render(); });
+
+  (async () => {
+    saved = await loadSaved(false);
+    render();
+    const rows = await fetchLiveTracks();
+    if (!rows) return;
+    tracks = rows; live = true; flagEl.hidden = true;
+    saved = await loadSaved(true);
+    // back from the Discord login: save the track the guest clicked
+    const url = new URL(window.location.href);
+    const pending = url.searchParams.get('save');
+    if (pending) {
+      url.searchParams.delete('save'); history.replaceState(null, '', url.pathname + url.search + url.hash);
+      if (saved.signedIn && !saved.ids.has(pending) && tracks.some((t) => t.track_id === pending)) {
+        const r = await toggleSaved(saved, pending, true);
+        msg(r.error ?? 'Saved. You find it in My Account → Tracks.', Boolean(r.error));
+      }
+    }
+    render();
+  })();
 </script>

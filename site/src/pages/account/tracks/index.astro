@@ -25,13 +25,17 @@ const base = import.meta.env.BASE_URL;
     </div>
 
     <div id="acc-body" hidden>
-      <div class="panel tr-cta">
-        <p><strong>Looking for a new track?</strong> Race jobs built by the community — circuits and point-to-point runs with lobby size and vehicle classes.</p>
-        <a class="btn btn-primary" href={`${base}community/tracks/`}>Find tracks</a>
+      <!-- Saved tracks (DEC-0146, Fausto 20.10.): one list, saved on Community > Tracks. COPY: Claude placeholder. -->
+      <h2 class="section-heading">Saved tracks</h2>
+      <p class="section-lede">Race jobs you saved on <a href={`${base}community/tracks/`}>Community → Tracks</a>. Open them on Social Club to bookmark them for the game.</p>
+      <p class="tr-msg" id="sv-msg" role="status" hidden></p>
+      <div class="tr-list" id="sv-root"></div>
+      <div class="panel tr-cta" id="sv-empty" hidden>
+        <p><strong>No saved tracks yet.</strong> Find a circuit or a point-to-point run and tap Save.</p>
+        <a class="btn btn-outline" href={`${base}community/tracks/`}>Find tracks</a>
       </div>
-
       <div id="creator-block" hidden>
-        <h2 class="section-heading">My Tracks</h2>
+        <h2 class="section-heading">Your tracks</h2>
         <p class="section-lede">Submit your race jobs with the Social Club link. A moderator checks the details against Social Club and publishes the track. Every change goes back to a quick check before it is live again.</p>
         <HubEditor mode="tracks" />
       </div>
@@ -52,6 +56,10 @@ const base = import.meta.env.BASE_URL;
   .tr-cta strong { color: var(--gh-text); }
   .section-heading { margin: 2.5rem 0 .3rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
   .section-lede { margin: 0 0 1.2rem; color: var(--gh-muted); font-size: .88rem; }
+  .section-lede a { color: var(--gh-text); }
+  .section-heading:first-child { margin-top: 0; }
+  .tr-msg { margin: 0 0 12px; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); font-size: 14px; color: var(--lr-soft); }
+  .tr-msg.is-error { border-color: rgba(255,122,122,.5); color: #FF8A8A; }
 </style>
 
 <script>
@@ -59,9 +67,40 @@ const base = import.meta.env.BASE_URL;
   document.addEventListener('hc-access', (e: any) => {
     document.getElementById('creator-block')!.hidden = !e.detail.hasAccess;
   });
+  import { trackRowHtml, type CommunityTrack } from '../../../data/tracks';
+  import { loadSaved, toggleSaved, type SavedState } from '../../../scripts/track-saves';
+  const svRoot = document.getElementById('sv-root')!, svEmpty = document.getElementById('sv-empty')!, svMsg = document.getElementById('sv-msg')!;
+  let state: SavedState | null = null;
+  let list: CommunityTrack[] = [];
+  function renderSaved() {
+    svRoot.innerHTML = list.map((t) => trackRowHtml(t, { saved: true })).join('');
+    svEmpty.hidden = list.length > 0;
+  }
+  async function loadSavedTracks() {
+    state = await loadSaved(true);
+    list = [];
+    if (state.driverId && state.available) {
+      const { data } = await getSupabase().from('saved_tracks')
+        .select('created_at, track:community_tracks(track_id,title,social_club_url,layout,race_types,vehicle_classes,players_min,players_max,length_km,created_at,updated_at,is_published)')
+        .eq('driver_id', state.driverId).order('created_at', { ascending: false });
+      list = ((data ?? []) as any[]).map((r) => r.track).filter((t) => t && t.is_published).map((t) => ({ ...t, length_km: Number(t.length_km) }));
+    }
+    renderSaved();
+  }
+  svRoot.addEventListener('click', async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-save]');
+    if (!b || !state) return;
+    b.disabled = true;
+    const r = await toggleSaved(state, b.dataset.save!, true);
+    if (r.error) { b.disabled = false; svMsg.textContent = r.error; svMsg.hidden = false; svMsg.classList.add('is-error'); return; }
+    list = list.filter((t) => state!.ids.has(t.track_id));
+    svMsg.textContent = 'Removed from your saved tracks.'; svMsg.hidden = false; svMsg.classList.remove('is-error');
+    renderSaved();
+  });
   function init(session: any) {
     document.getElementById('acc-auth')!.hidden = Boolean(session);
     document.getElementById('acc-body')!.hidden = !session;
+    if (session) loadSavedTracks();
   }
   if (backendConfigured) {
     const sb = getSupabase();
