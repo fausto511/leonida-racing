@@ -247,7 +247,9 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <div><dt>GTA history</dt><dd class="va-hist">{!vehicle.previousGames
             ? <span class="is-tba">Earlier appearances under review</span>
             : vehicle.previousGames.length === 0
-              ? <span class="va-tag">New in GTA VI</span>
+              ? (vehicle.releaseId
+                ? <a class="va-tag va-tag-link" href={`${base}cars/new-cars/`} title="All cars new in GTA VI">New in GTA VI <span aria-hidden="true">→</span></a>
+                : <span class="va-tag">New in GTA VI</span>)
               : <><span class="va-tag">Returning</span>{groupedTitles(vehicle.previousGames).map((t) => <span class="va-chip" title={t.tooltip}>{t.label}</span>)}</>}</dd></div>
         </dl>
       </div>
@@ -455,6 +457,9 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .va-src:hover { color: var(--lr-pink); }
   .va-hist { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
   .va-tag { display: inline-flex; align-items: center; height: 26px; padding: 0 8px; border-radius: 4px; background: rgba(217,245,142,.14); color: var(--lr-lime); font-size: 13px; font-weight: 600; }
+  /* Fausto 20.10.: links to New cars (revealed cars only); hover = stronger lime background, no new colour rule. */
+  a.va-tag-link { gap: 5px; text-decoration: none; transition: background .15s; }
+  a.va-tag-link:hover, a.va-tag-link:focus-visible { background: rgba(217,245,142,.26); color: var(--lr-lime); text-decoration: none; }
   .va-chip { display: inline-flex; align-items: center; height: 26px; padding: 0 8px; border-radius: 4px; background: var(--lr-raised); font-size: 13px; font-weight: 600; }
 
   /* ---- Similar cars + head to head ---- */
