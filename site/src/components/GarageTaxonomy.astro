@@ -25,7 +25,7 @@ export interface TaxonomyCustom {
   metaDescription: string;
   noindex?: boolean;
   /** vehicle id whose garage photo fills the band, plus object-position */
-  band?: { id: string; pos: string };
+  band?: { id?: string; src?: string; pos: string; style?: string }; // src: /images/... base path, files <src>-{640,1280,1920}.webp
   glanceTitle: string;
   countLabel: string;
   glance: { k: string; v: string }[]; // v: trusted HTML
@@ -77,9 +77,10 @@ const jsonLd = [{
 }];
 
 // ---- image band: fastest car with a photo, else first photo, else the garage ----
-const bandCar = custom?.band ? list.find((v) => v.id === custom.band!.id) ?? bandVehicle(list) : bandVehicle(list);
-const bandSrc = bandCar ? `${base}images/vehicles/${bandCar.id}` : null;
-const bandPos = custom?.band && bandCar?.id === custom.band.id ? custom.band.pos : undefined;
+const bandCar = custom?.band?.id ? list.find((v) => v.id === custom.band!.id) ?? bandVehicle(list) : bandVehicle(list);
+const bandSrc = custom?.band?.src ? `${base}${custom.band.src}` : bandCar ? `${base}images/vehicles/${bandCar.id}` : null;
+const bandPos = custom?.band && (custom.band.src || bandCar?.id === custom.band.id) ? custom.band.pos : undefined;
+const bandStyle = [bandPos ? `object-position:${bandPos}` : '', custom?.band?.style ?? ''].filter(Boolean).join(';') || undefined;
 
 // ---- at a glance ----
 const lapOf = (v: VehicleOption) => fastestGellhornLapMs(v.id);
@@ -131,7 +132,7 @@ const more = custom
 >
   <section class="tb">
     {bandSrc
-      ? <img class="tb-bg" style={bandPos ? `object-position:${bandPos}` : undefined} src={`${bandSrc}-1280.webp`} srcset={`${bandSrc}-640.webp 640w, ${bandSrc}-1280.webp 1280w, ${bandSrc}-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="1080" fetchpriority="high" />
+      ? <img class="tb-bg" style={bandStyle} src={`${bandSrc}-1280.webp`} srcset={`${bandSrc}-640.webp 640w, ${bandSrc}-1280.webp 1280w, ${bandSrc}-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="1080" fetchpriority="high" />
       : <img class="tb-bg tb-ph" src={`${base}images/garage/garage-hero-placeholder-1080.webp`} alt="" width="1080" height="608" fetchpriority="high" />}
     <span class="lr-shade is-open" aria-hidden="true"></span>
     <div class="wrap tb-inner lr-band-in">

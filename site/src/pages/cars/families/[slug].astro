@@ -3,7 +3,7 @@
 // Members may span several classes. noindex until the family has its own copy
 // (familyCopy in data/rankings.ts) -- written from community experience after launch.
 // Redesign 20.10.2026 (DEC-0147): same layout as class / manufacturer pages (GarageTaxonomy, kind "custom");
-// Dominator band = '67 Buggy garage photo (Fausto). Family chips appear once there are two or more family pages.
+// Dominator band = steering wheel photo (Fausto 20.10.). Family chips appear once there are two or more family pages.
 // COPY: band/glance labels = Claude placeholders (Codex, DEC-0088).
 import GarageTaxonomy from '../../../components/GarageTaxonomy.astro';
 import { familyMembers, familyName } from '../../../data/vehicles';
@@ -19,7 +19,8 @@ const list = familyMembers(f).filter((v) => v.releaseId);
 const classes = [...new Set(list.flatMap((v) => v.classes))].sort();
 const makes = [...new Map(list.map((v) => [v.logoSlug, v.make])).entries()];
 const families = familyPageSlugs();
-const BANDS: Record<string, { id: string; pos: string }> = { dominator: { id: 'vapid-dominator-67-buggy', pos: '50% 60%' } };
+// Dominator: steering wheel with the Dominator logo (Fausto 20.10.: the off-road Buggy is not representative of the family).
+const BANDS: Record<string, { id?: string; src?: string; pos: string }> = { dominator: { src: 'images/garage/family-dominator-band', pos: '0% 32%', style: 'width:118%;max-width:none' } }; // wider image: the wheel moves out from under the title
 const copy = familyCopy[f] ?? [];
 const page = { slug: f, name, intro: [], copyStatus: 'approved' as const };
 ---
