@@ -1,0 +1,6 @@
+-- Fausto 21.10.2026: a driver can hold at most 10 open crew invites at once (applied via MCP).
+-- Change in crew_memberships_limit(): inside the 'invited' branch
+--   if (select count(*) from public.crew_memberships m where m.driver_id = new.driver_id and m.status = 'invited') >= 10 then
+--     raise exception 'driver_invite_limit: this driver already has 10 open crew invites' using errcode = 'P0001';
+--   end if;
+-- Full function: pg_get_functiondef('public.crew_memberships_limit'::regproc).

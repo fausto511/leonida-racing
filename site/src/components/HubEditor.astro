@@ -646,7 +646,7 @@ const base = import.meta.env.BASE_URL;
       ($('invite-q') as HTMLInputElement).value = '';
       $('invite-results').innerHTML = '';
       await loadMembers();
-      const why = error ? (/crew_banned/.test(error.message) ? 'This driver is banned from your crew. Unban them first.' : /invite_limit/.test(error.message) ? 'Your crew already has 20 open invites.' : /invite_declined/.test(error.message) ? 'This driver declined an invite from your crew in the last 30 days.' : /duplicate|unique/i.test(error.message) ? 'This driver is already a member, invited or has asked to join.' : `Could not invite: ${error.message}`) : `Invite sent to ${inv.dataset.name}. They accept it in My Account.`;
+      const why = error ? (/crew_banned/.test(error.message) ? 'This driver is banned from your crew. Unban them first.' : /driver_invite_limit/.test(error.message) ? 'This driver already has 10 open crew invites. Try again once they have answered some of them.' : /invite_limit/.test(error.message) ? 'Your crew already has 20 open invites.' : /invite_declined/.test(error.message) ? 'This driver declined an invite from your crew in the last 30 days.' : /duplicate|unique/i.test(error.message) ? 'This driver is already a member, invited or has asked to join.' : `Could not invite: ${error.message}`) : `Invite sent to ${inv.dataset.name}. They accept it in My Account.`;
       renderMembers(why, Boolean(error));
     }
   });
