@@ -1,6 +1,6 @@
 ---
 // Site footer — Redesign Phase 1 (DEC-0116 "Footer", mockup boards Home desktop/phone).
-// New cars, Rankings and Tracks join the columns only once they are finished.
+// Rankings and Tracks join the columns only once they are finished. New cars added 2026-10-20 (Fausto, indexed).
 // COPY STATUS: column labels from the mockup (Claude placeholders) -> Codex review (DEC-0088);
 // disclaimer unchanged (approved, DEC-0081).
 import { SITE_NAME, SITE_DISCLAIMER } from '../data/site';
@@ -11,6 +11,7 @@ const DISCORD_INVITE_URL = 'https://discord.gg/hPGuBwXRqT';
 const columns: { head: string; href?: string; links: { label: string; href: string; consent?: boolean }[] }[] = [
   { head: 'Cars', href: `${base}cars/`, links: [
     { label: 'All cars', href: `${base}cars/` },
+    { label: 'New cars', href: `${base}cars/new-cars/` },
     { label: 'Classes', href: `${base}cars/classes/` },
     { label: 'Manufacturers', href: `${base}cars/manufacturers/` },
   ] },
