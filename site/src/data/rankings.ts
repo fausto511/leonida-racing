@@ -71,8 +71,8 @@ export const newCars = () => revealed(vehicleOptions).filter((v) => Array.isArra
 export function newCarsResearchCoverage(): number {
   const r = revealed(vehicleOptions); return r.length ? r.filter((v) => Array.isArray(v.previousGames)).length / r.length : 0;
 }
-// Manual gate (Fausto 2026-10-09): keep noindex until Fausto has reviewed the page.
-export const NEW_CARS_INDEX_ENABLED = false;
+// Manual gate (Fausto 2026-10-09): keep noindex until Fausto has reviewed the page. Reviewed + enabled 2026-10-20 (Fausto).
+export const NEW_CARS_INDEX_ENABLED = true;
 export const newCarsIndexable = () => NEW_CARS_INDEX_ENABLED && newCars().length > 0 && newCarsResearchCoverage() >= NEW_CARS_MIN_COVERAGE;
 
 // Family pages: from FAMILY_PAGE_MIN models; indexed once the family has its own copy.
@@ -83,8 +83,8 @@ export const familyCopy: Record<string, string[]> = {
     'These are separate models within the same family. Their shared name connects the designs; it does not establish equal performance or the same racing class. Top-speed and reference-lap results will allow more detailed comparisons as GTA VI testing progresses.',
   ],
 };
-// Manual gate (Fausto 2026-10-09): family pages stay noindex until listed here.
-export const FAMILY_INDEX_ENABLED = new Set<string>([]);
+// Manual gate (Fausto 2026-10-09): family pages stay noindex until listed here. dominator: 2026-10-20 (Fausto).
+export const FAMILY_INDEX_ENABLED = new Set<string>(['dominator']);
 // only officially revealed members count and are shown (leak-only vehicles stay off public pages; Codex 08.10.)
 export const familyPageSlugs = () => familySlugs().filter((f) => familyMembers(f).filter((v) => v.releaseId).length >= FAMILY_PAGE_MIN);
 export const familyIndexable = (f: string) => FAMILY_INDEX_ENABLED.has(f) && Boolean(familyCopy[f]?.length) && familyMembers(f).some((v) => v.releaseId);
