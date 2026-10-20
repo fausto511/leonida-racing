@@ -289,6 +289,18 @@ a.crew-pill { text-decoration: none; }
 .tr-facts > span { display: inline-flex; align-items: center; gap: 6px; }
 .tr-classes { color: var(--lr-text); }
 .tr-dates { margin: 8px 0 0; color: var(--lr-muted); font-size: 12px; }
+/* Rating line (DEC-0146): average from 3 ratings + "Your rating" stars (hover fills up to the star) */
+.tr-rate { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; margin: 10px 0 0; font-size: 14px; color: var(--lr-muted); }
+.tr-avg b { color: var(--lr-lime); font-weight: 700; }
+.tr-avg.is-none { font-size: 13px; }
+.tr-my { display: inline-flex; align-items: center; gap: 8px; }
+.tr-my .k { font-size: 12px; }
+.tr-stars { display: inline-flex; flex-direction: row-reverse; }
+.tr-stars button { width: 26px; height: 26px; padding: 0; border: 0; background: none; color: rgba(200,200,222,.35); font-size: 18px; line-height: 1; cursor: pointer; }
+.tr-stars button.on { color: var(--lr-lime); }
+.tr-stars:hover button { color: rgba(200,200,222,.35); }
+.tr-stars button:hover, .tr-stars button:hover ~ button { color: var(--lr-lime); }
+.tr-stars button:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 1px; border-radius: 4px; }
 .tr-side { display: flex; align-items: center; gap: 10px; }
 .tr-sc { white-space: nowrap; }
 .tr-sc.is-disabled { opacity: .45; cursor: not-allowed; }

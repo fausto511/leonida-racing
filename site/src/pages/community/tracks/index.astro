@@ -57,7 +57,7 @@ const steps = [
           <label class="sel"><span class="k">Layout</span><select id="tr-layout"><option value="">All</option>{Object.entries(layoutLabels).map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
           <label class="sel"><span class="k">Class</span><select id="tr-class"><option value="">All</option>{trackVehicleClasses.map((c) => <option value={c}>{c}</option>)}</select></label>
           <label class="sel"><span class="k">Lobby</span><select id="tr-players"><option value="">Any size</option>{[2, 4, 8, 12, 16, 24, 30].map((n) => <option value={n}>{n} players</option>)}</select></label>
-          <label class="sel"><span class="k">Sort</span><select id="tr-sort"><option value="updated">Recently updated</option><option value="new">Newest</option><option value="short">Shortest</option><option value="long">Longest</option></select></label>
+          <label class="sel"><span class="k">Sort</span><select id="tr-sort"><option value="updated">Recently updated</option><option value="new">Newest</option><option value="short">Shortest</option><option value="long">Longest</option><option value="rated">Top rated</option></select></label>
           <div class="sh-foot"><button type="button" class="btn btn-s" id="tr-reset">Reset</button><button type="button" class="btn btn-p" id="tr-apply">Show tracks</button></div>
         </div>
       </div>
@@ -151,7 +151,7 @@ const steps = [
 <script>
   import { sampleTracks, trackRowHtml, type CommunityTrack } from '../../../data/tracks';
   import { fetchLiveTracks } from '../../../scripts/hub-live';
-  import { loadSaved, toggleSaved, loginToSave, type SavedState } from '../../../scripts/track-saves';
+  import { loadSaved, toggleSaved, loginToSave, loadRatings, rateTrack, loginToRate, type SavedState, type Ratings } from '../../../scripts/track-saves';
   const $ = (id: string) => document.getElementById(id)!;
   const root = $('tr-root'), emptyEl = $('tr-empty'), flagEl = $('tr-flag'), msgEl = $('tr-msg');
   const sel = (id: string) => $(id) as HTMLSelectElement;
@@ -160,6 +160,8 @@ const steps = [
   let live = false;
   let type = '';
   let saved: SavedState = { ids: new Set(), driverId: null, signedIn: false, available: true };
+  let ratings: Ratings = { pub: new Map(), my: new Map(), available: true };
+  const avgOf = (id: string) => ratings.pub.get(id)?.avg ?? -1;
 
   function render() {
     const l = layoutSel.value, c = classSel.value, n = Number(playersSel.value) || 0;
@@ -173,8 +175,9 @@ const steps = [
       s === 'new' ? b.created_at.localeCompare(a.created_at)
       : s === 'short' ? a.length_km - b.length_km
       : s === 'long' ? b.length_km - a.length_km
+      : s === 'rated' ? avgOf(b.track_id) - avgOf(a.track_id) || (ratings.pub.get(b.track_id)?.count ?? 0) - (ratings.pub.get(a.track_id)?.count ?? 0)
       : b.updated_at.localeCompare(a.updated_at));
-    root.innerHTML = list.map((x) => trackRowHtml(x, { sample: !live, saved: saved.ids.has(x.track_id) })).join('');
+    root.innerHTML = list.map((x) => { const pub = ratings.pub.get(x.track_id); return trackRowHtml(x, { sample: !live, saved: saved.ids.has(x.track_id), rating: { avg: pub?.avg ?? null, count: pub?.count ?? 0, my: ratings.my.get(x.track_id), canRate: !(live && x.created_by && x.created_by === saved.driverId) } }); }).join('');
     emptyEl.textContent = type === 'saved' ? 'No saved tracks yet. Tap Save on a track to keep it here and in My Account.' : 'No tracks match these filters.';
     emptyEl.hidden = list.length > 0;
     const count = tracks.filter((x) => saved.ids.has(x.track_id)).length;
@@ -209,6 +212,17 @@ const steps = [
     render();
   });
 
+  // Rating stars (DEC-0146)
+  root.addEventListener('click', async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-rate]');
+    if (!b) return;
+    const r = await rateTrack(saved, ratings, b.dataset.track!, Number(b.dataset.rate), live);
+    if (r.login) { loginToRate(); return; }
+    if (r.error) { msg(r.error, true); return; }
+    msg(!live ? 'Rating saved in this browser (sample track).' : 'Thanks — your rating is saved. You can change it any time.');
+    render();
+  });
+
   // phone: filters as a bottom sheet
   const sheet = $('tr-adv'), bg = $('tr-sheet-bg'), fbtn = $('tr-fbtn');
   const openSheet = (o: boolean) => { sheet.classList.toggle('open', o); bg.hidden = !o; fbtn.setAttribute('aria-expanded', String(o)); };
@@ -218,11 +232,13 @@ const steps = [
 
   (async () => {
     saved = await loadSaved(false);
+    ratings = await loadRatings(false, saved);
     render();
     const rows = await fetchLiveTracks();
     if (!rows) return;
     tracks = rows; live = true; flagEl.hidden = true;
     saved = await loadSaved(true);
+    ratings = await loadRatings(true, saved);
     // back from the Discord login: save the track the guest clicked
     const url = new URL(window.location.href);
     const pending = url.searchParams.get('save');

@@ -68,26 +68,34 @@ const base = import.meta.env.BASE_URL;
     document.getElementById('creator-block')!.hidden = !e.detail.hasAccess;
   });
   import { trackRowHtml, type CommunityTrack } from '../../../data/tracks';
-  import { loadSaved, toggleSaved, type SavedState } from '../../../scripts/track-saves';
+  import { loadSaved, toggleSaved, loadRatings, rateTrack, type SavedState, type Ratings } from '../../../scripts/track-saves';
   const svRoot = document.getElementById('sv-root')!, svEmpty = document.getElementById('sv-empty')!, svMsg = document.getElementById('sv-msg')!;
   let state: SavedState | null = null;
   let list: CommunityTrack[] = [];
+  let ratings: Ratings = { pub: new Map(), my: new Map(), available: true };
   function renderSaved() {
-    svRoot.innerHTML = list.map((t) => trackRowHtml(t, { saved: true })).join('');
+    svRoot.innerHTML = list.map((t) => { const pub = ratings.pub.get(t.track_id); return trackRowHtml(t, { saved: true, rating: { avg: pub?.avg ?? null, count: pub?.count ?? 0, my: ratings.my.get(t.track_id), canRate: (t as any).created_by !== state?.driverId } }); }).join('');
     svEmpty.hidden = list.length > 0;
   }
   async function loadSavedTracks() {
     state = await loadSaved(true);
+    ratings = await loadRatings(true, state);
     list = [];
     if (state.driverId && state.available) {
       const { data } = await getSupabase().from('saved_tracks')
-        .select('created_at, track:community_tracks(track_id,title,social_club_url,layout,race_types,vehicle_classes,players_min,players_max,length_km,created_at,updated_at,is_published)')
+        .select('created_at, track:community_tracks(track_id,title,social_club_url,layout,race_types,vehicle_classes,players_min,players_max,length_km,created_at,updated_at,is_published,created_by)')
         .eq('driver_id', state.driverId).order('created_at', { ascending: false });
       list = ((data ?? []) as any[]).map((r) => r.track).filter((t) => t && t.is_published).map((t) => ({ ...t, length_km: Number(t.length_km) }));
     }
     renderSaved();
   }
   svRoot.addEventListener('click', async (e) => {
+    const rb = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-rate]');
+    if (rb && state) {
+      const r = await rateTrack(state, ratings, rb.dataset.track!, Number(rb.dataset.rate), true);
+      svMsg.textContent = r.error ?? 'Your rating is saved.'; svMsg.hidden = false; svMsg.classList.toggle('is-error', Boolean(r.error));
+      renderSaved(); return;
+    }
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-save]');
     if (!b || !state) return;
     b.disabled = true;

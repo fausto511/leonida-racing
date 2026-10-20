@@ -22,6 +22,7 @@ export interface CommunityTrack {
   created_at: string;
   updated_at: string;
   creator_name?: string | null; // site display name (public_drivers), filled at runtime
+  created_by?: string; // live rows: creator's driver_id (no rating of own tracks)
 }
 
 export const layoutLabels: Record<TrackLayout, string> = { circuit: 'Circuit (laps)', 'point-to-point': 'Point to point' };
@@ -59,7 +60,16 @@ export const trackSaveBtn = (id: string, saved = false) =>
   `<button type="button" class="tr-save${saved ? ' is-saved' : ''}" data-save="${esc(id)}" aria-pressed="${saved}" title="${saved ? 'Remove from your saved tracks' : 'Save to your tracks in My Account'}">${iconSave}<span class="t-def">${saved ? 'Saved' : 'Save'}</span>${saved ? '<span class="t-hov" aria-hidden="true">Remove</span>' : ''}</button>`;
 
 /** Redesign 20.10.2026 (DEC-0146): chips, title, creator, facts; side: Save + "Open in Social Club" (outline). */
-export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; preview?: boolean; saved?: boolean } = {}): string {
+/** Rating line (DEC-0146): public average from 3 ratings + "Your rating" stars (hidden on own tracks). */
+export function trackRateHtml(id: string, r: { avg?: number | null; count?: number; my?: number; canRate?: boolean } = {}): string {
+  const avg = r.avg != null && (r.count ?? 0) >= 3
+    ? `<span class="tr-avg"><b>★ ${r.avg.toFixed(1)}</b> · ${r.count} ratings</span>`
+    : '<span class="tr-avg is-none">Not enough ratings yet</span>';
+  const stars = r.canRate === false ? '' : `<span class="tr-my"><span class="k">Your rating</span><span class="tr-stars" role="group" aria-label="Your rating">${[5, 4, 3, 2, 1].map((n) => `<button type="button" data-rate="${n}" data-track="${esc(id)}" class="${(r.my ?? 0) >= n ? 'on' : ''}" aria-label="${n} star${n === 1 ? '' : 's'}" aria-pressed="${r.my === n}">★</button>`).join('')}</span></span>`;
+  return `<p class="tr-rate">${avg}${stars}</p>`;
+}
+
+export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; preview?: boolean; saved?: boolean; rating?: { avg?: number | null; count?: number; my?: number; canRate?: boolean } } = {}): string {
   const sc = t.social_club_url && /^https:\/\/socialclub\.rockstargames\.com\//.test(t.social_club_url) ? t.social_club_url : null;
   const players = t.players_min === t.players_max ? `${t.players_max}` : `${t.players_min}–${t.players_max}`;
   const edited = t.updated_at.slice(0, 10) !== t.created_at.slice(0, 10);
@@ -77,6 +87,7 @@ export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; previe
       <span>${iconUsers}${esc(players)} players</span>
       <span class="tr-classes">${t.vehicle_classes.map(esc).join(' · ')}</span>
     </p>
+    ${opts.preview ? '' : trackRateHtml(t.track_id, opts.rating)}
     <p class="tr-dates">Added ${esc(fmtDate(t.created_at))}${edited ? ` · updated ${esc(fmtDate(t.updated_at))}` : ''}</p>
   </div>
   <div class="tr-side">
