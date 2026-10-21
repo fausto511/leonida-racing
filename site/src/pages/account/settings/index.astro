@@ -155,7 +155,7 @@ import AccountSubnav from '../../../components/AccountSubnav.astro';
     $('acc-signin').addEventListener('click', () => {
       sb.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: window.location.origin + window.location.pathname, scopes: 'identify email guilds.join' } });
     });
-    $('discord-signout-btn').addEventListener('click', () => sb.auth.signOut());
+    $('discord-signout-btn').addEventListener('click', () => { try { localStorage.removeItem('lr-dash-cache'); } catch { /* ignore */ } sb.auth.signOut(); });
     $('save-name-btn').addEventListener('click', async () => {
       if (!session) return;
       const name = nameEl.value.trim();
@@ -181,6 +181,7 @@ import AccountSubnav from '../../../components/AccountSubnav.astro';
         const body = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
         deleting = true;
+        try { localStorage.removeItem('lr-dash-cache'); } catch { /* ignore */ }
         await sb.auth.signOut().catch(() => {});
         $('acc-body').hidden = true;
         $('acc-auth').hidden = true;

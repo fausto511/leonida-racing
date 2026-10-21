@@ -161,9 +161,35 @@ async function bandPersonal(me: string, myClassRows: RankRow[]) {
 // ---------------------------------------------------------------------------
 // Logged-in dashboard (DEC-0116 hero): four tiles with a value or an empty state
 // ---------------------------------------------------------------------------
-function tile(id: string, val: string, sub: string, opts: { cta?: boolean; href?: string; bar?: number } = {}) {
+// ---- dashboard cache (Fausto 21.10.): last known tiles per user, shown at once on the next visit,
+// then refreshed. Only in this browser (localStorage, < 1 KB); cleared on logout.
+type TileOpts = { cta?: boolean; href?: string; bar?: number };
+type DashCache = { uid: string; me: string | null; title: string; tiles: Record<string, { val: string; sub: string; opts: TileOpts }> };
+const DASH_KEY = 'lr-dash-cache';
+const snap: DashCache['tiles'] = {};
+function readDash(): DashCache | null { try { return JSON.parse(localStorage.getItem(DASH_KEY) || 'null'); } catch { return null; } }
+function writeDash(c: DashCache) { try { localStorage.setItem(DASH_KEY, JSON.stringify(c)); } catch { /* storage blocked */ } }
+function clearDash() { try { localStorage.removeItem(DASH_KEY); } catch { /* ignore */ } }
+/** User id from the stored Supabase session, read synchronously (no network). */
+function storedUid(): string | null {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && /^sb-.*-auth-token$/.test(k)) return JSON.parse(localStorage.getItem(k) || 'null')?.user?.id ?? null;
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+function showDash() {
+  $('hero-guest')!.hidden = true;
+  $('hero-dash')!.hidden = false;
+}
+
+function tile(id: string, val: string, sub: string, opts: TileOpts = {}) {
+  snap[id] = { val, sub, opts };
   const el = $(id) as HTMLAnchorElement | null;
   if (!el) return;
+  el.classList.remove('is-loading');
   el.querySelector('[data-val]')!.innerHTML = val;
   const s = el.querySelector<HTMLElement>('[data-sub]')!;
   s.textContent = sub;
@@ -178,23 +204,31 @@ const shortDate = (iso: string) => {
   return `${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}, ${d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`;
 };
 
-async function loadDashboard(session: any) {
+async function loadDashboard(session: any, cachedMe: string | null) {
   const sb = getSupabase();
-  const own = await sb.from('drivers').select('driver_id, display_name').eq('auth_user_id', session.user.id).maybeSingle();
+  const now = new Date().toISOString();
+  const ownQ = sb.from('drivers').select('driver_id, display_name').eq('auth_user_id', session.user.id).maybeSingle();
+  const batch = (id: string) => Promise.all([
+    ranks().eq('driver_id', id).in('scope', ['overall', 'class']),
+    sb.from('owned_vehicles').select('vehicle_id, created_at').eq('driver_id', id).order('created_at', { ascending: false }),
+    sb.from('crew_membership_overview').select('crew_id, crew_name, status, is_primary').eq('driver_id', id).in('status', ['active', 'pending']),
+    sb.from('hub_event_rsvps').select('event_id').eq('driver_id', id),
+  ]);
+  // Known driver id (last visit): everything in one round trip; otherwise profile first.
+  const guess = cachedMe ? batch(cachedMe) : null;
+  const own = await ownQ;
   const me: string | null = own.data?.driver_id ?? null;
   const meta = session.user.user_metadata ?? {};
   const name: string = own.data?.display_name ?? meta.full_name ?? meta.name ?? 'driver';
-  $('hero-guest')!.hidden = true;
-  $('hero-dash')!.hidden = false;
-  if (!me) { $('dash-title')!.textContent = `Welcome, ${name}`; tile('dash-lap', 'No lap yet', 'Set your first time →', { cta: true, href: `${base}time-attack/submit/` }); return { me: null, classRows: [] as RankRow[], crewIds: new Set<string>() }; }
-
-  const now = new Date().toISOString();
-  const [lapsRes, ownedRes, crewRes, rsvpRes] = await Promise.all([
-    ranks().eq('driver_id', me).in('scope', ['overall', 'class']),
-    sb.from('owned_vehicles').select('vehicle_id, created_at').eq('driver_id', me).order('created_at', { ascending: false }),
-    sb.from('crew_membership_overview').select('crew_id, crew_name, status, is_primary').eq('driver_id', me).in('status', ['active', 'pending']),
-    sb.from('hub_event_rsvps').select('event_id').eq('driver_id', me),
-  ]);
+  showDash();
+  if (!me) {
+    $('dash-title')!.textContent = `Welcome, ${name}`;
+    tile('dash-lap', 'No lap yet', 'Set your first time →', { cta: true, href: `${base}time-attack/submit/` });
+    ['dash-garage', 'dash-crew', 'dash-events'].forEach((id) => $(id)?.classList.remove('is-loading'));
+    clearDash();
+    return { me: null, classRows: [] as RankRow[], crewIds: new Set<string>() };
+  }
+  const [lapsRes, ownedRes, crewRes, rsvpRes] = await (guess && cachedMe === me ? guess : batch(me));
   const myRanks = (lapsRes.data ?? []) as RankRow[];
   const overall = myRanks.find((r) => r.scope === 'overall');
   const classRows = myRanks.filter((r) => r.scope === 'class');
@@ -221,30 +255,31 @@ async function loadDashboard(session: any) {
   const crews = (crewRes.data ?? []) as { crew_id: string; crew_name: string; status: string; is_primary?: boolean }[];
   const crewIds = new Set(crews.filter((c) => c.status === 'active').map((c) => c.crew_id));
   const main = crews.filter((c) => c.status === 'active').sort((a, b) => Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary)))[0];
+  const evIds = ((rsvpRes.data ?? []) as { event_id: string }[]).map((r) => r.event_id);
+  // crew details and the next event in parallel (were two rounds before)
+  const empty = Promise.resolve({ data: null as any });
+  const [ev, cr, nx] = await Promise.all([
+    main ? sb.from('hub_events').select('title, starts_at').eq('host_crew_id', main.crew_id).eq('is_published', true).gte('starts_at', now).order('starts_at').limit(1) : empty,
+    main ? sb.from('crews').select('member_count').eq('crew_id', main.crew_id).maybeSingle() : empty,
+    evIds.length ? sb.from('hub_events').select('event_id, title, event_type, starts_at').in('event_id', evIds).gte('starts_at', now).order('starts_at').limit(1) : empty,
+  ]);
   if (main) {
     active = true;
-    const [ev, cr] = await Promise.all([
-      sb.from('hub_events').select('title, starts_at').eq('host_crew_id', main.crew_id).eq('is_published', true).gte('starts_at', now).order('starts_at').limit(1),
-      sb.from('crews').select('member_count').eq('crew_id', main.crew_id).maybeSingle(),
-    ]);
     const next = ev.data?.[0];
     const members = cr.data?.member_count;
     tile('dash-crew', esc(main.crew_name), next ? `Next: ${next.title} · ${shortDate(next.starts_at)}` : members != null ? `${members} ${members === 1 ? 'member' : 'members'}` : 'Crew page →');
   } else tile('dash-crew', 'No crew', 'Find a crew →', { cta: true, href: `${base}community/crews/` });
 
   // Events: next event I'm going to
-  const evIds = ((rsvpRes.data ?? []) as { event_id: string }[]).map((r) => r.event_id);
-  let nextEv: { event_id: string; title: string; event_type: string; starts_at: string } | undefined;
-  if (evIds.length) {
-    const { data } = await sb.from('hub_events').select('event_id, title, event_type, starts_at').in('event_id', evIds).gte('starts_at', now).order('starts_at').limit(1);
-    nextEv = data?.[0];
-  }
+  const nextEv: { event_id: string; title: string; event_type: string; starts_at: string } | undefined = nx.data?.[0];
   if (nextEv) {
     active = true;
     tile('dash-events', esc(nextEv.title), `${eventTypeLabels[nextEv.event_type as keyof typeof eventTypeLabels] ?? ''} · ${shortDate(nextEv.starts_at)}`, { href: `${base}community/events/#event-${encodeURIComponent(nextEv.event_id)}` });
   } else tile('dash-events', 'No events planned', 'Host one →', { cta: true, href: `${base}account/events/` });
 
-  $('dash-title')!.textContent = `${active ? 'Welcome back' : 'Welcome'}, ${name}`;
+  const title = `${active ? 'Welcome back' : 'Welcome'}, ${name}`;
+  $('dash-title')!.textContent = title;
+  writeDash({ uid: session.user.id, me, title, tiles: { ...snap } });
   return { me, classRows, crewIds };
 }
 
@@ -258,6 +293,19 @@ function showGuest() {
   $('hero-dash')!.hidden = true;
 }
 
+// Logged in on the last visit: show the dashboard at once (cached tiles or loading state).
+let cachedMe: string | null = null;
+if (backendConfigured && root.classList.contains('lr-authed')) {
+  const uid = storedUid();
+  const c = readDash();
+  showDash();
+  if (c && uid && c.uid === uid) {
+    cachedMe = c.me;
+    $('dash-title')!.textContent = c.title;
+    Object.entries(c.tiles).forEach(([id, t]) => tile(id, t.val, t.sub, t.opts));
+  } else ['dash-lap', 'dash-garage', 'dash-crew', 'dash-events'].forEach((id) => $(id)?.classList.add('is-loading'));
+}
+
 if (!backendConfigured) {
   showGuest();
 } else {
@@ -265,6 +313,7 @@ if (!backendConfigured) {
   sb.auth.getSession().then(async ({ data }) => {
     const session = data?.session ?? null;
     if (!session) {
+      clearDash();
       showGuest();
       // Discord band: login = automatic server join (guilds.join)
       dband.removeAttribute('target');
@@ -280,7 +329,7 @@ if (!backendConfigured) {
     $('dband-label')!.textContent = 'Open Discord';
     dband.href = INVITE;
     try {
-      const { me, classRows, crewIds } = await loadDashboard(session);
+      const { me, classRows, crewIds } = await loadDashboard(session, cachedMe);
       loadLiveCrews(crewIds);
       if (me && classRows.length) await bandPersonal(me, classRows);
       else await bandOverall();
@@ -290,5 +339,5 @@ if (!backendConfigured) {
     }
   });
   // logging out on this page -> back to the guest view
-  sb.auth.onAuthStateChange((event) => { if (event === 'SIGNED_OUT') window.location.reload(); });
+  sb.auth.onAuthStateChange((event) => { if (event === 'SIGNED_OUT') { clearDash(); window.location.reload(); } });
 }

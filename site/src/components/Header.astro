@@ -416,6 +416,7 @@ const discordIcon = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
     document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeDropdown(); });
     logoutBtnEl.addEventListener('click', async () => {
       closeDropdown();
+      try { localStorage.removeItem('lr-dash-cache'); } catch { /* ignore */ }
       await supabase.auth.signOut();
     });
   }

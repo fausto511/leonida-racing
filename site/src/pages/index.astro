@@ -330,6 +330,12 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
   .mtile-val { margin-top: auto; font-family: var(--gh-font-display); font-weight: 800; text-transform: uppercase; font-size: 26px; line-height: 1.05; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .mtile-val :global(small) { font-size: 18px; color: var(--lr-muted); }
   .mtile-sub { font-size: 14px; line-height: 1.45; color: #D6D6DE; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* loading state of the dashboard tiles (first visit, Fausto 21.10.): shimmer instead of "…" */
+  .mtile.is-loading [data-val], .mtile.is-loading [data-sub] { color: transparent; border-radius: 4px; background: linear-gradient(90deg, rgba(251,247,234,.06) 0%, rgba(251,247,234,.14) 50%, rgba(251,247,234,.06) 100%); background-size: 200% 100%; animation: mt-shimmer 1.2s ease-in-out infinite; }
+  .mtile.is-loading [data-val] { width: 60%; }
+  .mtile.is-loading [data-sub] { width: 85%; }
+  @keyframes mt-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+  @media (prefers-reduced-motion: reduce) { .mtile.is-loading [data-val], .mtile.is-loading [data-sub] { animation: none; } }
   .mtile-sub.is-cta { color: var(--lr-orange); font-weight: 600; }
   .mbar { display: block; height: 4px; border-radius: 999px; background: rgba(251,247,234,.1); overflow: hidden; margin-top: 2px; }
   .mbar i { display: block; height: 100%; background: var(--lr-orange); border-radius: 999px; }
