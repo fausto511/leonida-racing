@@ -23,7 +23,7 @@ const { focus } = Astro.props;
       <Fragment>
         <p class="ra-kicker">You are not a creator yet</p>
         <h2 class="ra-title">Apply to become a Creator</h2>
-        <p class="ra-lede">Creators submit the race jobs they build to the Tracks page in The Hub. Send an application — once a moderator approves it, you can submit your tracks here.</p>
+        <p class="ra-lede">Creators submit their race jobs to Community → Tracks. Apply for creator access to submit a job for review.</p>
       </Fragment>
     ) : (
       <Fragment>
@@ -33,7 +33,7 @@ const { focus } = Astro.props;
       </Fragment>
     )}
 
-    <button type="button" class="btn btn-outline" id="ra-open">{focus === 'crew_leader' ? 'Start crew leader application' : focus === 'creator' ? 'Start creator application' : 'Start event host application'}</button>
+    <button type="button" class="btn btn-outline" id="ra-open">{focus === 'crew_leader' ? 'Start crew leader application' : focus === 'creator' ? 'Apply as creator' : 'Start event host application'}</button>
     <form id="ra-form" novalidate hidden>
       <p class="ra-form-note">Application — nothing is published until a moderator approves it. Crew leaders, event hosts and creators are shown with their display name.</p>
       <div class="ra-choices" hidden>

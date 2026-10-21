@@ -3,20 +3,20 @@
 // Fausto: "How it works" invites, "Rules" deters -> /time-attack/rules/ redirects to #rules here.
 // Video-only submissions allowed (DEC-0141). Status flow matches submit-lap v7: every run is
 // hidden until a moderator accepts it (no automatic publishing).
-// Copy: kept Codex text where still true; new/changed lines = Claude placeholders (Codex, DEC-0088).
+// Copy: Codex 21.10.2026 (Codex Zuarbeit/Texte-Submit-HowItWorks-Tracks-NewCars-2026-10-21.md), DEC-0088.
 import Base from '../../../layouts/Base.astro';
 const base = import.meta.env.BASE_URL;
 
 const steps = [
   { t: 'Drive your lap', c: 'Put down your best time at Gellhorn International Raceway on PS5.' },
-  { t: 'Save your proof', c: 'A screenshot of the results screen, a full lap video on YouTube, or both.' },
-  { t: 'Submit in three steps', c: 'Add your proof, pick your car, type your time. Done in under a minute.' },
-  { t: 'We check it', c: 'A moderator compares your entry with the proof. Then it goes on the leaderboard.' },
+  { t: 'Save your proof', c: 'A results screenshot, a full, uncut lap video on YouTube, or both.' },
+  { t: 'Submit in three steps', c: 'Add your proof, enter your PSN name, car and time, then check and submit.' },
+  { t: 'We check it', c: 'A moderator compares your entry with the proof. If accepted, it can appear on the leaderboard.' },
 ];
 const flow = [
-  { t: 'Pending review', c: 'Your lap is in. Only you can see it, in My laps.', tone: 'wait' },
-  { t: 'On the leaderboard', c: 'A moderator accepted it. Listed under All times as Provisional.', tone: 'ok' },
-  { t: 'Video verified', c: 'With a video: watched in full and marked Video verified. Can set an Official Record.', tone: 'top' },
+  { t: 'Pending review', c: 'Your lap is awaiting review. You can check it in My laps; it is not public yet.', tone: 'wait' },
+  { t: 'On the leaderboard', c: 'A moderator accepted it. Your best accepted times can appear under All times, with video verification shown separately.', tone: 'ok' },
+  { t: 'Video verified', c: 'A moderator has verified the full, uncut video. The lap is eligible for an official record.', tone: 'top' },
 ];
 const faq = [
   {
@@ -29,7 +29,7 @@ const faq = [
   {
     q: 'How do you check a submission?',
     a: [
-      'Every submission is checked by a moderator before it appears on the leaderboard. A run only becomes <strong>Video verified</strong> and <strong>Official</strong> once a person has watched the full, unedited lap video — a moderator looking at just your screenshot never counts as verification.',
+      'Every submission is checked by a moderator before it appears on the leaderboard. A run is marked <strong>Video verified</strong> only after a moderator has reviewed and verified the full, unedited lap video. A screenshot alone does not qualify for video verification or an official record.',
       'If something doesn’t match, the moderator can ask you to correct it. You’ll see that in My laps.',
     ],
   },
@@ -40,20 +40,20 @@ const faq = [
   {
     q: 'What happens to my screenshot?',
     a: [
-      'Screenshots you upload are stored privately for review — they’re never shown publicly, to other drivers, or on your run’s page. A video only becomes public if you choose to link one, and even then we link out to it rather than hosting a copy ourselves.',
+      'Screenshots you upload are stored privately for review and are never published on the site. If you provide a video link, it may be shown with your published time. We link to the video rather than hosting a copy.',
       `See the <a href="${base}privacy/">Privacy page</a> for how your data is stored and how to request a correction or removal.`,
     ],
   },
   {
     q: 'Can I submit from Xbox or PC?',
-    a: ['Not yet. Time Attack runs on PS5 for now. Xbox Series X|S and PC will follow later.'],
+    a: ['Not yet. Time Attack accepts PS5 laps only for now. Xbox and PC support is planned.'],
   },
 ];
 const camera = 'M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z';
 const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z M10 9l5 3-5 3Z';
 ---
 <Base
-  title="How Time Attack Works — Submit a GTA VI Lap"
+  title="How Time Attack Works — Submit a GTA 6 Lap"
   description="How to submit a Gellhorn lap time in GTA 6: save a results screenshot or a full lap video, submit in three steps, and see how review and video verification work."
   section="time-attack"
   breadcrumbs={[{ name: 'Time Attack', path: 'time-attack/gellhorn-international-raceway/' }, { name: 'How It Works', path: 'time-attack/how-it-works/' }]}
@@ -64,7 +64,7 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
         <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}time-attack/gellhorn-international-raceway/`}>Time Attack</a><span aria-hidden="true">/</span><span aria-current="page">How it works</span></nav>
         <p class="eyebrow">Gellhorn International Raceway</p>
         <h1 class="display lr-t2">How it works</h1>
-        <p class="lr-lede">Drive a lap, save your proof, send it in. A moderator checks every time before it goes on the leaderboard.</p>
+        <p class="lr-lede">Drive a lap, save your proof, send it in. A moderator reviews every submission before it can appear on the leaderboard.</p>
       </div>
       <a class="btn btn-primary hw-band-cta" href={`${base}time-attack/submit/`}>Submit a lap</a>
     </div>
@@ -93,18 +93,18 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
           <ul>
             <li>Listed under <strong>All times</strong> once accepted</li>
             <li>Marked <strong>Not video verified</strong></li>
-            <li>Can’t set an <strong>Official Record</strong></li>
+            <li>Not eligible for an <strong>official record</strong></li>
           </ul>
-          <p class="hw-tip"><strong>On PS5:</strong> open Captures in the PlayStation App and save the screenshot to your phone.</p>
+          <p class="hw-tip"><strong>On PS5:</strong> upload the screenshot to PlayStation App, save it to your phone, then add it to your submission.</p>
         </div>
         <div class="hw-card is-top">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={video} /></svg>
           <h3>Video</h3>
           <p>The full, uncut lap on YouTube. You only paste the link.</p>
           <ul>
-            <li>Marked <strong>Video verified</strong> once watched</li>
-            <li>Listed under <strong>All times</strong> and <strong>Verified only</strong></li>
-            <li>Can set an <strong>Official Record</strong></li>
+            <li>Marked <strong>Video verified</strong> after a moderator verifies it</li>
+            <li>Eligible for <strong>All times</strong> and <strong>Video verified only</strong> once verified</li>
+            <li>Eligible for an <strong>official record</strong> once verified</li>
             <li>Video link shown with your time</li>
           </ul>
         </div>
@@ -117,6 +117,7 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
       <ol class="hw-flow">
         {flow.map((f) => <li class={`is-${f.tone}`}><i aria-hidden="true"></i><strong>{f.t}</strong><span>{f.c}</span></li>)}
       </ol>
+      <p class="hw-sub">Video verification requires a full, uncut video. A screenshot alone cannot reach this status.</p>
       <p class="hw-sub">You’ll find the status of every lap in <a href={`${base}account/`}>My laps</a>.</p>
     </section>
 

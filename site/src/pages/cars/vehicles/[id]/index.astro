@@ -248,7 +248,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
             ? <span class="is-tba">Earlier appearances under review</span>
             : vehicle.previousGames.length === 0
               ? (vehicle.releaseId
-                ? <a class="va-tag va-tag-link" href={`${base}cars/new-cars/`} title="All cars new in GTA VI">New in GTA VI <span aria-hidden="true">→</span></a>
+                ? <a class="va-tag va-tag-link" href={`${base}cars/new-cars/`} title="Browse cars identified as new to GTA VI">New in GTA VI <span aria-hidden="true">→</span></a>
                 : <span class="va-tag">New in GTA VI</span>)
               : <><span class="va-tag">Returning</span>{groupedTitles(vehicle.previousGames).map((t) => <span class="va-chip" title={t.tooltip}>{t.label}</span>)}</>}</dd></div>
         </dl>

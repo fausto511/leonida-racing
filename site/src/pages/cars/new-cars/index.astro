@@ -3,7 +3,7 @@
 // earlier GTA title of the same model name (vehicles.previous_games = '{}').
 // noindex until the research covers most revealed cars (data/rankings.ts).
 // Redesign 20.10.2026 (DEC-0147): same layout as class / manufacturer pages (GarageTaxonomy, kind "custom"),
-// band photo Sirius (Fausto). COPY: About = Codex 2026-10-08 (approved 09.10.); band/glance labels = Claude placeholders.
+// band photo Sirius (Fausto). COPY: About = Codex 2026-10-08 (approved 09.10.); band/glance labels = Codex 21.10.2026.
 import GarageTaxonomy from '../../../components/GarageTaxonomy.astro';
 import { classPages, classSlug, manufacturerPages } from '../../../data/garage-taxonomy';
 import { newCars, newCarsIndexable, newCarsResearchCoverage } from '../../../data/rankings';
@@ -21,16 +21,16 @@ const page = { slug: 'new-cars', name: 'New cars', intro: [], copyStatus: 'appro
   breadcrumbs: [{ name: 'Cars', path: 'cars/' }, { name: 'New Cars', path: 'cars/new-cars/' }],
   eyebrow: 'GTA VI',
   heading: 'New cars',
-  lede: 'Revealed GTA VI cars with no counterpart in an earlier GTA game or GTA Online: new models and new variants of familiar families.',
+  lede: 'Revealed GTA VI cars with no identified counterpart in earlier GTA games or GTA Online, from new models to distinct variants of familiar families.',
   metaTitle: 'New Cars in GTA 6',
   metaDescription: 'Explore officially revealed GTA 6 cars with no identified earlier GTA model counterpart, including new models and distinct variants of familiar families.',
   noindex: !newCarsIndexable(),
   band: { id: 'dundreary-sirius', pos: '50% 50%' },
   glanceTitle: 'New cars at a glance',
-  countLabel: 'New cars so far',
+  countLabel: 'New cars listed',
   glance: [
     { k: 'Manufacturers', v: String(makes.length) },
-    { k: 'Earlier games checked', v: pct >= 100 ? 'All revealed cars' : `<span class="is-tba">${pct}% of revealed cars</span>` },
+    { k: 'History reviewed', v: pct >= 100 ? 'All listed revealed cars' : `<span class="is-tba">${pct}% of listed revealed cars</span>` },
   ],
   about: { title: 'What counts as a new car', paras: [
     'Officially revealed GTA VI cars with no identified counterpart in an earlier GTA game, expansion or GTA Online. A familiar family name does not make every model a returning car. Confirmed renamings are treated as returning models.',

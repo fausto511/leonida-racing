@@ -61,15 +61,17 @@ export const trackSaveBtn = (id: string, saved = false) =>
 
 /** Redesign 20.10.2026 (DEC-0146): chips, title, creator, facts; side: Save + "Open in Social Club" (outline). */
 /** Rating line (DEC-0146): public average from 3 ratings + "Your rating" stars (hidden on own tracks). */
-export function trackRateHtml(id: string, r: { avg?: number | null; count?: number; my?: number; canRate?: boolean } = {}): string {
-  const avg = r.avg != null && (r.count ?? 0) >= 3
+export function trackRateHtml(id: string, r: { avg?: number | null; count?: number; my?: number; canRate?: boolean; unavailable?: boolean } = {}): string {
+  // COPY: Codex 21.10.2026. Load error is not shown as "too few ratings".
+  const avg = r.unavailable ? '<span class="tr-avg is-none">Could not load track ratings. Please try again.</span>'
+    : r.avg != null && (r.count ?? 0) >= 3
     ? `<span class="tr-avg"><b>★ ${r.avg.toFixed(1)}</b> · ${r.count} ratings</span>`
-    : '<span class="tr-avg is-none">Not enough ratings yet</span>';
+    : '<span class="tr-avg is-none">Average shown after 3 ratings</span>';
   const stars = r.canRate === false ? '' : `<span class="tr-my"><span class="k">Your rating</span><span class="tr-stars" role="group" aria-label="Your rating">${[5, 4, 3, 2, 1].map((n) => `<button type="button" data-rate="${n}" data-track="${esc(id)}" class="${(r.my ?? 0) >= n ? 'on' : ''}" aria-label="${n} star${n === 1 ? '' : 's'}" aria-pressed="${r.my === n}">★</button>`).join('')}</span></span>`;
   return `<p class="tr-rate">${avg}${stars}</p>`;
 }
 
-export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; preview?: boolean; saved?: boolean; rating?: { avg?: number | null; count?: number; my?: number; canRate?: boolean } } = {}): string {
+export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; preview?: boolean; saved?: boolean; rating?: { avg?: number | null; count?: number; my?: number; canRate?: boolean; unavailable?: boolean } } = {}): string {
   const sc = t.social_club_url && /^https:\/\/socialclub\.rockstargames\.com\//.test(t.social_club_url) ? t.social_club_url : null;
   const players = t.players_min === t.players_max ? `${t.players_max}` : `${t.players_min}–${t.players_max}`;
   const edited = t.updated_at.slice(0, 10) !== t.created_at.slice(0, 10);
@@ -93,8 +95,8 @@ export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; previe
   <div class="tr-side">
     ${opts.preview ? '' : trackSaveBtn(t.track_id, Boolean(opts.saved))}
     ${sc
-      ? `<a class="btn btn-outline tr-sc" href="${esc(sc)}" target="_blank" rel="noopener" title="Open the job on Social Club to bookmark it for the game">Open in Social Club <span aria-hidden="true">↗</span></a>`
-      : `<span class="btn btn-outline tr-sc is-disabled" aria-disabled="true" title="Sample track — no real job">Open in Social Club <span aria-hidden="true">↗</span></span>`}
+      ? `<a class="btn btn-outline tr-sc" href="${esc(sc)}" target="_blank" rel="noopener" title="Open the job on Social Club to bookmark it for the game">Open Social Club <span aria-hidden="true">↗</span></a>`
+      : `<span class="btn btn-outline tr-sc is-disabled" aria-disabled="true" title="Sample track — no real job">Open Social Club <span aria-hidden="true">↗</span></span>`}
     ${!opts.sample ? `<a class="ev-report tr-report" href="${esc(`${import.meta.env.BASE_URL}report-content/`)}" title="Report this track to the moderators">Report</a>` : ''}
   </div>
 </article>`;

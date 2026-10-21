@@ -40,7 +40,7 @@ export async function toggleSaved(state: SavedState, trackId: string, live: bool
   }
   if (!state.signedIn) return { login: true };
   if (!state.driverId) return { error: 'Your driver profile is not ready yet. Reload the page in a moment.' };
-  if (!state.available) return { error: 'Saving tracks is not switched on yet.' };
+  if (!state.available) return { error: 'Saving tracks is currently unavailable. Please try again later.' };
   const sb = getSupabase();
   const { error } = was
     ? await sb.from('saved_tracks').delete().eq('driver_id', state.driverId).eq('track_id', trackId)
@@ -86,7 +86,7 @@ export async function rateTrack(state: SavedState, ratings: Ratings, trackId: st
   }
   if (!state.signedIn) return { login: true };
   if (!state.driverId) return { error: 'Your driver profile is not ready yet. Reload the page in a moment.' };
-  if (!ratings.available) return { error: 'Rating tracks is not switched on yet.' };
+  if (!ratings.available) return { error: 'Track ratings are currently unavailable. Please try again later.' };
   const sb = getSupabase();
   const { error } = await sb.from('track_ratings').upsert({ driver_id: state.driverId, track_id: trackId, stars, updated_at: new Date().toISOString() }, { onConflict: 'driver_id,track_id' });
   if (error) return { error: 'Could not save your rating. Please try again.' };

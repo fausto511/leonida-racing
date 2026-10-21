@@ -4,7 +4,7 @@
 // (+ "Saved"), layout / class / lobby / sort (phone: "Filters" bottom sheet), track rows with
 // Save toggle + "Open in Social Club" (outline), "How tracks get here", Discord band. No sub-nav.
 // Creators submit tracks in My Account > Tracks; moderators check them against Social Club and publish.
-// Until real tracks are published, flagged sample tracks are shown. COPY: Claude placeholders (Codex, DEC-0088).
+// Until real tracks are published, flagged sample tracks are shown. COPY: Codex 21.10.2026 (DEC-0088).
 import Base from '../../../layouts/Base.astro';
 import DiscordBand from '../../../components/DiscordBand.astro';
 import '../../../styles/hub.css';
@@ -13,14 +13,14 @@ const base = import.meta.env.BASE_URL;
 const initialHtml = sampleTracks.map((t) => trackRowHtml(t, { sample: true })).join('');
 const flag = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/></svg>';
 const steps = [
-  ['Apply as creator', 'In My Account → Tracks. A moderator confirms creators once.'],
+  ['Apply as creator', 'Apply in My Account → Tracks. A moderator reviews your application.'],
   ['Submit the job', 'Title, Social Club link, layout, classes and lobby size.'],
-  ['Checked and live', 'A moderator compares it with Social Club and publishes it here.'],
+  ['Checked and live', 'A moderator checks the details against Social Club. Approved tracks appear here.'],
 ];
 ---
 <Base
-  title="GTA VI Community Tracks — Race Jobs by Creators"
-  description="Find GTA VI race jobs built by the community. Filter by race type, circuit or point to point, vehicle class and lobby size, save tracks and open them on Social Club."
+  title="GTA 6 Community Tracks — Race Jobs by Creators"
+  description="Browse GTA 6 community race jobs by type, layout, vehicle class and lobby size. Save tracks here and open published jobs on Social Club."
   section="hub"
   noindex={true /* until real tracks replace the sample data */}
 >
@@ -32,12 +32,12 @@ const steps = [
         <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}community/`}>Community</a><span aria-hidden="true">/</span><span aria-current="page">Tracks</span></nav>
         <p class="eyebrow">Community race jobs</p>
         <h1 class="display lr-t1">Tracks</h1>
-        <p class="lr-lede">Race jobs built by the GTA VI community. Find a circuit or a point-to-point run for your lobby and your cars, save it and open it on Social Club.</p>
+        <p class="lr-lede">Find a circuit or a point-to-point run for your next playlist. Save tracks to your list here, then open published jobs on Social Club.</p>
       </div>
       <div class="tr-tile">
         <div class="eb"><Fragment set:html={flag} />For creators</div>
-        <p class="t">Built a race job?</p>
-        <p class="s">Race creation tools for GTA VI are not announced yet. Apply now and submit your tracks as soon as they are.</p>
+        <p class="t">Build for the community</p>
+        <p class="s">Apply now to become a creator. Track listings will need a published GTA VI race job and its Social Club link.</p>
         <a class="btn btn-p" href={`${base}account/tracks/`}>Apply as creator</a>
       </div>
     </div>
@@ -65,6 +65,7 @@ const steps = [
     <div class="tr-sheet-bg" id="tr-sheet-bg" hidden></div>
 
     <p class="tr-sample" id="tr-flag">Sample tracks — examples, not real race jobs</p>
+    <p class="tr-note">Save keeps a track in your list here and in My Account. To bookmark a published job for the game, open it on Social Club.</p>
     <p class="tr-msg" id="tr-msg" role="status" hidden></p>
     <div class="tr-list" id="tr-root" set:html={initialHtml} />
     <p class="hub-empty" id="tr-empty" hidden>No tracks match these filters.</p>
@@ -111,6 +112,7 @@ const steps = [
   .sel:focus-within { border-color: var(--lr-orange); }
 
   .tr-sample { margin: 22px 0 12px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #6B6B80; }
+  .tr-note { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--lr-muted); }
   .tr-msg { margin: 0 0 12px; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); font-size: 14px; color: var(--lr-soft); }
   .tr-msg.is-error { border-color: rgba(255,122,122,.5); color: #FF8A8A; }
   .tr-list:first-child { margin-top: 22px; }
@@ -177,8 +179,9 @@ const steps = [
       : s === 'long' ? b.length_km - a.length_km
       : s === 'rated' ? avgOf(b.track_id) - avgOf(a.track_id) || (ratings.pub.get(b.track_id)?.count ?? 0) - (ratings.pub.get(a.track_id)?.count ?? 0)
       : b.updated_at.localeCompare(a.updated_at));
-    root.innerHTML = list.map((x) => { const pub = ratings.pub.get(x.track_id); return trackRowHtml(x, { sample: !live, saved: saved.ids.has(x.track_id), rating: { avg: pub?.avg ?? null, count: pub?.count ?? 0, my: ratings.my.get(x.track_id), canRate: !(live && x.created_by && x.created_by === saved.driverId) } }); }).join('');
-    emptyEl.textContent = type === 'saved' ? 'No saved tracks yet. Tap Save on a track to keep it here and in My Account.' : 'No tracks match these filters.';
+    root.innerHTML = list.map((x) => { const pub = ratings.pub.get(x.track_id); return trackRowHtml(x, { sample: !live, saved: saved.ids.has(x.track_id), rating: { avg: pub?.avg ?? null, count: pub?.count ?? 0, my: ratings.my.get(x.track_id), canRate: !(live && x.created_by && x.created_by === saved.driverId), unavailable: live && !ratings.available } }); }).join('');
+    const savedTotal = tracks.filter((x) => saved.ids.has(x.track_id)).length;
+    emptyEl.textContent = type === 'saved' && savedTotal === 0 ? 'No saved tracks yet. Select Save on a track to keep it in your list.' : type === 'saved' ? 'No saved tracks match these filters.' : 'No tracks match these filters.';
     emptyEl.hidden = list.length > 0;
     const count = tracks.filter((x) => saved.ids.has(x.track_id)).length;
     $('tr-saved-n').textContent = count ? `· ${count}` : '';
@@ -208,7 +211,7 @@ const steps = [
     b.disabled = false;
     if (r.login) { loginToSave(id); return; }
     if (r.error) { msg(r.error, true); return; }
-    msg(!live ? (r.saved ? 'Saved in this browser (sample track).' : 'Removed.') : (r.saved ? 'Saved. You find it in My Account → Tracks.' : 'Removed from your saved tracks.'));
+    msg(!live ? (r.saved ? 'Saved in this browser (sample track).' : 'Removed.') : (r.saved ? 'Saved to your list. Find it in My Account → Tracks.' : 'Removed from your saved tracks.'));
     render();
   });
 
@@ -246,7 +249,7 @@ const steps = [
       url.searchParams.delete('save'); history.replaceState(null, '', url.pathname + url.search + url.hash);
       if (saved.signedIn && !saved.ids.has(pending) && tracks.some((t) => t.track_id === pending)) {
         const r = await toggleSaved(saved, pending, true);
-        msg(r.error ?? 'Saved. You find it in My Account → Tracks.', Boolean(r.error));
+        msg(r.error ?? 'Saved to your list. Find it in My Account → Tracks.', Boolean(r.error));
       }
     }
     render();

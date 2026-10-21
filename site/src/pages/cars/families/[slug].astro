@@ -4,7 +4,7 @@
 // (familyCopy in data/rankings.ts) -- written from community experience after launch.
 // Redesign 20.10.2026 (DEC-0147): same layout as class / manufacturer pages (GarageTaxonomy, kind "custom");
 // Dominator band = steering wheel photo (Fausto 20.10.). Family chips appear once there are two or more family pages.
-// COPY: band/glance labels = Claude placeholders (Codex, DEC-0088).
+// COPY: band/glance labels = Codex 21.10.2026 (DEC-0088).
 import GarageTaxonomy from '../../../components/GarageTaxonomy.astro';
 import { familyMembers, familyName } from '../../../data/vehicles';
 import { classPages, classSlug } from '../../../data/garage-taxonomy';
@@ -30,13 +30,13 @@ const page = { slug: f, name, intro: [], copyStatus: 'approved' as const };
   breadcrumbs: [{ name: 'Cars', path: 'cars/' }, { name: `${name} family`, path: `cars/families/${f}/` }],
   eyebrow: 'GTA VI model family',
   heading: `${name} family`,
-  lede: `Every ${name} model revealed for GTA VI, across all classes, with the details available for each car.`,
+  lede: `Explore the ${name} models listed for GTA VI, across different classes and variants, with available details for each car.`,
   metaTitle: `${name} Models in GTA 6`,
   metaDescription: `Explore the ${name} model family in GTA 6, with individual vehicle details, release information and available performance results.`,
   noindex: !familyIndexable(f),
   band: BANDS[f],
   glanceTitle: `${name} at a glance`,
-  countLabel: 'Models',
+  countLabel: 'Models listed',
   glance: [
     { k: makes.length === 1 ? 'Manufacturer' : 'Manufacturers', v: makes.map(([slug, m]) => `<a href="${base}cars/manufacturers/${slug}/">${m}</a>`).join(', ') },
     { k: 'Classes', v: classes.join(', ') },
