@@ -3,93 +3,71 @@
 // Germany) and Art. 14 DSA (how we moderate). Short on purpose: no blanket
 // liability waivers (void under German law), no "continued use = consent".
 // Assessment, not legal advice -- reviewed by the operator before launch.
-import Base from '../../layouts/Base.astro';
+import LegalLayout from '../../components/LegalLayout.astro';
 const base = import.meta.env.BASE_URL;
 ---
-<Base
+<LegalLayout
   title="Terms of Use"
   description="The rules for using Leonida Racing: accounts, your content, what's not allowed, how moderation works, and how to report content."
+  heading="Terms of Use"
+  kicker="Legal" updated="Last updated: 17 October 2026"
+  current="terms"
 >
-  <section class="page-head">
-    <div class="wrap">
-      <p class="eyebrow">Legal</p>
-      <h1 class="display page-title">Terms of Use</h1>
-      <p class="page-lede">Last updated: 17 October 2026</p>
-    </div>
-  </section>
+    <h2>1. Who we are</h2>
+    <p>Leonida Racing is an independent GTA VI community project. It is run by the person named in the <a href={`${base}legal/`}>Legal notice</a> ("we", "us"). It has no connection to Rockstar Games or Take-Two Interactive. These terms apply to everyone who uses the site. Using the site is free.</p>
 
-  <section class="prose">
-    <div class="wrap prose-body">
-      <h2>1. Who we are</h2>
-      <p>Leonida Racing is an independent GTA VI community project. It is run by the person named in the <a href={`${base}legal/`}>Legal notice</a> ("we", "us"). It has no connection to Rockstar Games or Take-Two Interactive. These terms apply to everyone who uses the site. Using the site is free.</p>
+    <h2>2. Your account</h2>
+    <p>You sign in with Discord. You must be at least 16 years old to create an account. One account per person. Keep your account access secure and contact us if you suspect unauthorised use. Your responsibility is determined by applicable law.</p>
+    <p>Your display name is shown publicly (leaderboards, crews, events). Don't use a name that insults others, impersonates someone or breaks the law.</p>
 
-      <h2>2. Your account</h2>
-      <p>You sign in with Discord. You must be at least 16 years old to create an account. One account per person. Keep your account access secure and contact us if you suspect unauthorised use. Your responsibility is determined by applicable law.</p>
-      <p>Your display name is shown publicly (leaderboards, crews, events). Don't use a name that insults others, impersonates someone or breaks the law.</p>
+    <h2>3. Your content</h2>
+    <p>You can add content to the site: lap times with screenshots and video links, your display name, crews, events, descriptions and links, and reports. Only add content you have the right to share.</p>
+    <!-- Codex review 16.10.2026 (Leonida-Terms-Legal-Review): Discord distribution covered, no absolute anonymity claim. -->
+    <p>By submitting content, you give us a non-exclusive, free-of-charge permission to store, check, format, display and moderate it for the relevant community feature. Published event details may also be distributed by our Discord bot to servers following the public calendar, your crew or your host profile, as described in the <a href={`${base}privacy/#discord`}>Privacy Policy</a>. You keep your rights to your content. Private screenshots submitted as lap-time proof are not included in this public distribution.</p>
+    <p>The <a href={`${base}privacy/`}>Privacy Policy</a> explains deletion and retention. Reviewed lap times remain as "Deleted driver", without your display name, Discord ID or sign-in link in the retained driver record. Separate handling of Discord posts and operational records is explained there.</p>
 
-      <h2>3. Your content</h2>
-      <p>You can add content to the site: lap times with screenshots and video links, your display name, crews, events, descriptions and links, and reports. Only add content you have the right to share.</p>
-      <!-- Codex review 16.10.2026 (Leonida-Terms-Legal-Review): Discord distribution covered, no absolute anonymity claim. -->
-      <p>By submitting content, you give us a non-exclusive, free-of-charge permission to store, check, format, display and moderate it for the relevant community feature. Published event details may also be distributed by our Discord bot to servers following the public calendar, your crew or your host profile, as described in the <a href={`${base}privacy/#discord`}>Privacy Policy</a>. You keep your rights to your content. Private screenshots submitted as lap-time proof are not included in this public distribution.</p>
-      <p>The <a href={`${base}privacy/`}>Privacy Policy</a> explains deletion and retention. Reviewed lap times remain as "Deleted driver", without your display name, Discord ID or sign-in link in the retained driver record. Separate handling of Discord posts and operational records is explained there.</p>
+    <h2>4. What's not allowed</h2>
+    <ul>
+      <li>Submitting lap times you didn't set, or times that break the <a href={`${base}time-attack/how-it-works/#rules`}>Rules</a>, or manipulated proof.</li>
+      <li>Illegal content of any kind.</li>
+      <li>Hate, harassment or threats against anyone.</li>
+      <li>Sexual or graphically violent content.</li>
+      <li>Spam, scams, misleading events or links to harmful sites.</li>
+      <li>Impersonating other people, crews or organisations — including Rockstar Games.</li>
+      <li>Content that infringes someone else's copyright or trademark.</li>
+      <li>Attacking or overloading the site, or accessing data that isn't meant for you.</li>
+    </ul>
+    <p>Crew leaders and event hosts are responsible for their crews and events, including the Discord servers and links they add. Community hosts are responsible for organising their own events; listing an event does not mean we supervise it.</p>
 
-      <h2>4. What's not allowed</h2>
-      <ul>
-        <li>Submitting lap times you didn't set, or times that break the <a href={`${base}time-attack/how-it-works/#rules`}>Rules</a>, or manipulated proof.</li>
-        <li>Illegal content of any kind.</li>
-        <li>Hate, harassment or threats against anyone.</li>
-        <li>Sexual or graphically violent content.</li>
-        <li>Spam, scams, misleading events or links to harmful sites.</li>
-        <li>Impersonating other people, crews or organisations — including Rockstar Games.</li>
-        <li>Content that infringes someone else's copyright or trademark.</li>
-        <li>Attacking or overloading the site, or accessing data that isn't meant for you.</li>
-      </ul>
-      <p>Crew leaders and event hosts are responsible for their crews and events, including the Discord servers and links they add. Community hosts are responsible for organising their own events; listing an event does not mean we supervise it.</p>
+    <h2>5. Moderation</h2>
+    <p>Moderators check submitted lap times against the <a href={`${base}time-attack/how-it-works/#rules`}>Rules</a> and act on reports. All decisions are made by people; we don't use automated moderation.</p>
+    <p>If content or behaviour breaks the law or these terms, we can: reject or remove lap times, edit or remove crews, events, names and links, remove community roles or publishing permissions, and suspend or delete accounts. We choose the mildest step that fixes the problem; repeated or serious violations can lead to a permanent ban.</p>
+    <p>If we remove your content or restrict your account, we tell you why — on the site or via Discord, where we can reach you. If you think a decision is wrong, write to us (see section 7) and we'll look at it again.</p>
 
-      <h2>5. Moderation</h2>
-      <p>Moderators check submitted lap times against the <a href={`${base}time-attack/how-it-works/#rules`}>Rules</a> and act on reports. All decisions are made by people; we don't use automated moderation.</p>
-      <p>If content or behaviour breaks the law or these terms, we can: reject or remove lap times, edit or remove crews, events, names and links, remove community roles or publishing permissions, and suspend or delete accounts. We choose the mildest step that fixes the problem; repeated or serious violations can lead to a permanent ban.</p>
-      <p>If we remove your content or restrict your account, we tell you why — on the site or via Discord, where we can reach you. If you think a decision is wrong, write to us (see section 7) and we'll look at it again.</p>
+    <h2>6. Reporting content</h2>
+    <p>Found something that is illegal or breaks these terms? Report it:</p>
+    <ul>
+      <li>Lap times: <a href={`${base}report/`}>Report a time</a>.</li>
+      <li>Crews, events, driver names and anything else: <a href={`${base}report-content/`}>Report content</a>. Crews and events also have a "Report" link.</li>
+      <li>No Discord account: send your report to the e-mail address in the <a href={`${base}legal/`}>Legal notice</a>. Say what and where it is (a link helps), why it's a problem, and add your name and e-mail address.</li>
+    </ul>
+    <p>We look at every report and tell you the outcome. Please report in good faith — knowingly false reports can get your account suspended.</p>
 
-      <h2>6. Reporting content</h2>
-      <p>Found something that is illegal or breaks these terms? Report it:</p>
-      <ul>
-        <li>Lap times: <a href={`${base}report/`}>Report a time</a>.</li>
-        <li>Crews, events, driver names and anything else: <a href={`${base}report-content/`}>Report content</a>. Crews and events also have a "Report" link.</li>
-        <li>No Discord account: send your report to the e-mail address in the <a href={`${base}legal/`}>Legal notice</a>. Say what and where it is (a link helps), why it's a problem, and add your name and e-mail address.</li>
-      </ul>
-      <p>We look at every report and tell you the outcome. Please report in good faith — knowingly false reports can get your account suspended.</p>
+    <h2>7. Contact</h2>
+    <p>For questions, objections to moderation decisions and requests from authorities, use the e-mail address in the <a href={`${base}legal/`}>Legal notice</a>. You can write to us in English or German.</p>
 
-      <h2>7. Contact</h2>
-      <p>For questions, objections to moderation decisions and requests from authorities, use the e-mail address in the <a href={`${base}legal/`}>Legal notice</a>. You can write to us in English or German.</p>
+    <h2>8. No guarantees</h2>
+    <p>GTA VI hasn't been released yet. Vehicle data, rules and much of the Hub are built ahead of launch, and some of it is clearly marked sample data. We run the site as a free community project: we can change, pause or end features or the whole site at any time, and there is no right to a place on a leaderboard or to a particular result. These operational limitations do not exclude rights or liability that cannot be excluded under applicable law.</p>
 
-      <h2>8. No guarantees</h2>
-      <p>GTA VI hasn't been released yet. Vehicle data, rules and much of the Hub are built ahead of launch, and some of it is clearly marked sample data. We run the site as a free community project: we can change, pause or end features or the whole site at any time, and there is no right to a place on a leaderboard or to a particular result. These operational limitations do not exclude rights or liability that cannot be excluded under applicable law.</p>
+    <h2>9. Liability</h2>
+    <p>We are fully liable for damage we cause intentionally or through gross negligence, and for injury to life, body or health. For slight negligence we are only liable if we breach an obligation that is essential for using the site, and only for the typical, foreseeable damage. Liability under the German Product Liability Act is not affected. Otherwise we are not liable.</p>
 
-      <h2>9. Liability</h2>
-      <p>We are fully liable for damage we cause intentionally or through gross negligence, and for injury to life, body or health. For slight negligence we are only liable if we breach an obligation that is essential for using the site, and only for the typical, foreseeable damage. Liability under the German Product Liability Act is not affected. Otherwise we are not liable.</p>
+    <h2>10. Ending your use</h2>
+    <p>You can stop using the site and delete your account at any time under My Account › Settings. We can end your use for serious or repeated violations of these terms (see section 5).</p>
 
-      <h2>10. Ending your use</h2>
-      <p>You can stop using the site and delete your account at any time under My Account › Settings. We can end your use for serious or repeated violations of these terms (see section 5).</p>
+    <h2>11. Changes to these terms</h2>
+    <p>If we change these terms in a way that matters to you, we'll announce it on the site before the change takes effect. If you don't agree, you can delete your account. Where a change requires your agreement under applicable law, we will obtain it. Continued use or failure to delete an account does not replace that agreement.</p>
 
-      <h2>11. Changes to these terms</h2>
-      <p>If we change these terms in a way that matters to you, we'll announce it on the site before the change takes effect. If you don't agree, you can delete your account. Where a change requires your agreement under applicable law, we will obtain it. Continued use or failure to delete an account does not replace that agreement.</p>
-
-      <h2>12. Applicable law</h2>
-      <p>German law applies. If you are a consumer living in another country, the mandatory consumer protection rules of that country still apply to you.</p>
-    </div>
-  </section>
-</Base>
-
-<style>
-  .page-head { padding-block: clamp(3rem, 6vw, 4.5rem) clamp(2rem, 4vw, 3rem); }
-  .page-title { margin: .6rem 0 .5rem; font-size: clamp(2.2rem, 4.5vw, 3.2rem); }
-  .page-lede { color: var(--gh-muted); font-size: .92rem; }
-  .prose { padding-bottom: var(--gh-gap-section); }
-  .prose-body { max-width: 66ch; }
-  .prose-body h2 { font-size: 1.05rem; margin: 2rem 0 .6rem; }
-  .prose-body h2:first-child { margin-top: 0; }
-  .prose-body p, .prose-body ul { margin: 0 0 1rem; color: var(--gh-muted); font-size: .94rem; line-height: 1.7; }
-  .prose-body ul { padding-left: 1.1rem; }
-  .prose-body a { color: var(--gh-yellow); }
-</style>
+    <h2>12. Applicable law</h2>
+    <p>German law applies. If you are a consumer living in another country, the mandatory consumer protection rules of that country still apply to you.</p>
+</LegalLayout>

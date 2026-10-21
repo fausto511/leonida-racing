@@ -4,6 +4,7 @@
 // Login required; the database enforces: published runs only, one report per
 // person and run, max. 5 open reports per person, reason text >= 20 chars.
 import Base from '../../layouts/Base.astro';
+import '../../styles/report.css';
 const base = import.meta.env.BASE_URL;
 ---
 <Base
@@ -11,22 +12,28 @@ const base = import.meta.env.BASE_URL;
   description="Report a lap time you believe is wrong. Reports go to the moderators only."
   noindex
 >
-  <section class="wrap rep-wrap">
-    <p class="eyebrow">Time Attack</p>
-    <h1 class="display rep-title">Report a time</h1>
-    <p class="rep-lede">Think a published lap time is wrong — impossible, wrong car, wrong track or rules? Tell the moderators. Reports are private: only moderators see them, and the driver is not notified by us.</p>
+  <section class="rp-band">
+    <div class="wrap lr-band-in is-compact rp-band-in">
+      <nav class="lr-crumb" aria-label="Breadcrumb"><a href={base}>Home</a><span aria-hidden="true">/</span><span aria-current="page">Report a time</span></nav>
+      <p class="eyebrow">Time Attack</p>
+      <h1 class="display lr-t2">Report a time</h1>
+      <p class="lr-lede">Think a published lap time is wrong — impossible, wrong car, wrong track or rules? Tell the moderators. Reports are private: only moderators see them, and the driver is not notified by us.</p>
+    </div>
+  </section>
 
-    <div id="rep-backend" class="notice" hidden><strong>Backend not connected.</strong><span>Reports cannot be sent from this build.</span></div>
+  <div class="wrap rp">
+    <div class="rp-main">
+      <div id="rep-backend" class="notice" hidden><strong>Reports are unavailable in this preview.</strong><span>Nothing will be sent.</span></div>
 
-    <div id="rep-auth" class="panel rep-auth" hidden>
+    <div id="rep-auth" class="rep-auth" hidden>
       <p>Sign in with Discord to report a time. This keeps reports accountable and lets us follow up if needed.</p>
-      <button type="button" id="rep-signin" class="btn btn-discord">Sign in with Discord</button>
+      <button type="button" id="rep-signin" class="btn btn-discord">Discord login</button>
     </div>
 
     <div id="rep-body" hidden>
       <div id="rep-mine" class="rep-mine" hidden></div>
 
-      <form id="rep-form" class="panel rep-form" novalidate>
+      <form id="rep-form" class="rep-form" novalidate>
         <div class="rep-step">
           <p class="rep-step-title"><span>1</span> Which time?</p>
           <label class="ui-search rep-search">
@@ -56,56 +63,29 @@ const base = import.meta.env.BASE_URL;
         </div>
       </form>
     </div>
-  </section>
+    </div>
+    <!-- COPY: side card = Claude placeholder from existing page facts (Codex, DEC-0088) -->
+    <aside class="rp-side">
+      <div class="rp-card">
+        <h2>How reports work</h2>
+        <ul>
+          <li>Only moderators see your report. The driver is not notified by us.</li>
+          <li>You see the status and outcome of your reports on this page.</li>
+          <li>You can have up to 5 open reports at a time.</li>
+        </ul>
+      </div>
+      <div class="rp-card">
+        <h2>Other ways</h2>
+        <div class="rp-links">
+          <a class="arrow" href={`${base}report-content/`}>Report content →</a>
+          <a class="arrow" href={`${base}time-attack/how-it-works/#rules`}>Rules and verification →</a>
+          <a class="arrow" href={`${base}terms/`}>Terms of Use →</a>
+        </div>
+      </div>
+    </aside>
+  </div>
 </Base>
 
-<style>
-  [hidden] { display: none !important; }
-  .rep-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); max-width: 52rem; }
-  .rep-title { margin: .4rem 0 .8rem; font-size: clamp(2rem, 4vw, 2.8rem); }
-  .rep-lede { margin: 0 0 1.8rem; color: var(--gh-muted); font-size: .92rem; }
-  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: rgba(255,149,90,.08); border-radius: var(--gh-radius); font-size: .85rem; }
-  .rep-auth { padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .rep-auth p { margin: 0; font-size: .88rem; }
-  .rep-form { padding: var(--gh-pad-card); display: grid; gap: 1.6rem; }
-  .rep-step { display: grid; gap: .8rem; }
-  .rep-step-title { margin: 0; display: flex; align-items: center; gap: .6rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.05rem; }
-  .rep-step-title span { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 999px; background: var(--gh-yellow); color: #111; font-style: normal; font-size: .8rem; }
-  .rep-search input { font-size: 16px; }
-  @media (min-width: 761px) { .rep-search input { font-size: .85rem; } }
-  .rep-results { display: grid; gap: .35rem; max-height: 17rem; overflow-y: auto; }
-  :global(.rep-item) { display: flex; align-items: center; gap: .8rem; width: 100%; text-align: left; padding: .6rem .8rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); background: var(--gh-surface-soft); color: var(--gh-text); font: inherit; font-size: .86rem; cursor: pointer; }
-  :global(.rep-item:hover) { border-color: var(--gh-muted); }
-  :global(.rep-item.is-picked) { border-color: var(--gh-yellow); background: rgba(255,149,90,.08); }
-  :global(.rep-item .ri-driver) { font-weight: 700; flex: 1 1 8rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  :global(.rep-item .ri-car) { color: var(--gh-muted); flex: 1 1 9rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  :global(.rep-item .ri-time) { font-family: var(--gh-font-display); font-weight: 900; }
-  :global(.rep-none) { margin: 0; color: var(--gh-muted); font-size: .85rem; }
-  .rep-picked { margin: 0; font-size: .86rem; color: var(--gh-yellow); }
-  .rep-reasons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
-  @media (max-width: 560px) { .rep-reasons { grid-template-columns: 1fr; } }
-  .rep-reasons label { display: flex; align-items: center; gap: .55rem; padding: .7rem .85rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); font-size: .88rem; font-weight: 600; cursor: pointer; }
-  .rep-reasons label:has(input:checked) { border-color: var(--gh-yellow); background: rgba(255,149,90,.06); }
-  .rep-reasons input { accent-color: var(--gh-yellow); }
-  .rep-details { display: flex; flex-direction: column; gap: .35rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
-  .rep-details small { text-transform: none; letter-spacing: 0; font-weight: 500; }
-  .rep-details textarea { padding: .65rem .75rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text); font: inherit; font-size: 16px; text-transform: none; letter-spacing: normal; font-weight: 400; resize: vertical; }
-  @media (min-width: 761px) { .rep-details textarea { font-size: .9rem; } }
-  .rep-details textarea:focus { outline: 2px solid var(--gh-yellow); outline-offset: 1px; }
-  .rep-details textarea[aria-invalid="true"] { border-color: var(--gh-red); }
-  .rep-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; }
-  .rep-msg { margin: 0; font-size: .86rem; }
-  .rep-msg.is-error { color: var(--gh-red); }
-  .rep-msg.is-ok { color: #D9F58E; }
-  .rep-mine { display: grid; gap: .5rem; margin-bottom: 1.5rem; }
-  :global(.rep-mine-row) { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding: .7rem 1rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); background: var(--gh-surface); font-size: .86rem; }
-  :global(.rep-mine-row .rm-main) { flex: 1 1 16rem; min-width: 0; }
-  :global(.rep-mine-row small) { display: block; color: var(--gh-muted); font-size: .78rem; margin-top: .1rem; }
-  :global(.rep-status) { padding: .15rem .55rem; border-radius: 999px; font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; border: 1px solid var(--gh-line); color: var(--gh-muted); }
-  :global(.rep-status.open) { color: var(--gh-yellow); border-color: rgba(255,149,90,.45); }
-  :global(.rep-status.resolved) { color: #D9F58E; border-color: rgba(217,245,142,.45); }
-  :global(.rep-mine-title) { margin: 0 0 .2rem; font-size: .72rem; color: var(--gh-muted); font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
-</style>
 
 <script>
   import { backendConfigured, getSupabase } from '../../scripts/supabase-client';
