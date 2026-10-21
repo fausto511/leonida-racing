@@ -2,11 +2,18 @@
 // Ranking pages (Fausto 2026-10-08): fastest (overall + per class), most expensive,
 // cheapest, Gellhorn reference lap. Filled from the database at build time;
 // noindex until enough cars are measured (see data/rankings.ts).
-// COPY STATUS: Codex 2026-10-08, approved by Fausto 2026-10-09.
+// Redesign 21.10.2026 (DEC-0148, no mockup): image band + at-a-glance tile like the
+// class pages, ranking switcher chips, leaderboard-style table, "Waiting for results"
+// tiles for revealed cars without a value, loops to compare / class page / Time Attack,
+// Discord band. Band photo = the #1 car once it has a photo, else a car from the scope;
+// Gellhorn lap = track photo.
+// COPY STATUS: title, description, intro, coverage note and empty-state sentences =
+// Codex 2026-10-08 (approved 09.10.); chip/tile/glance/section labels = Claude placeholders (DEC-0088).
 import Base from '../../../layouts/Base.astro';
+import DiscordBand from '../../../components/DiscordBand.astro';
 import { rankings, rankingEntries, rankingIndexable, RANKING_MIN_ENTRIES } from '../../../data/rankings';
-// COPY: Codex 2026-10-08, approved 2026-10-09.
-import { formatVehicleValue, valueSourceLabels } from '../../../data/vehicles';
+import { formatVehicleValue, valueSourceLabels, bandVehicle, type VehicleOption } from '../../../data/vehicles';
+import { classPages } from '../../../data/garage-taxonomy';
 import { releaseById } from '../../../data/releases';
 
 export function getStaticPaths() {
@@ -17,86 +24,275 @@ const base = import.meta.env.BASE_URL;
 const entries = rankingEntries(r);
 const indexable = rankingIndexable(r);
 const complete = entries.length === r.scope.length;
-const related = rankings.filter((x) => x.slug !== r.slug && (x.classSlug ? x.slug.startsWith('fastest/') && r.slug.startsWith('fastest') : true));
+const isPrice = r.metric === 'price_gtad';
+const isLap = r.metric === 'gellhorn_reference_lap_ms';
+const isSpeed = r.metric === 'top_speed_mph';
+const cls = r.classSlug ? classPages.find((c) => c.slug === r.classSlug) : undefined;
+
+// Visible H1 without "in GTA 6" (DEC-0130: GTA VI stays in title, eyebrow, meta)
+// The Gellhorn title is too long for the band (4 lines) -> short visible form; meta title unchanged.
+const heading = isLap ? 'Fastest at Gellhorn' : r.title.replace(/ in GTA 6$/, '');
+
+// ---- switcher chips ----
+const metricChips = [
+  { name: 'Top speed', slug: 'fastest', on: isSpeed },
+  { name: 'Most expensive', slug: 'most-expensive', on: r.slug === 'most-expensive' },
+  { name: 'Cheapest', slug: 'cheapest', on: r.slug === 'cheapest' },
+  { name: 'Gellhorn lap', slug: 'gellhorn-lap', on: isLap },
+];
+const fastestAll = rankings.find((x) => x.slug === 'fastest')!;
+const classChips = isSpeed
+  ? [
+      { name: 'All classes', slug: 'fastest', count: fastestAll.scope.length, on: !r.classSlug },
+      ...rankings.filter((x) => x.classSlug).map((x) => ({ name: classPages.find((c) => c.slug === x.classSlug)?.name ?? x.classSlug!, slug: x.slug, count: x.scope.length, on: x.slug === r.slug })),
+    ]
+  : [];
+
+// ---- waiting cars: revealed cars in scope without a value (photo cars first) ----
+const ranked = new Set(entries.map((e) => e.vehicle.id));
+const waiting = r.scope.filter((v) => !ranked.has(v.id))
+  .sort((a, b) => Number(Boolean(b.photo)) - Number(Boolean(a.photo)) || `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`));
+const WAIT_SHOW = 6;
+const scopeHref = cls ? `${base}cars/classes/${cls.slug}/` : `${base}cars/`;
+const scopeName = cls ? `${cls.name} cars` : 'cars';
+
+// ---- band: #1 car with a photo, else a car from the scope; Gellhorn = track photo ----
+const topWithPhoto = entries.find((e) => e.vehicle.photo)?.vehicle ?? null;
+const bandCar: VehicleOption | null = isLap ? null : topWithPhoto ?? bandVehicle(r.scope);
+
+// ---- at a glance ----
+const pct = r.scope.length ? Math.round((entries.length / r.scope.length) * 100) : 0;
+const top = entries[0] ?? null;
+const measuredAs = isPrice ? 'Purchase price' : isLap ? 'Stock, reference lap' : 'Stock, no upgrades';
+
+// ---- loops ----
+const compareIds = entries.slice(0, 4).map((e) => e.vehicle.id);
+const lbHref = `${base}time-attack/gellhorn-international-raceway/${cls ? `?class=${encodeURIComponent(cls.name)}` : ''}#leaderboard`;
+const more = [
+  { eb: 'Cars', t: cls ? `All ${cls.name} cars` : 'All cars', s: cls ? `Every revealed ${cls.name} car with its details, inspirations and lap times.` : 'Every revealed GTA VI car with its details, inspirations and lap times.', a: 'Browse cars', href: scopeHref },
+  { eb: 'Time Attack', t: cls ? `${cls.name} leaderboard at Gellhorn` : 'Gellhorn leaderboard', s: 'Recorded driver laps at Gellhorn, for every car.', a: 'Open leaderboard', href: lbHref },
+  { eb: 'Compare', t: 'Compare cars', s: 'Pick up to four cars and compare their available specs and lap times.', a: 'Start comparing', href: `${base}cars/compare/` },
+];
+
 const pageUrl = new URL(`${base}${r.path}`, Astro.site).href;
 const jsonLd = entries.length ? [{
   '@context': 'https://schema.org', '@type': 'ItemList', name: r.title, url: pageUrl, numberOfItems: entries.length,
   itemListElement: entries.map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: `${e.vehicle.make} ${e.vehicle.model}`, url: new URL(`${base}cars/vehicles/${e.vehicle.id}/`, Astro.site).href })),
 }] : undefined;
+const logo = (v: VehicleOption) => `${base}images/logos/${v.logoSlug}-gta-6-logo.svg`;
+const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.source_type]}${e.value.game_release_id && releaseById[e.value.game_release_id] ? ` · ${releaseById[e.value.game_release_id].name}` : ''}`;
 ---
 <Base title={r.title} description={r.description} section="garage" noindex={!indexable} jsonLd={jsonLd}
-  breadcrumbs={[{ name: 'The Garage', path: 'cars/' }, { name: 'Rankings', path: 'cars/rankings/fastest/' }, { name: r.title, path: r.path }]}>
-  <section class="wrap rk-head">
-    <nav class="rk-crumbs" aria-label="Breadcrumb"><a href={`${base}cars/`}>The Garage</a><span aria-hidden="true">/</span><span>Rankings</span></nav>
-    <p class="eyebrow">GTA VI Rankings</p>
-    <h1 class="display rk-title">{r.title}</h1>
-    <p class="rk-intro">{r.intro}</p>
-    {entries.length > 0 && !complete && (
-      <p class="rk-note">{r.metric === 'price_gtad' ? 'Prices' : 'Results'} available for {entries.length} of {r.scope.length} officially revealed vehicles. Positions may change as more {r.metric === 'price_gtad' ? 'prices' : 'results'} are added.</p>
-    )}
+  breadcrumbs={[{ name: 'Cars', path: 'cars/' }, { name: 'Rankings', path: 'cars/rankings/fastest/' }, { name: heading, path: r.path }]}>
+  <section class="rb">
+    {isLap
+      ? <img class="rb-bg" src={`${base}images/gellhorn-raceway-1080.webp`} srcset={`${base}images/gellhorn-raceway-640.webp 640w, ${base}images/gellhorn-raceway-1080.webp 1080w, ${base}images/gellhorn-raceway-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="941" fetchpriority="high" />
+      : bandCar
+        ? <img class="rb-bg" src={`${base}images/vehicles/${bandCar.id}-1280.webp`} srcset={`${base}images/vehicles/${bandCar.id}-640.webp 640w, ${base}images/vehicles/${bandCar.id}-1280.webp 1280w, ${base}images/vehicles/${bandCar.id}-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="1080" fetchpriority="high" />
+        : <img class="rb-bg rb-ph" src={`${base}images/garage/garage-hero-placeholder-1080.webp`} alt="" width="1080" height="608" fetchpriority="high" />}
+    <span class="lr-shade is-open" aria-hidden="true"></span>
+    <div class="wrap rb-inner lr-band-in">
+      <div class="rb-copy">
+        <nav class="lr-crumb" aria-label="Breadcrumb">
+          <a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><span>Rankings</span><span aria-hidden="true">/</span><span aria-current="page">{heading}</span>
+        </nav>
+        <p class="eyebrow">GTA VI Rankings</p>
+        <h1 class="display lr-t2">{heading}</h1>
+        <p class="lr-lede">{r.intro}</p>
+      </div>
+      <div class="glance">
+        <p class="glance-eb">At a glance</p>
+        <div class="gl-row gl-cov"><span>Cars ranked</span><b class="tnum">{entries.length} of {r.scope.length}</b>
+          <span class="mbar" aria-hidden="true"><i style={`width:${pct}%`}></i></span></div>
+        <div class="gl-row"><span>Top spot</span>{top
+          ? <b><a href={`${base}cars/vehicles/${top.vehicle.id}/`}>{top.vehicle.model}</a>{' · '}<span class="tnum">{formatVehicleValue(top.value)}</span></b>
+          : <b class="is-tba">After launch</b>}</div>
+        <div class="gl-row"><span>Values</span><b>{measuredAs}</b></div>
+      </div>
+    </div>
   </section>
 
-  <section class="wrap rk-body">
-    {entries.length === 0 ? (
-      <div class="panel rk-empty">
-        <p>{r.metric === 'price_gtad'
-          ? 'No purchase prices are available yet. Cars will appear here as their prices are recorded in GTA VI.'
-          : r.metric === 'gellhorn_reference_lap_ms'
-            ? 'No reference lap times are available yet. Cars will appear here as their stock results are recorded at Gellhorn International Raceway.'
-            : 'No top-speed results are available yet. Cars will appear here as their stock results are recorded.'}</p>
-        <a class="btn btn-outline" href={`${base}cars/`}>Browse The Garage</a>
-      </div>
-    ) : (
-      <div class="panel rk-table-wrap">
-        <table class="rk-table">
-          <thead><tr><th scope="col">#</th><th scope="col">Vehicle</th><th scope="col">Class</th><th scope="col">{r.valueLabel}</th><th scope="col">Source</th></tr></thead>
-          <tbody>
-            {entries.map((e, i) => (
-              <tr>
-                <td class="rk-pos">{i + 1}</td>
-                <td><a class="rk-car" href={`${base}cars/vehicles/${e.vehicle.id}/`}><img src={`${base}images/logos/${e.vehicle.logoSlug}-gta-6-logo.svg`} alt="" width="18" height="18" loading="lazy" /><span><small>{e.vehicle.make}</small> {e.vehicle.model}</span></a></td>
-                <td class="rk-muted">{e.vehicle.classes[0]}</td>
-                <td class="rk-val">{formatVehicleValue(e.value)}</td>
-                <td class="rk-muted">{valueSourceLabels[e.value.source_type]}{e.value.game_release_id && releaseById[e.value.game_release_id] ? ` · ${releaseById[e.value.game_release_id].name}` : ''}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )}
-    {!indexable && entries.length > 0 && entries.length < RANKING_MIN_ENTRIES && <p class="rk-note">This ranking currently contains only {entries.length} vehicles.</p>}
-  </section>
-
-  <nav class="wrap rk-more" aria-label="Other rankings">
-    <h2 class="rk-more-title">Other rankings</h2>
-    <ul>{related.map((x) => <li><a href={`${base}${x.path}`}>{x.title}</a></li>)}</ul>
+  <nav class="wrap rchips" aria-label="Rankings">
+    {metricChips.map((c) => <a class:list={['rchip', { on: c.on }]} href={`${base}cars/rankings/${c.slug}/`} aria-current={c.on && !classChips.length ? 'page' : undefined}>{c.name}</a>)}
   </nav>
+  {classChips.length > 0 && (
+    <nav class="wrap rchips rchips-sub" aria-label="Classes">
+      {classChips.map((c) => <a class:list={['rchip', 'is-sub', { on: c.on }]} href={`${base}cars/rankings/${c.slug}/`} aria-current={c.on ? 'page' : undefined}>{c.name}<span>{c.count}</span></a>)}
+    </nav>
+  )}
+
+  <div class="wrap rk">
+    {entries.length > 0 && (
+      <section class="rk-sec" aria-labelledby="rk-list-h">
+        <div class="rk-sec-head">
+          <h2 class="rk-h2" id="rk-list-h">Ranked by {r.valueLabel.toLowerCase()}</h2>
+          {compareIds.length >= 2 && <a class="arrow rk-cmp" href={`${base}cars/compare/?cars=${compareIds.join(',')}`}>Compare the top {compareIds.length} →</a>}
+        </div>
+        {!complete && <p class="rk-note">{isPrice ? 'Prices' : 'Results'} available for {entries.length} of {r.scope.length} officially revealed vehicles. Positions may change as more {isPrice ? 'prices' : 'results'} are added.</p>}
+        <div class="card rk-wrap">
+          <table class="rk-table">
+            <thead><tr><th scope="col" class="c-pos">#</th><th scope="col">Car</th><th scope="col" class="c-cls">Class</th><th scope="col" class="c-val">{r.valueLabel}</th><th scope="col" class="c-src">Source</th></tr></thead>
+            <tbody>
+              {entries.map((e, i) => (
+                <tr class:list={{ first: i === 0 }}>
+                  <td class="c-pos tnum">{i + 1}</td>
+                  <td><a class="rk-car" href={`${base}cars/vehicles/${e.vehicle.id}/`}><span class="rk-logo"><img src={logo(e.vehicle)} alt="" width="30" height="30" loading="lazy" /></span><span class="rk-nm"><small>{e.vehicle.make}</small><b>{e.vehicle.model}</b></span></a></td>
+                  <td class="c-cls">{e.vehicle.classes[0]}</td>
+                  <td class="c-val tnum">{formatVehicleValue(e.value)}</td>
+                  <td class="c-src">{source(e)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {!indexable && entries.length < RANKING_MIN_ENTRIES && <p class="rk-note">This ranking currently contains only {entries.length} vehicles.</p>}
+      </section>
+    )}
+
+    {waiting.length > 0 && (
+      <section class="rk-sec" aria-labelledby="rk-wait-h">
+        <div class="rk-sec-head">
+          <h2 class="rk-h2" id="rk-wait-h">{entries.length ? 'Not ranked yet' : 'Waiting for results'}<span class="rk-count tnum">{waiting.length}</span></h2>
+        </div>
+        {entries.length === 0 && (
+          <p class="rk-lead">{isPrice
+            ? 'No purchase prices are available yet. Cars will appear here as their prices are recorded in GTA VI.'
+            : isLap
+              ? 'No reference lap times are available yet. Cars will appear here as their stock results are recorded at Gellhorn International Raceway.'
+              : 'No top-speed results are available yet. Cars will appear here as their stock results are recorded.'}</p>
+        )}
+        <div class="rk-tiles">
+          {waiting.slice(0, WAIT_SHOW).map((v) => (
+            <a class="rk-tile" href={`${base}cars/vehicles/${v.id}/`}>
+              <span class="rk-logo"><img src={logo(v)} alt="" width="30" height="30" loading="lazy" /></span>
+              <span class="rk-nm"><b>{v.model}</b><small>{v.make} · {v.classes[0]}</small></span>
+            </a>
+          ))}
+        </div>
+        {waiting.length > WAIT_SHOW && <a class="arrow rk-all" href={scopeHref}>All {r.scope.length} {scopeName} →</a>}
+      </section>
+    )}
+
+    <section class="rk-sec rk-more" aria-labelledby="rk-more-h">
+      <p class="rk-eb" id="rk-more-h">More in Cars</p>
+      <div class="rk-more-grid">
+        {more.map((m) => (
+          <a class="card rk-mcard" href={m.href}>
+            <span class="rk-mcard-eb">{m.eb}</span>
+            <span class="rk-mcard-t">{m.t}</span>
+            <span class="rk-mcard-s">{m.s}</span>
+            <span class="arrow">{m.a} →</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <DiscordBand />
 </Base>
 
 <style>
-  .rk-head { padding-top: 1.75rem; }
-  .rk-crumbs { display: flex; gap: .45rem; font-size: .78rem; color: var(--gh-muted); margin-bottom: 1rem; }
-  .rk-crumbs a { color: var(--gh-muted); }
-  .rk-title { margin: .3rem 0 .8rem; font-size: clamp(2rem, 4.5vw, 3rem); }
-  .rk-intro { margin: 0 0 .6rem; color: var(--gh-muted); max-width: 46rem; }
-  .rk-note { margin: .4rem 0 0; font-size: .82rem; color: var(--gh-yellow); }
-  .rk-body { padding-top: 1.5rem; }
-  .rk-empty { padding: var(--gh-pad-card); display: grid; gap: 1rem; justify-items: start; }
-  .rk-empty p { margin: 0; color: var(--gh-muted); }
-  .rk-table-wrap { padding: 0; overflow-x: auto; }
-  .rk-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
-  .rk-table th, .rk-table td { text-align: left; padding: .7rem .9rem; border-bottom: 1px solid var(--gh-line); white-space: nowrap; }
-  .rk-table th { color: var(--gh-muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; }
+  .tnum { font-variant-numeric: tabular-nums; }
+  /* ---- band (same system as class pages, DEC-0139) ---- */
+  .rb { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
+  .rb-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 55%; max-width: none; }
+  .rb-ph { filter: grayscale(.5); }
+  .rb-inner { display: flex; align-items: center; justify-content: space-between; gap: 48px; }
+  .rb-copy { min-width: 0; max-width: 700px; }
+  .glance { flex: none; width: 380px; margin-top: 30px; padding: 18px 18px 14px; border: 1px solid rgba(200,200,222,.2); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
+  .glance-eb { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+  .gl-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 14px; padding: 9px 0; border-top: 1px solid var(--lr-line); font-size: 15px; color: var(--lr-soft); }
+  .gl-row:first-of-type { border-top: 0; }
+  .gl-row b { color: var(--lr-text); font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .gl-row b.is-tba { color: var(--lr-muted); font-weight: 500; }
+  .gl-row b a { color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(251,247,234,.4); }
+  .gl-row b a:hover { color: var(--lr-pink); }
+  .gl-cov .mbar { display: block; flex-basis: 100%; height: 4px; margin-top: 6px; border-radius: 999px; background: rgba(251,247,234,.1); overflow: hidden; }
+  .gl-cov .mbar i { display: block; height: 100%; background: var(--lr-lime); border-radius: 999px; }
+
+  /* ---- switcher chips (look of the class chips) ---- */
+  .rchips { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 24px; }
+  .rchips-sub { padding-top: 12px; }
+  .rchip { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(200,200,222,.24); color: #E4E4EC; font-size: 15px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+  .rchip span { color: var(--lr-muted); font-size: 13px; }
+  .rchip:hover { border-color: var(--lr-pink); color: var(--lr-text); }
+  .rchip.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 600; }
+  .rchip.on span { color: #55556A; }
+  .rchip.is-sub { height: 34px; font-size: 14px; }
+  .rchip.is-sub.on { background: transparent; border-color: var(--lr-text); color: var(--lr-text); }
+  .rchip.is-sub.on span { color: var(--lr-soft); }
+
+  /* ---- sections ---- */
+  .rk { padding-bottom: 64px; }
+  .rk-sec { padding-top: 40px; }
+  .rk-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+  .rk-h2 { display: flex; align-items: baseline; gap: 10px; margin: 0; font-size: 22px; font-weight: 700; }
+  .rk-count { font-size: 15px; font-weight: 600; color: var(--lr-muted); }
+  .rk-cmp, .rk-all { font-size: 15px; font-weight: 600; }
+  .rk-wrap + .rk-note { margin: 12px 0 0; }
+  .rk-note { margin: 0 0 14px; font-size: 14px; color: var(--lr-soft); }
+  .rk-lead { margin: 0 0 18px; max-width: 640px; font-size: 16px; line-height: 1.55; color: var(--lr-soft); }
+  .rk-eb { margin: 0 0 14px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lr-soft); }
+
+  /* ---- table (leaderboard look) ---- */
+  .rk-wrap { padding: 0; overflow: hidden; }
+  .rk-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .rk-table th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); border-bottom: 1px solid var(--lr-line); }
+  .rk-table td { padding: 10px 16px; border-bottom: 1px solid var(--lr-line); color: var(--lr-soft); white-space: nowrap; }
   .rk-table tr:last-child td { border-bottom: 0; }
-  .rk-pos { font-weight: 900; width: 2.5rem; }
-  .rk-car { display: inline-flex; align-items: center; gap: .5rem; color: var(--gh-text); text-decoration: none; font-weight: 700; }
-  .rk-car small { color: var(--gh-muted); font-weight: 600; }
-  .rk-car:hover span { text-decoration: underline; }
-  .rk-val { font-weight: 800; }
-  .rk-muted { color: var(--gh-muted); }
-  .rk-more { padding-block: var(--gh-gap-section); }
-  .rk-more-title { font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.05rem; margin: 0 0 .8rem; }
-  .rk-more ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; }
-  .rk-more a { color: var(--gh-text); font-size: .88rem; }
-  @media (max-width: 600px) { .rk-table th:nth-child(3), .rk-table td:nth-child(3), .rk-table th:nth-child(5), .rk-table td:nth-child(5) { display: none; } }
+  .rk-table .c-pos { width: 48px; font-weight: 700; color: var(--lr-muted); }
+  .rk-table tr.first .c-pos { color: var(--lr-pink); }
+  .rk-table .c-val { text-align: right; font-weight: 700; color: var(--lr-text); font-size: 16px; }
+  .rk-table th.c-val { text-align: right; font-size: 12px; font-weight: 600; color: var(--lr-muted); }
+  .rk-table .c-src { font-size: 13px; color: var(--lr-muted); }
+  .rk-car { display: inline-flex; align-items: center; gap: 12px; min-width: 0; color: var(--lr-text); text-decoration: none; }
+  .rk-car:hover b { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--lr-pink); }
+  .rk-logo { width: 36px; height: 36px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
+  .rk-logo img { width: 30px; height: 30px; object-fit: contain; filter: brightness(0) invert(1); opacity: .9; }
+  .rk-nm { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+  .rk-nm b { font-weight: 600; color: #E4E4EC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rk-nm small { font-size: 12px; color: var(--lr-muted); }
+
+  /* ---- waiting tiles (look of "No lap yet in these cars") ---- */
+  .rk-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .rk-tile { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; background: var(--lr-raised); min-width: 0; color: var(--lr-text); text-decoration: none; }
+  .rk-tile:hover { background: #242436; }
+  .rk-all { display: inline-block; margin-top: 14px; }
+
+  /* ---- more in Cars ---- */
+  .rk-more { padding-top: 48px; }
+  .rk-more-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .rk-mcard { display: flex; flex-direction: column; gap: 6px; padding: 20px; color: var(--lr-text); text-decoration: none; }
+  .rk-mcard:hover { border-color: var(--lr-pink); }
+  .rk-mcard-eb { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-soft); }
+  .rk-mcard-t { font-size: 19px; font-weight: 700; line-height: 1.25; }
+  .rk-mcard-s { font-size: 15px; line-height: 1.45; color: var(--lr-soft); }
+  .rk-mcard .arrow { margin-top: 6px; }
+
+  @media (max-width: 1100px) {
+    .rb-inner { flex-direction: column; align-items: stretch; gap: 20px; }
+    .glance { width: 100%; max-width: 560px; margin-top: 0; }
+    .rk-more-grid { grid-template-columns: 1fr; gap: 12px; }
+  }
+  @media (max-width: 760px) {
+    .gl-row { font-size: 14px; }
+    .rchips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-top: 16px; margin-right: 0; }
+    .rchips::-webkit-scrollbar { display: none; }
+    .rchip { flex: none; height: 36px; font-size: 14px; }
+    .rchip.is-sub { height: 32px; font-size: 13px; }
+    .rk-sec { padding-top: 28px; }
+    .rk-h2 { font-size: 19px; }
+    .rk-table { font-size: 14px; }
+    .rk-table th, .rk-table td { padding-left: 10px; padding-right: 10px; }
+    .rk-table .c-cls, .rk-table .c-src { display: none; }
+    .rk-table .c-pos { width: 32px; }
+    .rk-table .c-val { font-size: 15px; }
+    .rk-car { gap: 8px; }
+    .rk-logo { width: 30px; height: 30px; }
+    .rk-logo img { width: 26px; height: 26px; }
+    .rk-tiles { grid-template-columns: 1fr 1fr; }
+    .rk-tile .rk-nm small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rk-more { padding-top: 32px; }
+    .rk-mcard-s { display: none; }
+  }
 </style>

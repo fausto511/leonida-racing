@@ -38,7 +38,7 @@ export default defineConfig({
       // are not content either.
       filter: (page) =>
         !page.includes('/account/') && !page.includes('/moderator/') && !page.includes('/community/tracks/') &&
-        !page.endsWith('/time-attack/') && !page.includes('/tracks/') && !page.includes('/report/') && !page.includes('/report-content/') && !page.endsWith('.txt') &&
+        !page.endsWith('/time-attack/') && !page.endsWith('/cars/rankings/') && !page.includes('/tracks/') && !page.includes('/report/') && !page.includes('/report-content/') && !page.endsWith('.txt') &&
         !page.endsWith('/cars/vehicles/vapid-caracara/') && !page.endsWith('/cars/vehicles/enus-jubilee/') && !page.endsWith('/cars/vehicles/enus-windsor/') && !page.endsWith('/cars/vehicles/karin-contender/') && !page.endsWith('/time-attack/submit/') && !page.endsWith('/time-attack/rules/') &&
         !noindexVehiclePaths.some((p) => page.endsWith(p)) && !noindexDataPaths.some((p) => page.endsWith(p)),
     }),
