@@ -68,7 +68,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp-crumbs a { color: var(--lr-muted); text-decoration: none; }
   .cp-crumbs a:hover { color: var(--lr-text); }
   .cp-crumbs [aria-current] { color: var(--lr-text); font-weight: 500; }
-  .cp-h1 { margin: 8px 0 0; font-size: clamp(40px, 5vw, 56px); }
+  .cp-h1 { margin: 8px 0 0; font-size: 52px; line-height: .95; } /* = .lr-t2 (design audit 21.10.) */
   .cp-sub { margin: 8px 0 0; font-size: 17px; color: var(--lr-soft); }
   .cp-share { flex: none; }
 
@@ -224,7 +224,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   /* ---- phone (handoff): strip 3 columns (4 narrow), controls row below, table label row ---- */
   @media (max-width: 760px) {
     .cp-head { padding-top: 16px; align-items: flex-start; }
-    .cp-h1 { font-size: clamp(32px, 9vw, 40px); }
+    .cp-h1 { font-size: 34px; }
     .cp-sub { display: none; }
     .cp-share { width: 44px; height: 44px; min-height: 44px; padding: 0; }
     .cp-share span { display: none; }

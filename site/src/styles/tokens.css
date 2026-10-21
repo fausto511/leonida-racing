@@ -72,6 +72,9 @@ body {
 }
 img { max-width: 100%; display: block; }
 a { color: inherit; }
+/* Buttons and form controls use the site font, not the browser default (Arial) – design audit 21.10.2026.
+   :where() keeps specificity at zero, so any class still sets its own size/weight. */
+:where(button, input, select, textarea) { font-family: inherit; }
 
 .wrap {
   max-width: var(--gh-max);

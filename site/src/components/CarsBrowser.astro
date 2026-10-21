@@ -236,29 +236,6 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .ctl :global(svg.ico-sm) { width: 14px; height: 14px; margin-left: 2px; }
   .muted { color: var(--lr-muted); }
 
-  /* ---- band ---- */
-  .band { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
-  .band-bg, .band-t { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .band-bg { object-fit: cover; object-position: 50% 55%; }
-  .band-t1 { background: linear-gradient(115deg, rgba(242,75,157,.75) 0%, rgba(242,75,157,.2) 42%, rgba(255,122,61,.2) 58%, rgba(255,122,61,.75) 100%); mix-blend-mode: color; }
-  .band-t2 { background: linear-gradient(115deg, rgba(242,75,157,.22) 0%, rgba(242,75,157,0) 42%, rgba(255,122,61,0) 58%, rgba(255,122,61,.22) 100%); }
-  .band-t3 { background: linear-gradient(90deg, rgba(11,11,20,.9) 0%, rgba(11,11,20,.65) 45%, rgba(11,11,20,.25) 100%); }
-  .band-t4 { background: linear-gradient(180deg, rgba(11,11,20,.1) 0%, rgba(11,11,20,.7) 100%); }
-  .band-inner { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; padding-top: 44px; padding-bottom: 36px; }
-  .band-copy { display: flex; flex-direction: column; gap: 8px; }
-  .band-copy .eyebrow { margin: 0; font-size: 12px; font-weight: 600; }
-  .band-title { margin: 0; font-size: 56px; }
-  .band-sub { margin: 0; max-width: 640px; font-size: 16px; line-height: 1.5; color: #EDEBF2; text-shadow: 0 1px 12px rgba(11,11,20,.9); }
-  .garage-tile { flex: none; display: flex; flex-direction: column; gap: 8px; min-width: 260px; padding: 14px 16px; border: 1px solid rgba(200,200,222,.18); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
-  .garage-tile:hover { border-color: var(--lr-orange); }
-  .gt-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
-  .gt-eb { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
-  .gt-cta { font-size: 13px; }
-  .gt-val { font-family: var(--gh-font-display); font-weight: 800; font-size: 24px; text-transform: uppercase; font-variant-numeric: tabular-nums; }
-  .gt-val small { color: var(--lr-muted); font-size: 15px; }
-  .mbar { display: block; height: 4px; border-radius: 999px; background: rgba(251,247,234,.1); overflow: hidden; }
-  .mbar i { display: block; height: 100%; background: var(--lr-orange); border-radius: 999px; }
-
   /* ---- toolbar ---- */
   .tools { display: flex; flex-direction: column; gap: 14px; padding-top: 24px; }
   .tools-row, .tools-row2 { display: flex; align-items: center; gap: 10px; }

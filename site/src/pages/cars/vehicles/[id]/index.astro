@@ -537,7 +537,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
     .vg-rows :global(.vg-make) { display: none; }
     .vg-cols-c { grid-template-columns: 22px 1fr 58px 64px; }
     .vg-cols-c span:nth-child(2) { padding-left: 58px; }
-    .vg-btns { display: grid; grid-template-columns: 1fr 1fr; }
+    /* stacked on the phone: two buttons side by side clipped 'Set a Gellhorn time' at 390 px (design audit 21.10.) */
+    .vg-btns { display: grid; grid-template-columns: 1fr; }
     .vg-btns .btn { padding: 0 10px; min-width: 0; }
     .vg-btns #vg-vsleader, .vg-btns #vg-how { grid-column: 1 / -1; }
     .va-p { font-size: 17px; }
