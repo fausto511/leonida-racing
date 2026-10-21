@@ -1,78 +1,211 @@
 ---
+// About (redesign 21.10.2026, DEC-0149, no mockup): who we are instead of a product tour
+// (Fausto 21.10.: convince people, show our roots, mindset, goals; invite to join and partner).
+// Facts: interview with Fausto (Claude outputs/ABOUT-Interview-Fausto-2026-10-21.md) + RRL website.
+// RRL numbers only in the RRL block, never in band/H1/lede/meta (Fausto 21.10.: different project).
+// COPY STATUS: Codex 21.10.2026 (Codex Zuarbeit/About-Seite-neu-2026-10-21.md), DEC-0088.
+// Exception: "150 championship races" added on Fausto's decision (21.10., reached by GTA VI release).
 import Base from '../../layouts/Base.astro';
+import DiscordBand from '../../components/DiscordBand.astro';
 import { DISCORD_INVITE_URL } from '../../data/site';
 const base = import.meta.env.BASE_URL;
+const RRL_URL = 'https://fausto511.github.io/rockford-racing-league/';
+
+const rrlNumbers = [
+  { v: '2017', k: 'Championship founded' },
+  { v: '150', k: 'Championship races' },
+  { v: '200+', k: 'Championship drivers' },
+  { v: '1,000+', k: 'Tracks tested and rated' },
+];
+const principles = [
+  { t: 'Test across tracks', c: 'A car can tell a different story on a tight street circuit than on a fast, open route. We bring experience in testing across both, comparing clean laps and having another driver check a result when it needs a closer look.',
+    i: 'M3 17l6-6 4 4 8-8 M14 7h7v7' },
+  { t: 'Build it together', c: 'GTA VI means learning the cars and racing all over again. We want to build that knowledge with the community and share what we learn, with room for new testers, different perspectives and useful questions.',
+    i: 'M16 11a4 4 0 1 0-8 0 M4 20a8 8 0 0 1 16 0 M12 3v4' },
+  { t: 'Give the scene room', c: 'Leonida Racing is here to help drivers discover events, crews and tracks across the scene. You do not have to race in the RRL to have a place here or bring something worth sharing.',
+    i: 'M3 12h18 M12 3a14 14 0 0 1 0 18 M12 3a14 14 0 0 0 0 18 M12 3a9 9 0 1 1 0 18a9 9 0 0 1 0-18' },
+  { t: 'Show the evidence', c: 'Our Guide separates confirmed information, community identifications and open questions. Time Attack submissions need moderator review before publication, and Video verified status requires a moderator to review and verify the full lap video.',
+    i: 'M9 12l2 2 4-4 M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z' },
+];
+const roles = [
+  { t: 'Test drivers', c: 'Help compare cars across different tracks with clean, repeatable laps and a second look at results that need one.' },
+  { t: 'Gellhorn drivers', c: 'Help put a time against every car at Gellhorn, from your favorite daily driver to the one everyone else overlooks.' },
+  { t: 'Creators', c: 'Bring your race-building ideas and help shape a collection of tracks that drivers want to run again.' },
+  { t: 'Event hosts', c: 'Bring your races, meets and playlists to more drivers, and help them find their next regular lobby.' },
+];
 ---
 <Base
-  title="About Leonida Racing — GTA 6 Cars & Community"
-  description="Meet Leonida Racing: a GTA 6 car database and community connecting vehicle research, Gellhorn Time Attack, crews, events and Discord."
+  title="About Leonida Racing — GTA 6 Racing Community"
+  description="Meet the community behind Leonida Racing: our Rockford Racing League roots, how we test, and how to help build GTA 6 racing knowledge and connections."
 >
-  <!-- COPY STATUS: approved Codex copy 18.10.2026 (Codex Zuarbeit/About-Seite-Texte-2026-10-18.md), DEC-0088. -->
-  <section class="page-head">
-    <div class="wrap">
-      <p class="eyebrow">GTA VI Racing Database &amp; Community</p>
-      <h1 class="display page-title">About Leonida Racing</h1>
-      <p class="page-lede">You do not have to chase an overall record to belong here. Leonida Racing brings GTA VI car research, racing and the people behind the builds together. Find your next car, your next crew or a reason to stay in the conversation.</p>
+  <section class="ab-band">
+    <img class="ab-bg" src={`${base}images/hub/hub-carmeet-1080.webp`} srcset={`${base}images/hub/hub-carmeet-640.webp 640w, ${base}images/hub/hub-carmeet-1080.webp 1080w, ${base}images/hub/hub-carmeet-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="940" fetchpriority="high" />
+    <span class="lr-shade is-open" aria-hidden="true"></span>
+    <div class="wrap lr-band-in ab-band-in">
+      <p class="eyebrow">GTA VI · Built by the community</p>
+      <h1 class="display lr-t2">Good racing brings people together</h1>
+      <p class="lr-lede">Leonida Racing comes from the people behind the Rockford Racing League. We’re building a GTA VI home for racers, car enthusiasts and the crews, hosts and creators who keep the scene moving.</p>
     </div>
   </section>
 
-  <section class="prose">
-    <div class="wrap prose-body">
-      <h2>Cars</h2>
-      <p><a href={`${base}cars/`}>Cars</a> is Leonida Racing’s GTA VI vehicle database. Browse <a href={`${base}cars/classes/`}>classes</a> and <a href={`${base}cars/manufacturers/`}>manufacturers</a>, explore real-life inspirations and <a href={`${base}cars/compare/`}>compare</a> the available details side by side. <a href={`${base}account/garage/`}>My Garage</a> keeps your own collection in one place. Community car ratings open at launch, alongside the chance to find out which favorites live up to their looks.</p>
+  <div class="wrap ab">
+    <!-- Where we come from -->
+    <section class="ab-sec ab-roots" aria-labelledby="ab-roots-h">
+      <div class="ab-roots-text">
+                <h2 class="ab-h2" id="ab-roots-h">Where we come from</h2>
+        <p>The <a href={RRL_URL} target="_blank" rel="noopener">Rockford Racing League</a> has been running GTA championships since 2017. Alongside the championship seasons came cup events, training sessions and a lot of testing. Drivers brought tracks, compared cars and helped shape racing classes where a close fight was the point.</p>
+        <p>That work became a testing routine of its own. Cars were compared on tight city circuits, fast open-road routes and hills with climbs and descents. Only clean laps counted. Test drivers checked their pace against one another, and uncertain results got a second driver’s attention. The balancing grew more detailed over the years, with plenty of spreadsheets along the way.</p>
+        <p>Racing Society brought another part of the idea: a Discord space connecting racers, hosts and creators. That server is now Leonida Racing’s Discord. This new project brings the RRL’s testing experience and Racing Society’s network together, with room for the wider scene to help shape it.</p>
+      </div>
+      <aside class="card ab-rrl" aria-labelledby="ab-rrl-h">
+        <p class="ab-rrl-h" id="ab-rrl-h">The Rockford Racing League in numbers</p>
+        <dl class="ab-stats">
+          {rrlNumbers.map((n) => <div><dt>{n.k}</dt><dd>{n.v}</dd></div>)}
+        </dl>
+        <a class="arrow ab-rrl-a" href={RRL_URL} target="_blank" rel="noopener">Meet the RRL <span aria-hidden="true">↗</span></a>
+      </aside>
+    </section>
 
-      <h2>Time Attack</h2>
-      <p><a href={`${base}time-attack/gellhorn-international-raceway/`}>Time Attack</a> adds the driver to the equation. Once GTA VI launches, submit a lap at Gellhorn International Raceway with the required proof and see where it puts you on the leaderboard. You might be chasing an overall record, a class rival or a better time in a car you refuse to give up on.</p>
+    <!-- How we work -->
+    <section class="ab-sec" aria-labelledby="ab-work-h">
+            <h2 class="ab-h2" id="ab-work-h">How we work</h2>
+      <div class="ab-grid4">
+        {principles.map((p) => (
+          <div class="card ab-p">
+            <svg class="ab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d={p.i} /></svg>
+            <h3>{p.t}</h3>
+            <p>{p.c}</p>
+          </div>
+        ))}
+      </div>
+    </section>
 
-      <h2>The Guide</h2>
-      <p><a href={`${base}guide/`}>The Guide</a> follows what is known about GTA VI cars, driving, customization, garages, racing and car culture. Sources sit alongside the claims they support, with confirmed information, community identifications and open questions kept apart. Start there when you want more than another screenshot with a confident caption.</p>
+    <!-- Where we're heading -->
+    <section class="ab-sec ab-next" aria-labelledby="ab-next-h">
+      <div class="ab-next-in">
+                <h2 class="ab-h2" id="ab-next-h">Where we’re heading</h2>
+        <p>We want our first year to lay the groundwork for a detailed GTA VI car database: results from different tracks, a new approach to balancing built around those results, and useful comparisons of price, pace and where each car fits. Our GTA V testing gives us a way to approach the work. GTA VI needs its own results.</p>
+        <p>We also want Leonida Racing to become a regular meeting point for experienced hosts, creators and racing crews from around the world. More events to discover, more creations to try, more people to line up alongside. Through Time Attack, we want drivers and their crews to show their pace with laps others can check.</p>
+      </div>
+    </section>
 
-      <h2>Community and Discord</h2>
-      <p><a href={`${base}community/`}>Community</a> is where drivers, hosts and creators meet. Find races, league rounds, playlists, car meets and crews. Join a crew through the website or use I’m in to sign up for an event. Crew Leader, Event Host and Creator roles are confirmed on the website; choosing a Discord role alone does not grant them.</p>
-      <p>The conversation carries on in <a href={`${base}discord/`}>our Discord</a>: car talk, photos, videos and groups looking for players. The <a href={`${base}discord/bot/`}>Leonida Racing bot</a> also lets server administrators bring event and vehicle feeds into their own servers. You can bring something of your own without running a league or being the quickest person in the room.</p>
+    <!-- Get involved -->
+    <section class="ab-sec" aria-labelledby="ab-join-h">
+      <div class="ab-join-head">
+        <div>
+          <h2 class="ab-h2" id="ab-join-h">Get involved</h2>
+          <p class="ab-lead">You do not have to chase an overall record to belong here. Bring an idea, a willingness to test, a track you’re building or an event you want people to find. Start a conversation on Discord; there’s room to contribute from the beginning. As you spend time helping shape the project, your ideas help steer it too.</p>
+        </div>
+        <a class="btn btn-discord ab-join-btn" href={DISCORD_INVITE_URL} target="_blank" rel="noopener">Join Discord</a>
+      </div>
+      <div class="ab-grid4">
+        {roles.map((r) => <div class="ab-role"><h3>{r.t}</h3><p>{r.c}</p></div>)}
+      </div>
+    </section>
 
-      <h2>Independent</h2>
-      <p>Leonida Racing is an independent community project built for GTA VI racers and car enthusiasts. It is not affiliated with Rockstar Games or Take-Two Interactive.</p>
+    <!-- Partner with us -->
+    <section class="ab-sec" aria-labelledby="ab-partner-h">
+      <div class="card ab-partner">
+        <div>
+                    <h2 class="ab-h2" id="ab-partner-h">Partner with us</h2>
+          <p>Run a crew, a community, a stream or a channel? We’re interested in working with people who want to share good racing, useful knowledge and an audience for each other’s work. Track-building communities are welcome too: tell us what you’re making and what we could do together.</p>
+        </div>
+        <div class="ab-partner-act">
+          <a class="btn btn-primary" href={DISCORD_INVITE_URL} target="_blank" rel="noopener">Talk partnerships</a>
+          <a class="arrow" href={`${base}legal/`}>Contact us →</a>
+        </div>
+      </div>
+    </section>
 
-      <h2>Contact</h2>
-      <p>Found incorrect vehicle data, have a question about a lap submission or need help with a listing? Reach us on <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener">Discord</a> or use the email address in the <a href={`${base}legal/`}>Legal Notice</a>. To flag a lap or other content for review, use <a href={`${base}report/`}>Report a time</a> or <a href={`${base}report-content/`}>Report content</a>.</p>
-
-      <h2>How Your Data Is Used</h2>
-      <p>Signing in uses Discord. The features you use can involve account details, your garage, crew memberships, event sign-ups, lap submissions and proof, and role syncing with our official Discord server. The <a href={`${base}privacy/`}>Privacy Policy</a> explains what is processed, why, how long it is kept and how to exercise your rights.</p>
-    </div>
-  </section>
-
-  <section class="cta-band">
-    <div class="wrap cta-row">
+    <!-- Independent · Contact · Data -->
+    <section class="ab-sec ab-info" aria-label="Independent, contact and data">
       <div>
-        <h2 class="display cta-title">Join the Community</h2>
-        <p class="cta-copy">Talk cars, meet racers, find events and bring something of your own to Leonida Racing.</p>
+        <h2 class="ab-h3">Independent</h2>
+        <p>Leonida Racing is an independent community project built for GTA VI racers and car enthusiasts. It is not affiliated with Rockstar Games or Take-Two Interactive. Leonida Racing is free to use.</p>
       </div>
-      <div class="cta-actions">
-        <a class="btn btn-outline" href={`${base}cars/`}>Explore Cars</a>
-        <a class="btn btn-red" href={DISCORD_INVITE_URL} target="_blank" rel="noopener">Join Discord</a>
+      <div>
+        <h2 class="ab-h3">Contact</h2>
+        <p>Have a question, spotted something wrong or want to contribute? Reach us on <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener">Discord</a> or use the email address in the <a href={`${base}legal/`}>Legal Notice</a>. To flag a lap or other content for review, use <a href={`${base}report/`}>Report a time</a> or <a href={`${base}report-content/`}>Report content</a>.</p>
       </div>
-    </div>
-  </section>
+      <div>
+        <h2 class="ab-h3">How your data is used</h2>
+        <p>Signing in uses Discord. Your account, submissions and community activity are handled as described in our <a href={`${base}privacy/`}>Privacy Policy</a>, including what we store, why we use it and how to exercise your rights.</p>
+      </div>
+    </section>
+  </div>
+
+  <DiscordBand />
 </Base>
 
 <style>
-  .page-head { padding-block: clamp(3rem, 6vw, 4.5rem) clamp(2rem, 4vw, 3rem); }
-  .page-title { margin: .6rem 0 .9rem; font-size: clamp(2.2rem, 4.5vw, 3.2rem); }
-  .page-lede { max-width: 60ch; color: var(--gh-muted); font-size: 1.02rem; }
+  /* ---- band (DEC-0139, text only) ---- */
+  .ab-band { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
+  .ab-bg { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 60% 45%; }
+  .ab-band-in { display: flex; flex-direction: column; justify-content: center; }
+  .ab-band-in .lr-t2 { max-width: 760px; }
 
-  .prose { padding-bottom: var(--gh-gap-section); }
-  .prose-body { max-width: 62ch; }
-  .prose-body h2 { font-size: 1.15rem; margin: 2.2rem 0 .7rem; }
-  .prose-body h2:first-child { margin-top: 0; }
-  .prose-body p { margin: 0 0 1rem; color: var(--gh-muted); font-size: .96rem; line-height: 1.7; }
-  .prose-body ul { margin: 0 0 1rem; padding-left: 1.1rem; display: grid; gap: .6rem; color: var(--gh-muted); font-size: .96rem; line-height: 1.7; }
-  .prose-body li strong { color: var(--gh-text); }
-  .prose-body a { color: var(--gh-text); }
+  /* ---- sections ---- */
+  .ab { padding-bottom: 72px; }
+  .ab-sec { padding-top: 64px; }
+  .ab-eb { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lr-orange); }
+  .ab-h2 { margin: 0 0 18px; font-size: 30px; font-weight: 700; line-height: 1.15; }
+  .ab p { line-height: 1.65; }
+  .ab a:not(.btn):not(.arrow) { color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(251,247,234,.4); }
+  .ab a:not(.btn):not(.arrow):hover { text-decoration-color: var(--lr-pink); }
 
-  .cta-band { padding-block: var(--gh-gap-section); border-top: 1px solid var(--gh-line); background: var(--gh-surface-soft); }
-  .cta-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2rem; }
-  .cta-title { margin: 0 0 .5rem; font-size: clamp(1.5rem, 2.6vw, 2rem); }
-  .cta-copy { margin: 0; max-width: 42ch; color: var(--gh-muted); font-size: .95rem; }
-  .cta-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+  /* roots */
+  .ab-roots { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 56px; align-items: start; }
+  .ab-roots-text p { margin: 0 0 16px; font-size: 17px; color: #E4E4EC; max-width: 680px; }
+  .ab-rrl { padding: 24px; margin-top: 36px; }
+  .ab-rrl-h { margin: 0 0 14px; font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-soft); }
+  .ab-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 16px; margin: 0 0 18px; }
+  .ab-stats div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 4px; }
+  .ab-stats dd { margin: 0; font-family: var(--gh-font-display); font-size: 34px; font-weight: 900; line-height: 1; color: var(--lr-text); }
+  .ab-stats dt { font-size: 14px; color: var(--lr-soft); line-height: 1.35; }
+  .ab-rrl-a { font-size: 15px; }
+
+  /* principles + roles */
+  .ab-grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .ab-p { padding: 22px; display: flex; flex-direction: column; gap: 10px; }
+  .ab-ico { width: 28px; height: 28px; fill: none; stroke: var(--lr-pink); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .ab-p h3, .ab-role h3 { margin: 0; font-size: 18px; font-weight: 700; }
+  .ab-p p, .ab-role p { margin: 0; font-size: 15px; color: var(--lr-soft); line-height: 1.55; }
+
+  /* heading */
+  .ab-next-in { max-width: 820px; padding: 32px 0 4px 28px; border-left: 3px solid; border-image: var(--lr-brand-gradient) 1; }
+  .ab-next-in p { margin: 0 0 16px; font-size: 17px; color: #E4E4EC; }
+
+  /* join */
+  .ab-join-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-bottom: 22px; }
+  .ab-lead { margin: 0; max-width: 720px; font-size: 17px; color: #E4E4EC; }
+  .ab-join-btn { flex: none; }
+  .ab-role { padding: 20px; border-radius: 8px; background: var(--lr-raised); display: flex; flex-direction: column; gap: 8px; }
+
+  /* partner */
+  .ab-partner { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding: 32px; background: linear-gradient(135deg, rgba(255,62,165,.12), rgba(255,149,90,.08) 60%, transparent), var(--lr-card); }
+  .ab-partner p { margin: 0; max-width: 680px; font-size: 16px; color: #E4E4EC; }
+  .ab-partner-act { flex: none; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
+  /* info */
+  .ab-info { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; padding-top: 56px; margin-top: 64px; border-top: 1px solid var(--lr-line); }
+  .ab-h3 { margin: 0 0 8px; font-size: 16px; font-weight: 700; }
+  .ab-info p { margin: 0; font-size: 14px; color: var(--lr-soft); line-height: 1.6; }
+
+  @media (max-width: 1100px) {
+    .ab-roots { grid-template-columns: 1fr; gap: 8px; }
+    .ab-rrl { margin-top: 8px; max-width: 560px; }
+    .ab-grid4 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 760px) {
+    .ab-sec { padding-top: 44px; }
+    .ab-h2 { font-size: 24px; }
+    .ab-roots-text p, .ab-next-in p, .ab-lead { font-size: 16px; }
+    .ab-stats dd { font-size: 28px; }
+    .ab-grid4 { grid-template-columns: 1fr; gap: 12px; }
+    .ab-next-in { padding: 4px 0 0 18px; }
+    .ab-join-head { flex-direction: column; align-items: flex-start; gap: 18px; }
+    .ab-partner { flex-direction: column; align-items: flex-start; gap: 22px; padding: 22px; }
+    .ab-partner-act { flex-direction: row; align-items: center; gap: 18px; }
+    .ab-info { grid-template-columns: 1fr; gap: 22px; margin-top: 44px; padding-top: 36px; }
+  }
 </style>
