@@ -551,7 +551,9 @@ const discordPath = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
     .crows :global(.cdate) { width: 34px; }
     .crows :global(.cdate b) { font-size: 18px; }
     .crows :global(.crow > .crew-tag) { display: none; }
-    .crows :global(.ctag-inline) { display: inline-flex; margin-left: 8px; vertical-align: 2px; }
+    /* crew = subject: tag in front like a logo, same as desktop and the crew cards (DEC-0157) */
+    .crows :global(.ctag-inline) { display: inline-flex; margin-right: 8px; vertical-align: 2px; }
+    .crows :global(.ctag-inline .crew-tag) { margin-left: 0; min-width: 54px; justify-content: center; } /* names line up like the desktop column */
     .crows :global(.cside .btn), .crows :global(.crew-join-btn), .crows :global(.crew-pill) { height: 30px; min-height: 30px; padding: 0 10px; font-size: 12px; }
     .cfoot { padding: 14px 6px 0; }
 

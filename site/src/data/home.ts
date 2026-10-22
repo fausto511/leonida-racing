@@ -45,7 +45,7 @@ export function homeCrewRow(c: HubCrew, sample: boolean): string {
   return `<div class="crow crew-card" data-crew-id="${esc(joinId)}">
   <a class="clink" href="${href}" aria-label="${esc(c.name)} in the crew directory"></a>
   ${crewTagHtml(c.tag, c.color, 'sm')}
-  <span class="cmain"><b>${esc(c.name)}<span class="ctag-inline">${crewTagHtml(c.tag, c.color, 'sm')}</span></b><span>${sub}</span></span>
+  <span class="cmain"><b><span class="ctag-inline">${crewTagHtml(c.tag, c.color, 'sm')}</span>${esc(c.name)}</b><span>${sub}</span></span>
   <span class="cside crew-join-slot"></span>
 </div>`;
 }
