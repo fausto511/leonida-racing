@@ -1,0 +1,17 @@
+/* My Garage tile in the photo band of Cars and New cars (DEC-0163). Shared so both pages stay identical. */
+.garage-tile { flex: none; display: flex; flex-direction: column; gap: 8px; min-width: 260px; padding: 14px 16px; border: 1px solid rgba(200,200,222,.18); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
+.garage-tile:hover { border-color: var(--lr-orange); }
+.garage-tile .gt-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.garage-tile .gt-eb { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+.garage-tile .gt-cta { font-size: 13px; }
+.garage-tile .gt-val { font-family: var(--gh-font-display); font-weight: 800; font-size: 24px; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+.garage-tile .gt-val small { color: var(--lr-muted); font-size: 15px; }
+.garage-tile .mbar { display: block; height: 4px; border-radius: 999px; background: rgba(251,247,234,.1); overflow: hidden; }
+.garage-tile .mbar i { display: block; height: 100%; background: var(--lr-orange); border-radius: 999px; }
+@media (max-width: 760px) {
+  .garage-tile { min-width: 0; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding: 10px 12px; }
+  .garage-tile .gt-top { order: 1; flex: 1; }
+  .garage-tile .gt-val { order: 0; font-size: 18px; }
+  .garage-tile .gt-val small { font-size: 13px; }
+  .garage-tile .mbar { order: 2; flex-basis: 100%; }
+}

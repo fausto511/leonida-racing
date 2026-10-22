@@ -12,6 +12,7 @@ import { classPages, manufacturerPages, classSlug, type TaxonomyPage } from '../
 import { lapTime } from '../data/leaderboard';
 import { taxonomyCopy } from '../data/taxonomy-copy';
 import { LAUNCH_DATE, LAUNCH_AT } from '../data/launch';
+import '../styles/garage-tile.css';
 
 /** New cars + model family pages use the same layout (DEC-0147, Fausto 20.10.2026). */
 export interface TaxonomyCustom {
@@ -33,6 +34,8 @@ export interface TaxonomyCustom {
   chips?: { label: string; items: { name: string; href: string; count: number; on: boolean; logo?: string }[] };
   links: { title: string; items: { name: string; href: string; count?: number }[]; all?: { name: string; href: string } }[];
   noun: string;
+  /** Cars-style head (DEC-0163): compact band and the My Garage tile instead of the glance tile */
+  garageTile?: boolean;
   /** hide the class or manufacturer filter (e.g. a one-make family) */
   scope?: 'class' | 'make' | null;
 }
@@ -135,7 +138,7 @@ const more = custom
       ? <img class="tb-bg" style={bandStyle} src={`${bandSrc}-1280.webp`} srcset={`${bandSrc}-640.webp 640w, ${bandSrc}-1280.webp 1280w, ${bandSrc}-1920.webp 1920w`} sizes="100vw" alt="" width="1920" height="1080" fetchpriority="high" />
       : <img class="tb-bg tb-ph" src={`${base}images/garage/garage-hero-placeholder-1080.webp`} alt="" width="1080" height="608" fetchpriority="high" />}
     <span class="lr-shade is-open" aria-hidden="true"></span>
-    <div class="wrap tb-inner lr-band-in">
+    <div class:list={['wrap tb-inner lr-band-in', { 'is-compact is-cars': custom?.garageTile }]}>
       {custom ? (
         <div class="tb-copy">
           <nav class="lr-crumb" aria-label="Breadcrumb">
@@ -155,7 +158,13 @@ const more = custom
         <p class="lr-lede">{copy?.band ?? page.intro[0]}</p>
       </div>
       )}
-      {custom ? (
+      {custom?.garageTile ? (
+        <a class="garage-tile" id="garage-tile" href={`${base}account/garage/`}>
+          <span class="gt-top"><span class="gt-eb">My Garage</span><span class="arrow gt-cta" id="gt-cta">Log in to start →</span></span>
+          <span class="gt-val"><span id="gt-owned">0</span> <small>/ {N} owned</small></span>
+          <span class="mbar"><i id="gt-bar" style="width:0%"></i></span>
+        </a>
+      ) : custom ? (
         <div class="glance">
           <p class="glance-eb">{custom.glanceTitle}</p>
           <div class="gl-row"><span>{custom.countLabel}</span><b class="tnum">{N}</b></div>
@@ -331,6 +340,9 @@ const more = custom
   .tb-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; }
   /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
   @media (min-width: 1101px) { .tb-inner > .glance { align-self: flex-end; margin-top: 0; } }
+  /* Cars-style head (New cars): same layout as the Cars page — tile beside the text down to 761px, bottom edge */
+  @media (min-width: 761px) { .tb-inner.is-cars { flex-direction: row; gap: 40px; } .tb-inner.is-cars > .garage-tile { align-self: flex-end; } }
+  @media (max-width: 760px) { .tb-inner.is-cars { flex-direction: column; align-items: stretch; gap: 16px; } }
   .tb-copy { min-width: 0; max-width: 700px; }
   .tb-title { display: flex; align-items: center; gap: 16px; }
   .tb-logo { width: 56px; height: 56px; flex: none; object-fit: contain; filter: brightness(0) invert(1); }

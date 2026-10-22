@@ -4,6 +4,7 @@
 // COPY STATUS: all new texts are Claude placeholders from the mockup -> Codex (DEC-0088).
 import Base from '../../layouts/Base.astro';
 import CarsBrowser from '../../components/CarsBrowser.astro';
+import '../../styles/garage-tile.css';
 import { vehicleOptions } from '../../data/vehicles';
 import { classPages, manufacturerPages } from '../../data/garage-taxonomy';
 
@@ -62,15 +63,7 @@ const N = vehicleOptions.length;
   /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
   @media (min-width: 761px) { .band-inner > .garage-tile { align-self: flex-end; } }
   .band-copy { min-width: 0; }
-  .garage-tile { flex: none; display: flex; flex-direction: column; gap: 8px; min-width: 260px; padding: 14px 16px; border: 1px solid rgba(200,200,222,.18); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
-  .garage-tile:hover { border-color: var(--lr-orange); }
-  .gt-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
-  .gt-eb { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
-  .gt-cta { font-size: 13px; }
-  .gt-val { font-family: var(--gh-font-display); font-weight: 800; font-size: 24px; text-transform: uppercase; font-variant-numeric: tabular-nums; }
-  .gt-val small { color: var(--lr-muted); font-size: 15px; }
-  .mbar { display: block; height: 4px; border-radius: 999px; background: rgba(251,247,234,.1); overflow: hidden; }
-  .mbar i { display: block; height: 100%; background: var(--lr-orange); border-radius: 999px; }
+  /* garage tile: styles/garage-tile.css */
 
   /* ---- browse lists ---- */
   .browse { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding-top: 40px; padding-bottom: 24px; border-top: 1px solid var(--lr-line); margin-top: 32px; }
@@ -83,11 +76,6 @@ const N = vehicleOptions.length;
 
   @media (max-width: 760px) {
     .band-inner { flex-direction: column; align-items: stretch; gap: 16px; }
-    .garage-tile { min-width: 0; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding: 10px 12px; }
-    .gt-top { order: 1; flex: 1; }
-    .gt-val { order: 0; font-size: 18px; }
-    .gt-val small { font-size: 13px; }
-    .mbar { order: 2; flex-basis: 100%; }
     .browse { grid-template-columns: 1fr; gap: 24px; }
   }
 </style>
