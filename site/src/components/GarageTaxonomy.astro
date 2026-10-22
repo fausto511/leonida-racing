@@ -362,8 +362,8 @@ const more = custom
   .tchip.is-x { display: none; }
   :global(.tchip-more) { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(255,149,90,.5); background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: var(--lr-orange); cursor: pointer; white-space: nowrap; }
   :global(.tchip-more:hover) { border-color: var(--lr-orange); }
-  .tchip-logo { width: 20px; height: 20px; object-fit: contain; filter: brightness(0) invert(1); opacity: .85; }
-  .tchip.on .tchip-logo { filter: brightness(0); opacity: .8; }
+  .tchip-logo { width: 20px; height: 20px; object-fit: contain; filter: brightness(0) invert(1); opacity: var(--lr-logo-info); }
+  .tchip.on .tchip-logo { filter: brightness(0) invert(7%) sepia(100%) saturate(200%) hue-rotate(200deg); opacity: var(--lr-logo-info); } /* = #14141F, same as the chip text */
 
   /* ---- more + links (slot content, page scope) ---- */
   .tsec-eb { margin: 0 0 14px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lr-soft); }

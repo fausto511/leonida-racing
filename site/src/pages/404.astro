@@ -192,10 +192,10 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .dym-ph { position: relative; width: 120px; height: 68px; flex: none; border-radius: 5px; overflow: hidden; background: var(--lr-raised); }
   .dym-ph :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .dym-ph :global(.ph-bg) { filter: grayscale(.4) brightness(.7); }
-  .dym-ph :global(.ph-logo) { inset: 18%; width: 64%; height: 64%; object-fit: contain; filter: brightness(0) invert(1); }
+  .dym-ph :global(.ph-logo) { inset: 18%; width: 64%; height: 64%; object-fit: contain; filter: brightness(0) invert(1); opacity: var(--lr-logo-ph); }
   .dym-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .dym-t small { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--lr-muted); }
-  .dym-t small :global(img) { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) invert(1); opacity: .8; }
+  .dym-t small :global(img) { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) invert(1); opacity: var(--lr-logo-info); }
   .dym-t b { font-size: 19px; }
   .dym-tm { display: none; }
   .dym-op { text-decoration: none; flex: none; height: 40px; padding: 0 16px; border-radius: 6px; border: 1px solid rgba(255,149,90,.6); background: rgba(255,149,90,.1); color: var(--lr-orange); font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; white-space: nowrap; }

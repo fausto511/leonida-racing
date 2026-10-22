@@ -12,6 +12,9 @@
   are gone (DEC-0114); "ok/done" states use lime.
 */
 :root {
+  /* manufacturer logos (DEC-0155): information = full, placeholder for a missing photo = softer */
+  --lr-logo-info: 1;
+  --lr-logo-ph: .7;
   /* surfaces */
   --lr-bg: #0B0B14;          /* page, slight violet tint */
   --lr-card: #14141F;        /* cards, panels */
