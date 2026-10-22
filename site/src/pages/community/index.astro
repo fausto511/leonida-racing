@@ -24,7 +24,7 @@ const entries = [
   { href: `${base}community/tracks/`, img: 'tracks', eb: 'Race jobs', title: 'Tracks', text: 'Community-built race jobs for your next playlist.', short: 'Community-built race jobs', cta: 'Find tracks', pos: '50% 75%' },
 ];
 const startCrew = `<div class="crew-start"><h3>Start a crew</h3><p>Got a crew already? List it here so drivers can find you and join or request an invite.</p><a class="btn btn-s" href="${base}account/crew/">Start a crew</a></div>`;
-const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>';
 ---
 <Base
   title="Community — GTA 6 Racing Community"
@@ -296,7 +296,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
       const d = new Date(next.starts_at);
       const by = next.host?.name ?? next.host_name;
       a.href = `${base}community/events/#event-${encodeURIComponent(next.event_id)}`;
-      a.innerHTML = `<span class="d"><span>${d.toLocaleDateString('en-GB', { weekday: 'short' })}</span><b>${d.getDate()}</b></span><span class="m"><b>${esc(next.title)}</b><span>${d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })} your time${by ? ` · by ${esc(by)}` : ''}</span></span><span class="go"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Going</span>`;
+      a.innerHTML = `<span class="d"><span>${d.toLocaleDateString('en-GB', { weekday: 'short' })}</span><b>${d.getDate()}</b></span><span class="m"><b>${esc(next.title)}</b><span>${d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })} your time${by ? ` · by ${esc(by)}` : ''}</span></span><span class="go"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Going</span>`;
     } else {
       a.innerHTML = '<span class="m"><b>No event planned yet</b><span>Pick one from Next up below.</span></span>';
       a.href = '#next-up';

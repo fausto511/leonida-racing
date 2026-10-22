@@ -52,7 +52,7 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   </a>
   <button type="button" class="vc-cmp" data-compare={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to compare`}>
     <svg class="vc-plus" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-    <svg class="vc-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+    <svg class="vc-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
   </button>
   <div class="vc-body">
     <div class="vc-brand"><img src={`${base}images/logos/${v.logoSlug}-gta-6-logo.svg`} alt="" width="20" height="20" loading="lazy" />{v.make}</div>
@@ -64,12 +64,12 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     <div class="vc-based">{v.realLifeInspiration ? `Based on ${v.realLifeInspiration}` : ' '}</div>
     <div class="vc-foot">
       <span class="vc-rank" title={cars && lap ? `Gellhorn rank in ${cls}` : 'Gellhorn International Raceway'}>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>
         {lap ? (cars ? <>Gellhorn #{lap.rank}{'\u2002·\u2002'}<span class="tnum">{lapTime(lap.ms)}</span></> : <>#{lap.rank} in {cls}{'\u2002·\u2002'}<span class="tnum">{lapTime(lap.ms)}</span></>) : 'No Gellhorn lap yet'}
       </span>
       {cars ? (
         <button type="button" class="vc-garage" data-garage={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to My Garage`} title="Mark as owned · Adds the car to My Garage">
-          <svg class="vc-g-house" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M7 21v-8h10v8M7 17h10"/></svg>
+          <svg class="vc-g-house" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12M7 21v-7h10v7"/></svg>
           <svg class="vc-g-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/></svg>
         </button>
       ) : <span class="vc-arrow" aria-hidden="true">→</span>}

@@ -22,7 +22,7 @@ for (const e of buildEvents) {
 const dayLabel = (k: string) => { const d = new Date(`${k}T12:00:00Z`); return `${d.toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' })}, ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' })}`; };
 const initialHtml = [...groups.entries()].map(([k, rows]) => `<section class="ev-day-g" id="day-${k}"><h2 class="ev-dh">${dayLabel(k)}<span class="n">${rows.length} event${rows.length === 1 ? '' : 's'}</span></h2><div class="ev-list">${rows.join('')}</div></section>`).join('');
 const chips: [string, string][] = [['', 'All events'], ['race', 'Races'], ['time-attack', 'Time Attack'], ['league', 'Leagues'], ['car-meet', 'Car meets'], ['cruise', 'Cruises']];
-const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>';
 const dc = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 5.3A18 18 0 0 0 15.9 4l-.3.6a15 15 0 0 1 4 1.6 16 16 0 0 0-13.2 0 15 15 0 0 1 4-1.6L10.1 4a18 18 0 0 0-4.4 1.3C2.9 9 2.2 12.6 2.5 16.1a18 18 0 0 0 5.5 2.8l.8-1.3a11 11 0 0 1-1.9-.9l.5-.4a13 13 0 0 0 9.2 0l.5.4a11 11 0 0 1-1.9.9l.8 1.3a18 18 0 0 0 5.5-2.8c.4-4-.7-7.5-2.2-10.8ZM9.3 14c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Zm5.4 0c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Z"/></svg>';
 const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3><p data-dc-p>Find event announcements, ask for a lobby, or meet your next crew on our Discord.</p><p class="dc-free" data-dc-free><i></i>Free to join · Discord account required</p><a class="btn dc-btn" href="${DISCORD_INVITE_URL}" target="_blank" rel="noopener">${dc}<span data-dc-b>Join our Discord</span></a></div>`;
 ---
@@ -53,7 +53,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   <section class="wrap"><div class="ec-bar">
     <div class="chips" id="ev-chips" role="group" aria-label="Event type">
       {chips.map(([v, l], i) => <button type="button" class={i === 0 ? 'on' : ''} data-type={v} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>)}
-      <button type="button" class="mine" data-type="mine" aria-pressed="false" id="ev-mine" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>My events</button>
+      <button type="button" class="mine" data-type="mine" aria-pressed="false" id="ev-mine" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>My events</button>
     </div>
     <span class="tz"><Fragment set:html={cal} />Your local time: <b id="ev-tz">UTC</b></span>
   </div></section>

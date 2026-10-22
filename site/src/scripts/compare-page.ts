@@ -9,6 +9,8 @@ import { bubble, hideBubble } from './bubble';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
 import { lapTime } from '../data/leaderboard';
 import { CLOSE_SVG } from '../data/site';
+// check icon instead of the ✓ glyph (DEC-0158)
+const CHECK_SVG = '<svg class="cp-ck" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
 import { COMPARE_MAX, verdict, alternatives, limited, limitedNote, money, moneyShort, secs, ALT_MAX_SLOWER_MS, ALT_MIN_CHEAPER, VALUE_MAX_SLOWER_MS, VALUE_MIN_CHEAPER, type CmpCar } from '../data/compare';
 
 const base = import.meta.env.BASE_URL;
@@ -57,7 +59,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
   const ratings = new Map<string, { avg: number; count: number }>();
 
   // ---- strip ----------------------------------------------------------------------
-  const houseIco = '<svg class="g1" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M7 21v-8h10v8M7 17h10"/></svg><svg class="g2" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/></svg>';
+  const houseIco = '<svg class="g1" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12M7 21v-7h10v7"/></svg><svg class="g2" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/></svg>';
   function tile(c: CmpCar): string {
     const pic = c.photo
       ? `<img src="${img(c)}" alt="" width="640" height="360" loading="lazy" />`
@@ -65,7 +67,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     const o = owned.has(c.id);
     return `<article class="ct" data-car="${c.id}">
   <a class="ct-img" href="${vhref(c)}" tabindex="-1" aria-hidden="true">${pic}</a>
-  ${o ? '<span class="ct-own">✓ In your garage</span>' : ''}
+  ${o ? `<span class="ct-own">${CHECK_SVG}In your garage</span>` : ''}
   <button type="button" class="ct-x" data-remove="${c.id}" aria-label="Remove ${esc(c.make)} ${esc(c.model)}">${CLOSE_SVG}</button>
   <div class="ct-b">
     <span class="ct-make">${esc(c.make)}</span>
@@ -104,7 +106,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     $('cp-count').textContent = `Comparing ${list.length} of ${COMPARE_MAX}`;
     const classes = new Set(list.map((c) => c.cls));
     $('cp-cls').innerHTML = list.length < 2 ? '' : classes.size === 1
-      ? `<span class="cp-chip">✓ All ${esc(list[0].cls)}</span>`
+      ? `<span class="cp-chip">${CHECK_SVG}All ${esc(list[0].cls)}</span>`
       : '<span class="cp-diff">Different classes – they don\'t race each other on the leaderboard</span>';
     root.style.setProperty('--n', String(Math.max(1, list.length)));
     ($('cp-add-m') as HTMLElement).hidden = list.length >= COMPARE_MAX;

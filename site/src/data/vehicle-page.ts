@@ -35,7 +35,7 @@ export function startTileHtml(model: string, submitHref: string): string {
   <b class="vg-start-n">#1</b>
   <p class="vg-start-t">No laps in the ${esc(model)} yet.</p>
   <p class="vg-start-s">Set the first time and take #1. Every lap after yours has to beat it.</p>
-  <a class="btn btn-p" href="${submitHref}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Set the first time</a>
+  <a class="btn btn-p" href="${submitHref}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>Set the first time</a>
 </div>`;
 }
 

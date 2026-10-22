@@ -51,8 +51,8 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
   <section class="wrap">
     <div class="cr-bar">
       <div class="cr-row">
-        <label class="ui-search cr-q"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input type="search" id="crew-search" placeholder="Search by crew name or tag" aria-label="Search crews by name or tag" autocomplete="off" /></label>
-        <button type="button" class="cr-fbtn" id="cr-fbtn" aria-expanded="false" aria-controls="cr-adv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="nb" id="cr-fn" hidden></span></button>
+        <label class="ui-search cr-q"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="crew-search" placeholder="Search by crew name or tag" aria-label="Search crews by name or tag" autocomplete="off" /></label>
+        <button type="button" class="cr-fbtn" id="cr-fbtn" aria-expanded="false" aria-controls="cr-adv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="nb" id="cr-fn" hidden></span></button>
         <div class="cr-adv" id="cr-adv" role="dialog" aria-label="Filters">
           <div class="sh-head"><b>Filters</b><button type="button" class="x" id="cr-fclose" aria-label="Close filters"><Fragment set:html={CLOSE_SVG} /></button></div>
           <label class="sel"><span class="k">Language</span><select id="crew-lang" aria-label="Language"><option value="">All</option></select></label>
@@ -108,7 +108,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
   .cr-adv { display: flex; gap: 10px; align-items: center; }
   .sh-head, .sh-foot { display: none; }
   .sel { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 30px 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; cursor: pointer; }
-  .sel::after { content: '▾'; position: absolute; right: 11px; font-size: 11px; color: var(--lr-muted); pointer-events: none; }
+  .sel::after { content: ''; position: absolute; right: 11px; width: 14px; height: 14px; background: var(--lr-muted); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; pointer-events: none; } /* chevron icon, not the ▾ glyph (DEC-0158) */
   .sel .k { font-size: 12px; color: var(--lr-muted); white-space: nowrap; }
   .sel select { appearance: none; background: transparent; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; max-width: 11rem; field-sizing: content; }
   .sel select option { background: var(--lr-card); color: var(--lr-text); }
@@ -243,7 +243,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
     const byId = (id: string) => list.find((c) => (isLive ? c.crew_id : c.slug) === id);
     const rows = [...mine].sort((a, b) => Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary)) || ['active', 'invited', 'pending'].indexOf(a.status) - ['active', 'invited', 'pending'].indexOf(b.status));
     if (!rows.length) { $('cr-tile-me').hidden = true; $('cr-tile-guest').hidden = false; return; }
-    const check = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+    const check = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
     $('cr-mine').innerHTML = rows.map((m) => {
       const c = byId(m.crew_id);
       const [label, cls] = m.status === 'active' && m.is_primary ? ['Active crew', 'act'] : STATUS[m.status] ?? [m.status, ''];

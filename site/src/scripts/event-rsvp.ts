@@ -37,7 +37,7 @@ export function createEventRsvp(root: HTMLElement) {
       : discord
         ? 'Join the host\u2019s Discord so they can send your lobby invite.'
         : 'Add the host on PlayStation and message them for your lobby invite.';
-    const cal = `<button type="button" class="ev-ics" data-ics="${esc(e.event_id)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Add to calendar</button>`;
+    const cal = `<button type="button" class="ev-ics" data-ics="${esc(e.event_id)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>Add to calendar</button>`;
     return `<div class="ev-next"><p class="ev-next-text"><strong>You\u2019re in \u2014 one more step.</strong> ${text} ${cal}</p>${buttons ? `<div class="ev-next-actions">${buttons}</div>` : ''}</div>`;
   }
 
@@ -56,7 +56,7 @@ export function createEventRsvp(root: HTMLElement) {
       const countTxt = `${n}${max ? ' / ' + max : ''} going`;
       const list = n ? `<details class="ev-going"><summary>${countTxt}</summary><p>${named.join(', ')}${anon ? `${named.length ? ' + ' : ''}${anon} anonymous` : ''}</p></details>` : `<span class="ev-going-none">${max ? `0 / ${max} going` : 'Be the first to join'}</span>`;
       let action = '';
-      if (mine.has(id)) action = `<button type="button" class="btn btn-sm ev-rsvp-btn is-in" data-leave="${esc(id)}" title="Click to cancel"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Going</button>`;
+      if (mine.has(id)) action = `<button type="button" class="btn btn-sm ev-rsvp-btn is-in" data-leave="${esc(id)}" title="Click to cancel"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Going</button>`;
       else if (closed) action = '';
       else if (e.registration === 'closed') action = '<span class="ev-full">Sign-ups Closed</span>';
       else if (full) action = '<span class="ev-full">Full</span>';

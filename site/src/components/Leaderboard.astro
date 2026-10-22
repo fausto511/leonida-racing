@@ -10,7 +10,7 @@ import { sampleEntries, initialState, render, headHtml, vehicleSelectHtml, class
 const first = render(sampleEntries, initialState, true);
 const noLap = noLapCars(sampleEntries);
 const base = import.meta.env.BASE_URL;
-const search = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
+const search = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
 const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>';
 ---
 <section id="leaderboard" class="wrap lb">
@@ -38,7 +38,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     <span class="lbl">Show</span>
     <div class="vseg sm lb-toggle" role="group" aria-label="Times shown">
       <button type="button" class="on" aria-pressed="true" data-verified="0">All times</button>
-      <button type="button" class="v" aria-pressed="false" data-verified="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span class="lg-l">Video verified only</span><span class="sm-l">Verified</span></button>
+      <button type="button" class="v" aria-pressed="false" data-verified="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="lg-l">Video verified only</span><span class="sm-l">Verified</span></button>
     </div>
   </div>
 
@@ -56,7 +56,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     <div role="rowgroup" id="lb-thead" set:html={headHtml(true)} />
     <div role="rowgroup" id="lb-tbody" aria-live="polite" set:html={first.body} />
   </div>
-  <p class="lb-legend" aria-hidden="true"><span class="st ok"><i><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></i>Video verified</span><span class="st no"><i></i>Screenshot only</span><span class="vd-l"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg></span>Watch</p>
+  <p class="lb-legend" aria-hidden="true"><span class="st ok"><i><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>Video verified</span><span class="st no"><i></i>Screenshot only</span><span class="vd-l"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>Watch</p>
   <div class="lb-more" id="lb-more" set:html={first.more} />
 
   <div class="ta-2">

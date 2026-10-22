@@ -52,7 +52,7 @@ const steps = [
         <button type="button" class="mine" data-type="saved" aria-pressed="false" id="tr-saved-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Saved<span class="n" id="tr-saved-n"></span></button>
       </div>
       <div class="tr-row2">
-        <button type="button" class="tr-fbtn" id="tr-fbtn" aria-expanded="false" aria-controls="tr-adv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="nb" id="tr-fn" hidden></span></button>
+        <button type="button" class="tr-fbtn" id="tr-fbtn" aria-expanded="false" aria-controls="tr-adv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="nb" id="tr-fn" hidden></span></button>
         <div class="tr-adv" id="tr-adv" role="dialog" aria-label="Filters">
           <div class="sh-head"><b>Filters</b><button type="button" class="x" id="tr-fclose" aria-label="Close filters"><Fragment set:html={CLOSE_SVG} /></button></div>
           <label class="sel"><span class="k">Layout</span><select id="tr-layout"><option value="">All</option>{Object.entries(layoutLabels).map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
@@ -108,7 +108,7 @@ const steps = [
   .tr-adv { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
   .sh-head, .sh-foot { display: none; }
   .sel { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 30px 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; cursor: pointer; }
-  .sel::after { content: '▾'; position: absolute; right: 11px; font-size: 11px; color: var(--lr-muted); pointer-events: none; }
+  .sel::after { content: ''; position: absolute; right: 11px; width: 14px; height: 14px; background: var(--lr-muted); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; pointer-events: none; } /* chevron icon, not the ▾ glyph (DEC-0158) */
   .sel .k { font-size: 12px; color: var(--lr-muted); white-space: nowrap; }
   .sel select { appearance: none; background: transparent; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; max-width: 12rem; field-sizing: content; }
   .sel select option { background: var(--lr-card); color: var(--lr-text); }

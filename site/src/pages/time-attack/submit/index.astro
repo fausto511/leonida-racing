@@ -92,7 +92,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
 
             <div class="sb-box" id="tile-video">
               <div class="sb-vbox">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z M10 9l5 3-5 3Z"/></svg>
                 <strong class="dz-title">Video</strong>
                 <label class="dz-sub" for="video_url">Full, uncut lap</label>
                 <input id="video_url" name="video_url" type="url" inputmode="url" autocomplete="off" placeholder="Paste YouTube link" />
@@ -701,7 +701,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
     const el = $(id);
     const parts = [];
     if (screenshot) parts.push(`<img src="${esc(screenshot.url)}" alt="Your screenshot" />`);
-    else if (videoId) parts.push('<i class="sb-mini-vid"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg></i>');
+    else if (videoId) parts.push('<i class="sb-mini-vid"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z M10 9l5 3-5 3Z"/></svg></i>');
     parts.push(`<span>${screenshot && videoId ? 'Screenshot and video' : screenshot ? 'Screenshot' : 'Video'}</span>`);
     el.innerHTML = parts.join('');
   }

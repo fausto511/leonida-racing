@@ -62,7 +62,7 @@ const ORIGIN: [string, string][] = [['new', 'New in GTA VI'], ['returning', 'Ret
 const PRICE_PRESETS = [['250k', 250000], ['500k', 500000], ['1M', 1000000], ['2M', 2000000], ['5M', 5000000]] as const;
 
 const chev = '<svg class="ico ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
-const check = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+const check = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
 function mc(group: string, value: string | number, label: string, n: number | undefined): string {
   const count = n != null ? ' <span>' + n + '</span>' : '';
   const dis = n ? '' : ' disabled';
@@ -112,7 +112,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
     </div>
     <!-- phone: search full width, then Filters + Sort -->
     <div class="tools-phone">
-      <button type="button" class="ctl" id="open-filters"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filters<b class="ctl-count" id="filter-count" hidden></b></button>
+      <button type="button" class="ctl" id="open-filters"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<b class="ctl-count" id="filter-count" hidden></b></button>
       <button type="button" class="ctl" id="open-sort-phone"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg>Sort: <b data-sort-label>{defaultSort === 'name' ? 'Name A–Z' : 'Class'}</b></button>
     </div>
     <div class="tools-row2">
@@ -263,7 +263,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .menu-i { white-space: nowrap; }
   .menu-i:hover:not(:disabled) { background: rgba(251,247,234,.06); }
   .menu-i.on { color: var(--lr-text); font-weight: 600; }
-  .menu-i.on::after { content: '✓'; color: var(--lr-pink); }
+  .menu-i.on::after { content: ''; width: 14px; height: 14px; background: var(--lr-pink); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat; } /* check icon, not the ✓ glyph (DEC-0158) */
   .menu-i:disabled { color: #77778A; cursor: not-allowed; }
   .menu-h { display: flex; align-items: center; height: 28px; padding: 0 10px; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #77778A; }
   .menu-hint { text-transform: none; letter-spacing: 0; font-weight: 500; }
