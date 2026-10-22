@@ -147,6 +147,9 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
 <style>
   .hw-band-in.lr-band-in { min-height: 0; padding-bottom: 32px; display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; }
   .hw-band-cta { flex: none; }
+  .hw-band-in > div:first-child { align-self: flex-start; }
+  /* Same head height as Report a time / Report content on desktop (DEC-0154) */
+  @media (min-width: 861px) { .hw-band-in.lr-band-in { min-height: 280px; } }
 
   .hw { padding-bottom: 72px; }
   .hw > section { max-width: 960px; }

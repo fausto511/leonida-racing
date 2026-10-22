@@ -65,6 +65,9 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
 <style>
   .cp :global(.ico) { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .cp-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding-top: 40px; padding-bottom: 28px; }
+  .cp-head > div:first-child { align-self: flex-start; }
+  /* Same head height as the legal pages on desktop (DEC-0154) */
+  @media (min-width: 861px) { .cp-head { box-sizing: border-box; min-height: 220px; } }
   .cp-sub { margin: 16px 0 0; font-size: 17px; color: var(--lr-soft); } /* spacing = .lr-lede */
   .cp-share { flex: none; }
 

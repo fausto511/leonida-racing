@@ -201,6 +201,8 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
   .gd-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
   .gd-hero { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: start; }
+  /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
+  .gd-hero > .gd-tile { align-self: end; margin-top: 0; }
   .gd-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
   .gd-tile-eb { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .gd-glance { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }

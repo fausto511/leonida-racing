@@ -198,6 +198,8 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
   .rb-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 55%; max-width: none; }
   .rb-ph { filter: grayscale(.5); }
   .rb-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; }
+  /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
+  @media (min-width: 1101px) { .rb-inner > .glance { align-self: flex-end; margin-top: 0; } }
   .rb-copy { min-width: 0; max-width: 700px; }
   .glance { flex: none; width: 380px; margin-top: 30px; padding: 18px 18px 14px; border: 1px solid rgba(200,200,222,.2); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
   .glance-eb { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }

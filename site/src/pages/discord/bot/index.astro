@@ -155,6 +155,8 @@ const img = `${base}images/hub/hub-events`;
   .db picture, .db-bg, .db-t { position: absolute; inset: 0; width: 100%; height: 100%; }
   .db-bg { object-fit: cover; object-position: 50% 55%; }
   .db-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; }
+  /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
+  @media (min-width: 1101px) { .db-inner > .glance { align-self: flex-end; margin-top: 0; } }
   .db-copy { min-width: 0; max-width: 680px; }
   .db-act { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-top: 18px; }
   .dico { width: 20px; height: 20px; fill: currentColor; flex: none; }
