@@ -72,7 +72,7 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
   <div class="wrap hw">
     <!-- 4 steps -->
     <section class="hw-sec" aria-labelledby="hw-steps-h">
-      <h2 class="hw-h2" id="hw-steps-h">From the track to the leaderboard</h2>
+      <h2 class="lr-h2 lr-h2-s hw-h2" id="hw-steps-h">From the track to the leaderboard</h2>
       <ol class="hw-steps">
         {steps.map((s, i) => (
           <li><span class="hw-n">{i + 1}</span><strong>{s.t}</strong><span class="hw-c">{s.c}</span></li>
@@ -82,7 +82,7 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
 
     <!-- proof -->
     <section class="hw-sec" aria-labelledby="hw-proof-h">
-      <h2 class="hw-h2" id="hw-proof-h">Two ways to prove your lap</h2>
+      <h2 class="lr-h2 lr-h2-s hw-h2" id="hw-proof-h">Two ways to prove your lap</h2>
       <p class="hw-sub">Pick one or send both.</p>
       <div class="hw-proof">
         <div class="hw-card">
@@ -112,7 +112,7 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
 
     <!-- after submit -->
     <section class="hw-sec" aria-labelledby="hw-flow-h">
-      <h2 class="hw-h2" id="hw-flow-h">After you submit</h2>
+      <h2 class="lr-h2 lr-h2-s hw-h2" id="hw-flow-h">After you submit</h2>
       <ol class="hw-flow">
         {flow.map((f) => <li class={`is-${f.tone}`}><i aria-hidden="true"></i><strong>{f.t}</strong><span>{f.c}</span></li>)}
       </ol>
@@ -122,7 +122,7 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
 
     <!-- rules -->
     <section class="hw-sec" id="rules" aria-labelledby="rules-h">
-      <h2 class="hw-h2" id="rules-h">Rules and verification</h2>
+      <h2 class="lr-h2 lr-h2-s hw-h2" id="rules-h">Rules and verification</h2>
       <div class="hw-faq card">
         {faq.map((f, i) => (
           <details open={i === 0}>
@@ -135,7 +135,7 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
 
     <section class="hw-end">
       <div>
-        <h2 class="display hw-end-t">Ready to put a time on the board?</h2>
+        <h2 class="lr-h2 lr-h2-s display hw-end-t">Ready to put a time on the board?</h2>
         <p>Three short steps. Screenshot or video.</p>
       </div>
       <a class="btn btn-primary" href={`${base}time-attack/submit/`}>Submit a lap</a>
@@ -153,7 +153,7 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
   .hw { padding-bottom: 72px; }
   .hw > section { max-width: 960px; }
   .hw-sec { padding-top: 48px; scroll-margin-top: calc(var(--gh-header-h) + 16px); }
-  .hw-h2 { margin: 0; font-family: var(--gh-font-display); font-size: 26px; font-weight: 800; text-transform: uppercase; line-height: 1.05; }
+  .hw-h2 { margin: 0; }
   .hw-sub { margin: 8px 0 0; font-size: 15px; color: var(--lr-soft); }
   .hw-sub a { color: var(--lr-text); text-decoration-color: var(--lr-orange); text-underline-offset: 3px; }
 
@@ -201,13 +201,12 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
   .hw-a :global(a) { color: var(--lr-text); text-decoration-color: var(--lr-orange); text-underline-offset: 3px; }
 
   .hw-end { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 56px; padding: 24px; border-radius: 8px; background: var(--lr-card); border: 1px solid var(--lr-line); }
-  .hw-end-t { margin: 0; font-size: 24px; }
+  .hw-end-t { margin: 0; }
   .hw-end p { margin: 6px 0 0; font-size: 14px; color: var(--lr-soft); }
 
   @media (max-width: 860px) {
     .hw-band-in.lr-band-in { flex-direction: column; align-items: stretch; padding-bottom: 24px; gap: 18px; }
     .hw-sec { padding-top: 36px; }
-    .hw-h2 { font-size: 22px; }
     .hw-steps { grid-template-columns: 1fr; gap: 14px; }
     .hw-steps li { display: grid; grid-template-columns: 34px 1fr; column-gap: 14px; row-gap: 2px; }
     .hw-n { grid-row: span 2; margin: 0; }

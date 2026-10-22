@@ -53,7 +53,7 @@ const roles = [
     <!-- Where we come from -->
     <section class="ab-sec ab-roots" aria-labelledby="ab-roots-h">
       <div class="ab-roots-text">
-                <h2 class="ab-h2" id="ab-roots-h">Where we come from</h2>
+                <h2 class="lr-h2 lr-h2-s ab-h2" id="ab-roots-h">Where we come from</h2>
         <p>The <a href={RRL_URL} target="_blank" rel="noopener">Rockford Racing League</a> has been running GTA championships since 2017. Alongside the championship seasons came cup events, training sessions and a lot of testing. Drivers brought tracks, compared cars and helped shape racing classes where a close fight was the point.</p>
         <p>That work became a testing routine of its own. Cars were compared on tight city circuits, fast open-road routes and hills with climbs and descents. Only clean laps counted. Test drivers checked their pace against one another, and uncertain results got a second driver’s attention. The balancing grew more detailed over the years, with plenty of spreadsheets along the way.</p>
         <p>Racing Society brought another part of the idea: a Discord space connecting racers, hosts and creators. That server is now Leonida Racing’s Discord. This new project brings the RRL’s testing experience and Racing Society’s network together, with room for the wider scene to help shape it.</p>
@@ -69,7 +69,7 @@ const roles = [
 
     <!-- How we work -->
     <section class="ab-sec" aria-labelledby="ab-work-h">
-            <h2 class="ab-h2" id="ab-work-h">How we work</h2>
+            <h2 class="lr-h2 lr-h2-s ab-h2" id="ab-work-h">How we work</h2>
       <div class="ab-grid4">
         {principles.map((p) => (
           <div class="card ab-p">
@@ -84,7 +84,7 @@ const roles = [
     <!-- Where we're heading -->
     <section class="ab-sec ab-next" aria-labelledby="ab-next-h">
       <div class="ab-next-in">
-                <h2 class="ab-h2" id="ab-next-h">Where we’re heading</h2>
+                <h2 class="lr-h2 lr-h2-s ab-h2" id="ab-next-h">Where we’re heading</h2>
         <p>We want our first year to lay the groundwork for a detailed GTA VI car database: results from different tracks, a new approach to balancing built around those results, and useful comparisons of price, pace and where each car fits. Our GTA V testing gives us a way to approach the work. GTA VI needs its own results.</p>
         <p>We also want Leonida Racing to become a regular meeting point for experienced hosts, creators and racing crews from around the world. More events to discover, more creations to try, more people to line up alongside. Through Time Attack, we want drivers and their crews to show their pace with laps others can check.</p>
       </div>
@@ -94,7 +94,7 @@ const roles = [
     <section class="ab-sec" aria-labelledby="ab-join-h">
       <div class="ab-join-head">
         <div>
-          <h2 class="ab-h2" id="ab-join-h">Get involved</h2>
+          <h2 class="lr-h2 lr-h2-s ab-h2" id="ab-join-h">Get involved</h2>
           <p class="ab-lead">You do not have to chase an overall record to belong here. Bring an idea, a willingness to test, a track you’re building or an event you want people to find. Start a conversation on Discord; there’s room to contribute from the beginning. As you spend time helping shape the project, your ideas help steer it too.</p>
         </div>
         <a class="btn btn-discord ab-join-btn" href={DISCORD_INVITE_URL} target="_blank" rel="noopener">Join Discord</a>
@@ -108,7 +108,7 @@ const roles = [
     <section class="ab-sec" aria-labelledby="ab-partner-h">
       <div class="card ab-partner">
         <div>
-                    <h2 class="ab-h2" id="ab-partner-h">Partner with us</h2>
+                    <h2 class="lr-h2 lr-h2-s ab-h2" id="ab-partner-h">Partner with us</h2>
           <p>Run a crew, a community, a stream or a channel? We’re interested in working with people who want to share good racing, useful knowledge and an audience for each other’s work. Track-building communities are welcome too: tell us what you’re making and what we could do together.</p>
         </div>
         <div class="ab-partner-act">
@@ -121,15 +121,15 @@ const roles = [
     <!-- Independent · Contact · Data -->
     <section class="ab-sec ab-info" aria-label="Independent, contact and data">
       <div>
-        <h2 class="ab-h3">Independent</h2>
+        <h3 class="ab-h3">Independent</h3>
         <p>Leonida Racing is an independent community project built for GTA VI racers and car enthusiasts. It is not affiliated with Rockstar Games or Take-Two Interactive. Leonida Racing is free to use.</p>
       </div>
       <div>
-        <h2 class="ab-h3">Contact</h2>
+        <h3 class="ab-h3">Contact</h3>
         <p>Have a question, spotted something wrong or want to contribute? Reach us on <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener">Discord</a> or use the email address in the <a href={`${base}legal/`}>Legal Notice</a>. To flag a lap or other content for review, use <a href={`${base}report/`}>Report a time</a> or <a href={`${base}report-content/`}>Report content</a>.</p>
       </div>
       <div>
-        <h2 class="ab-h3">How your data is used</h2>
+        <h3 class="ab-h3">How your data is used</h3>
         <p>Signing in uses Discord. Your account, submissions and community activity are handled as described in our <a href={`${base}privacy/`}>Privacy Policy</a>, including what we store, why we use it and how to exercise your rights.</p>
       </div>
     </section>
@@ -148,7 +148,7 @@ const roles = [
   .ab { padding-bottom: 72px; }
   .ab-sec { padding-top: 64px; }
   .ab-eb { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lr-orange); }
-  .ab-h2 { margin: 0 0 18px; font-size: 30px; font-weight: 700; line-height: 1.15; }
+  .ab-h2 { margin: 0 0 18px; }
   .ab p { line-height: 1.65; }
   .ab a:not(.btn):not(.arrow) { color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(251,247,234,.4); }
   .ab a:not(.btn):not(.arrow):hover { text-decoration-color: var(--lr-pink); }
@@ -198,7 +198,6 @@ const roles = [
   }
   @media (max-width: 760px) {
     .ab-sec { padding-top: 44px; }
-    .ab-h2 { font-size: 24px; }
     .ab-roots-text p, .ab-next-in p, .ab-lead { font-size: 16px; }
     .ab-stats dd { font-size: 28px; }
     .ab-grid4 { grid-template-columns: 1fr; gap: 12px; }

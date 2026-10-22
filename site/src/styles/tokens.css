@@ -298,6 +298,12 @@ main:focus { outline: none; }
 .btn.btn-discord.btn-discord:hover { background: #4752C4; border-color: #4752C4; color: #fff; }
 .btn-discord svg { fill: currentColor; color: #fff; flex: none; }
 .btn-discord:not(:has(svg))::before { content: ''; width: 18px; height: 18px; flex: none; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z'/%3E%3C/svg%3E") center / contain no-repeat; }
+/* Section heading H2 (Fausto 22.10.2026, DEC-0165): one style on every page — display face, uppercase, 30px (phone 24px).
+   Exception: the legal texts (Legal, Privacy, Terms) keep their own body headings. Card titles stay H3 in normal type. */
+.lr-h2 { margin: 0; font-family: var(--gh-font-display); font-weight: 800; text-transform: uppercase; font-size: 30px; line-height: 1.05; letter-spacing: .005em; text-wrap: balance; }
+/* Explanation pages (Submit, How it works, Discord, Discord bot, Guide, About, Report): smaller H2, same style (DEC-0165) */
+.lr-h2.lr-h2-s { font-size: 24px; }
+@media (max-width: 760px) { .lr-h2 { font-size: 24px; } .lr-h2.lr-h2-s { font-size: 22px; } }
 /* Line icons (Fausto 22.10.2026, DEC-0159): every icon on the 24px grid gets the same on-screen stroke,
    whatever its size, with round ends and joins so corners stay clean. Filled icons (Discord, play, star) are unaffected. */
 :root { --lr-icon-stroke: 1.8px; }

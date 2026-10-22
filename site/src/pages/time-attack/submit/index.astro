@@ -40,7 +40,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
       <!-- Guest -->
       <div id="sb-guest" class="card sb-guest" hidden>
         <p class="sb-eb">Three short steps</p>
-        <h2 class="sb-h2">Log in, then three short steps</h2>
+        <h2 class="lr-h2 lr-h2-s sb-h2">Log in, then three short steps</h2>
         <ol class="sb-steps-preview">
           <li><b>1</b><span><strong>Proof</strong>A results screenshot, a YouTube link to your full lap, or both.</span></li>
           <li><b>2</b><span><strong>Your lap</strong>PSN name, car and lap time.</span></li>
@@ -201,7 +201,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
       <div id="form-success" class="card sb-done" hidden>
         <span class="sb-done-i" set:html={check} />
         <p class="sb-eb">In review</p>
-        <h2 class="sb-h2">Lap submitted</h2>
+        <h2 class="lr-h2 lr-h2-s sb-h2">Lap submitted</h2>
         <p id="success-text" class="sb-done-t"></p>
         <p id="success-rank" class="sb-done-rank" hidden></p>
         <div class="sb-done-a">
@@ -229,7 +229,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   .sb-notice strong { color: var(--lr-orange); }
 
   .sb-eb { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
-  .sb-h2 { margin: 0; padding: 0; font-family: var(--gh-font-display); font-size: 26px; font-weight: 800; text-transform: uppercase; line-height: 1.05; }
+  .sb-h2 { margin: 0; padding: 0; }
   .sb-plat { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; margin-right: 10px; border-radius: 4px; background: rgba(217,245,142,.14); color: var(--lr-lime); font-size: 12px; font-weight: 800; letter-spacing: .04em; }
   .sb-ps { display: flex; align-items: center; flex-wrap: wrap; margin: 12px 0 0; font-size: 14px; color: var(--lr-soft); }
 
@@ -362,7 +362,6 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   @media (max-width: 860px) {
     .sb-layout { padding-top: 16px; }
     .sb-guest, .sb-done { padding: 20px 16px; }
-    .sb-h2 { font-size: 22px; }
     .sb-proof { grid-template-columns: 1fr; gap: 12px; margin-top: 18px; }
     .sb-vbox, .dropzone { min-height: 150px; }
     .sb-need-b { grid-template-columns: 1fr; }

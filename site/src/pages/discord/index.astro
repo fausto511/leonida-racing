@@ -64,7 +64,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   <!-- ===== what's on the server ===== -->
   <section class="wrap dsec">
     <p class="dsec-eb">What you’ll find</p>
-    <h2 class="dsec-h">Find your people</h2>
+    <h2 class="lr-h2 lr-h2-s dsec-h">Find your people</h2>
     <div class="areas">
       {discordAreas.map((a) => (
         <article class="area">
@@ -84,7 +84,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   <section class="wrap dsec lfg">
     <div class="lfg-copy">
       <p class="dsec-eb">{discordLfg.eyebrow}</p>
-      <h2 class="dsec-h">{discordLfg.title}</h2>
+      <h2 class="lr-h2 lr-h2-s dsec-h">{discordLfg.title}</h2>
       <p class="dsec-p">{discordLfg.text}</p>
       <ol class="lfg-steps">{discordLfg.steps.map((s) => <li>{s}</li>)}</ol>
       <p class="dsec-small">{discordLfg.notes}</p>
@@ -114,7 +114,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   <!-- ===== three steps ===== -->
   <section class="wrap dsec">
     <p class="dsec-eb">Getting started</p>
-    <h2 class="dsec-h">Make yourself at home</h2>
+    <h2 class="lr-h2 lr-h2-s dsec-h">Make yourself at home</h2>
     <ol class="steps">
       {discordSteps.map((s, i) => (
         <li class="step">
@@ -131,7 +131,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   <!-- ===== tiers ===== -->
   <section class="wrap dsec">
     <p class="dsec-eb">Roles</p>
-    <h2 class="dsec-h">Guest, Registered Driver, Verified</h2>
+    <h2 class="lr-h2 lr-h2-s dsec-h">Guest, Registered Driver, Verified</h2>
     <div class="tiers-wrap">
       <table class="tiers">
         <thead><tr><th scope="col"><span class="sr">What you can do</span></th>{discordTiers.cols.map((c) => <th scope="col">{c}</th>)}</tr></thead>
@@ -157,7 +157,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
     </div>
     <a class="bot" href={`${base}discord/bot/`}>
       <p class="dsec-eb">{discordBotTeaser.eyebrow}</p>
-      <h2 class="bot-t">{discordBotTeaser.title}</h2>
+      <h2 class="lr-h2 lr-h2-s bot-t">{discordBotTeaser.title}</h2>
       <p class="bot-p">{discordBotTeaser.text}</p>
       <div class="bot-cmds"><code>/events</code><code>/event</code><code>/car</code><code>/compare</code><code>/crew</code><code>/leonida feed</code></div>
       <span class="arrow">{discordBotTeaser.link} →</span>
@@ -167,7 +167,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   <!-- ===== FAQ ===== -->
   <section class="wrap dsec faq" aria-labelledby="faq-h">
     <p class="dsec-eb">FAQ</p>
-    <h2 class="dsec-h" id="faq-h">Questions about the server</h2>
+    <h2 class="lr-h2 lr-h2-s dsec-h" id="faq-h">Questions about the server</h2>
     <div class="faq-list">
       {discordFaq.map((f, i) => (
         <details open={i === 0}>
@@ -182,7 +182,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   <section class="dband">
     <div class="wrap dband-inner">
       <div class="dband-copy">
-        <h2 class="display dband-title">Pull up a chair</h2>
+        <h2 class="lr-h2 display dband-title">Pull up a chair</h2>
         <p class="dband-text">Say hi in #chat, pick your roles and meet the people behind the builds.</p>
       </div>
       <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener" class="btn dband-btn">
@@ -214,7 +214,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   /* ---- sections ---- */
   .dsec { padding-top: 56px; }
   .dsec-eb { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lr-orange); }
-  .dsec-h { margin: 0 0 20px; font-size: clamp(24px, 3vw, 32px); font-weight: 700; line-height: 1.15; }
+  .dsec-h { margin: 0 0 20px; }
   .dsec-p { margin: 0; font-size: 17px; line-height: 1.65; color: #E4E4EC; max-width: 640px; }
   .dsec-small { margin: 14px 0 0; font-size: 14px; line-height: 1.55; color: var(--lr-soft); max-width: 760px; }
 
@@ -281,7 +281,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .rules ul { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.5; color: #E4E4EC; }
   .bot { display: flex; flex-direction: column; gap: 8px; padding: 22px 24px; border-radius: 8px; border: 1px solid var(--lr-line-strong); background: linear-gradient(140deg, rgba(42,31,158,.35), rgba(177,42,140,.25) 55%, rgba(242,106,61,.18)), var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
   .bot:hover { border-color: var(--lr-orange); }
-  .bot-t { margin: 0; font-size: 24px; font-weight: 700; line-height: 1.2; }
+  .bot-t { margin: 0; }
   .bot-p { margin: 0; font-size: 15px; line-height: 1.55; color: #E4E4EC; }
   .bot-cmds { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }
   .bot-cmds code { font-size: 13px; padding: 3px 8px; border-radius: 4px; background: rgba(11,11,20,.6); color: var(--lr-text); }
@@ -302,7 +302,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .dband { background: var(--lr-brand-gradient); }
   .dband-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding-top: 56px; padding-bottom: 56px; }
   .dband-copy { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
-  .dband-title { margin: 0; font-size: 30px; }
+  .dband-title { margin: 0; }
   .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
   .dband-btn { background: var(--lr-text); color: var(--lr-discord); flex: none; }
   .dband-btn:hover { background: #fff; color: var(--lr-discord); }
@@ -332,7 +332,6 @@ const dash = '<span class="no" aria-label="No">–</span>';
     .tiers thead th { font-size: 10px; letter-spacing: .04em; line-height: 1.25; }
     .cond { white-space: normal; font-size: 12px; }
     .dband-inner { flex-direction: column; align-items: stretch; gap: 18px; padding-top: 36px; padding-bottom: 36px; }
-    .dband-title { font-size: 24px; }
     .dband-btn { width: 100%; justify-content: center; }
   }
 </style>

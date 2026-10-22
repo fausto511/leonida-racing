@@ -125,7 +125,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
     {entries.length > 0 && (
       <section class="rk-sec" aria-labelledby="rk-list-h">
         <div class="rk-sec-head">
-          <h2 class="rk-h2" id="rk-list-h">Ranked by {r.valueLabel.toLowerCase()}</h2>
+          <h2 class="lr-h2 rk-h2" id="rk-list-h">Ranked by {r.valueLabel.toLowerCase()}</h2>
           {compareIds.length >= 2 && <a class="arrow rk-cmp" href={`${base}cars/compare/?cars=${compareIds.join(',')}`}>Compare the top {compareIds.length} →</a>}
         </div>
         {!complete && <p class="rk-note">{isPrice ? 'Prices' : 'Results'} available for {entries.length} of {r.scope.length} officially revealed vehicles. Positions may change as more {isPrice ? 'prices' : 'results'} are added.</p>}
@@ -152,7 +152,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
     {waiting.length > 0 && (
       <section class="rk-sec" aria-labelledby="rk-wait-h">
         <div class="rk-sec-head">
-          <h2 class="rk-h2" id="rk-wait-h">{entries.length ? 'Not ranked yet' : 'Waiting for results'}<span class="rk-count tnum">{waiting.length}</span></h2>
+          <h2 class="lr-h2 rk-h2" id="rk-wait-h">{entries.length ? 'Not ranked yet' : 'Waiting for results'}<span class="rk-count tnum">{waiting.length}</span></h2>
         </div>
         {entries.length === 0 && (
           <p class="rk-lead">{isPrice
@@ -228,7 +228,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
   .rk { padding-bottom: 64px; }
   .rk-sec { padding-top: 40px; }
   .rk-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
-  .rk-h2 { display: flex; align-items: baseline; gap: 10px; margin: 0; font-size: 22px; font-weight: 700; }
+  .rk-h2 { display: flex; align-items: baseline; gap: 10px; margin: 0; }
   .rk-count { font-size: 15px; font-weight: 600; color: var(--lr-muted); }
   .rk-cmp, .rk-all { font-size: 15px; font-weight: 600; }
   .rk-wrap + .rk-note { margin: 12px 0 0; }
@@ -283,7 +283,6 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
     .rchip { flex: none; height: 36px; font-size: 14px; }
     .rchip.is-sub { height: 32px; font-size: 13px; }
     .rk-sec { padding-top: 28px; }
-    .rk-h2 { font-size: 19px; }
     .rk-table { font-size: 14px; }
     .rk-table th, .rk-table td { padding-left: 10px; padding-right: 10px; }
     .rk-table .c-cls, .rk-table .c-src { display: none; }

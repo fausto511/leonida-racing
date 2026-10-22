@@ -235,13 +235,13 @@ const more = custom
       </section>
       {custom?.about && (
         <section class="wrap tabout" aria-labelledby="tabout-h">
-          <h2 class="tabout-h" id="tabout-h">{custom.about.title}</h2>
+          <h2 class="lr-h2 tabout-h" id="tabout-h">{custom.about.title}</h2>
           {custom.about.paras.map((p) => <p>{p}</p>)}
         </section>
       )}
       {!custom && copy && (
         <section class="wrap tabout" aria-labelledby="tabout-h">
-          <h2 class="tabout-h" id="tabout-h">{copy.aboutTitle}</h2>
+          <h2 class="lr-h2 tabout-h" id="tabout-h">{copy.aboutTitle}</h2>
           {copy.about.map((p) => <p>{p}</p>)}
         </section>
       )}
@@ -388,7 +388,7 @@ const more = custom
   .tm-s { font-size: 15px; line-height: 1.45; color: var(--lr-soft); }
   .tm-a { margin-top: 6px; }
   .tabout { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--lr-line); }
-  .tabout-h { margin: 0 0 12px; font-size: clamp(22px, 3vw, 28px); font-weight: 700; line-height: 1.2; }
+  .tabout-h { margin: 0 0 12px; }
   .tabout p { max-width: 820px; margin: 0 0 14px; font-size: 17px; line-height: 1.7; color: #E4E4EC; }
   .tlinks { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; margin-top: 40px; padding-top: 32px; padding-bottom: 32px; border-top: 1px solid var(--lr-line); }
   .tls { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 15px; }

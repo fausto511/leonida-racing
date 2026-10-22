@@ -72,7 +72,7 @@ const steps = [
     <p class="hub-empty" id="tr-empty" hidden>No tracks match these filters.</p>
 
     <section class="tr-how" aria-labelledby="tr-how-h">
-      <h2 class="tr-h2" id="tr-how-h">How tracks get here</h2>
+      <h2 class="lr-h2 tr-h2" id="tr-how-h">How tracks get here</h2>
       <ol>
         {steps.map(([t, c], i) => <li><span class="n">{i + 1}</span><strong>{t}</strong><span>{c}</span></li>)}
       </ol>
@@ -121,7 +121,7 @@ const steps = [
   .tr-list:first-child { margin-top: 22px; }
 
   .tr-how { margin: 48px 0 72px; }
-  .tr-h2 { margin: 0; font-family: var(--gh-font-display); font-size: 24px; font-weight: 800; text-transform: uppercase; }
+  .tr-h2 { margin: 0; }
   .tr-how ol { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   .tr-how li { display: flex; flex-direction: column; gap: 6px; padding: 16px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
   .tr-how .n { display: grid; place-items: center; width: 30px; height: 30px; margin-bottom: 4px; border-radius: 50%; border: 1px solid rgba(255,149,90,.5); color: var(--lr-orange); font-weight: 700; font-size: 14px; }

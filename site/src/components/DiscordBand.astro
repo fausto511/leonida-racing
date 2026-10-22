@@ -10,7 +10,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
 <section class="dband">
   <div class="wrap dband-inner">
     <div class="dband-copy">
-      <h2 class="display dband-title">The scene talks on Discord</h2>
+      <h2 class="lr-h2 display dband-title">The scene talks on Discord</h2>
       <p class="dband-text">Find people to race with, catch the next event, talk cars, and discover new tracks and race jobs.<span class="dband-guest"> Log in with Discord and you join the server automatically.</span></p>
       <a class="dband-more" href={`${base}discord/`}>What’s on the server →</a>
     </div>
@@ -25,7 +25,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .dband { background: var(--lr-brand-gradient); }
   .dband-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding-top: 56px; padding-bottom: 56px; }
   .dband-copy { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
-  .dband-title { margin: 0; font-size: 30px; }
+  .dband-title { margin: 0; }
   .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
   :global(html.lr-authed) .dband-guest { display: none; }
   .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: #fff; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.5); }
@@ -36,7 +36,6 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   :global(main:has(.dband) + .site-foot) { margin-top: 0; }
   @media (max-width: 760px) {
     .dband-inner { flex-direction: column; align-items: stretch; gap: 18px; padding-top: 36px; padding-bottom: 36px; }
-    .dband-title { font-size: 24px; }
     .dband-btn { width: 100%; }
   }
 </style>

@@ -16,7 +16,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 <section id="leaderboard" class="wrap lb">
   <div class="lb-head">
     <div>
-      <h2 class="display">Leaderboard</h2>
+      <h2 class="lr-h2 display">Leaderboard</h2>
       <p id="lb-meta">{first.meta}</p>
     </div>
     <span class="sample" id="lb-flag" title="Fictional drivers, crews and times until GTA VI is out">Sample until launch</span>
@@ -86,7 +86,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 <style>
   .lb { padding-top: 40px; }
   .lb-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
-  .lb-head h2 { margin: 0; font-size: 40px; }
+  .lb-head h2 { margin: 0; }
   .lb-head p { margin: 8px 0 0; color: var(--lr-muted); font-size: 14px; }
   .sample { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #6B6B80; white-space: nowrap; }
   .sample[hidden] { display: none; }
@@ -213,7 +213,6 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   @media (max-width: 760px) {
     .lb { padding-top: 32px; }
     .lb-head { flex-direction: column; align-items: flex-start; gap: 6px; }
-    .lb-head h2 { font-size: 32px; }
     .lg-l { display: none; }
     .sm-l { display: inline; }
     .lb-ctl { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; }

@@ -48,7 +48,7 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
 
   <section class="wrap ta-sec" id="track">
     <p class="eyebrow">The track</p>
-    <h2 class="display">About Gellhorn</h2>
+    <h2 class="lr-h2 display">About Gellhorn</h2>
     <div class="track">
       <div class="img">
         <img src={`${base}images/gellhorn-raceway-1080.webp`} srcset={`${base}images/gellhorn-raceway-640.webp 640w, ${base}images/gellhorn-raceway-1080.webp 1080w, ${base}images/gellhorn-raceway-1672.webp 1672w`} sizes="(max-width: 760px) 100vw, 55vw" alt="Palm-lined race track straight with blue and red curbs in GTA VI" width="1080" height="608" loading="lazy" />
@@ -117,7 +117,7 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
 
   /* ---- track ---- */
   .ta-sec { padding-top: 64px; padding-bottom: 72px; }
-  .ta-sec h2 { margin: 10px 0 0; font-size: 36px; }
+  .ta-sec h2 { margin: 10px 0 0; }
   .track { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap: 20px; margin-top: 20px; align-items: stretch; }
   .track .img { position: relative; border-radius: 8px; overflow: hidden; min-height: 340px; }
   .track .img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -148,7 +148,6 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
     .ta-hero { grid-template-columns: 1fr; gap: 20px; padding-top: 28px; padding-bottom: 24px; }
     .ta-hero h1 { font-size: 38px; }
     .ta-sec { padding-top: 48px; padding-bottom: 56px; }
-    .ta-sec h2 { font-size: 30px; }
     .lede { font-size: 16px; }
     .ta-cta { display: grid; grid-template-columns: 1fr 1fr; }
     .track { grid-template-columns: 1fr; }

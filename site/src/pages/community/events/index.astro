@@ -20,7 +20,7 @@ for (const e of buildEvents) {
   groups.get(k)!.push(eventRowHtml(e, { full: true }));
 }
 const dayLabel = (k: string) => { const d = new Date(`${k}T12:00:00Z`); return `${d.toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' })}, ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' })}`; };
-const initialHtml = [...groups.entries()].map(([k, rows]) => `<section class="ev-day-g" id="day-${k}"><h2 class="ev-dh">${dayLabel(k)}<span class="n">${rows.length} event${rows.length === 1 ? '' : 's'}</span></h2><div class="ev-list">${rows.join('')}</div></section>`).join('');
+const initialHtml = [...groups.entries()].map(([k, rows]) => `<section class="ev-day-g" id="day-${k}"><h3 class="ev-dh">${dayLabel(k)}<span class="n">${rows.length} event${rows.length === 1 ? '' : 's'}</span></h3><div class="ev-list">${rows.join('')}</div></section>`).join('');
 const chips: [string, string][] = [['', 'All events'], ['race', 'Races'], ['time-attack', 'Time Attack'], ['league', 'Leagues'], ['car-meet', 'Car meets'], ['cruise', 'Cruises']];
 const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>';
 const dc = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.92 3.58 14.74 3.99C12.9 3.71 11.07 3.71 9.26 3.99C9.09 3.58 8.83 3.06 8.62 2.67C6.88 2.97 5.21 3.5 3.66 4.23C0.53 8.97 -0.32 13.58 0.1 18.14C2.18 19.69 4.19 20.63 6.17 21.25C6.66 20.58 7.1 19.86 7.48 19.11C6.76 18.83 6.07 18.5 5.43 18.11C5.6 17.98 5.77 17.85 5.93 17.71C9.88 19.56 14.17 19.56 18.07 17.71C18.23 17.85 18.4 17.98 18.57 18.11C17.92 18.5 17.24 18.84 16.52 19.11C16.9 19.86 17.33 20.58 17.82 21.25C19.8 20.63 21.82 19.69 23.9 18.14C24.4 12.86 23.05 8.28 20.33 4.23ZM8.01 15.34C6.83 15.34 5.86 14.23 5.86 12.88C5.86 11.53 6.81 10.43 8.01 10.43C9.22 10.43 10.19 11.53 10.17 12.88C10.17 14.23 9.22 15.34 8.01 15.34ZM15.99 15.34C14.8 15.34 13.83 14.23 13.83 12.88C13.83 11.53 14.78 10.43 15.99 10.43C17.19 10.43 18.17 11.53 18.14 12.88C18.14 14.23 17.19 15.34 15.99 15.34Z"/></svg>';
@@ -70,11 +70,11 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
     </div>
     <aside class="ec-side">
       <div class="side-dc">
-        <h2 class="sh"><span data-dc-h>Join the scene</span><small data-dc-k>Discord</small></h2>
+        <h3 class="sh"><span data-dc-h>Join the scene</span><small data-dc-k>Discord</small></h3>
         <Fragment set:html={dcCard} />
       </div>
       <div>
-        <h2 class="sh">Jump to a date</h2>
+        <h3 class="sh">Jump to a date</h3>
         <div class="mcal card" id="ev-cal"></div>
       </div>
     </aside>
@@ -225,7 +225,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   }
   const dayTitle = (k: string) => { const d = new Date(`${k}T12:00:00`); return `${d.toLocaleDateString('en-GB', { weekday: 'long' })}, ${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`; };
   function groupHtml(k: string, list: HubEvent[], rsvpOn: boolean) {
-    return `<section class="ev-day-g" id="day-${k}"><h2 class="ev-dh">${dayTitle(k)}${k === todayKey ? '<span class="today">Today</span>' : ''}<span class="n">${list.length} event${list.length === 1 ? '' : 's'}</span></h2><div class="ev-list">${list.map((e) => eventRowHtml(e, { rsvp: rsvpOn, sample: !live, full: true })).join('')}</div></section>`;
+    return `<section class="ev-day-g" id="day-${k}"><h3 class="ev-dh">${dayTitle(k)}${k === todayKey ? '<span class="today">Today</span>' : ''}<span class="n">${list.length} event${list.length === 1 ? '' : 's'}</span></h3><div class="ev-list">${list.map((e) => eventRowHtml(e, { rsvp: rsvpOn, sample: !live, full: true })).join('')}</div></section>`;
   }
 
   function render() {
@@ -373,7 +373,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
     const past = (data ?? []) as unknown as HubEvent[];
     const g = groupsOf(past);
     const box = $('ev-past');
-    box.innerHTML = past.length ? `<h2 class="ev-dh" style="margin-top:32px">Past events</h2>${[...g].map(([k, l]) => groupHtml(k, l, false)).join('')}` : '<p class="hub-empty">No past events yet.</p>';
+    box.innerHTML = past.length ? `<h3 class="ev-dh" style="margin-top:32px">Past events</h3>${[...g].map(([k, l]) => groupHtml(k, l, false)).join('')}` : '<p class="hub-empty">No past events yet.</p>';
     localizeTimes(box);
     box.hidden = false;
     btn.hidden = true;

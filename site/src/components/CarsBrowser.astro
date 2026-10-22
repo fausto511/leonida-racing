@@ -151,7 +151,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
 
     <!-- no results (DEC-0117): drop one filter, closest matches, did you mean -->
     <div class="empty" id="empty" hidden>
-      <h2 class="display empty-title">No cars match</h2>
+      <h2 class="lr-h2 display empty-title">No cars match</h2>
       <p class="muted" id="empty-dym"></p>
       <div class="empty-drops" id="empty-drops"></div>
       <div id="closest-wrap" hidden>
@@ -290,7 +290,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .more { display: flex; justify-content: center; padding-top: 28px; }
   :global(.miss) { display: block; margin-top: 2px; font-size: 13px; font-weight: 600; color: var(--lr-orange); }
   .empty { display: flex; flex-direction: column; gap: 14px; padding: 24px 0 8px; }
-  .empty-title { margin: 0; font-size: 28px; }
+  .empty-title { margin: 0; }
   .empty-drops { display: flex; flex-wrap: wrap; gap: 10px; }
   .closest-title { margin: 24px 0 0; font-size: 20px; }
   .closest-sub { margin: 0 0 6px; font-size: 14px; }
@@ -298,9 +298,9 @@ function mc(group: string, value: string | number, label: string, n: number | un
 
   /* ---- browse lists ---- */
   .browse { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding-top: 40px; padding-bottom: 24px; border-top: 1px solid var(--lr-line); margin-top: 32px; }
-  .browse h2 { margin: 0 0 12px; font-size: 16px; font-weight: 700; }
-  .browse h2 a { color: var(--lr-text); text-decoration: none; }
-  .browse h2 a:hover { color: var(--lr-orange); }
+  .browse h3 { margin: 0 0 12px; font-size: 16px; font-weight: 700; }
+  .browse h3 a { color: var(--lr-text); text-decoration: none; }
+  .browse h3 a:hover { color: var(--lr-orange); }
   .ls { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
   .ls a { color: var(--lr-muted); text-decoration: none; }
   .ls a:hover { color: var(--lr-orange); }
