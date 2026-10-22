@@ -9,6 +9,8 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 
 import { SITE_NAME, SITE_TAGLINE } from '../data/site';
+// Preconnect to Supabase so live data (events, crews, leaderboard) starts sooner (Lighthouse network tree, 22.10.).
+const supabaseOrigin = (() => { try { return new URL(import.meta.env.PUBLIC_SUPABASE_URL ?? '').origin; } catch { return null; } })();
 
 interface Props {
   title: string;
@@ -65,6 +67,7 @@ if (breadcrumbs.length) {
     <meta charset="utf-8" />
     <link rel="preload" href={fontDisplayUrl} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={fontTextUrl} as="font" type="font/woff2" crossorigin />
+    {supabaseOrigin && <link rel="preconnect" href={supabaseOrigin} crossorigin />}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0B0B14" />
