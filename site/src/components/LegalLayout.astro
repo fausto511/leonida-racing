@@ -15,7 +15,7 @@ const docs = [
 ];
 ---
 <Base title={title} description={description}>
-  <section class="lg-band">
+  <section class="lg-band lr-band-plain">
     <div class="wrap lr-band-in is-compact lg-band-in">
       <nav class="lr-crumb" aria-label="Breadcrumb"><a href={base}>Home</a><span aria-hidden="true">/</span><span aria-current="page">{heading}</span></nav>
       <p class="eyebrow">{kicker}</p>
@@ -71,10 +71,6 @@ const docs = [
 </script>
 
 <style>
-  .lg-band { position: relative; border-bottom: 1px solid rgba(200,200,222,.22); background:
-    radial-gradient(120% 140% at 100% 0%, rgba(255,62,165,.14), transparent 55%),
-    radial-gradient(90% 120% at 85% 100%, rgba(255,149,90,.10), transparent 60%),
-    var(--lr-card); }
   .lg-band-in { display: flex; flex-direction: column; justify-content: center; }
   .lg-updated { margin: 14px 0 0; font-size: 14px; color: var(--lr-soft); }
 

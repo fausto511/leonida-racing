@@ -22,7 +22,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   noindex={true /* until laps can be submitted on launch day (RS-0050) */}
   breadcrumbs={[{ name: 'Time Attack', path: 'time-attack/gellhorn-international-raceway/' }, { name: 'Submit a Lap', path: 'time-attack/submit/' }]}
 >
-  <section class="sb-band">
+  <section class="sb-band lr-band-plain">
     <div class="wrap lr-band-in sb-band-in">
       <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}time-attack/gellhorn-international-raceway/`}>Time Attack</a><span aria-hidden="true">/</span><span aria-current="page">Submit a lap</span></nav>
       <p class="eyebrow">Gellhorn International Raceway</p>
@@ -220,7 +220,6 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
 <style>
   [hidden] { display: none !important; }
   /* ---- band: "without image" variant (DEC-0139) ---- */
-  .sb-band { border-bottom: 1px solid var(--lr-line); background: linear-gradient(180deg, rgba(28,28,42,.6), rgba(11,11,20,0)); }
   .sb-band-in.lr-band-in { min-height: 0; padding-top: 32px; padding-bottom: 28px; }
 
   .sb-layout { padding-top: 28px; padding-bottom: 72px; }

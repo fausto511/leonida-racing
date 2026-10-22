@@ -28,14 +28,14 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   breadcrumbs={[{ name: 'Cars', path: 'cars/' }, { name: 'Compare', path: 'cars/compare/' }]}
 >
   <div class="cp" id="cp">
-    <section class="wrap cp-head">
+    <section class="lr-band-plain cp-band"><div class="wrap cp-head">
       <div>
         <nav class="cp-crumbs" aria-label="Breadcrumb"><a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><span aria-current="page">Compare</span></nav>
         <h1 class="display cp-h1">Compare cars</h1>
         <p class="cp-sub">Up to four cars side by side, with our take on which one is worth it.</p>
       </div>
       <button type="button" class="btn btn-s cp-share" id="cp-share" aria-label="Share comparison"><Fragment set:html={shareIco} /><span>Share comparison</span></button>
-    </section>
+    </div></section>
 
     <section class="wrap cp-stripw">
       <div class="cp-grid cp-strip" id="cp-strip">
@@ -63,7 +63,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
 
 <style>
   .cp :global(.ico) { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .cp-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding-top: 28px; }
+  .cp-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding-top: 28px; padding-bottom: 28px; }
   .cp-crumbs { display: flex; gap: 10px; font-size: 14px; color: var(--lr-muted); }
   .cp-crumbs a { color: var(--lr-muted); text-decoration: none; }
   .cp-crumbs a:hover { color: var(--lr-text); }
@@ -223,7 +223,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   }
   /* ---- phone (handoff): strip 3 columns (4 narrow), controls row below, table label row ---- */
   @media (max-width: 760px) {
-    .cp-head { padding-top: 16px; align-items: flex-start; }
+    .cp-head { padding-top: 16px; padding-bottom: 20px; align-items: flex-start; }
     .cp-h1 { font-size: 34px; }
     .cp-sub { display: none; }
     .cp-share { width: 44px; height: 44px; min-height: 44px; padding: 0; }

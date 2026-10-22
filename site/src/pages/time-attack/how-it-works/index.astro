@@ -58,7 +58,7 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
   section="time-attack"
   breadcrumbs={[{ name: 'Time Attack', path: 'time-attack/gellhorn-international-raceway/' }, { name: 'How It Works', path: 'time-attack/how-it-works/' }]}
 >
-  <section class="hw-band">
+  <section class="hw-band lr-band-plain">
     <div class="wrap lr-band-in hw-band-in">
       <div>
         <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}time-attack/gellhorn-international-raceway/`}>Time Attack</a><span aria-hidden="true">/</span><span aria-current="page">How it works</span></nav>
@@ -145,7 +145,6 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
 </Base>
 
 <style>
-  .hw-band { border-bottom: 1px solid var(--lr-line); background: linear-gradient(180deg, rgba(28,28,42,.6), rgba(11,11,20,0)); }
   .hw-band-in.lr-band-in { min-height: 0; padding-top: 32px; padding-bottom: 32px; display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; }
   .hw-band-cta { flex: none; }
 

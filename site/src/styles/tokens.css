@@ -249,6 +249,12 @@ main:focus { outline: none; }
    Special pages (home, Time Attack/Gellhorn, vehicle, compare) don't use it. */
 .lr-band-in { position: relative; box-sizing: border-box; min-height: 340px; padding-top: 40px; padding-bottom: 40px; }
 .lr-band-in.is-compact { min-height: 220px; padding-bottom: 32px; }
+/* Header without a photo (Fausto 22.10.2026, DEC-0152): dark card colour with a soft pink/orange glow,
+   so the head stands apart without distracting. Use on every band that has no image. */
+.lr-band-plain { position: relative; border-bottom: 1px solid rgba(200,200,222,.22); background:
+  radial-gradient(120% 140% at 100% 0%, rgba(255,62,165,.14), transparent 55%),
+  radial-gradient(90% 120% at 85% 100%, rgba(255,149,90,.10), transparent 60%),
+  var(--lr-card); }
 .lr-crumb { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; font-size: 14px; color: var(--lr-muted); }
 .lr-crumb a { color: var(--lr-muted); text-decoration: none; }
 .lr-crumb a:hover { color: var(--lr-text); }
