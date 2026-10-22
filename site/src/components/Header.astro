@@ -4,6 +4,7 @@
 // COPY STATUS: launch strip + menu labels are Claude placeholders from the
 // mockup -> Codex review (DEC-0088).
 import { LAUNCH_DATE, LAUNCH_AT } from '../data/launch';
+import { CLOSE_SVG } from '../data/site';
 
 interface Props {
   section?: 'time-attack' | 'garage' | 'hub' | 'guide' | 'account' | 'moderator' | null;
@@ -54,7 +55,7 @@ const discordIcon = 'M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 
         <span class="lr-strip-sep" aria-hidden="true"></span>
         <a href={`${base}account/`} data-login-link>Create your driver profile<span class="lr-strip-long"> now</span> →</a>
       </span>
-      <button type="button" class="lr-strip-close" id="lr-strip-close" aria-label="Dismiss">×</button>
+      <button type="button" class="lr-strip-close" id="lr-strip-close" aria-label="Dismiss"><Fragment set:html={CLOSE_SVG} /></button>
     </div>
   </div>
 )}

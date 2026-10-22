@@ -6,6 +6,7 @@
 import { getSelected, toggleSelected } from './compare';
 import { currentDriverId, fetchOwned, setOwned } from './owned';
 import { backendConfigured, getSupabase } from './supabase-client';
+import { CLOSE_SVG } from '../data/site';
 import { releaseById } from '../data/releases';
 import { lapTime } from '../data/leaderboard';
 
@@ -245,7 +246,7 @@ function render() {
   const chips = $('chips');
   if (!keys.length) chips.innerHTML = `<span class="muted">Showing ${matches.length} ${matches.length === N ? NOUN : 'cars'}</span>`;
   else chips.innerHTML = `<span class="muted">${matches.length} ${matches.length === 1 ? 'car' : 'cars'}</span>`
-    + keys.map((k) => `<button type="button" class="fchip" data-drop="${k}" aria-label="Remove filter ${esc(filterLabel(k))}">${esc(filterLabel(k))}<b aria-hidden="true">×</b></button>`).join('')
+    + keys.map((k) => `<button type="button" class="fchip" data-drop="${k}" aria-label="Remove filter ${esc(filterLabel(k))}">${esc(filterLabel(k))}<b aria-hidden="true">${CLOSE_SVG}</b></button>`).join('')
     + `<button type="button" class="clear-all" data-clear>Clear all</button>`;
 
   const one = (g: Group, all: string) => (state.sets[g].size === 0 ? all : state.sets[g].size === 1 ? valueLabel(g, [...state.sets[g]][0]) : `${state.sets[g].size} selected`);
@@ -369,7 +370,7 @@ function renderCompare() {
     const img = c.querySelector<HTMLImageElement>('.vc-img img')?.getAttribute('src') ?? '';
     const name = `${c.querySelector('.vc-brand')?.textContent?.trim()} ${c.querySelector('.vc-name')?.textContent?.trim()}`;
     const short = c.querySelector('.vc-name')?.textContent?.trim() ?? name;
-    return `<span class="cb" title="${esc(name)}"><img src="${esc(img)}" alt="" width="64" height="40" /><span>${esc(short)}</span><button type="button" data-uncompare="${esc(id)}" aria-label="Remove ${esc(name)} from compare">×</button></span>`;
+    return `<span class="cb" title="${esc(name)}"><img src="${esc(img)}" alt="" width="64" height="40" /><span>${esc(short)}</span><button type="button" data-uncompare="${esc(id)}" aria-label="Remove ${esc(name)} from compare">${CLOSE_SVG}</button></span>`;
   }).join('');
 }
 

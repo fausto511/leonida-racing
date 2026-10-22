@@ -7,6 +7,7 @@
 import Base from '../../../layouts/Base.astro';
 import DiscordBand from '../../../components/DiscordBand.astro';
 import '../../../styles/hub.css';
+import { CLOSE_SVG } from '../../../data/site';
 import { buildCrews, crewCardHtml, crewRegionLabels } from '../../../data/hub';
 import { PLATFORMS } from '../../../data/platforms';
 
@@ -53,7 +54,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
         <label class="ui-search cr-q"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input type="search" id="crew-search" placeholder="Search by crew name or tag" aria-label="Search crews by name or tag" autocomplete="off" /></label>
         <button type="button" class="cr-fbtn" id="cr-fbtn" aria-expanded="false" aria-controls="cr-adv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="nb" id="cr-fn" hidden></span></button>
         <div class="cr-adv" id="cr-adv" role="dialog" aria-label="Filters">
-          <div class="sh-head"><b>Filters</b><button type="button" class="x" id="cr-fclose" aria-label="Close filters">×</button></div>
+          <div class="sh-head"><b>Filters</b><button type="button" class="x" id="cr-fclose" aria-label="Close filters"><Fragment set:html={CLOSE_SVG} /></button></div>
           <label class="sel"><span class="k">Language</span><select id="crew-lang" aria-label="Language"><option value="">All</option></select></label>
           <label class="sel"><span class="k">Region</span><select id="crew-region" aria-label="Region"><option value="">All</option>{Object.entries(crewRegionLabels).map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
           <label class="sel"><span class="k">Platform</span><select id="crew-platform" aria-label="Platform">{PLATFORMS.map((p) => <option value="" disabled={!p.active} selected={p.id === 'ps5'}>{p.active ? p.label.replace('PlayStation 5', 'PS5') : `${p.label} — later`}</option>)}</select></label>
@@ -151,7 +152,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
     .cr-adv.open { display: flex; }
     .sh-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 0 12px; border-bottom: 1px solid var(--lr-line); margin: 0 -16px 8px; padding-inline: 16px; }
     .sh-head b { font-size: 18px; }
-    .sh-head .x { width: 32px; height: 32px; border: 0; background: none; color: var(--lr-text); font-size: 24px; cursor: pointer; }
+    .sh-head .x { width: 32px; height: 32px; border: 0; background: none; color: var(--lr-text); font-size: 22px; cursor: pointer; } /* icon size = Cars detailed search */
     .sel, .chk { height: 48px; margin-top: 10px; width: 100%; }
     .sel select { max-width: none; flex: 1; }
     .chk { justify-content: flex-start; }

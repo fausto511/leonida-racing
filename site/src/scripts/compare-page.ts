@@ -8,6 +8,7 @@ import { getSelected, setSelectedList } from './compare';
 import { bubble, hideBubble } from './bubble';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
 import { lapTime } from '../data/leaderboard';
+import { CLOSE_SVG } from '../data/site';
 import { COMPARE_MAX, verdict, alternatives, limited, limitedNote, money, moneyShort, secs, ALT_MAX_SLOWER_MS, ALT_MIN_CHEAPER, VALUE_MAX_SLOWER_MS, VALUE_MIN_CHEAPER, type CmpCar } from '../data/compare';
 
 const base = import.meta.env.BASE_URL;
@@ -65,7 +66,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     return `<article class="ct" data-car="${c.id}">
   <a class="ct-img" href="${vhref(c)}" tabindex="-1" aria-hidden="true">${pic}</a>
   ${o ? '<span class="ct-own">✓ In your garage</span>' : ''}
-  <button type="button" class="ct-x" data-remove="${c.id}" aria-label="Remove ${esc(c.make)} ${esc(c.model)}">×</button>
+  <button type="button" class="ct-x" data-remove="${c.id}" aria-label="Remove ${esc(c.make)} ${esc(c.model)}">${CLOSE_SVG}</button>
   <div class="ct-b">
     <span class="ct-make">${esc(c.make)}</span>
     <a class="ct-name" href="${vhref(c)}">${esc(c.model)}</a>

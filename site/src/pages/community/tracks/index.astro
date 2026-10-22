@@ -8,6 +8,7 @@
 import Base from '../../../layouts/Base.astro';
 import DiscordBand from '../../../components/DiscordBand.astro';
 import '../../../styles/hub.css';
+import { CLOSE_SVG } from '../../../data/site';
 import { sampleTracks, trackRowHtml, raceTypeLabels, layoutLabels, trackVehicleClasses } from '../../../data/tracks';
 const base = import.meta.env.BASE_URL;
 const initialHtml = sampleTracks.map((t) => trackRowHtml(t, { sample: true })).join('');
@@ -53,7 +54,7 @@ const steps = [
       <div class="tr-row2">
         <button type="button" class="tr-fbtn" id="tr-fbtn" aria-expanded="false" aria-controls="tr-adv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="nb" id="tr-fn" hidden></span></button>
         <div class="tr-adv" id="tr-adv" role="dialog" aria-label="Filters">
-          <div class="sh-head"><b>Filters</b><button type="button" class="x" id="tr-fclose" aria-label="Close filters">×</button></div>
+          <div class="sh-head"><b>Filters</b><button type="button" class="x" id="tr-fclose" aria-label="Close filters"><Fragment set:html={CLOSE_SVG} /></button></div>
           <label class="sel"><span class="k">Layout</span><select id="tr-layout"><option value="">All</option>{Object.entries(layoutLabels).map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
           <label class="sel"><span class="k">Class</span><select id="tr-class"><option value="">All</option>{trackVehicleClasses.map((c) => <option value={c}>{c}</option>)}</select></label>
           <label class="sel"><span class="k">Lobby</span><select id="tr-players"><option value="">Any size</option>{[2, 4, 8, 12, 16, 24, 30].map((n) => <option value={n}>{n} players</option>)}</select></label>
@@ -142,7 +143,7 @@ const steps = [
     .tr-adv.open { display: flex; }
     .sh-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 16px 12px; border-bottom: 1px solid var(--lr-line); margin: 0 -16px 8px; }
     .sh-head b { font-size: 18px; }
-    .sh-head .x { width: 32px; height: 32px; border: 0; background: none; color: var(--lr-text); font-size: 24px; cursor: pointer; }
+    .sh-head .x { width: 32px; height: 32px; border: 0; background: none; color: var(--lr-text); font-size: 22px; cursor: pointer; } /* icon size = Cars detailed search */
     .sel { height: 48px; margin-top: 10px; width: 100%; box-sizing: border-box; }
     .sel select { max-width: none; flex: 1; }
     .sh-foot { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 16px; }
