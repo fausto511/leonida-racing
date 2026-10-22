@@ -42,6 +42,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
     <span class="lr-shade" aria-hidden="true"></span>
     <div class="wrap db-inner lr-band-in">
       <div class="db-copy">
+        <nav class="lr-crumb" aria-label="Breadcrumb"><a href={base}>Home</a><span aria-hidden="true">/</span><span aria-current="page">Discord</span></nav>
         <p class="eyebrow">{P.eyebrow}</p>
         <h1 class="display lr-t2">{P.h1}</h1>
         <p class="lr-lede">{P.intro}</p>
@@ -197,7 +198,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .db { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
   .db picture, .db-bg, .db-t { position: absolute; inset: 0; width: 100%; height: 100%; }
   .db-bg { object-fit: cover; object-position: 60% 45%; }
-  .db-inner { display: flex; align-items: center; justify-content: space-between; gap: 48px; }
+  .db-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; }
   .db-copy { min-width: 0; max-width: 680px; }
   .db-act { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-top: 18px; }
   .dico { width: 20px; height: 20px; fill: currentColor; flex: none; }

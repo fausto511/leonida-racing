@@ -42,6 +42,7 @@ const roles = [
     <img class="ab-bg" src={`${base}images/hub/hub-carmeet-1080.webp`} srcset={`${base}images/hub/hub-carmeet-640.webp 640w, ${base}images/hub/hub-carmeet-1080.webp 1080w, ${base}images/hub/hub-carmeet-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="940" fetchpriority="high" />
     <span class="lr-shade is-open" aria-hidden="true"></span>
     <div class="wrap lr-band-in ab-band-in">
+      <nav class="lr-crumb" aria-label="Breadcrumb"><a href={base}>Home</a><span aria-hidden="true">/</span><span aria-current="page">About</span></nav>
       <p class="eyebrow">GTA VI · Built by the community</p>
       <h1 class="display lr-t2">Good racing brings people together</h1>
       <p class="lr-lede">Leonida Racing comes from the people behind the Rockford Racing League. We’re building a GTA VI home for racers, car enthusiasts and the crews, hosts and creators who keep the scene moving.</p>
@@ -141,7 +142,6 @@ const roles = [
   /* ---- band (DEC-0139, text only) ---- */
   .ab-band { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
   .ab-bg { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 60% 45%; }
-  .ab-band-in { display: flex; flex-direction: column; justify-content: center; }
   .ab-band-in .lr-t2 { max-width: 760px; }
 
   /* ---- sections ---- */

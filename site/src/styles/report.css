@@ -4,7 +4,6 @@
    Class names (rep-*) are kept because the page scripts render rows with them. */
 [hidden] { display: none !important; }
 
-.rp-band-in { display: flex; flex-direction: column; justify-content: center; }
 
 .rp { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; align-items: start; padding-top: 32px; padding-bottom: 80px; }
 .rp-main { min-width: 0; max-width: 760px; }

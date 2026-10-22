@@ -76,6 +76,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
     <span class="lr-shade" aria-hidden="true"></span>
     <div class="wrap gd-hero lr-band-in">
       <div>
+        <nav class="lr-crumb" aria-label="Breadcrumb"><a href={base}>Home</a><span aria-hidden="true">/</span><span aria-current="page">Guide</span></nav>
         <p class="eyebrow">GTA VI Cars &amp; Racing</p>
         <h1 class="display lr-t1">Guide</h1>
         <p class="lr-lede">Cars, garages, race grids and the details worth a closer look. Follow what’s known about GTA VI driving and car culture, with sources alongside the facts and room for the questions still open.</p>
@@ -199,7 +200,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   /* ---- band (DEC-0139 standard, T1) ---- */
   .gd-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
   .gd-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
-  .gd-hero { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: center; }
+  .gd-hero { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: start; }
   .gd-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
   .gd-tile-eb { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .gd-glance { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
