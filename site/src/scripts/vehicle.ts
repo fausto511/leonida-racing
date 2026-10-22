@@ -8,6 +8,7 @@ import { getSelected, toggleSelected } from './compare';
 import { bubble, hideBubble } from './bubble';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
 import { lapTime } from '../data/leaderboard';
+import { STAR_SVG } from '../data/site';
 import { classRowsHtml, driverRowHtml, openRowHtml, startTileHtml, rivalsFromClass, rivalHtml, sortClass, GELLHORN_ROWS, type ClassRow } from '../data/vehicle-page';
 
 const base = import.meta.env.BASE_URL;
@@ -133,7 +134,7 @@ function init(root: HTMLElement) {
     const base1 = avg != null ? `${count} ${count === 1 ? 'rating' : 'ratings'}` : 'Not enough ratings yet';
     let act = '';
     if (saved) act = '<span class="vr-saved">Saved</span>';
-    else if (mine != null) act = `You rated it ${mine} ★ · <button type="button" class="vr-act" data-rate-hint>change</button>`;
+    else if (mine != null) act = `You rated it ${mine} ${STAR_SVG} · <button type="button" class="vr-act" data-rate-hint>change</button>`;
     else if (rateable && !me && backendConfigured) act = '<button type="button" class="vr-act" data-rate-hint>log in to rate</button>';
     else if (rateable) act = '<button type="button" class="vr-act" data-rate-hint>rate it</button>';
     sub.innerHTML = mine != null && !saved ? act : act ? `${base1} · ${act}` : base1;

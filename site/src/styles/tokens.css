@@ -306,4 +306,7 @@ svg[viewBox="0 0 24 24"] :is(path, circle, rect, line, polyline, polygon, ellips
 .lr-x { display: block; width: 1.15em; height: 1.15em; flex: none; fill: none; stroke: currentColor; }
 /* centre the icon exactly in its button/label (no text baseline involved), so it sits on the text's mid-line */
 :where(button, b):has(> .lr-x) { display: inline-grid; place-items: center; }
+/* Rating star (DEC-0161) */
+.lr-star { display: inline-block; width: 1em; height: 1em; vertical-align: -.125em; flex: none; fill: currentColor; }
+:where(button):has(> .lr-star:only-child) { display: inline-grid; place-items: center; }
 .ico-discord, .ico-discord svg { color: var(--lr-discord); fill: var(--lr-discord); }

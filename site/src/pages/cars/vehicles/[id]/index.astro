@@ -103,7 +103,7 @@ const ico = {
   houseCheck: '<svg class="ico vh-g-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/></svg>',
   timer: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>',
 };
-const star = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L3.4 9.8l6-.7z"/></svg>';
+const star = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.3L14.38 9.62L22.08 9.62L15.85 14.15L18.23 21.48L12 16.95L5.77 21.48L8.15 14.15L1.92 9.62L9.62 9.62Z"/></svg>';
 const starsHtml = [1, 2, 3, 4, 5].map((n) => '<button type="button" class="vr-star" data-star="' + n + '" aria-label="' + n + (n === 1 ? ' star' : ' stars') + '">' + star + '</button>').join('');
 const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrder);
 ---

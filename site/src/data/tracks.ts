@@ -3,6 +3,7 @@
 // a moderator checks them against the Social Club page and publishes.
 // One renderer, used at build time (flagged samples) and at runtime (live rows).
 import { esc } from './hub';
+import { STAR_SVG } from './site';
 
 export type TrackLayout = 'circuit' | 'point-to-point';
 // PLACEHOLDER list (GTA Online race types) until GTA VI's race types are
@@ -65,9 +66,9 @@ export function trackRateHtml(id: string, r: { avg?: number | null; count?: numb
   // COPY: Codex 21.10.2026. Load error is not shown as "too few ratings".
   const avg = r.unavailable ? '<span class="tr-avg is-none">Could not load track ratings. Please try again.</span>'
     : r.avg != null && (r.count ?? 0) >= 3
-    ? `<span class="tr-avg"><b>★ ${r.avg.toFixed(1)}</b> · ${r.count} ratings</span>`
+    ? `<span class="tr-avg"><b>${STAR_SVG} ${r.avg.toFixed(1)}</b> · ${r.count} ratings</span>`
     : '<span class="tr-avg is-none">Average shown after 3 ratings</span>';
-  const stars = r.canRate === false ? '' : `<span class="tr-my"><span class="k">Your rating</span><span class="tr-stars" role="group" aria-label="Your rating">${[5, 4, 3, 2, 1].map((n) => `<button type="button" data-rate="${n}" data-track="${esc(id)}" class="${(r.my ?? 0) >= n ? 'on' : ''}" aria-label="${n} star${n === 1 ? '' : 's'}" aria-pressed="${r.my === n}">★</button>`).join('')}</span></span>`;
+  const stars = r.canRate === false ? '' : `<span class="tr-my"><span class="k">Your rating</span><span class="tr-stars" role="group" aria-label="Your rating">${[5, 4, 3, 2, 1].map((n) => `<button type="button" data-rate="${n}" data-track="${esc(id)}" class="${(r.my ?? 0) >= n ? 'on' : ''}" aria-label="${n} star${n === 1 ? '' : 's'}" aria-pressed="${r.my === n}">${STAR_SVG}</button>`).join('')}</span></span>`;
   return `<p class="tr-rate">${avg}${stars}</p>`;
 }
 

@@ -8,7 +8,7 @@ import { getSelected, setSelectedList } from './compare';
 import { bubble, hideBubble } from './bubble';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
 import { lapTime } from '../data/leaderboard';
-import { CLOSE_SVG } from '../data/site';
+import { CLOSE_SVG, STAR_SVG } from '../data/site';
 // check icon instead of the ✓ glyph (DEC-0158)
 const CHECK_SVG = '<svg class="cp-ck" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
 import { COMPARE_MAX, verdict, alternatives, limited, limitedNote, money, moneyShort, secs, ALT_MAX_SLOWER_MS, ALT_MIN_CHEAPER, VALUE_MAX_SLOWER_MS, VALUE_MIN_CHEAPER, type CmpCar } from '../data/compare';
@@ -161,7 +161,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
       return;
     }
     const card = (eb: string, x: { car: CmpCar; text: string } | null, link: [string, string], best = false) => x
-      ? `<div class="tk-c${best ? ' is-best' : ''}"><span class="tk-eb">${best ? '★ ' : ''}${eb}</span><p class="tk-n">${esc(x.car.make)} ${esc(x.car.model)}</p><p class="tk-t">${esc(x.text)}</p><a class="tk-a" href="${link[1]}">${link[0]} →</a></div>`
+      ? `<div class="tk-c${best ? ' is-best' : ''}"><span class="tk-eb">${best ? STAR_SVG + ' ' : ''}${eb}</span><p class="tk-n">${esc(x.car.make)} ${esc(x.car.model)}</p><p class="tk-t">${esc(x.text)}</p><a class="tk-a" href="${link[1]}">${link[0]} →</a></div>`
       : `<div class="tk-c"><span class="tk-eb">${eb}</span><p class="tk-t">${eb === 'Best value' ? esc(v.valueNote ?? 'Not enough data yet.') : 'Not enough data yet.'}</p></div>`;
     const sp = v.speed?.car;
     box.innerHTML = `<p class="cp-eb">Our take</p><div class="tk">
@@ -175,7 +175,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
   const tb = (long: string, short: string) => `<span class="tl">${long}</span><span class="ts">${short}</span>`;
   type Cell = { m: string; s?: string; tba?: boolean; mine?: boolean; v?: number | null; raw?: string };
   type Row = { label: string; sub?: string; dir?: 'min' | 'max'; cells: (c: CmpCar) => Cell };
-  const star = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L3.4 9.8l6-.7z"/></svg>';
+  const star = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.3L14.38 9.62L22.08 9.62L15.85 14.15L18.23 21.48L12 16.95L5.77 21.48L8.15 14.15L1.92 9.62L9.62 9.62Z"/></svg>';
   const stars = (n: number) => `<span class="tv-stars">${[1, 2, 3, 4, 5].map((i) => star.replace('<svg', `<svg class="${i <= Math.round(n) ? 'on' : ''}"`)).join('')}</span>`;
   const acqNote: Record<string, string> = { 'pre-order': 'Pre-order bonus', 'ultimate-edition': 'Ultimate Edition exclusive', 'gta-plus': 'GTA+ members only' };
   const classRank = (c: CmpCar) => {

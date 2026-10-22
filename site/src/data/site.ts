@@ -8,6 +8,9 @@ export const SITE_DISCLAIMER = 'Independent GTA VI community project. Not affili
 // Header/Footer/home/404 still carry their own copy of the invite (same value).
 export const DISCORD_INVITE_URL = 'https://discord.gg/hPGuBwXRqT';
 export const DISCORD_BOT_INVITE_URL = 'https://discord.com/oauth2/authorize?client_id=1552506662533861376&scope=bot+applications.commands&permissions=17600777047040&integration_type=0';
+/** Rating star (DEC-0161): drawn, sharp like the ★ glyph, so it looks the same on every device. Size = 1em. */
+export const STAR_SVG = '<svg class="lr-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.3L14.38 9.62L22.08 9.62L15.85 14.15L18.23 21.48L12 16.95L5.77 21.48L8.15 14.15L1.92 9.62L9.62 9.62Z"/></svg>';
+
 /** Close / remove icon (DEC-0156). Size follows the button's font-size (.lr-x = 1.15em), stroke stays 1.5px. */
 export const CLOSE_SVG = '<svg class="lr-x" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
