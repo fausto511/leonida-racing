@@ -544,7 +544,7 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
             screenshotEvidence
               ? `<div class="evidence-shot-wrap">
                    <img class="evidence-shot" id="evidence-shot-img" hidden alt="Submitted results screenshot for review" />
-                   <button type="button" class="btn btn-outline" data-action="reveal-screenshot" data-evidence-id="${screenshotEvidence.evidence_id}">Reveal screenshot (10 min link)</button>
+                   <button type="button" class="btn btn-s" data-action="reveal-screenshot" data-evidence-id="${screenshotEvidence.evidence_id}">Reveal screenshot (10 min link)</button>
                  </div>`
               : `<p class="evidence-none">No screenshot on file.</p>`
           }
@@ -607,7 +607,7 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
         </div>
         <textarea id="override-reason" placeholder="Reason for this manual change (required, logged to moderation_log)"></textarea>
         <div class="decision-actions">
-          <button type="button" class="btn btn-primary" data-action="save-override">Save Override</button>
+          <button type="button" class="btn btn-p" data-action="save-override">Save Override</button>
         </div>
         <p class="decision-msg" id="override-msg" hidden></p>
       </div>
@@ -625,11 +625,11 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
         <div class="review-box-head"><h3>Decision</h3><span>Reason required for correction, reject or invalidate</span></div>
         <textarea id="decision-reason" placeholder="Moderator reason / internal note"></textarea>
         <div class="decision-actions">
-          ${!isAccepted ? `<button type="button" class="btn btn-outline" data-action="request_correction">Request Correction</button>` : ''}
+          ${!isAccepted ? `<button type="button" class="btn btn-s" data-action="request_correction">Request Correction</button>` : ''}
           ${!isAccepted ? `<button type="button" class="btn btn-danger" data-action="reject">Reject</button>` : ''}
-          ${!isAccepted ? `<button type="button" class="btn btn-primary" data-action="accept_provisional">Accept</button>` : ''}
-          <button type="button" class="btn btn-primary" data-action="verify" ${canVerify ? '' : 'disabled'}>Verify (Official)</button>
-          ${isAccepted ? `<button type="button" class="btn btn-outline-red" data-action="invalidate">Invalidate</button>` : ''}
+          ${!isAccepted ? `<button type="button" class="btn btn-p" data-action="accept_provisional">Accept</button>` : ''}
+          <button type="button" class="btn btn-p" data-action="verify" ${canVerify ? '' : 'disabled'}>Verify (Official)</button>
+          ${isAccepted ? `<button type="button" class="btn btn-danger" data-action="invalidate">Invalidate</button>` : ''}
         </div>
         ${canVerify ? '' : '<p class="decision-hint">Verify is disabled: no public video link on this run yet.</p>'}
         <p class="decision-msg" id="decision-msg" hidden></p>

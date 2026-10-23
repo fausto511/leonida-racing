@@ -96,8 +96,8 @@ export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; previe
   <div class="tr-side">
     ${opts.preview ? '' : trackSaveBtn(t.track_id, Boolean(opts.saved))}
     ${sc
-      ? `<a class="btn btn-outline tr-sc" href="${esc(sc)}" target="_blank" rel="noopener" title="Open the job on Social Club to bookmark it for the game">Open Social Club <span class="lr-ext-after" aria-hidden="true"></span></a>`
-      : `<span class="btn btn-outline tr-sc is-disabled" aria-disabled="true" title="Sample track — no real job">Open Social Club <span class="lr-ext-after" aria-hidden="true"></span></span>`}
+      ? `<a class="btn btn-s tr-sc" href="${esc(sc)}" target="_blank" rel="noopener" title="Open the job on Social Club to bookmark it for the game">Open Social Club <span class="lr-ext-after" aria-hidden="true"></span></a>`
+      : `<span class="btn btn-s tr-sc is-disabled" aria-disabled="true" title="Sample track — no real job">Open Social Club <span class="lr-ext-after" aria-hidden="true"></span></span>`}
     ${!opts.sample ? `<a class="ev-report tr-report" href="${esc(`${import.meta.env.BASE_URL}report-content/`)}" title="Report this track to the moderators">Report</a>` : ''}
   </div>
 </article>`;

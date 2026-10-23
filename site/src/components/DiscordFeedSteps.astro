@@ -19,12 +19,12 @@ const pick = source === 'crew' ? 'My crew' : 'My host profile';
       <li>
         <strong>Add the bot to your server</strong>
         <span>You need the “Manage Server” permission there.</span>
-        <a class="btn btn-outline btn-md dfs-btn" href={DISCORD_BOT_INVITE_URL} target="_blank" rel="noopener">Add to Discord</a>
+        <a class="btn btn-s btn-md dfs-btn" href={DISCORD_BOT_INVITE_URL} target="_blank" rel="noopener">Add to Discord</a>
       </li>
       <li>
         <strong>Choose an event feed</strong>
         <span>Run <code>/leonida feed add</code> in your server. Choose the destination channel, then select <b>{pick}</b> as the source. You need the matching website role for that source.</span>
-        <button type="button" class="btn btn-outline dfs-btn dfs-copy" data-copy="/leonida feed add">Copy command</button>
+        <button type="button" class="btn btn-s dfs-btn dfs-copy" data-copy="/leonida feed add">Copy command</button>
       </li>
       <li>
         <strong>Check the feed</strong>

@@ -41,7 +41,7 @@ const base = import.meta.env.BASE_URL;
         <div class="panel list-panel">
           <div class="list-head">
             <h2 class="list-title" id="list-title">Crews</h2>
-            <button type="button" class="btn btn-red btn-md" id="new-btn">+ New crew</button>
+            <button type="button" class="btn btn-p btn-md" id="new-btn">+ New crew</button>
           </div>
           <div class="list" id="list"></div>
           <p class="list-empty" id="list-empty" hidden>Nothing here yet.</p>
@@ -96,8 +96,8 @@ const base = import.meta.env.BASE_URL;
             </div>
             <div class="preview-wrap"><p class="preview-label">Preview</p><div class="crew-grid preview" id="crew-preview"></div></div>
             <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Save</button>
-              <button type="button" class="btn btn-outline-red" data-action="delete" hidden>Delete</button>
+              <button type="submit" class="btn btn-p">Save</button>
+              <button type="button" class="btn btn-danger" data-action="delete" hidden>Delete</button>
               <p class="form-msg" data-role="msg" aria-live="polite"></p>
             </div>
           </form>
@@ -151,8 +151,8 @@ const base = import.meta.env.BASE_URL;
             <div class="preview-wrap"><p class="preview-label">Preview</p><div class="ev-list preview" id="event-preview"></div></div>
             <div class="rsvp-panel" id="rsvp-panel" hidden><p class="preview-label">Sign-ups</p><div id="rsvp-list"></div><div id="rsvp-bans"></div><p class="form-msg" id="rsvp-msg" aria-live="polite"></p></div>
             <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Save</button>
-              <button type="button" class="btn btn-outline-red" data-action="delete" hidden>Delete</button>
+              <button type="submit" class="btn btn-p">Save</button>
+              <button type="button" class="btn btn-danger" data-action="delete" hidden>Delete</button>
               <p class="form-msg" data-role="msg" aria-live="polite"></p>
             </div>
           </form>
@@ -182,8 +182,8 @@ const base = import.meta.env.BASE_URL;
             </div>
             <div class="preview-wrap"><p class="preview-label">Preview</p><div class="tr-list preview" id="track-preview"></div></div>
             <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Save</button>
-              <button type="button" class="btn btn-outline-red" data-action="delete" hidden>Delete</button>
+              <button type="submit" class="btn btn-p">Save</button>
+              <button type="button" class="btn btn-danger" data-action="delete" hidden>Delete</button>
               <p class="form-msg" data-role="msg" aria-live="polite"></p>
             </div>
           </form>
@@ -194,8 +194,8 @@ const base = import.meta.env.BASE_URL;
             <div id="req-body" class="req-body"></div>
             <label class="req-note">Note to the driver <small>optional, only stored with a rejection</small><textarea id="req-note" maxlength="300" rows="2"></textarea></label>
             <div class="form-actions" id="req-actions">
-              <button type="button" class="btn btn-primary" id="req-approve">Approve</button>
-              <button type="button" class="btn btn-outline-red" id="req-reject">Reject</button>
+              <button type="button" class="btn btn-p" id="req-approve">Approve</button>
+              <button type="button" class="btn btn-danger" id="req-reject">Reject</button>
               <p class="form-msg" id="req-msg" aria-live="polite"></p>
             </div>
           </div>
@@ -204,7 +204,7 @@ const base = import.meta.env.BASE_URL;
           <div id="roles-panel" class="hc-form" hidden>
             <div id="role-selected" class="role-selected" hidden>
               <p><strong id="role-selected-text"></strong></p>
-              <button type="button" class="btn btn-outline-red btn-md" id="role-revoke">Revoke role</button>
+              <button type="button" class="btn btn-danger btn-md" id="role-revoke">Revoke role</button>
             </div>
             <div class="form-head"><h2>Grant a role</h2></div>
             <div class="grid">
@@ -220,7 +220,7 @@ const base = import.meta.env.BASE_URL;
               <label class="span2" id="role-crew-wrap" hidden>Crew <small>crew not listed yet? Create it under Crews first, or let the driver apply with a new crew (approving the request creates it)</small><select id="role-crew"></select></label>
             </div>
             <div class="form-actions">
-              <button type="button" class="btn btn-primary" id="role-grant">Grant roles</button>
+              <button type="button" class="btn btn-p" id="role-grant">Grant roles</button>
               <p class="form-msg" id="role-msg" aria-live="polite"></p>
             </div>
           </div>
@@ -553,15 +553,15 @@ const base = import.meta.env.BASE_URL;
     const d = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' }) : '');
     const iLead = isMod || leaderCrewIds.has(selectedId);
     $('members-invited').innerHTML = invited.length
-      ? `<p class="mem-group-title">Open invites (${invited.length}/20)</p>` + invited.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">invited ${esc(d(m.requested_at))}${m.invited_by_name ? ` by ${esc(m.invited_by_name)}` : ''}</span><span class="mem-actions"><button type="button" class="btn btn-outline-red btn-md" data-drop="${esc(m.membership_id)}" data-label="Withdraw">Withdraw</button></span></div>`).join('')
+      ? `<p class="mem-group-title">Open invites (${invited.length}/20)</p>` + invited.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">invited ${esc(d(m.requested_at))}${m.invited_by_name ? ` by ${esc(m.invited_by_name)}` : ''}</span><span class="mem-actions"><button type="button" class="btn btn-danger btn-md" data-drop="${esc(m.membership_id)}" data-label="Withdraw">Withdraw</button></span></div>`).join('')
       : '';
     $('members-sub').textContent = `${active.length} member${active.length === 1 ? '' : 's'} on this site`;
     $('members-pending').innerHTML = `<p class="mem-group-title">Join requests</p>` + (pending.length
-      ? pending.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">asked ${esc(d(m.requested_at))}</span><span class="mem-actions"><button type="button" class="btn btn-primary btn-md" data-approve="${esc(m.membership_id)}">Approve</button><button type="button" class="btn btn-outline-red btn-md" data-drop="${esc(m.membership_id)}" data-label="Decline">Decline</button></span></div>`).join('')
+      ? pending.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">asked ${esc(d(m.requested_at))}</span><span class="mem-actions"><button type="button" class="btn btn-p btn-md" data-approve="${esc(m.membership_id)}">Approve</button><button type="button" class="btn btn-danger btn-md" data-drop="${esc(m.membership_id)}" data-label="Decline">Decline</button></span></div>`).join('')
       : `<p class="mem-empty">${crews.find((c) => c.crew_id === selectedId)?.join_mode === 'open' ? 'Your crew is open: drivers join right away, no requests to approve.' : 'No open requests.'}</p>`);
     // DEC-0144: Kick (can rejoin / ask again) and Ban (blocked); commissioners can't act on the leader or other commissioners.
     // COPY STATUS: Claude placeholders, Codex review pending.
-    const btn = (act: string, m: any, label: string, cls = 'btn-outline-red') => `<button type="button" class="btn ${cls} btn-md" data-act="${act}" data-driver="${esc(m.driver_id)}" data-name="${esc(m.display_name)}" data-label="${esc(label)}">${esc(label)}</button>`;
+    const btn = (act: string, m: any, label: string, cls = 'btn-danger') => `<button type="button" class="btn ${cls} btn-md" data-act="${act}" data-driver="${esc(m.driver_id)}" data-name="${esc(m.display_name)}" data-label="${esc(label)}">${esc(label)}</button>`;
     const roleBadge = (r?: string) => (r === 'crew_leader' ? '<span class="mem-role">Leader</span>' : r === 'crew_commissioner' ? '<span class="mem-role">Commissioner</span>' : '');
     $('members-active').innerHTML = `<p class="mem-group-title">Members</p>` + (active.length
       ? active.map((m) => {
@@ -569,13 +569,13 @@ const base = import.meta.env.BASE_URL;
           let acts = '';
           if (m.driver_id === ownDriverId) acts = '<span class="mem-date">you</span>';
           else if (r === 'crew_leader') acts = isMod ? btn('kick', m, 'Kick') + btn('ban', m, 'Ban') : '';
-          else if (r === 'crew_commissioner') acts = iLead ? btn('comm-off', m, 'Remove Commissioner', 'btn-outline') + btn('lead', m, 'Make Leader', 'btn-outline') + btn('kick', m, 'Kick') + btn('ban', m, 'Ban') : '';
-          else acts = (iLead ? btn('comm-on', m, 'Make Commissioner', 'btn-outline') : '') + btn('kick', m, 'Kick') + btn('ban', m, 'Ban');
+          else if (r === 'crew_commissioner') acts = iLead ? btn('comm-off', m, 'Remove Commissioner', 'btn-s') + btn('lead', m, 'Make Leader', 'btn-s') + btn('kick', m, 'Kick') + btn('ban', m, 'Ban') : '';
+          else acts = (iLead ? btn('comm-on', m, 'Make Commissioner', 'btn-s') : '') + btn('kick', m, 'Kick') + btn('ban', m, 'Ban');
           return `<div class="mem-row"><span class="mem-name">${esc(m.display_name)} ${roleBadge(r)}</span><span class="mem-date">since ${esc(d(m.decided_at))}</span><span class="mem-actions">${acts}</span></div>`;
         }).join('')
       : '<p class="mem-empty">No members yet. Drivers ask to join on the public Crews page.</p>');
     $('members-bans').innerHTML = crewBans.length
-      ? `<p class="mem-group-title">Banned (${crewBans.length})</p>` + crewBans.map((b) => `<div class="mem-row"><span class="mem-name">${esc(b.display_name ?? 'Driver')}</span><span class="mem-date">banned ${esc(d(b.banned_at))}</span><span class="mem-actions">${btn('unban', b, 'Unban', 'btn-outline')}</span></div>`).join('')
+      ? `<p class="mem-group-title">Banned (${crewBans.length})</p>` + crewBans.map((b) => `<div class="mem-row"><span class="mem-name">${esc(b.display_name ?? 'Driver')}</span><span class="mem-date">banned ${esc(d(b.banned_at))}</span><span class="mem-actions">${btn('unban', b, 'Unban', 'btn-s')}</span></div>`).join('')
       : '';
     const msgEl = $('members-msg');
     msgEl.textContent = message;
@@ -663,7 +663,7 @@ const base = import.meta.env.BASE_URL;
       if (error) { out.innerHTML = `<p class="mem-empty">Search is not available right now.</p>`; return; }
       const rows = (data ?? []) as { driver_id: string; display_name: string }[];
       out.innerHTML = rows.length
-        ? rows.map((r) => `<div class="mem-row"><span class="mem-name">${esc(r.display_name)}</span><span class="mem-actions"><button type="button" class="btn btn-primary btn-md" data-invite="${esc(r.driver_id)}" data-name="${esc(r.display_name)}">Invite to Crew</button></span></div>`).join('')
+        ? rows.map((r) => `<div class="mem-row"><span class="mem-name">${esc(r.display_name)}</span><span class="mem-actions"><button type="button" class="btn btn-p btn-md" data-invite="${esc(r.driver_id)}" data-name="${esc(r.display_name)}">Invite to Crew</button></span></div>`).join('')
         : '<p class="mem-empty">No driver found who isn\u2019t already in your crew or invited.</p>';
     }, 300);
   });
@@ -949,15 +949,15 @@ const base = import.meta.env.BASE_URL;
     const going = rows.filter((r) => !r.kicked);
     const kicked = rows.filter((r) => r.kicked);
     const bans = ((br.data ?? []) as any[]);
-    const b = (act: string, r: any, label: string, cls = 'btn-outline-red') => `<button type="button" class="btn ${cls} btn-md" data-ract="${act}" data-driver="${esc(r.driver_id)}" data-name="${esc(r.display_name ?? 'Driver')}" data-label="${esc(label)}">${esc(label)}</button>`;
+    const b = (act: string, r: any, label: string, cls = 'btn-danger') => `<button type="button" class="btn ${cls} btn-md" data-ract="${act}" data-driver="${esc(r.driver_id)}" data-name="${esc(r.display_name ?? 'Driver')}" data-label="${esc(label)}">${esc(label)}</button>`;
     const row = (r: any, acts: string, note = '') => `<div class="mem-row"><span class="mem-name">${esc(r.display_name ?? 'Driver')}</span>${note ? `<span class="mem-date">${esc(note)}</span>` : ''}<span class="mem-actions">${acts}</span></div>`;
     $('rsvp-list').innerHTML = (pr.error
       ? '<p class="rsvp-count">Sign-ups could not be loaded.</p>'
       : going.length
         ? `<p class="rsvp-count"><strong>${going.length}${max ? ' / ' + max : ''}</strong> going</p><p class="mem-empty">Kick removes a driver from this event and prevents them from signing up again. Ban applies to all events by this host, including future events.</p>` + going.map((r) => row(r, r.driver_id === ownDriverId ? '<span class="mem-date">you</span>' : b('kick', r, 'Kick') + b('ban', r, 'Ban'))).join('')
         : `<p class="rsvp-count">No sign-ups yet${max ? ` (max. ${max})` : ''}.</p>`)
-      + (kicked.length ? `<p class="mem-group-title">Removed from this event</p>` + kicked.map((r) => row(r, b('unkick', r, 'Allow Again', 'btn-outline'))).join('') : '');
-    $('rsvp-bans').innerHTML = bans.length ? `<p class="mem-group-title">Banned from all your events (${bans.length})</p>` + bans.map((r) => row(r, b('unban', r, 'Unban', 'btn-outline'), `since ${new Date(r.banned_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}`)).join('') : '';
+      + (kicked.length ? `<p class="mem-group-title">Removed from this event</p>` + kicked.map((r) => row(r, b('unkick', r, 'Allow Again', 'btn-s'))).join('') : '');
+    $('rsvp-bans').innerHTML = bans.length ? `<p class="mem-group-title">Banned from all your events (${bans.length})</p>` + bans.map((r) => row(r, b('unban', r, 'Unban', 'btn-s'), `since ${new Date(r.banned_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}`)).join('') : '';
     const m = $('rsvp-msg'); m.textContent = message; m.className = `form-msg ${message ? (isError ? 'is-error' : 'is-ok') : ''}`;
   }
   $('rsvp-panel').addEventListener('click', async (e) => {

@@ -30,7 +30,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
       <aside class="panel vx-listbox">
         <div class="vx-listhead">
           <input type="search" id="vx-search" placeholder="Search vehicle" aria-label="Search vehicles" />
-          <button type="button" class="btn btn-outline" id="vx-new">+ New</button>
+          <button type="button" class="btn btn-s" id="vx-new">+ New</button>
         </div>
         <p class="vx-count" id="vx-count"></p>
         <ul id="vx-list" class="vx-list"></ul>
@@ -62,7 +62,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
             <label class="vx-check"><input type="checkbox" name="has_photo" /> Garage photo exists (<code>public/images/vehicles/&lt;id&gt;-640/1280/1920.webp</code>)</label>
           </div>
           <div class="vx-actions">
-            <button type="submit" class="btn btn-primary" id="vx-save">Save vehicle</button>
+            <button type="submit" class="btn btn-p" id="vx-save">Save vehicle</button>
             <span class="vx-meta" id="vx-updated"></span>
           </div>
         </form>
@@ -82,7 +82,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
             <label>Measured on<input name="measured_at" type="date" /></label>
             <label>Evidence link<input name="evidence_url" type="url" placeholder="https://…" /></label>
             <label class="vx-wide">Note<input name="note" maxlength="300" /></label>
-            <div class="vx-actions vx-wide"><button type="submit" class="btn btn-primary">Add value</button></div>
+            <div class="vx-actions vx-wide"><button type="submit" class="btn btn-p">Add value</button></div>
           </form>
         </section>
 
@@ -249,7 +249,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
         <td>${esc(releases.find((x) => x.release_id === r.game_release_id)?.name ?? '—')}</td>
         <td>${esc(r.measured_at ?? '—')}<br><small>by ${esc(r.creator?.display_name ?? '?')}</small></td>
         <td>${esc(r.status)}</td>
-        <td>${r.status === 'current' ? `<button type="button" class="btn btn-outline" data-reject="${esc(r.value_id)}">Reject</button>` : ''}</td>
+        <td>${r.status === 'current' ? `<button type="button" class="btn btn-s" data-reject="${esc(r.value_id)}">Reject</button>` : ''}</td>
       </tr>`).join('')}</tbody></table>` : '<p class="vx-meta">No values yet — the site shows "Data pending".</p>';
   }
 

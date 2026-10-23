@@ -347,8 +347,8 @@ import AccountSubnav from '../../components/AccountSubnav.astro';
         const canAddVideo = run.review_status !== 'rejected' && run.review_status !== 'invalidated'
           && run.verification_tier !== 'verified';
         const actionButtons = [
-          canWithdraw ? '<button type="button" class="btn btn-outline-red withdraw-btn" data-run-id="' + run.run_id + '">Withdraw</button>' : '',
-          canAddVideo ? '<button type="button" class="btn btn-outline add-video-btn" data-run-id="' + run.run_id + '">+ Video</button>' : '',
+          canWithdraw ? '<button type="button" class="btn btn-danger withdraw-btn" data-run-id="' + run.run_id + '">Withdraw</button>' : '',
+          canAddVideo ? '<button type="button" class="btn btn-s add-video-btn" data-run-id="' + run.run_id + '">+ Video</button>' : '',
         ].filter(Boolean).join(' ') || '—';
         tr.innerHTML = `
           <td>${vehicleCell(run)}</td>

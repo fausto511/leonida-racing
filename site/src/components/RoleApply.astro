@@ -33,7 +33,7 @@ const { focus } = Astro.props;
       </Fragment>
     )}
 
-    <button type="button" class="btn btn-outline" id="ra-open">{focus === 'crew_leader' ? 'Start crew leader application' : focus === 'creator' ? 'Apply as creator' : 'Start event host application'}</button>
+    <button type="button" class="btn btn-s" id="ra-open">{focus === 'crew_leader' ? 'Start crew leader application' : focus === 'creator' ? 'Apply as creator' : 'Start event host application'}</button>
     <form id="ra-form" novalidate hidden>
       <p class="ra-form-note">Application — nothing is published until a moderator approves it. Crew leaders, event hosts and creators are shown with their display name.</p>
       <div class="ra-choices" hidden>
@@ -89,7 +89,7 @@ const { focus } = Astro.props;
       </fieldset>
 
       <div class="ra-actions">
-        <button type="submit" class="btn btn-primary" id="ra-submit">Send application</button>
+        <button type="submit" class="btn btn-p" id="ra-submit">Send application</button>
         <p class="ra-msg" id="ra-msg" aria-live="polite"></p>
       </div>
     </form>
@@ -196,7 +196,7 @@ const { focus } = Astro.props;
     reqBox.innerHTML = shown.map((r) => {
       const crew = r.role === 'crew_leader' ? (r.crew ? `${crewTagHtml(r.crew.tag, r.crew.color, 'sm')} ${esc(r.crew.name)}` : `${crewTagHtml(r.new_crew_tag, r.new_crew_color, 'sm')} ${esc(r.new_crew_name)}`) : '';
       if (r.status === 'pending') {
-        return `<div class="ra-req is-pending"><div class="ra-req-main"><strong>${roleLabel(r.role)} application pending</strong> ${crew}<small>Sent ${esc(new Date(r.requested_at).toLocaleDateString(undefined, { dateStyle: 'medium' }))} — a moderator will review it.</small></div><button type="button" class="btn btn-outline" data-withdraw="${esc(r.request_id)}">Withdraw</button></div>`;
+        return `<div class="ra-req is-pending"><div class="ra-req-main"><strong>${roleLabel(r.role)} application pending</strong> ${crew}<small>Sent ${esc(new Date(r.requested_at).toLocaleDateString(undefined, { dateStyle: 'medium' }))} — a moderator will review it.</small></div><button type="button" class="btn btn-s" data-withdraw="${esc(r.request_id)}">Withdraw</button></div>`;
       }
       return `<div class="ra-req"><div class="ra-req-main"><strong>${roleLabel(r.role)} application not approved</strong> ${crew}<small>${r.decision_note ? 'Moderator note: ' + esc(r.decision_note) : 'You can send a new application below.'}</small></div></div>`;
     }).join('');

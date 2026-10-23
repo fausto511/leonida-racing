@@ -76,10 +76,10 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
   function targetLink(r: any): string {
-    if (r.target_type === 'crew') return r.target_crew_id ? `<a class="btn btn-outline" href="${base}moderator/hub/">Open Hub Content</a>` : '<span class="cr-meta">Crew no longer exists</span>';
-    if (r.target_type === 'event') return r.target_event_id ? `<a class="btn btn-outline" href="${base}moderator/hub/">Open Hub Content</a>` : '<span class="cr-meta">Event no longer exists</span>';
+    if (r.target_type === 'crew') return r.target_crew_id ? `<a class="btn btn-s" href="${base}moderator/hub/">Open Hub Content</a>` : '<span class="cr-meta">Crew no longer exists</span>';
+    if (r.target_type === 'event') return r.target_event_id ? `<a class="btn btn-s" href="${base}moderator/hub/">Open Hub Content</a>` : '<span class="cr-meta">Event no longer exists</span>';
     const t = String(r.target_text ?? '');
-    return /^https?:\/\//i.test(t) ? `<a class="btn btn-outline" href="${esc(t)}" target="_blank" rel="noopener noreferrer">Open link ↗</a>` : '';
+    return /^https?:\/\//i.test(t) ? `<a class="btn btn-s" href="${esc(t)}" target="_blank" rel="noopener noreferrer">Open link ↗</a>` : '';
   }
 
   function render() {
@@ -95,8 +95,8 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
             ? `<div class="cr-actions">
                  ${targetLink(r)}
                  <input type="text" maxlength="1000" placeholder="Decision note — visible to the reporter" data-note="${esc(r.report_id)}" />
-                 <button type="button" class="btn btn-primary" data-act="resolved" data-id="${esc(r.report_id)}">Action taken</button>
-                 <button type="button" class="btn btn-outline" data-act="dismissed" data-id="${esc(r.report_id)}">No action</button>
+                 <button type="button" class="btn btn-p" data-act="resolved" data-id="${esc(r.report_id)}">Action taken</button>
+                 <button type="button" class="btn btn-s" data-act="dismissed" data-id="${esc(r.report_id)}">No action</button>
                </div>`
             : `<div class="cr-actions">${targetLink(r)}<span class="cr-meta">${STATUS[r.status]} · ${r.handled_at ? esc(when(r.handled_at)) : ''}${r.handler?.display_name ? ` · by ${esc(r.handler.display_name)}` : ''}</span></div>
                ${r.decision_note ? `<p class="cr-note">Note to reporter: ${esc(r.decision_note)}</p>` : ''}`;
