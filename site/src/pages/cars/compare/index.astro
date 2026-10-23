@@ -87,7 +87,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp-tgl input:checked + .cp-sw { background: var(--lr-pink); }
   .cp-tgl input:checked + .cp-sw::after { transform: translateX(14px); background: var(--lr-on-pink); }
   .cp-tgl input:focus-visible + .cp-sw { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
-  .cp-clear { margin-top: auto; padding: 0; border: 0; background: none; color: var(--lr-soft); font: inherit; font-size: 14px; cursor: pointer; }
+  .cp-clear { margin-top: auto; padding: 0; border: 0; background: none; color: var(--lr-muted); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
   .cp-clear:hover { color: var(--lr-text); }
   .cp-add-m { display: none; }
   .cp-nojs { grid-column: 2 / -1; color: var(--lr-soft); }
@@ -97,7 +97,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp :global(.ct-img > img:not(.ct-ph-logo)) { width: 100%; height: 100%; object-fit: cover; display: block; }
   .cp :global(.ct-ph-bg) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(.6) brightness(.35); }
   .cp :global(.ct-ph-logo) { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; transform: translate(-50%, -50%); object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-ph); }
-  .cp :global(.ct-x) { position: absolute; right: 8px; top: 8px; z-index: 2; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 999px; background: var(--lr-dark-80); color: var(--lr-text); font-size: 16px; line-height: 1; cursor: pointer; }
+  .cp :global(.ct-x) { position: absolute; right: 8px; top: 8px; z-index: 2; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 999px; background: var(--lr-dark-80); color: var(--lr-text); font-size: 16px; line-height: 1; cursor: pointer; }
   .cp :global(.ct-x:hover) { background: var(--lr-pink); color: var(--lr-on-pink); }
   .cp :global(.ct-own) { position: absolute; left: 8px; top: 8px; z-index: 2; display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 999px; background: var(--lr-dark-80); color: var(--lr-lime); font-size: 11px; font-weight: 700; }
   .cp :global(.ct-b) { display: flex; flex-direction: column; flex: 1; padding: 12px 12px 12px; }
@@ -105,7 +105,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp :global(.ct-name) { margin-top: 2px; font-size: 17px; font-weight: 700; line-height: 1.2; color: var(--lr-text); text-decoration: none; }
   .cp :global(.ct-cls) { font-size: 13px; color: var(--lr-soft); }
   .cp :global(.ct-foot) { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--lr-line); }
-  .cp :global(.ct-gar) { width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); cursor: pointer; }
+  .cp :global(.ct-gar) { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); cursor: pointer; }
   .cp :global(.ct-gar svg) { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .cp :global(.ct-gar .g2), .cp :global(.ct-gar[aria-pressed="true"] .g1) { display: none; }
   .cp :global(.ct-gar[aria-pressed="true"] .g2) { display: block; }
@@ -242,7 +242,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
     .cp :global(.ct-make) { font-size: 10px; }
     .cp :global(.ct-name) { font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .cp :global(.ct-cls), .cp :global(.ct-foot), .cp :global(.ct-own) { display: none; }
-    .cp :global(.ct-x) { width: 24px; height: 24px; font-size: 14px; right: 6px; top: 6px; }
+    .cp :global(.ct-x) { width: 32px; height: 32px; font-size: 14px; right: 6px; top: 6px; }
     .cp :global(.ct-empty) { grid-column: 1 / -1; grid-row: auto; }
     .cp-mini :global(.cp-grid) { padding: 6px 0; }
     .cp :global(.cm) { font-size: 12px; gap: 6px; }

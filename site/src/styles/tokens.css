@@ -191,6 +191,8 @@ a[target="_blank"]:not(.btn):not([class*="btn"]):not(.lr-noext):not([href^="http
   content: ""; display: inline-block; flex: none; width: .78em; height: .78em; margin-left: .28em; vertical-align: -.02em;
   background-color: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 7h10v10'/%3E%3Cpath d='M7 17 17 7'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 7h10v10'/%3E%3Cpath d='M7 17 17 7'/%3E%3C/svg%3E") center / contain no-repeat; }
 .btn:disabled, .btn.is-disabled, .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+/* text buttons (DEC-0175): 14px, 600, no frame — orange when it leads somewhere (hover pink, like arrow links), muted for small actions such as Clear / Share (hover white).
+   icon buttons: 32 (default) or 40 (touch / toolbars). */
 /* sizes (Fausto 23.10.2026, DEC-0175): .btn 48 = page level · .btn-md 40 = in cards and list rows · .btn-sm 32 = tables, dense rows, hint bubbles */
 .btn-md { min-height: 40px; padding: 0 16px; font-size: 14px; gap: 8px; }
 .btn-sm { min-height: 32px; padding: 0 12px; font-size: 13px; gap: 6px; }

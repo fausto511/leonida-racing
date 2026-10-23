@@ -170,8 +170,8 @@
 .ev-lb:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ev-fullrow .ev-desc { margin-top: 8px; font-size: 15px; }
 .ev-tools { margin-top: auto; display: flex; align-items: center; gap: 12px; }
-.ev-share { display: inline-flex; align-items: center; gap: 6px; padding: 0; background: none; border: 0; font: inherit; font-size: 13px; font-weight: 600; color: var(--lr-text); cursor: pointer; }
-.ev-share:hover { color: var(--lr-orange); }
+.ev-share { display: inline-flex; align-items: center; gap: 6px; padding: 0; background: none; border: 0; font: inherit; font-size: 14px; font-weight: 600; color: var(--lr-muted); cursor: pointer; }
+.ev-share:hover { color: var(--lr-text); }
 .ev-tools .ev-report { font-size: 13px; font-weight: 500; color: var(--lr-muted); text-decoration: none; }
 .ev-tools .ev-report:hover { color: var(--lr-text); }
 .ev-report.is-off { cursor: default; }
