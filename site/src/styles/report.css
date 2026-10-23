@@ -14,7 +14,8 @@
 .rp-card li { position: relative; padding-left: 18px; font-size: 14px; line-height: 1.5; color: #CFCFDA; }
 .rp-card li::before { content: ''; position: absolute; left: 2px; top: .55em; width: 6px; height: 6px; border-radius: 999px; background: var(--lr-orange); }
 .rp-card p { margin: 0 0 8px; font-size: 14px; line-height: 1.5; color: #CFCFDA; }
-.rp-card a:not(.arrow) { color: var(--lr-text); text-underline-offset: 3px; }
+.rp-card a:not(.arrow) { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
+.rp-card a:not(.arrow):hover { color: var(--lr-orange); }
 .rp-links { display: grid; gap: 8px; }
 
 .notice { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; padding: 12px 14px; border: 1px solid rgba(255,149,90,.4); border-radius: 8px; background: rgba(255,149,90,.08); font-size: 14px; color: var(--lr-soft); }

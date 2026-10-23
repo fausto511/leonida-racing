@@ -150,7 +150,8 @@ const roles = [
   .ab-eb { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lr-orange); }
   .ab-h2 { margin: 0 0 18px; }
   .ab p { line-height: 1.65; }
-  .ab a:not(.btn):not(.arrow) { color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(251,247,234,.4); }
+  .ab a:not(.btn):not(.arrow) { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; } /* text link (DEC-0169) */
+  .ab a:not(.btn):not(.arrow):hover { color: var(--lr-orange); }
   .ab a:not(.btn):not(.arrow):hover { text-decoration-color: var(--lr-pink); }
 
   /* roots */

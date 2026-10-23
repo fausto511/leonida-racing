@@ -235,7 +235,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-pill.is-open { color: var(--lr-soft); background: rgba(200,200,222,.08); border: 1px solid var(--lr-line-strong); }
   .gd-p { margin: 0 0 16px; font-size: 16px; line-height: 1.7; color: #E4E2EA; }
   .gd-p :global(strong) { color: var(--lr-text); }
-  .gd-p :global(a) { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-underline-offset: 3px; }
+  .gd-p :global(a) { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
   .gd-p :global(a:hover) { color: var(--lr-orange); }
   .gd-cta { margin: 4px 0 0; }
 
@@ -293,7 +293,8 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-count strong { font-size: 40px; line-height: 1; color: var(--lr-lime); }
   .gd-count p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--lr-soft); }
   .gd-count b { color: var(--lr-text); }
-  .gd-count a { color: var(--lr-text); text-underline-offset: 3px; text-decoration-color: var(--lr-orange); }
+  .gd-count a { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
+  .gd-count a:hover { color: var(--lr-orange); }
   .gd-updated { margin: 20px 0 4px; font-size: 14px; font-weight: 600; }
   .gd-indep { margin: 0; font-size: 13px; color: var(--lr-muted); }
 

@@ -144,6 +144,13 @@ a { color: inherit; }
   transition: background-color .12s, border-color .12s, color .12s;
 }
 .btn:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+/* Text links in running text (Fausto 23.10.2026, DEC-0169): white, orange underline 1px / 3px offset, hover text orange.
+   Pages apply these values to their prose links; .lr-link is the shared class for new markup. */
+.lr-link { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
+.lr-link:hover { color: var(--lr-orange); }
+.lr-lede a { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
+.lr-lede a:hover { color: var(--lr-orange); }
+a:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; border-radius: 2px; }
 .btn:disabled, .btn.is-disabled, .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
 .btn-sm { min-height: 36px; padding: 0 14px; font-size: 13px; gap: 6px; }
 

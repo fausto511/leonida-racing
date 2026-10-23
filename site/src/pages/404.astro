@@ -218,7 +218,8 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .g4 .go { margin-top: 6px; font-size: 13px; font-weight: 700; color: var(--lr-orange); }
   .g4-arrow { display: none; }
   .rep { margin: 28px 0 0; font-size: 14px; color: var(--lr-muted); }
-  .rep a { color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; }
+  .rep a { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
+  .rep a:hover { color: var(--lr-orange); }
 
   /* Discord band (same look as home) */
   .dband { background: var(--lr-brand-gradient); }

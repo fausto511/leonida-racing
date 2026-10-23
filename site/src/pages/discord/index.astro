@@ -297,7 +297,8 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .faq summary::after { content: '+'; color: var(--lr-orange); font-size: 22px; line-height: 1; }
   .faq details[open] summary::after { content: '–'; }
   .faq details p { margin: 0 0 18px; font-size: 16px; line-height: 1.65; color: #E4E4EC; max-width: 760px; }
-  .faq details a { color: var(--lr-orange); text-decoration: none; font-weight: 600; }
+  .faq details a { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
+  .faq details a:hover { color: var(--lr-orange); }
 
   /* ---- Discord band (same look as home/404) ---- */
   .dband { background: var(--lr-brand-gradient); }

@@ -96,7 +96,8 @@ const docs = [
   .lg-body :global(ul), .lg-body :global(ol) { margin: 0 0 14px; padding-left: 1.2rem; }
   .lg-body :global(li) { margin-bottom: 6px; }
   .lg-body :global(strong) { color: var(--lr-text); }
-  .lg-body :global(a) { color: var(--gh-yellow); text-underline-offset: 3px; }
+  .lg-body :global(a) { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
+  .lg-body :global(a:hover) { color: var(--lr-orange); }
 
   @media (max-width: 960px) {
     .lg { grid-template-columns: 1fr; gap: 24px; padding-top: 24px; }
