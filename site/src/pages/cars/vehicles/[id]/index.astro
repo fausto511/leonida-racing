@@ -401,7 +401,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   /* ---- Gellhorn ---- */
   .vg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
   .vg-card { display: flex; flex-direction: column; min-width: 0; padding: 20px 20px 20px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }
-  .vg-h h3 { margin: 0; font-size: 19px; font-weight: 700; }
+  .vg-h h3 { margin: 0; font-size: var(--lr-h3); font-weight: 700; }
   .vg-h p { margin: 2px 0 0; font-size: 14px; color: var(--lr-soft); }
   .vg-cols { display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; margin-top: 14px; padding: 8px 14px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-muted); }
   .vg-cols[hidden] { display: none; }
@@ -467,7 +467,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vm-cards { display: contents; }
   .vh2h { display: flex; flex-direction: column; gap: 6px; padding: 20px; border: 1px solid rgba(242,75,157,.35); border-radius: 8px; background: linear-gradient(160deg, rgba(242,75,157,.16), rgba(20,20,31,.9) 60%), var(--lr-card); }
   .vh2h .eyebrow { margin: 0; font-size: 12px; font-weight: 600; }
-  .vh2h h3 { margin: 4px 0 0; font-size: 21px; line-height: 1.2; }
+  .vh2h h3 { margin: 4px 0 0; font-size: var(--lr-h3); font-weight: 700; line-height: 1.2; }
   .vh2h-sub { margin: 0 0 8px; font-size: 14px; color: var(--lr-soft); }
   .vh2h-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
   .vh2h :global(.vh-rival) { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 6px; background: rgba(251,247,234,.05); text-decoration: none; color: var(--lr-text); }

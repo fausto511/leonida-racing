@@ -122,7 +122,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 
   #lb-context :global(.lb-context) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-top: 18px; }
   #lb-context :global(.lb-context-title) { display: flex; align-items: center; gap: 12px; }
-  #lb-context :global(.lb-context-title h3) { margin: 2px 0 0; font-size: 22px; font-weight: 700; }
+  #lb-context :global(.lb-context-title h3) { margin: 2px 0 0; font-size: var(--lr-h3); font-weight: 700; }
   #lb-context :global(.lb-context-kicker) { margin: 0; color: var(--lr-muted); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
   #lb-context :global(.lb-context-link) { color: var(--lr-orange); font-size: 14px; font-weight: 600; text-decoration: none; }
 
@@ -186,7 +186,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   /* ---- cards under the table ---- */
   .ta-2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 20px; margin-top: 20px; }
   .need, .ta-box { padding: 20px; display: flex; flex-direction: column; }
-  .need h3, .ta-box h3 { margin: 0; font-size: 20px; font-weight: 700; }
+  .need h3, .ta-box h3 { margin: 0; font-size: var(--lr-h3); font-weight: 700; }
   .sub { font-size: 14px; color: var(--lr-muted); margin: 6px 0 14px; line-height: 1.5; }
   .need .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
   .need .grid[hidden] { display: none; }

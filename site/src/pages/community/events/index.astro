@@ -112,7 +112,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   #ev-root :global(.ev-day-g) { scroll-margin-top: 90px; }
   #ev-root :global(.ev-day-g), #ev-past :global(.ev-day-g) { margin-top: 28px; }
   #ev-root :global(.ev-day-g:first-child) { margin-top: 0; }
-  :global(.ev-dh) { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-family: var(--gh-font-body); font-size: 20px; font-weight: 700; text-transform: none; letter-spacing: 0; }
+  :global(.ev-dh) { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-family: var(--gh-font-body); font-size: var(--lr-h3); font-weight: 700; text-transform: none; letter-spacing: 0; }
   :global(.ev-dh .today) { height: 22px; padding: 0 8px; border-radius: 4px; background: rgba(255,149,90,.16); color: var(--lr-orange); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; display: inline-flex; align-items: center; }
   :global(.ev-dh .n) { font-size: 14px; font-weight: 500; color: var(--lr-muted); }
   :global(.ec-dc-inline) { display: none; }
@@ -122,10 +122,10 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   #ev-past :global(.ev-row) { opacity: .7; }
 
   .ec-side { display: flex; flex-direction: column; gap: 28px; position: sticky; top: 90px; }
-  .sh { display: flex; align-items: baseline; gap: 10px; margin: 0 0 12px; font-family: var(--gh-font-body); font-size: 20px; font-weight: 700; text-transform: none; letter-spacing: 0; }
+  .sh { display: flex; align-items: baseline; gap: 10px; margin: 0 0 12px; font-family: var(--gh-font-body); font-size: var(--lr-h3); font-weight: 700; text-transform: none; letter-spacing: 0; }
   .sh small { font-size: 14px; font-weight: 500; color: var(--lr-muted); }
   :global(.dc-card) { padding: 18px; border-radius: 8px; border: 1px solid rgba(88,101,242,.55); background: linear-gradient(160deg, rgba(88,101,242,.22), rgba(88,101,242,.06)); }
-  :global(.dc-card h3) { margin: 0; font-size: 20px; font-weight: 700; }
+  :global(.dc-card h3) { margin: 0; font-size: var(--lr-h3); font-weight: 700; }
   :global(.dc-card p) { margin: 8px 0 0; font-size: 14px; line-height: 1.55; color: var(--lr-soft); }
   :global(.dc-card .dc-free) { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--lr-muted); }
   :global(.dc-card .dc-free i) { width: 7px; height: 7px; border-radius: 999px; background: #3BA55D; }
@@ -181,7 +181,6 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
     .ec-body { grid-template-columns: 1fr; padding-top: 20px; }
     .ec-side { display: none; }
     :global(.ec-dc-inline) { display: block; margin-top: 20px; }
-    :global(.ev-dh) { font-size: 18px; }
     .ec-open { flex-wrap: wrap; }
     .ec-more .btn { width: 100%; }
   }
