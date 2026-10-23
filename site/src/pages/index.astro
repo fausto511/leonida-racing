@@ -314,7 +314,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .htile-img { position: relative; display: block; aspect-ratio: 16 / 6.4; overflow: hidden; background: var(--lr-raised); }
   .htile-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .htile-go, .mtile-go { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; transition: background .15s, color .15s; }
-  .htile-go { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; background: rgba(11,11,20,.62); backdrop-filter: blur(6px); color: var(--lr-text); }
+  .htile-go { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; background: var(--lr-dark-60); backdrop-filter: blur(6px); color: var(--lr-text); }
   .htile-go :global(svg), .mtile-go :global(svg) { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .htile:hover .htile-go, .htile:focus-visible .htile-go { background: var(--lr-orange); color: var(--lr-on-orange); }
   .htile-body { display: flex; flex-direction: column; gap: 3px; padding: 12px 16px 14px; }
@@ -337,7 +337,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   @keyframes mt-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
   @media (prefers-reduced-motion: reduce) { .mtile.is-loading [data-val], .mtile.is-loading [data-sub] { animation: none; } }
   .mtile-sub.is-cta { color: var(--lr-orange); font-weight: 600; }
-  .mbar { display: block; height: 4px; border-radius: 999px; background: rgba(251,247,234,.1); overflow: hidden; margin-top: 2px; }
+  .mbar { display: block; height: 4px; border-radius: 999px; background: var(--lr-white-active); overflow: hidden; margin-top: 2px; }
   .mbar i { display: block; height: 100%; background: var(--lr-orange); border-radius: 999px; }
 
   /* ---- section frame ---- */
@@ -353,7 +353,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .hsec-head .arrow { white-space: nowrap; }
 
   /* ---- chips (mockup .chip) ---- */
-  .chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); font-size: 13px; font-weight: 500; color: var(--lr-text); background: rgba(11,11,20,.55); text-decoration: none; white-space: nowrap; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); font-size: 13px; font-weight: 500; color: var(--lr-text); background: var(--lr-dark-60); text-decoration: none; white-space: nowrap; }
   .chip:hover { border-color: var(--lr-pink); color: var(--lr-text); }
   .chip-sm { height: 30px; font-size: 12px; padding: 0 11px; }
 
@@ -367,7 +367,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .tband-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,11,20,0) 50%, rgba(11,11,20,.85) 100%); }
   .tband-actions { position: relative; z-index: 2; padding: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
   .btn-44 { min-height: 44px; font-size: 14px; }
-  .btn-glass { border-color: rgba(251,247,234,.4); background: rgba(11,11,20,.45); }
+  .btn-glass { border-color: var(--lr-line-hover); background: var(--lr-dark-60); }
   .tband-board { position: relative; z-index: 2; padding: 20px 22px 18px; display: flex; flex-direction: column; pointer-events: none; }
   .tband-board :global(a) { pointer-events: auto; }
   .tband-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 0 10px; }
@@ -376,7 +376,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .tband-rows { display: flex; flex-direction: column; margin-top: 8px; }
   .tband-rows :global(.trow) { display: flex; align-items: center; gap: 14px; padding: 11px 10px; border-top: 1px solid var(--lr-line); border-radius: 4px; color: var(--lr-text); text-decoration: none; transition: background .15s; }
   .tband-rows :global(.trow:first-child) { border-top: 0; }
-  .tband-rows :global(.trow:hover) { background: rgba(251,247,234,.06); }
+  .tband-rows :global(.trow:hover) { background: var(--lr-white-hover); }
   .tband-rows :global(.tpos) { width: 24px; flex: none; font-weight: 600; color: var(--lr-muted); }
   .tband-rows :global(.tpos.is-first) { color: var(--lr-pink); }
   .tband-rows :global(.tdrv) { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-weight: 600; padding-right: 16px; }
@@ -408,7 +408,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .crows { display: flex; flex-direction: column; }
   .crows :global(.crow) { position: relative; display: flex; align-items: center; gap: 14px; padding: 12px 10px; border-top: 1px solid var(--lr-line); border-radius: 4px; transition: background .15s; }
   .crows :global(.crow:first-child) { border-top: 0; }
-  .crows :global(.crow:hover) { background: rgba(251,247,234,.06); }
+  .crows :global(.crow:hover) { background: var(--lr-white-hover); }
   .crows :global(.clink) { position: absolute; inset: 0; z-index: 1; border-radius: 4px; }
   .crows :global(.cdate) { width: 40px; flex: none; text-align: center; line-height: 1.1; }
   .crows :global(.cdate b) { display: block; font-size: 20px; font-weight: 700; }
@@ -421,9 +421,9 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .crows :global(.ctag-inline) { display: none; }
   .crows :global(.cside) { position: relative; z-index: 2; flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
   /* sign-up slot content from event-rsvp.ts / crew-membership.ts, in the row style */
-  .crows :global(.cside .btn), .crows :global(.crew-join-btn), .crows :global(.crew-withdraw) { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; height: 32px; padding: 0 13px; border-radius: 6px; font-family: var(--gh-font-body); font-size: 13px; font-weight: 600; border: 1px solid rgba(251,247,234,.26); color: var(--lr-text); background: transparent; cursor: pointer; white-space: nowrap; text-decoration: none; }
+  .crows :global(.cside .btn), .crows :global(.crew-join-btn), .crows :global(.crew-withdraw) { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; height: 32px; padding: 0 13px; border-radius: 6px; font-family: var(--gh-font-body); font-size: 13px; font-weight: 600; border: 1px solid var(--lr-line-strong); color: var(--lr-text); background: transparent; cursor: pointer; white-space: nowrap; text-decoration: none; }
   .crows :global(.cside .btn:hover), .crows :global(.crew-join-btn:hover), .crows :global(.crew-withdraw:hover) { border-color: var(--lr-text); }
-  .crows :global(.cside .ev-rsvp-btn.is-in) { background: rgba(217,245,142,.12); border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
+  .crows :global(.cside .ev-rsvp-btn.is-in) { background: var(--lr-lime-fill); border-color: var(--lr-lime-border); color: var(--lr-lime); }
   .crows :global(.ev-going), .crows :global(.ev-going-none) { order: 2; font-size: 12px; color: var(--lr-muted); }
   .crows :global(.ev-going summary) { cursor: pointer; list-style: none; }
   .crows :global(.ev-going summary::-webkit-details-marker) { display: none; }
@@ -431,18 +431,18 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .crows :global(.ev-full) { font-size: 12px; color: var(--lr-muted); }
   .crows :global(.ev-rsvp-msg) { order: 3; font-size: 11px; color: var(--lr-lime); max-width: 9rem; text-align: right; }
   .crows :global(.crew-join-slot) { flex-direction: row; align-items: center; gap: 8px; }
-  .crows :global(.crew-pill) { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 6px; background: rgba(251,247,234,.08); color: var(--lr-muted); font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .crows :global(.crew-pill) { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 6px; background: var(--lr-white-hover); color: var(--lr-muted); font-size: 13px; font-weight: 600; white-space: nowrap; }
   .crows :global(.crew-withdraw) { border-color: transparent; color: var(--lr-muted); padding: 0 6px; }
   .crows :global(.crew-link:not(.crew-join-btn):not(.crew-withdraw)) { font-size: 12px; color: var(--lr-muted); }
   .crows :global(.crow.cfree) { border: 1px dashed var(--lr-line-strong); margin-top: 8px; }
-  .crows :global(.crow.cfree:hover) { border-color: rgba(251,247,234,.5); }
+  .crows :global(.crow.cfree:hover) { border-color: var(--lr-line-hover); }
   .crows :global(.crow.cfree .cdate) { display: flex; align-items: center; justify-content: center; height: 44px; }
   .crows :global(.cplus) { width: 32px; height: 32px; border-radius: 999px; border: 1px dashed var(--lr-line-hover); display: inline-flex; align-items: center; justify-content: center; color: var(--lr-muted); font-size: 18px; line-height: 1; }
   .crows :global(.crow.cfree .cmain b) { color: var(--lr-muted); }
   .cfoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding: 16px 10px 0; }
   /* loading rows (no flash of sample data) */
   .crows :global(.crow-sk) { pointer-events: none; }
-  .crows :global(.sk) { display: block; border-radius: 4px; background: rgba(251,247,234,.07); animation: sk 1.4s ease-in-out infinite; }
+  .crows :global(.sk) { display: block; border-radius: 4px; background: var(--lr-white-hover); animation: sk 1.4s ease-in-out infinite; }
   .crows :global(.sk-date) { width: 44px; height: 44px; flex: none; }
   .crows :global(.sk-tag) { width: 44px; height: 24px; flex: none; }
   .crows :global(.sk-main) { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
@@ -456,7 +456,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .gcard:hover { border-color: var(--lr-orange); }
   .g-img { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--lr-raised); }
   .g-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .g-status { position: absolute; left: 12px; top: 12px; height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(11,11,20,.78); backdrop-filter: blur(4px); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; }
+  .g-status { position: absolute; left: 12px; top: 12px; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--lr-dark-80); backdrop-filter: blur(4px); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; }
   .g-status i { width: 7px; height: 7px; border-radius: 999px; background: var(--lr-lime); }
   .g-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
   .g-name { font-size: 18px; font-weight: 700; line-height: 1.2; color: var(--lr-text); text-decoration: none; }
@@ -477,7 +477,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .dband-title { margin: 0; }
   .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: var(--lr-text); }
   :global(html.lr-authed) .dband-guest { display: none; }
-  .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(251,247,234,.5); }
+  .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--lr-white-underline); }
   .dband-more:hover { text-decoration-color: var(--lr-text); }
   .dband-btn { background: var(--lr-discord-text); color: var(--lr-discord); flex: none; }
   .dband-btn:hover { background: var(--lr-discord-text); color: var(--lr-discord); }

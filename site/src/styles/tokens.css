@@ -47,6 +47,22 @@
   --lr-coral: #FF8A8A;
   --lr-coral-hover: #FFAAAA;
   --lr-on-coral: #2A0F0F;
+  /* transparencies (Fausto 23.10.2026, DEC-0174): one fixed level per purpose, same for every accent.
+     tint 6 % = highlighted row / note box · fill 12 % = chips, badges, outlined buttons · fill-hover 18 % · border 45 % (hover: full colour).
+     Gradients (band glow, image tint, rank-1 row, logo gradient) and text shadows on images are fixed recipes, not levels. */
+  --lr-pink-tint: rgba(242,75,157,.06);   --lr-pink-fill: rgba(242,75,157,.12);   --lr-pink-fill-hover: rgba(242,75,157,.18);   --lr-pink-border: rgba(242,75,157,.45);
+  --lr-orange-tint: rgba(255,149,90,.06); --lr-orange-fill: rgba(255,149,90,.12); --lr-orange-fill-hover: rgba(255,149,90,.18); --lr-orange-border: rgba(255,149,90,.45);
+  --lr-lime-tint: rgba(217,245,142,.06);  --lr-lime-fill: rgba(217,245,142,.12);  --lr-lime-fill-hover: rgba(217,245,142,.18);  --lr-lime-border: rgba(217,245,142,.45);
+  --lr-coral-tint: rgba(255,138,138,.06); --lr-coral-fill: rgba(255,138,138,.12); --lr-coral-fill-hover: rgba(255,138,138,.18); --lr-coral-border: rgba(255,138,138,.45);
+  /* light veils on dark surfaces (borders use the --lr-line-* levels) */
+  --lr-white-hover: rgba(251,247,234,.06);
+  --lr-white-active: rgba(251,247,234,.12);
+  --lr-white-underline: rgba(251,247,234,.45);
+  /* dark veils (#0B0B14) */
+  --lr-dark-60: rgba(11,11,20,.6);        /* text/icons on photos */
+  --lr-dark-80: rgba(11,11,20,.8);        /* behind open panels */
+  --lr-dark-92: rgba(11,11,20,.92);       /* bars over content */
+  --lr-shadow: rgba(11,11,20,.5);         /* menus, dropdowns, hints */
   /* third-party brands keep their own colours, only on their own buttons/icons (Fausto 23.10.) */
   --lr-discord: #5865F2;
   --lr-discord-hover: #4752C4;
@@ -156,7 +172,7 @@ a { color: inherit; }
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  background: rgba(251,247,234,.08);
+  background: var(--lr-white-hover);
   color: var(--lr-text);
   transition: background-color .12s, border-color .12s, color .12s;
 }
@@ -180,15 +196,15 @@ a[target="_blank"]:not(.btn):not([class*="btn"]):not(.lr-noext):not([href^="http
 
 .btn-primary, .btn-red, .btn-p { background: var(--lr-pink); border-color: var(--lr-pink); color: var(--lr-on-pink); }
 .btn-primary:hover, .btn-red:hover, .btn-p:hover { background: var(--lr-pink-hover); border-color: var(--lr-pink-hover); color: var(--lr-on-pink); }
-.btn-outline, .btn-s { background: transparent; border-color: rgba(251,247,234,.26); color: var(--lr-text); }
+.btn-outline, .btn-s { background: transparent; border-color: var(--lr-line-strong); color: var(--lr-text); }
 .btn-outline:hover, .btn-s:hover, .outline-hover:hover { background: transparent; border-color: var(--lr-text); color: var(--lr-text); }
-.btn-white-tonal, .btn-t, .btn-surface { background: rgba(251,247,234,.08); color: var(--lr-text); }
-.btn-white-tonal:hover, .btn-t:hover, .btn-surface:hover { background: rgba(251,247,234,.14); }
-.btn-red-tonal { background: transparent; border-color: rgba(242,75,157,.55); color: var(--lr-pink); }
-.btn-red-tonal:hover { background: rgba(242,75,157,.1); border-color: var(--lr-pink); }
+.btn-white-tonal, .btn-t, .btn-surface { background: var(--lr-white-hover); color: var(--lr-text); }
+.btn-white-tonal:hover, .btn-t:hover, .btn-surface:hover { background: var(--lr-white-active); }
+.btn-red-tonal { background: transparent; border-color: var(--lr-pink-border); color: var(--lr-pink); }
+.btn-red-tonal:hover { background: var(--lr-pink-fill); border-color: var(--lr-pink); }
 /* legacy tonal/outline yellow -> orange text, kept for any leftover markup */
-.btn-danger, .btn-outline-red { background: transparent; border-color: rgba(255,138,138,.55); color: var(--lr-coral); }
-.btn-danger:hover, .btn-outline-red:hover { background: rgba(255,138,138,.1); border-color: var(--lr-coral); }
+.btn-danger, .btn-outline-red { background: transparent; border-color: var(--lr-coral-border); color: var(--lr-coral); }
+.btn-danger:hover, .btn-outline-red:hover { background: var(--lr-coral-fill); border-color: var(--lr-coral); }
 /* arrow text link (mockup .arrow): "Open the Guide →" */
 /* Arrow link "go further" (DEC-0170): section-head "more" links, card actions, end of link lists — 14px, 600, orange, hover pink, no underline.
    Exceptions by design: link inside an info line (grey, e.g. vehicle make line) and links on the Discord gradient band (white, underlined). */
@@ -270,7 +286,7 @@ main:focus { outline: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 /* Speech bubble next to the clicked element (scripts/bubble.ts, DEC-0126 C1) */
-.lr-bubble { position: fixed; z-index: 70; width: max-content; max-width: min(280px, calc(100vw - 24px)); padding: 12px 14px; border-radius: 8px; background: var(--lr-text); color: #14141F; box-shadow: 0 16px 40px rgba(11,11,20,.5); font-size: 13px; line-height: 1.45; }
+.lr-bubble { position: fixed; z-index: 70; width: max-content; max-width: min(280px, calc(100vw - 24px)); padding: 12px 14px; border-radius: 8px; background: var(--lr-text); color: #14141F; box-shadow: 0 16px 40px var(--lr-shadow); font-size: 13px; line-height: 1.45; }
 .lr-bubble::after { content: ''; position: absolute; left: var(--arrow-x, 50%); width: 12px; height: 12px; margin-left: -6px; background: var(--lr-text); transform: rotate(45deg); bottom: -6px; }
 .lr-bubble.below::after { bottom: auto; top: -6px; }
 .lr-bubble[hidden] { display: none; }

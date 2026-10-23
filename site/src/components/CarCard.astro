@@ -85,22 +85,22 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   .vc-ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   .vc-ph-bg { position: absolute; inset: 0; filter: grayscale(.6) brightness(.35); }
   .vc-ph-logo { position: relative; width: 92px; height: 92px; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-ph); }
-  .vc-ph-pill { position: absolute; right: 12px; bottom: 12px; height: 24px; padding: 0 10px; border-radius: 999px; background: rgba(11,11,20,.78); font-size: 11px; font-weight: 600; color: var(--lr-muted); display: inline-flex; align-items: center; }
+  .vc-ph-pill { position: absolute; right: 12px; bottom: 12px; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--lr-dark-80); font-size: 11px; font-weight: 600; color: var(--lr-muted); display: inline-flex; align-items: center; }
   .vc-pills { position: absolute; left: 12px; top: 12px; right: 56px; display: flex; flex-wrap: wrap; gap: 6px; }
-  .vc-cls { height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(11,11,20,.78); backdrop-filter: blur(4px); font-size: 12px; font-weight: 600; color: var(--lr-text); display: inline-flex; align-items: center; }
+  .vc-cls { height: 26px; padding: 0 10px; border-radius: 999px; background: var(--lr-dark-80); backdrop-filter: blur(4px); font-size: 12px; font-weight: 600; color: var(--lr-text); display: inline-flex; align-items: center; }
   .vc-new { background: var(--lr-lime); color: var(--lr-on-lime); font-weight: 700; }
   .vc-acq { color: var(--lr-orange); }
   /* C2 (Fausto 15.10.): edition as an orange text line, not a second pill in the image */
   .vc-edition { font-size: 13px; font-weight: 600; color: var(--lr-orange); }
-  .vc-garage { position: relative; z-index: 2; flex: none; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid rgba(251,247,234,.22); background: transparent; color: var(--lr-text); cursor: pointer; }
+  .vc-garage { position: relative; z-index: 2; flex: none; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); cursor: pointer; }
   .vc-garage:hover { border-color: var(--lr-text); }
   .vc-garage:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
   .vc-garage svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .vc-g-check { display: none; }
-  .vc-garage[aria-pressed="true"] { background: rgba(217,245,142,.12); border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
+  .vc-garage[aria-pressed="true"] { background: var(--lr-lime-fill); border-color: var(--lr-lime-border); color: var(--lr-lime); }
   .vc-garage[aria-pressed="true"] .vc-g-house { display: none; }
   .vc-garage[aria-pressed="true"] .vc-g-check { display: block; stroke-width: 2; }
-  .vc-cmp { position: absolute; z-index: 2; right: 12px; top: 12px; width: 34px; height: 34px; padding: 0; border-radius: 999px; border: 1px solid rgba(251,247,234,.35); background: rgba(11,11,20,.65); color: var(--lr-text); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+  .vc-cmp { position: absolute; z-index: 2; right: 12px; top: 12px; width: 34px; height: 34px; padding: 0; border-radius: 999px; border: 1px solid var(--lr-line-hover); background: var(--lr-dark-60); color: var(--lr-text); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
   .vc-cmp:hover { border-color: var(--lr-pink); color: var(--lr-pink); }
   .vc-cmp svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
   .vc-check { display: none; }

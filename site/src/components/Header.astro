@@ -144,7 +144,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .lr-strip-close:focus-visible { outline: 2px solid var(--lr-on-pink); outline-offset: 1px; border-radius: 4px; }
 
   /* ---- header bar ---- */
-  .site-head { position: sticky; top: 0; z-index: 40; background: rgba(11,11,20,.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--lr-line); }
+  .site-head { position: sticky; top: 0; z-index: 40; background: var(--lr-dark-92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--lr-line); }
   .head-row { display: flex; align-items: center; gap: 32px; height: 76px; }
   .ico { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
@@ -161,8 +161,8 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .head-search input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; padding: 0; }
   .head-search input::-webkit-search-cancel-button { filter: invert(1) opacity(.5); }
 
-  .head-icon { display: none; width: 44px; height: 44px; padding: 0; flex: none; align-items: center; justify-content: center; border: 0; border-radius: var(--gh-radius); background: rgba(251,247,234,.08); color: var(--lr-text); cursor: pointer; }
-  .head-icon:hover { background: rgba(251,247,234,.14); }
+  .head-icon { display: none; width: 44px; height: 44px; padding: 0; flex: none; align-items: center; justify-content: center; border: 0; border-radius: var(--gh-radius); background: var(--lr-white-hover); color: var(--lr-text); cursor: pointer; }
+  .head-icon:hover { background: var(--lr-white-active); }
   .head-icon:focus-visible, .account-trigger:focus-visible, .head-discord:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
 
   /* Discord blue only here (DEC-0114). */
@@ -173,13 +173,13 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .account-menu { position: relative; display: none; flex: none; }
   :global(html.lr-authed) .account-menu { display: block; }
   :global(html.lr-authed) .head-discord { display: none; }
-  .account-trigger { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 8px 0 4px; border: 0; border-radius: 999px; background: rgba(251,247,234,.08); color: var(--lr-text); cursor: pointer; }
-  .account-trigger:hover { background: rgba(251,247,234,.14); }
+  .account-trigger { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 8px 0 4px; border: 0; border-radius: 999px; background: var(--lr-white-hover); color: var(--lr-text); cursor: pointer; }
+  .account-trigger:hover { background: var(--lr-white-active); }
   .account-trigger .chev { width: 14px; height: 14px; }
   .account-avatar { width: 36px; height: 36px; border-radius: 999px; object-fit: cover; }
   .account-avatar-fallback { display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #2A1F9E, #B12A8C 60%, #F26A3D); color: var(--lr-text); font-weight: 700; font-size: 13px; }
   .account-avatar-fallback:empty::before { content: ''; }
-  .account-dropdown { position: absolute; top: calc(100% + 10px); right: 0; min-width: 13rem; padding: 6px; display: flex; flex-direction: column; background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: var(--gh-radius-lg); box-shadow: 0 16px 32px rgba(11,11,20,.45); }
+  .account-dropdown { position: absolute; top: calc(100% + 10px); right: 0; min-width: 13rem; padding: 6px; display: flex; flex-direction: column; background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: var(--gh-radius-lg); box-shadow: 0 16px 32px var(--lr-shadow); }
   .account-dropdown[hidden] { display: none; }
   .account-dropdown a, .account-dropdown button { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: var(--gh-radius); background: none; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 500; text-align: left; text-decoration: none; cursor: pointer; }
   .account-dropdown a:hover, .account-dropdown button:hover, .account-dropdown a:focus-visible, .account-dropdown button:focus-visible { background: var(--lr-raised); outline: none; }
@@ -219,7 +219,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
     .account-trigger { height: 40px; }
     .account-avatar { width: 32px; height: 32px; }
     .head-burger { display: inline-flex; }
-    .head-panel { position: absolute; top: 100%; left: 0; right: 0; background: var(--lr-bg); border-bottom: 1px solid var(--lr-line); box-shadow: 0 16px 28px rgba(11,11,20,.45); padding: 12px 0 8px; }
+    .head-panel { position: absolute; top: 100%; left: 0; right: 0; background: var(--lr-bg); border-bottom: 1px solid var(--lr-line); box-shadow: 0 16px 28px var(--lr-shadow); padding: 12px 0 8px; }
     .site-head.nav-open .head-panel { display: block; }
     .site-head.nav-open .nav-icon-open { display: none; }
     .site-head.nav-open .nav-icon-close { display: block; }

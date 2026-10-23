@@ -64,7 +64,7 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
   .mod-title { margin: .4rem 0 .6rem; font-size: clamp(2rem, 4vw, 2.8rem); }
   .mod-lede { margin: 0 0 1.75rem; color: var(--gh-muted); font-size: .92rem; max-width: 46rem; }
 
-  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: rgba(255,149,90,.08); border-radius: var(--gh-radius); font-size: .85rem; }
+  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: var(--lr-orange-tint); border-radius: var(--gh-radius); font-size: .85rem; }
   .notice strong { color: var(--gh-yellow); }
   .notice code { color: var(--gh-text); }
 
@@ -90,13 +90,13 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
      Account page: the browser's UA-stylesheet defaults win instead). */
   :global(.queue-item) { display: block; width: 100%; text-align: left; padding: .7rem .8rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); border-left: 3px solid transparent; background: var(--gh-surface-soft); color: var(--gh-text); cursor: pointer; font-family: var(--gh-font-body); }
   :global(.queue-item:hover) { border-color: var(--gh-muted); }
-  :global(.queue-item.is-active) { border-left-color: var(--gh-yellow); background: rgba(255,149,90,.08); }
+  :global(.queue-item.is-active) { border-left-color: var(--gh-yellow); background: var(--lr-orange-tint); }
   :global(.queue-item-title) { font-weight: 700; font-size: .88rem; margin-bottom: .2rem; }
   :global(.queue-item-sub) { color: var(--gh-muted); font-size: .76rem; display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
   :global(.queue-tag) { display: inline-block; padding: .1rem .45rem; border-radius: 999px; font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
-  :global(.queue-tag.tag-video) { background: rgba(217,245,142,.14); color: #D9F58E; }
-  :global(.queue-tag.tag-record) { background: rgba(255,149,90,.14); color: var(--gh-yellow); }
-  :global(.queue-tag.tag-correction) { background: rgba(242,75,157,.14); color: var(--gh-red); }
+  :global(.queue-tag.tag-video) { background: var(--lr-lime-fill); color: #D9F58E; }
+  :global(.queue-tag.tag-record) { background: var(--lr-orange-fill); color: var(--gh-yellow); }
+  :global(.queue-tag.tag-correction) { background: var(--lr-pink-fill); color: var(--gh-red); }
   .queue-empty, .queue-error { color: var(--gh-muted); font-size: .85rem; margin: 0; }
   .queue-error { color: var(--lr-coral); }
 
@@ -112,9 +112,9 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
   :global(.review-head-sub) { margin: 0; color: var(--gh-muted); font-size: .85rem; }
   :global(.review-pills) { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
   :global(.pill) { display: inline-block; padding: .2rem .55rem; border-radius: 999px; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
-  :global(.pill-live) { background: rgba(217,245,142,.14); color: #D9F58E; }
-  :global(.pill-pending) { background: rgba(255,149,90,.14); color: var(--gh-yellow); }
-  :global(.pill-rejected) { background: rgba(242,75,157,.14); color: var(--gh-red); }
+  :global(.pill-live) { background: var(--lr-lime-fill); color: #D9F58E; }
+  :global(.pill-pending) { background: var(--lr-orange-fill); color: var(--gh-yellow); }
+  :global(.pill-rejected) { background: var(--lr-pink-fill); color: var(--gh-red); }
   :global(.pill-muted) { background: var(--gh-surface-soft); color: var(--gh-muted); }
 
   :global(.review-grid) { display: grid; grid-template-columns: 1.1fr .9fr; gap: 1.25rem; margin-bottom: 1.25rem; }

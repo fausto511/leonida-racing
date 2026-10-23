@@ -99,7 +99,7 @@ const steps = [
   .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 14px; font-weight: 500; color: var(--lr-text); cursor: pointer; white-space: nowrap; }
   .chips button:hover:not(.on) { border-color: var(--lr-line-hover); }
   .chips button.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
-  .chips button.mine { border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
+  .chips button.mine { border-color: var(--lr-lime-border); color: var(--lr-lime); }
   .chips button.mine.on { background: var(--lr-lime); border-color: var(--lr-lime); color: var(--lr-on-lime); }
   .chips button .n:not(:empty) { font-weight: 700; }
   .chips button:focus-visible, .tr-fbtn:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
@@ -117,14 +117,14 @@ const steps = [
   .tr-sample { margin: 22px 0 12px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--lr-muted); }
   .tr-note { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--lr-muted); }
   .tr-msg { margin: 0 0 12px; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); font-size: 14px; color: var(--lr-soft); }
-  .tr-msg.is-error { border-color: rgba(255,138,138,.5); color: var(--lr-coral); }
+  .tr-msg.is-error { border-color: var(--lr-coral-border); color: var(--lr-coral); }
   .tr-list:first-child { margin-top: 22px; }
 
   .tr-how { margin: 48px 0 72px; }
   .tr-h2 { margin: 0; }
   .tr-how ol { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   .tr-how li { display: flex; flex-direction: column; gap: 6px; padding: 16px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
-  .tr-how .n { display: grid; place-items: center; width: 30px; height: 30px; margin-bottom: 4px; border-radius: 50%; border: 1px solid rgba(255,149,90,.5); color: var(--lr-orange); font-weight: 700; font-size: 14px; }
+  .tr-how .n { display: grid; place-items: center; width: 30px; height: 30px; margin-bottom: 4px; border-radius: 50%; border: 1px solid var(--lr-orange-border); color: var(--lr-orange); font-weight: 700; font-size: 14px; }
   .tr-how strong { font-size: 16px; }
   .tr-how li > span:last-child { font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
   .tr-how-a { display: inline-block; margin-top: 14px; font-size: 14px; font-weight: 700; color: var(--lr-orange); text-decoration: none; }
@@ -148,7 +148,7 @@ const steps = [
     .sel select { max-width: none; flex: 1; }
     .sh-foot { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 16px; }
     .sh-foot .btn { height: 48px; }
-    .tr-sheet-bg { position: fixed; inset: 0; z-index: 79; background: rgba(11,11,20,.6); }
+    .tr-sheet-bg { position: fixed; inset: 0; z-index: 79; background: var(--lr-dark-60); }
     .tr-how ol { grid-template-columns: 1fr; }
   }
 </style>

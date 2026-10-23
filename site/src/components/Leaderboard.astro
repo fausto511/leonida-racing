@@ -106,7 +106,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .lb-q input { flex: 1; min-width: 0; height: 100%; background: transparent; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; }
   .lb-q input::placeholder { color: var(--lr-muted); }
   .lb-q:focus-within { border-color: var(--lr-orange); }
-  .mypos { height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 6px; border: 1px solid rgba(255,149,90,.5); background: transparent; color: var(--lr-orange); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .mypos { height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-orange-border); background: transparent; color: var(--lr-orange); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
   .mypos[hidden] { display: none; }
   .lbl { font-size: 13px; color: var(--lr-muted); margin-left: auto; }
 
@@ -163,7 +163,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .tbl :global(.tr.me) { background: linear-gradient(90deg, rgba(255,149,90,.14) 0%, rgba(255,149,90,.035) 55%, rgba(255,149,90,0) 100%); box-shadow: inset 3px 0 0 var(--lr-orange); scroll-margin-top: 120px; }
   .tbl :global(.tr.me .rk) { color: var(--lr-orange); }
   .tbl :global(.tr.brk) { border-top: 1px solid var(--lr-line-hover); margin-top: 10px; }
-  .tbl :global(.you) { flex: none; font-size: 10px; font-weight: 800; padding: 2px 5px; border-radius: 3px; background: rgba(255,149,90,.16); color: var(--lr-orange); }
+  .tbl :global(.you) { flex: none; font-size: 10px; font-weight: 800; padding: 2px 5px; border-radius: 3px; background: var(--lr-orange-fill-hover); color: var(--lr-orange); }
   .tbl :global(.lb-empty) { display: block; padding: 28px 18px; text-align: center; color: var(--lr-muted); }
   .tbl :global(.lb-empty a) { color: var(--lr-orange); }
   :global(.logo-chip) { width: 36px; height: 36px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
@@ -172,7 +172,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   :global(.logo-chip-lg img) { width: 44px; height: 44px; }
   .lb :global(.st) { display: flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
   .lb :global(.st.ok) { color: var(--lr-lime); }
-  .lb :global(.st.ok i) { width: 18px; height: 18px; flex: none; border-radius: 999px; background: rgba(217,245,142,.16); display: inline-flex; align-items: center; justify-content: center; }
+  .lb :global(.st.ok i) { width: 18px; height: 18px; flex: none; border-radius: 999px; background: var(--lr-lime-fill-hover); display: inline-flex; align-items: center; justify-content: center; }
   .lb :global(.st.no) { color: var(--lr-muted); }
   .lb :global(.st.no i) { width: 7px; height: 7px; flex: none; border-radius: 999px; background: var(--lr-disabled); margin: 0 5px; }
   .tbl :global(.vd) { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid var(--lr-line-strong); border-radius: 5px; font-size: 12px; font-weight: 600; color: var(--lr-text); text-decoration: none; white-space: nowrap; }

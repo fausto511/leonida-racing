@@ -80,7 +80,7 @@ import AccountSubnav from '../../components/AccountSubnav.astro';
   .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
   .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
 
-  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: rgba(255,149,90,.08); border-radius: var(--gh-radius); font-size: .85rem; }
+  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: var(--lr-orange-tint); border-radius: var(--gh-radius); font-size: .85rem; }
   .notice strong { color: var(--gh-yellow); }
   .notice code { color: var(--gh-text); }
 
@@ -112,9 +112,9 @@ import AccountSubnav from '../../components/AccountSubnav.astro';
      them -- without :global() these rules would be dead code. */
   :global(.rank-cell) { font-family: var(--gh-font-display); font-weight: 900; }
   :global(.status-pill) { display: inline-block; padding: .2rem .55rem; border-radius: 999px; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-  :global(.status-pending) { background: rgba(255,149,90,.14); color: var(--gh-yellow); }
-  :global(.status-live) { background: rgba(217,245,142,.14); color: #D9F58E; }
-  :global(.status-rejected) { background: rgba(242,75,157,.14); color: var(--gh-red); }
+  :global(.status-pending) { background: var(--lr-orange-fill); color: var(--gh-yellow); }
+  :global(.status-live) { background: var(--lr-lime-fill); color: #D9F58E; }
+  :global(.status-rejected) { background: var(--lr-pink-fill); color: var(--gh-red); }
   :global(.status-muted) { background: var(--gh-surface-soft); color: var(--gh-muted); }
   .empty-note { margin: 0; padding: 1.1rem; color: var(--gh-muted); font-size: .85rem; }
   .empty-note a { color: var(--gh-text); text-decoration: underline; }

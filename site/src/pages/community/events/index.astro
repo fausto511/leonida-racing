@@ -100,7 +100,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 14px; font-weight: 500; color: var(--lr-text); cursor: pointer; white-space: nowrap; }
   .chips button:hover:not(.on) { border-color: var(--lr-line-hover); }
   .chips button.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
-  .chips button.mine { border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
+  .chips button.mine { border-color: var(--lr-lime-border); color: var(--lr-lime); }
   .chips button.mine.on { background: var(--lr-lime); border-color: var(--lr-lime); color: var(--lr-on-lime); }
   .chips button:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
   .tz, .tz-m { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--lr-muted); white-space: nowrap; }
@@ -113,7 +113,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   #ev-root :global(.ev-day-g), #ev-past :global(.ev-day-g) { margin-top: 28px; }
   #ev-root :global(.ev-day-g:first-child) { margin-top: 0; }
   :global(.ev-dh) { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-family: var(--gh-font-body); font-size: var(--lr-h3); font-weight: 700; text-transform: none; letter-spacing: 0; }
-  :global(.ev-dh .today) { height: 22px; padding: 0 8px; border-radius: 4px; background: rgba(255,149,90,.16); color: var(--lr-orange); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; display: inline-flex; align-items: center; }
+  :global(.ev-dh .today) { height: 22px; padding: 0 8px; border-radius: 4px; background: var(--lr-orange-fill-hover); color: var(--lr-orange); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; display: inline-flex; align-items: center; }
   :global(.ev-dh .n) { font-size: 14px; font-weight: 500; color: var(--lr-muted); }
   :global(.ec-dc-inline) { display: none; }
   .ec-open { margin: 20px 0 0; }

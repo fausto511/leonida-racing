@@ -6,7 +6,7 @@
 .garage-tile .gt-cta { font-size: 13px; }
 .garage-tile .gt-val { font-family: var(--gh-font-display); font-weight: 800; font-size: 24px; text-transform: uppercase; font-variant-numeric: tabular-nums; }
 .garage-tile .gt-val small { color: var(--lr-muted); font-size: 15px; }
-.garage-tile .mbar { display: block; height: 4px; border-radius: 999px; background: rgba(251,247,234,.1); overflow: hidden; }
+.garage-tile .mbar { display: block; height: 4px; border-radius: 999px; background: var(--lr-white-active); overflow: hidden; }
 .garage-tile .mbar i { display: block; height: 100%; background: var(--lr-orange); border-radius: 999px; }
 @media (max-width: 760px) {
   .garage-tile { min-width: 0; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding: 10px 12px; }
