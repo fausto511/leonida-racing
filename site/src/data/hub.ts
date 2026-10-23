@@ -215,7 +215,7 @@ function luminance(hex: string): number {
 }
 export function crewEmblemHtml(color: string): string {
   const c = safeColor(color);
-  const wheel = luminance(c) > 0.45 ? '#0B0B14' : '#ffffff';
+  const wheel = luminance(c) > 0.45 ? '#0B0B14' : '#FBF7EA';
   return `<span class="crew-emblem" aria-hidden="true"><svg viewBox="0 0 48 48" width="48" height="48"><path d="${EMBLEM_PANEL}" fill="${c}"/><g transform="translate(13.5 13.5) scale(0.041016) translate(0 512) scale(0.1 -0.1)"><path fill="${wheel}" d="${EMBLEM_WHEEL}"/></g></svg></span>`;
 }
 

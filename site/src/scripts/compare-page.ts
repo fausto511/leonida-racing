@@ -266,10 +266,10 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     const pts = ALL.filter((c) => c.classes.includes(cls) && c.price != null && c.ref != null);
     const W = 520, H = 260, L = 50, R = 12, T = 18, B = 34;
     const lapShort = (ms: number) => `${Math.floor(ms / 60000)}:${((ms % 60000) / 1000).toFixed(1).padStart(4, '0')}`;
-    const grid = [0, 1, 2, 3].map((i) => `<line x1="${L}" x2="${W - R}" y1="${T + i * (H - T - B) / 3}" y2="${T + i * (H - T - B) / 3}" stroke="rgba(200,200,222,.12)"/>`).join('')
-      + [0, 1, 2, 3, 4].map((i) => `<line y1="${T}" y2="${H - B}" x1="${L + i * (W - L - R) / 4}" x2="${L + i * (W - L - R) / 4}" stroke="rgba(200,200,222,.08)"/>`).join('');
+    const grid = [0, 1, 2, 3].map((i) => `<line x1="${L}" x2="${W - R}" y1="${T + i * (H - T - B) / 3}" y2="${T + i * (H - T - B) / 3}" stroke="rgba(200,200,222,.10)"/>`).join('')
+      + [0, 1, 2, 3, 4].map((i) => `<line y1="${T}" y2="${H - B}" x1="${L + i * (W - L - R) / 4}" x2="${L + i * (W - L - R) / 4}" stroke="rgba(200,200,222,.10)"/>`).join('');
     if (pts.length < 2) {
-      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map, fills in after launch">${grid}<text x="${(W + L) / 2}" y="${H / 2 - 4}" text-anchor="middle" fill="#B4B4C2" font-size="15">Fills in after launch</text><text x="${(W + L) / 2}" y="${H / 2 + 16}" text-anchor="middle" fill="#77778A" font-size="12">once prices and Gellhorn reference laps are in</text><text x="${(W + L) / 2}" y="${H - 6}" text-anchor="middle" fill="#77778A" font-size="11">Price →</text></svg>`;
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map, fills in after launch">${grid}<text x="${(W + L) / 2}" y="${H / 2 - 4}" text-anchor="middle" fill="#B4B4C2" font-size="15">Fills in after launch</text><text x="${(W + L) / 2}" y="${H / 2 + 16}" text-anchor="middle" fill="#9C9CAB" font-size="12">once prices and Gellhorn reference laps are in</text><text x="${(W + L) / 2}" y="${H - 6}" text-anchor="middle" fill="#9C9CAB" font-size="11">Price →</text></svg>`;
     }
     const px = pts.map((c) => c.price!), py = pts.map((c) => c.ref!);
     const x0 = Math.min(...px), x1 = Math.max(...px), y0 = Math.min(...py), y1 = Math.max(...py);
@@ -284,9 +284,9 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
       if (alt.has(c.id)) return `<circle cx="${x}" cy="${y}" r="5.5" fill="none" stroke="#FF955A" stroke-width="2"/>${lab('#FF955A')}`;
       return `<circle cx="${x}" cy="${y}" r="4" fill="#55556A"><title>${esc(c.make)} ${esc(c.model)}</title></circle>`;
     }).join('');
-    const ticksX = [0, 1, 2, 3, 4].map((i) => `<text x="${L + i * (W - L - R) / 4}" y="${H - B + 16}" text-anchor="middle" fill="#77778A" font-size="11">${moneyShort(x0 + i * (x1 - x0) / 4)}</text>`).join('');
-    const ticksY = [0, 1, 2, 3].map((i) => `<text x="${L - 6}" y="${T + i * (H - T - B) / 3 + 4}" text-anchor="end" fill="#77778A" font-size="11">${lapShort(y0 + i * (y1 - y0) / 3)}</text>`).join('');
-    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map: price against Gellhorn reference lap">${grid}<text x="${L + 6}" y="${T + 12}" fill="#D9F58E" font-size="11">↖ better value: faster and cheaper</text>${dots}${ticksX}${ticksY}<text x="${(W + L) / 2}" y="${H - 2}" text-anchor="middle" fill="#77778A" font-size="11">Price →</text></svg>`;
+    const ticksX = [0, 1, 2, 3, 4].map((i) => `<text x="${L + i * (W - L - R) / 4}" y="${H - B + 16}" text-anchor="middle" fill="#9C9CAB" font-size="11">${moneyShort(x0 + i * (x1 - x0) / 4)}</text>`).join('');
+    const ticksY = [0, 1, 2, 3].map((i) => `<text x="${L - 6}" y="${T + i * (H - T - B) / 3 + 4}" text-anchor="end" fill="#9C9CAB" font-size="11">${lapShort(y0 + i * (y1 - y0) / 3)}</text>`).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map: price against Gellhorn reference lap">${grid}<text x="${L + 6}" y="${T + 12}" fill="#D9F58E" font-size="11">↖ better value: faster and cheaper</text>${dots}${ticksX}${ticksY}<text x="${(W + L) / 2}" y="${H - 2}" text-anchor="middle" fill="#9C9CAB" font-size="11">Price →</text></svg>`;
   }
   function renderBottom() {
     const list = cars();

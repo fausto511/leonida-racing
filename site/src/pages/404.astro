@@ -167,7 +167,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .ico { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
   /* ---- band ---- */
-  .nf { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.16); }
+  .nf { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
   .nf-bg, .nf-o { position: absolute; inset: 0; width: 100%; height: 100%; }
   .nf-bg { object-fit: cover; object-position: 50% 62%; }
   .nf-in { display: flex; flex-direction: column; justify-content: center; }
@@ -177,7 +177,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .nf-url { display: inline-flex; max-width: 100%; margin-top: 8px; font-size: 13px; color: var(--lr-muted); font-family: ui-monospace, Menlo, monospace; background: rgba(11,11,20,.7); padding: 4px 9px; border-radius: 5px; overflow-wrap: anywhere; }
   .nf-url[hidden] { display: none; }
   .nf-srch { margin-top: 20px; display: flex; gap: 10px; max-width: 620px; }
-  .nf-f { flex: 1; min-width: 0; height: 48px; border-radius: 6px; border: 1px solid rgba(200,200,222,.3); background: rgba(20,20,31,.9); display: flex; align-items: center; gap: 10px; padding: 0 16px; color: var(--lr-muted); }
+  .nf-f { flex: 1; min-width: 0; height: 48px; border-radius: 6px; border: 1px solid var(--lr-line-hover); background: rgba(20,20,31,.9); display: flex; align-items: center; gap: 10px; padding: 0 16px; color: var(--lr-muted); }
   .nf-f:focus-within { border-color: var(--lr-muted); }
   .nf-f input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 15px; padding: 0; }
   .nf-f input::placeholder { color: var(--lr-muted); }
@@ -185,23 +185,23 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
 
   /* ---- did you mean ---- */
   .nf-dym-sec[hidden] { display: none; }
-  .nf-dym-wrap { display: flex; align-items: center; gap: 8px; margin-top: 28px; padding: 14px 16px; border-radius: 8px; background: var(--lr-card); border: 1px solid rgba(200,200,222,.16); transition: border-color .15s; }
+  .nf-dym-wrap { display: flex; align-items: center; gap: 8px; margin-top: 28px; padding: 14px 16px; border-radius: 8px; background: var(--lr-card); border: 1px solid var(--lr-line); transition: border-color .15s; }
   .nf-dym-wrap:hover { border-color: var(--lr-orange); }
   .dym { display: flex; align-items: center; gap: 18px; flex: 1; min-width: 0; color: var(--lr-text); text-decoration: none; }
   .dym-eb { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); white-space: nowrap; }
   .dym-ph { position: relative; width: 120px; height: 68px; flex: none; border-radius: 5px; overflow: hidden; background: var(--lr-raised); }
   .dym-ph :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .dym-ph :global(.ph-bg) { filter: grayscale(.4) brightness(.7); }
-  .dym-ph :global(.ph-logo) { inset: 18%; width: 64%; height: 64%; object-fit: contain; filter: brightness(0) invert(1); opacity: var(--lr-logo-ph); }
+  .dym-ph :global(.ph-logo) { inset: 18%; width: 64%; height: 64%; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-ph); }
   .dym-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .dym-t small { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--lr-muted); }
-  .dym-t small :global(img) { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) invert(1); opacity: var(--lr-logo-info); }
+  .dym-t small :global(img) { width: 14px; height: 14px; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-info); }
   .dym-t b { font-size: 19px; }
   .dym-tm { display: none; }
   .dym-op { text-decoration: none; flex: none; height: 40px; padding: 0 16px; border-radius: 6px; border: 1px solid rgba(255,149,90,.6); background: rgba(255,149,90,.1); color: var(--lr-orange); font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; white-space: nowrap; }
   .dym-ch { display: flex; gap: 8px; margin-left: auto; }
   .dym-ch:empty + .dym-op { margin-left: auto; }
-  .dym-ch :global(a) { height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(200,200,222,.24); display: inline-flex; align-items: center; font-size: 13px; color: #E4E4EC; white-space: nowrap; text-decoration: none; }
+  .dym-ch :global(a) { height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--lr-line-strong); display: inline-flex; align-items: center; font-size: 13px; color: var(--lr-text); white-space: nowrap; text-decoration: none; }
   .dym-ch :global(a:hover) { border-color: var(--lr-pink); }
   .dym-ch :global(small) { display: none; }
 
@@ -209,12 +209,12 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .nft { padding-top: 32px; padding-bottom: 56px; }
   .nft h3 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-muted); }
   .g4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 14px; }
-  .g4 a { position: relative; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; background: var(--lr-card); border: 1px solid rgba(200,200,222,.16); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
+  .g4 a { position: relative; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; background: var(--lr-card); border: 1px solid var(--lr-line); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
   .g4 a:hover { border-color: var(--lr-orange); }
   .g4 img { width: 100%; height: auto; aspect-ratio: 16 / 8; object-fit: cover; display: block; }
   .g4 .b { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
   .g4-h { font-size: 22px; line-height: 1.05; }
-  .g4-p { font-size: 13px; color: #B4B4C2; line-height: 1.5; min-height: 39px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .g4-p { font-size: 13px; color: var(--lr-soft); line-height: 1.5; min-height: 39px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .g4 .go { margin-top: 6px; font-size: 13px; font-weight: 700; color: var(--lr-orange); }
   .g4-arrow { display: none; }
   .rep { margin: 28px 0 0; font-size: 14px; color: var(--lr-muted); }
@@ -226,11 +226,11 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .dband-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding-top: 56px; padding-bottom: 56px; }
   .dband-copy { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
   .dband-title { margin: 0; }
-  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
-  .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: #fff; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.5); }
-  .dband-more:hover { text-decoration-color: #fff; }
+  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: var(--lr-text); }
+  .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(251,247,234,.5); }
+  .dband-more:hover { text-decoration-color: var(--lr-text); }
   .dband-btn { background: var(--lr-text); color: var(--lr-discord); flex: none; }
-  .dband-btn:hover { background: #fff; color: var(--lr-discord); }
+  .dband-btn:hover { background: var(--lr-text); color: var(--lr-discord); }
   .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; } /* white button, logo + text blurple (Fausto 20.10.) */
   :global(main:has(.dband) + .site-foot) { margin-top: 0; }
 

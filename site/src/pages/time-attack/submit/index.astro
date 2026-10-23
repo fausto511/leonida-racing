@@ -106,12 +106,12 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
             <div class="sb-need-b">
               <div>
 <svg class="sb-sketch" viewBox="0 0 300 168" role="img" aria-label="Sketch of a results screen: your row with PSN name, car and lap time is highlighted.">
-                <rect x="1" y="1" width="298" height="166" rx="8" fill="#14141F" stroke="rgba(200,200,222,.25)"/>
+                <rect x="1" y="1" width="298" height="166" rx="8" fill="#14141F" stroke="rgba(200,200,222,.24)"/>
                 <text x="14" y="22" fill="#9C9CAB" font-size="9" font-weight="700" letter-spacing="1.5">RESULTS</text>
                 <g font-size="10" fill="#B4B4C2">
-                  <text x="14" y="48">1</text><rect x="30" y="41" width="70" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="120" y="41" width="80" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="236" y="41" width="48" height="8" rx="2" fill="rgba(200,200,222,.18)"/>
-                  <text x="14" y="104">3</text><rect x="30" y="97" width="60" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="120" y="97" width="72" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="236" y="97" width="48" height="8" rx="2" fill="rgba(200,200,222,.18)"/>
-                  <text x="14" y="130">4</text><rect x="30" y="123" width="76" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="120" y="123" width="66" height="8" rx="2" fill="rgba(200,200,222,.18)"/><rect x="236" y="123" width="48" height="8" rx="2" fill="rgba(200,200,222,.18)"/>
+                  <text x="14" y="48">1</text><rect x="30" y="41" width="70" height="8" rx="2" fill="rgba(200,200,222,.16)"/><rect x="120" y="41" width="80" height="8" rx="2" fill="rgba(200,200,222,.16)"/><rect x="236" y="41" width="48" height="8" rx="2" fill="rgba(200,200,222,.16)"/>
+                  <text x="14" y="104">3</text><rect x="30" y="97" width="60" height="8" rx="2" fill="rgba(200,200,222,.16)"/><rect x="120" y="97" width="72" height="8" rx="2" fill="rgba(200,200,222,.16)"/><rect x="236" y="97" width="48" height="8" rx="2" fill="rgba(200,200,222,.16)"/>
+                  <text x="14" y="130">4</text><rect x="30" y="123" width="76" height="8" rx="2" fill="rgba(200,200,222,.16)"/><rect x="120" y="123" width="66" height="8" rx="2" fill="rgba(200,200,222,.16)"/><rect x="236" y="123" width="48" height="8" rx="2" fill="rgba(200,200,222,.16)"/>
                 </g>
                 <rect x="6" y="62" width="288" height="26" rx="5" fill="rgba(255,149,90,.12)" stroke="#FF955A"/>
                 <g font-size="10.5" font-weight="700" fill="#FBF7EA">
@@ -258,7 +258,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
 
   .sb-proof { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
   .sb-box { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-  .sb-vbox, .dropzone { position: relative; min-height: 230px; border: 2px dashed rgba(200,200,222,.32); border-radius: 10px; background: rgba(28,28,42,.55); transition: border-color .15s, background .15s; }
+  .sb-vbox, .dropzone { position: relative; min-height: 230px; border: 2px dashed var(--lr-line-hover); border-radius: 10px; background: rgba(28,28,42,.55); transition: border-color .15s, background .15s; }
   .sb-vbox { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px; color: var(--lr-muted); text-align: center; }
   .sb-vbox:focus-within { border-color: var(--lr-orange); }
   .sb-vbox input { margin-top: 8px; max-width: 300px; text-align: center; }
@@ -314,13 +314,13 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
 
   .sb-combo { position: relative; }
   .sb-combo-in { position: relative; display: flex; align-items: center; }
-  .sb-combo-in img { position: absolute; left: 10px; width: 24px; height: 24px; object-fit: contain; filter: brightness(0) invert(1); opacity: var(--lr-logo-info); }
+  .sb-combo-in img { position: absolute; left: 10px; width: 24px; height: 24px; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-info); }
   .sb-combo-in img:not([hidden]) + input { padding-left: 42px; }
   .sb-combo-x { position: absolute; right: 6px; width: 34px; height: 34px; border: 0; border-radius: 4px; background: none; color: var(--lr-muted); font-size: 20px; cursor: pointer; }
   .sb-combo-x:hover { color: var(--lr-text); }
   .sb-combo-list { position: absolute; z-index: 30; top: 74px; left: 0; right: 0; max-height: 300px; overflow-y: auto; margin: 0; padding: 4px; list-style: none; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-raised); box-shadow: 0 12px 32px rgba(0,0,0,.45); }
   .sb-combo-list :global(li) { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 4px; font-size: 15px; cursor: pointer; }
-  .sb-combo-list :global(li img) { width: 22px; height: 22px; object-fit: contain; flex: none; filter: brightness(0) invert(1); opacity: var(--lr-logo-info); }
+  .sb-combo-list :global(li img) { width: 22px; height: 22px; object-fit: contain; flex: none; filter: var(--lr-logo-filter); opacity: var(--lr-logo-info); }
   .sb-combo-list :global(li small) { color: var(--lr-muted); font-size: 12px; }
   .sb-combo-list :global(li.is-act), .sb-combo-list :global(li:hover) { background: rgba(255,149,90,.12); }
   .sb-combo-list :global(li.is-none) { color: var(--lr-muted); cursor: default; background: none; }

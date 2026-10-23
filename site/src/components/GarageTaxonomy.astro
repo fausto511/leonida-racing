@@ -333,7 +333,7 @@ const more = custom
   .is-tba { color: var(--lr-muted) !important; font-weight: 500 !important; }
 
   /* ---- image band ---- */
-  .tb { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
+  .tb { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line-strong); }
   .tb-bg, .tb-t { position: absolute; inset: 0; width: 100%; height: 100%; }
   .tb-bg { object-fit: cover; object-position: 50% 55%; }
   .tb-ph { filter: grayscale(.5); }
@@ -345,9 +345,9 @@ const more = custom
   @media (max-width: 760px) { .tb-inner.is-cars { flex-direction: column; align-items: stretch; gap: 16px; } }
   .tb-copy { min-width: 0; max-width: 700px; }
   .tb-title { display: flex; align-items: center; gap: 16px; }
-  .tb-logo { width: 56px; height: 56px; flex: none; object-fit: contain; filter: brightness(0) invert(1); }
+  .tb-logo { width: 56px; height: 56px; flex: none; object-fit: contain; filter: var(--lr-logo-filter); }
 
-  .glance { flex: none; width: 380px; margin-top: 30px; padding: 18px 18px 14px; border: 1px solid rgba(200,200,222,.2); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
+  .glance { flex: none; width: 380px; margin-top: 30px; padding: 18px 18px 14px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
   .glance-eb { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .gl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 9px 0; border-top: 1px solid var(--lr-line); font-size: 15px; color: var(--lr-soft); }
   .gl-row:first-of-type { border-top: 0; }
@@ -362,11 +362,11 @@ const more = custom
 
   /* ---- class chips ---- */
   .tchips { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 24px; }
-  .tchip { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(200,200,222,.24); color: #E4E4EC; font-size: 15px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+  .tchip { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--lr-line-strong); color: var(--lr-text); font-size: 15px; font-weight: 500; text-decoration: none; white-space: nowrap; }
   .tchip span { color: var(--lr-muted); font-size: 13px; }
   .tchip:hover { border-color: var(--lr-pink); color: var(--lr-text); }
   .tchip.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 600; }
-  .tchip.on span { color: #55556A; }
+  .tchip.on span { color: var(--lr-disabled); }
   /* manufacturer chips (Fausto 18.10.): logo + name + count; wrap on desktop, one swipeable row on the phone */
   @media (max-width: 860px) {
     .tchips-make .tchip { flex: none; }
@@ -374,7 +374,7 @@ const more = custom
   .tchip.is-x { display: none; }
   :global(.tchip-more) { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(255,149,90,.5); background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: var(--lr-orange); cursor: pointer; white-space: nowrap; }
   :global(.tchip-more:hover) { border-color: var(--lr-orange); }
-  .tchip-logo { width: 20px; height: 20px; object-fit: contain; filter: brightness(0) invert(1); opacity: var(--lr-logo-info); }
+  .tchip-logo { width: 20px; height: 20px; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-info); }
   .tchip.on .tchip-logo { filter: brightness(0) invert(7%) sepia(100%) saturate(200%) hue-rotate(200deg); opacity: var(--lr-logo-info); } /* = #14141F, same as the chip text */
 
   /* ---- more + links (slot content, page scope) ---- */
@@ -389,10 +389,10 @@ const more = custom
   .tm-a { margin-top: 6px; }
   .tabout { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--lr-line); }
   .tabout-h { margin: 0 0 12px; }
-  .tabout p { max-width: 820px; margin: 0 0 14px; font-size: 17px; line-height: 1.7; color: #E4E4EC; }
+  .tabout p { max-width: 820px; margin: 0 0 14px; font-size: 17px; line-height: 1.7; color: var(--lr-text); }
   .tlinks { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; margin-top: 40px; padding-top: 32px; padding-bottom: 32px; border-top: 1px solid var(--lr-line); }
   .tls { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 15px; }
-  .tls a, .tls > span { color: #E4E4EC; text-decoration: none; }
+  .tls a, .tls > span { color: var(--lr-text); text-decoration: none; }
   .tls a:hover { color: var(--lr-orange); }
   .tls a span, .tls > span span { margin-left: 4px; color: var(--lr-muted); font-size: 13px; }
   .tls a.arrow { color: var(--lr-orange); }

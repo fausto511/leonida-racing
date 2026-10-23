@@ -96,7 +96,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp :global(.ct-img) { position: relative; aspect-ratio: 16 / 9; background: var(--lr-raised); overflow: hidden; display: block; }
   .cp :global(.ct-img > img:not(.ct-ph-logo)) { width: 100%; height: 100%; object-fit: cover; display: block; }
   .cp :global(.ct-ph-bg) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(.6) brightness(.35); }
-  .cp :global(.ct-ph-logo) { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; transform: translate(-50%, -50%); object-fit: contain; filter: brightness(0) invert(1); opacity: var(--lr-logo-ph); }
+  .cp :global(.ct-ph-logo) { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; transform: translate(-50%, -50%); object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-ph); }
   .cp :global(.ct-x) { position: absolute; right: 8px; top: 8px; z-index: 2; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 999px; background: rgba(11,11,20,.8); color: var(--lr-text); font-size: 16px; line-height: 1; cursor: pointer; }
   .cp :global(.ct-x:hover) { background: var(--lr-pink); color: var(--lr-on-pink); }
   .cp :global(.ct-own) { position: absolute; left: 8px; top: 8px; z-index: 2; display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 999px; background: rgba(11,11,20,.85); color: var(--lr-lime); font-size: 11px; font-weight: 700; }
@@ -140,7 +140,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp :global(.cm img), .cp :global(.cm .cm-ph) { width: 48px; height: 27px; flex: none; border-radius: 4px; object-fit: cover; background: var(--lr-raised); }
   /* no photo: manufacturer logo on the placeholder (Fausto 20.10.) */
   .cp :global(.cm .cm-ph) { display: inline-grid; place-items: center; }
-  .cp :global(.cm .cm-ph img.cm-logo) { width: 18px; height: 18px; border-radius: 0; object-fit: contain; background: none; filter: brightness(0) invert(1); opacity: var(--lr-logo-info); }
+  .cp :global(.cm .cm-ph img.cm-logo) { width: 18px; height: 18px; border-radius: 0; object-fit: contain; background: none; filter: var(--lr-logo-filter); opacity: var(--lr-logo-info); }
   .cp :global(.cm span) { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .cp :global(.cm-l) { font-size: 13px; color: var(--lr-soft); align-self: center; }
 
@@ -161,7 +161,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp :global(.tk-rules) { margin: 10px 0 0; padding: 14px 16px; border-radius: 8px; background: var(--lr-card); font-size: 14px; line-height: 1.55; color: var(--lr-soft); }
   .cp :global(.tk-rules[hidden]) { display: none; }
   .cp :global(.tk-rules ul) { margin: 6px 0 0; padding-left: 18px; }
-  .cp :global(.lock) { display: flex; align-items: center; gap: 24px; padding: 22px 22px; border: 1px dashed rgba(200,200,222,.3); border-radius: 8px; }
+  .cp :global(.lock) { display: flex; align-items: center; gap: 24px; padding: 22px 22px; border: 1px dashed var(--lr-line-hover); border-radius: 8px; }
   .cp :global(.lock-m) { flex: 1; min-width: 0; }
   .cp :global(.lock h3) { margin: 0; font-size: var(--lr-h3); font-weight: 700; }
   .cp :global(.lock p) { margin: 6px 0 0; font-size: 15px; line-height: 1.5; color: var(--lr-soft); }
@@ -174,7 +174,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp :global(.tg:first-child) { margin-top: 0; }
   .cp :global(.tg-h) { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--lr-line); font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lr-soft); }
   .cp :global(.tr) { padding: 14px 0; border-bottom: 1px solid var(--lr-line); align-items: start; }
-  .cp :global(.tr-l) { font-size: 15px; color: #E4E4EC; }
+  .cp :global(.tr-l) { font-size: 15px; color: var(--lr-text); }
   .cp :global(.tr-l small) { display: block; margin-top: 2px; font-size: 12px; color: var(--lr-muted); }
   .cp :global(.tv) { min-width: 0; font-size: 16px; }
   .cp :global(.tv-m) { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-weight: 500; }
@@ -189,7 +189,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp :global(.tv a.tv-quiet) { color: var(--lr-muted); font-weight: 500; text-decoration: none; }
   .cp :global(.tv a.tv-quiet:hover) { color: var(--lr-text); }
   .cp :global(.tv-stars) { display: inline-flex; gap: 2px; }
-  .cp :global(.tv-stars svg) { width: 16px; height: 16px; fill: #4A4A5C; }
+  .cp :global(.tv-stars svg) { width: 16px; height: 16px; fill: var(--lr-disabled); }
   .cp :global(.tv-stars svg.on) { fill: var(--lr-orange); }
   .cp :global(.tr-hid) { padding: 12px 0; border-bottom: 1px solid var(--lr-line); font-size: 14px; color: var(--lr-soft); }
   .cp :global(.tr-hid button) { margin-left: 6px; padding: 0; border: 0; background: none; color: var(--lr-orange); font: inherit; font-weight: 600; cursor: pointer; }
@@ -202,7 +202,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
   .cp :global(.al-img) { width: 112px; height: 63px; flex: none; border-radius: 4px; object-fit: cover; background: var(--lr-raised); }
   .cp :global(.al-ph) { position: relative; overflow: hidden; display: block; }
   .cp :global(.al-ph img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(.6) brightness(.35); }
-  .cp :global(.al-ph .al-logo) { inset: 50% auto auto 50%; width: 30px; height: 30px; transform: translate(-50%, -50%); object-fit: contain; filter: brightness(0) invert(1); opacity: var(--lr-logo-ph); }
+  .cp :global(.al-ph .al-logo) { inset: 50% auto auto 50%; width: 30px; height: 30px; transform: translate(-50%, -50%); object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-ph); }
   .cp :global(.al-m) { flex: 1; min-width: 0; }
   .cp :global(.al-m b) { display: block; font-size: 17px; }
   .cp :global(.al-m span) { font-size: 14px; color: var(--lr-soft); }

@@ -88,7 +88,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .lb-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
   .lb-head h2 { margin: 0; }
   .lb-head p { margin: 8px 0 0; color: var(--lr-muted); font-size: 14px; }
-  .sample { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #6B6B80; white-space: nowrap; }
+  .sample { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); white-space: nowrap; }
   .sample[hidden] { display: none; }
 
   .lb-ctl { display: flex; gap: 10px; align-items: center; margin-top: 20px; flex-wrap: wrap; }
@@ -116,8 +116,8 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .sel select { width: 100%; }
   .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
   .chips[hidden] { display: none; }
-  .chips :global(.chip-c) { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; display: inline-flex; align-items: center; font: inherit; font-size: 13px; font-weight: 500; color: #E4E4EC; cursor: pointer; white-space: nowrap; }
-  .chips :global(.chip-c:hover:not(.on)) { border-color: rgba(200,200,222,.5); }
+  .chips :global(.chip-c) { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; display: inline-flex; align-items: center; font: inherit; font-size: 13px; font-weight: 500; color: var(--lr-text); cursor: pointer; white-space: nowrap; }
+  .chips :global(.chip-c:hover:not(.on)) { border-color: var(--lr-line-hover); }
   .chips :global(.chip-c.on) { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
 
   #lb-context :global(.lb-context) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-top: 18px; }
@@ -128,7 +128,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 
   /* ---- table (div grid, rows inserted at runtime -> :global) ---- */
   .tbl { margin-top: 16px; overflow: hidden; padding: 0; }
-  .tbl :global(.tr) { display: grid; grid-template-columns: 56px minmax(0,1.3fr) minmax(0,1.4fr) 80px 100px 150px 80px; align-items: center; column-gap: 12px; min-height: 56px; padding: 0 18px; border-top: 1px solid rgba(200,200,222,.1); font-size: 15px; color: var(--lr-soft); }
+  .tbl :global(.tr) { display: grid; grid-template-columns: 56px minmax(0,1.3fr) minmax(0,1.4fr) 80px 100px 150px 80px; align-items: center; column-gap: 12px; min-height: 56px; padding: 0 18px; border-top: 1px solid var(--lr-line-soft); font-size: 15px; color: var(--lr-soft); }
   .tbl.nocar :global(.tr) { grid-template-columns: 56px minmax(0,2fr) 80px 100px 150px 80px; }
   .tbl :global(.tr > *), .tbl :global(.mt > *) { grid-row: 1; }
   .tbl :global(.mt) { display: contents; }
@@ -143,42 +143,42 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .tbl.nocar :global(.tm) { grid-column: 4; }
   .tbl.nocar :global(.st), .tbl.nocar :global(.tr.h .mt > :nth-child(2)) { grid-column: 5; }
   .tbl.nocar :global(.vd), .tbl.nocar :global(.vd-h) { grid-column: 6; }
-  .tbl :global(.tr.h) { min-height: 40px; border-top: 0; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #6B6B80; }
+  .tbl :global(.tr.h) { min-height: 40px; border-top: 0; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); }
   .tbl :global(.rk) { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--lr-muted); }
   .tbl :global(.dr) { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--lr-text); font-weight: 600; }
   .tbl :global(.dr .n) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tbl :global(.lb-crew-tag) { flex: none; text-decoration: none; color: #111; }
   .tbl :global(.car) { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .tbl :global(.nm) { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
-  .tbl :global(.nm b) { font-weight: 600; color: #E4E4EC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tbl :global(.nm b) { font-weight: 600; color: var(--lr-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tbl :global(.nm a) { color: inherit; text-decoration: none; }
   .tbl :global(.nm a:hover) { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--lr-pink); }
   .tbl :global(.nm small) { font-size: 12px; color: var(--lr-muted); }
   .tbl :global(.gp) { text-align: right; font-size: 13px; color: var(--lr-muted); font-variant-numeric: tabular-nums; }
   .tbl :global(.tm) { text-align: right; font-weight: 700; color: var(--lr-text); font-variant-numeric: tabular-nums; font-size: 16px; }
-  .tbl :global(.tr.h .gp), .tbl :global(.tr.h .tm) { font-size: 11px; font-weight: 600; color: #6B6B80; }
+  .tbl :global(.tr.h .gp), .tbl :global(.tr.h .tm) { font-size: 11px; font-weight: 600; color: var(--lr-muted); }
   .tbl :global(.vd), .tbl :global(.vd-h) { justify-self: end; }
   .tbl :global(.tr.first) { background: linear-gradient(90deg, rgba(242,75,157,.12) 0%, rgba(242,75,157,.03) 55%, rgba(242,75,157,0) 100%); box-shadow: inset 3px 0 0 var(--lr-pink); }
   .tbl :global(.tr.first .rk) { color: var(--lr-pink); }
   .tbl :global(.tr.me) { background: linear-gradient(90deg, rgba(255,149,90,.14) 0%, rgba(255,149,90,.035) 55%, rgba(255,149,90,0) 100%); box-shadow: inset 3px 0 0 var(--lr-orange); scroll-margin-top: 120px; }
   .tbl :global(.tr.me .rk) { color: var(--lr-orange); }
-  .tbl :global(.tr.brk) { border-top: 1px solid rgba(200,200,222,.35); margin-top: 10px; }
+  .tbl :global(.tr.brk) { border-top: 1px solid var(--lr-line-hover); margin-top: 10px; }
   .tbl :global(.you) { flex: none; font-size: 10px; font-weight: 800; padding: 2px 5px; border-radius: 3px; background: rgba(255,149,90,.16); color: var(--lr-orange); }
   .tbl :global(.lb-empty) { display: block; padding: 28px 18px; text-align: center; color: var(--lr-muted); }
   .tbl :global(.lb-empty a) { color: var(--lr-orange); }
   :global(.logo-chip) { width: 36px; height: 36px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
-  :global(.logo-chip img) { width: 30px; height: 30px; object-fit: contain; filter: brightness(0) invert(1); opacity: var(--lr-logo-info); }
+  :global(.logo-chip img) { width: 30px; height: 30px; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-info); }
   :global(.logo-chip-lg) { width: 48px; height: 48px; }
   :global(.logo-chip-lg img) { width: 44px; height: 44px; }
   .lb :global(.st) { display: flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
   .lb :global(.st.ok) { color: var(--lr-lime); }
   .lb :global(.st.ok i) { width: 18px; height: 18px; flex: none; border-radius: 999px; background: rgba(217,245,142,.16); display: inline-flex; align-items: center; justify-content: center; }
   .lb :global(.st.no) { color: var(--lr-muted); }
-  .lb :global(.st.no i) { width: 7px; height: 7px; flex: none; border-radius: 999px; background: #55556A; margin: 0 5px; }
+  .lb :global(.st.no i) { width: 7px; height: 7px; flex: none; border-radius: 999px; background: var(--lr-disabled); margin: 0 5px; }
   .tbl :global(.vd) { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border: 1px solid var(--lr-line-strong); border-radius: 5px; font-size: 12px; font-weight: 600; color: var(--lr-text); text-decoration: none; white-space: nowrap; }
   .tbl :global(a.vd:hover) { border-color: var(--lr-orange); }
   .tbl :global(.vd.is-off) { opacity: .5; cursor: not-allowed; }
-  .tbl :global(.vd.x) { border-color: transparent; color: #55556A; }
+  .tbl :global(.vd.x) { border-color: transparent; color: var(--lr-disabled); }
   .lb-legend { display: none; }
   .lb-more { display: flex; justify-content: center; padding: 16px 0 4px; }
   .lb-more :global(.lb-more-btn) { height: 44px; font-size: 14px; }
@@ -199,7 +199,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .need-all { align-self: flex-start; margin-top: 14px; padding: 0; background: none; border: 0; font: inherit; font-size: 14px; font-weight: 600; color: var(--lr-orange); cursor: pointer; text-align: left; }
   .need-all[hidden] { display: none; }
   .steps { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-  .steps li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: #E4E4EC; }
+  .steps li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--lr-text); }
   .steps b { flex: none; width: 26px; height: 26px; border-radius: 999px; background: var(--lr-raised); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; color: var(--lr-orange); }
   .box-cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: auto; padding-top: 18px; }
   .box-cta .btn { height: 44px; font-size: 14px; }

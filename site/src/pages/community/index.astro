@@ -118,7 +118,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   .cm-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: start; }
   /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
   .cm-hero > .cm-tile { align-self: end; margin-top: 0; }
-  .cm-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
+  .cm-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid var(--lr-line); border-radius: 8px; padding: 18px; }
   .cm-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .cm-next { display: flex; align-items: center; gap: 14px; margin-top: 14px; padding: 12px 14px; border-radius: 6px; border: 1px solid rgba(255,149,90,.3); background: rgba(255,149,90,.06); color: var(--lr-text); text-decoration: none; }
   .cm-next[hidden] { display: none; }
@@ -138,7 +138,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   /* ---- entry cards ---- */
   .cm-entries { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px; padding-top: 28px; }
   .cm-entry { display: flex; flex-direction: column; overflow: hidden; padding: 0; text-decoration: none; color: var(--lr-text); transition: border-color .15s; }
-  .cm-entry:hover { border-color: rgba(200,200,222,.4); }
+  .cm-entry:hover { border-color: var(--lr-line-hover); }
   .cm-entry img { display: block; width: 100%; height: 170px; object-fit: cover; object-position: 50% 40%; background: var(--lr-raised); }
   .cm-entry-b { display: flex; flex-direction: column; gap: 6px; padding: 18px; flex: 1; }
   .cm-entry-b strong { font-size: 26px; line-height: 1; }
@@ -155,13 +155,13 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   .sub { margin: 8px 0 0; color: var(--lr-muted); font-size: 15px; }
   .sub .sm { display: none; }
   .cm-head-r { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex: none; }
-  .sample { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #6B6B80; white-space: nowrap; }
+  .sample { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); white-space: nowrap; }
   .cm-more { white-space: nowrap; } /* style = .arrow (DEC-0170) */
   .cm-more-btn { display: none; }
   .cm-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 16px; }
-  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; font: inherit; font-size: 14px; font-weight: 500; color: #E4E4EC; cursor: pointer; white-space: nowrap; }
-  .chips button:hover:not(.on) { border-color: rgba(200,200,222,.5); }
+  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; font: inherit; font-size: 14px; font-weight: 500; color: var(--lr-text); cursor: pointer; white-space: nowrap; }
+  .chips button:hover:not(.on) { border-color: var(--lr-line-hover); }
   .chips button.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
   .chips button:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
   .tz { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--lr-muted); white-space: nowrap; }

@@ -92,13 +92,13 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   .ec-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: start; }
   /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
   .ec-hero > .ec-tile { align-self: end; margin-top: 0; }
-  .ec-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
+  .ec-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid var(--lr-line); border-radius: 8px; padding: 18px; }
   .ec-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .ec-tile .t { margin: 8px 0 14px; font-family: var(--gh-font-display); font-weight: 800; font-size: 22px; text-transform: uppercase; line-height: 1.1; }
   .ec-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--lr-line); }
   .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
-  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 14px; font-weight: 500; color: #E4E4EC; cursor: pointer; white-space: nowrap; }
-  .chips button:hover:not(.on) { border-color: rgba(200,200,222,.5); }
+  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 14px; font-weight: 500; color: var(--lr-text); cursor: pointer; white-space: nowrap; }
+  .chips button:hover:not(.on) { border-color: var(--lr-line-hover); }
   .chips button.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
   .chips button.mine { border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
   .chips button.mine.on { background: var(--lr-lime); border-color: var(--lr-lime); color: #14141F; }
@@ -108,7 +108,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   .ec-strip-w { display: none; }
 
   .ec-body { display: grid; grid-template-columns: minmax(0,1fr) 320px; gap: 28px; align-items: start; padding-top: 28px; padding-bottom: 72px; }
-  .ec-sample { margin: 0 0 14px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #6B6B80; }
+  .ec-sample { margin: 0 0 14px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--lr-muted); }
   #ev-root :global(.ev-day-g) { scroll-margin-top: 90px; }
   #ev-root :global(.ev-day-g), #ev-past :global(.ev-day-g) { margin-top: 28px; }
   #ev-root :global(.ev-day-g:first-child) { margin-top: 0; }
@@ -129,8 +129,8 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   :global(.dc-card p) { margin: 8px 0 0; font-size: 14px; line-height: 1.55; color: var(--lr-soft); }
   :global(.dc-card .dc-free) { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--lr-muted); }
   :global(.dc-card .dc-free i) { width: 7px; height: 7px; border-radius: 999px; background: #3BA55D; }
-  :global(.dc-card .dc-btn) { width: 100%; margin-top: 14px; justify-content: center; gap: 8px; background: var(--lr-discord); border-color: var(--lr-discord); color: #fff; }
-  :global(.dc-card .dc-btn:hover) { background: #4752c4; border-color: #4752c4; color: #fff; }
+  :global(.dc-card .dc-btn) { width: 100%; margin-top: 14px; justify-content: center; gap: 8px; background: var(--lr-discord); border-color: var(--lr-discord); color: var(--lr-text); }
+  :global(.dc-card .dc-btn:hover) { background: #4752c4; border-color: #4752c4; color: var(--lr-text); }
 
   .mcal { padding: 18px; }
   .mcal :global(.mh) { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
@@ -138,9 +138,9 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   .mcal :global(.mh button) { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); cursor: pointer; font-size: 15px; line-height: 1; }
   .mcal :global(.mh button:hover) { border-color: var(--lr-text); }
   .mcal :global(.mg) { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-  .mcal :global(.wd) { font-size: 11px; color: #6B6B80; padding-bottom: 6px; }
+  .mcal :global(.wd) { font-size: 11px; color: var(--lr-muted); padding-bottom: 6px; }
   .mcal :global(.d) { position: relative; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 14px; color: var(--lr-soft); border: 1px solid transparent; background: none; font-family: inherit; padding: 0; }
-  .mcal :global(.d.o) { color: #45455A; }
+  .mcal :global(.d.o) { color: var(--lr-disabled); }
   .mcal :global(.d.has) { background: var(--lr-raised); color: var(--lr-text); font-weight: 700; cursor: pointer; }
   .mcal :global(.d.has:hover) { border-color: var(--lr-line-strong); }
   .mcal :global(.d.today) { border-color: var(--lr-orange); color: var(--lr-text); font-weight: 700; }

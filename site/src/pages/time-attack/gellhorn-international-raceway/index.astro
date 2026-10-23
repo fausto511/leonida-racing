@@ -96,18 +96,18 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
   .ta-o3 { background: linear-gradient(180deg, rgba(11,11,20,0) 55%, rgba(11,11,20,.8) 100%); }
   .ta-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: end; padding-top: 56px; padding-bottom: 40px; }
   .ta-hero h1 { margin: 12px 0 0; font-size: 64px; line-height: .95; }
-  .lede { margin: 16px 0 0; font-size: 17px; line-height: 1.55; color: #EDEBF2; max-width: 600px; text-shadow: 0 1px 12px rgba(11,11,20,.9); }
+  .lede { margin: 16px 0 0; font-size: 17px; line-height: 1.55; color: var(--lr-text); max-width: 600px; text-shadow: 0 1px 12px rgba(11,11,20,.9); }
   .ta-cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
   .ta-how { background: rgba(11,11,20,.5); }
-  .ta-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
+  .ta-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid var(--lr-line); border-radius: 8px; padding: 18px; }
   .ta-tile :global(.eb) { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); display: flex; align-items: center; gap: 8px; }
-  .smp { margin-left: auto; color: #6B6B80; letter-spacing: .12em; }
+  .smp { margin-left: auto; color: var(--lr-muted); letter-spacing: .12em; }
   .smp[hidden] { display: none; }
   .ta-tile :global(.big) { font-family: 'Archivo', sans-serif; font-variation-settings: 'wdth' 112; font-weight: 800; font-size: 34px; line-height: 1; margin-top: 10px; font-variant-numeric: tabular-nums; }
   .ta-tile :global(.who) { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 8px; font-size: 14px; color: var(--lr-soft); }
   .ta-tile :global(.who b) { color: var(--lr-text); font-weight: 600; }
   .ta-tile :global(.lb-crew-tag) { text-decoration: none; color: #111; }
-  .ta-tile :global(.row3) { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(200,200,222,.14); }
+  .ta-tile :global(.row3) { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--lr-line); }
   .ta-tile :global(.row3 div) { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
   .ta-tile :global(.row3 b) { font-size: 18px; font-variant-numeric: tabular-nums; }
   .ta-tile :global(.row3 span) { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--lr-muted); }
@@ -123,7 +123,7 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
   .track .img { position: relative; border-radius: 8px; overflow: hidden; min-height: 340px; }
   .track .img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .track .txt { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
-  .track .txt p { margin: 0; font-size: 16px; line-height: 1.65; color: #E4E4EC; }
+  .track .txt p { margin: 0; font-size: 16px; line-height: 1.65; color: var(--lr-text); }
   .facts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin: auto 0 0; }
   .facts div { background: var(--lr-raised); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .facts dt { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); }
@@ -133,9 +133,9 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
   .ta-3 .card { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
   .ta-3 h3 { margin: 0; font-size: var(--lr-h3); font-weight: 700; }
   .ta-3 p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--lr-soft); }
-  .ta-3 p b { color: #E4E4EC; }
+  .ta-3 p b { color: var(--lr-text); }
   .lk { margin-top: auto; } /* style = .arrow (DEC-0170) */
-  .lk.off { color: #6B6B80; }
+  .lk.off { color: var(--lr-muted); }
   .pill { align-self: flex-start; height: 24px; padding: 0 9px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .06em; display: inline-flex; align-items: center; gap: 6px; background: var(--lr-raised); color: var(--lr-soft); }
   .pill i { width: 7px; height: 7px; border-radius: 999px; background: var(--lr-orange); }
   .pill i.lime { background: var(--lr-lime); }

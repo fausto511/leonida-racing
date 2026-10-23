@@ -291,7 +291,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .tnum, :global(.tnum) { font-variant-numeric: tabular-nums; }
 
   /* ---- hero ---- */
-  .hero { position: relative; display: flex; align-items: flex-end; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
+  .hero { position: relative; display: flex; align-items: flex-end; overflow: hidden; border-bottom: 1px solid var(--lr-line-strong); }
   .hero-bg, .hero-bg img { position: absolute; inset: 0; width: 100%; height: 100%; }
   .hero-bg img { object-fit: cover; object-position: 60% 40%; }
   .hero-tint { position: absolute; inset: 0; pointer-events: none; }
@@ -307,9 +307,9 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .hero-inner .eyebrow { margin: 0; }
   .hero-title { margin: 0; font-size: clamp(38px, 5.4vw, 68px); line-height: .98; text-shadow: 0 2px 24px rgba(11,11,20,.55); }
   .hero-title-dash { font-size: clamp(30px, 4.4vw, 56px); line-height: 1; }
-  .hero-sub { margin: 0; max-width: 760px; font-size: 18px; line-height: 1.6; color: #EDEBF2; font-weight: 500; text-wrap: balance; text-shadow: 0 1px 12px rgba(11,11,20,.9), 0 0 2px rgba(11,11,20,.6); }
+  .hero-sub { margin: 0; max-width: 760px; font-size: 18px; line-height: 1.6; color: var(--lr-text); font-weight: 500; text-wrap: balance; text-shadow: 0 1px 12px rgba(11,11,20,.9), 0 0 2px rgba(11,11,20,.6); }
   .htiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 10px; }
-  .htile { position: relative; display: flex; flex-direction: column; background: rgba(20,20,31,.88); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; overflow: hidden; backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s, transform .15s; }
+  .htile { position: relative; display: flex; flex-direction: column; background: rgba(20,20,31,.88); border: 1px solid var(--lr-line); border-radius: 8px; overflow: hidden; backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s, transform .15s; }
   .htile:hover, .htile:focus-visible { border-color: var(--lr-orange); transform: translateY(-2px); outline: none; }
   .htile-img { position: relative; display: block; aspect-ratio: 16 / 6.4; overflow: hidden; background: var(--lr-raised); }
   .htile-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -320,8 +320,8 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .htile-body { display: flex; flex-direction: column; gap: 3px; padding: 12px 16px 14px; }
   .htile-eb { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .htile-name { font-family: var(--gh-font-display); font-weight: 800; text-transform: uppercase; font-size: 22px; line-height: 1; }
-  .htile-live { display: block; margin-top: 4px; font-size: 14px; line-height: 1.45; color: #D6D6DE; }
-  .mtile { display: flex; flex-direction: column; gap: 8px; min-height: 150px; padding: 18px; background: rgba(20,20,31,.9); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s, transform .15s; }
+  .htile-live { display: block; margin-top: 4px; font-size: 14px; line-height: 1.45; color: var(--lr-text); }
+  .mtile { display: flex; flex-direction: column; gap: 8px; min-height: 150px; padding: 18px; background: rgba(20,20,31,.9); border: 1px solid var(--lr-line); border-radius: 8px; backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s, transform .15s; }
   .mtile:hover, .mtile:focus-visible { border-color: var(--lr-orange); transform: translateY(-2px); outline: none; }
   .mtile-top { display: flex; align-items: center; gap: 8px; }
   .mtile-ic { display: inline-flex; color: var(--lr-orange); }
@@ -329,7 +329,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .mtile:hover .mtile-go { background: var(--lr-orange); color: #1A0E06; }
   .mtile-val { margin-top: auto; font-family: var(--gh-font-display); font-weight: 800; text-transform: uppercase; font-size: 26px; line-height: 1.05; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .mtile-val :global(small) { font-size: 18px; color: var(--lr-muted); }
-  .mtile-sub { font-size: 14px; line-height: 1.45; color: #D6D6DE; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mtile-sub { font-size: 14px; line-height: 1.45; color: var(--lr-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* loading state of the dashboard tiles (first visit, Fausto 21.10.): shimmer instead of "…" */
   .mtile.is-loading [data-val], .mtile.is-loading [data-sub] { color: transparent; border-radius: 4px; background: linear-gradient(90deg, rgba(251,247,234,.06) 0%, rgba(251,247,234,.14) 50%, rgba(251,247,234,.06) 100%); background-size: 200% 100%; animation: mt-shimmer 1.2s ease-in-out infinite; }
   .mtile.is-loading [data-val] { width: 60%; }
@@ -353,7 +353,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .hsec-head .arrow { white-space: nowrap; }
 
   /* ---- chips (mockup .chip) ---- */
-  .chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 13px; border-radius: 999px; border: 1px solid rgba(200,200,222,.24); font-size: 13px; font-weight: 500; color: #E4E4EC; background: rgba(11,11,20,.55); text-decoration: none; white-space: nowrap; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); font-size: 13px; font-weight: 500; color: var(--lr-text); background: rgba(11,11,20,.55); text-decoration: none; white-space: nowrap; }
   .chip:hover { border-color: var(--lr-pink); color: var(--lr-text); }
   .chip-sm { height: 30px; font-size: 12px; padding: 0 11px; }
 
@@ -386,7 +386,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .tband-rows :global(.ttime) { width: 76px; flex: none; text-align: right; font-weight: 600; }
   .tband-rows :global(.trow.me) { background: var(--lr-raised); }
   :global(.tband-rows:has(.trow.me) .trow:not(.me) .tn), :global(.tband-rows:has(.trow.me) .trow:not(.me) .ttime) { color: var(--lr-soft); }
-  .tband-rows :global(.trow.gapb) { margin-top: 10px; border-top: 1px solid rgba(200,200,222,.32); }
+  .tband-rows :global(.trow.gapb) { margin-top: 10px; border-top: 1px solid var(--lr-line-hover); }
   .tband-chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: auto; padding: 14px 10px 0; }
   .tband-chips-label { font-size: 12px; font-weight: 600; color: var(--lr-muted); margin-right: 4px; }
 
@@ -434,10 +434,10 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .crows :global(.crew-pill) { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 6px; background: rgba(251,247,234,.08); color: var(--lr-muted); font-size: 13px; font-weight: 600; white-space: nowrap; }
   .crows :global(.crew-withdraw) { border-color: transparent; color: var(--lr-muted); padding: 0 6px; }
   .crows :global(.crew-link:not(.crew-join-btn):not(.crew-withdraw)) { font-size: 12px; color: var(--lr-muted); }
-  .crows :global(.crow.cfree) { border: 1px dashed rgba(200,200,222,.24); margin-top: 8px; }
+  .crows :global(.crow.cfree) { border: 1px dashed var(--lr-line-strong); margin-top: 8px; }
   .crows :global(.crow.cfree:hover) { border-color: rgba(251,247,234,.5); }
   .crows :global(.crow.cfree .cdate) { display: flex; align-items: center; justify-content: center; height: 44px; }
-  .crows :global(.cplus) { width: 32px; height: 32px; border-radius: 999px; border: 1px dashed rgba(200,200,222,.4); display: inline-flex; align-items: center; justify-content: center; color: var(--lr-muted); font-size: 18px; line-height: 1; }
+  .crows :global(.cplus) { width: 32px; height: 32px; border-radius: 999px; border: 1px dashed var(--lr-line-hover); display: inline-flex; align-items: center; justify-content: center; color: var(--lr-muted); font-size: 18px; line-height: 1; }
   .crows :global(.crow.cfree .cmain b) { color: var(--lr-muted); }
   .cfoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding: 16px 10px 0; }
   /* loading rows (no flash of sample data) */
@@ -475,12 +475,12 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .dband-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding-top: 56px; padding-bottom: 56px; }
   .dband-copy { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
   .dband-title { margin: 0; }
-  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
+  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: var(--lr-text); }
   :global(html.lr-authed) .dband-guest { display: none; }
-  .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: #fff; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.5); }
-  .dband-more:hover { text-decoration-color: #fff; }
+  .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(251,247,234,.5); }
+  .dband-more:hover { text-decoration-color: var(--lr-text); }
   .dband-btn { background: var(--lr-text); color: var(--lr-discord); flex: none; }
-  .dband-btn:hover { background: #fff; color: var(--lr-discord); }
+  .dband-btn:hover { background: var(--lr-text); color: var(--lr-discord); }
   .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; } /* white button, logo + text blurple (Fausto 20.10.) */
   /* the footer's top margin would leave a gap under the band */
   :global(main:has(.dband) + .site-foot) { margin-top: 0; }

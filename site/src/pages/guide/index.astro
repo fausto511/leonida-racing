@@ -203,7 +203,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-hero { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: start; }
   /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
   .gd-hero > .gd-tile { align-self: end; margin-top: 0; }
-  .gd-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
+  .gd-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid var(--lr-line); border-radius: 8px; padding: 18px; }
   .gd-tile-eb { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .gd-glance { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
   .gd-glance > * { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 6px; border: 1px solid var(--lr-line); background: rgba(11,11,20,.4); color: var(--lr-text); text-decoration: none; }
@@ -232,8 +232,8 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-pill-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
   .gd-pill.is-ok { color: var(--lr-lime); background: rgba(217,245,142,.1); border: 1px solid rgba(217,245,142,.35); }
   .gd-pill.is-mid { color: var(--lr-orange); background: rgba(255,149,90,.1); border: 1px solid rgba(255,149,90,.38); }
-  .gd-pill.is-open { color: var(--lr-soft); background: rgba(200,200,222,.08); border: 1px solid var(--lr-line-strong); }
-  .gd-p { margin: 0 0 16px; font-size: 16px; line-height: 1.7; color: #E4E2EA; }
+  .gd-pill.is-open { color: var(--lr-soft); background: var(--lr-line-soft); border: 1px solid var(--lr-line-strong); }
+  .gd-p { margin: 0 0 16px; font-size: 16px; line-height: 1.7; color: var(--lr-text); }
   .gd-p :global(strong) { color: var(--lr-text); }
   .gd-p :global(a) { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
   .gd-p :global(a:hover) { color: var(--lr-orange); }
@@ -259,7 +259,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-src-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .gd-kind { padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
   .gd-kind.is-official { color: var(--lr-lime); background: rgba(217,245,142,.12); }
-  .gd-kind.is-press { color: var(--lr-soft); background: rgba(200,200,222,.1); }
+  .gd-kind.is-press { color: var(--lr-soft); background: var(--lr-line-soft); }
   .gd-kind.is-community { color: var(--lr-orange); background: rgba(255,149,90,.12); }
   .gd-src-pub { font-size: 12px; color: var(--lr-muted); }
   .gd-src-t { font-size: 14px; font-weight: 600; line-height: 1.35; }
@@ -268,7 +268,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   /* entry cards */
   .gd-entries { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 6px; }
   .gd-entry { display: flex; flex-direction: column; padding: 0; color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
-  .gd-entry:hover { border-color: rgba(200,200,222,.4); }
+  .gd-entry:hover { border-color: var(--lr-line-hover); }
   .gd-entry img { display: block; width: 100%; height: 120px; object-fit: cover; background: var(--lr-raised); }
   .gd-entry-b { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 16px; }
   .gd-entry-b strong { font-size: 22px; line-height: 1; }

@@ -151,7 +151,7 @@ const img = `${base}images/hub/hub-events`;
 </Base>
 
 <style>
-  .db { position: relative; overflow: hidden; border-bottom: 1px solid rgba(200,200,222,.22); }
+  .db { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line-strong); }
   .db picture, .db-bg, .db-t { position: absolute; inset: 0; width: 100%; height: 100%; }
   .db-bg { object-fit: cover; object-position: 50% 55%; }
   .db-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; }
@@ -161,7 +161,7 @@ const img = `${base}images/hub/hub-events`;
   .db-act { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-top: 18px; }
   .dico { width: 20px; height: 20px; fill: currentColor; flex: none; }
   .db-note { font-size: 13px; color: var(--lr-soft); }
-  .glance { flex: none; width: 380px; margin-top: 30px; padding: 18px 18px 12px; border: 1px solid rgba(200,200,222,.2); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
+  .glance { flex: none; width: 380px; margin-top: 30px; padding: 18px 18px 12px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
   .glance-eb { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .gl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 9px 0; border-top: 1px solid var(--lr-line); font-size: 15px; color: var(--lr-soft); }
   .gl-row:first-of-type { border-top: 0; }
@@ -179,7 +179,7 @@ const img = `${base}images/hub/hub-events`;
   .lfg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); gap: 48px; align-items: center; }
   .steps1 { list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 16px; }
   .steps1 li { display: flex; gap: 14px; }
-  .step-n { width: 34px; height: 34px; flex: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--lr-brand-gradient); color: #fff; font-weight: 800; font-size: 15px; }
+  .step-n { width: 34px; height: 34px; flex: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--lr-brand-gradient); color: var(--lr-text); font-weight: 800; font-size: 15px; }
   .step-t { margin: 4px 0 4px; font-size: var(--lr-h3-s); font-weight: 700; }
   .step-p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--lr-soft); }
 
@@ -190,7 +190,7 @@ const img = `${base}images/hub/hub-events`;
   .mock-body { min-width: 0; flex: 1; }
   .mock-msg p { margin: 0; }
   .mock-name { font-weight: 600; color: #F2F3F5; font-size: 15px; display: flex; align-items: center; gap: 6px; }
-  .mock-app { font-size: 10px; font-weight: 700; background: #5865F2; color: #fff; border-radius: 3px; padding: 1px 4px; }
+  .mock-app { font-size: 10px; font-weight: 700; background: #5865F2; color: var(--lr-text); border-radius: 3px; padding: 1px 4px; }
   .mock-embed { margin-top: 6px; padding: 10px 14px 12px; border-left: 4px solid #FFD74C; border-radius: 4px; background: #2B2D31; }
   .mock-au { font-size: 13px; font-weight: 600; color: #F2F3F5; }
   .mock-et { margin-top: 6px !important; font-weight: 700; color: #00A8FC; font-size: 16px; }
@@ -203,7 +203,7 @@ const img = `${base}images/hub/hub-events`;
   .mock-img { margin-top: 12px; width: 100%; height: auto; border-radius: 4px; aspect-ratio: 16 / 8; object-fit: cover; }
   .mock-foot { margin-top: 10px !important; font-size: 12px; color: #B5BAC1; }
   .mock-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  .mb { height: 32px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: 4px; background: #4E5058; color: #fff; font-size: 14px; font-weight: 500; }
+  .mb { height: 32px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: 4px; background: #4E5058; color: var(--lr-text); font-size: 14px; font-weight: 500; }
   .mb-g { background: #248046; }
   .mock figcaption { margin-top: 8px; font-size: 13px; color: var(--lr-muted); }
 
@@ -213,7 +213,7 @@ const img = `${base}images/hub/hub-events`;
   .cmds thead th { border-top: 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-soft); }
   .cmds tbody th { white-space: nowrap; font-weight: 500; }
   .cmds code { font-size: 14px; padding: 2px 7px; border-radius: 4px; background: var(--lr-raised); color: var(--lr-text); }
-  .cmds td { color: #E4E4EC; line-height: 1.5; }
+  .cmds td { color: var(--lr-text); line-height: 1.5; }
   .cmds .who { color: var(--lr-soft); white-space: nowrap; font-size: 14px; }
   .perms { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
   .perms li { display: flex; flex-direction: column; gap: 6px; padding: 18px 20px; border-radius: 8px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); }
@@ -227,15 +227,15 @@ const img = `${base}images/hub/hub-events`;
   .faq summary::-webkit-details-marker { display: none; }
   .faq summary::after { content: '+'; color: var(--lr-orange); font-size: 22px; line-height: 1; }
   .faq details[open] summary::after { content: '–'; }
-  .faq details p { margin: 0 0 18px; font-size: 16px; line-height: 1.65; color: #E4E4EC; max-width: 760px; }
+  .faq details p { margin: 0 0 18px; font-size: 16px; line-height: 1.65; color: var(--lr-text); max-width: 760px; }
 
   .dband { background: var(--lr-brand-gradient); }
   .dband-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding-top: 56px; padding-bottom: 56px; }
   .dband-copy { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
   .dband-title { margin: 0; }
-  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
+  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: var(--lr-text); }
   .dband-btn { background: var(--lr-text); color: var(--lr-discord); flex: none; }
-  .dband-btn:hover { background: #fff; color: var(--lr-discord); }
+  .dband-btn:hover { background: var(--lr-text); color: var(--lr-discord); }
   .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; } /* white button, logo + text blurple (Fausto 20.10.) */
   :global(main:has(.dband) + .site-foot) { margin-top: 0; }
 

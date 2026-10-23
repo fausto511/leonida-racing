@@ -88,7 +88,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
   /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
   .cr-hero > .cr-tile { align-self: end; margin-top: 0; }
   .sm { display: none; }
-  .cr-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
+  .cr-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid var(--lr-line); border-radius: 8px; padding: 18px; }
   .cr-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .cr-tile .t { margin: 8px 0 14px; font-family: var(--gh-font-display); font-weight: 800; font-size: 22px; text-transform: uppercase; line-height: 1.1; }
   .mine { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -97,7 +97,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
   .mine :global(li .st) { flex: none; font-size: 13px; font-weight: 500; color: var(--lr-muted); display: inline-flex; align-items: center; gap: 5px; }
   .mine :global(li .st.act) { color: var(--lr-lime); font-weight: 600; }
   .mine :global(li .st.inv) { color: var(--lr-orange); }
-  .mine-f { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(200,200,222,.14); font-size: 13px; color: var(--lr-muted); }
+  .mine-f { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--lr-line); font-size: 13px; color: var(--lr-muted); }
   .mine-f a { color: var(--lr-orange); font-weight: 700; text-decoration: none; white-space: nowrap; }
 
   .cr-bar { padding: 22px 0 18px; border-bottom: 1px solid var(--lr-line); }
@@ -116,15 +116,15 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
   .chk { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; font-size: 14px; cursor: pointer; white-space: nowrap; }
   .chk input { width: 16px; height: 16px; accent-color: var(--lr-orange); margin: 0; }
   .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; font: inherit; font-size: 14px; font-weight: 500; color: #E4E4EC; cursor: pointer; white-space: nowrap; }
-  .chips button:hover:not(.on) { border-color: rgba(200,200,222,.5); }
+  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; font: inherit; font-size: 14px; font-weight: 500; color: var(--lr-text); cursor: pointer; white-space: nowrap; }
+  .chips button:hover:not(.on) { border-color: var(--lr-line-hover); }
   .chips button.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
   .chips button:focus-visible, .cr-fbtn:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
 
   .cr-count { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin: 24px 0 14px; }
   .cr-count h3 { margin: 0; font-family: var(--gh-font-body); font-size: var(--lr-h3); font-weight: 700; text-transform: none; letter-spacing: 0; }
   .cr-count p { margin: 0; font-size: 14px; color: var(--lr-muted); }
-  .cr-sample { margin: -6px 0 14px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #6B6B80; }
+  .cr-sample { margin: -6px 0 14px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--lr-muted); }
   #crew-root :global(.crew-card) { scroll-margin-top: 100px; }
   #crew-root :global(.crew-card.is-target) { border-color: var(--lr-orange); box-shadow: 0 0 0 1px var(--lr-orange); }
   .cr-more { display: flex; justify-content: center; padding: 24px 0 72px; }

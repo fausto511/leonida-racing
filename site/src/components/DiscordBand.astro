@@ -26,12 +26,12 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .dband-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding-top: 56px; padding-bottom: 56px; }
   .dband-copy { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
   .dband-title { margin: 0; }
-  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.88); }
+  .dband-text { margin: 0; font-size: 15px; line-height: 1.5; color: var(--lr-text); }
   :global(html.lr-authed) .dband-guest { display: none; }
-  .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: #fff; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.5); }
-  .dband-more:hover { text-decoration-color: #fff; }
+  .dband-more { align-self: flex-start; margin-top: 4px; font-size: 14px; font-weight: 600; color: var(--lr-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(251,247,234,.5); }
+  .dband-more:hover { text-decoration-color: var(--lr-text); }
   .dband-btn { background: var(--lr-text); color: var(--lr-discord); flex: none; }
-  .dband-btn:hover { background: #fff; color: var(--lr-discord); }
+  .dband-btn:hover { background: var(--lr-text); color: var(--lr-discord); }
   .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; } /* white button, logo + text blurple (Fausto 20.10.) */
   :global(main:has(.dband) + .site-foot) { margin-top: 0; }
   @media (max-width: 760px) {

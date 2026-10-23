@@ -89,15 +89,15 @@ const steps = [
   .tr-hero { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: start; }
   /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
   .tr-hero > .tr-tile { align-self: end; margin-top: 0; }
-  .tr-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid rgba(200,200,222,.18); border-radius: 8px; padding: 18px; }
+  .tr-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid var(--lr-line); border-radius: 8px; padding: 18px; }
   .tr-tile .eb { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .tr-tile .t { margin: 8px 0 6px; font-family: var(--gh-font-display); font-weight: 800; font-size: 22px; text-transform: uppercase; line-height: 1.1; }
   .tr-tile .s { margin: 0 0 14px; font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
 
   .tr-bar { padding: 14px 0 16px; border-bottom: 1px solid var(--lr-line); }
   .chips { display: flex; gap: 8px; flex-wrap: wrap; }
-  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 14px; font-weight: 500; color: #E4E4EC; cursor: pointer; white-space: nowrap; }
-  .chips button:hover:not(.on) { border-color: rgba(200,200,222,.5); }
+  .chips button { height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 14px; font-weight: 500; color: var(--lr-text); cursor: pointer; white-space: nowrap; }
+  .chips button:hover:not(.on) { border-color: var(--lr-line-hover); }
   .chips button.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 700; }
   .chips button.mine { border-color: rgba(217,245,142,.5); color: var(--lr-lime); }
   .chips button.mine.on { background: var(--lr-lime); border-color: var(--lr-lime); color: #14141F; }
@@ -114,7 +114,7 @@ const steps = [
   .sel select option { background: var(--lr-card); color: var(--lr-text); }
   .sel:focus-within { border-color: var(--lr-orange); }
 
-  .tr-sample { margin: 22px 0 12px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #6B6B80; }
+  .tr-sample { margin: 22px 0 12px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--lr-muted); }
   .tr-note { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--lr-muted); }
   .tr-msg { margin: 0 0 12px; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); font-size: 14px; color: var(--lr-soft); }
   .tr-msg.is-error { border-color: rgba(255,122,122,.5); color: #FF8A8A; }

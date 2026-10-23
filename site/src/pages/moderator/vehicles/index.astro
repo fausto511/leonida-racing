@@ -108,7 +108,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
   .vx-count { margin: .5rem 0; color: var(--gh-muted); font-size: .75rem; }
   .vx-list { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow-y: auto; }
   :global(.vx-list button) { width: 100%; text-align: left; padding: .4rem .5rem; border: 0; border-radius: var(--gh-radius); background: transparent; color: var(--gh-text); font: inherit; font-size: .82rem; cursor: pointer; }
-  :global(.vx-list button:hover), :global(.vx-list button.is-active) { background: rgba(200,200,222,.14); }
+  :global(.vx-list button:hover), :global(.vx-list button.is-active) { background: var(--lr-line); }
   :global(.vx-list small) { color: var(--gh-muted); }
   .vx-main { display: grid; gap: var(--gh-gap-card); min-width: 0; }
   .vx-form { padding: 1.1rem 1.2rem; }

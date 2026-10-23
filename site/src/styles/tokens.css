@@ -19,13 +19,19 @@
   --lr-bg: #0B0B14;          /* page, slight violet tint */
   --lr-card: #14141F;        /* cards, panels */
   --lr-raised: #1C1C2A;      /* image areas, hover, own row */
-  --lr-line: rgba(200, 200, 222, 0.16);
-  --lr-line-strong: rgba(200, 200, 222, 0.24);
+  /* lines and borders: 4 levels only (Fausto 23.10.2026, DEC-0172) */
+  --lr-line-soft: rgba(200,200,222,.10);    /* fine dividers inside cards */
+  --lr-line: rgba(200,200,222,.16);         /* default border / divider */
+  --lr-line-strong: rgba(200,200,222,.24);  /* inputs, chips, emphasised borders */
+  --lr-line-hover: rgba(200,200,222,.40);   /* hover / focus borders */
 
-  /* text */
-  --lr-text: #FBF7EA;
-  --lr-muted: #9C9CAB;
-  --lr-soft: #B4B4C2;        /* other people's names/times next to "you" */
+  /* text: exactly 4 levels (Fausto 23.10.2026, DEC-0172). Never pure #FFF; no other greys for text. */
+  --lr-text: #FBF7EA;        /* headings and all running text */
+  --lr-soft: #B4B4C2;        /* secondary text: descriptions, stats */
+  --lr-muted: #9C9CAB;       /* meta, labels, footer, table heads */
+  --lr-disabled: #55556A;    /* disabled controls, separators, out-of-month days */
+  /* manufacturer logos (black PNG/SVG) recoloured to --lr-text, not pure white */
+  --lr-logo-filter: brightness(0) invert(1) sepia(1) brightness(.985);
 
   /* accents */
   --lr-pink: #F24B9D;        /* primary */
@@ -236,7 +242,7 @@ select optgroup option { background: var(--gh-surface); color: var(--gh-text); f
 /* ---- Crew tag plate (The Hub, DEC-0062) — global: hub pages + leaderboard */
 .crew-tag {
   display: inline-flex; align-items: center; justify-content: center;
-  background: #FBF7EA; color: #111;
+  background: var(--lr-text); color: #111;
   font-family: var(--gh-font-body); font-weight: 900; letter-spacing: .06em;
   text-transform: uppercase; line-height: 1;
   border-radius: 2px;
@@ -272,7 +278,7 @@ main:focus { outline: none; }
 .lr-band-in.is-compact { min-height: 220px; padding-bottom: 32px; }
 /* Header without a photo (Fausto 22.10.2026, DEC-0152): dark card colour with a soft pink/orange glow,
    so the head stands apart without distracting. Use on every band that has no image. */
-.lr-band-plain { position: relative; border-bottom: 1px solid rgba(200,200,222,.22); background:
+.lr-band-plain { position: relative; border-bottom: 1px solid var(--lr-line-strong); background:
   radial-gradient(120% 140% at 100% 0%, rgba(255,62,165,.14), transparent 55%),
   radial-gradient(90% 120% at 85% 100%, rgba(255,149,90,.10), transparent 60%),
   var(--lr-card); }
@@ -284,7 +290,7 @@ main:focus { outline: none; }
 .lr-t1, .lr-t2 { margin: 12px 0 0; line-height: .95; }
 .lr-t1 { font-size: 64px; }
 .lr-t2 { font-size: 52px; }
-.lr-lede { margin: 16px 0 0; max-width: 600px; font-size: 17px; line-height: 1.55; color: #EDEBF2; text-shadow: 0 1px 12px rgba(11,11,20,.9); }
+.lr-lede { margin: 16px 0 0; max-width: 600px; font-size: 17px; line-height: 1.55; color: var(--lr-text); text-shadow: 0 1px 12px rgba(11,11,20,.9); }
 @media (max-width: 860px) {
   .lr-band-in, .lr-band-in.is-compact { min-height: 0; padding-top: 24px; padding-bottom: 24px; }
   .lr-crumb { font-size: 13px; margin-bottom: 14px; }
@@ -312,9 +318,9 @@ main:focus { outline: none; }
 
 /* Discord (Fausto 20.10., Discord brand rules: logo only in its own colours, black or white, never recoloured).
    Every Discord button: blurple with white logo + text. A logo without its own svg gets one via ::before. */
-.btn.btn-discord.btn-discord { background: var(--lr-discord); border-color: var(--lr-discord); color: #fff; gap: 8px; }
-.btn.btn-discord.btn-discord:hover { background: #4752C4; border-color: #4752C4; color: #fff; }
-.btn-discord svg { fill: currentColor; color: #fff; flex: none; }
+.btn.btn-discord.btn-discord { background: var(--lr-discord); border-color: var(--lr-discord); color: var(--lr-text); gap: 8px; }
+.btn.btn-discord.btn-discord:hover { background: #4752C4; border-color: #4752C4; color: var(--lr-text); }
+.btn-discord svg { fill: currentColor; color: var(--lr-text); flex: none; }
 .btn-discord:not(:has(svg))::before { content: ''; width: 18px; height: 18px; flex: none; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 1 4.5 2.3 15.6 15.6 0 0 0-15.4 0A18 18 0 0 1 8.8 3.4L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9.1-.3 13.7.1 18.2A20 20 0 0 0 6.1 21l1.3-2.1a12.9 12.9 0 0 1-2-1l.5-.4a14.3 14.3 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2.1a20 20 0 0 0 6-2.8c.5-5.2-.9-9.8-3.6-13.8ZM8.5 15.5c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z'/%3E%3C/svg%3E") center / contain no-repeat; }
 /* H3 (Fausto 23.10.2026, DEC-0167): titles in cards, boxes and above lists — main pages 20px, explanation pages 18px;
    small titles in lists / info rows / FAQ questions 16px. Always bold, normal case. */
