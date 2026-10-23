@@ -187,7 +187,7 @@ function statusCell(verified: boolean) {
     : '<span class="st no" role="cell" title="Not video verified (screenshot only)"><i></i><span class="st-t">Not video verified</span></span>';
 }
 function videoCell(e: LbEntry, sample: boolean) {
-  if (e.verified && e.video_url && /^https:\/\//.test(e.video_url)) return `<a class="vd" href="${esc(e.video_url)}" target="_blank" rel="noopener" aria-label="Watch ${esc(e.driver)}'s lap">${PLAY}<span class="vd-t">Watch</span></a>`;
+  if (e.verified && e.video_url && /^https:\/\//.test(e.video_url)) return `<a class="vd lr-noext" href="${esc(e.video_url)}" target="_blank" rel="noopener" aria-label="Watch ${esc(e.driver)}'s lap">${PLAY}<span class="vd-t">Watch</span></a>`;
   if (e.verified && sample) return `<span class="vd is-off" title="Sample data — no real video">${PLAY}<span class="vd-t">Watch</span></span>`;
   return '<span class="vd x" aria-label="No video">—</span>';
 }

@@ -241,7 +241,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         <dl class="va-card">
           <div><dt>Real-life inspiration</dt><dd class:list={{ 'is-tba': !vehicle.realLifeInspiration }}>{vehicle.realLifeInspiration ?? 'Under review'}</dd></div>
           <div><dt>First seen</dt><dd>{vehicle.firstSeenIn && vehicle.firstSeenUrl
-            ? <a class="va-src" href={vehicle.firstSeenUrl} target="_blank" rel="noopener">{vehicle.firstSeenIn}{vehicle.firstSeenTimestamp && <>{' · '}{vehicle.firstSeenTimestamp}</>} <span aria-hidden="true">↗</span></a>
+            ? <a class="va-src" href={vehicle.firstSeenUrl} target="_blank" rel="noopener">{vehicle.firstSeenIn}{vehicle.firstSeenTimestamp && <>{' · '}{vehicle.firstSeenTimestamp}</>}</a>
             : <span class:list={{ 'is-tba': !vehicle.firstSeenIn }}>{vehicle.firstSeenIn ?? 'Not officially revealed'}</span>}</dd></div>
           <div><dt>Added with</dt><dd class:list={{ 'is-tba': !release }}>{releaseText}</dd></div>
           <div><dt>GTA history</dt><dd class="va-hist">{!vehicle.previousGames

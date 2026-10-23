@@ -135,9 +135,9 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
                 const sp = sourceParts(x);
                 return (
                   <li>
-                    <a href={x.url} target="_blank" rel="noopener">
+                    <a class="lr-noext" href={x.url} target="_blank" rel="noopener">
                       <span class="gd-src-top"><span class:list={['gd-kind', `is-${sp.kind}`]}>{kindLabel[sp.kind]}</span><span class="gd-src-pub">{sp.publisher}</span></span>
-                      <span class="gd-src-t">{sp.title}<span class="gd-ext" aria-hidden="true"> ↗</span></span>
+                      <span class="gd-src-t lr-ext-after">{sp.title}</span>
                       {x.note && <span class="gd-src-n">{x.note}</span>}
                     </a>
                   </li>
@@ -185,7 +185,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
         {guideMethodology.map((p) => <p class="gd-p" set:html={p} />)}
         <div class="gd-count card" id="vehicle-count">
           <strong class="display">{GUIDE_VEHICLES.value}</strong>
-          <p><b>{GUIDE_VEHICLES.label}:</b> <a href={GUIDE_VEHICLES.sourceUrl} target="_blank" rel="noopener">{GUIDE_VEHICLES.sourceLabel} ↗</a> {GUIDE_VEHICLES.note}</p>
+          <p><b>{GUIDE_VEHICLES.label}:</b> <a href={GUIDE_VEHICLES.sourceUrl} target="_blank" rel="noopener">{GUIDE_VEHICLES.sourceLabel}</a> {GUIDE_VEHICLES.note}</p>
         </div>
         <p class="gd-updated">Last updated: <time datetime={GUIDE_UPDATED}>{updatedLabel}</time></p>
         <p class="gd-indep">Leonida Racing is an independent community project and is not affiliated with Rockstar Games or Take-Two Interactive.</p>
@@ -263,7 +263,6 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-kind.is-community { color: var(--lr-orange); background: rgba(255,149,90,.12); }
   .gd-src-pub { font-size: 12px; color: var(--lr-muted); }
   .gd-src-t { font-size: 14px; font-weight: 600; line-height: 1.35; }
-  .gd-ext { color: var(--lr-muted); font-weight: 400; }
   .gd-src-n { font-size: 13px; line-height: 1.45; color: var(--lr-muted); }
 
   /* entry cards */

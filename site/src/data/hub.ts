@@ -250,8 +250,8 @@ export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: bo
     c.is_partner ? '<span class="crew-badge b-partner">Partner</span>' : '',
     opts.badges ?? '',
   ].join('');
-  const scLink = sc ? `<a class="crew-icon-link crew-icon-sc" href="${esc(sc)}" target="_blank" rel="noopener" title="Social Club" aria-label="Social Club">SC</a>` : '';
-  const dcLink = discord ? `<a class="crew-icon-link crew-icon-dc" href="${esc(discord)}" target="_blank" rel="noopener" title="Discord" aria-label="Discord">${iconDiscord}</a>`
+  const scLink = sc ? `<a class="crew-icon-link crew-icon-sc lr-noext" href="${esc(sc)}" target="_blank" rel="noopener" title="Social Club" aria-label="Social Club">SC</a>` : '';
+  const dcLink = discord ? `<a class="crew-icon-link crew-icon-dc lr-noext" href="${esc(discord)}" target="_blank" rel="noopener" title="Discord" aria-label="Discord">${iconDiscord}</a>`
     : opts.sample ? `<span class="crew-icon-link crew-icon-dc is-disabled" title="Sample crew — no Discord server">${iconDiscord}</span>` : '';
   const report = c.crew_id ? `<a class="crew-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?crew=${encodeURIComponent(c.crew_id)}`)}" title="Report this crew to the moderators" aria-label="Report this crew"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/></svg></a>` : '';
   const actions = opts.actions ? `<div class="crew-actions">${opts.actions}</div>` : joinId ? '<span class="crew-join-slot"></span>' : '';
@@ -308,7 +308,7 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
     eventDiscordHtml(e, Boolean(opts.sample)),
     eventStreamHtml(e, Boolean(opts.sample)),
     plats ? `<span class="ev-plat">${esc(plats)}</span>` : '',
-    join && !cancelled ? `<a class="ev-info" href="${esc(join)}" target="_blank" rel="noopener">Event info ↗</a>` : '',
+    join && !cancelled ? `<a class="ev-info" href="${esc(join)}" target="_blank" rel="noopener">Event info</a>` : '',
     !opts.sample ? `<a class="ev-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?event=${encodeURIComponent(e.event_id)}`)}" title="Report this event to the moderators">Report</a>` : '',
   ].filter(Boolean).join('<span class="dot" aria-hidden="true">·</span>');
   const dateBlock = `<div class="ev-date" data-ts="${esc(e.starts_at)}">
@@ -325,7 +325,7 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
       eventDiscordHtml(e, Boolean(opts.sample)),
       eventStreamHtml(e, Boolean(opts.sample)),
       e.event_type === 'time-attack' && !cancelled ? `<a class="ev-lb" href="${import.meta.env.BASE_URL}time-attack/gellhorn-international-raceway/"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg>Gellhorn leaderboard →</a>` : '',
-      join && !cancelled ? `<a class="ev-info" href="${esc(join)}" target="_blank" rel="noopener">Event info ↗</a>` : '',
+      join && !cancelled ? `<a class="ev-info" href="${esc(join)}" target="_blank" rel="noopener">Event info</a>` : '',
     ].filter(Boolean).join('<span class="dot" aria-hidden="true">·</span>');
     const share = cancelled ? '' : `<button type="button" class="ev-share" data-share="${esc(e.event_id)}" data-title="${esc(e.title)}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>Share</button>`;
     const report = !opts.sample ? `<a class="ev-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?event=${encodeURIComponent(e.event_id)}`)}" title="Report this event to the moderators">Report</a>` : '<span class="ev-report is-off" title="Sample event">Report</span>';

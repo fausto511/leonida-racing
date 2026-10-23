@@ -151,6 +151,12 @@ a { color: inherit; }
 .lr-lede a { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
 .lr-lede a:hover { color: var(--lr-orange); }
 a:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; border-radius: 2px; }
+/* External links (Fausto 23.10.2026, DEC-0171): every text link that opens another website gets the arrow-up-right icon (Lucide),
+   added automatically — no glyph in the markup. Buttons and icon-only links are excluded (.lr-noext); inside cards the icon
+   sits after the title (.lr-ext-after). */
+a[target="_blank"]:not(.btn):not([class*="btn"]):not(.lr-noext)::after, .lr-ext-after::after {
+  content: ""; display: inline-block; flex: none; width: .78em; height: .78em; margin-left: .28em; vertical-align: -.02em;
+  background-color: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 7h10v10'/%3E%3Cpath d='M7 17 17 7'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 7h10v10'/%3E%3Cpath d='M7 17 17 7'/%3E%3C/svg%3E") center / contain no-repeat; }
 .btn:disabled, .btn.is-disabled, .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
 .btn-sm { min-height: 36px; padding: 0 14px; font-size: 13px; gap: 6px; }
 
