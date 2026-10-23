@@ -73,7 +73,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
       </div>
       <div class="cm-head-r">
         <span class="sample" id="cm-ev-flag" hidden></span>
-        <a class="cm-more" href={`${base}community/events/`}>Open the full calendar →</a>
+        <a class="arrow cm-more" href={`${base}community/events/`}>Open the full calendar →</a>
       </div>
     </div>
     <div class="cm-bar">
@@ -95,7 +95,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
       </div>
       <div class="cm-head-r">
         <span class="sample" id="cm-crew-flag" hidden></span>
-        <a class="cm-more" href={`${base}community/crews/`}>Browse all crews →</a>
+        <a class="arrow cm-more" href={`${base}community/crews/`}>Browse all crews →</a>
       </div>
     </div>
     <div class="chips" id="cm-crew-chips" role="group" aria-label="Crew focus">
@@ -156,8 +156,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   .sub .sm { display: none; }
   .cm-head-r { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex: none; }
   .sample { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #6B6B80; white-space: nowrap; }
-  .cm-more { font-size: 15px; font-weight: 700; color: var(--lr-orange); text-decoration: none; white-space: nowrap; }
-  .cm-more:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .cm-more { white-space: nowrap; } /* style = .arrow (DEC-0170) */
   .cm-more-btn { display: none; }
   .cm-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 16px; }

@@ -73,7 +73,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     <span class="ct-make">${esc(c.make)}</span>
     <a class="ct-name" href="${vhref(c)}">${esc(c.model)}</a>
     <span class="ct-cls">${esc(c.cls)}</span>
-    <div class="ct-foot"><a class="ct-view" href="${vhref(c)}">View car →</a>
+    <div class="ct-foot"><a class="arrow ct-view" href="${vhref(c)}">View car →</a>
       <button type="button" class="ct-gar" data-gar="${c.id}" aria-pressed="${o}" title="${o ? 'In My Garage · click to remove' : 'Mark as owned · Adds the car to My Garage'}" aria-label="My Garage">${houseIco}</button></div>
   </div>
 </article>`;

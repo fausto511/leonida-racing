@@ -168,6 +168,8 @@ a:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; bord
 .btn-danger, .btn-outline-red { background: transparent; border-color: rgba(255,122,122,.55); color: #FF8A8A; }
 .btn-danger:hover, .btn-outline-red:hover { background: rgba(255,122,122,.1); border-color: #FF8A8A; }
 /* arrow text link (mockup .arrow): "Open the Guide →" */
+/* Arrow link "go further" (DEC-0170): section-head "more" links, card actions, end of link lists — 14px, 600, orange, hover pink, no underline.
+   Exceptions by design: link inside an info line (grey, e.g. vehicle make line) and links on the Discord gradient band (white, underlined). */
 .arrow { font-size: 14px; font-weight: 600; color: var(--lr-orange); text-decoration: none; }
 .arrow:hover { color: var(--lr-pink); }
 

@@ -68,19 +68,19 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
         <span class="pill"><i class="lime"></i>Rules</span>
         <h3>Screenshot or video?</h3>
         <p><b>Screenshot:</b> your lap is listed as Not video verified and can’t set an official record. <b>Full, uncut video:</b> if a moderator verifies the lap, it is listed as Video verified and is eligible for an official record.</p>
-        <a href={`${base}time-attack/how-it-works/#rules`} class="lk">Read the rules →</a>
+        <a href={`${base}time-attack/how-it-works/#rules`} class="arrow lk">Read the rules →</a>
       </div>
       <div class="card">
         <span class="pill"><i></i>After launch</span>
         <h3>Track guide</h3>
         <p>Braking points, racing lines and common mistakes, section by section. Goes up once we have driven Gellhorn ourselves.</p>
-        <span class="lk off">Coming after launch</span>
+        <span class="arrow lk off">Coming after launch</span>
       </div>
       <div class="card">
         <span class="pill"><i class="pink"></i>Cars</span>
         <h3>Find a car for Gellhorn</h3>
         <p>Browse the cars, compare available specs and lap times, and pick your next Gellhorn entry.</p>
-        <a href={`${base}cars/`} class="lk">Browse cars →</a>
+        <a href={`${base}cars/`} class="arrow lk">Browse cars →</a>
       </div>
     </div>
   </section>
@@ -134,7 +134,7 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
   .ta-3 h3 { margin: 0; font-size: var(--lr-h3); font-weight: 700; }
   .ta-3 p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--lr-soft); }
   .ta-3 p b { color: #E4E4EC; }
-  .lk { margin-top: auto; font-size: 14px; font-weight: 600; color: var(--lr-orange); text-decoration: none; }
+  .lk { margin-top: auto; } /* style = .arrow (DEC-0170) */
   .lk.off { color: #6B6B80; }
   .pill { align-self: flex-start; height: 24px; padding: 0 9px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .06em; display: inline-flex; align-items: center; gap: 6px; background: var(--lr-raised); color: var(--lr-soft); }
   .pill i { width: 7px; height: 7px; border-radius: 999px; background: var(--lr-orange); }
