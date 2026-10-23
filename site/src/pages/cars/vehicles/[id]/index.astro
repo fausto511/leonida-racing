@@ -391,8 +391,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   /* ---- sections ---- */
   .vsec { padding-top: 60px; }
   .vsec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
-  .vsec-titles { display: flex; flex-direction: column; gap: 6px; }
-  .vsec .eyebrow { margin: 0; font-size: 12px; font-weight: 600; }
+  .vsec-titles { display: flex; flex-direction: column; gap: 8px; } /* label -> H2: 8px (DEC-0168) */
+  .vsec .eyebrow { margin: 0; }
   .vsec-title { margin: 0; }
   .vsec-sub { margin: 0; color: var(--lr-soft); font-size: 16px; }
   .vsec-flag { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-muted); white-space: nowrap; }
@@ -442,7 +442,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
 
   /* ---- About + Origins: same height ---- */
   .va { display: grid; grid-template-columns: minmax(0, 1.42fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
-  .va-about, .va-orig { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .va-about, .va-orig { display: flex; flex-direction: column; gap: 8px; min-width: 0; } /* label -> H2: 8px (DEC-0168) */
   .va-about .vsec-title { margin-bottom: 10px; }
   .va-sources { margin: 4px 0 0; font-size: 14px; line-height: 1.5; color: var(--lr-muted); }
   .va-sources a { color: var(--lr-soft); text-decoration: underline; text-underline-offset: 3px; }
@@ -466,7 +466,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vm-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
   .vm-cards { display: contents; }
   .vh2h { display: flex; flex-direction: column; gap: 6px; padding: 20px; border: 1px solid rgba(242,75,157,.35); border-radius: 8px; background: linear-gradient(160deg, rgba(242,75,157,.16), rgba(20,20,31,.9) 60%), var(--lr-card); }
-  .vh2h .eyebrow { margin: 0; font-size: 12px; font-weight: 600; }
+  .vh2h .eyebrow { margin: 0; }
   .vh2h h3 { margin: 4px 0 0; font-size: var(--lr-h3); font-weight: 700; line-height: 1.2; }
   .vh2h-sub { margin: 0 0 8px; font-size: 14px; color: var(--lr-soft); }
   .vh2h-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }

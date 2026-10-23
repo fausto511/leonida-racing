@@ -63,7 +63,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
 
   <!-- ===== what's on the server ===== -->
   <section class="wrap dsec">
-    <p class="dsec-eb">What you’ll find</p>
+    <p class="eyebrow dsec-eb">What you’ll find</p>
     <h2 class="lr-h2 lr-h2-s dsec-h">Find your people</h2>
     <div class="areas">
       {discordAreas.map((a) => (
@@ -83,7 +83,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   <!-- ===== LFG ===== -->
   <section class="wrap dsec lfg">
     <div class="lfg-copy">
-      <p class="dsec-eb">{discordLfg.eyebrow}</p>
+      <p class="eyebrow dsec-eb">{discordLfg.eyebrow}</p>
       <h2 class="lr-h2 lr-h2-s dsec-h">{discordLfg.title}</h2>
       <p class="dsec-p">{discordLfg.text}</p>
       <ol class="lfg-steps">{discordLfg.steps.map((s) => <li>{s}</li>)}</ol>
@@ -113,7 +113,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
 
   <!-- ===== three steps ===== -->
   <section class="wrap dsec">
-    <p class="dsec-eb">Getting started</p>
+    <p class="eyebrow dsec-eb">Getting started</p>
     <h2 class="lr-h2 lr-h2-s dsec-h">Make yourself at home</h2>
     <ol class="steps">
       {discordSteps.map((s, i) => (
@@ -130,7 +130,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
 
   <!-- ===== tiers ===== -->
   <section class="wrap dsec">
-    <p class="dsec-eb">Roles</p>
+    <p class="eyebrow dsec-eb">Roles</p>
     <h2 class="lr-h2 lr-h2-s dsec-h">Guest, Registered Driver, Verified</h2>
     <div class="tiers-wrap">
       <table class="tiers">
@@ -151,12 +151,12 @@ const dash = '<span class="no" aria-label="No">–</span>';
   <!-- ===== rules + bot ===== -->
   <section class="wrap dsec two">
     <div class="rules">
-      <p class="dsec-eb">House rules, short version</p>
+      <p class="eyebrow dsec-eb">House rules, short version</p>
       <ul>{discordRules.map((r) => <li>{r}</li>)}</ul>
       <p class="dsec-small">Read the full rules in #rules on the server.</p>
     </div>
     <a class="bot" href={`${base}discord/bot/`}>
-      <p class="dsec-eb">{discordBotTeaser.eyebrow}</p>
+      <p class="eyebrow dsec-eb">{discordBotTeaser.eyebrow}</p>
       <h2 class="lr-h2 lr-h2-s bot-t">{discordBotTeaser.title}</h2>
       <p class="bot-p">{discordBotTeaser.text}</p>
       <div class="bot-cmds"><code>/events</code><code>/event</code><code>/car</code><code>/compare</code><code>/crew</code><code>/leonida feed</code></div>
@@ -166,7 +166,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
 
   <!-- ===== FAQ ===== -->
   <section class="wrap dsec faq" aria-labelledby="faq-h">
-    <p class="dsec-eb">FAQ</p>
+    <p class="eyebrow dsec-eb">FAQ</p>
     <h2 class="lr-h2 lr-h2-s dsec-h" id="faq-h">Questions about the server</h2>
     <div class="faq-list">
       {discordFaq.map((f, i) => (
@@ -213,7 +213,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
 
   /* ---- sections ---- */
   .dsec { padding-top: 56px; }
-  .dsec-eb { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--lr-orange); }
+  .dsec-eb { display: flex; width: fit-content; margin: 0 0 8px; } /* label -> H2: 8px (DEC-0168) */
   .dsec-h { margin: 0 0 20px; }
   .dsec-p { margin: 0; font-size: 17px; line-height: 1.65; color: #E4E4EC; max-width: 640px; }
   .dsec-small { margin: 14px 0 0; font-size: 14px; line-height: 1.55; color: var(--lr-soft); max-width: 760px; }
@@ -279,6 +279,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
   .rules { padding: 22px 24px; border-radius: 8px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); }
   .rules ul { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.5; color: #E4E4EC; }
+  .bot > .dsec-eb { margin: 0; } /* the card gap already gives 8px */
   .bot { display: flex; flex-direction: column; gap: 8px; padding: 22px 24px; border-radius: 8px; border: 1px solid var(--lr-line-strong); background: linear-gradient(140deg, rgba(42,31,158,.35), rgba(177,42,140,.25) 55%, rgba(242,106,61,.18)), var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
   .bot:hover { border-color: var(--lr-orange); }
   .bot-t { margin: 0; }

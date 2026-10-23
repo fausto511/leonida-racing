@@ -91,14 +91,16 @@ a { color: inherit; }
   border: 1px solid var(--gh-line);
 }
 
+/* Label above a title (DEC-0168): one look everywhere — 12px, 600, 0.14em, orange.
+   Gap to the title: 12px to an H1 (band), 8px to an H2. */
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--gh-yellow);
+  color: var(--lr-orange);
 }
 
 .display {
