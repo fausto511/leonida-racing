@@ -7,6 +7,7 @@ import fontTextUrl from '../assets/fonts/instrument-sans-latin.woff2?url';
 import ConsentBar from '../components/ConsentBar.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import CompareBar from '../components/CompareBar.astro';
 
 import { SITE_NAME, SITE_TAGLINE } from '../data/site';
 // Preconnect to Supabase so live data (events, crews, leaderboard) starts sooner (Lighthouse network tree, 22.10.).
@@ -48,6 +49,9 @@ const base = import.meta.env.BASE_URL;
 // <title>, og:title and twitter:title use "GTA 6" (search spelling); visible page text keeps "GTA VI" (RS-0044).
 const fullTitle = (title.includes(SITE_NAME) || !brandSuffix ? title : `${title} | ${SITE_NAME}`).replace(/\bGTA VI\b/g, 'GTA 6');
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
+// compare bar on every Cars page except the compare page itself (DEC-0176)
+const carsBase = `${import.meta.env.BASE_URL}cars/`;
+const showCompareBar = Astro.url.pathname.startsWith(carsBase) && !Astro.url.pathname.startsWith(`${carsBase}compare`);
 const ogImageUrl = new URL(`${base}${ogImage}`, Astro.site).href;
 const allJsonLd = [...jsonLd];
 if (breadcrumbs.length) {
@@ -102,6 +106,7 @@ if (breadcrumbs.length) {
     <a class="skip-link" href="#main">Skip to content</a>
     <Header section={section} />
     <main id="main" tabindex="-1"><slot /></main>
+    {showCompareBar && <CompareBar />}
     <Footer />
     <ConsentBar />
   </body>

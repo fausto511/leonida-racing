@@ -4,7 +4,7 @@
 // COPY STATUS: hint and status texts are Claude placeholders -> Codex (DEC-0088).
 import { backendConfigured, getSupabase } from './supabase-client';
 import { currentDriverId, fetchOwned, setOwned } from './owned';
-import { getSelected, toggleSelected } from './compare';
+import { getSelected, toggleSelected, onCompareChange } from './compare';
 import { bubble, hideBubble } from './bubble';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
 import { lapTime } from '../data/leaderboard';
@@ -50,19 +50,19 @@ function init(root: HTMLElement) {
   }
   function toggleCompare(carId: string, anchor: HTMLElement) {
     const sel = getSelected();
-    if (!sel.includes(carId) && sel.length >= MAX_COMPARE) { bubble(anchor, `You can compare up to ${MAX_COMPARE} cars. Remove one on the <a href="${base}cars/compare/">compare page</a> first.`); return; }
-    const now = toggleSelected(carId);
+    if (!sel.includes(carId) && sel.length >= MAX_COMPARE) { bubble(anchor, `You can compare up to ${MAX_COMPARE} cars. Remove one in the compare bar first.`); return; }
+    toggleSelected(carId); // the compare bar at the bottom shows the selection (DEC-0176), no extra hint
     paintCompare();
-    if (now) bubble(anchor, `Added to compare (${getSelected().length}/${MAX_COMPARE}). <a href="${base}cars/compare/">Open the comparison →</a>`);
-    else hideBubble();
+    hideBubble();
   }
+  onCompareChange(paintCompare);
   /** "vs →" / "Compare with the class leader": head to head on the compare page (just these two);
    *  "Pick any car": the stored selection plus this car (DEC-0128). */
   function compareWith(ids: string[], anchor: HTMLElement) {
     let list = ids;
     if (ids.length === 1) {
       const sel = getSelected();
-      if (!sel.includes(ids[0]) && sel.length >= MAX_COMPARE) { bubble(anchor, `You can compare up to ${MAX_COMPARE} cars. Remove one on the <a href="${base}cars/compare/">compare page</a> first.`); return; }
+      if (!sel.includes(ids[0]) && sel.length >= MAX_COMPARE) { bubble(anchor, `You can compare up to ${MAX_COMPARE} cars. Remove one in the compare bar first.`); return; }
       list = sel.includes(ids[0]) ? sel : [...sel, ids[0]];
     }
     location.href = `${base}cars/compare/?cars=${list.map(encodeURIComponent).join(',')}`;

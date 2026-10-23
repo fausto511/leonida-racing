@@ -1,0 +1,73 @@
+---
+// Compare bar (DEC-0176, Fausto 23.10.2026): shown on every Cars page except the compare page itself,
+// as soon as at least one car is selected. Sits at the end of the page (before the footer), so it is
+// sticky at the bottom of the screen and stops directly above the footer. Reads the shared selection
+// (scripts/compare.ts) and updates live when any script on the page changes it.
+import { vehicleOptions, shortModelName } from '../data/vehicles';
+const base = import.meta.env.BASE_URL;
+const data: Record<string, [string, string, boolean]> = Object.fromEntries(
+  vehicleOptions.map((v) => [v.id, [shortModelName(v), `${v.make} ${v.model}`, Boolean(v.photo)]]),
+);
+---
+<div class="cmpbar" id="cmpbar" hidden>
+  <div class="wrap cmpbar-inner">
+    <div class="cmpbar-cars" id="cmpbar-cars"></div>
+    <button type="button" class="cmpbar-clear" id="cmpbar-clear">Clear</button>
+    <a class="btn btn-p btn-md cmpbar-go" href={`${base}cars/compare/`} id="cmpbar-go">Compare <span id="cmpbar-n">0</span> <span id="cmpbar-w">cars</span></a>
+  </div>
+</div>
+<script type="application/json" id="cmpbar-data" set:html={JSON.stringify(data)}></script>
+
+<script>
+  import { getSelected, toggleSelected, onCompareChange } from '../scripts/compare';
+  import { CLOSE_SVG } from '../data/site';
+  const base = import.meta.env.BASE_URL;
+  const bar = document.getElementById('cmpbar');
+  const dataEl = document.getElementById('cmpbar-data');
+  if (bar && dataEl) {
+    const cars = JSON.parse(dataEl.textContent || '{}') as Record<string, [string, string, boolean]>;
+    const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+    const list = document.getElementById('cmpbar-cars')!;
+    const go = document.getElementById('cmpbar-go') as HTMLAnchorElement;
+    const render = () => {
+      const sel = getSelected().filter((id) => cars[id]);
+      bar.hidden = sel.length === 0;
+      document.getElementById('cmpbar-n')!.textContent = String(sel.length);
+      document.getElementById('cmpbar-w')!.textContent = sel.length === 1 ? 'car' : 'cars';
+      go.href = `${base}cars/compare/?cars=${sel.map(encodeURIComponent).join(',')}`;
+      list.innerHTML = sel.map((id) => {
+        const [short, full, photo] = cars[id];
+        const img = photo ? `${base}images/vehicles/${id}-640.webp` : `${base}images/garage/garage-hero-placeholder-640.webp`;
+        return `<span class="cb" title="${esc(full)}"><img src="${img}" alt="" width="64" height="40" loading="lazy" /><span>${esc(short)}</span><button type="button" data-uncompare="${esc(id)}" aria-label="Remove ${esc(full)} from compare">${CLOSE_SVG}</button></span>`;
+      }).join('');
+    };
+    list.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLElement>('[data-uncompare]');
+      if (b) toggleSelected(b.dataset.uncompare!);
+    });
+    document.getElementById('cmpbar-clear')!.addEventListener('click', () => { getSelected().forEach((id) => toggleSelected(id)); });
+    onCompareChange(render);
+    render();
+  }
+</script>
+
+<style>
+  .cmpbar { position: sticky; bottom: 0; z-index: 35; background: rgba(20,20,31,.96); backdrop-filter: blur(10px); border-top: 1px solid var(--lr-line-strong); box-shadow: 0 -12px 30px var(--lr-shadow); }
+  .cmpbar[hidden] { display: none; }
+  /* the bar takes over the footer's top gap, so at the end of the page it sits directly on the footer (Fausto: no gap) */
+  .cmpbar { margin-top: var(--gh-gap-section); }
+  :global(body:has(.cmpbar:not([hidden])) .site-foot) { margin-top: 0; }
+  .cmpbar-inner { display: flex; align-items: center; gap: 16px; min-height: 72px; }
+  .cmpbar-cars { flex: 1; min-width: 0; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
+  .cmpbar-cars :global(.cb) { position: relative; flex: none; display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 38px 0 4px; border-radius: 6px; background: var(--lr-raised); font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .cmpbar-cars :global(.cb img) { width: 64px; height: 40px; object-fit: cover; border-radius: 4px; background: var(--lr-bg); }
+  .cmpbar-cars :global(.cb button) { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border: 0; border-radius: 999px; display: inline-grid; place-items: center; background: none; color: var(--lr-muted); font-size: 16px; cursor: pointer; }
+  .cmpbar-cars :global(.cb button:hover) { color: var(--lr-text); }
+  .cmpbar-clear { border: 0; background: none; color: var(--lr-muted); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .cmpbar-clear:hover { color: var(--lr-text); }
+  .cmpbar-go { flex: none; gap: .3em; }
+  @media (max-width: 760px) {
+    .cmpbar-inner { gap: 10px; min-height: 64px; }
+    .cmpbar-cars :global(.cb > span) { display: none; }
+  }
+</style>

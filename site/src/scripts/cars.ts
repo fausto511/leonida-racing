@@ -3,7 +3,7 @@
 // "Show all", no-results help, compare (max 4) and My Garage. All cards are
 // server-rendered; this only shows/hides/reorders them.
 // COPY STATUS: messages are Claude placeholders -> Codex review (DEC-0088).
-import { getSelected, toggleSelected } from './compare';
+import { getSelected, toggleSelected, onCompareChange } from './compare';
 import { currentDriverId, fetchOwned, setOwned } from './owned';
 import { backendConfigured, getSupabase } from './supabase-client';
 import { CLOSE_SVG } from '../data/site';
@@ -361,17 +361,6 @@ function renderCompare() {
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach((b) => b.setAttribute('aria-pressed', String(sel.includes(b.dataset.compare!))));
   $('cmp-btn').classList.toggle('on', sel.length > 0);
   $('cmp-n').textContent = sel.length ? String(sel.length) : `0 / ${MAX_COMPARE}`;
-  $('cmpbar').hidden = sel.length === 0;
-  $('cmpbar-n').textContent = String(sel.length);
-  ($('cmpbar-go') as HTMLAnchorElement).href = `${import.meta.env.BASE_URL}cars/compare/?cars=${sel.map(encodeURIComponent).join(',')}`;
-  $('cmpbar-cars').innerHTML = sel.map((id) => {
-    const c = cards.find((x) => x.dataset.id === id);
-    if (!c) return '';
-    const img = c.querySelector<HTMLImageElement>('.vc-img img')?.getAttribute('src') ?? '';
-    const name = `${c.querySelector('.vc-brand')?.textContent?.trim()} ${c.querySelector('.vc-name')?.textContent?.trim()}`;
-    const short = c.querySelector('.vc-name')?.textContent?.trim() ?? name;
-    return `<span class="cb" title="${esc(name)}"><img src="${esc(img)}" alt="" width="64" height="40" /><span>${esc(short)}</span><button type="button" data-uncompare="${esc(id)}" aria-label="Remove ${esc(name)} from compare">${CLOSE_SVG}</button></span>`;
-  }).join('');
 }
 
 // ---- my garage --------------------------------------------------------------
@@ -430,8 +419,6 @@ document.addEventListener('click', async (e) => {
     renderCompare();
     return;
   }
-  const unc = t.closest<HTMLElement>('[data-uncompare]');
-  if (unc) { toggleSelected(unc.dataset.uncompare!); renderCompare(); return; }
   const gar = t.closest<HTMLButtonElement>('[data-garage]');
   if (gar) {
     e.preventDefault();
@@ -493,7 +480,6 @@ $('cmp-btn').addEventListener('click', () => {
   // K1 (Fausto 15.10.): always open the compare page; with nothing picked you add cars there
   location.href = `${import.meta.env.BASE_URL}cars/compare/?cars=${getSelected().map(encodeURIComponent).join(',')}`;
 });
-$('cmpbar-clear').addEventListener('click', () => { getSelected().forEach((id) => toggleSelected(id)); renderCompare(); });
 
 let qTimer = 0;
 ($('f-q') as HTMLInputElement).addEventListener('input', (e) => {
@@ -601,6 +587,7 @@ document.addEventListener('keydown', (e) => {
 readUrl();
 render();
 renderCompare();
+onCompareChange(renderCompare); // the compare bar (CompareBar.astro) can remove cars too
 loadOwned();
 // old /garage/#compare links (via the /garage -> /cars redirect) open the compare page (handoff 15.10.)
 if (location.hash === '#compare') location.replace(`${import.meta.env.BASE_URL}cars/compare/`);

@@ -17,12 +17,21 @@ export function getSelected(): string[] {
   }
 }
 
+const EVT = 'lr-compare-change';
+
 function setSelected(ids: string[]) {
   try {
     localStorage.setItem(KEY, JSON.stringify(ids));
   } catch {
     // storage unavailable (private browsing, disabled, quota) -- selection just won't persist
   }
+  window.dispatchEvent(new CustomEvent(EVT));
+}
+
+/** Runs fn whenever the selection changes: in this tab (any script, incl. the compare bar) or in another tab. */
+export function onCompareChange(fn: () => void) {
+  window.addEventListener(EVT, fn);
+  window.addEventListener('storage', (e) => { if (e.key === KEY) fn(); });
 }
 
 export function isSelected(id: string): boolean {
