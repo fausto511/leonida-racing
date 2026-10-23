@@ -101,8 +101,8 @@
 .ev-side { min-width: 0; }
 .ev-rsvp { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; min-width: 7.5rem; }
 .ev-rsvp > .ev-rsvp-btn, .ev-rsvp > .ev-full { order: -1; }
-.ev-rsvp-btn { display: inline-flex; align-items: center; gap: 6px; height: 38px; min-height: 38px; padding: 0 15px; border-radius: 6px; border: 1px solid var(--lr-orange-border); background: var(--lr-orange-fill); color: var(--lr-orange); font-family: var(--gh-font-body); font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-.ev-rsvp-btn:hover { background: var(--lr-orange-fill-hover); border-color: var(--lr-orange); color: var(--lr-orange); }
+.ev-rsvp-btn { display: inline-flex; align-items: center; gap: 6px; height: 40px; min-height: 40px; padding: 0 16px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); font-family: var(--gh-font-body); font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.ev-rsvp-btn:hover { background: transparent; border-color: var(--lr-text); color: var(--lr-text); }
 .ev-rsvp-btn.is-in { background: var(--lr-lime-fill); border-color: var(--lr-lime-border); color: var(--lr-lime); }
 .ev-rsvp-btn.is-in:hover { background: var(--lr-lime-fill-hover); color: var(--lr-lime); }
 .ev-full { display: inline-flex; align-items: center; height: 38px; padding: 0 15px; border-radius: 6px; border: 1px solid var(--lr-orange-border); color: rgba(255,149,90,.5); font-size: 14px; font-weight: 700; white-space: nowrap; }
@@ -128,7 +128,7 @@
 .ev-open-plus { flex: none; width: 44px; height: 44px; border-radius: 999px; border: 1px dashed var(--lr-line-hover); display: inline-flex; align-items: center; justify-content: center; font-size: 20px; color: var(--lr-muted); }
 .ev-open-t { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; font-size: 14px; color: var(--lr-soft); }
 .ev-open-t b { font-size: 16px; color: var(--lr-text); }
-.ev-open-btn { flex: none; height: 40px; font-size: 14px; }
+.ev-open-btn { flex: none; }
 /* track rows (data/tracks.ts) still use the older chip / facts lines */
 .ev-top { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .45rem; }
 .ev-facts { display: flex; flex-wrap: wrap; gap: .35rem 1.1rem; margin: 0; color: var(--gh-muted); font-size: .8rem; }
@@ -216,10 +216,10 @@
 .crew-card[hidden], .ev-row[hidden] { display: none; }
 
 /* ---- Crew membership (RS-0024) ------------------------------------------ */
-.crew-link.crew-join-btn, .crew-join-btn { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-orange-border); background: var(--lr-orange-fill); color: var(--lr-orange); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-.crew-link.crew-join-btn:hover, .crew-join-btn:hover { background: var(--lr-orange-fill-hover); border-color: var(--lr-orange); }
+.crew-link.crew-join-btn, .crew-join-btn { display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; text-decoration: none; }
+.crew-link.crew-join-btn:hover, .crew-join-btn:hover { background: transparent; border-color: var(--lr-text); text-decoration: none; }
 .crew-join-btn:disabled { opacity: .6; cursor: default; }
-.crew-pill { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-lime-border); color: var(--lr-lime); font-size: 14px; font-weight: 600; white-space: nowrap; }
+.crew-pill { display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 6px; border: 1px solid var(--lr-lime-border); color: var(--lr-lime); font-size: 14px; font-weight: 600; white-space: nowrap; }
 .crew-pill.is-pending { border-color: var(--lr-line-strong); color: var(--lr-muted); }
 /* Status button that toggles back (Fausto 20.10.): hover shows the undo action */
 a.crew-pill { text-decoration: none; }
@@ -227,7 +227,7 @@ a.crew-pill { text-decoration: none; }
 .crew-toggle .t-hov { display: none; }
 .crew-toggle:hover .t-def, .crew-toggle:focus-visible .t-def { display: none; }
 .crew-toggle:hover .t-hov, .crew-toggle:focus-visible .t-hov { display: inline; }
-.crew-toggle:hover, .crew-toggle:focus-visible { border-color: var(--lr-coral-border); color: var(--lr-coral); }
+.crew-toggle:hover, .crew-toggle:focus-visible { border-color: var(--lr-text); color: var(--lr-text); } /* hover shows the action (Withdraw / Leave crew) neutrally; only the armed state is coral (DEC-0175) */
 .crew-toggle.is-armed { border-color: var(--lr-coral); background: var(--lr-coral-fill); color: var(--lr-coral); }
 .crew-toggle:disabled { opacity: .6; cursor: default; }
 .crew-link { color: var(--lr-text); font-size: 13px; font-weight: 600; text-decoration: none; padding: 0; border: 0; background: none; }
@@ -303,12 +303,12 @@ a.crew-pill { text-decoration: none; }
 .tr-sc.is-disabled { opacity: .45; cursor: not-allowed; }
 .tr-report { align-self: center; }
 /* Save toggle: "Save" -> "Saved" (lime); hover on saved shows "Remove" (coral), same idea as the crew buttons */
-.tr-save { display: inline-flex; align-items: center; gap: 7px; height: 44px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.tr-save { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .tr-save:hover { border-color: var(--lr-text); }
 .tr-save.is-saved { border-color: var(--lr-lime-border); color: var(--lr-lime); }
 .tr-save.is-saved svg { fill: currentColor; }
 .tr-save .t-hov { display: none; }
-.tr-save.is-saved:hover, .tr-save.is-saved:focus-visible { border-color: var(--lr-coral-border); color: var(--lr-coral); }
+.tr-save.is-saved:hover, .tr-save.is-saved:focus-visible { border-color: var(--lr-text); color: var(--lr-text); }
 .tr-save.is-saved:hover .t-def, .tr-save.is-saved:focus-visible .t-def { display: none; }
 .tr-save.is-saved:hover .t-hov, .tr-save.is-saved:focus-visible .t-hov { display: inline; }
 .tr-save:disabled { opacity: .6; cursor: default; }
@@ -345,8 +345,9 @@ a.ev-next-copy { text-decoration: none; }
 /* Account crew cards (Fausto 20.10.): one row of real buttons, no wrapping */
 .crew-btn { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; flex: none; }
 .crew-btn:hover { border-color: var(--lr-text); }
-.crew-btn-leave { border-color: var(--lr-coral-border); color: var(--lr-coral); }
-.crew-btn-leave:hover, .crew-btn-leave.is-armed { border-color: var(--lr-coral); background: var(--lr-coral-fill); }
+.crew-btn-leave { border-color: var(--lr-line-strong); color: var(--lr-text); }
+.crew-btn-leave:hover { border-color: var(--lr-text); }
+.crew-btn-leave.is-armed { border-color: var(--lr-coral); background: var(--lr-coral-fill); color: var(--lr-coral); }
 .crew-actions:has(.is-armed) > :not(.is-armed) { display: none; }
 .crew-actions .crew-pill { flex: none; }
 .jm-hint { display: block; margin-top: .35rem; color: var(--gh-yellow); font-size: .75rem; }

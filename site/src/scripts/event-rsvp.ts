@@ -56,11 +56,11 @@ export function createEventRsvp(root: HTMLElement) {
       const countTxt = `${n}${max ? ' / ' + max : ''} going`;
       const list = n ? `<details class="ev-going"><summary>${countTxt}</summary><p>${named.join(', ')}${anon ? `${named.length ? ' + ' : ''}${anon} anonymous` : ''}</p></details>` : `<span class="ev-going-none">${max ? `0 / ${max} going` : 'Be the first to join'}</span>`;
       let action = '';
-      if (mine.has(id)) action = `<button type="button" class="btn btn-sm ev-rsvp-btn is-in" data-leave="${esc(id)}" title="Click to cancel"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Going</button>`;
+      if (mine.has(id)) action = `<button type="button" class="btn btn-md ev-rsvp-btn is-in" data-leave="${esc(id)}" title="Click to cancel"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Going</button>`;
       else if (closed) action = '';
       else if (e.registration === 'closed') action = '<span class="ev-full">Sign-ups Closed</span>';
       else if (full) action = '<span class="ev-full">Full</span>';
-      else action = `<button type="button" class="btn btn-sm ev-rsvp-btn" data-join="${esc(id)}">I'm in</button>`;
+      else action = `<button type="button" class="btn btn-md ev-rsvp-btn" data-join="${esc(id)}">I'm in</button>`;
       const msg = note && note.id === id ? `<span class="ev-rsvp-msg${note.err ? ' is-error' : ''}">${esc(note.text)}</span>` : '';
       slot.innerHTML = `${list}${action}${msg}`;
       // Next step after "I'm in" (Fausto, 2026-10-01): signing up alone is

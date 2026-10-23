@@ -19,7 +19,7 @@ const pick = source === 'crew' ? 'My crew' : 'My host profile';
       <li>
         <strong>Add the bot to your server</strong>
         <span>You need the “Manage Server” permission there.</span>
-        <a class="btn btn-outline dfs-btn" href={DISCORD_BOT_INVITE_URL} target="_blank" rel="noopener">Add to Discord</a>
+        <a class="btn btn-outline btn-md dfs-btn" href={DISCORD_BOT_INVITE_URL} target="_blank" rel="noopener">Add to Discord</a>
       </li>
       <li>
         <strong>Choose an event feed</strong>
@@ -57,6 +57,6 @@ const pick = source === 'crew' ? 'My crew' : 'My host profile';
   .dfs-steps li::before { content: counter(dfs); position: absolute; left: 0; top: 0; width: 1.7rem; height: 1.7rem; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: .8rem; background: var(--lr-orange); color: var(--lr-on-orange); }
   .dfs-steps span { color: var(--gh-muted); }
   .dfs-steps code { font-size: .84em; padding: .05rem .35rem; border-radius: 4px; background: var(--gh-line); color: var(--gh-text); }
-  .dfs-btn { margin-top: .2rem; font-size: .8rem; padding: .45rem .9rem; }
+  .dfs-btn { margin-top: .2rem; }
   .dfs-more { display: inline-block; margin-top: 1rem; color: var(--lr-orange); font-weight: 600; font-size: .88rem; text-decoration: none; }
 </style>

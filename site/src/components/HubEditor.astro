@@ -41,7 +41,7 @@ const base = import.meta.env.BASE_URL;
         <div class="panel list-panel">
           <div class="list-head">
             <h2 class="list-title" id="list-title">Crews</h2>
-            <button type="button" class="btn btn-red btn-sm" id="new-btn">+ New crew</button>
+            <button type="button" class="btn btn-red btn-md" id="new-btn">+ New crew</button>
           </div>
           <div class="list" id="list"></div>
           <p class="list-empty" id="list-empty" hidden>Nothing here yet.</p>
@@ -204,7 +204,7 @@ const base = import.meta.env.BASE_URL;
           <div id="roles-panel" class="hc-form" hidden>
             <div id="role-selected" class="role-selected" hidden>
               <p><strong id="role-selected-text"></strong></p>
-              <button type="button" class="btn btn-outline-red btn-sm" id="role-revoke">Revoke role</button>
+              <button type="button" class="btn btn-outline-red btn-md" id="role-revoke">Revoke role</button>
             </div>
             <div class="form-head"><h2>Grant a role</h2></div>
             <div class="grid">
@@ -553,15 +553,15 @@ const base = import.meta.env.BASE_URL;
     const d = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' }) : '');
     const iLead = isMod || leaderCrewIds.has(selectedId);
     $('members-invited').innerHTML = invited.length
-      ? `<p class="mem-group-title">Open invites (${invited.length}/20)</p>` + invited.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">invited ${esc(d(m.requested_at))}${m.invited_by_name ? ` by ${esc(m.invited_by_name)}` : ''}</span><span class="mem-actions"><button type="button" class="btn btn-outline-red btn-sm" data-drop="${esc(m.membership_id)}" data-label="Withdraw">Withdraw</button></span></div>`).join('')
+      ? `<p class="mem-group-title">Open invites (${invited.length}/20)</p>` + invited.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">invited ${esc(d(m.requested_at))}${m.invited_by_name ? ` by ${esc(m.invited_by_name)}` : ''}</span><span class="mem-actions"><button type="button" class="btn btn-outline-red btn-md" data-drop="${esc(m.membership_id)}" data-label="Withdraw">Withdraw</button></span></div>`).join('')
       : '';
     $('members-sub').textContent = `${active.length} member${active.length === 1 ? '' : 's'} on this site`;
     $('members-pending').innerHTML = `<p class="mem-group-title">Join requests</p>` + (pending.length
-      ? pending.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">asked ${esc(d(m.requested_at))}</span><span class="mem-actions"><button type="button" class="btn btn-primary btn-sm" data-approve="${esc(m.membership_id)}">Approve</button><button type="button" class="btn btn-outline-red btn-sm" data-drop="${esc(m.membership_id)}" data-label="Decline">Decline</button></span></div>`).join('')
+      ? pending.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">asked ${esc(d(m.requested_at))}</span><span class="mem-actions"><button type="button" class="btn btn-primary btn-md" data-approve="${esc(m.membership_id)}">Approve</button><button type="button" class="btn btn-outline-red btn-md" data-drop="${esc(m.membership_id)}" data-label="Decline">Decline</button></span></div>`).join('')
       : `<p class="mem-empty">${crews.find((c) => c.crew_id === selectedId)?.join_mode === 'open' ? 'Your crew is open: drivers join right away, no requests to approve.' : 'No open requests.'}</p>`);
     // DEC-0144: Kick (can rejoin / ask again) and Ban (blocked); commissioners can't act on the leader or other commissioners.
     // COPY STATUS: Claude placeholders, Codex review pending.
-    const btn = (act: string, m: any, label: string, cls = 'btn-outline-red') => `<button type="button" class="btn ${cls} btn-sm" data-act="${act}" data-driver="${esc(m.driver_id)}" data-name="${esc(m.display_name)}" data-label="${esc(label)}">${esc(label)}</button>`;
+    const btn = (act: string, m: any, label: string, cls = 'btn-outline-red') => `<button type="button" class="btn ${cls} btn-md" data-act="${act}" data-driver="${esc(m.driver_id)}" data-name="${esc(m.display_name)}" data-label="${esc(label)}">${esc(label)}</button>`;
     const roleBadge = (r?: string) => (r === 'crew_leader' ? '<span class="mem-role">Leader</span>' : r === 'crew_commissioner' ? '<span class="mem-role">Commissioner</span>' : '');
     $('members-active').innerHTML = `<p class="mem-group-title">Members</p>` + (active.length
       ? active.map((m) => {
@@ -663,7 +663,7 @@ const base = import.meta.env.BASE_URL;
       if (error) { out.innerHTML = `<p class="mem-empty">Search is not available right now.</p>`; return; }
       const rows = (data ?? []) as { driver_id: string; display_name: string }[];
       out.innerHTML = rows.length
-        ? rows.map((r) => `<div class="mem-row"><span class="mem-name">${esc(r.display_name)}</span><span class="mem-actions"><button type="button" class="btn btn-primary btn-sm" data-invite="${esc(r.driver_id)}" data-name="${esc(r.display_name)}">Invite to Crew</button></span></div>`).join('')
+        ? rows.map((r) => `<div class="mem-row"><span class="mem-name">${esc(r.display_name)}</span><span class="mem-actions"><button type="button" class="btn btn-primary btn-md" data-invite="${esc(r.driver_id)}" data-name="${esc(r.display_name)}">Invite to Crew</button></span></div>`).join('')
         : '<p class="mem-empty">No driver found who isn\u2019t already in your crew or invited.</p>';
     }, 300);
   });
@@ -949,7 +949,7 @@ const base = import.meta.env.BASE_URL;
     const going = rows.filter((r) => !r.kicked);
     const kicked = rows.filter((r) => r.kicked);
     const bans = ((br.data ?? []) as any[]);
-    const b = (act: string, r: any, label: string, cls = 'btn-outline-red') => `<button type="button" class="btn ${cls} btn-sm" data-ract="${act}" data-driver="${esc(r.driver_id)}" data-name="${esc(r.display_name ?? 'Driver')}" data-label="${esc(label)}">${esc(label)}</button>`;
+    const b = (act: string, r: any, label: string, cls = 'btn-outline-red') => `<button type="button" class="btn ${cls} btn-md" data-ract="${act}" data-driver="${esc(r.driver_id)}" data-name="${esc(r.display_name ?? 'Driver')}" data-label="${esc(label)}">${esc(label)}</button>`;
     const row = (r: any, acts: string, note = '') => `<div class="mem-row"><span class="mem-name">${esc(r.display_name ?? 'Driver')}</span>${note ? `<span class="mem-date">${esc(note)}</span>` : ''}<span class="mem-actions">${acts}</span></div>`;
     $('rsvp-list').innerHTML = (pr.error
       ? '<p class="rsvp-count">Sign-ups could not be loaded.</p>'

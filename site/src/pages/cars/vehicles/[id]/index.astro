@@ -212,8 +212,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <div class="vg-rows" id="vg-drivers" set:html={driversHtml} />
           <div class="vg-btns">
             <a class="btn btn-p" href={submitHref} id="vg-set" hidden={!driverRows.length}><Fragment set:html={ico.timer} /><span data-l>Set a Gellhorn time</span></a>
-            <a class="btn btn-s" href={lbHref} id="vg-lb" hidden={!driverRows.length}>Full leaderboard →</a>
-            <a class="btn btn-s" href={`${base}time-attack/how-it-works/`} id="vg-how" hidden={driverRows.length > 0}>How Gellhorn works →</a>
+            <a class="btn btn-s" href={lbHref} id="vg-lb" hidden={!driverRows.length}>Full leaderboard</a>
+            <a class="btn btn-s" href={`${base}time-attack/how-it-works/`} id="vg-how" hidden={driverRows.length > 0}>How Gellhorn works</a>
           </div>
         </div>
         <div class="vg-card">
@@ -287,7 +287,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
             <p class="vmore-t"><b>More from {vehicle.make}</b><span>{' · '}{makeCars.length} cars in GTA VI</span></p>
             <div class="vmore-chips">{others.slice(0, 6).map((v) => <a class="chip" href={`${base}cars/vehicles/${v.id}/`}>{v.model}</a>)}</div>
           </div>
-          {makeLink && <a class="btn btn-s vmore-all" href={`${base}${makeLink}`}>All {vehicle.make} cars →</a>}
+          {makeLink && <a class="btn btn-s vmore-all" href={`${base}${makeLink}`}>All {vehicle.make} cars</a>}
         </div>
       )}
       {family.length > 0 && (
@@ -296,7 +296,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
             <p class="vmore-t"><b>More {familyLabel} models</b><span>{' · '}any class</span></p>
             <div class="vmore-chips">{family.slice(0, 6).map((v) => <a class="chip" href={`${base}cars/vehicles/${v.id}/`}>{v.make} {v.model}</a>)}</div>
           </div>
-          {familyPage && <a class="btn btn-s vmore-all" href={familyPage}>The {familyLabel} family →</a>}
+          {familyPage && <a class="btn btn-s vmore-all" href={familyPage}>The {familyLabel} family</a>}
         </div>
       )}
     </section>

@@ -205,7 +205,7 @@ const { focus } = Astro.props;
   reqBox.addEventListener('click', async (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-withdraw]');
     if (!b) return;
-    if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Click again to withdraw'; return; }
+    // withdrawing an application is one click (DEC-0175): it can be re-sent right away
     b.disabled = true;
     await getSupabase().from('hub_role_requests').delete().eq('request_id', b.dataset.withdraw!);
     await load();

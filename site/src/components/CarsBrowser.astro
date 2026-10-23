@@ -169,7 +169,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
     <div class="wrap cmpbar-inner">
       <div class="cmpbar-cars" id="cmpbar-cars"></div>
       <button type="button" class="cmpbar-clear" id="cmpbar-clear">Clear</button>
-      <a class="btn btn-p cmpbar-go" href={`${base}cars/compare/`} id="cmpbar-go">Compare <span id="cmpbar-n">0</span> cars →</a>
+      <a class="btn btn-p btn-md cmpbar-go" href={`${base}cars/compare/`} id="cmpbar-go">Compare <span id="cmpbar-n">0</span> cars</a>
     </div>
   </div>
 
@@ -418,8 +418,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
     .cmpbar-inner { gap: 10px; min-height: 64px; }
     .cmpbar-cars :global(.cb span) { display: none; }
     .cmpbar-cars :global(.cb) { padding: 0 26px 0 4px; }
-    .cmpbar-go { min-height: 44px; padding: 0 14px; font-size: 14px; }
-    /* bottom sheets */
+      /* bottom sheets */
     .dsp { left: 0; right: 0; top: auto; bottom: 0; transform: none; width: 100%; max-height: 88vh; border-radius: 14px 14px 0 0; }
     .dsp-sort { width: 100%; }
     .dsp-h { padding: 16px 16px 12px; }

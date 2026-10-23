@@ -300,7 +300,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
 <p class="al-note">Same class, within ${(ALT_MAX_SLOWER_MS / 1000).toFixed(1)} s of your fastest pick and at least ${Math.round(ALT_MIN_CHEAPER * 100)} % cheaper.</p></div>`
       : f
         ? `<div class="lock"><div class="lock-m"><h3>No cheaper alternative</h3><p>No ${esc(cls)} car is close enough at Gellhorn and clearly cheaper.</p></div></div>`
-        : `<div class="lock"><div class="lock-m"><h3>Suggestions unlock with prices and lap times</h3><p>We will suggest ${esc(cls)} cars that are about as fast as your pick but clearly cheaper. Until then, browse the class.</p></div><a class="btn btn-s" href="${base}cars/?class=${encodeURIComponent(cls)}">All ${esc(cls)} cars →</a></div>`;
+        : `<div class="lock"><div class="lock-m"><h3>Suggestions unlock with prices and lap times</h3><p>We will suggest ${esc(cls)} cars that are about as fast as your pick but clearly cheaper. Until then, browse the class.</p></div><a class="btn btn-s" href="${base}cars/?class=${encodeURIComponent(cls)}">All ${esc(cls)} cars</a></div>`;
     box.innerHTML = `<div><p class="cp-eb">Cheaper alternatives</p>${left}</div><div><p class="cp-eb">Value map</p><div class="vmap"><div class="vmap-h"><span>${esc(cls)} cars · price vs. Gellhorn reference lap (stock)</span><span>Higher = faster</span></div>${mapSvg(cls, list, alts.map((a) => a.car))}</div></div>`;
   }
 

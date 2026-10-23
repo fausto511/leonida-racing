@@ -175,8 +175,8 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
           <img src={`${base}images/gellhorn-raceway-1672.jpg`} alt="Gellhorn International Raceway" width="1672" height="941" loading="lazy" />
         </picture>
         <div class="tband-actions">
-          <a href={`${base}time-attack/submit/`} class="btn btn-p btn-44">Submit a lap</a>
-          <a href={`${base}time-attack/how-it-works/`} class="btn btn-s btn-44 btn-glass">How it works</a>
+          <a href={`${base}time-attack/submit/`} class="btn btn-p">Submit a lap</a>
+          <a href={`${base}time-attack/how-it-works/`} class="btn btn-s btn-glass">How it works</a>
         </div>
       </div>
       <div class="tband-board">
@@ -222,7 +222,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         <div class="cbody">
           <h3><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>Next events<span class="ctz">Your local time</span></h3>
           <div class="crows" id="home-events" set:html={eventsHtml} />
-          <div class="cfoot"><a href={`${base}account/events/`} class="btn btn-s btn-sm">Become a host</a><a href={`${base}community/events/`} class="arrow">All events →</a></div>
+          <div class="cfoot"><a href={`${base}account/events/`} class="btn btn-s btn-md">Become a host</a><a href={`${base}community/events/`} class="arrow">All events →</a></div>
         </div>
       </article>
       <article class="card ccard">
@@ -230,7 +230,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         <div class="cbody">
           <h3><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Featured crews</h3>
           <div class="crows" id="home-crews" set:html={crewsHtml} />
-          <div class="cfoot"><a href={`${base}account/crew/`} class="btn btn-s btn-sm">Start a crew</a><a href={`${base}community/crews/`} class="arrow">All crews →</a></div>
+          <div class="cfoot"><a href={`${base}account/crew/`} class="btn btn-s btn-md">Start a crew</a><a href={`${base}community/crews/`} class="arrow">All crews →</a></div>
         </div>
       </article>
     </div>
@@ -366,7 +366,6 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .tband-img img { object-fit: cover; }
   .tband-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,11,20,0) 50%, rgba(11,11,20,.85) 100%); }
   .tband-actions { position: relative; z-index: 2; padding: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
-  .btn-44 { min-height: 44px; font-size: 14px; }
   .btn-glass { border-color: var(--lr-line-hover); background: var(--lr-dark-60); }
   .tband-board { position: relative; z-index: 2; padding: 20px 22px 18px; display: flex; flex-direction: column; pointer-events: none; }
   .tband-board :global(a) { pointer-events: auto; }
@@ -421,7 +420,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .crows :global(.ctag-inline) { display: none; }
   .crows :global(.cside) { position: relative; z-index: 2; flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
   /* sign-up slot content from event-rsvp.ts / crew-membership.ts, in the row style */
-  .crows :global(.cside .btn), .crows :global(.crew-join-btn), .crows :global(.crew-withdraw) { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; height: 32px; padding: 0 13px; border-radius: 6px; font-family: var(--gh-font-body); font-size: 13px; font-weight: 600; border: 1px solid var(--lr-line-strong); color: var(--lr-text); background: transparent; cursor: pointer; white-space: nowrap; text-decoration: none; }
+  .crows :global(.cside .btn), .crows :global(.crew-join-btn), .crows :global(.crew-withdraw) { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; height: 40px; padding: 0 16px; border-radius: 6px; font-family: var(--gh-font-body); font-size: 14px; font-weight: 600; border: 1px solid var(--lr-line-strong); color: var(--lr-text); background: transparent; cursor: pointer; white-space: nowrap; text-decoration: none; }
   .crows :global(.cside .btn:hover), .crows :global(.crew-join-btn:hover), .crows :global(.crew-withdraw:hover) { border-color: var(--lr-text); }
   .crows :global(.cside .ev-rsvp-btn.is-in) { background: var(--lr-lime-fill); border-color: var(--lr-lime-border); color: var(--lr-lime); }
   .crows :global(.ev-going), .crows :global(.ev-going-none) { order: 2; font-size: 12px; color: var(--lr-muted); }
@@ -552,7 +551,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
     /* crew = subject: tag in front like a logo, same as desktop and the crew cards (DEC-0157) */
     .crows :global(.ctag-inline) { display: inline-flex; margin-right: 8px; vertical-align: 2px; }
     .crows :global(.ctag-inline .crew-tag) { margin-left: 0; min-width: 54px; justify-content: center; } /* names line up like the desktop column */
-    .crows :global(.cside .btn), .crows :global(.crew-join-btn), .crows :global(.crew-pill) { height: 30px; min-height: 30px; padding: 0 10px; font-size: 12px; }
+    .crows :global(.cside .btn), .crows :global(.crew-join-btn), .crows :global(.crew-pill) { height: 32px; min-height: 32px; padding: 0 12px; font-size: 13px; }
     .cfoot { padding: 14px 6px 0; }
 
     .dband-inner { flex-direction: column; align-items: stretch; gap: 18px; padding-top: 36px; padding-bottom: 36px; }

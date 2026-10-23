@@ -274,7 +274,7 @@ function render() {
   if (!matches.length) {
     $('empty-drops').innerHTML = keys.map((k) => {
       const n = countWith(without(state, k));
-      return n ? `<button type="button" class="btn btn-s btn-sm" data-drop="${k}">Without ${esc(filterLabel(k))} → ${n} ${n === 1 ? 'car' : 'cars'}</button>` : '';
+      return n ? `<button type="button" class="btn btn-s btn-md" data-drop="${k}">Without ${esc(filterLabel(k))} → ${n} ${n === 1 ? 'car' : 'cars'}</button>` : '';
     }).join('');
     // S1: only say "no car named …" when the search text alone finds nothing
     const qHits = state.q ? cards.filter((c) => !fails(c, state).includes('q')).length : 0;
