@@ -38,7 +38,7 @@ const metricChips = [
   { name: 'Top speed', slug: 'fastest', on: isSpeed },
   { name: 'Most expensive', slug: 'most-expensive', on: r.slug === 'most-expensive' },
   { name: 'Cheapest', slug: 'cheapest', on: r.slug === 'cheapest' },
-  { name: 'Gellhorn lap', slug: 'gellhorn-lap', on: isLap },
+  { name: 'Gellhorn reference lap', slug: 'gellhorn-lap', on: isLap },
 ];
 const fastestAll = rankings.find((x) => x.slug === 'fastest')!;
 const classChips = isSpeed
@@ -54,7 +54,8 @@ const waiting = r.scope.filter((v) => !ranked.has(v.id))
   .sort((a, b) => Number(Boolean(b.photo)) - Number(Boolean(a.photo)) || `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`));
 const WAIT_SHOW = 6;
 const scopeHref = cls ? `${base}cars/classes/${cls.slug}/` : `${base}cars/`;
-const scopeName = cls ? `${cls.name} cars` : 'cars';
+// Codex 22.10.: "Browse {className}" / "Browse cars" (avoids "Off-Road Vehicles cars").
+const browseLabel = cls ? `Browse ${cls.name}` : 'Browse cars';
 
 // ---- band: #1 car with a photo, else a car from the scope; Gellhorn = track photo ----
 const topWithPhoto = entries.find((e) => e.vehicle.photo)?.vehicle ?? null;
@@ -63,14 +64,15 @@ const bandCar: VehicleOption | null = isLap ? null : topWithPhoto ?? bandVehicle
 // ---- at a glance ----
 const pct = r.scope.length ? Math.round((entries.length / r.scope.length) * 100) : 0;
 const top = entries[0] ?? null;
+const topLabel = isPrice ? (r.slug === 'cheapest' ? 'Lowest price' : 'Highest price') : isLap ? 'Quickest reference lap' : 'Highest top speed';
 const measuredAs = isPrice ? 'Purchase price' : isLap ? 'Stock, reference lap' : 'Stock, no upgrades';
 
 // ---- loops ----
 const compareIds = entries.slice(0, 4).map((e) => e.vehicle.id);
 const lbHref = `${base}time-attack/gellhorn-international-raceway/${cls ? `?class=${encodeURIComponent(cls.name)}` : ''}#leaderboard`;
 const more = [
-  { eb: 'Cars', t: cls ? `All ${cls.name} cars` : 'All cars', s: cls ? `Every revealed ${cls.name} car with its details, inspirations and lap times.` : 'Every revealed GTA VI car with its details, inspirations and lap times.', a: 'Browse cars', href: scopeHref },
-  { eb: 'Time Attack', t: cls ? `${cls.name} leaderboard at Gellhorn` : 'Gellhorn leaderboard', s: 'Recorded driver laps at Gellhorn, for every car.', a: 'Open leaderboard', href: lbHref },
+  { eb: 'Cars', t: cls ? cls.name : 'All cars', s: cls ? `Explore the listed ${cls.name} models, their design inspirations and available vehicle details.` : 'Explore the GTA VI cars in our database, their design inspirations and available vehicle details.', a: 'Browse cars', href: scopeHref },
+  { eb: 'Time Attack', t: cls ? `${cls.name} leaderboard at Gellhorn` : 'Gellhorn leaderboard', s: 'Driver-submitted laps at Gellhorn. Filter by car to find available times.', a: 'Open leaderboard', href: lbHref },
   { eb: 'Compare', t: 'Compare cars', s: 'Pick up to four cars and compare their available specs and lap times.', a: 'Start comparing', href: `${base}cars/compare/` },
 ];
 
@@ -104,10 +106,11 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
         <p class="glance-eb">At a glance</p>
         <div class="gl-row gl-cov"><span>Cars ranked</span><b class="tnum">{entries.length} of {r.scope.length}</b>
           <span class="mbar" aria-hidden="true"><i style={`width:${pct}%`}></i></span></div>
-        <div class="gl-row"><span>Top spot</span>{top
+        <div class="gl-row"><span>{topLabel}</span>{top
           ? <b><a href={`${base}cars/vehicles/${top.vehicle.id}/`}>{top.vehicle.model}</a>{' · '}<span class="tnum">{formatVehicleValue(top.value)}</span></b>
-          : <b class="is-tba">After launch</b>}</div>
+          : <b class="is-tba">{isPrice ? 'No price yet' : 'No result yet'}</b>}</div>
         <div class="gl-row"><span>Values</span><b>{measuredAs}</b></div>
+        <p class="gl-note">Coverage is based on revealed cars listed in our database for this ranking.</p>
       </div>
     </div>
   </section>
@@ -126,9 +129,9 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
       <section class="rk-sec" aria-labelledby="rk-list-h">
         <div class="rk-sec-head">
           <h2 class="lr-h2 rk-h2" id="rk-list-h">Ranked by {r.valueLabel.toLowerCase()}</h2>
-          {compareIds.length >= 2 && <a class="arrow rk-cmp" href={`${base}cars/compare/?cars=${compareIds.join(',')}`}>Compare the top {compareIds.length} →</a>}
+          {compareIds.length >= 2 && <a class="arrow rk-cmp" href={`${base}cars/compare/?cars=${compareIds.join(',')}`}>Compare top {compareIds.length} →</a>}
         </div>
-        {!complete && <p class="rk-note">{isPrice ? 'Prices' : 'Results'} available for {entries.length} of {r.scope.length} officially revealed vehicles. Positions may change as more {isPrice ? 'prices' : 'results'} are added.</p>}
+        {!complete && <p class="rk-note">{isPrice ? 'Prices' : 'Results'} available for {entries.length} of {r.scope.length} revealed cars listed in this ranking. Positions may change as more {isPrice ? 'prices' : 'results'} are added.</p>}
         <div class="card rk-wrap">
           <table class="rk-table">
             <thead><tr><th scope="col" class="c-pos">#</th><th scope="col">Car</th><th scope="col" class="c-cls">Class</th><th scope="col" class="c-val">{r.valueLabel}</th><th scope="col" class="c-src">Source</th></tr></thead>
@@ -145,14 +148,15 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
             </tbody>
           </table>
         </div>
-        {!indexable && entries.length < RANKING_MIN_ENTRIES && <p class="rk-note">This ranking currently contains only {entries.length} vehicles.</p>}
+        {!indexable && entries.length < RANKING_MIN_ENTRIES && <p class="rk-note">This ranking currently contains {entries.length} {entries.length === 1 ? 'car' : 'cars'} with a recorded {isPrice ? 'price' : 'result'}.</p>}
       </section>
     )}
 
+    {r.scope.length === 0 && <p class="rk-lead">No cars are listed in this ranking yet.</p>}
     {waiting.length > 0 && (
       <section class="rk-sec" aria-labelledby="rk-wait-h">
         <div class="rk-sec-head">
-          <h2 class="lr-h2 rk-h2" id="rk-wait-h">{entries.length ? 'Not ranked yet' : 'Waiting for results'}<span class="rk-count tnum">{waiting.length}</span></h2>
+          <h2 class="lr-h2 rk-h2" id="rk-wait-h">{entries.length ? (isPrice ? 'No price recorded yet' : 'Not ranked yet') : (isPrice ? 'Waiting for prices' : 'Waiting for results')}<span class="rk-count tnum">{waiting.length}</span></h2>
         </div>
         {entries.length === 0 && (
           <p class="rk-lead">{isPrice
@@ -169,7 +173,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
             </a>
           ))}
         </div>
-        {waiting.length > WAIT_SHOW && <a class="arrow rk-all" href={scopeHref}>All {r.scope.length} {scopeName} →</a>}
+        {waiting.length > WAIT_SHOW && <a class="arrow rk-all" href={scopeHref}>{browseLabel} →</a>}
       </section>
     )}
 
@@ -202,6 +206,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
   @media (min-width: 1101px) { .rb-inner > .glance { align-self: flex-end; margin-top: 0; } }
   .rb-copy { min-width: 0; max-width: 700px; }
   .glance { flex: none; width: 380px; margin-top: 30px; padding: 18px 18px 14px; border: 1px solid rgba(200,200,222,.2); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
+  .gl-note { margin: 8px 0 0; font-size: 12px; line-height: 1.4; color: var(--lr-muted); }
   .glance-eb { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .gl-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 14px; padding: 9px 0; border-top: 1px solid var(--lr-line); font-size: 15px; color: var(--lr-soft); }
   .gl-row:first-of-type { border-top: 0; }
