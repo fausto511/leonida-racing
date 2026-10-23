@@ -125,11 +125,11 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
   .vx-title-boxes label { flex-direction: row !important; align-items: center; gap: .35rem; font-weight: 600 !important; color: var(--gh-text) !important; }
   .vx-check { flex-direction: row !important; align-items: center; grid-column: 1 / -1; color: var(--gh-text) !important; font-weight: 600 !important; }
   .mod-wrap input:not([type="checkbox"]), .mod-wrap select { padding: .45rem .6rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text); font: inherit; font-size: .85rem; }
-  .mod-wrap input[aria-invalid="true"] { border-color: var(--gh-red); }
+  .mod-wrap input[aria-invalid="true"] { border-color: var(--lr-coral); }
   .vx-actions { display: flex; flex-wrap: wrap; gap: .7rem; align-items: center; margin-top: 1rem; }
   .vx-meta, .vx-empty { color: var(--gh-muted); font-size: .8rem; }
   .vx-msg { margin: 0; padding: .6rem .8rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); font-size: .85rem; }
-  .vx-msg.is-error { border-color: var(--gh-red); color: #ff8a8a; }
+  .vx-msg.is-error { border-color: var(--lr-coral); color: var(--lr-coral); }
   .vx-msg.is-ok { border-color: #27c281; color: #7be0b0; }
   :global(.vx-table) { width: 100%; border-collapse: collapse; font-size: .8rem; margin-bottom: 1rem; }
   :global(.vx-table th), :global(.vx-table td) { text-align: left; padding: .45rem .4rem; border-bottom: 1px solid var(--gh-line); vertical-align: top; }

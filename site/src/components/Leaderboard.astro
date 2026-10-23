@@ -98,7 +98,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .vseg button:hover:not(.on) { color: var(--lr-text); }
   .vseg button.on { background: var(--lr-text); color: #14141F; }
   .vseg.sm button { padding: 0 14px; font-size: 13px; }
-  .vseg.sm button.on.v { background: var(--lr-lime); color: #14141F; }
+  .vseg.sm button.on.v { background: var(--lr-lime); color: var(--lr-on-lime); }
   .vseg button:focus-visible, .chips :global(button:focus-visible), .mypos:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: -2px; }
   .sm-l { display: none; }
   .ctl { height: 44px; display: inline-flex; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; color: var(--lr-muted); }
@@ -147,7 +147,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .tbl :global(.rk) { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--lr-muted); }
   .tbl :global(.dr) { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--lr-text); font-weight: 600; }
   .tbl :global(.dr .n) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tbl :global(.lb-crew-tag) { flex: none; text-decoration: none; color: #111; }
+  .tbl :global(.lb-crew-tag) { flex: none; text-decoration: none; color: var(--lr-bg); }
   .tbl :global(.car) { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .tbl :global(.nm) { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
   .tbl :global(.nm b) { font-weight: 600; color: var(--lr-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

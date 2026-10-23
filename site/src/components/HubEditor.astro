@@ -248,7 +248,7 @@ const base = import.meta.env.BASE_URL;
   .list-title { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.15rem; }
   .list { display: flex; flex-direction: column; gap: .45rem; max-height: 34rem; overflow-y: auto; }
   .list-empty, .list-error { margin: 0; color: var(--gh-muted); font-size: .85rem; }
-  .list-error { color: var(--gh-red); }
+  .list-error { color: var(--lr-coral); }
   /* built via innerHTML -> :global */
   :global(.li) { display: flex; align-items: center; gap: .6rem; width: 100%; text-align: left; padding: .6rem .7rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); border-left: 3px solid transparent; background: var(--gh-surface-soft); color: var(--gh-text); cursor: pointer; font-family: var(--gh-font-body); }
   :global(.li:hover) { border-color: var(--gh-muted); }
@@ -282,7 +282,7 @@ const base = import.meta.env.BASE_URL;
   .hc-form select option { background: var(--gh-surface); }
   .hc-form textarea { resize: vertical; }
   .hc-form :is(input, select, textarea):focus { outline: 2px solid var(--gh-yellow); outline-offset: 1px; }
-  .hc-form :is(input, select, textarea)[aria-invalid="true"] { border-color: var(--gh-red); }
+  .hc-form :is(input, select, textarea)[aria-invalid="true"] { border-color: var(--lr-coral); }
   .tag-input { text-transform: uppercase !important; letter-spacing: .12em !important; font-weight: 800 !important; }
   .color-row { display: flex; gap: .5rem; }
   .color-row input[type="color"] { width: 2.6rem; height: 2.4rem; padding: 0; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); background: none; cursor: pointer; }
@@ -315,7 +315,7 @@ const base = import.meta.env.BASE_URL;
   :global(.rsvp-names) { margin: 0; color: var(--gh-muted); font-size: .84rem; }
   .form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin-top: 1.4rem; }
   .form-msg { margin: 0; font-size: .84rem; }
-  .form-msg.is-error { color: var(--gh-red); }
+  .form-msg.is-error { color: var(--lr-coral); }
   .form-msg.is-ok { color: #D9F58E; }
   .req-body { font-size: .9rem; }
   :global(.req-list) { display: grid; gap: .7rem; margin: 0; }

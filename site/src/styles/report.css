@@ -27,7 +27,7 @@
 .rep-form { display: grid; gap: 16px; }
 .rep-step { display: grid; gap: 14px; padding: 22px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
 .rep-step-title { margin: 0; display: flex; align-items: center; gap: 12px; font-family: var(--gh-font-display); font-size: 20px; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
-.rep-step-title span { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 999px; background: var(--lr-orange); color: #14141F; font-family: inherit; font-size: 14px; font-weight: 800; }
+.rep-step-title span { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 999px; background: var(--lr-orange); color: var(--lr-on-orange); font-family: inherit; font-size: 14px; font-weight: 800; }
 
 .rep-reasons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .rep-reasons label { position: relative; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 10px 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-bg); font-size: 15px; font-weight: 500; color: var(--lr-text); cursor: pointer; }
@@ -43,7 +43,7 @@
 .rep-field select, .rep-field input { height: 46px; }
 .rep-details textarea { padding: 12px 14px; min-height: 120px; line-height: 1.5; resize: vertical; }
 .rep-field select:focus-visible, .rep-field input:focus-visible, .rep-details textarea:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 1px; border-color: transparent; }
-[aria-invalid="true"] { border-color: var(--lr-pink) !important; }
+[aria-invalid="true"] { border-color: var(--lr-coral) !important; }
 
 .rep-check { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.5; color: var(--lr-text); cursor: pointer; }
 .rep-check input { margin-top: 3px; width: 16px; height: 16px; flex: none; }
@@ -65,7 +65,7 @@
 
 .rep-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding-top: 4px; }
 .rep-msg { margin: 0; font-size: 14px; }
-.rep-msg.is-error { color: #FF8A8A; }
+.rep-msg.is-error { color: var(--lr-coral); }
 .rep-msg.is-ok { color: var(--lr-lime); }
 
 /* Your reports */
