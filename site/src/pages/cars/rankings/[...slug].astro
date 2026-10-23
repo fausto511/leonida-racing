@@ -220,10 +220,10 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
   /* ---- switcher chips (look of the class chips) ---- */
   .rchips { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 24px; }
   .rchips-sub { padding-top: 12px; }
-  .rchip { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--lr-line-strong); color: var(--lr-text); font-size: 15px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+  .rchip { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--lr-line-strong); color: var(--lr-text); font-size: 14px; font-weight: 500; text-decoration: none; white-space: nowrap; }
   .rchip span { color: var(--lr-muted); font-size: 13px; }
-  .rchip:hover { border-color: var(--lr-pink); color: var(--lr-text); }
-  .rchip.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 600; }
+  .rchip:hover { border-color: var(--lr-line-hover); color: var(--lr-text); }
+  .rchip.on { background: var(--lr-text); border-color: var(--lr-text); color: var(--lr-card); font-weight: 600; }
   .rchip.on span { color: var(--lr-disabled); }
   .rchip.is-sub { height: 34px; font-size: 14px; }
   .rchip.is-sub.on { background: transparent; border-color: var(--lr-text); color: var(--lr-text); }
@@ -284,8 +284,8 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
     .gl-row { font-size: 14px; }
     .rchips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-top: 16px; margin-right: 0; }
     .rchips::-webkit-scrollbar { display: none; }
-    .rchip { flex: none; height: 36px; font-size: 14px; }
-    .rchip.is-sub { height: 32px; font-size: 13px; }
+    .rchip { flex: none; height: 34px; font-size: 14px; }
+    .rchip.is-sub { height: 34px; font-size: 14px; }
     .rk-sec { padding-top: 28px; }
     .rk-table { font-size: 14px; }
     .rk-table th, .rk-table td { padding-left: 10px; padding-right: 10px; }

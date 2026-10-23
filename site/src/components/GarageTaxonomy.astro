@@ -362,17 +362,17 @@ const more = custom
 
   /* ---- class chips ---- */
   .tchips { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 24px; }
-  .tchip { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--lr-line-strong); color: var(--lr-text); font-size: 15px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+  .tchip { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--lr-line-strong); color: var(--lr-text); font-size: 14px; font-weight: 500; text-decoration: none; white-space: nowrap; }
   .tchip span { color: var(--lr-muted); font-size: 13px; }
-  .tchip:hover { border-color: var(--lr-pink); color: var(--lr-text); }
-  .tchip.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 600; }
+  .tchip:hover { border-color: var(--lr-line-hover); color: var(--lr-text); }
+  .tchip.on { background: var(--lr-text); border-color: var(--lr-text); color: var(--lr-card); font-weight: 600; }
   .tchip.on span { color: var(--lr-disabled); }
   /* manufacturer chips (Fausto 18.10.): logo + name + count; wrap on desktop, one swipeable row on the phone */
   @media (max-width: 860px) {
     .tchips-make .tchip { flex: none; }
   }
   .tchip.is-x { display: none; }
-  :global(.tchip-more) { display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--lr-orange-border); background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: var(--lr-orange); cursor: pointer; white-space: nowrap; }
+  :global(.tchip-more) { display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--lr-orange-border); background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: var(--lr-orange); cursor: pointer; white-space: nowrap; }
   :global(.tchip-more:hover) { border-color: var(--lr-orange); }
   .tchip-logo { width: 20px; height: 20px; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-info); }
   .tchip.on .tchip-logo { filter: brightness(0) invert(7%) sepia(100%) saturate(200%) hue-rotate(200deg); opacity: var(--lr-logo-info); } /* = #14141F, same as the chip text */
@@ -407,7 +407,7 @@ const more = custom
     .tb-logo { width: 36px; height: 36px; }
     .gl-row { font-size: 14px; }
     .tchips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-top: 16px; }
-    .tchip { height: 36px; font-size: 14px; }
+    .tchip { height: 34px; font-size: 14px; }
     .tmore { padding-top: 32px; }
     .tm { padding: 14px 16px; }
     .tm-s { display: none; }
