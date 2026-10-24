@@ -126,10 +126,10 @@ import AccountSubnav from '../../components/AccountSubnav.astro';
   .account-status-row { display: flex; align-items: center; flex-wrap: wrap; gap: .9rem; padding-block: .05rem; }
   .account-status-row p { margin: 0; font-size: .88rem; }
   .settings-card input[type="text"] {
-    padding: .7rem .9rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line);
-    background: var(--gh-bg); color: var(--gh-text); font-size: .9rem; font-family: var(--gh-font-body);
+    height: var(--lr-field-h); box-sizing: border-box; padding: 0 14px; border-radius: var(--gh-radius); border: 1px solid var(--lr-line-strong);
+    background: var(--gh-bg); color: var(--gh-text); font-size: 14px; font-family: var(--gh-font-body);
   }
-  .settings-card input:focus { outline: 2px solid var(--gh-yellow); outline-offset: 1px; }
+  .settings-card input:focus { outline: none; border-color: var(--lr-field-focus); }
   .settings-msg { flex-basis: 100%; margin: 0; font-size: .82rem; }
   .settings-msg.is-error { color: var(--lr-coral); }
   .settings-msg.is-ok { color: #D9F58E; }

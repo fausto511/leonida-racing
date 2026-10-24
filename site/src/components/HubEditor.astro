@@ -266,7 +266,7 @@ const base = import.meta.env.BASE_URL;
   .form-head h2 { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.35rem; }
   .hc-form .pub-toggle { flex-direction: row; text-transform: none; letter-spacing: 0; color: var(--gh-text); }
   .pub-toggle { display: inline-flex; align-items: center; gap: .5rem; padding: .45rem .8rem; border-radius: 999px; border: 1px solid var(--gh-line); font-size: .8rem; font-weight: 700; cursor: pointer; }
-  .pub-toggle input { width: 1rem; height: 1rem; accent-color: #D9F58E; }
+  .pub-toggle input { width: 1rem; height: 1rem; accent-color: var(--lr-orange); }
   .pub-toggle:has(input:checked) { border-color: #D9F58E; color: #D9F58E; }
 
   .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.1rem; }
@@ -276,12 +276,12 @@ const base = import.meta.env.BASE_URL;
   .hc-form label, .hc-form legend { display: flex; flex-direction: column; gap: .35rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
   .hc-form small { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--gh-muted); opacity: .8; }
   .hc-form input[type="text"], .hc-form input[type="url"], .hc-form input[type="number"], .hc-form input[type="datetime-local"], .hc-form select, .hc-form textarea {
-    padding: .6rem .7rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text);
-    font-size: .88rem; font-family: var(--gh-font-body); text-transform: none; letter-spacing: normal; font-weight: 400; color-scheme: dark;
+    height: var(--lr-field-h); box-sizing: border-box; padding: 0 14px; border-radius: var(--gh-radius); border: 1px solid var(--lr-line-strong); background: var(--gh-bg); color: var(--gh-text);
+    font-size: 14px; font-family: var(--gh-font-body); text-transform: none; letter-spacing: normal; font-weight: 400; color-scheme: dark;
   }
   .hc-form select option { background: var(--gh-surface); }
-  .hc-form textarea { resize: vertical; }
-  .hc-form :is(input, select, textarea):focus { outline: 2px solid var(--gh-yellow); outline-offset: 1px; }
+  .hc-form textarea { height: auto; padding: 10px 14px; line-height: 1.5; resize: vertical; }
+  .hc-form :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]), select, textarea):focus { outline: none; border-color: var(--lr-field-focus); }
   .hc-form :is(input, select, textarea)[aria-invalid="true"] { border-color: var(--lr-coral); }
   .tag-input { text-transform: uppercase !important; letter-spacing: .12em !important; font-weight: 800 !important; }
   .color-row { display: flex; gap: .5rem; }
@@ -298,7 +298,7 @@ const base = import.meta.env.BASE_URL;
   .check.is-soon input { cursor: not-allowed; }
   .soon { padding: .1rem .45rem; border-radius: 999px; border: 1px solid var(--gh-line); font-size: .66rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--gh-muted); }
   .hc-form label.check { flex-direction: row; align-items: center; gap: .45rem; text-transform: none; letter-spacing: 0; font-size: .86rem; font-weight: 600; color: var(--gh-text); }
-  .check input { width: 1rem; height: 1rem; accent-color: var(--gh-red); }
+  .check input { width: 1rem; height: 1rem; accent-color: var(--lr-orange); }
 
   .pub-state { padding: .35rem .75rem; border-radius: 999px; border: 1px solid var(--gh-line); font-size: .75rem; font-weight: 700; color: var(--gh-muted); }
   .role-selected { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: 1.4rem; padding: .9rem 1rem; border: 1px solid var(--gh-yellow); border-radius: var(--gh-radius); background: var(--lr-orange-tint); }

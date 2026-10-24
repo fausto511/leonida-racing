@@ -97,7 +97,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .vseg button:last-child { border-right: 0; }
   .vseg button:hover:not(.on) { color: var(--lr-text); }
   .vseg button.on { background: var(--lr-text); color: #14141F; }
-  .vseg.sm button { padding: 0 14px; font-size: 13px; }
+  .vseg.sm button { padding: 0 14px; }
   .vseg.sm button.on.v { background: var(--lr-lime); color: var(--lr-on-lime); }
   .vseg button:focus-visible, .chips :global(button:focus-visible), .mypos:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: -2px; }
   .sm-l { display: none; }
@@ -105,7 +105,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .lb-q { flex: 1 1 220px; max-width: 360px; }
   .lb-q input { flex: 1; min-width: 0; height: 100%; background: transparent; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; }
   .lb-q input::placeholder { color: var(--lr-muted); }
-  .lb-q:focus-within { border-color: var(--lr-orange); }
+  .lb-q:focus-within { border-color: var(--lr-field-focus); }
   .mypos { height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-orange-border); background: transparent; color: var(--lr-orange); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
   .mypos[hidden] { display: none; }
   .lbl { font-size: 13px; color: var(--lr-muted); margin-left: auto; }

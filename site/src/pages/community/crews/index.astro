@@ -102,18 +102,18 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
 
   .cr-bar { padding: 22px 0 18px; border-bottom: 1px solid var(--lr-line); }
   .cr-row { display: flex; gap: 10px; align-items: center; }
-  .cr-q { flex: 0 1 300px; min-width: 200px; height: 40px; }
+  .cr-q { flex: 0 1 300px; min-width: 200px; }
   .cr-q input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; }
   .cr-fbtn { display: none; }
   .cr-adv { display: flex; gap: 10px; align-items: center; }
   .sh-head, .sh-foot { display: none; }
-  .sel { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 30px 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; cursor: pointer; }
+  .sel { position: relative; display: inline-flex; align-items: center; gap: 8px; height: var(--lr-field-h); box-sizing: border-box; padding: 0 30px 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; cursor: pointer; }
   .sel::after { content: ''; position: absolute; right: 11px; width: 14px; height: 14px; background: var(--lr-muted); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; pointer-events: none; } /* chevron icon, not the ▾ glyph (DEC-0158) */
   .sel .k { font-size: 12px; color: var(--lr-muted); white-space: nowrap; }
   .sel select { appearance: none; background: transparent; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; max-width: 11rem; field-sizing: content; }
   .sel select option { background: var(--lr-card); color: var(--lr-text); }
-  .sel:focus-within { border-color: var(--lr-orange); }
-  .chk { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+  .sel:focus-within { border-color: var(--lr-field-focus); }
+  .chk { display: inline-flex; align-items: center; gap: 8px; height: var(--lr-field-h); box-sizing: border-box; padding: 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; font-size: 14px; cursor: pointer; white-space: nowrap; }
   .chk input { width: 16px; height: 16px; accent-color: var(--lr-orange); margin: 0; }
   .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   .chips button { height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; font: inherit; font-size: 14px; font-weight: 500; color: var(--lr-text); cursor: pointer; white-space: nowrap; }
@@ -144,7 +144,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
     #cr-tile-guest .btn { grid-column: 2; grid-row: 1 / span 2; }
     .cr-bar { border-bottom: 0; padding-bottom: 0; }
     .cr-row { flex-direction: column; align-items: stretch; flex-wrap: nowrap; }
-    .cr-q { flex: none; width: 100%; height: 44px; }
+    .cr-q { flex: none; width: 100%; }
     .cr-fbtn { display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; color: var(--lr-text); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
     .cr-fbtn .nb { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--lr-raised); font-size: 12px; display: inline-flex; align-items: center; justify-content: center; }
     /* bottom sheet */
@@ -153,7 +153,7 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
     .sh-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 0 12px; border-bottom: 1px solid var(--lr-line); margin: 0 -16px 8px; padding-inline: 16px; }
     .sh-head b { font-size: 18px; }
     .sh-head .x { width: 32px; height: 32px; border: 0; background: none; color: var(--lr-text); font-size: 22px; cursor: pointer; } /* icon size = Cars detailed search */
-    .sel, .chk { height: 48px; margin-top: 10px; width: 100%; }
+    .sel, .chk { margin-top: 10px; width: 100%; }
     .sel select { max-width: none; flex: 1; }
     .chk { justify-content: flex-start; }
     .sh-foot { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 16px; }

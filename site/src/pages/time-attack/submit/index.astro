@@ -165,7 +165,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
               </div>
               <div class="field">
                 <label class="field-label" for="lap_time">Lap time</label>
-                <input id="lap_time" name="lap_time" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="1:24.683" />
+                <input id="lap_time" class="lr-field-xl" name="lap_time" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="1:24.683" />
                 <p class="hint">Just type the digits: 124683 becomes 1:24.683.</p>
               </div>
             </div>
@@ -294,8 +294,8 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   .dz-actions { display: flex; gap: 12px; flex: none; }
   .link-btn, .sb-sum-list :global(.link-btn) { padding: 0; border: 0; background: none; color: var(--lr-orange); font: inherit; font-weight: 600; cursor: pointer; }
 
-  input[type="text"], input[type="url"] { width: 100%; box-sizing: border-box; height: 46px; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-bg); color: var(--lr-text); font: inherit; font-size: 16px; }
-  input:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 1px; border-color: transparent; }
+  input[type="text"], input[type="url"] { width: 100%; box-sizing: border-box; height: var(--lr-field-h); padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-bg); color: var(--lr-text); font: inherit; font-size: 14px; }
+  input:focus { outline: none; border-color: var(--lr-field-focus); }
   input[aria-invalid] { border-color: var(--lr-coral); }
   #lap_time { font-family: var(--gh-font-display); font-weight: 700; letter-spacing: .04em; font-size: 18px; }
   .field { display: flex; flex-direction: column; gap: 6px; }

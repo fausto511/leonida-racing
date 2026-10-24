@@ -237,7 +237,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .tools-phone { display: none; }
   .ctl { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; color: var(--lr-muted); font: inherit; font-size: 14px; white-space: nowrap; cursor: pointer; }
   .ctl:hover { border-color: var(--lr-line-hover); }
-  .ctl:focus-within, .ctl:focus-visible { border-color: var(--lr-muted); outline: none; }
+  .ctl:focus-within, .ctl:focus-visible { border-color: var(--lr-field-focus); outline: none; }
   .ctl b { color: var(--lr-text); font-weight: 500; }
   .ctl input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--lr-text); font: inherit; padding: 0; }
   .ctl-search { flex: 1 1 auto; min-width: 0; cursor: text; }
@@ -313,7 +313,8 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .dsg h4 { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); }
   .dsg h4 em { font-style: normal; text-transform: none; letter-spacing: 0; color: var(--lr-pink); font-weight: 600; }
   .dsg-wide { grid-column: 1 / -1; }
-  .dsp-msearch { margin-left: auto; width: 220px; height: 32px; padding: 0 10px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; color: var(--lr-text); font: inherit; font-size: 13px; letter-spacing: 0; text-transform: none; outline: none; }
+  .dsp-msearch { margin-left: auto; width: 220px; height: var(--lr-field-h); box-sizing: border-box; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 400; letter-spacing: 0; text-transform: none; outline: none; }
+  .dsp-msearch:focus { border-color: var(--lr-field-focus); }
   .mchips { display: flex; flex-wrap: wrap; gap: 8px; }
   .mlist { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 12px; }
   .dsp :global(.mc) { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px 0 8px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
@@ -343,7 +344,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .rng-track input::-moz-range-thumb { pointer-events: auto; width: 18px; height: 18px; border: 0; border-radius: 999px; background: var(--lr-text); box-shadow: 0 0 0 3px var(--lr-pink); cursor: grab; }
   .rng-track input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--lr-pink), 0 0 0 6px var(--lr-orange-border); }
   .rng-vals { display: flex; gap: 10px; align-items: center; }
-  .rng-vals span { flex: 1; height: 38px; display: flex; align-items: center; padding: 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .rng-vals span { flex: 1; height: var(--lr-field-h); box-sizing: border-box; display: flex; align-items: center; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; font-size: 14px; font-variant-numeric: tabular-nums; }
   .rng-vals em { font-style: normal; color: var(--lr-muted); }
   .rng-off { display: none; margin: 8px 0 0; font-size: 12px; color: var(--lr-muted); }
   .rng.is-off { opacity: .5; }
@@ -354,8 +355,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .rng.is-off .rng-fill { background: var(--lr-disabled); }
   .menu-price { min-width: 260px; }
   .menu-price .rng-single { padding: 2px 10px 6px; }
-  .menu-price .rng-vals span { height: 32px; }
-  .ctl-price.ctl-off input { cursor: not-allowed; font-size: 12px; }
+  .ctl-price.ctl-off input { cursor: not-allowed; }
   .ctl-price.ctl-off input::placeholder { color: var(--lr-muted); }
   .dsp-q { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; padding: 12px 24px 0; font-size: 13px; }
   .dsp-qchip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 6px 0 12px; border-radius: 999px; border: 1px solid var(--lr-pink); background: var(--lr-pink-tint); color: var(--lr-text); font: inherit; font-size: 13px; cursor: pointer; }

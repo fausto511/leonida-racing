@@ -177,11 +177,11 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .nf-url { display: inline-flex; max-width: 100%; margin-top: 8px; font-size: 13px; color: var(--lr-muted); font-family: ui-monospace, Menlo, monospace; background: var(--lr-dark-80); padding: 4px 9px; border-radius: 5px; overflow-wrap: anywhere; }
   .nf-url[hidden] { display: none; }
   .nf-srch { margin-top: 20px; display: flex; gap: 10px; max-width: 620px; }
-  .nf-f { flex: 1; min-width: 0; height: 48px; border-radius: 6px; border: 1px solid var(--lr-line-hover); background: rgba(20,20,31,.9); display: flex; align-items: center; gap: 10px; padding: 0 16px; color: var(--lr-muted); }
-  .nf-f:focus-within { border-color: var(--lr-muted); }
-  .nf-f input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 15px; padding: 0; }
+  .nf-f { flex: 1; min-width: 0; height: var(--lr-field-h); box-sizing: border-box; border-radius: 6px; border: 1px solid var(--lr-line-hover); background: rgba(20,20,31,.9); display: flex; align-items: center; gap: 10px; padding: 0 16px; color: var(--lr-muted); }
+  .nf-f:focus-within { border-color: var(--lr-field-focus); }
+  .nf-f input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; padding: 0; }
   .nf-f input::placeholder { color: var(--lr-muted); }
-  .nf-home { height: 48px; flex: none; }
+  .nf-home { height: var(--lr-field-h); min-height: var(--lr-field-h); flex: none; } /* same height as the search next to it */
 
   /* ---- did you mean ---- */
   .nf-dym-sec[hidden] { display: none; }

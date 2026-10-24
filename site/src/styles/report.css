@@ -39,18 +39,18 @@
 .rep-field, .rep-details { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--lr-soft); }
 .rep-field small, .rep-details small { font-size: 12px; font-weight: 400; color: var(--lr-muted); line-height: 1.45; }
 .rep-field select, .rep-field input, .rep-details textarea, .rep-search input {
-  width: 100%; box-sizing: border-box; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-bg); color: var(--lr-text); font: inherit; font-size: 16px; font-weight: 400; }
-.rep-field select, .rep-field input { height: 46px; }
+  width: 100%; box-sizing: border-box; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-bg); color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 400; }
+.rep-field select, .rep-field input { height: var(--lr-field-h); }
 .rep-details textarea { padding: 12px 14px; min-height: 120px; line-height: 1.5; resize: vertical; }
-.rep-field select:focus-visible, .rep-field input:focus-visible, .rep-details textarea:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 1px; border-color: transparent; }
+.rep-field select:focus, .rep-field input:focus, .rep-details textarea:focus { outline: none; border-color: var(--lr-field-focus); }
 [aria-invalid="true"] { border-color: var(--lr-coral) !important; }
 
 .rep-check { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.5; color: var(--lr-text); cursor: pointer; }
 .rep-check input { margin-top: 3px; width: 16px; height: 16px; flex: none; }
 
 /* Report a time: search + results */
-.rep-search { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-bg); color: var(--lr-muted); }
-.rep-search:focus-within { outline: 2px solid var(--lr-orange); outline-offset: 1px; border-color: transparent; }
+.rep-search { display: flex; align-items: center; gap: 10px; height: var(--lr-field-h); box-sizing: border-box; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-bg); color: var(--lr-muted); }
+.rep-search:focus-within { border-color: var(--lr-field-focus); }
 .rep-search input { height: 100%; padding: 0; border: 0; background: transparent; }
 .rep-search input:focus { outline: none; }
 .rep-results { display: grid; gap: 6px; max-height: 288px; overflow-y: auto; }

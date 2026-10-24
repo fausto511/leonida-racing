@@ -126,12 +126,11 @@ const { focus } = Astro.props;
   .ra label:not(.ra-choice):not(.ra-radio) { display: flex; flex-direction: column; gap: .35rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
   .ra small { font-weight: 500; text-transform: none; letter-spacing: 0; opacity: .85; }
   .ra input[type="text"], .ra input[type="url"], .ra select, .ra textarea {
-    padding: .6rem .7rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text);
-    font-size: 16px; font-family: var(--gh-font-body); text-transform: none; letter-spacing: normal; font-weight: 400; color-scheme: dark; min-width: 0;
+    height: var(--lr-field-h); box-sizing: border-box; padding: 0 14px; border-radius: var(--gh-radius); border: 1px solid var(--lr-line-strong); background: var(--gh-bg); color: var(--gh-text);
+    font-size: 14px; font-family: var(--gh-font-body); text-transform: none; letter-spacing: normal; font-weight: 400; color-scheme: dark; min-width: 0;
   }
-  @media (min-width: 761px) { .ra input[type="text"], .ra input[type="url"], .ra select, .ra textarea { font-size: .88rem; } }
-  .ra textarea { resize: vertical; }
-  .ra :is(input, select, textarea):focus { outline: 2px solid var(--gh-yellow); outline-offset: 1px; }
+  .ra textarea { height: auto; padding: 10px 14px; line-height: 1.5; resize: vertical; }
+  .ra :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]), select, textarea):focus { outline: none; border-color: var(--lr-field-focus); }
   .ra :is(input, select, textarea)[aria-invalid="true"] { border-color: var(--lr-coral); }
   .ra-tag { text-transform: uppercase !important; letter-spacing: .12em !important; font-weight: 800 !important; }
   .ra-color { display: flex; gap: .5rem; }

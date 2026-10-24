@@ -24,6 +24,8 @@
   --lr-line: rgba(200,200,222,.16);         /* default border / divider */
   --lr-line-strong: rgba(200,200,222,.24);  /* inputs, chips, emphasised borders */
   --lr-line-hover: rgba(200,200,222,.40);   /* hover / focus borders */
+  --lr-field-h: 44px;            /* every input, select, search and segmented toggle (DEC-0178) */
+  --lr-field-focus: var(--lr-orange); /* border colour of a focused field */
 
   /* text: exactly 4 levels (Fausto 23.10.2026, DEC-0172). Never pure #FFF; no other greys for text. */
   --lr-text: #FBF7EA;        /* headings and all running text */
@@ -175,6 +177,16 @@ a { color: inherit; }
   transition: background-color .12s, border-color .12s, color .12s;
 }
 .btn:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+/* Form fields (DEC-0178, Fausto 24.10.2026). Two families with the same shape (6px corners, 1px strong line):
+   filter fields sit transparent on the page, form fields sit in cards with the dark fill.
+   Both: 44px high, 14px text; focus = the field's own border turns orange (no outer ring).
+   Keyboard focus on everything clickable = 2px orange ring (base rule below, components may refine it).
+   Checkboxes and radios are orange. Touch devices get 16px text in fields, otherwise iOS zooms in. */
+:where(button, summary, [role="button"], [tabindex]:not([tabindex="-1"]), input[type="checkbox"], input[type="radio"]):focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+:where(input[type="checkbox"], input[type="radio"]) { accent-color: var(--lr-orange); }
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not(.lr-field-xl), select, textarea { font-size: 16px !important; }
+}
 /* Text links in running text (Fausto 23.10.2026, DEC-0169): white, orange underline 1px / 3px offset, hover text orange.
    Pages apply these values to their prose links; .lr-link is the shared class for new markup. */
 .lr-link { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
@@ -238,18 +250,18 @@ a[target="_blank"]:not(.btn):not([class*="btn"]):not(.lr-noext):not([href^="http
             <select class="ui-select">…</select>
    Layout (width/flex) stays with each page; only the look lives here. */
 .ui-search, .ui-select {
-  border: 1px solid var(--gh-line);
+  border: 1px solid var(--lr-line-strong);
   border-radius: var(--gh-radius);
   color: var(--gh-text);
-  padding: 0.65rem 0.9rem;
-  font-size: 0.85rem;
+  padding: 0 14px;
+  font-size: 14px;
   font-family: var(--gh-font-body);
-  min-height: 2.5rem; /* same height for search + dropdown in every row */
+  height: var(--lr-field-h); box-sizing: border-box; /* one field height everywhere (DEC-0178) */
 }
 .ui-search { display: flex; align-items: center; gap: 0.55rem; background: transparent; color: var(--gh-muted); }
-.ui-search:focus-within, .ui-select:focus-visible { border-color: var(--gh-muted); outline: none; }
+.ui-search:focus-within, .ui-select:focus-visible { border-color: var(--lr-field-focus); outline: none; }
 .ui-search svg { flex: none; }
-.ui-search input { flex: 1; min-width: 0; background: none; border: none; color: var(--gh-text); font-size: 0.85rem; font-family: var(--gh-font-body); outline: none; padding: 0; }
+.ui-search input { flex: 1; min-width: 0; background: none; border: none; color: var(--gh-text); font-size: 14px; font-family: var(--gh-font-body); outline: none; padding: 0; }
 .ui-select {
   appearance: none; -webkit-appearance: none; -moz-appearance: none;
   min-width: 9rem; padding-right: 2.2rem; cursor: pointer;
