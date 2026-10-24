@@ -33,7 +33,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .dband-btn { background: var(--lr-discord-text); color: var(--lr-discord); flex: none; }
   .dband-btn:hover { background: var(--lr-discord-text); color: var(--lr-discord); }
   .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; } /* white button, logo + text blurple (Fausto 20.10.) */
-  :global(main:has(.dband) + .site-foot) { margin-top: 0; }
+  :global(main:has(.dband) ~ .site-foot), :global(main:has(.dband) ~ .cmpbar) { margin-top: 0; } /* the band always sits directly on the footer (DEC-0179) */
   @media (max-width: 760px) {
     .dband-inner { flex-direction: column; align-items: stretch; gap: 18px; padding-top: 36px; padding-bottom: 36px; }
     .dband-btn { width: 100%; }

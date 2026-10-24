@@ -389,7 +389,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vs-own .vh-g-check { display: none; }
 
   /* ---- sections ---- */
-  .vsec { padding-top: 60px; }
+  .vsec { padding-top: var(--lr-gap-sec); }
   .vsec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
   .vsec-titles { display: flex; flex-direction: column; gap: 8px; } /* label -> H2: 8px (DEC-0168) */
   .vsec .eyebrow { margin: 0; }
@@ -481,7 +481,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vh2h > .btn { margin-top: auto; }
 
   /* ---- More from ---- */
-  .vmore { display: flex; flex-direction: column; gap: 16px; padding-top: 20px; padding-bottom: 72px; }
+  .vmore { display: flex; flex-direction: column; gap: 16px; padding-top: 20px; }
   .vmore-card { display: flex; align-items: center; gap: 18px; padding: 18px 22px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }
   .vmore-logo { width: 40px; height: 40px; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-info); flex: none; }
   .vmore-main { flex: 1; min-width: 0; }
@@ -521,7 +521,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
     .vh-actions { order: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 14px; }
     .vh-actions .btn { min-width: 0; padding: 0 12px; }
     .vs-panel { order: 3; margin: 14px clamp(1.25rem, 4vw, 2.5rem) 0; padding: 12px; }
-    .vsec { order: 4; padding-top: 44px; }
+    .vsec { order: 4; }
     .vt { padding: 10px 12px; }
     .vt-v { font-size: 21px; }
     .vt-opt { display: none; }
@@ -546,7 +546,6 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
     .vm-row { display: flex; flex-direction: column; gap: 16px; }
     .vm-cards { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; margin-inline: calc(-1 * clamp(1.25rem, 4vw, 2.5rem)); padding: 0 clamp(1.25rem, 4vw, 2.5rem) 4px; scroll-padding-inline: clamp(1.25rem, 4vw, 2.5rem); scrollbar-width: none; }
     .vm-cards > :global(.vcard) { flex: 0 0 78%; scroll-snap-align: start; }
-    .vmore { padding-bottom: 48px; }
     .vmore-card { flex-wrap: wrap; align-items: flex-start; padding: 16px; }
     .vmore-all { flex-basis: 100%; }
   }

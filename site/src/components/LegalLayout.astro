@@ -78,7 +78,7 @@ const docs = [
   .lg-doc:hover { border-color: var(--lr-pink); color: var(--lr-text); }
   .lg-doc.on { background: var(--lr-text); border-color: var(--lr-text); color: #14141F; font-weight: 600; }
 
-  .lg { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 56px; align-items: start; padding-top: 40px; padding-bottom: 80px; }
+  .lg { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 56px; align-items: start; padding-top: 40px; }
   .lg-toc-wrap { position: sticky; top: 96px; }
   .lg-toc summary { list-style: none; cursor: default; margin: 0 0 12px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-soft); }
   .lg-toc summary::-webkit-details-marker { display: none; }
@@ -93,6 +93,7 @@ const docs = [
   .lg-body :global(h3) { margin: 22px 0 8px; font-size: 16px; font-weight: 700; color: var(--lr-text); }
   .lg-body :global(p), .lg-body :global(li) { font-size: 16px; line-height: 1.7; color: var(--lr-text); }
   .lg-body :global(p) { margin: 0 0 14px; }
+  .lg-body > :global(:last-child) { margin-bottom: 0; }
   .lg-body :global(ul), .lg-body :global(ol) { margin: 0 0 14px; padding-left: 1.2rem; }
   .lg-body :global(li) { margin-bottom: 6px; }
   .lg-body :global(strong) { color: var(--lr-text); }

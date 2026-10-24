@@ -73,7 +73,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
 
   /* ---- car strip: 220px control column + 4 car columns ---- */
   .cp :global(.cp-grid) { display: grid; grid-template-columns: 220px repeat(4, minmax(0, 1fr)); gap: 16px; }
-  .cp-stripw { padding-top: 36px; }
+  .cp-stripw { padding-top: var(--lr-gap-head); }
   .cp-strip { padding-bottom: 16px; border-bottom: 1px solid var(--lr-line); }
   .cp-ctrl { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; min-width: 0; }
   .cp-count { margin: 0; font-size: 19px; font-weight: 700; }

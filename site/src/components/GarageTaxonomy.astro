@@ -379,7 +379,7 @@ const more = custom
 
   /* ---- more + links (slot content, page scope) ---- */
   .tsec-eb { margin: 0 0 14px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-soft); }
-  .tmore { padding-top: 48px; }
+  .tmore { padding-top: calc(var(--lr-gap-sec) - 24px); } /* grid-wrap above ends with 24px padding */
   .tmore-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
   .tm { display: flex; flex-direction: column; gap: 6px; padding: 18px 20px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
   .tm:hover { border-color: var(--lr-orange); }
@@ -387,7 +387,7 @@ const more = custom
   .tm-t { font-size: 19px; font-weight: 700; line-height: 1.25; }
   .tm-s { font-size: 15px; line-height: 1.45; color: var(--lr-soft); }
   .tm-a { margin-top: 6px; }
-  .tabout { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--lr-line); }
+  .tabout { margin-top: var(--lr-gap-sec); padding-top: 32px; border-top: 1px solid var(--lr-line); }
   .tabout-h { margin: 0 0 12px; }
   .tabout p { max-width: 820px; margin: 0 0 14px; font-size: 17px; line-height: 1.7; color: var(--lr-text); }
   .tlinks { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; margin-top: 40px; padding-top: 32px; padding-bottom: 32px; border-top: 1px solid var(--lr-line); }
@@ -408,7 +408,6 @@ const more = custom
     .gl-row { font-size: 14px; }
     .tchips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-top: 16px; }
     .tchip { height: 34px; font-size: 14px; }
-    .tmore { padding-top: 32px; }
     .tm { padding: 14px 16px; }
     .tm-s { display: none; }
     .tlinks { grid-template-columns: 1fr; gap: 24px; }

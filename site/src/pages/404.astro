@@ -232,7 +232,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .dband-btn { background: var(--lr-discord-text); color: var(--lr-discord); flex: none; }
   .dband-btn:hover { background: var(--lr-discord-text); color: var(--lr-discord); }
   .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; } /* white button, logo + text blurple (Fausto 20.10.) */
-  :global(main:has(.dband) + .site-foot) { margin-top: 0; }
+  :global(main:has(.dband) ~ .site-foot), :global(main:has(.dband) ~ .cmpbar) { margin-top: 0; }
 
   @media (max-width: 1100px) {
     .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }

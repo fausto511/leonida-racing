@@ -341,9 +341,9 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .mbar i { display: block; height: 100%; background: var(--lr-orange); border-radius: 999px; }
 
   /* ---- section frame ---- */
-  .hsec { display: flex; flex-direction: column; gap: 22px; padding-top: 64px; padding-bottom: 16px; }
-  .hsec-first { padding-top: 36px; }
-  .hsec-last { padding-bottom: 72px; }
+  .hsec { display: flex; flex-direction: column; gap: 22px; padding-top: calc(var(--lr-gap-sec) - 16px); padding-bottom: 16px; }
+  .hsec-first { padding-top: var(--lr-gap-head); }
+  .hsec-last { padding-bottom: var(--lr-gap-sec); }
   .hsec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
   .hsec-titles { display: flex; flex-direction: column; gap: 8px; } /* label -> H2: 8px (DEC-0168) */
   .hsec-titles .eyebrow { margin: 0; }
@@ -482,7 +482,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .dband-btn:hover { background: var(--lr-discord-text); color: var(--lr-discord); }
   .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; } /* white button, logo + text blurple (Fausto 20.10.) */
   /* the footer's top margin would leave a gap under the band */
-  :global(main:has(.dband) + .site-foot) { margin-top: 0; }
+  :global(main:has(.dband) ~ .site-foot), :global(main:has(.dband) ~ .cmpbar) { margin-top: 0; }
 
   /* ---- responsive ---- */
   @media (max-width: 1100px) {
@@ -519,8 +519,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
     .mtile-go { width: 24px; height: 24px; }
     .mtile .htile-eb { letter-spacing: .06em; white-space: nowrap; }
 
-    .hsec { padding-top: 44px; gap: 16px; }
-    .hsec-first { padding-top: 32px; }
+    .hsec { gap: 16px; }
     .hsec-head { flex-direction: column; align-items: flex-start; gap: 10px; }
     .hsec-sub { font-size: 14px; line-height: 1.45; }
 

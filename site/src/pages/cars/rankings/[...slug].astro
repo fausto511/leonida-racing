@@ -230,7 +230,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
   .rchip.is-sub.on span { color: var(--lr-soft); }
 
   /* ---- sections ---- */
-  .rk { padding-bottom: 64px; }
+  .rk { padding-bottom: var(--lr-gap-sec); }
   .rk-sec { padding-top: 40px; }
   .rk-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
   .rk-h2 { margin: 0; } /* count follows the text inline, also when the heading wraps on the phone */
@@ -266,7 +266,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
   .rk-all { display: inline-block; margin-top: 14px; }
 
   /* ---- more in Cars ---- */
-  .rk-more { padding-top: 48px; }
+  .rk-more { padding-top: var(--lr-gap-sec); }
   .rk-more-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
   .rk-mcard { display: flex; flex-direction: column; gap: 6px; padding: 20px; color: var(--lr-text); text-decoration: none; }
   .rk-mcard:hover { border-color: var(--lr-pink); }
@@ -287,6 +287,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
     .rchip { flex: none; height: 34px; font-size: 14px; }
     .rchip.is-sub { height: 34px; font-size: 14px; }
     .rk-sec { padding-top: 28px; }
+    .rk-more { padding-top: var(--lr-gap-sec); }
     .rk-table { font-size: 14px; }
     .rk-table th, .rk-table td { padding-left: 10px; padding-right: 10px; }
     .rk-table .c-cls, .rk-table .c-src { display: none; }
@@ -297,7 +298,6 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
     .rk-logo img { width: 26px; height: 26px; }
     .rk-tiles { grid-template-columns: 1fr 1fr; }
     .rk-tile .rk-nm small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .rk-more { padding-top: 32px; }
     .rk-mcard-s { display: none; }
   }
 </style>

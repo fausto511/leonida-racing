@@ -26,6 +26,8 @@
   --lr-line-hover: rgba(200,200,222,.40);   /* hover / focus borders */
   --lr-field-h: 44px;            /* every input, select, search and segmented toggle (DEC-0178) */
   --lr-field-focus: var(--lr-orange); /* border colour of a focused field */
+  --lr-gap-sec: 64px;            /* between page sections and before the footer (DEC-0179) */
+  --lr-gap-head: 40px;           /* header band -> first section (DEC-0179) */
 
   /* text: exactly 4 levels (Fausto 23.10.2026, DEC-0172). Never pure #FFF; no other greys for text. */
   --lr-text: #FBF7EA;        /* headings and all running text */
@@ -89,7 +91,7 @@
   /* rhythm */
   --gh-radius: 6px;
   --gh-radius-lg: 8px;
-  --gh-gap-section: clamp(3.5rem, 7vw, 6rem);
+  --gh-gap-section: var(--lr-gap-sec); /* legacy name, same value */
   --gh-gap-card: 1.5rem;
   --gh-pad-card: clamp(1.4rem, 2.4vw, 2rem);
   --gh-max: 80rem;           /* 1280px like the mockup */
@@ -184,6 +186,7 @@ a { color: inherit; }
    Checkboxes and radios are orange. Touch devices get 16px text in fields, otherwise iOS zooms in. */
 :where(button, summary, [role="button"], [tabindex]:not([tabindex="-1"]), input[type="checkbox"], input[type="radio"]):focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
 :where(input[type="checkbox"], input[type="radio"]) { accent-color: var(--lr-orange); }
+@media (max-width: 760px) { :root { --lr-gap-sec: 48px; --lr-gap-head: 32px; } }
 @media (pointer: coarse) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not(.lr-field-xl), select, textarea { font-size: 16px !important; }
 }

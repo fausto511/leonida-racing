@@ -281,6 +281,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
   /* one class filtered -> class pill hidden (DEC-0117) */
   .cars-grid.one-class :global([data-cls-pill]) { display: none; }
   .more { display: flex; justify-content: center; padding-top: 28px; }
+  .more:has(> #show-more[hidden]) { padding-top: 0; } /* no empty gap when there is nothing to show */
   :global(.miss) { display: block; margin-top: 2px; font-size: 13px; font-weight: 600; color: var(--lr-orange); }
   .empty { display: flex; flex-direction: column; gap: 14px; padding: 24px 0 8px; }
   .empty-title { margin: 0; }
@@ -290,7 +291,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
   :global(#empty-dym a) { color: var(--lr-orange); font-weight: 600; }
 
   /* ---- browse lists ---- */
-  .browse { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding-top: 40px; padding-bottom: 24px; border-top: 1px solid var(--lr-line); margin-top: 32px; }
+  .browse { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding-top: 40px; padding-bottom: 24px; border-top: 1px solid var(--lr-line); margin-top: calc(var(--lr-gap-sec) - 24px); }
   .browse h3 { margin: 0 0 12px; font-size: var(--lr-h3-xs); font-weight: 700; }
   .browse h3 a { color: var(--lr-text); text-decoration: none; }
   .browse h3 a:hover { color: var(--lr-orange); }

@@ -167,7 +167,8 @@ const img = `${base}images/hub/hub-events`;
   .gl-row:first-of-type { border-top: 0; }
   .gl-row b { color: var(--lr-text); font-weight: 600; text-align: right; }
 
-  .dsec { padding-top: 56px; }
+  .dsec { padding-top: var(--lr-gap-sec); }
+  .db + .dsec { padding-top: var(--lr-gap-head); }
   .dsec-eb { display: flex; width: fit-content; margin: 0 0 8px; } /* label -> H2: 8px (DEC-0168) */
   .dsec-h { margin: 0 0 20px; }
   .dsec-small { margin: 14px 0 0; font-size: 14px; line-height: 1.55; color: var(--lr-soft); max-width: 820px; }
@@ -220,7 +221,7 @@ const img = `${base}images/hub/hub-events`;
   .perms b { font-size: 16px; }
   .perms span { font-size: 15px; line-height: 1.5; color: var(--lr-soft); }
 
-  .faq { padding-bottom: 64px; }
+  .faq { padding-bottom: var(--lr-gap-sec); }
   .faq-list { border-top: 1px solid var(--lr-line); max-width: 880px; }
   .faq details { border-bottom: 1px solid var(--lr-line); }
   .faq summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; font-size: 17px; font-weight: 600; }
@@ -237,7 +238,7 @@ const img = `${base}images/hub/hub-events`;
   .dband-btn { background: var(--lr-discord-text); color: var(--lr-discord); flex: none; }
   .dband-btn:hover { background: var(--lr-discord-text); color: var(--lr-discord); }
   .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; } /* white button, logo + text blurple (Fausto 20.10.) */
-  :global(main:has(.dband) + .site-foot) { margin-top: 0; }
+  :global(main:has(.dband) ~ .site-foot), :global(main:has(.dband) ~ .cmpbar) { margin-top: 0; }
 
   @media (max-width: 1100px) {
     .db-inner { flex-direction: column; gap: 22px; }
@@ -250,7 +251,6 @@ const img = `${base}images/hub/hub-events`;
   @media (max-width: 760px) {
     .db-act .btn { width: 100%; }
     .gl-row { font-size: 14px; }
-    .dsec { padding-top: 40px; }
     .areas { grid-template-columns: 1fr; gap: 12px; }
     .area { padding: 16px; }
     .mock-msg { padding: 12px; gap: 10px; }

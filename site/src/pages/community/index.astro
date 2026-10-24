@@ -147,8 +147,8 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   .cm-entry-b .cta { margin-top: auto; padding-top: 6px; font-size: 14px; font-weight: 700; color: var(--lr-orange); }
 
   /* ---- sections ---- */
-  .cm-sec { padding-top: 56px; }
-  .cm-last { padding-bottom: 72px; }
+  .cm-sec { padding-top: var(--lr-gap-sec); }
+  .cm-last { padding-bottom: var(--lr-gap-sec); }
   .eyebrow:has(+ .cm-head) { display: flex; width: fit-content; margin: 0; } /* label -> H2: 8px via .cm-head margin (DEC-0168) */
   .cm-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-top: 8px; }
   .cm-head h2 { margin: 0; }
@@ -183,7 +183,6 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
     .cm-entry-b .cta::after { content: '→'; font-size: 20px; }
   }
   @media (max-width: 760px) {
-    .cm-sec { padding-top: 44px; }
     .cm-head { flex-direction: column; align-items: flex-start; gap: 6px; }
     .sub .lg { display: none; }
     .sub .sm { display: inline; }

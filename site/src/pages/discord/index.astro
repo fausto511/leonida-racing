@@ -212,7 +212,8 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .gl-row b { color: var(--lr-text); font-weight: 600; text-align: right; }
 
   /* ---- sections ---- */
-  .dsec { padding-top: 56px; }
+  .dsec { padding-top: var(--lr-gap-sec); }
+  .db + .dsec { padding-top: var(--lr-gap-head); }
   .dsec-eb { display: flex; width: fit-content; margin: 0 0 8px; } /* label -> H2: 8px (DEC-0168) */
   .dsec-h { margin: 0 0 20px; }
   .dsec-p { margin: 0; font-size: 17px; line-height: 1.65; color: var(--lr-text); max-width: 640px; }
@@ -289,7 +290,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .bot .arrow { margin-top: auto; }
 
   /* ---- FAQ ---- */
-  .faq { padding-bottom: 64px; }
+  .faq { padding-bottom: var(--lr-gap-sec); }
   .faq-list { border-top: 1px solid var(--lr-line); max-width: 880px; }
   .faq details { border-bottom: 1px solid var(--lr-line); }
   .faq summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; font-size: 17px; font-weight: 600; }
@@ -309,7 +310,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .dband-btn { background: var(--lr-discord-text); color: var(--lr-discord); flex: none; }
   .dband-btn:hover { background: var(--lr-discord-text); color: var(--lr-discord); }
   .dband-btn svg { width: 20px; height: 20px; fill: currentColor; flex: none; } /* white button, logo + text blurple (Fausto 20.10.) */
-  :global(main:has(.dband) + .site-foot) { margin-top: 0; }
+  :global(main:has(.dband) ~ .site-foot), :global(main:has(.dband) ~ .cmpbar) { margin-top: 0; }
 
   @media (max-width: 1100px) {
     .db-inner { flex-direction: column; gap: 22px; }
@@ -321,7 +322,6 @@ const dash = '<span class="no" aria-label="No">–</span>';
   @media (max-width: 760px) {
     .db-act .btn { width: 100%; }
     .gl-row { font-size: 14px; }
-    .dsec { padding-top: 40px; }
     .dsec-p { font-size: 16px; }
     .areas, .steps, .two { grid-template-columns: 1fr; gap: 12px; }
     .area, .step { padding: 16px; }
