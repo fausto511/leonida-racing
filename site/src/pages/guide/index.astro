@@ -84,7 +84,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
       <div class="gd-tile">
         <p class="gd-tile-eb">At a glance</p>
         <div class="gd-glance">
-          {glance.map((g) => <a class="lr-hcard lr-hlift" href={g.href}><strong>{g.v}</strong><span>{g.l}</span></a>)}
+          {glance.map((g) => <a class="lr-hcard" href={g.href}><strong>{g.v}</strong><span>{g.l}</span></a>)}
           <div><strong class="is-date"><time datetime={GUIDE_UPDATED}>{updatedShort}</time></strong><span>Last updated</span></div>
         </div>
       </div>

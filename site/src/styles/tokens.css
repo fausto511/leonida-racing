@@ -188,8 +188,8 @@ a { color: inherit; }
 :where(input[type="checkbox"], input[type="radio"]) { accent-color: var(--lr-orange); }
 @media (max-width: 760px) { :root { --lr-gap-sec: 48px; --lr-gap-head: 32px; } }
 /* Clickable cards (DEC-0180, Fausto 25.10.2026). Every card that is a link as a whole: border turns orange on hover.
-   .lr-hlift: only the page's main tiles at the top (home tiles/dashboard, community entries, guide numbers,
-   My garage tile, 404 tiles) also lift by 2px. Every other card on the page doesn't lift (Fausto: calmer).
+   .lr-hlift: only a page's main tiles at the top that have a photo and are there to get the click
+   (home tiles, community entries, 404 tiles) also lift by 2px. Every other card doesn't lift (Fausto: calmer).
    .lr-hzoom: the card's photo or logo zooms to 103% inside its frame (.lr-hmedia clips it).
    Motion only with a real mouse and when the visitor hasn't asked for reduced motion.
    List rows are different: they get a lighter background (--lr-white-hover), no border. */
