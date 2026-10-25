@@ -33,6 +33,17 @@ const photoAlt = vehiclePhotoAlt[vehicle.id] ?? `${fullName} in GTA VI`;
 // SEO metadata: approved Codex copy (2026-10-01), unchanged by the redesign.
 const metaTitle = `${fullName} — GTA VI Car Specs & Performance`;
 const metaDescription = `Explore the ${fullName} in GTA 6, including key vehicle details, release information, real-life inspiration, and available performance data.`;
+// WebPage + main photo for Google (thumbnail in search results prefers the marked primary image), 25.10.
+const pageUrlAbs = new URL(`${import.meta.env.BASE_URL}cars/vehicles/${vehicle.id}/`, Astro.site).href;
+const vehicleJsonLd = [{
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: `${fullName} in GTA 6`,
+  url: pageUrlAbs,
+  description: metaDescription,
+  about: { '@type': 'VideoGame', name: 'Grand Theft Auto VI', alternateName: ['GTA VI', 'GTA 6'] },
+  ...(vehicle.photo ? { primaryImageOfPage: { '@type': 'ImageObject', url: new URL(`${import.meta.env.BASE_URL}images/vehicles/${vehicle.id}-1920.webp`, Astro.site).href, width: 1920, height: 1080, caption: photoAlt } } : {}),
+}];
 
 const acqLabels: Record<string, string> = { 'pre-order': 'Pre-Order bonus', 'ultimate-edition': 'Ultimate Edition', 'gta-plus': 'GTA+' };
 const acqNotes: Record<string, string> = { 'pre-order': 'Pre-order bonus', 'ultimate-edition': 'Ultimate Edition exclusive', 'gta-plus': 'GTA+ members only' };
@@ -113,6 +124,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   description={metaDescription}
   section="garage"
   noindex={!vehicle.releaseId}
+  jsonLd={vehicleJsonLd}
   ogImage={vehicle.photo ? `images/vehicles/${vehicle.id}-1280.webp` : undefined}
   ogImageAlt={vehicle.photo ? photoAlt : undefined}
   ogImageWidth={vehicle.photo ? 1280 : undefined}

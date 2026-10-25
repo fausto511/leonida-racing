@@ -82,6 +82,8 @@ const jsonLd = [{
 // ---- image band: fastest car with a photo, else first photo, else the garage ----
 const bandCar = custom?.band?.id ? list.find((v) => v.id === custom.band!.id) ?? bandVehicle(list) : bandVehicle(list);
 const bandSrc = custom?.band?.src ? `${base}${custom.band.src}` : bandCar ? `${base}images/vehicles/${bandCar.id}` : null;
+// Main photo for Google (25.10.): only when the band is a vehicle photo with the standard sizes.
+if (!custom?.band?.src && bandCar?.photo) (jsonLd[0] as Record<string, unknown>).primaryImageOfPage = { '@type': 'ImageObject', url: new URL(`${base}images/vehicles/${bandCar.id}-1920.webp`, Astro.site).href, width: 1920, height: 1080 };
 const bandPos = custom?.band && (custom.band.src || bandCar?.id === custom.band.id) ? custom.band.pos : undefined;
 const bandStyle = [bandPos ? `object-position:${bandPos}` : '', custom?.band?.style ?? ''].filter(Boolean).join(';') || undefined;
 
