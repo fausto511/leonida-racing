@@ -155,7 +155,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
           {entries.map((c) => {
             const m = entryMeta[c.name];
             return (
-              <a class="gd-entry card lr-hcard lr-hlift" href={`${base}${m.href}`}>
+              <a class="gd-entry card lr-hcard" href={`${base}${m.href}`}>
                 <span class="gd-entry-ph lr-hmedia"><img class="lr-hzoom" src={`${base}${m.img}`} srcset={m.srcset} sizes="(max-width: 760px) 112px, 260px" alt="" width="640" height="360" loading="lazy" style={m.pos ? `object-position:${m.pos}` : undefined} /></span>
                 <span class="gd-entry-b">
                   <strong class="display">{c.name}</strong>

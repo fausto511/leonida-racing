@@ -248,7 +248,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
     </div>
     <div class="cgrid cgrid-3" id="guide-cards">
       {[guideFixed, ...guideRest].map((s, i) => (
-        <article class="card gcard lr-hcard lr-hlift" data-rotate={i === 0 ? 'fixed' : i <= 2 ? 'pool-default' : 'pool'}>
+        <article class="card gcard lr-hcard" data-rotate={i === 0 ? 'fixed' : i <= 2 ? 'pool-default' : 'pool'}>
           <div class="g-img">
             <img class="lr-hzoom" src={`${base}images/${GUIDE_CARD[s.id].img}-640.webp`} srcset={`${base}images/${GUIDE_CARD[s.id].img}-640.webp 640w, ${base}images/${GUIDE_CARD[s.id].img}-1280.webp 1280w`} sizes="(max-width: 760px) 272px, 420px" alt="" width="640" height="360" loading="lazy" />
             {s.status && <span class="g-status"><i aria-hidden="true"></i>{s.status}</span>}
