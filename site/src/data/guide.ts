@@ -13,7 +13,7 @@
 // Never add leak information here. Visible text: "GTA VI"; meta: "GTA 6".
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
-export const GUIDE_UPDATED = '2026-10-20';
+export const GUIDE_UPDATED = '2026-10-25';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -21,7 +21,7 @@ export interface GuideSource { label: string; url: string; note: string }
  *  Rockstar's own channels = official, fan sites/databases = community, everything else = press. */
 export type SourceKind = 'official' | 'press' | 'community';
 const OFFICIAL = ['Rockstar Games', 'Rockstar Newswire', 'Rockstar Support'];
-const COMMUNITY = ['GTABase', 'RockstarINTEL'];
+const COMMUNITY = ['GTABase', 'RockstarINTEL', 'TGG'];
 export function sourceParts(src: GuideSource): { publisher: string; title: string; kind: SourceKind } {
   const i = src.label.indexOf(' — ');
   const publisher = i > 0 ? src.label.slice(0, i) : src.label;
@@ -98,7 +98,7 @@ export const guideSections: GuideSection[] = [
     paragraphs: [
       `GTA VI brings back familiar in-game manufacturers and models while adding vehicles created specifically for Leonida. Rockstar has named only part of the lineup, while many vehicles shown in official trailers and screenshots are identified by their design and badges. Those are community identifications, not Rockstar-confirmed names. Our <a href="{base}cars/">Cars section</a> focuses on racing-relevant cars and is not a complete list of every vehicle shown for GTA VI.`,
       `Official footage also shows motorcycles, watercraft, and aircraft, but this guide focuses on cars and racing. A car appearing on screen does not by itself establish how it can be owned, stored, or customized.`,
-      `Open Cars for individual models, <a href="{base}cars/classes/">GTA classes</a>, <a href="{base}cars/manufacturers/">manufacturers</a>, first appearances, release information, and real-life inspirations. Prices and tested performance data will be added when they can be verified in the released game.`,
+      `Open Cars for individual models, <a href="{base}cars/classes/">GTA classes</a>, <a href="{base}cars/manufacturers/">manufacturers</a>, first appearances, release information, and real-life inspirations. Compare recorded prices and tested performance where results are available; individual car pages keep the source and tuning category beside the data.`,
       `Rockstar released the Launch Trailer on October 15, 2026. It joins the official footage used to document vehicles, while model identifications remain separate from Rockstar-confirmed names.`,
     ],
     cta: { label: 'Explore Cars', href: 'cars/' },
@@ -142,8 +142,10 @@ export const guideSections: GuideSection[] = [
       `Rockstar has also assembled a vehicle-handling team that includes real race-car drivers. That signals serious attention to how vehicles behave, but it is not proof that GTA VI is a full driving simulation. Exact grip levels, drivetrain advantages, damage behavior, and the fastest cars still need to be tested in the released game.`,
       `Narrower streets and dense traffic put more demands on your driving, according to Nelson. You can also switch between Jason and Lucia while the other character takes the wheel. During a getaway, your partner can drive while you shoot behind you; Nelson describes moments where taking out a pursuing car’s tires blocks the cars following it.`,
       `IGN’s demo also includes a ride with <strong>Ryde Me</strong>, the game’s ride-hailing service. Nelson describes it as a way to fast travel, with the option to ride along and chat.`,
+      `Small details matter when you’re just out for a drive, too. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=506s" rel="noopener">8:26</a> in the Extended Look, the Sentinel Classic Cabrio drives with a working turn signal. The footage does not show whether you operate the indicators yourself or the game handles them.`,
     ],
     sources: [
+      { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: `${EXT_LOOK}&t=506s`, note: 'August 27, 2026: Sentinel Classic Cabrio with a working turn signal at approximately 8:26.' },
       { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration.' },
       { label: 'GamesRadar — Rob Nelson on GTA VI driving physics', url: 'https://www.gamesradar.com/games/grand-theft-auto/gta-6-driving-is-the-best-parts-of-gta-4-but-with-the-accessibility-of-gta-5-says-rockstar-boss/', note: 'September 4, 2026: direct Nelson quotation covering drivetrain, tires, suspension, steering, and the rebuilt physics model.' },
       { label: 'Dazed — GTA VI: An Exclusive Deep Dive', url: DAZED, note: 'September 6, 2026: vehicle-handling team described as including race-car drivers.' },
@@ -201,6 +203,20 @@ export const guideSections: GuideSection[] = [
     ],
   },
   {
+    id: 'fuel',
+    title: 'Fuel, EV Charging, and Gas-Station Repairs',
+    status: 'Reported from a Rockstar Demo',
+    paragraphs: [
+      `A getaway car may need a little more planning than a full throttle pedal. <strong>GamesRadar</strong> reports TGG’s account of a Rockstar North preview: a gas-station interaction offered refueling or vehicle repair, with the fill-up estimated at around ten seconds. That timing is the previewer’s estimate, not a fixed specification for every car.`,
+      `<strong>PC Gamer</strong> also reports EV charging in the same preview account. These are reported demo features, not a published rulebook for fuel consumption, charging speed, prices, or race conditions. Whether the systems can be disabled or apply differently across missions and racing remains unresolved.`,
+    ],
+    sources: [
+      { label: 'TGG — GTA 6: Vehicles Work Differently Now', url: 'https://www.youtube.com/watch?v=5PEKC28azRU&t=558s', note: 'Original creator report; chapter “Fuel & EV Charging” starts at 9:18.' },
+      { label: 'GamesRadar — Rockstar boss on GTA 6’s refueling system', url: 'https://www.gamesradar.com/games/grand-theft-auto/rockstar-boss-says-well-see-what-people-say-about-gta-6s-controversial-refueling-system-but-thinks-its-so-fast-that-you-cant-complain/', note: 'September 3, 2026: explicitly attributes the refuel/repair interaction and approximate timing to TGG’s preview account.' },
+      { label: 'PC Gamer — GTA 6’s reported refuelling action', url: 'https://www.pcgamer.com/games/grand-theft-auto/grand-theft-auto-6s-controversial-refuelling-action-reportedly-takes-about-10-seconds-to-perform-which-rockstars-co-studio-head-says-is-pretty-fast-for-a-fill-up/', note: 'September 5, 2026: reports charging and refueling via TGG/GamesRadar; the same report chain, not another independent demo.' },
+    ],
+  },
+  {
     id: 'customization',
     images: [IMG.rideout, IMG.willies],
     title: 'Car Customization and Mod Shops',
@@ -239,12 +255,14 @@ export const guideSections: GuideSection[] = [
     status: 'Shown by Rockstar',
     paragraphs: [
       `GTA VI includes structured circuit, off-road, and street racing. Rockstar’s Extended Look shows all three with an active race HUD rather than presenting them only as background scenes.`,
-      `At roughly 17:42, a 16-car race runs for two laps on a wet paved circuit, with position, lap, and timing information on screen. At roughly 18:35, an off-road event shows a 12-entry field on a dirt course. At roughly 20:23, a six-car street race uses a progress counter instead of a lap counter.`,
-      `That footage confirms three distinct racing formats and visible event structure. Rockstar has not yet explained how races are entered, which vehicle classes they support, what they pay, whether championships exist, or how racing will work online.`,
+      `At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1061s" rel="noopener">17:41</a>, 16 cars race two laps on a wet paved circuit, with position, lap, and timing information on screen. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1115s" rel="noopener">18:35</a>, a 12-entry field of quads, motorcycles, and off-road pickups runs two laps on a dirt course. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1221s" rel="noopener">20:21</a>, a six-car street race tracks progress as a percentage. These are the events shown, not a fixed rule for grid sizes or race distances.`,
+      `The footage shows organized racing, but the full event rules remain open: entry requirements, eligible classes, rewards, championships, and online support. A race shown in the story-game presentation does not establish a GTA VI Online racing mode.`,
+      `The same street race shows a nitrous boost in use. Which cars can run it, how you get it, and whether every event allows it are separate questions the footage does not answer.`,
+      `For your own car comparisons, keep <strong>top speed</strong> separate from <strong>lap time</strong>. One measures speed; the other includes the corners, braking, and acceleration of a particular route. Our car rankings distinguish reference testing from driver leaderboard results. Compare the same tuning category and read the test conditions before treating two times as equivalent.`,
     ],
     cta: { label: 'Go to Time Attack', href: 'time-attack/gellhorn-international-raceway/' },
     sources: [
-      { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: EXT_LOOK, note: 'August 27, 2026: circuit race at approximately 17:41–17:47, off-road race at 18:34–18:39, and street race at 20:21–20:25.' },
+      { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: `${EXT_LOOK}&t=1061s`, note: 'August 27, 2026: circuit race at approximately 17:41–17:47, off-road race at 18:35–18:39, and street race with nitrous at 20:21–20:25.' },
       { label: 'Rockstar Newswire — An Extended Look', url: 'https://www.rockstargames.com/newswire/article/4k138k8okkk483/grand-theft-auto-vi-an-extended-look-now-playing', note: 'confirms the presentation was captured entirely from in-game PlayStation 5 footage.' },
       { label: 'Game Informer — GTA VI: Welcome to Leonida', url: 'https://gameinformer.com/feature/2026/09/29/grand-theft-auto-vi-welcome-to-leonida', note: 'September 29, 2026: Rockstar cover story additionally identifies street and off-road racing among the activities; full article access may require a subscription.' },
     ],
@@ -257,9 +275,12 @@ export const guideSections: GuideSection[] = [
     paragraphs: [
       `Rockstar has shown a dedicated paved race circuit in GTA VI, complete with a grid, curbing, timing, position, and lap information. Trailer 2 separately shows Lucia wearing clothing marked <strong>Gellhorn International</strong> with a race-car graphic.`,
       `The venue is widely known as <strong>Gellhorn International Raceway</strong>, and Leonida Racing uses that established name for its <a href="{base}time-attack/gellhorn-international-raceway/">Time Attack competition</a>. The source record remains more precise: Rockstar’s public footage shows the circuit and the Gellhorn International branding, but does not display the full venue name alongside the race. The complete layout, location, classes, and event schedule remain unannounced.`,
+      `Sebring International Raceway is a rumored inspiration, discussed in coverage by <strong>The Drive</strong> and <strong>Jalopnik</strong>. Parts of that comparison rely on leaked maps rather than official footage. It is a published theory about the inspiration, not a Rockstar-confirmed connection or proof that Gellhorn copies Sebring’s layout, length, or corners.`,
     ],
     cta: { label: 'Visit Gellhorn Time Attack', href: 'time-attack/gellhorn-international-raceway/' },
     sources: [
+      { label: 'Jalopnik — GTA VI Has A Race Track', url: 'https://www.jalopnik.com/2246099/gta-6-race-track-new-details/', note: 'August 27, 2026: discusses Sebring as an inspiration; not an independent Rockstar confirmation.' },
+      { label: 'The Drive — Is Sebring Raceway Going To Be in GTA 6?', url: 'https://www.thedrive.com/news/theres-convincing-evidence-that-sebring-raceway-will-be-in-grand-theft-auto-6', note: 'April 3, 2026: documents the Sebring theory; map/leak-derived arguments are not treated as verified circuit facts.' },
       { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: EXT_LOOK, note: 'approximately 17:41–17:47: official circuit-racing footage.' },
       { label: 'Rockstar Games — GTA VI Trailer 2', url: 'https://www.youtube.com/watch?v=VQRLujxTm3c', note: 'approximately 1:57: “Gellhorn International” clothing and race-car graphic.' },
     ],
@@ -289,7 +310,7 @@ export const guideSections: GuideSection[] = [
     status: 'Not Confirmed',
     paragraphs: [
       `Several details players naturally want to know are still open. Rockstar has not published a complete vehicle list, dealership structure, later-game ownership limit, property-by-property garage capacities, tuning catalog, parts compatibility list, upgrade pricing, or final performance figures.`,
-      `Public material also leaves the full damage model, fuel use, EV charging, insurance, the full recovery rules for owned vehicles, wheel support, manual shifting, race creation tools, and GTA VI online racing systems unresolved. Some of these subjects have appeared in preview reports or community analysis, but Leonida Racing will not present them as confirmed until the supporting source is strong enough.`,
+      `The full damage model, insurance, recovery rules for owned vehicles, wheel support, manual shifting, race creation tools, and GTA VI online racing systems remain unresolved in the reviewed sources. Refueling, EV charging, and gas-station repairs have been reported from a Rockstar demo; their final rates, costs, settings, and application to racing are separate open questions.`,
       `This section will shrink as Rockstar releases more information and the finished game provides testable answers. Until then, “not confirmed” means exactly that—not impossible, not secretly ruled out, just not ready to call a fact.`,
     ],
     sourcesHeading: 'Official material checked for this section',
@@ -306,13 +327,19 @@ export const guideSections: GuideSection[] = [
 /** "How Leonida Racing Covers ..." — The Lab line removed until the section exists. */
 export const guideCoverage: { name: string; text: string }[] = [
   { name: 'Cars', text: 'brings models, classes, manufacturers and real-life inspirations together. Browse the available details and compare cars side by side.' },
-  { name: 'Time Attack', text: 'is where your driving meets the stopwatch: Gellhorn lap submissions and leaderboards, with the required proof, once GTA VI launches.' },
+  { name: 'Time Attack', text: 'is where your driving meets the stopwatch: Gellhorn lap submissions and leaderboards, with the required proof.' },
   { name: 'Community', text: 'connects drivers, crews, hosts and creators through events, car meets, playlists and Discord.' },
   { name: 'The Guide', text: 'explains what is known, shows where the information came from, and keeps confirmed facts separate from strong identifications and open questions.' },
 ];
 
 /** FAQ: the same text is used for the visible answers and FAQPage JSON-LD. */
 export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
+  { q: 'Is Gellhorn International Raceway based on Sebring?', a: 'Sebring is a rumored inspiration discussed by The Drive and Jalopnik. Parts of that comparison rely on leaked maps. The official material reviewed here does not confirm a Sebring connection or establish that Gellhorn copies its layout, length, or corners.' },
+  { q: 'Do cars need fuel or charging in GTA VI?', a: 'Refueling and EV charging have been reported from TGG’s Rockstar North preview, as covered by GamesRadar and PC Gamer. Consumption rates, charging times, settings, and how these systems apply to racing remain unresolved.' },
+  { q: 'Can you repair cars at gas stations in GTA VI?', a: 'GamesRadar reports that TGG’s Rockstar preview included a gas-station choice between refueling and vehicle repair. That does not establish the services available at every station or their prices.' },
+  { q: 'Does GTA VI have nitrous?', a: 'Yes. Nitrous is used in the street race shown in Rockstar’s Extended Look. Which cars can run it, how you get it, and the rules for individual events are not shown.' },
+  { q: 'Are GTA VI Online races confirmed by the gameplay footage?', a: 'The circuit, off-road, and street races shown in the Extended Look do not establish an online racing mode. Online event formats, multiplayer grids, cross-play, and Race Creator support need their own confirmation.' },
+  { q: 'Is the fastest GTA VI car also the best for Gellhorn?', a: 'Top speed and lap time measure different things. Use Gellhorn reference laps to compare tested cars, and the driver leaderboard to compare submitted runs. Keep tuning categories and test conditions consistent.' },
   { q: 'How does the vehicle scanner work in GTA VI?', a: 'Rob Nelson describes a phone scanner that shows whether a car is locked, has an alarm or tracker, what it is worth at a Pay ’n’ Spray or specialty car fence, and what it costs to register for yourself. Different vehicles can require tools such as a Slim Jim or key cloner.' },
   { q: 'Can changing cars or clothes help you escape the police in GTA VI?', a: 'Yes. In Nelson’s demonstration, switching to a car the police do not recognize lowers their perception of you. He also says buying and wearing a new outfit removes his current heat. Glasses, a cap, or a haircut alone do not address clothing the police already recognize.' },
   { q: 'Is GranForma replacing Pegassi for the Zorrusso in GTA VI?', a: 'The Zorrusso-associated car shown in Rockstar images published with Bloomberg’s October 14 feature carries GranForma lettering instead of the familiar Pegassi branding. Whether GranForma is the manufacturer, a customizer or a particular version remains unresolved. It does not establish a replacement for Pegassi across the lineup.' },
@@ -323,18 +350,18 @@ export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'Does GTA VI have car customization?', a: 'Yes. Rockstar has confirmed specialist mod shops and described cosmetic and performance-oriented modifications. The complete parts catalog and standard-edition workshop options remain unknown.' },
   { q: 'What mod shops are confirmed for GTA VI?', a: 'Rideout Customs Mod Shop in Vice City and One-Eyed Willie’s Mod Shop in Lake Leonida are confirmed as Ultimate Edition content. Rideout Customs focuses on interiors, wheels, and donk builds; One-Eyed Willie’s specializes in off-road modifications and hand-painted designs.' },
   { q: 'Does GTA VI have garages?', a: 'Yes. Players begin with storage for three vehicles, and garages purchased around the map expand that capacity. Rockstar has also revealed garage content tied to the ’67 Vapid Dominator Buggy and ’55 Vapid Stanier. The later-game ownership limit and the capacity of each garage remain unannounced.', aHtml: 'Yes. Players begin with storage for three vehicles, and garages purchased around the map expand that capacity. Rockstar has also revealed garage content tied to the <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a> and <a href="{base}cars/vehicles/vapid-stanier-55/">’55 Vapid Stanier</a>. The later-game ownership limit and the capacity of each garage remain unannounced.' },
-  { q: 'What kinds of racing are shown in GTA VI?', a: 'Official in-game footage shows circuit, off-road, and street racing with position and timing information on screen. Event access, rewards, classes, championships, and online support remain open.' },
+  { q: 'What kinds of racing are shown in GTA VI?', a: 'Rockstar’s Extended Look shows circuit, off-road, and street racing with position and timing information on screen. Event access, rewards, classes, championships, and online support remain open.' },
   { q: 'Is Gellhorn International Raceway confirmed?', aHtml: 'Rockstar has shown a dedicated paved circuit and separate Gellhorn International racing branding. Leonida Racing uses the established name <a href="{base}time-attack/gellhorn-international-raceway/">Gellhorn International Raceway</a>, while noting that Rockstar’s public footage has not yet displayed the complete venue name beside the circuit.', a: 'Rockstar has shown a dedicated paved circuit and separate Gellhorn International racing branding. Leonida Racing uses the established name Gellhorn International Raceway, while noting that Rockstar’s public footage has not yet displayed the complete venue name beside the circuit.' },
   { q: 'Are car meets confirmed in GTA VI?', a: 'Rockstar has shown car-meet and street-takeover scenes. Those scenes confirm the culture and setting, but Rockstar has not yet announced a player-hosted car-meet system.' },
   { q: 'Will GTA VI have a Race Creator?', a: 'Rockstar has not confirmed a Race Creator or player-built race jobs for GTA VI.' },
-  { q: 'Where can I compare GTA VI cars?', a: 'Cars lets you browse racing-relevant GTA VI cars by class and manufacturer and compare the details currently available. Verified prices, tested top speeds, and performance data will follow when the released game makes reliable testing possible.', aHtml: '<a href="{base}cars/">Cars</a> lets you browse racing-relevant GTA VI cars by <a href="{base}cars/classes/">class</a> and <a href="{base}cars/manufacturers/">manufacturer</a> and <a href="{base}cars/compare/">compare</a> the details currently available. Verified prices, tested top speeds, and performance data will follow when the released game makes reliable testing possible.' },
+  { q: 'Where can I compare GTA VI cars?', a: 'Cars lets you browse racing-relevant GTA VI cars by class and manufacturer and compare the details currently available. Compare recorded prices, tested top speeds, and performance data where available, with sources and tuning categories kept alongside the results.', aHtml: '<a href="{base}cars/">Cars</a> lets you browse racing-relevant GTA VI cars by <a href="{base}cars/classes/">class</a> and <a href="{base}cars/manufacturers/">manufacturer</a> and <a href="{base}cars/compare/">compare</a> the details currently available. Compare recorded prices, tested top speeds, and performance data where available, with sources and tuning categories kept alongside the results.' },
   { q: 'Is there a Leonida Racing Discord for GTA VI racing?', a: 'Yes. Our Discord brings GTA racers, crews and car enthusiasts together to talk cars, share their work and find groups. You can join without a Leonida Racing account. A linked website account is needed for calendar event sign-ups and starting an LFG search.', aHtml: 'Yes. <a href="{base}discord/">Our Discord</a> brings GTA racers, crews and car enthusiasts together to talk cars, share their work and find groups. You can join without a Leonida Racing account. A linked website account is needed for calendar event sign-ups and starting an LFG search.' },
 ];
 
 export const guideMethodology: string[] = [
   `Leonida Racing separates information into six public evidence levels: <strong>Confirmed by Rockstar</strong>, <strong>Shown by Rockstar</strong>, <strong>Rockstar Interview</strong>, <strong>Reported from a Rockstar Demo</strong>, <strong>Community Identification</strong>, and <strong>Not Confirmed</strong>. Each section carries one label for the evidence behind its central claim. When an individual detail uses a different evidence level, the text and its sources say so directly.`,
   `Official footage proves only what can be seen. A visible spoiler does not automatically prove a selectable spoiler upgrade, and a car at a meet does not automatically prove a player-hosted event system. Vehicle names and real-life inspirations identified by the community are labeled separately from Rockstar-confirmed names.`,
-  `Sources are attached to the section they support, with timestamps for videos and official titles for screenshots. The page is updated when a new source changes the known facts—not simply because another site repeats the same claim.`,
+  `Sources are attached to the section they support, with timestamps for videos and official titles for screenshots. Reported theories may be included when they answer a useful question, with the publication and unconfirmed status made clear. Repetition across articles is not independent confirmation; an article’s use of leaked material is not presented as evidence from official footage. The page is updated when a source adds meaningful information or changes the evidence behind a claim.`,
 ];
 
 /** Vehicle-count card. Value = GTABase count (Fausto 2026-10-03: GTABase has very good sourcing).

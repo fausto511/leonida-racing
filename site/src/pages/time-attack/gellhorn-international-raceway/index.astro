@@ -10,11 +10,27 @@ const base = import.meta.env.BASE_URL;
 const st = trackStats(sampleEntries, sampleEntries);
 const fmt = (n: number) => n.toLocaleString('en-US');
 const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>';
+const DRIVE = 'https://www.thedrive.com/news/theres-convincing-evidence-that-sebring-raceway-will-be-in-grand-theft-auto-6';
+const JALOPNIK = 'https://www.jalopnik.com/2246099/gta-6-race-track-new-details/';
+// FAQ copy: Codex 25.10.2026 (Gellhorn-Seitentexte). "Where" and "How long" held back until measured (DEC-0181).
+const faq = [
+  { q: 'Is there a race track in GTA 6?', a: 'Yes. Rockstar’s Extended Look shows cars racing on a paved circuit, with lap information, a timer, and a position display.' },
+  { q: 'Is Gellhorn International Raceway the official name?', a: 'It is the established name we use for the circuit. Rockstar’s footage separately shows the race track and “Gellhorn International” racing branding, but does not display the complete venue name alongside the circuit.' },
+  { q: 'Is Gellhorn International Raceway based on Sebring?', a: 'Sebring is a rumored inspiration. The Drive and Jalopnik have discussed the comparison, but it has not been confirmed by Rockstar in the official material reviewed for this guide. Parts of that discussion rely on leaked maps. That does not establish that Gellhorn copies Sebring’s layout, length, or corners.',
+    aHtml: `Sebring is a rumored inspiration. <a href="${DRIVE}" rel="noopener">The Drive</a> and <a href="${JALOPNIK}" rel="noopener">Jalopnik</a> have discussed the comparison, but it has not been confirmed by Rockstar in the official material reviewed for this guide. Parts of that discussion rely on leaked maps. That does not establish that Gellhorn copies Sebring’s layout, length, or corners.` },
+  { q: 'What cars are best for Gellhorn?', a: 'Check the Gellhorn reference-lap rankings to compare cars, and the Time Attack leaderboard to see driver results. Compare the same tuning category and read the test notes before treating two times as equivalent. A reference lap is not a guarantee of your own result.',
+    aHtml: `Check the <a href="${base}cars/rankings/gellhorn-lap/">Gellhorn reference-lap rankings</a> to compare cars, and the <a href="#leaderboard">Time Attack leaderboard</a> to see driver results. Compare the same tuning category and read the test notes before treating two times as equivalent. A reference lap is not a guarantee of your own result.` },
+  { q: 'How do I submit a Gellhorn lap?', a: 'Use Submit a lap and follow the Time Attack rules for your entry and evidence. Video verification is shown separately from acceptance onto the leaderboard.',
+    aHtml: `Use <a href="${base}time-attack/submit/">Submit a lap</a> and follow the <a href="${base}time-attack/how-it-works/#rules">Time Attack rules</a> for your entry and evidence. Video verification is shown separately from acceptance onto the leaderboard.` },
+  { q: 'Is Leonida Racing’s leaderboard an official Rockstar ranking?', a: 'No. It is a community leaderboard run by Leonida Racing. Our submission rules and verification labels describe our own competition.' },
+];
+const jsonLd = [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }];
 const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg>';
 ---
 <Base
-  title="Gellhorn International Raceway — GTA 6 Time Attack"
-  description="Submit your fastest GTA 6 lap at Gellhorn International Raceway, check the Time Attack leaderboard, and see where you rank."
+  title="Gellhorn International Raceway — GTA 6 Race Track"
+  description="Explore the GTA 6 race track known as Gellhorn International Raceway, compare Time Attack lap times, and find the rules for submitting your own lap."
+  jsonLd={jsonLd}
   section="time-attack"
   breadcrumbs={[{ name: 'Gellhorn International Raceway', path: 'time-attack/gellhorn-international-raceway/' }]}
 >
@@ -54,11 +70,14 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
         <img src={`${base}images/gellhorn-raceway-1080.webp`} srcset={`${base}images/gellhorn-raceway-640.webp 640w, ${base}images/gellhorn-raceway-1080.webp 1080w, ${base}images/gellhorn-raceway-1672.webp 1672w`} sizes="(max-width: 760px) 100vw, 55vw" alt="Palm-lined race track straight with blue and red curbs in GTA VI" width="1080" height="608" loading="lazy" />
       </div>
       <div class="card txt">
-        <p>Gellhorn International Raceway is the circuit at the center of GTA VI Time Attack. Accepted laps follow our submission rules, with video verification shown separately.</p>
-        <p>The track appears in Rockstar’s official gameplay footage, including a full racing HUD with lap counter, timer and position tracker. We’ll check the layout, length and direction in the released game.</p>
+        <p>Gellhorn International Raceway is the circuit at the center of Leonida Racing’s GTA VI Time Attack. Bring your favorite car, put a clean lap together, and give the next driver something to chase. Accepted laps follow our submission rules, with video verification shown separately.</p>
+        <p>Rockstar’s Extended Look shows cars racing on a paved circuit with curbing and a racing HUD: lap information, a timer, and a position display. There’s a grid to race against and a clock to watch. For anyone who enjoys chasing a personal best, that’s a good reason to pay attention.</p>
+        <p>The name needs one distinction. Trailer 2 shows Lucia wearing “Gellhorn International” racing branding. The circuit footage does not display the full venue name beside the track. We use the established name Gellhorn International Raceway, while keeping those two pieces of official footage separate in our source notes.</p>
+        <p>Sebring International Raceway comes up as a possible inspiration in coverage by <a href={DRIVE} rel="noopener">The Drive</a> and <a href={JALOPNIK} rel="noopener">Jalopnik</a>. That comparison remains unconfirmed, and parts of the discussion rely on leaked maps rather than official footage. It is a theory about the inspiration, not proof of a replica.</p>
+        <p>Use the leaderboard to compare driver laps, then check the <a href={`${base}cars/rankings/gellhorn-lap/`}>car rankings</a> for Gellhorn reference times. Your favorite build still has to earn its time on the board.</p>
         <dl class="facts">
-          <div><dt>Length</dt><dd class="p">After launch</dd></div>
-          <div><dt>Corners</dt><dd class="p">After launch</dd></div>
+          <div><dt>Length</dt><dd class="p">Not measured</dd></div>
+          <div><dt>Corners</dt><dd class="p">Not measured</dd></div>
           <div><dt>Track record</dt><dd id="ta-fact-rec">{st.rec ? lapTime(st.rec.lap_time_ms) : 'No record yet'}</dd></div>
         </dl>
       </div>
@@ -82,6 +101,19 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
         <p>Browse the cars, compare available specs and lap times, and pick your next Gellhorn entry.</p>
         <a href={`${base}cars/`} class="arrow lk">Browse cars →</a>
       </div>
+    </div>
+  </section>
+
+  <section class="wrap ta-sec" id="faq" aria-labelledby="faq-h">
+    <p class="eyebrow">FAQ</p>
+    <h2 class="lr-h2 display" id="faq-h">GTA VI race track FAQ</h2>
+    <div class="gf-faq card">
+      {faq.map((f) => (
+        <details>
+          <summary><h3>{f.q}</h3><span class="gf-faq-i" aria-hidden="true"></span></summary>
+          <p set:html={f.aHtml ?? f.a} />
+        </details>
+      ))}
     </div>
   </section>
 </Base>
@@ -134,6 +166,18 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
   .ta-3 h3 { margin: 0; font-size: var(--lr-h3); font-weight: 700; }
   .ta-3 p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--lr-soft); }
   .ta-3 p b { color: var(--lr-text); }
+  .track .txt a, .gf-faq p :global(a) { color: var(--lr-orange); }
+  .gf-faq { margin-top: 20px; padding: 0; }
+  .gf-faq details + details { border-top: 1px solid var(--lr-line); }
+  .gf-faq summary { display: flex; align-items: center; gap: 16px; padding: 16px 18px; cursor: pointer; list-style: none; }
+  .gf-faq summary::-webkit-details-marker { display: none; }
+  .gf-faq summary:hover h3 { color: var(--lr-orange); }
+  .gf-faq h3 { flex: 1; margin: 0; font-size: var(--lr-h3-xs); font-weight: 700; line-height: 1.4; }
+  .gf-faq-i { position: relative; flex: none; width: 14px; height: 14px; }
+  .gf-faq-i::before, .gf-faq-i::after { content: ''; position: absolute; left: 0; top: 6px; width: 14px; height: 2px; border-radius: 1px; background: var(--lr-muted); transition: transform .15s; }
+  .gf-faq-i::after { transform: rotate(90deg); }
+  .gf-faq details[open] .gf-faq-i::after { transform: rotate(0); }
+  .gf-faq p { margin: -4px 0 0; padding: 0 18px 18px; font-size: 15px; line-height: 1.65; color: var(--lr-soft); }
   .lk { margin-top: auto; } /* style = .arrow (DEC-0170) */
   .lk.off { color: var(--lr-muted); }
   .pill { align-self: flex-start; height: 24px; padding: 0 9px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .06em; display: inline-flex; align-items: center; gap: 6px; background: var(--lr-raised); color: var(--lr-soft); }
