@@ -1,6 +1,5 @@
 /* My Garage tile in the photo band of Cars and New cars (DEC-0163). Shared so both pages stay identical. */
 .garage-tile { flex: none; display: flex; flex-direction: column; gap: 8px; min-width: 260px; padding: 14px 16px; border: 1px solid var(--lr-line); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
-.garage-tile:hover { border-color: var(--lr-orange); }
 .garage-tile .gt-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
 .garage-tile .gt-eb { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
 .garage-tile .gt-cta { font-size: 13px; }

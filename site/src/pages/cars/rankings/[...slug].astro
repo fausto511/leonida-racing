@@ -181,7 +181,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
       <p class="rk-eb" id="rk-more-h">More in Cars</p>
       <div class="rk-more-grid">
         {more.map((m) => (
-          <a class="card rk-mcard" href={m.href}>
+          <a class="card rk-mcard lr-hcard lr-hlift" href={m.href}>
             <span class="rk-mcard-eb">{m.eb}</span>
             <span class="rk-mcard-t">{m.t}</span>
             <span class="rk-mcard-s">{m.s}</span>
@@ -269,7 +269,6 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
   .rk-more { padding-top: var(--lr-gap-sec); }
   .rk-more-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
   .rk-mcard { display: flex; flex-direction: column; gap: 6px; padding: 20px; color: var(--lr-text); text-decoration: none; }
-  .rk-mcard:hover { border-color: var(--lr-pink); }
   .rk-mcard-eb { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-soft); }
   .rk-mcard-t { font-size: 19px; font-weight: 700; line-height: 1.25; }
   .rk-mcard-s { font-size: 15px; line-height: 1.45; color: var(--lr-soft); }

@@ -123,8 +123,8 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
             { href: `${base}community/`, img: 'hub/hub-carmeet', eb: 'Events & Crews', name: 'Community', line: 'Find races, crews, and car meets.' },
             { href: `${base}guide/`, img: 'home/guide-tile', eb: 'Sourced', name: 'Guide', line: 'Facts, not rumors. All sourced.' },
           ].map((t) => (
-            <a href={t.href} class="htile">
-              <span class="htile-img"><img src={`${base}images/${t.img}-640.webp`} alt="" width="640" height="360" loading="eager" /><span class="htile-go" set:html={arrowSvg} /></span>
+            <a href={t.href} class="htile lr-hcard lr-hlift">
+              <span class="htile-img"><img class="lr-hzoom" src={`${base}images/${t.img}-640.webp`} alt="" width="640" height="360" loading="eager" /><span class="htile-go" set:html={arrowSvg} /></span>
               <span class="htile-body"><span class="htile-eb">{t.eb}</span><span class="htile-name">{t.name}</span><span class="htile-live">{t.line}</span></span>
             </a>
           ))}
@@ -136,19 +136,19 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         <p class="eyebrow">Your dashboard</p>
         <h2 class="display hero-title hero-title-dash" id="dash-title">Welcome</h2>
         <div class="htiles">
-          <a class="mtile" id="dash-lap" href={`${base}account/`}>
+          <a class="mtile lr-hcard lr-hlift" id="dash-lap" href={`${base}account/`}>
             <span class="mtile-top"><span class="mtile-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg></span><span class="htile-eb">Your best lap</span><span class="mtile-go" set:html={arrowSvg} /></span>
             <span class="mtile-val" data-val>…</span><span class="mtile-sub" data-sub>&nbsp;</span>
           </a>
-          <a class="mtile" id="dash-garage" href={`${base}account/garage/`}>
+          <a class="mtile lr-hcard lr-hlift" id="dash-garage" href={`${base}account/garage/`}>
             <span class="mtile-top"><span class="mtile-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12M7 21v-7h10v7"/></svg></span><span class="htile-eb">My Garage</span><span class="mtile-go" set:html={arrowSvg} /></span>
             <span class="mtile-val" data-val>…</span><span class="mbar"><i data-bar style="width:0%"></i></span><span class="mtile-sub" data-sub>&nbsp;</span>
           </a>
-          <a class="mtile" id="dash-crew" href={`${base}account/crew/`}>
+          <a class="mtile lr-hcard lr-hlift" id="dash-crew" href={`${base}account/crew/`}>
             <span class="mtile-top"><span class="mtile-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="htile-eb">Your crew</span><span class="mtile-go" set:html={arrowSvg} /></span>
             <span class="mtile-val" data-val>…</span><span class="mtile-sub" data-sub>&nbsp;</span>
           </a>
-          <a class="mtile" id="dash-events" href={`${base}account/events/`}>
+          <a class="mtile lr-hcard lr-hlift" id="dash-events" href={`${base}account/events/`}>
             <span class="mtile-top"><span class="mtile-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg></span><span class="htile-eb">Events</span><span class="mtile-go" set:html={arrowSvg} /></span>
             <span class="mtile-val" data-val>…</span><span class="mtile-sub" data-sub>&nbsp;</span>
           </a>
@@ -248,9 +248,9 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
     </div>
     <div class="cgrid cgrid-3" id="guide-cards">
       {[guideFixed, ...guideRest].map((s, i) => (
-        <article class="card gcard" data-rotate={i === 0 ? 'fixed' : i <= 2 ? 'pool-default' : 'pool'}>
+        <article class="card gcard lr-hcard lr-hlift" data-rotate={i === 0 ? 'fixed' : i <= 2 ? 'pool-default' : 'pool'}>
           <div class="g-img">
-            <img src={`${base}images/${GUIDE_CARD[s.id].img}-640.webp`} srcset={`${base}images/${GUIDE_CARD[s.id].img}-640.webp 640w, ${base}images/${GUIDE_CARD[s.id].img}-1280.webp 1280w`} sizes="(max-width: 760px) 272px, 420px" alt="" width="640" height="360" loading="lazy" />
+            <img class="lr-hzoom" src={`${base}images/${GUIDE_CARD[s.id].img}-640.webp`} srcset={`${base}images/${GUIDE_CARD[s.id].img}-640.webp 640w, ${base}images/${GUIDE_CARD[s.id].img}-1280.webp 1280w`} sizes="(max-width: 760px) 272px, 420px" alt="" width="640" height="360" loading="lazy" />
             {s.status && <span class="g-status"><i aria-hidden="true"></i>{s.status}</span>}
           </div>
           <div class="g-body">
@@ -310,7 +310,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .hero-sub { margin: 0; max-width: 760px; font-size: 18px; line-height: 1.6; color: var(--lr-text); font-weight: 500; text-wrap: balance; text-shadow: 0 1px 12px rgba(11,11,20,.9), 0 0 2px rgba(11,11,20,.6); }
   .htiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 10px; }
   .htile { position: relative; display: flex; flex-direction: column; background: rgba(20,20,31,.88); border: 1px solid var(--lr-line); border-radius: 8px; overflow: hidden; backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s, transform .15s; }
-  .htile:hover, .htile:focus-visible { border-color: var(--lr-orange); transform: translateY(-2px); outline: none; }
+  .htile:focus-visible { border-color: var(--lr-orange); outline: none; }
   .htile-img { position: relative; display: block; aspect-ratio: 16 / 6.4; overflow: hidden; background: var(--lr-raised); }
   .htile-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .htile-go, .mtile-go { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; transition: background .15s, color .15s; }
@@ -322,7 +322,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .htile-name { font-family: var(--gh-font-display); font-weight: 800; text-transform: uppercase; font-size: 22px; line-height: 1; }
   .htile-live { display: block; margin-top: 4px; font-size: 14px; line-height: 1.45; color: var(--lr-text); }
   .mtile { display: flex; flex-direction: column; gap: 8px; min-height: 150px; padding: 18px; background: rgba(20,20,31,.9); border: 1px solid var(--lr-line); border-radius: 8px; backdrop-filter: blur(6px); color: var(--lr-text); text-decoration: none; transition: border-color .15s, transform .15s; }
-  .mtile:hover, .mtile:focus-visible { border-color: var(--lr-orange); transform: translateY(-2px); outline: none; }
+  .mtile:focus-visible { border-color: var(--lr-orange); outline: none; }
   .mtile-top { display: flex; align-items: center; gap: 8px; }
   .mtile-ic { display: inline-flex; color: var(--lr-orange); }
   .mtile-go { margin-left: auto; width: 30px; height: 30px; color: var(--lr-muted); }
@@ -452,7 +452,6 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
 
   /* ---- guide cards ---- */
   .gcard { position: relative; display: flex; flex-direction: column; transition: border-color .15s; }
-  .gcard:hover { border-color: var(--lr-orange); }
   .g-img { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--lr-raised); }
   .g-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .g-status { position: absolute; left: 12px; top: 12px; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--lr-dark-80); backdrop-filter: blur(4px); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; }
@@ -502,7 +501,6 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
     .hero-sub { font-size: 15px; line-height: 1.5; }
     .htiles { grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 4px; }
     .htile { flex-direction: row; align-items: stretch; }
-    .htile:hover { transform: none; }
     .htile-img { width: 104px; flex: none; aspect-ratio: auto; }
     .htile-go { display: none; }
     .htile-body { flex: 1; min-width: 0; padding: 10px 36px 10px 12px; justify-content: center; position: relative; }
@@ -512,7 +510,6 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
     .hero-dash .htiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .mtile { min-width: 0; }
     .mtile { min-height: 118px; padding: 12px; gap: 6px; }
-    .mtile:hover { transform: none; }
     .mtile-val { font-size: 18px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
     .mtile-val :global(small) { font-size: 13px; }
     .mtile-sub { font-size: 12px; }

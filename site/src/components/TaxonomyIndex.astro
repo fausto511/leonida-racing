@@ -68,13 +68,13 @@ const jsonLd = [{
 
   <section class:list={['wrap', 'ti-grid', { 'ti-grid-logos': kind === 'manufacturer' }]} aria-label={heading}>
     {cards.map((c) => (
-      <a class="ti-card" href={`${base}cars/${dir}/${c.page.slug}/`}>
-        <span class="ti-photo">
+      <a class="ti-card lr-hcard" href={`${base}cars/${dir}/${c.page.slug}/`}>
+        <span class="ti-photo lr-hmedia">
           {c.cover
-            ? <img src={`${base}images/vehicles/${c.cover.id}-640.webp`} alt="" width="640" height="360" loading="lazy" />
-            : <img class="ti-fallback" src={`${base}images/garage/garage-hero-placeholder-640.webp`} alt="" width="640" height="360" loading="lazy" />}
+            ? <img class="lr-hzoom" src={`${base}images/vehicles/${c.cover.id}-640.webp`} alt="" width="640" height="360" loading="lazy" />
+            : <img class="ti-fallback lr-hzoom" src={`${base}images/garage/garage-hero-placeholder-640.webp`} alt="" width="640" height="360" loading="lazy" />}
           {/* Manufacturers: darkened photo + big white logo (Fausto, 2026-10-03; classes stay plain). Logos: logos/tile/, equal visual area per logo. */}
-          {kind === 'manufacturer' && c.logo && <img class="ti-badge" src={`${base}images/logos/tile/${c.logo}.webp`} alt="" width="600" height="360" loading="lazy" />}
+          {kind === 'manufacturer' && c.logo && <img class="ti-badge lr-hzoom" src={`${base}images/logos/tile/${c.logo}.webp`} alt="" width="600" height="360" loading="lazy" />}
           <span class="ti-count">{c.count} {c.count === 1 ? 'car' : 'cars'}</span>
         </span>
         <span class="ti-body">
@@ -110,11 +110,9 @@ const jsonLd = [{
 
   .ti-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; padding-top: 32px; }
   .ti-card { display: flex; flex-direction: column; background: var(--lr-card); border: 1px solid var(--lr-line-strong); border-radius: 8px; overflow: hidden; color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
-  .ti-card:hover { border-color: var(--lr-pink); }
   .ti-photo { position: relative; aspect-ratio: 16/9; background: var(--lr-line-soft); }
   .ti-grid-logos .ti-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,11,20,.72), rgba(11,11,20,.88)); }
-  .ti-photo .ti-badge { position: absolute; inset: 0; margin: auto; z-index: 1; width: 100%; height: 100%; max-height: 120px; object-fit: contain; filter: drop-shadow(0 2px 10px rgba(11,11,20,.55)); transition: transform .2s; }
-  .ti-card:hover .ti-badge { transform: scale(1.04); }
+  .ti-photo .ti-badge { position: absolute; inset: 0; margin: auto; z-index: 1; width: 100%; height: 100%; max-height: 120px; object-fit: contain; filter: drop-shadow(0 2px 10px rgba(11,11,20,.55)); }
   .ti-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .ti-fallback { opacity: .45; filter: saturate(.7); }
   .ti-count { position: absolute; z-index: 2; right: 10px; bottom: 10px; padding: 3px 9px; border-radius: 999px; background: var(--lr-dark-80); border: 1px solid var(--lr-line-strong); font-size: 12px; font-weight: 600; color: var(--lr-text); }

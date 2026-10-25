@@ -52,8 +52,8 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
 
   <section class="wrap cm-entries">
     {entries.map((e) => (
-      <a class="cm-entry card" href={e.href}>
-        <img src={`${base}images/hub/community-entry-${e.img}-640.webp`} srcset={`${base}images/hub/community-entry-${e.img}-640.webp 640w, ${base}images/hub/community-entry-${e.img}-1280.webp 1280w`} sizes="(max-width: 760px) 120px, 420px" alt="" width="640" height="360" loading="lazy" style={e.pos ? `object-position:${e.pos}` : undefined} />
+      <a class="cm-entry card lr-hcard lr-hlift" href={e.href}>
+        <span class="cm-entry-ph lr-hmedia"><img class="lr-hzoom" src={`${base}images/hub/community-entry-${e.img}-640.webp`} srcset={`${base}images/hub/community-entry-${e.img}-640.webp 640w, ${base}images/hub/community-entry-${e.img}-1280.webp 1280w`} sizes="(max-width: 760px) 120px, 420px" alt="" width="640" height="360" loading="lazy" style={e.pos ? `object-position:${e.pos}` : undefined} /></span>
         <span class="cm-entry-b">
           <span class="eyebrow">{e.eb}</span>
           <strong class="display">{e.title}</strong>
@@ -138,8 +138,8 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   /* ---- entry cards ---- */
   .cm-entries { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px; padding-top: 28px; }
   .cm-entry { display: flex; flex-direction: column; overflow: hidden; padding: 0; text-decoration: none; color: var(--lr-text); transition: border-color .15s; }
-  .cm-entry:hover { border-color: var(--lr-line-hover); }
-  .cm-entry img { display: block; width: 100%; height: 170px; object-fit: cover; object-position: 50% 40%; background: var(--lr-raised); }
+  .cm-entry-ph { position: relative; display: block; height: 170px; background: var(--lr-raised); }
+  .cm-entry-ph img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
   .cm-entry-b { display: flex; flex-direction: column; gap: 6px; padding: 18px; flex: 1; }
   .cm-entry-b strong { font-size: 26px; line-height: 1; }
   .cm-entry-b .t-long { font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
@@ -174,7 +174,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
     .cm-hero { grid-template-columns: 1fr; gap: 22px; }
       .cm-entries { grid-template-columns: 1fr; gap: 12px; padding-top: 20px; }
     .cm-entry { flex-direction: row; align-items: stretch; }
-    .cm-entry img { width: 112px; height: auto; min-height: 84px; flex: none; }
+    .cm-entry-ph { width: 112px; height: auto; min-height: 84px; flex: none; }
     .cm-entry-b { position: relative; gap: 4px; padding: 14px 44px 14px 16px; justify-content: center; }
     .cm-entry-b .eyebrow, .cm-entry-b .t-long { display: none; }
     .cm-entry-b .t-short { display: block; font-size: 14px; line-height: 1.4; color: var(--lr-soft); }

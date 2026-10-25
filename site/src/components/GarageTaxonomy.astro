@@ -159,7 +159,7 @@ const more = custom
       </div>
       )}
       {custom?.garageTile ? (
-        <a class="garage-tile" id="garage-tile" href={`${base}account/garage/`}>
+        <a class="garage-tile lr-hcard lr-hlift" id="garage-tile" href={`${base}account/garage/`}>
           <span class="gt-top"><span class="gt-eb">My Garage</span><span class="arrow gt-cta" id="gt-cta">Log in to start →</span></span>
           <span class="gt-val"><span id="gt-owned">0</span> <small>/ {N} owned</small></span>
           <span class="mbar"><i id="gt-bar" style="width:0%"></i></span>
@@ -224,7 +224,7 @@ const more = custom
         <p class="tsec-eb">More on {heading}</p>
         <div class="tmore-grid">
           {more.map((m) => (
-            <a class="tm" href={m.href}>
+            <a class="tm lr-hcard lr-hlift" href={m.href}>
               <span class="tm-eb"><Fragment set:html={m.ico} />{m.eb}</span>
               <b class="tm-t">{m.t}</b>
               <span class="tm-s">{m.s}</span>
@@ -382,7 +382,6 @@ const more = custom
   .tmore { padding-top: calc(var(--lr-gap-sec) - 24px); } /* grid-wrap above ends with 24px padding */
   .tmore-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
   .tm { display: flex; flex-direction: column; gap: 6px; padding: 18px 20px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
-  .tm:hover { border-color: var(--lr-orange); }
   .tm-eb { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-soft); }
   .tm-t { font-size: 19px; font-weight: 700; line-height: 1.25; }
   .tm-s { font-size: 15px; line-height: 1.45; color: var(--lr-soft); }

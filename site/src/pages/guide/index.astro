@@ -84,7 +84,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
       <div class="gd-tile">
         <p class="gd-tile-eb">At a glance</p>
         <div class="gd-glance">
-          {glance.map((g) => <a href={g.href}><strong>{g.v}</strong><span>{g.l}</span></a>)}
+          {glance.map((g) => <a class="lr-hcard lr-hlift" href={g.href}><strong>{g.v}</strong><span>{g.l}</span></a>)}
           <div><strong class="is-date"><time datetime={GUIDE_UPDATED}>{updatedShort}</time></strong><span>Last updated</span></div>
         </div>
       </div>
@@ -135,7 +135,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
                 const sp = sourceParts(x);
                 return (
                   <li>
-                    <a class="lr-noext" href={x.url} target="_blank" rel="noopener">
+                    <a class="lr-noext lr-hcard" href={x.url} target="_blank" rel="noopener">
                       <span class="gd-src-top"><span class:list={['gd-kind', `is-${sp.kind}`]}>{kindLabel[sp.kind]}</span><span class="gd-src-pub">{sp.publisher}</span></span>
                       <span class="gd-src-t lr-ext-after">{sp.title}</span>
                       {x.note && <span class="gd-src-n">{x.note}</span>}
@@ -155,8 +155,8 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
           {entries.map((c) => {
             const m = entryMeta[c.name];
             return (
-              <a class="gd-entry card" href={`${base}${m.href}`}>
-                <img src={`${base}${m.img}`} srcset={m.srcset} sizes="(max-width: 760px) 112px, 260px" alt="" width="640" height="360" loading="lazy" style={m.pos ? `object-position:${m.pos}` : undefined} />
+              <a class="gd-entry card lr-hcard lr-hlift" href={`${base}${m.href}`}>
+                <span class="gd-entry-ph lr-hmedia"><img class="lr-hzoom" src={`${base}${m.img}`} srcset={m.srcset} sizes="(max-width: 760px) 112px, 260px" alt="" width="640" height="360" loading="lazy" style={m.pos ? `object-position:${m.pos}` : undefined} /></span>
                 <span class="gd-entry-b">
                   <strong class="display">{c.name}</strong>
                   <span class="t">{c.name} {c.text}</span>
@@ -207,7 +207,6 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-tile-eb { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .gd-glance { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
   .gd-glance > * { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 6px; border: 1px solid var(--lr-line); background: var(--lr-dark-60); color: var(--lr-text); text-decoration: none; }
-  .gd-glance > a:hover { border-color: var(--lr-line-strong); background: rgba(28,28,42,.7); }
   .gd-glance strong { font-family: var(--gh-font-display); font-size: 30px; font-weight: 800; line-height: 1; color: var(--lr-lime); }
   .gd-glance strong.is-date { font-size: 22px; line-height: 30px; color: var(--lr-text); }
   .gd-glance span { font-size: 12px; line-height: 1.3; color: var(--lr-muted); }
@@ -254,7 +253,6 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-src ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .gd-src li { display: flex; }
   .gd-src a { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
-  .gd-src a:hover { border-color: var(--lr-line-strong); }
   .gd-src a:hover .gd-src-t { color: var(--lr-orange); }
   .gd-src-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .gd-kind { padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
@@ -268,8 +266,8 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   /* entry cards */
   .gd-entries { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 6px; }
   .gd-entry { display: flex; flex-direction: column; padding: 0; color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
-  .gd-entry:hover { border-color: var(--lr-line-hover); }
-  .gd-entry img { display: block; width: 100%; height: 120px; object-fit: cover; background: var(--lr-raised); }
+  .gd-entry-ph { position: relative; display: block; height: 120px; background: var(--lr-raised); }
+  .gd-entry-ph img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
   .gd-entry-b { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 16px; }
   .gd-entry-b strong { font-size: 22px; line-height: 1; }
   .gd-entry-b .t { font-size: 13px; line-height: 1.5; color: var(--lr-soft); }
@@ -324,7 +322,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
     .gd-src ul { grid-template-columns: 1fr; }
     .gd-entries { grid-template-columns: 1fr; gap: 10px; }
     .gd-entry { flex-direction: row; }
-    .gd-entry img { width: 112px; height: auto; min-height: 96px; flex: none; }
+    .gd-entry-ph { width: 112px; height: auto; min-height: 96px; flex: none; }
     .gd-entry-b { padding: 12px 14px; }
     .gd-entry-b strong { font-size: 20px; }
     .gd-faq summary { padding: 14px; }

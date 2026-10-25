@@ -63,8 +63,8 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
     <h3>Or head somewhere else</h3>
     <div class="g4">
       {tiles.map((t) => (
-        <a href={t.href}>
-          <img src={`${base}images/${t.img}-640.webp`} alt="" width="640" height="320" loading="lazy" />
+        <a class="lr-hcard lr-hlift" href={t.href}>
+          <span class="g4-ph lr-hmedia"><img class="lr-hzoom" src={`${base}images/${t.img}-640.webp`} alt="" width="640" height="320" loading="lazy" /></span>
           <span class="b">
             <span class="g4-h display">{t.name}</span>
             <span class="g4-p">{t.line}</span>
@@ -210,7 +210,7 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
   .nft h3 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-muted); }
   .g4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 14px; }
   .g4 a { position: relative; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; background: var(--lr-card); border: 1px solid var(--lr-line); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
-  .g4 a:hover { border-color: var(--lr-orange); }
+  .g4-ph { display: block; }
   .g4 img { width: 100%; height: auto; aspect-ratio: 16 / 8; object-fit: cover; display: block; }
   .g4 .b { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
   .g4-h { font-size: 22px; line-height: 1.05; }
@@ -261,7 +261,8 @@ const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 
     .g4 { grid-template-columns: 1fr; gap: 10px; }
     .g4 a { flex-direction: row; align-items: center; }
     .g4 a { align-items: stretch; min-height: 96px; }
-    .g4 img { width: 104px; height: 0; min-height: 100%; aspect-ratio: auto; flex: none; }
+    .g4-ph { position: relative; width: 104px; flex: none; }
+    .g4 img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; }
     .g4-arrow { align-self: center; }
     .g4 .b { flex: 1; min-width: 0; padding: 14px 8px 14px 14px; gap: 2px; }
     .g4-h { font-size: 19px; }

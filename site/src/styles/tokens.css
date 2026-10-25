@@ -187,6 +187,19 @@ a { color: inherit; }
 :where(button, summary, [role="button"], [tabindex]:not([tabindex="-1"]), input[type="checkbox"], input[type="radio"]):focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
 :where(input[type="checkbox"], input[type="radio"]) { accent-color: var(--lr-orange); }
 @media (max-width: 760px) { :root { --lr-gap-sec: 48px; --lr-gap-head: 32px; } }
+/* Clickable cards (DEC-0180, Fausto 25.10.2026). Every card that is a link as a whole: border turns orange on hover.
+   .lr-hlift: groups of only a few cards (about 3-5) also lift by 2px. Long lists and grids don't lift.
+   .lr-hzoom: the card's photo or logo zooms to 103% inside its frame (.lr-hmedia clips it).
+   Motion only with a real mouse and when the visitor hasn't asked for reduced motion.
+   List rows are different: they get a lighter background (--lr-white-hover), no border. */
+.lr-hcard { transition: border-color .15s, transform .2s ease !important; }
+.lr-hcard:hover { border-color: var(--lr-orange) !important; }
+.lr-hmedia { overflow: hidden; }
+.lr-hzoom { transition: transform .3s ease; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .lr-hcard.lr-hlift:hover { transform: translateY(-2px); }
+  .lr-hcard:hover .lr-hzoom { transform: scale(1.03); }
+}
 @media (pointer: coarse) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not(.lr-field-xl), select, textarea { font-size: 16px !important; }
 }

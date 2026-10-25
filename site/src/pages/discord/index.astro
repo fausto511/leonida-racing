@@ -155,7 +155,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
       <ul>{discordRules.map((r) => <li>{r}</li>)}</ul>
       <p class="dsec-small">Read the full rules in #rules on the server.</p>
     </div>
-    <a class="bot" href={`${base}discord/bot/`}>
+    <a class="bot lr-hcard lr-hlift" href={`${base}discord/bot/`}>
       <p class="eyebrow dsec-eb">{discordBotTeaser.eyebrow}</p>
       <h2 class="lr-h2 lr-h2-s bot-t">{discordBotTeaser.title}</h2>
       <p class="bot-p">{discordBotTeaser.text}</p>
@@ -282,7 +282,6 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .rules ul { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.5; color: var(--lr-text); }
   .bot > .dsec-eb { margin: 0; } /* the card gap already gives 8px */
   .bot { display: flex; flex-direction: column; gap: 8px; padding: 22px 24px; border-radius: 8px; border: 1px solid var(--lr-line-strong); background: linear-gradient(140deg, rgba(42,31,158,.35), rgba(177,42,140,.25) 55%, rgba(242,106,61,.18)), var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
-  .bot:hover { border-color: var(--lr-orange); }
   .bot-t { margin: 0; }
   .bot-p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--lr-text); }
   .bot-cmds { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }

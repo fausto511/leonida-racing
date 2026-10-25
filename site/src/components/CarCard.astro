@@ -34,13 +34,13 @@ const price = vehicleValues[v.id]?.price_gtad?.value;
 const speed = vehicleValues[v.id]?.top_speed_mph?.value;
 const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 ---
-<article class:list={['card vcard', { 'vc-cars': cars, 'vc-list': cars && list }]} data-id={v.id} data-rotate={rotate} {...dataAttrs}>
+<article class:list={['card vcard lr-hcard', { 'vc-cars': cars, 'vc-list': cars && list }]} data-id={v.id} data-rotate={rotate} {...dataAttrs}>
   <a href={href} class="vc-img" tabindex="-1" aria-hidden="true">
     {v.photo ? (
-      <img src={`${base}images/vehicles/${v.id}-640.webp`} srcset={`${base}images/vehicles/${v.id}-640.webp 640w, ${base}images/vehicles/${v.id}-1280.webp 1280w`} sizes="(max-width: 760px) 272px, 320px" alt="" width="640" height="360" loading="lazy" />
+      <img class="lr-hzoom" src={`${base}images/vehicles/${v.id}-640.webp`} srcset={`${base}images/vehicles/${v.id}-640.webp 640w, ${base}images/vehicles/${v.id}-1280.webp 1280w`} sizes="(max-width: 760px) 272px, 320px" alt="" width="640" height="360" loading="lazy" />
     ) : (
       <span class="vc-ph">
-        <img class="vc-ph-bg" src={`${base}images/garage/garage-hero-placeholder-640.webp`} alt="" width="640" height="360" loading="lazy" />
+        <img class="vc-ph-bg lr-hzoom" src={`${base}images/garage/garage-hero-placeholder-640.webp`} alt="" width="640" height="360" loading="lazy" />
         <img class="vc-ph-logo" src={`${base}images/logos/${v.logoSlug}-gta-6-logo.svg`} alt="" width="92" height="92" loading="lazy" />
         <span class="vc-ph-pill">Photo coming</span>
       </span>
@@ -79,7 +79,6 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 
 <style>
   .vcard { position: relative; display: flex; flex-direction: column; transition: border-color .15s; }
-  .vcard:hover { border-color: var(--lr-orange); }
   .vc-img { position: relative; display: block; aspect-ratio: 16 / 10; background: var(--lr-raised); overflow: hidden; }
   .vc-img > img, .vc-ph-bg { width: 100%; height: 100%; object-fit: cover; display: block; }
   .vc-ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
