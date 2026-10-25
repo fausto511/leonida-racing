@@ -373,7 +373,8 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     t.querySelector('[data-cars]')!.textContent = s.cars.toLocaleString('en-US');
     (t.querySelector('[data-sample]') as HTMLElement).hidden = !sample;
     const f = document.getElementById('ta-fact-rec');
-    if (f) f.textContent = s.rec ? lapTime(s.rec.lap_time_ms) : 'No record yet';
+    // Sample times only appear in the labelled hero tile, never as a track fact.
+    if (f) f.textContent = !sample && s.rec ? lapTime(s.rec.lap_time_ms) : 'No record yet';
   }
 
   type RankRow = { scope: string; scope_key: string; rank: number; run_id: string; driver_id: string; vehicle_id: string; make: string; model: string; lap_time_ms: number; gap_to_ahead_ms: number | null; ahead_driver: string | null };
