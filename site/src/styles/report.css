@@ -25,7 +25,7 @@
 .rep-form { display: grid; gap: 16px; }
 .rep-step { display: grid; gap: 14px; padding: 22px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
 .rep-step-title { margin: 0; display: flex; align-items: center; gap: 12px; font-family: var(--gh-font-display); font-size: 20px; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
-.rep-step-title span { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 999px; background: var(--lr-orange); color: var(--lr-on-orange); font-family: inherit; font-size: 14px; font-weight: 800; }
+/* .rep-step-title span: look from .lr-step-n (DEC-0183) */
 
 .rep-reasons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .rep-reasons label { position: relative; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 10px 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-bg); font-size: 15px; font-weight: 500; color: var(--lr-text); cursor: pointer; }

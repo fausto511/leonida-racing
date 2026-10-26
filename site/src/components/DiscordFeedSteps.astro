@@ -53,8 +53,8 @@ const pick = source === 'crew' ? 'My crew' : 'My host profile';
   .dfs-body { padding: 0 1.1rem 1.1rem; }
   .dfs-note { margin: 0 0 1rem; font-size: .86rem; color: var(--gh-muted); }
   .dfs-steps { margin: 0; padding: 0; list-style: none; counter-reset: dfs; display: grid; gap: .9rem; }
-  .dfs-steps li { counter-increment: dfs; position: relative; padding-left: 2.4rem; display: grid; gap: .3rem; justify-items: start; font-size: .88rem; }
-  .dfs-steps li::before { content: counter(dfs); position: absolute; left: 0; top: 0; width: 1.7rem; height: 1.7rem; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: .8rem; background: var(--lr-orange); color: var(--lr-on-orange); }
+  .dfs-steps li { counter-increment: dfs; position: relative; padding-left: 44px; display: grid; gap: .3rem; justify-items: start; font-size: .88rem; }
+  .dfs-steps li::before { content: counter(dfs); position: absolute; left: 0; top: 0; width: 32px; height: 32px; box-sizing: border-box; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--lr-orange-border); background: none; color: var(--lr-orange); font-family: var(--gh-font-body); font-size: 14px; font-weight: 700; line-height: 1; } /* same look as .lr-step-n (DEC-0183) */
   .dfs-steps span { color: var(--gh-muted); }
   .dfs-steps code { font-size: .84em; padding: .05rem .35rem; border-radius: 4px; background: var(--gh-line); color: var(--gh-text); }
   .dfs-btn { margin-top: .2rem; }

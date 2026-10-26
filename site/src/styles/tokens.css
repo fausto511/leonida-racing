@@ -217,6 +217,9 @@ a { color: inherit; }
 .lr-empty-panel { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 20px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
 .lr-empty-panel p { margin: 0; flex: 1 1 320px; max-width: 600px; font-size: 15px; line-height: 1.5; color: var(--lr-text); }
 .lr-empty[hidden], .lr-empty-panel[hidden] { display: none; }
+/* Step numbers (DEC-0183, Fausto 26.10.2026): one circle everywhere, 32px, orange outline, orange number.
+   Outline, not filled: a filled orange circle reads like a button. */
+.lr-step-n { display: inline-grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--lr-orange-border); background: none; color: var(--lr-orange); font-family: var(--gh-font-body); font-size: 14px; font-weight: 700; line-height: 1; }
 .lr-hcard { transition: border-color .15s, transform .2s ease !important; }
 .lr-hcard:hover { border-color: var(--lr-orange) !important; }
 .lr-hmedia { overflow: hidden; }

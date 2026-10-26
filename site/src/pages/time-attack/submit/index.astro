@@ -42,9 +42,9 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
         <p class="eyebrow sb-eb">Three short steps</p>
         <h2 class="lr-h2 lr-h2-s sb-h2">Log in, then three short steps</h2>
         <ol class="sb-steps-preview">
-          <li><b>1</b><span><strong>Proof</strong>A results screenshot, a YouTube link to your full lap, or both.</span></li>
-          <li><b>2</b><span><strong>Your lap</strong>PSN name, car and lap time.</span></li>
-          <li><b>3</b><span><strong>Submit</strong>Check it once and send. A moderator reviews it.</span></li>
+          <li><b class="lr-step-n">1</b><span><strong>Proof</strong>A results screenshot, a YouTube link to your full lap, or both.</span></li>
+          <li><b class="lr-step-n">2</b><span><strong>Your lap</strong>PSN name, car and lap time.</span></li>
+          <li><b class="lr-step-n">3</b><span><strong>Submit</strong>Check it once and send. A moderator reviews it.</span></li>
         </ol>
         <p class="sb-ps"><span class="sb-plat">PS5</span>PS5 laps only for now. Xbox and PC support is planned.</p>
         <button type="button" id="discord-signin-btn" class="btn btn-discord sb-login">
@@ -237,7 +237,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   .sb-guest .sb-h2 { margin-top: 8px; }
   .sb-steps-preview { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 12px; }
   .sb-steps-preview li { display: flex; gap: 14px; align-items: flex-start; }
-  .sb-steps-preview b { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--lr-orange-border); color: var(--lr-orange); font-size: 14px; }
+  /* .sb-steps-preview b: look from .lr-step-n (DEC-0183) */
   .sb-steps-preview span { display: flex; flex-direction: column; gap: 2px; font-size: 14px; line-height: 1.45; color: var(--lr-soft); }
   .sb-steps-preview strong { font-size: 15px; color: var(--lr-text); }
   .sb-guest .sb-ps { margin-top: 20px; }

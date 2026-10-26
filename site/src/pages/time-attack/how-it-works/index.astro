@@ -75,7 +75,7 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
       <h2 class="lr-h2 lr-h2-s hw-h2" id="hw-steps-h">From the track to the leaderboard</h2>
       <ol class="hw-steps">
         {steps.map((s, i) => (
-          <li><span class="hw-n">{i + 1}</span><strong>{s.t}</strong><span class="hw-c">{s.c}</span></li>
+          <li><span class="hw-n lr-step-n">{i + 1}</span><strong>{s.t}</strong><span class="hw-c">{s.c}</span></li>
         ))}
       </ol>
     </section>
@@ -160,7 +160,7 @@ const video = 'M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 
 
   .hw-steps { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; counter-reset: s; }
   .hw-steps li { position: relative; display: flex; flex-direction: column; gap: 6px; }
-  .hw-n { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 6px; border-radius: 50%; border: 1px solid var(--lr-orange-border); color: var(--lr-orange); font-weight: 700; font-size: 15px; }
+  .hw-n { margin-bottom: 6px; } /* look from .lr-step-n (DEC-0183) */
   .hw-steps li:not(:last-child)::after { content: ''; position: absolute; top: 17px; left: 46px; right: -12px; height: 1px; background: var(--lr-line-strong); }
   .hw-steps strong { font-size: 16px; }
   .hw-c { font-size: 14px; line-height: 1.5; color: var(--lr-soft); }

@@ -71,9 +71,9 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
       <h3>Put a time on the board</h3>
       <p class="sub">Three steps to get your lap listed.</p>
       <ol class="steps">
-        <li><b>1</b><span>Drive Gellhorn in GTA VI and take a screenshot of the results screen.</span></li>
-        <li><b>2</b><span>Submit the screenshot and select the car you drove. Add a full, uncut lap video for video verification.</span></li>
-        <li><b>3</b><span>Once accepted, your lap shows up overall, in your class and on the car’s page.</span></li>
+        <li><b class="lr-step-n">1</b><span>Drive Gellhorn in GTA VI and take a screenshot of the results screen.</span></li>
+        <li><b class="lr-step-n">2</b><span>Submit the screenshot and select the car you drove. Add a full, uncut lap video for video verification.</span></li>
+        <li><b class="lr-step-n">3</b><span>Once accepted, your lap shows up overall, in your class and on the car’s page.</span></li>
       </ol>
       <div class="box-cta">
         <a href={`${base}time-attack/submit/`} class="btn btn-p"><Fragment set:html={stopwatch} />Submit a lap</a>
@@ -200,7 +200,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .need-all[hidden] { display: none; }
   .steps { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
   .steps li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; color: var(--lr-text); }
-  .steps b { flex: none; width: 26px; height: 26px; border-radius: 999px; background: var(--lr-raised); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; color: var(--lr-orange); }
+  /* .steps b: look from .lr-step-n (DEC-0183) */
   .box-cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: auto; padding-top: 18px; }
   .box-cta .btn { min-height: 40px; height: 40px; padding: 0 16px; font-size: 14px; }
 
