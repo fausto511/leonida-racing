@@ -207,7 +207,7 @@
 /* Search/dropdown look: site-wide .ui-search / .ui-select (tokens.css). */
 .hub-search { flex: 0 1 18rem; min-width: 12rem; }
 .hub-count { margin: 0; color: var(--gh-muted); font-size: .8rem; }
-.hub-empty { padding: 2.5rem 1rem; text-align: center; color: var(--gh-muted); border: 1px dashed var(--gh-line); border-radius: var(--gh-radius-lg); }
+.hub-empty { } /* box: .lr-empty (DEC-0182) */
 .hub-note { margin: 2rem 0 0; padding: 1rem 1.2rem; border-left: 3px solid var(--gh-yellow); background: var(--gh-surface-soft); color: var(--gh-muted); font-size: .85rem; line-height: 1.6; }
 .crew-card[hidden], .ev-row[hidden] { display: none; }
 
@@ -252,7 +252,7 @@ a.crew-pill { text-decoration: none; }
 .mem-name { font-weight: 700; flex: 1 1 10rem; min-width: 0; overflow-wrap: anywhere; }
 .mem-date { color: var(--gh-muted); font-size: .75rem; }
 .mem-actions { display: flex; gap: .4rem; }
-.mem-empty { color: var(--gh-muted); font-size: .82rem; margin: .3rem 0; }
+.mem-empty { color: var(--lr-muted); font-size: 14px; margin: .3rem 0; }
 .li-pill.req { color: var(--lr-on-orange); background: var(--gh-yellow); border-color: var(--gh-yellow); }
 .tab-count { display: inline-block; margin-left: .35rem; padding: 0 .4rem; border-radius: 999px; background: var(--gh-yellow); color: var(--lr-on-orange); font-style: normal; font-size: .7rem; }
 

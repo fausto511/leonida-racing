@@ -21,7 +21,7 @@ const base = import.meta.env.BASE_URL;
     <h1 class="display account-title">My Account</h1>
     <AccountSubnav active="events" />
 
-    <div id="acc-auth" class="panel acc-auth" hidden>
+    <div id="acc-auth" class="acc-auth lr-empty-panel" hidden>
       <p>Sign in with Discord to see your events.</p>
       <button type="button" id="acc-signin" class="btn btn-discord">Sign in with Discord</button>
     </div>
@@ -57,8 +57,7 @@ const base = import.meta.env.BASE_URL;
   [hidden] { display: none !important; }
   .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
   .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
-  .acc-auth { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .acc-auth p { margin: 0; font-size: .88rem; }
+  .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
   .ev-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.2rem; }
   .ev-cta p { margin: 0; color: var(--gh-muted); font-size: .9rem; max-width: 40rem; }
   .ev-cta strong { color: var(--gh-text); }
@@ -77,7 +76,7 @@ const base = import.meta.env.BASE_URL;
   :global(.hs-row .hs-title) { flex: 1 1 12rem; font-weight: 700; }
   :global(.hs-row .hs-count) { color: var(--gh-text); }
   :global(.hs-row .hs-names) { flex: 1 1 100%; color: var(--gh-muted); font-size: .8rem; }
-  :global(.rsvp-empty) { margin: 0; color: var(--gh-muted); font-size: .88rem; }
+  :global(.rsvp-empty) { margin: 0; color: var(--lr-muted); font-size: 14px; }
 </style>
 
 <script>

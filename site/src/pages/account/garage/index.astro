@@ -24,7 +24,7 @@ const vehicleIndex = [...vehicleOptions]
     <h1 class="display account-title">My Account</h1>
     <AccountSubnav active="garage" />
 
-    <div id="acc-auth" class="panel acc-auth" hidden>
+    <div id="acc-auth" class="acc-auth lr-empty-panel" hidden>
       <p>Sign in with Discord to see your garage.</p>
       <button type="button" id="acc-signin" class="btn btn-discord">Sign in with Discord</button>
     </div>
@@ -54,8 +54,7 @@ const vehicleIndex = [...vehicleOptions]
   [hidden] { display: none !important; }
   .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
   .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
-  .acc-auth { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .acc-auth p { margin: 0; font-size: .88rem; }
+  .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
   .section-heading { margin: 0 0 .3rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
   .mg-count { color: var(--gh-muted); font-size: .95rem; }
   .section-lede { margin: 0 0 1.4rem; color: var(--gh-muted); font-size: .88rem; max-width: 42rem; }
@@ -106,7 +105,7 @@ const vehicleIndex = [...vehicleOptions]
   :global(.mg-opt .mg-make) { color: var(--gh-muted); font-size: .8rem; }
   :global(.mg-opt:disabled) { cursor: default; opacity: .55; }
   :global(.mg-opt .mg-have) { margin-left: auto; font-size: .68rem; font-weight: 800; text-transform: uppercase; color: var(--gh-yellow); }
-  :global(.mg-none) { padding: 1rem .5rem; color: var(--gh-muted); font-size: .88rem; }
+  :global(.mg-none) { padding: 1rem .5rem; color: var(--lr-muted); font-size: 14px; }
   @media (max-width: 560px) {
     .mg-picker { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; border-radius: 0; border: none; }
   }

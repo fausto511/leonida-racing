@@ -19,7 +19,7 @@ const base = import.meta.env.BASE_URL;
       <strong>Backend not connected.</strong>
       <span>No Supabase project is configured for this build, so nothing can be loaded or saved here.</span>
     </div>
-    {mode === 'moderator' && (<div id="auth-box" class="panel auth-box" hidden>
+    {mode === 'moderator' && (<div id="auth-box" class="auth-box lr-empty-panel" hidden>
       <p>Sign in with Discord to access the moderator area.</p>
       <button type="button" id="discord-signin-btn" class="btn btn-discord">Sign in with Discord</button>
     </div>)}
@@ -232,8 +232,7 @@ const base = import.meta.env.BASE_URL;
 <style>
   [hidden] { display: none !important; }
   .notice { margin-bottom: 1.5rem; } /* box: .lr-note .lr-note-warn (DEC-0181) */
-  .auth-box { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .auth-box p { margin: 0; font-size: .88rem; }
+  .auth-box { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
 
   .hc-tabs { display: flex; gap: .4rem; margin-bottom: 1rem; }
   .hc-tab { padding: .55rem 1.1rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: transparent; color: var(--gh-muted); font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: .85rem; cursor: pointer; }
@@ -246,7 +245,7 @@ const base = import.meta.env.BASE_URL;
   .list-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: 1rem; }
   .list-title { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.15rem; }
   .list { display: flex; flex-direction: column; gap: .45rem; max-height: 34rem; overflow-y: auto; }
-  .list-empty, .list-error { margin: 0; color: var(--gh-muted); font-size: .85rem; }
+  .list-empty, .list-error { margin: 0; color: var(--lr-muted); font-size: 14px; }
   .list-error { color: var(--lr-coral); }
   /* built via innerHTML -> :global */
   :global(.li) { display: flex; align-items: center; gap: .6rem; width: 100%; text-align: left; padding: .6rem .7rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); border-left: 3px solid transparent; background: var(--gh-surface-soft); color: var(--gh-text); cursor: pointer; font-family: var(--gh-font-body); }

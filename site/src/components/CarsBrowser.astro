@@ -150,9 +150,9 @@ function mc(group: string, value: string | number, label: string, n: number | un
     <div class="more"><button type="button" class="btn btn-s" id="show-more" hidden>Show all {noun}</button></div>
 
     <!-- no results (DEC-0117): drop one filter, closest matches, did you mean -->
-    <div class="empty" id="empty" hidden>
-      <h2 class="lr-h2 display empty-title">No cars match</h2>
-      <p class="muted" id="empty-dym"></p>
+    <div class="empty lr-empty" id="empty" hidden>
+      <h2 class="lr-empty-t empty-title">No cars match</h2>
+      <p id="empty-dym"></p>
       <div class="empty-drops" id="empty-drops"></div>
       <div id="closest-wrap" hidden>
         <h3 class="closest-title">Closest matches</h3>
@@ -283,9 +283,13 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .more { display: flex; justify-content: center; padding-top: 28px; }
   .more:has(> #show-more[hidden]) { padding-top: 0; } /* no empty gap when there is nothing to show */
   :global(.miss) { display: block; margin-top: 2px; font-size: 13px; font-weight: 600; color: var(--lr-orange); }
-  .empty { display: flex; flex-direction: column; gap: 14px; padding: 24px 0 8px; }
+  .empty { display: flex; flex-direction: column; align-items: center; gap: 14px; } /* box: .lr-empty (DEC-0182) */
+  .empty[hidden] { display: none; }
   .empty-title { margin: 0; }
-  .empty-drops { display: flex; flex-wrap: wrap; gap: 10px; }
+  #empty-dym { margin: 0; }
+  #empty-dym:empty { display: none; }
+  .empty-drops { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  #closest-wrap { align-self: stretch; text-align: left; }
   .closest-title { margin: 24px 0 0; font-size: 20px; }
   .closest-sub { margin: 0 0 6px; font-size: 14px; }
   :global(#empty-dym a) { color: var(--lr-orange); font-weight: 600; }

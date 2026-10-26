@@ -63,7 +63,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
     <div class="ec-main">
       <p class="ec-sample" id="ev-flag" hidden></p>
       <div id="ev-root" set:html={initialHtml} />
-      <p class="hub-empty" id="ev-empty" hidden>No events match this filter.</p>
+      <p class="hub-empty lr-empty" id="ev-empty" hidden>No events match this filter.</p>
       <div class="ev-open ec-open"><span class="ev-open-plus" aria-hidden="true">+</span><span class="ev-open-t"><b>Nothing on your night?</b><span>Host a race, a meet, or a hotlap session. Hosts publish their events here themselves.</span></span><a class="btn btn-s ev-open-btn" href={`${base}account/events/`}>Become a host</a></div>
       <div id="ev-past" hidden></div>
       <div class="ec-more"><button type="button" class="btn btn-s" id="ev-past-btn" hidden>Show past events</button></div>
@@ -372,7 +372,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
     const past = (data ?? []) as unknown as HubEvent[];
     const g = groupsOf(past);
     const box = $('ev-past');
-    box.innerHTML = past.length ? `<h3 class="ev-dh" style="margin-top:32px">Past events</h3>${[...g].map(([k, l]) => groupHtml(k, l, false)).join('')}` : '<p class="hub-empty">No past events yet.</p>';
+    box.innerHTML = past.length ? `<h3 class="ev-dh" style="margin-top:32px">Past events</h3>${[...g].map(([k, l]) => groupHtml(k, l, false)).join('')}` : '<p class="hub-empty lr-empty">No past events yet.</p>';
     localizeTimes(box);
     box.hidden = false;
     btn.hidden = true;

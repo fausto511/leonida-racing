@@ -19,7 +19,7 @@ const base = import.meta.env.BASE_URL;
     <h1 class="display account-title">My Account</h1>
     <AccountSubnav active="tracks" />
 
-    <div id="acc-auth" class="panel acc-auth" hidden>
+    <div id="acc-auth" class="acc-auth lr-empty-panel" hidden>
       <p>Log in to view saved tracks or submit your own.</p>
       <button type="button" id="acc-signin" class="btn btn-discord">Discord login</button>
     </div>
@@ -30,7 +30,7 @@ const base = import.meta.env.BASE_URL;
       <p class="section-lede">Your saved list from <a href={`${base}community/tracks/`}>Community → Tracks</a>. Saving here does not add an in-game bookmark; open published jobs on Social Club to bookmark them for the game.</p>
       <p class="tr-msg lr-note" id="sv-msg" role="status" hidden></p>
       <div class="tr-list" id="sv-root"></div>
-      <div class="panel tr-cta" id="sv-empty" hidden>
+      <div class="tr-cta lr-empty-panel" id="sv-empty" hidden>
         <p><strong>No saved tracks yet.</strong> Find a circuit or a point-to-point run and tap Save.</p>
         <a class="btn btn-s" href={`${base}community/tracks/`}>Find tracks</a>
       </div>
@@ -49,11 +49,7 @@ const base = import.meta.env.BASE_URL;
   [hidden] { display: none !important; }
   .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
   .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
-  .acc-auth { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .acc-auth p { margin: 0; font-size: .88rem; }
-  .tr-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.2rem; }
-  .tr-cta p { margin: 0; color: var(--gh-muted); font-size: .9rem; max-width: 40rem; }
-  .tr-cta strong { color: var(--gh-text); }
+  .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
   .section-heading { margin: 2.5rem 0 .3rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
   .section-lede { margin: 0 0 1.2rem; color: var(--gh-muted); font-size: .88rem; }
   .section-lede a { color: var(--gh-text); }

@@ -20,8 +20,7 @@
 
 .notice { margin-bottom: 16px; } /* box: .lr-note .lr-note-warn (DEC-0181) */
 
-.rep-auth { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 20px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
-.rep-auth p { margin: 0; max-width: 460px; font-size: 15px; line-height: 1.5; color: var(--lr-text); }
+.rep-auth { } /* box: .lr-empty-panel (DEC-0182) */
 
 .rep-form { display: grid; gap: 16px; }
 .rep-step { display: grid; gap: 14px; padding: 22px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }

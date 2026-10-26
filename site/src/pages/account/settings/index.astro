@@ -17,7 +17,7 @@ import AccountSubnav from '../../../components/AccountSubnav.astro';
     <h1 class="display account-title">My Account</h1>
     <AccountSubnav active="settings" />
 
-    <div id="acc-auth" class="panel acc-auth" hidden>
+    <div id="acc-auth" class="acc-auth lr-empty-panel" hidden>
       <p>Sign in with Discord to change your settings.</p>
       <button type="button" id="acc-signin" class="btn btn-discord">Sign in with Discord</button>
     </div>
@@ -76,8 +76,7 @@ import AccountSubnav from '../../../components/AccountSubnav.astro';
   [hidden] { display: none !important; }
   .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
   .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
-  .acc-auth { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-  .acc-auth p { margin: 0; font-size: .88rem; }
+  .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
   .settings-card { padding: var(--gh-pad-card); display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1.5rem; }
   /* inputs start at the same height; the button lines up with them (label row = 1.55rem) */
   #save-name-btn { margin-top: 1.55rem; }

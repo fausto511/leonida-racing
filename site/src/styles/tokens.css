@@ -206,6 +206,17 @@ a { color: inherit; }
 .lr-note-warn strong { color: var(--lr-orange); }
 .lr-note-err, .lr-note.is-error { border-color: var(--lr-coral-border); background: var(--lr-coral-tint); color: var(--lr-coral); }
 .lr-note-err strong, .lr-note.is-error strong { color: var(--lr-coral); }
+/* Empty states (DEC-0182, Fausto 26.10.2026): three kinds.
+   .lr-empty        no results for a filter or search on a list page: dashed box, centred, .lr-empty-t title + sentence
+   .lr-empty-line   empty inside a small list (search results, tables, compare): one grey 14px line, no box
+   .lr-empty-panel  nothing there yet / sign-in needed: box with the sentence on the left, button on the right
+   Special case kept on purpose: "#1 · No laps in the … yet" on vehicle pages (an invitation, may stand out). */
+.lr-empty { padding: 40px 20px; border: 1px dashed var(--lr-line-strong); border-radius: 8px; text-align: center; color: var(--lr-soft); font-size: 15px; line-height: 1.5; }
+.lr-empty-t { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--lr-text); }
+.lr-empty-line { margin: 0; font-size: 14px; line-height: 1.5; color: var(--lr-muted); }
+.lr-empty-panel { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 20px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
+.lr-empty-panel p { margin: 0; flex: 1 1 320px; max-width: 600px; font-size: 15px; line-height: 1.5; color: var(--lr-text); }
+.lr-empty[hidden], .lr-empty-panel[hidden] { display: none; }
 .lr-hcard { transition: border-color .15s, transform .2s ease !important; }
 .lr-hcard:hover { border-color: var(--lr-orange) !important; }
 .lr-hmedia { overflow: hidden; }
