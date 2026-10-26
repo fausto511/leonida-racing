@@ -33,7 +33,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
 
   <div class="wrap sb-layout">
     <div class="sb-main">
-      <div id="backend-notice" class="sb-notice" hidden>
+      <div id="backend-notice" class="sb-notice lr-note lr-note-warn" hidden>
         <strong>Submissions are unavailable in this preview.</strong> You can try the form, but nothing will be sent.
       </div>
 
@@ -225,8 +225,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
 
   .sb-layout { padding-top: 28px; }
   .sb-main { max-width: 760px; margin: 0 auto; min-width: 0; }
-  .sb-notice { margin-bottom: 16px; padding: 12px 14px; border: 1px solid var(--lr-orange-border); border-radius: 8px; background: var(--lr-orange-tint); font-size: 14px; color: var(--lr-soft); }
-  .sb-notice strong { color: var(--lr-orange); }
+  .sb-notice { margin-bottom: 16px; } /* box: .lr-note .lr-note-warn (DEC-0181) */
 
   .sb-eb { display: flex; width: fit-content; margin: 0; }
   .sb-h2 { margin: 0; padding: 0; }

@@ -106,7 +106,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
     </aside>
 
     <div class="gd-main">
-      <p class="gd-intro">Start with the topic you’re here for. Each section links to its sources and makes clear what has been confirmed, identified by the community or left unresolved.</p>
+      <p class="gd-intro lr-note">Start with the topic you’re here for. Each section links to its sources and makes clear what has been confirmed, identified by the community or left unresolved.</p>
 
       {guideSections.map((s) => (
         <section class="gd-sec" id={s.id} aria-labelledby={`${s.id}-h`}>
@@ -222,7 +222,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-chips { display: none; }
 
   .gd-main { min-width: 0; }
-  .gd-intro { margin: 0; padding: 14px 16px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); color: var(--lr-soft); font-size: 15px; line-height: 1.55; }
+  .gd-intro { margin: 0; } /* box: .lr-note (DEC-0181) */
 
   /* ---- sections ---- */
   .gd-sec { padding-top: 56px; scroll-margin-top: calc(var(--gh-header-h) + 16px); }

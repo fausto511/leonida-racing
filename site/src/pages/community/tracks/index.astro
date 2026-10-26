@@ -67,7 +67,7 @@ const steps = [
 
     <p class="tr-sample" id="tr-flag">Sample tracks — examples, not real race jobs</p>
     <p class="tr-note">Save keeps a track in your list here and in My Account. To bookmark a published job for the game, open it on Social Club.</p>
-    <p class="tr-msg" id="tr-msg" role="status" hidden></p>
+    <p class="tr-msg lr-note" id="tr-msg" role="status" hidden></p>
     <div class="tr-list" id="tr-root" set:html={initialHtml} />
     <p class="hub-empty" id="tr-empty" hidden>No tracks match these filters.</p>
 
@@ -116,8 +116,7 @@ const steps = [
 
   .tr-sample { margin: 22px 0 12px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--lr-muted); }
   .tr-note { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--lr-muted); }
-  .tr-msg { margin: 0 0 12px; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); font-size: 14px; color: var(--lr-soft); }
-  .tr-msg.is-error { border-color: var(--lr-coral-border); color: var(--lr-coral); }
+  .tr-msg { margin: 0 0 12px; } /* box: .lr-note, errors .is-error (DEC-0181) */
   .tr-list:first-child { margin-top: 22px; }
 
   .tr-how { margin: 48px 0 var(--lr-gap-sec); }

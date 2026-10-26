@@ -15,7 +15,7 @@ const { mode } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 <div id="hc-root" data-mode={mode}>
-    <div id="backend-notice" class="notice" hidden>
+    <div id="backend-notice" class="notice lr-note lr-note-warn" hidden>
       <strong>Backend not connected.</strong>
       <span>No Supabase project is configured for this build, so nothing can be loaded or saved here.</span>
     </div>
@@ -23,7 +23,7 @@ const base = import.meta.env.BASE_URL;
       <p>Sign in with Discord to access the moderator area.</p>
       <button type="button" id="discord-signin-btn" class="btn btn-discord">Sign in with Discord</button>
     </div>)}
-    {mode === 'moderator' && (<div id="not-mod-notice" class="notice" hidden>
+    {mode === 'moderator' && (<div id="not-mod-notice" class="notice lr-note lr-note-warn" hidden>
       <strong>Moderators only.</strong>
       <span>Crew leaders and event hosts manage their crew and events in <a href={`${base}account/crew/`}>My Account</a>.</span>
     </div>)}
@@ -58,7 +58,7 @@ const base = import.meta.env.BASE_URL;
               <label class="pub-toggle" data-mod-only><input type="checkbox" name="is_published" /> <span>Published</span></label>
               <span class="pub-state" data-leader-only hidden></span>
             </div>
-            <p class="track-note" id="crew-mod-note" hidden></p>
+            <p class="track-note lr-note lr-note-warn" id="crew-mod-note" hidden></p>
             <div class="grid">
               <label class="span2">Crew name * <small>max. 22 characters</small><input type="text" name="name" maxlength="22" required /></label>
               <label>Crew tag * <small>exactly 4 letters/digits</small><input type="text" name="tag" maxlength="4" required class="tag-input" /></label>
@@ -87,7 +87,7 @@ const base = import.meta.env.BASE_URL;
               <label>Social Club page<input type="url" name="social_club_url" placeholder="https://socialclub.rockstargames.com/…" /></label>
               <!-- DEC-0144. COPY: Claude placeholders, Codex review pending. -->
               <label class="span2">Join mode<select name="join_mode"><option value="request">Request — approval required</option><option value="open">Open — join right away</option></select><small class="jm-hint" id="jm-hint" hidden>Switching to Open accepts all pending requests.</small></label>
-              <p class="span2 track-note" id="crew-comm-note" hidden>As a commissioner, you can manage requests, invitations and member bans, and change the crew color and join mode. You can’t remove the leader or other commissioners. Other crew settings and role changes are handled by the leader.</p>
+              <p class="span2 track-note lr-note lr-note-warn" id="crew-comm-note" hidden>As a commissioner, you can manage requests, invitations and member bans, and change the crew color and join mode. You can’t remove the leader or other commissioners. Other crew settings and role changes are handled by the leader.</p>
               <label class="check" data-mod-only><input type="checkbox" name="is_official" /> Official crew <small>this site's own crews or the original creators</small></label>
               <label class="check" data-mod-only><input type="checkbox" name="is_partner" /> Partner crew</label>
               <label class="check" data-mod-only><input type="checkbox" name="is_featured" /> Featured crew <small>shown first on the home page, Hub overview and crew list</small></label>
@@ -124,7 +124,7 @@ const base = import.meta.env.BASE_URL;
               <h2 id="event-form-title">New event</h2>
               <label class="pub-toggle" data-mod-only><input type="checkbox" name="is_published" checked /> <span>Published</span></label>
             </div>
-            <p class="track-note" id="event-mod-note" hidden></p>
+            <p class="track-note lr-note lr-note-warn" id="event-mod-note" hidden></p>
             <div class="grid">
               <label class="span2">Title *<input type="text" name="title" maxlength="80" required /></label>
               <label>Event type *<select name="event_type" required>{Object.entries(eventTypeLabels).map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
@@ -164,7 +164,7 @@ const base = import.meta.env.BASE_URL;
               <label class="pub-toggle" data-mod-only><input type="checkbox" name="is_published" /> <span>Published</span></label>
               <span class="pub-state" data-creator-only hidden></span>
             </div>
-            <p class="track-note" id="track-review-note" hidden></p>
+            <p class="track-note lr-note lr-note-warn" id="track-review-note" hidden></p>
             <div class="grid">
               <label class="span2">Track name *<input type="text" name="title" maxlength="60" required /></label>
               <label class="span2">Social Club link * <small>the job's page on Social Club — we check the details there</small><input type="url" name="social_club_url" placeholder="https://socialclub.rockstargames.com/job/…" required /></label>
@@ -231,8 +231,7 @@ const base = import.meta.env.BASE_URL;
 
 <style>
   [hidden] { display: none !important; }
-  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: var(--lr-orange-tint); border-radius: var(--gh-radius); font-size: .85rem; }
-  .notice strong { color: var(--gh-yellow); }
+  .notice { margin-bottom: 1.5rem; } /* box: .lr-note .lr-note-warn (DEC-0181) */
   .auth-box { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .auth-box p { margin: 0; font-size: .88rem; }
 
@@ -325,7 +324,7 @@ const base = import.meta.env.BASE_URL;
   :global(.req-row a) { color: var(--gh-text); }
   @media (max-width: 640px) { :global(.req-row) { grid-template-columns: 1fr; gap: .2rem; } }
   .req-note { margin-top: 1.2rem; }
-  .track-note { margin: -.4rem 0 1.1rem; padding: .6rem .8rem; border-left: 3px solid var(--gh-yellow); background: var(--lr-orange-tint); font-size: .85rem; }
+  .track-note { margin: -.4rem 0 1.1rem; } /* box: .lr-note .lr-note-warn (DEC-0181) */
 </style>
 
 <script>

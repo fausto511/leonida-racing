@@ -193,6 +193,19 @@ a { color: inherit; }
    .lr-hzoom: the card's photo or logo zooms to 103% inside its frame (.lr-hmedia clips it).
    Motion only with a real mouse and when the visitor hasn't asked for reduced motion.
    List rows are different: they get a lighter background (--lr-white-hover), no border. */
+/* Notice boxes (DEC-0181, Fausto 26.10.2026): one shape, three colours. 1px border, 8px corners, 14px text.
+   .lr-note       neutral: explains something or confirms an action
+   .lr-note-warn  orange: worth knowing before you continue (title in orange)
+   .lr-note-err   coral: something went wrong (also .lr-note.is-error, set by scripts)
+   An optional <strong> first line is the title. No left-bar variant any more. */
+.lr-note { display: block; padding: 12px 14px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
+.lr-note[hidden] { display: none; }
+.lr-note strong { display: block; margin-bottom: 2px; color: var(--lr-text); font-weight: 600; }
+.lr-note code { color: var(--lr-text); }
+.lr-note-warn { border-color: var(--lr-orange-border); background: var(--lr-orange-tint); }
+.lr-note-warn strong { color: var(--lr-orange); }
+.lr-note-err, .lr-note.is-error { border-color: var(--lr-coral-border); background: var(--lr-coral-tint); color: var(--lr-coral); }
+.lr-note-err strong, .lr-note.is-error strong { color: var(--lr-coral); }
 .lr-hcard { transition: border-color .15s, transform .2s ease !important; }
 .lr-hcard:hover { border-color: var(--lr-orange) !important; }
 .lr-hmedia { overflow: hidden; }

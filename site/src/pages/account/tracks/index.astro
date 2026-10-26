@@ -28,7 +28,7 @@ const base = import.meta.env.BASE_URL;
       <!-- Saved tracks (DEC-0146, Fausto 20.10.): one list, saved on Community > Tracks. COPY: Codex 21.10.2026. -->
       <h2 class="section-heading">Saved tracks</h2>
       <p class="section-lede">Your saved list from <a href={`${base}community/tracks/`}>Community → Tracks</a>. Saving here does not add an in-game bookmark; open published jobs on Social Club to bookmark them for the game.</p>
-      <p class="tr-msg" id="sv-msg" role="status" hidden></p>
+      <p class="tr-msg lr-note" id="sv-msg" role="status" hidden></p>
       <div class="tr-list" id="sv-root"></div>
       <div class="panel tr-cta" id="sv-empty" hidden>
         <p><strong>No saved tracks yet.</strong> Find a circuit or a point-to-point run and tap Save.</p>
@@ -58,8 +58,7 @@ const base = import.meta.env.BASE_URL;
   .section-lede { margin: 0 0 1.2rem; color: var(--gh-muted); font-size: .88rem; }
   .section-lede a { color: var(--gh-text); }
   .section-heading:first-child { margin-top: 0; }
-  .tr-msg { margin: 0 0 12px; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); font-size: 14px; color: var(--lr-soft); }
-  .tr-msg.is-error { border-color: var(--lr-coral-border); color: var(--lr-coral); }
+  .tr-msg { margin: 0 0 12px; } /* box: .lr-note, errors .is-error (DEC-0181) */
 </style>
 
 <script>

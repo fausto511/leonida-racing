@@ -13,7 +13,7 @@ import AccountSubnav from '../../components/AccountSubnav.astro';
     <h1 class="display account-title">My Account</h1>
     <AccountSubnav active="time-attack" />
 
-    <div id="backend-notice" class="notice" hidden>
+    <div id="backend-notice" class="notice lr-note lr-note-warn" hidden>
       <strong>Backend not connected yet.</strong>
       <span>This page reads and writes the real <code>drivers</code>/<code>runs</code> tables via Supabase, but no Supabase project is configured for this build (see <code>SETUP-BACKEND.md</code>). Sign-in and data are disabled until <code>PUBLIC_SUPABASE_URL</code> and <code>PUBLIC_SUPABASE_ANON_KEY</code> are set.</span>
     </div>
@@ -80,9 +80,7 @@ import AccountSubnav from '../../components/AccountSubnav.astro';
   .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
   .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
 
-  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: var(--lr-orange-tint); border-radius: var(--gh-radius); font-size: .85rem; }
-  .notice strong { color: var(--gh-yellow); }
-  .notice code { color: var(--gh-text); }
+  .notice { margin-bottom: 1.5rem; } /* box: .lr-note .lr-note-warn (DEC-0181) */
 
   .auth-box { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .auth-box p { margin: 0; font-size: .88rem; }

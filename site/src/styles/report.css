@@ -18,8 +18,7 @@
 .rp-card a:not(.arrow):hover { color: var(--lr-orange); }
 .rp-links { display: grid; gap: 8px; }
 
-.notice { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; padding: 12px 14px; border: 1px solid var(--lr-orange-border); border-radius: 8px; background: var(--lr-orange-tint); font-size: 14px; color: var(--lr-soft); }
-.notice strong { color: var(--lr-orange); }
+.notice { margin-bottom: 16px; } /* box: .lr-note .lr-note-warn (DEC-0181) */
 
 .rep-auth { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 20px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
 .rep-auth p { margin: 0; max-width: 460px; font-size: 15px; line-height: 1.5; color: var(--lr-text); }
