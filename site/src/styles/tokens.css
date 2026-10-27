@@ -193,7 +193,7 @@ a { color: inherit; }
    .lr-hzoom: the card's photo or logo zooms to 103% inside its frame (.lr-hmedia clips it).
    Motion only with a real mouse and when the visitor hasn't asked for reduced motion.
    List rows are different: they get a lighter background (--lr-white-hover), no border. */
-/* Notice boxes (DEC-0181, Fausto 26.10.2026): one shape, three colours. 1px border, 8px corners, 14px text.
+/* Notice boxes (DEC-0186, Fausto 26.10.2026): one shape, three colours. 1px border, 8px corners, 14px text.
    .lr-note       neutral: explains something or confirms an action
    .lr-note-warn  orange: worth knowing before you continue (title in orange)
    .lr-note-err   coral: something went wrong (also .lr-note.is-error, set by scripts)

@@ -18,7 +18,7 @@
 .rp-card a:not(.arrow):hover { color: var(--lr-orange); }
 .rp-links { display: grid; gap: 8px; }
 
-.notice { margin-bottom: 16px; } /* box: .lr-note .lr-note-warn (DEC-0181) */
+.notice { margin-bottom: 16px; } /* box: .lr-note .lr-note-warn (DEC-0186) */
 
 .rep-auth { } /* box: .lr-empty-panel (DEC-0182) */
 
