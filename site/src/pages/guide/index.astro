@@ -120,7 +120,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
                   {s.images.map((im) => (
                     <figure class="gd-fig">
                       <img src={src(im)} srcset={srcset(im)} sizes={s.images!.length > 1 ? '(max-width: 760px) 100vw, 390px' : '(max-width: 860px) 100vw, 780px'} width={im.w} height={im.h} alt={im.alt} loading="lazy" decoding="async" />
-                      <figcaption>{im.caption}</figcaption>
+                      <figcaption>{im.caption}{im.src && <> <a href={im.src.url} target="_blank" rel="noopener">{im.src.label}</a></>}</figcaption>
                     </figure>
                   ))}
                 </div>
@@ -245,6 +245,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-fig img { display: block; width: 100%; height: auto; background: var(--lr-raised); }
   .gd-figs-2 img { aspect-ratio: 16 / 9; object-fit: cover; }
   .gd-fig figcaption { padding: 10px 12px; font-size: 13px; line-height: 1.45; color: var(--lr-muted); }
+  .gd-fig figcaption a { color: var(--lr-orange); white-space: nowrap; }
 
   /* source cards */
   .gd-src { margin-top: 24px; }

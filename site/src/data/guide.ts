@@ -1,3 +1,4 @@
+import { vehicleOptions } from './vehicles';
 // The Guide (/guide/), sourced overview of GTA VI cars, driving, ownership,
 // customization, racing and car culture.
 // COPY STATUS: Codex 2026-10-02 (Codex Zuarbeit/The-Guide-Website-Texte-und-Quellen-2026-10-02.md),
@@ -38,10 +39,41 @@ export function statusTone(status: string): 'ok' | 'mid' | 'open' {
 /** Images in public/images/guide/<key>-<width>.webp (Fausto's selection, Visual/Guide, 2026-10-03).
  *  Cars only, no boats or aircraft (Fausto). Alt texts/captions: Codex 2026-10-03, approved; Rideout alt names
  *  the Albany Manana (Fausto, 2026-10-04; Codex had 'convertible'). */
-export interface GuideImage { key: string; widths: number[]; w: number; h: number; alt: string; caption: string }
+export interface GuideImage { key: string; widths: number[]; w: number; h: number; alt: string; caption: string; src?: { label: string; url: string } }
 const W3 = [640, 1280, 1920];
 const RS = 'Official screenshot — Rockstar Games.';
-const img = (key: string, widths: number[], w: number, h: number, alt: string, caption: string): GuideImage => ({ key, widths, w, h, alt, caption });
+// Returning vs new cars, computed from the database at build time (Fausto 27.10.2026).
+// Only revealed cars whose earlier GTA appearances have been reviewed are counted.
+const RETURNING_SENTENCE = (() => {
+  const rev = vehicleOptions.filter((v) => v.releaseId && Array.isArray(v.previousGames));
+  const fromV = rev.filter((v) => v.previousGames!.some((g) => g === 'gta5' || g === 'gta-online')).length;
+  const older = rev.filter((v) => v.previousGames!.length > 0 && !v.previousGames!.some((g) => g === 'gta5' || g === 'gta-online')).length;
+  const fresh = rev.filter((v) => v.previousGames!.length === 0).length;
+  if (!rev.length || fromV * 2 <= rev.length) return '';
+  const olderPart = older === 0 ? '' : older === 1 ? ', one returns from an older GTA game,' : `, ${older} return from older GTA games,`;
+  const freshPart = fresh === 1 ? 'one is <a href="{base}cars/new-cars/">new to the series</a>' : `${fresh} are <a href="{base}cars/new-cars/">new to the series</a>`;
+  return ` Most of the cars revealed so far are returning faces: of the ${rev.length} revealed cars in our database, ${fromV} appeared in GTA V or GTA Online${olderPart}${older ? '' : ','} and ${freshPart}.`;
+})();
+
+// Linked image sources (Fausto 27.10.2026): video frames with timestamp, screenshots to the publishing page.
+const XL = 'https://www.youtube.com/watch?v=tJbzMqJGH4k';
+const RS_SHOTS = { label: 'View gallery', url: 'https://www.rockstargames.com/VI/media/screenshots' };
+const atXL = (sec: number, t: string) => ({ label: `Watch at ${t}`, url: `${XL}&t=${sec}s` });
+const IMG_SRC: Record<string, { label: string; url: string }> = {
+  granforma: { label: 'Bloomberg feature', url: 'https://www.bloomberg.com/features/2026-grand-theft-auto-6-making-of/' },
+  driving: atXL(923, '15:23'),
+  'heat-garage': atXL(910, '15:10'),
+  'heat-police': atXL(943, '15:43'),
+  safehouse: RS_SHOTS, 'dominator-buggy-garage': RS_SHOTS, 'rideout-customs': RS_SHOTS, 'one-eyed-willies': RS_SHOTS,
+  'classic-collection-wyman': RS_SHOTS, 'classic-collection-car': RS_SHOTS, 'hero-cheetah': RS_SHOTS,
+  'slim-jim': atXL(364, '6:04'),
+  'circuit-race': atXL(1061, '17:41'),
+  'street-race': atXL(1221, '20:21'),
+  'car-meet': atXL(1566, '26:06'),
+  'circuit-empty': { label: 'Original at 17:46', url: `${XL}&t=1066s` },
+  'street-takeover': { label: 'Watch in Trailer 1 at 0:45', url: 'https://www.youtube.com/watch?v=QdBZY2fkU-0&t=45s' },
+};
+const img = (key: string, widths: number[], w: number, h: number, alt: string, caption: string): GuideImage => ({ key, widths, w, h, alt, caption, src: IMG_SRC[key] });
 const IMG = {
   // Visual/Cars/Garage/granforma-zorrusso.png, 2000x1125 (web exports = vehicles/granforma-zorrusso-*.webp).
   granforma: img('granforma', W3, 2000, 1125, 'Rear three-quarter view of a green sports car in GTA VI, with GranForma lettering and an emblem above the rear grille.', 'New rear branding on the car identified as the GranForma Zorrusso. The name’s exact role remains unconfirmed. Rockstar Games image published with Bloomberg’s October 14 feature.'),
@@ -59,7 +91,7 @@ const IMG = {
   classicCar: img('classic-collection-car', W3, 1920, 1080, 'A turquoise Sirius coupe with black side stripes and a rear spoiler, viewed from behind in GTA VI.', `Sirius from the Classic Car Collection, Ultimate Edition. ${RS}`),
   circuitRace: img('circuit-race', [640, 1280, 1672], 1672, 941, 'A pack of race cars on a wet, palm-lined circuit in GTA VI.', 'Circuit racing in GTA VI — Rockstar Games.'),
   streetRace: img('street-race', [640, 1280], 1280, 720, 'Customized cars race along a street at sunset, with a blue exhaust flame behind the nearest car in GTA VI.', 'Street racing in GTA VI — Rockstar Games.'),
-  circuitEmpty: img('circuit-empty', [640, 1280, 1672], 1672, 941, 'An empty race circuit lined with palms, fencing, and blue and red painted trackside areas in GTA VI.', 'The paved circuit shown in official GTA VI material — Rockstar Games.'),
+  circuitEmpty: img('circuit-empty', [640, 1280, 1672], 1672, 941, 'An empty race circuit lined with palms, fencing, and blue and red painted trackside areas in GTA VI.', 'The circuit from official GTA VI footage, with the race cars digitally removed for a clearer view of the track.'),
   carMeet: img('car-meet', [640, 1280, 1919], 1919, 1079, 'People gather beside customized cars at an outdoor parking-lot meet in GTA VI.', 'A car meet in GTA VI — Rockstar Games.'),
   takeover: img('street-takeover', [640, 1280, 1672], 1672, 941, 'A crowd surrounds cars and tire smoke at a nighttime street takeover in GTA VI, viewed from above.', 'A street takeover in GTA VI — Rockstar Games.'),
 };
@@ -78,7 +110,7 @@ export interface GuideSection {
 }
 
 const IGN_FULL = 'https://www.ign.com/articles/gta-6-the-big-interview';
-const LAUNCH = 'https://www.rockstargames.com/VI/launch-trailer';
+const LAUNCH = 'https://www.youtube.com/watch?v=rz1B4B2yBZY';
 const MUSIC = 'https://www.rockstargames.com/VI/music';
 const R_MEDIA = 'https://www.rockstargames.com/VI/media';
 const R_SHOTS = 'https://www.rockstargames.com/VI/media/screenshots';
@@ -96,7 +128,7 @@ export const guideSections: GuideSection[] = [
     title: 'Vehicles in GTA VI',
     status: 'Shown by Rockstar',
     paragraphs: [
-      `GTA VI brings back familiar in-game manufacturers and models while adding vehicles created specifically for Leonida. Rockstar has named only part of the lineup, while many vehicles shown in official trailers and screenshots are identified by their design and badges. Those are community identifications, not Rockstar-confirmed names. Our <a href="{base}cars/">Cars section</a> focuses on racing-relevant cars and is not a complete list of every vehicle shown for GTA VI.`,
+      `GTA VI brings back familiar in-game manufacturers and models while adding vehicles created specifically for Leonida.${RETURNING_SENTENCE} Rockstar has named only part of the lineup, while many vehicles shown in official trailers and screenshots are identified by their design and badges. Those are community identifications, not Rockstar-confirmed names. Our <a href="{base}cars/">Cars section</a> focuses on racing-relevant cars and is not a complete list of every vehicle shown for GTA VI.`,
       `Official footage also shows motorcycles, watercraft, and aircraft, but this guide focuses on cars and racing. A car appearing on screen does not by itself establish how it can be owned, stored, or customized.`,
       `Open Cars for individual models, <a href="{base}cars/classes/">GTA classes</a>, <a href="{base}cars/manufacturers/">manufacturers</a>, first appearances, release information, and real-life inspirations. Compare recorded prices and tested performance where results are available; individual car pages keep the source and tuning category beside the data.`,
       `Rockstar released the Launch Trailer on October 15, 2026. It joins the official footage used to document vehicles, while model identifications remain separate from Rockstar-confirmed names.`,
@@ -118,18 +150,18 @@ export const guideSections: GuideSection[] = [
     status: 'Community Identification',
     paragraphs: [
       `A familiar shape does not always come with a familiar badge. GTA VI is changing the branding on some returning cars, so the manufacturer you remember from GTA Online may no longer be the one on the bodywork.`,
-      `The Jubilee is a clear example. Known as the Enus Jubilee in GTA Online, the Rolls-Royce Cullinan-inspired SUV now wears Buckingham branding in GTA VI’s Extended Look. That brings a familiar luxury SUV under a marque previously known for aircraft and the Tug boat. The car returns; its place in GTA’s fictional industry changes.`,
-      `The Windsor family follows the same move. The closed Windsor and open Windsor Drop return as Buckingham models in GTA VI, after appearing in GTA Online as the Enus Windsor and Enus Windsor Drop. Their Rolls-Royce Wraith and Dawn inspirations put coupe and convertible alongside the Cullinan-inspired Jubilee. The Windsor Drop is visible in the Launch Trailer.`,
+      `The Jubilee is a clear example. Known as the Enus Jubilee in GTA Online, the Rolls-Royce Cullinan-inspired SUV now wears Buckingham branding in GTA VI’s Extended Look: on the front fender at around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1186s" rel="noopener">19:46</a> and on the tailgate at around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1207s" rel="noopener">20:07</a>. That brings a familiar luxury SUV under a marque previously known for aircraft and the Tug boat. The car returns; its place in GTA’s fictional industry changes.`,
+      `The Windsor family is likely to follow. At around <a href="https://www.youtube.com/watch?v=rz1B4B2yBZY&amp;t=48s" rel="noopener">0:48</a> in the Launch Trailer, the Rolls-Royce Dawn-inspired Windsor Drop carries a tall, rectangular badge on the front fender. That shape points to Buckingham rather than the oval Enus badge, although the emblem itself cannot be read clearly.`,
       `A familiar exotic with unfamiliar lettering tells another part of the story. The Zorrusso-associated car in the Rockstar images published with Bloomberg’s October 14 feature carries <strong>GranForma</strong> lettering on the rear, replacing the familiar Pegassi branding. Its real-world inspiration is the Italdesign Zerouno. Whether GranForma denotes the manufacturer, a customizer or a particular version remains unresolved.`,
       `The pattern suggests that Rockstar may be bringing some fictional marques into closer alignment with their real-world inspirations. It is a change worth following if you know the older cars—or organize your garage by manufacturer. Rockstar has not announced a rule for the full lineup, and a changed badge on one car does not mean every model under its old marque is moving with it.`,
     ],
     sources: [
       { label: 'RockstarINTEL — 2 More GTA 6 Screenshots Released', url: 'https://rockstarintel.com/2-more-gta-6-screenshots-released/', note: 'October 14, 2026: reports Rockstar-supplied Bloomberg images and the GranForma reading; model and brand interpretation are not a Rockstar announcement.' },
       { label: 'Bloomberg — The Making of Grand Theft Auto VI', url: 'https://www.bloomberg.com/features/2026-grand-theft-auto-6-making-of/', note: 'Original feature associated with the images.' },
-      { label: 'Rockstar Games — GTA VI: An Extended Look', url: 'https://www.youtube.com/watch?v=tJbzMqJGH4k', note: 'Official footage used for the Jubilee badge comparison; the manufacturer identification is not a written Rockstar announcement.' },
+      { label: 'Rockstar Games — GTA VI: An Extended Look', url: `${EXT_LOOK}&t=1186s`, note: 'August 27, 2026: Buckingham badge on the Jubilee’s front fender at approximately 19:46 and on the tailgate at approximately 20:07.' },
       { label: 'GTABase — Jubilee in GTA VI', url: 'https://www.gtabase.com/gta-6/vehicles/jubilee', note: 'Community identification of the Buckingham Jubilee.' },
       { label: 'GTABase — Jubilee in GTA Online', url: 'https://www.gtabase.com/grand-theft-auto-v/vehicles/enus-jubilee', note: 'The model’s earlier Enus identity.' },
-      { label: 'GTABase — Windsor Drop in GTA VI', url: 'https://www.gtabase.com/vehicles/gta-6/windsor-drop', note: 'Community identification of the returning convertible as a Buckingham; the open body is visible in Launch Trailer imagery.' },
+      { label: 'Rockstar Games — GTA VI Launch Trailer', url: `${LAUNCH}&t=48s`, note: 'October 15, 2026: Windsor Drop with a tall, rectangular fender badge at approximately 0:48.' },
     ],
   },
   {
@@ -140,7 +172,7 @@ export const guideSections: GuideSection[] = [
     paragraphs: [
       `GTA VI’s driving model was rebuilt for the current hardware. Rockstar North co-studio head Rob Nelson says drivetrain, tires, suspension, and steering all feed into the vehicle physics, with the team aiming to combine the weight and feel associated with GTA IV with the accessibility of GTA V.`,
       `Rockstar has also assembled a vehicle-handling team that includes real race-car drivers. That signals serious attention to how vehicles behave, but it is not proof that GTA VI is a full driving simulation. Exact grip levels, drivetrain advantages, damage behavior, and the fastest cars still need to be tested in the released game.`,
-      `Narrower streets and dense traffic put more demands on your driving, according to Nelson. You can also switch between Jason and Lucia while the other character takes the wheel. During a getaway, your partner can drive while you shoot behind you; Nelson describes moments where taking out a pursuing car’s tires blocks the cars following it.`,
+      `Narrower streets and dense traffic put more demands on your driving, according to Nelson. You can also switch between Jason and Lucia while the other character takes the wheel. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1120s" rel="noopener">18:40</a> in the Extended Look, the player switches from Jason at the wheel to Lucia, who shoots at the pursuing cars while Jason keeps driving. Nelson describes moments where taking out a pursuing car’s tires blocks the cars following it.`,
       `IGN’s demo also includes a ride with <strong>Ryde Me</strong>, the game’s ride-hailing service. Nelson describes it as a way to fast travel, with the option to ride along and chat.`,
       `Small details matter when you’re just out for a drive, too. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=506s" rel="noopener">8:26</a> in the Extended Look, the Sentinel Classic Cabrio drives with a working turn signal. The footage does not show whether you operate the indicators yourself or the game handles them.`,
     ],
@@ -191,7 +223,7 @@ export const guideSections: GuideSection[] = [
       `GTA VI has personal vehicles and expandable garage storage. Nelson told Famitsu that players begin with room for three vehicles. If all three spaces are occupied, one vehicle must be sold before another can be registered as personal. Buying garages around the map expands that capacity. Rockstar has not announced the later-game ownership limit, whether individual properties have different capacities, or how freely vehicles can be moved between garages.`,
       `Rockstar’s Ultimate Edition includes Jason’s Safehouse Vehicles and the Ganado Retro Build. It also includes the <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a> with a garage, while the Vintage Vice City Pack includes the <a href="{base}cars/vehicles/vapid-stanier-55/">’55 Vapid Stanier Sedan</a> with a garage.`,
       `The accompanying Rockstar press material identifies those locations as Paradise Garage in Watson Bay and Shore Court Garage near Ocean Beach. They are personal garages, not confirmed tuning shops.`,
-      `Your personal vehicle also acts as a mobile stash: Nelson says you can call it at any time and keep spare outfits and purchased weapons in the back.`,
+      `Your personal vehicle also acts as a mobile stash: Nelson says you can call it at any time and keep spare outfits and purchased weapons in the back. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1069s" rel="noopener">17:49</a> in the Extended Look, Lucia changes her outfit while sitting in the car with Jason.`,
     ],
     sources: [
       { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration.' },
