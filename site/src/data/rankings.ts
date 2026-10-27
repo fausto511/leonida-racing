@@ -52,7 +52,7 @@ export const rankings: RankingDef[] = [
     'price_gtad', 'desc', 'Price', 'Recorded vehicle purchase prices in GTA VI, ordered from highest to lowest. Each price includes its source and, where available, the game version.', vehicleOptions),
   def('cheapest', 'Cheapest Cars in GTA 6', 'Compare recorded GTA 6 vehicle purchase prices, lowest first. Each listed price includes its source and, where available, the game version.',
     'price_gtad', 'asc', 'Price', 'Recorded vehicle purchase prices in GTA VI, ordered from lowest to highest. Each price includes its source and, where available, the game version.', vehicleOptions),
-  def('gellhorn-lap', 'Fastest Cars at Gellhorn International Raceway', 'Compare GTA 6 cars by recorded stock reference lap times at Gellhorn International Raceway, with the source of each result.',
+  def('gellhorn-lap', 'Fastest Cars at Gellhorn International Raceway', 'Find the best GTA 6 cars for Gellhorn International Raceway by recorded stock reference lap times, with the source of each result.',
     'gellhorn_reference_lap_ms', 'asc', 'Reference lap', 'Recorded reference lap times at Gellhorn International Raceway for cars in stock form, ordered from quickest to slowest. These are vehicle reference results, separate from driver times in the Time Attack leaderboard.', vehicleOptions),
 ];
 
