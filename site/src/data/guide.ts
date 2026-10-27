@@ -62,7 +62,7 @@ const atXL = (sec: number, t: string) => ({ label: `Watch at ${t}`, url: `${XL}&
 const IMG_SRC: Record<string, { label: string; url: string }> = {
   granforma: { label: 'Bloomberg feature', url: 'https://www.bloomberg.com/features/2026-grand-theft-auto-6-making-of/' },
   driving: atXL(923, '15:23'),
-  'heat-garage': atXL(910, '15:10'),
+  'heat-outfit': atXL(1069, '17:49'),
   'heat-police': atXL(943, '15:43'),
   safehouse: RS_SHOTS, 'dominator-buggy-garage': RS_SHOTS, 'rideout-customs': RS_SHOTS, 'one-eyed-willies': RS_SHOTS,
   'classic-collection-wyman': RS_SHOTS, 'classic-collection-car': RS_SHOTS, 'hero-cheetah': RS_SHOTS,
@@ -70,15 +70,21 @@ const IMG_SRC: Record<string, { label: string; url: string }> = {
   'circuit-race': atXL(1061, '17:41'),
   'street-race': atXL(1221, '20:21'),
   'car-meet': atXL(1566, '26:06'),
+  'vehicles-ocean-drive': { label: 'Watch in Trailer 1 at 0:32', url: 'https://www.youtube.com/watch?v=QdBZY2fkU-0&t=32s' },
+  'vehicles-cheetah-cockpit': RS_SHOTS,
   'circuit-empty': { label: 'Original at 17:46', url: `${XL}&t=1066s` },
   'street-takeover': { label: 'Watch in Trailer 1 at 0:45', url: 'https://www.youtube.com/watch?v=QdBZY2fkU-0&t=45s' },
 };
 const img = (key: string, widths: number[], w: number, h: number, alt: string, caption: string): GuideImage => ({ key, widths, w, h, alt, caption, src: IMG_SRC[key] });
 const IMG = {
+  // Vehicles pair (Fausto 27.10.2026): Visual/Crews and Events/carmeet3.jpg (Trailer 1, 0:32) + Cheetah cockpit (former guide band, Rockstar screenshot). Alt/captions: Claude placeholders -> Codex.
+  vehiclesStreet: img('vehicles-ocean-drive', W3, 1920, 1080, 'Sports cars and classics lined up on a neon-lit beachfront street at dusk in GTA VI.', 'Cars lined up on a Vice City street — Rockstar Games.'),
+  vehiclesCockpit: img('vehicles-cheetah-cockpit', [640, 1280, 1672], 1672, 940, 'The red interior of a white Grotti Cheetah ’95, seen through its open driver’s door, in GTA VI.', `Grotti Cheetah ’95, Ultimate Edition. ${RS}`),
   // Visual/Cars/Garage/granforma-zorrusso.png, 2000x1125 (web exports = vehicles/granforma-zorrusso-*.webp).
   granforma: img('granforma', W3, 2000, 1125, 'Rear three-quarter view of a green sports car in GTA VI, with GranForma lettering and an emblem above the rear grille.', 'New rear branding on the car identified as the GranForma Zorrusso. The name’s exact role remains unconfirmed. Rockstar Games image published with Bloomberg’s October 14 feature.'),
   // Visual/Heat/heat.png + heat2.png, 1800x1013, screenshots from the Extended Look (Fausto 17.10.). Alt/caption: Claude placeholders -> Codex (DEC-0088).
-  heatGarage: img('heat-garage', [640, 1280, 1800], 1800, 1013, 'View from inside a dark garage, looking past a car’s dashboard toward a police car outside in GTA VI.', 'From Grand Theft Auto VI: An Extended Look — Rockstar Games.'),
+  // Visual/Guide/change-clothes.png, Extended Look 17:49 (Fausto 27.10.2026). Alt/caption: Claude placeholders -> Codex.
+  heatOutfit: img('heat-outfit', [640, 1280, 1800], 1800, 1012, 'An in-game menu for switching headwear, glasses and outfits, with Rod’s Racing Cap highlighted, in GTA VI.', 'Switching headwear and outfits from the item menu — Rockstar Games.'),
   heatPolice: img('heat-police', [640, 1280, 1800], 1800, 1013, 'Several police cars with flashing lights near a sunlit city intersection in GTA VI.', 'From Grand Theft Auto VI: An Extended Look — Rockstar Games.'),
   driving: img('driving', [640, 1280], 1280, 720, 'A dark sedan turns across a city street with smoke around its tires in GTA VI.', 'GTA VI gameplay — Rockstar Games.'),
   slimJim: img('slim-jim', [640, 1280], 1280, 720, 'A character stands beside a red parked car with “Slim Jim” and “Smash Window” prompts on screen in GTA VI.', 'On-screen theft options in GTA VI gameplay — Rockstar Games.'),
@@ -95,7 +101,8 @@ const IMG = {
   carMeet: img('car-meet', [640, 1280, 1919], 1919, 1079, 'People gather beside customized cars at an outdoor parking-lot meet in GTA VI.', 'A car meet in GTA VI — Rockstar Games.'),
   takeover: img('street-takeover', [640, 1280, 1672], 1672, 941, 'A crowd surrounds cars and tire smoke at a nighttime street takeover in GTA VI, viewed from above.', 'A street takeover in GTA VI — Rockstar Games.'),
 };
-export const guideHeroImage = img('hero-cheetah', W3, 1920, 1080, 'Close-up of a white Grotti Cheetah ’95 with raised pop-up headlights in warm evening light in GTA VI.', `Grotti Cheetah ’95, Ultimate Edition. ${RS}`);
+// Share image (og-guide.jpg) = circuit race crop (Fausto 27.10.2026); the band is the Launch Trailer night race (1:03).
+export const guideHeroImage = IMG.circuitRace;
 
 export interface GuideSection {
   id: string;
@@ -125,6 +132,7 @@ const DAZED = 'https://www.dazeddigital.com/life-culture/article/70859/1/gta-6-g
 export const guideSections: GuideSection[] = [
   {
     id: 'vehicles',
+    images: [IMG.vehiclesStreet, IMG.vehiclesCockpit],
     title: 'Vehicles in GTA VI',
     status: 'Shown by Rockstar',
     paragraphs: [
@@ -204,7 +212,7 @@ export const guideSections: GuideSection[] = [
     id: 'heat',
     title: 'Heat, Police Recognition, and Getaways',
     status: 'Rockstar Interview',
-    images: [IMG.heatGarage, IMG.heatPolice],
+    images: [IMG.heatOutfit, IMG.heatPolice],
     paragraphs: [
       `The police response depends on what has been reported and what officers know. Nelson says a crime needs a witness or an alarm to reach the law. Police can know your appearance, your clothes, your vehicle, and that Jason and Lucia are traveling together. In the demonstration, switching to a car they do not recognize lowers their perception of you; splitting the pair up can help, too.`,
       `A baseball cap is not a complete escape plan. Nelson puts on glasses and a cap, then points out that the police still know his outfit. The same limitation applies to a haircut. A clothing store or a spare outfit from your personal vehicle gives you another option; in the shopping demonstration, he says buying and wearing a new outfit removes his current heat.`,
