@@ -61,9 +61,15 @@ const seoName = isClass ? `GTA VI ${label}` : `${label} in GTA VI`;
 const launched = Date.now() >= new Date(LAUNCH_AT ?? `${LAUNCH_DATE}T00:00:00Z`).getTime();
 const noLap = launched ? 'No lap recorded yet' : 'After launch';
 const noSpeed = launched ? 'No speed recorded yet' : 'After launch';
+// Manufacturer with exactly one real-world counterpart: name it in the meta description (snippet only, not on the page; Fausto 27.10.2026).
+const soleInspiration = !isClass && Array.isArray((page as { inspiration?: string[] }).inspiration) && (page as { inspiration?: string[] }).inspiration!.length === 1
+  ? (page as { inspiration?: string[] }).inspiration![0] : null;
+const makeDesc = (avail: boolean) => `Explore ${page.name} vehicles in GTA 6, the brand behind the game's ${soleInspiration}-inspired cars. Compare real-life inspirations, specs and ${avail ? 'available ' : ''}performance data.`;
 const metaDescription = isClass
-  ? `Browse GTA 6 ${page.name} vehicles in The Garage. Compare models, key vehicle characteristics, real-life inspirations, release details, and available performance data.`
-  : `Explore ${page.name} vehicles in GTA 6. See the real-world inspiration behind each model and compare key characteristics and available performance data.`;
+  ? `Browse GTA 6 ${page.name} vehicles. Compare models, key vehicle characteristics, real-life inspirations, release details, and available performance data.`
+  : soleInspiration
+    ? (makeDesc(true).length <= 160 ? makeDesc(true) : makeDesc(false))
+    : `Explore ${page.name} vehicles in GTA 6. See the real-world inspiration behind each model and compare key characteristics and available performance data.`;
 const pageUrl = new URL(`${base}${path}`, Astro.site).href;
 const jsonLd = [{
   '@context': 'https://schema.org',
