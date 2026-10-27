@@ -33,3 +33,25 @@ export async function setOwned(driverId: string, vehicleId: string, owned: boole
   if (error) throw error;
   return owned;
 }
+
+// ---- Wishlist (RS-0087, DEC-0189): cars the driver wants next. Private like
+// owned_vehicles (table wishlist_vehicles). Owning a car removes it from the
+// wishlist in the database itself (trigger owned_vehicle_clears_wishlist).
+
+/** wishlisted vehicle ids, oldest first */
+export async function fetchWishList(): Promise<string[]> {
+  if (!backendConfigured) return [];
+  const { data, error } = await getSupabase().from('wishlist_vehicles').select('vehicle_id, created_at').order('created_at', { ascending: true });
+  if (error) return [];
+  return (data ?? []).map((r: { vehicle_id: string }) => r.vehicle_id);
+}
+
+/** true = now on the wishlist, false = removed; throws on error */
+export async function setWished(driverId: string, vehicleId: string, wished: boolean): Promise<boolean> {
+  const sb = getSupabase();
+  const { error } = wished
+    ? await sb.from('wishlist_vehicles').upsert({ driver_id: driverId, vehicle_id: vehicleId }, { onConflict: 'driver_id,vehicle_id', ignoreDuplicates: true })
+    : await sb.from('wishlist_vehicles').delete().eq('driver_id', driverId).eq('vehicle_id', vehicleId);
+  if (error) throw error;
+  return wished;
+}

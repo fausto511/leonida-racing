@@ -1,10 +1,10 @@
 ---
-// My Account > Garage (RS-0032, DEC-0074): every vehicle the driver owns.
-// Slot layout (Fausto, 2026-09-26): owned vehicles as garage tiles, followed
-// by one empty "+" slot. The slot opens a vehicle picker (search + list by
-// class); the picked car fills the slot and a new empty slot appears after it.
-// Vehicles can also be marked with "I own this vehicle" on their Garage page.
-// Private: only the driver sees this list.
+// My Account > Garage (RS-0032, DEC-0074; redesign DEC-0189): the start page of
+// My Account. Switch between My cars (vehicles the driver owns) and Wishlist
+// (RS-0087, cars he wants next). Both lists are private. Each list ends in a
+// "+" slot that opens the vehicle picker; the band action opens it too.
+// Owning a car takes it off the wishlist (database trigger). Garages (RS-0088)
+// join the switch after launch. Copy marked as placeholder until Codex (DEC-0088).
 import Base from '../../layouts/Base.astro';
 import AccountHead from '../../components/AccountHead.astro';
 import { vehicleOptions } from '../../data/vehicles';
@@ -15,11 +15,11 @@ const vehicleIndex = [...vehicleOptions]
 ---
 <Base
   title="My Garage — My Account"
-  description="The GTA VI vehicles you own."
+  description="The GTA VI cars you own and the ones on your wishlist."
   section="account"
   noindex
 >
-  <AccountHead active="garage" cta={{ label: 'Add a vehicle', id: 'acc-cta' }} />
+  <AccountHead active="garage" cta={{ label: 'Add a car you own', id: 'acc-cta' }} />
   <section class="wrap account-wrap">
 
     <div id="acc-auth" class="acc-auth lr-empty-panel" hidden>
@@ -28,16 +28,39 @@ const vehicleIndex = [...vehicleOptions]
     </div>
 
     <div id="acc-body" hidden>
-      <h2 class="section-heading">My Garage <span class="mg-count" id="mg-count"></span></h2>
-      <p class="section-lede">Vehicles you own in GTA VI. Only you can see this list. Add vehicles below, or switch on “I own this vehicle” from any vehicle page in <a href={`${base}cars/`}>The Garage</a>.</p>
-      <p class="mg-msg" id="mg-msg" role="status" hidden></p>
-      <div class="mg-grid" id="mg-grid"></div>
+      <div class="mg-seg" role="tablist" aria-label="Garage">
+        <button type="button" role="tab" id="mg-tab-cars" aria-controls="mg-v-cars" aria-selected="true" data-view="cars">My cars <span class="mg-n" id="mg-n-cars"></span></button>
+        <button type="button" role="tab" id="mg-tab-wish" aria-controls="mg-v-wish" aria-selected="false" data-view="wishlist">Wishlist <span class="mg-n" id="mg-n-wish"></span></button>
+      </div>
+
+      <section id="mg-v-cars" role="tabpanel" aria-labelledby="mg-tab-cars">
+        <div class="mg-head">
+          <div>
+            <h2 class="lr-h2 lr-h2-s">My cars</h2>
+            <p class="mg-lede">Cars you own in GTA VI. Only you can see this list.</p>
+          </div>
+          <div class="mg-meter"><b id="mg-own-n">0</b> of {vehicleIndex.length} cars<span class="mg-bar"><i id="mg-own-bar"></i></span></div>
+        </div>
+        <p class="mg-msg lr-note" id="mg-msg-cars" role="status" hidden></p>
+        <div class="mg-grid" id="mg-grid-cars"></div>
+      </section>
+
+      <section id="mg-v-wish" role="tabpanel" aria-labelledby="mg-tab-wish" hidden>
+        <div class="mg-head">
+          <div>
+            <h2 class="lr-h2 lr-h2-s">Wishlist</h2>
+            <p class="mg-lede">Cars you want next. Only you can see this list. When you buy one, mark it as owned and it moves to My cars.</p>
+          </div>
+        </div>
+        <p class="mg-msg lr-note" id="mg-msg-wish" role="status" hidden></p>
+        <div class="mg-grid" id="mg-grid-wish"></div>
+      </section>
     </div>
   </section>
 
   <dialog class="mg-picker" id="mg-picker" aria-labelledby="mg-picker-title">
     <div class="mg-picker-head">
-      <h2 id="mg-picker-title">Add a vehicle you own</h2>
+      <h2 id="mg-picker-title">Add a car you own</h2>
       <button type="button" class="mg-picker-close" id="mg-picker-close" aria-label="Close">✕</button>
     </div>
     <label class="ui-search mg-picker-search">
@@ -52,39 +75,59 @@ const vehicleIndex = [...vehicleOptions]
   [hidden] { display: none !important; }
   .account-wrap { padding-top: var(--lr-gap-head); } /* DEC-0188; the footer brings the 64px gap below */
   .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
-  .section-heading { margin: 0 0 .3rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
-  .mg-count { color: var(--gh-muted); font-size: .95rem; }
-  .section-lede { margin: 0 0 1.4rem; color: var(--gh-muted); font-size: .88rem; max-width: 42rem; }
-  .section-lede a { color: var(--gh-text); }
-  .mg-msg { margin: -.6rem 0 1rem; font-size: .82rem; color: var(--gh-muted); }
-  .mg-msg.is-error { color: var(--lr-coral); }
-  .mg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr)); gap: var(--gh-gap-card, 1rem); }
+  /* switch My cars / Wishlist (DEC-0189) */
+  .mg-seg { display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 32px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
+  .mg-seg button { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border: 0; border-radius: 5px; background: transparent; color: var(--lr-muted); font: 600 14px var(--gh-font-body); cursor: pointer; white-space: nowrap; }
+  .mg-seg button:hover { color: var(--lr-text); }
+  .mg-seg button[aria-selected="true"] { background: var(--lr-raised); color: var(--lr-text); }
+  .mg-n { color: var(--lr-muted); font-variant-numeric: tabular-nums; }
+  .mg-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 20px; }
+  .mg-lede { margin: 8px 0 0; max-width: 640px; font-size: 15px; line-height: 1.5; color: var(--lr-soft); }
+  .mg-meter { min-width: 220px; font-size: 14px; color: var(--lr-soft); }
+  .mg-meter b { font-family: var(--gh-font-display); font-weight: 800; font-size: 20px; color: var(--lr-text); font-variant-numeric: tabular-nums; }
+  .mg-bar { display: block; height: 4px; margin-top: 8px; border-radius: 2px; background: var(--lr-raised); overflow: hidden; }
+  .mg-bar i { display: block; width: 0; height: 100%; border-radius: 2px; background: var(--lr-orange); }
+  .mg-msg { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0 0 16px; }
+  .mg-msg[hidden] { display: none; }
+  :global(.mg-undo) { padding: 0; border: 0; background: none; color: var(--lr-orange); font: 600 14px var(--gh-font-body); cursor: pointer; }
+  :global(.mg-undo:hover) { color: var(--lr-pink); }
+  .mg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+  @media (max-width: 560px) { .mg-grid { grid-template-columns: 1fr 1fr; gap: 12px; } .mg-seg { display: flex; } .mg-seg button { flex: 1; justify-content: center; } }
 
-  /* owned vehicle tile -- same language as The Garage tiles */
-  :global(.mg-tile) { position: relative; border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg, 12px); overflow: hidden; background: var(--gh-surface); display: flex; flex-direction: column; }
-  :global(.mg-tile.is-new) { animation: mg-in .45s ease-out; border-color: var(--gh-yellow); }
+  /* car tile: photo, name below (like the car cards on Cars), hover per DEC-0180 */
+  :global(.mg-tile) { position: relative; display: flex; flex-direction: column; background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: 8px; overflow: hidden; }
+  :global(.mg-tile.is-new) { animation: mg-in .45s ease-out; border-color: var(--lr-orange); }
   @keyframes mg-in { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
-  :global(.mg-photo) { position: relative; aspect-ratio: 16 / 9; background: #0e0e13; }
-  :global(.mg-photo img.mg-bg) { width: 100%; height: 100%; object-fit: cover; opacity: .55; display: block; }
-  :global(.mg-photo img.mg-real) { opacity: 1; }
-  :global(.mg-name) { position: absolute; inset: auto 0 0 0; padding: .6rem .75rem; background: linear-gradient(to top, rgba(11,11,20,.95), transparent); display: flex; align-items: center; gap: .55rem; }
-  :global(.mg-logo) { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--gh-text); padding: 4px; display: inline-flex; }
+  @media (prefers-reduced-motion: reduce) { :global(.mg-tile.is-new) { animation: none; } }
+  :global(.mg-photo) { position: relative; aspect-ratio: 16 / 10; background: var(--lr-raised); }
+  :global(.mg-photo img) { width: 100%; height: 100%; object-fit: cover; display: block; }
+  :global(.mg-photo img.mg-ph) { opacity: .5; }
+  :global(.mg-remove) { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--lr-line-hover); background: var(--lr-dark-80); color: var(--lr-text); font-size: 13px; cursor: pointer; display: grid; place-items: center; }
+  :global(.mg-remove:hover) { border-color: var(--lr-text); }
+  :global(.mg-body) { display: flex; flex-direction: column; gap: 10px; flex: 1; padding: 12px 14px 14px; }
+  :global(.mg-name) { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  :global(.mg-logo) { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--lr-text); padding: 4px; display: inline-flex; box-sizing: border-box; }
   :global(.mg-logo img) { width: 100%; height: 100%; object-fit: contain; }
-  :global(.mg-name a) { color: var(--gh-text); font-weight: 800; text-decoration: none; line-height: 1.15; }
-  :global(.mg-name a:hover) { text-decoration: underline; text-underline-offset: 3px; }
-  :global(.mg-name small) { display: block; color: var(--gh-muted); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
-  :global(.mg-remove) { position: absolute; top: .55rem; right: .55rem; width: 1.9rem; height: 1.9rem; border-radius: 50%; border: 1px solid var(--lr-line-hover); background: var(--lr-dark-80); color: var(--gh-text); font-size: .8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  :global(.mg-remove:hover) { border-color: var(--gh-red); color: var(--gh-red); }
-  :global(.mg-foot) { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .6rem .75rem; font-size: .76rem; }
-  :global(.mg-foot a) { color: var(--gh-muted); font-weight: 700; text-decoration: none; }
-  :global(.mg-foot a:hover) { color: var(--gh-text); }
+  :global(.mg-name a) { display: block; color: var(--lr-text); font-weight: 600; font-size: 15px; line-height: 1.25; text-decoration: none; }
+  :global(.mg-name a:hover) { color: var(--lr-orange); }
+  :global(.mg-name small) { display: block; margin-top: 2px; color: var(--lr-muted); font-size: 12px; }
+  :global(.mg-foot) { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--lr-line-soft); font-size: 13px; }
+  :global(.mg-foot a) { color: var(--lr-muted); font-weight: 600; text-decoration: none; white-space: nowrap; }
+  :global(.mg-foot a:hover) { color: var(--lr-text); }
+  @media (max-width: 560px) {
+    :global(.mg-body) { padding: 10px 10px 12px; }
+    :global(.mg-logo) { width: 24px; height: 24px; }
+    :global(.mg-name a) { font-size: 14px; }
+    :global(.mg-foot .mg-long) { display: none; }
+  }
 
-  /* empty "+" slot */
-  :global(.mg-slot) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .55rem; min-height: 12.5rem; padding: 1.2rem; border: 2px dashed var(--gh-line); border-radius: var(--gh-radius-lg, 12px); background: transparent; color: var(--gh-muted); font: inherit; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
-  :global(.mg-slot:hover), :global(.mg-slot:focus-visible) { border-color: var(--gh-yellow); color: var(--gh-text); background: var(--lr-orange-tint); outline: none; }
-  :global(.mg-slot-plus) { width: 3rem; height: 3rem; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; line-height: 1; }
-  :global(.mg-slot strong) { font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1rem; color: var(--gh-text); }
-  :global(.mg-slot span.mg-slot-sub) { font-size: .78rem; }
+  /* "+" slot at the end of each list */
+  :global(.mg-slot) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 220px; padding: 20px; border: 1px dashed var(--lr-line-strong); border-radius: 8px; background: transparent; color: var(--lr-soft); font: inherit; font-size: 14px; text-align: center; cursor: pointer; }
+  :global(.mg-slot:hover), :global(.mg-slot:focus-visible) { border-color: var(--lr-orange); background: var(--lr-orange-tint); color: var(--lr-text); outline: none; }
+  :global(.mg-slot-plus) { width: 44px; height: 44px; border-radius: 50%; border: 1px solid currentColor; display: grid; place-items: center; font-size: 22px; line-height: 1; }
+  :global(.mg-slot strong) { color: var(--lr-text); font-weight: 600; font-size: 15px; }
+  @media (max-width: 560px) { :global(.mg-slot) { min-height: 180px; } }
+  :global(.mg-empty) { grid-column: 1 / -1; }
 
   /* picker */
   .mg-picker { width: min(34rem, calc(100vw - 2rem)); max-height: min(40rem, calc(100vh - 3rem)); padding: 0; border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg, 12px); background: var(--gh-surface); color: var(--gh-text); }
@@ -114,67 +157,106 @@ const vehicleIndex = [...vehicleOptions]
 
 <script>
   import { backendConfigured, getSupabase } from '../../scripts/supabase-client';
-  import { currentDriverId, fetchOwnedList, setOwned } from '../../scripts/owned';
+  import { currentDriverId, fetchOwnedList, setOwned, fetchWishList, setWished } from '../../scripts/owned';
   import { esc } from '../../data/hub';
 
   type V = { id: string; make: string; model: string; cls: string; classes: string; logo: string; photo: boolean };
+  type View = 'cars' | 'wishlist';
   const all = (window as any).__mgVehicles as V[];
   const byId = new Map(all.map((v) => [v.id, v]));
   const base = import.meta.env.BASE_URL;
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
-  const grid = $('mg-grid');
   const picker = $<HTMLDialogElement>('mg-picker');
   const pq = $<HTMLInputElement>('mg-picker-q');
   const plist = $('mg-picker-list');
+  const cta = document.getElementById('acc-cta');
   let me: string | null = null;
   let owned: string[] = []; // in the order they were added
+  let wish: string[] = [];
   let fresh: string | null = null;
+  let view: View = 'cars';
+  let pickFor: View = 'cars';
 
+  const name = (id: string) => { const v = byId.get(id); return v ? `${v.make} ${v.model}` : 'The car'; };
   const logo = (v: V) => `<span class="mg-logo"><img src="${base}images/logos/${esc(v.logo)}-gta-6-logo.svg" alt="" width="22" height="22" loading="lazy" /></span>`;
 
-  function msg(text: string, error = false) {
-    const el = $('mg-msg');
-    el.textContent = text; el.hidden = !text; el.className = `mg-msg${error ? ' is-error' : ''}`;
+  /** status line above a list; with undo it offers to take the last step back */
+  function msg(list: View, text: string, error = false, undo?: () => Promise<void>) {
+    (['cars', 'wishlist'] as View[]).forEach((l) => { const o = $(l === 'cars' ? 'mg-msg-cars' : 'mg-msg-wish'); if (l !== list) o.hidden = true; });
+    const el = $(list === 'cars' ? 'mg-msg-cars' : 'mg-msg-wish');
+    el.className = `mg-msg lr-note${error ? ' is-error' : ''}`;
+    el.innerHTML = `<span>${esc(text)}</span>${undo ? '<button type="button" class="mg-undo">Undo</button>' : ''}`;
+    el.hidden = !text;
+    if (undo) el.querySelector<HTMLButtonElement>('.mg-undo')!.addEventListener('click', async (e) => {
+      (e.currentTarget as HTMLButtonElement).disabled = true;
+      try { await undo(); el.hidden = true; render(); } catch { msg(list, 'Could not undo — please try again.', true); }
+    }, { once: true });
   }
 
+  function tile(x: V, list: View) {
+    const foot = list === 'cars'
+      ? `<a rel="nofollow" href="${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(x.id)}">Gellhorn<span class="mg-long"> leaderboard</span> →</a>`
+      : `<button type="button" class="btn btn-s btn-sm" data-own="${esc(x.id)}">I own it</button><a rel="nofollow" href="${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(x.id)}">Gellhorn →</a>`;
+    return `<article class="mg-tile lr-hcard${x.id === fresh ? ' is-new' : ''}">
+      <div class="mg-photo lr-hmedia">
+        ${x.photo
+          ? `<img class="lr-hzoom" src="${base}images/vehicles/${esc(x.id)}-640.webp" alt="" loading="lazy" width="640" height="360" />`
+          : `<img class="mg-ph lr-hzoom" src="${base}images/garage/garage-hero-placeholder-640.webp" alt="" loading="lazy" width="640" height="360" />`}
+        <button type="button" class="mg-remove" data-remove="${esc(x.id)}" data-list="${list}" title="Remove" aria-label="Remove ${esc(x.make)} ${esc(x.model)} from ${list === 'cars' ? 'My cars' : 'your wishlist'}">✕</button>
+      </div>
+      <div class="mg-body">
+        <div class="mg-name">${logo(x)}<span><a href="${base}cars/vehicles/${esc(x.id)}/">${esc(x.make)} ${esc(x.model)}</a><small>${esc(x.classes)}</small></span></div>
+        <div class="mg-foot">${foot}</div>
+      </div>
+    </article>`;
+  }
+  const slot = (list: View, title: string, sub: string) => `<button type="button" class="mg-slot" data-add="${list}" aria-haspopup="dialog">
+      <span class="mg-slot-plus" aria-hidden="true">+</span><strong>${title}</strong><span>${sub}</span></button>`;
+
   function render() {
-    $('mg-count').textContent = owned.length ? `· ${owned.length} vehicle${owned.length === 1 ? '' : 's'}` : '';
-    const tiles = owned.map((id) => byId.get(id)).filter(Boolean).map((v) => {
-      const x = v as V;
-      return `<article class="mg-tile${x.id === fresh ? ' is-new' : ''}">
-        <div class="mg-photo">
-          ${x.photo
-            ? `<img class="mg-bg mg-real" src="${base}images/vehicles/${esc(x.id)}-640.webp" alt="" loading="lazy" width="640" height="360" />`
-            : `<img class="mg-bg" src="${base}images/garage/garage-hero-placeholder-640.webp" alt="" loading="lazy" width="640" height="360" />`}
-          <button type="button" class="mg-remove" data-remove="${esc(x.id)}" title="Remove from my garage" aria-label="Remove ${esc(x.make)} ${esc(x.model)} from my garage">✕</button>
-          <div class="mg-name">${logo(x)}<span><a href="${base}cars/vehicles/${esc(x.id)}/">${esc(x.make)} ${esc(x.model)}</a><small>${esc(x.classes)}</small></span></div>
-        </div>
-        <div class="mg-foot"><a rel="nofollow" href="${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(x.id)}">Gellhorn leaderboard →</a></div>
-      </article>`;
-    });
-    const slot = `<button type="button" class="mg-slot" id="mg-slot" aria-haspopup="dialog">
-        <span class="mg-slot-plus" aria-hidden="true">+</span>
-        <strong>${owned.length ? 'Add another vehicle' : 'Add your first vehicle'}</strong>
-        <span class="mg-slot-sub">Pick a car you own</span>
-      </button>`;
-    grid.innerHTML = tiles.join('') + slot;
+    const cars = owned.map((id) => byId.get(id)).filter(Boolean) as V[];
+    const wl = wish.map((id) => byId.get(id)).filter(Boolean) as V[];
+    $('mg-grid-cars').innerHTML = cars.map((x) => tile(x, 'cars')).join('') + slot('cars', cars.length ? 'Add another car' : 'Add your first car', 'Pick a car you own');
+    $('mg-grid-wish').innerHTML = wl.length
+      ? wl.map((x) => tile(x, 'wishlist')).join('') + slot('wishlist', 'Add a car', 'Pick a car you want')
+      : `<div class="mg-empty lr-empty-panel"><p><strong>Your wishlist is empty.</strong> Tap the heart on any car page to keep it here for later.</p><a class="btn btn-s btn-md" href="${base}cars/">Browse cars</a></div>`;
+    $('mg-n-cars').textContent = String(cars.length);
+    $('mg-n-wish').textContent = String(wl.length);
+    $('mg-own-n').textContent = String(cars.length);
+    $('mg-own-bar').style.width = `${Math.min(100, (cars.length / all.length) * 100)}%`;
     fresh = null;
   }
 
+  function show(v: View, updateHash = true) {
+    view = v;
+    $('mg-v-cars').hidden = v !== 'cars';
+    $('mg-v-wish').hidden = v !== 'wishlist';
+    $('mg-tab-cars').setAttribute('aria-selected', String(v === 'cars'));
+    $('mg-tab-wish').setAttribute('aria-selected', String(v === 'wishlist'));
+    if (cta) cta.textContent = v === 'cars' ? 'Add a car you own' : 'Add to wishlist';
+    if (updateHash) history.replaceState(null, '', v === 'wishlist' ? '#wishlist' : location.pathname + location.search);
+  }
+  const viewFromHash = (): View => (location.hash === '#wishlist' ? 'wishlist' : 'cars');
+
   function renderPicker() {
     const q = pq.value.trim().toLowerCase();
-    const have = new Set(owned);
+    const have = new Set(owned), want = new Set(wish);
     const list = all.filter((v) => !q || `${v.make} ${v.model} ${v.classes}`.toLowerCase().includes(q));
     const groups = new Map<string, V[]>();
     list.forEach((v) => groups.set(v.cls, [...(groups.get(v.cls) ?? []), v]));
+    // owned cars can't be added again; for the wishlist, cars already on it are off too
+    const off = (id: string) => have.has(id) || (pickFor === 'wishlist' && want.has(id));
+    const tag = (id: string) => have.has(id) ? 'Owned' : want.has(id) ? 'On wishlist' : '';
     plist.innerHTML = list.length
       ? [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([cls, vs]) =>
           `<p class="mg-group">${esc(cls)}</p>` + vs.map((v) =>
-            `<button type="button" class="mg-opt" data-pick="${esc(v.id)}"${have.has(v.id) ? ' disabled' : ''}>${logo(v)}<span><span class="mg-make">${esc(v.make)}</span> ${esc(v.model)}</span>${have.has(v.id) ? '<span class="mg-have">In garage</span>' : ''}</button>`).join('')).join('')
-      : '<p class="mg-none">No vehicle matches your search.</p>';
+            `<button type="button" class="mg-opt" data-pick="${esc(v.id)}"${off(v.id) ? ' disabled' : ''}>${logo(v)}<span><span class="mg-make">${esc(v.make)}</span> ${esc(v.model)}</span>${tag(v.id) ? `<span class="mg-have">${tag(v.id)}</span>` : ''}</button>`).join('')).join('')
+      : '<p class="mg-none">No car matches your search.</p>';
   }
 
-  function openPicker() {
+  function openPicker(list: View) {
+    pickFor = list;
+    $('mg-picker-title').textContent = list === 'cars' ? 'Add a car you own' : 'Add to your wishlist';
     pq.value = '';
     renderPicker();
     picker.showModal();
@@ -183,16 +265,54 @@ const vehicleIndex = [...vehicleOptions]
     if (window.matchMedia('(pointer: fine)').matches) pq.focus();
   }
 
-  grid.addEventListener('click', async (e) => {
+  async function own(id: string) {
+    await setOwned(me!, id, true); // the database also takes it off the wishlist
+    owned = [...owned.filter((x) => x !== id), id];
+    wish = wish.filter((x) => x !== id);
+  }
+
+  document.querySelector('.mg-seg')!.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('[data-view]');
+    if (b) show(b.dataset.view as View);
+  });
+  window.addEventListener('hashchange', () => show(viewFromHash(), false));
+
+  $('acc-body').addEventListener('click', async (e) => {
     const t = e.target as HTMLElement;
-    if (t.closest('#mg-slot')) { openPicker(); return; }
-    const b = t.closest<HTMLButtonElement>('[data-remove]');
-    if (!b || !me) return;
-    const id = b.dataset.remove!;
-    b.disabled = true;
-    try { await setOwned(me, id, false); owned = owned.filter((x) => x !== id); msg(`${byId.get(id)?.make} ${byId.get(id)?.model} removed.`); }
-    catch { b.disabled = false; msg('Could not remove the vehicle — please try again.', true); return; }
-    render();
+    const add = t.closest<HTMLElement>('[data-add]');
+    if (add) { openPicker(add.dataset.add as View); return; }
+    if (!me) return;
+    const ownBtn = t.closest<HTMLButtonElement>('[data-own]');
+    if (ownBtn) {
+      const id = ownBtn.dataset.own!;
+      ownBtn.disabled = true;
+      try { await own(id); fresh = id; render(); msg('wishlist', `${name(id)} moved to My cars.`); }
+      catch { ownBtn.disabled = false; msg('wishlist', 'Could not save — please try again.', true); }
+      return;
+    }
+    const rm = t.closest<HTMLButtonElement>('[data-remove]');
+    if (!rm) return;
+    const id = rm.dataset.remove!;
+    const list = rm.dataset.list as View;
+    rm.disabled = true;
+    try {
+      if (list === 'cars') {
+        const i = owned.indexOf(id);
+        await setOwned(me, id, false);
+        owned = owned.filter((x) => x !== id);
+        render();
+        msg('cars', `${name(id)} removed.`, false, async () => { await setOwned(me!, id, true); owned.splice(i, 0, id); });
+      } else {
+        const i = wish.indexOf(id);
+        await setWished(me, id, false);
+        wish = wish.filter((x) => x !== id);
+        render();
+        msg('wishlist', `${name(id)} removed from your wishlist.`, false, async () => { await setWished(me!, id, true); wish.splice(i, 0, id); });
+      }
+    } catch {
+      rm.disabled = false;
+      msg(list, 'Could not remove the car — please try again.', true);
+    }
   });
 
   plist.addEventListener('click', async (e) => {
@@ -201,34 +321,41 @@ const vehicleIndex = [...vehicleOptions]
     const id = b.dataset.pick!;
     b.disabled = true;
     try {
-      await setOwned(me, id, true);
-      owned = [...owned.filter((x) => x !== id), id];
+      if (pickFor === 'cars') {
+        const wasWished = wish.includes(id);
+        await own(id);
+        msg('cars', `${name(id)} added to My cars${wasWished ? ' and taken off your wishlist' : ''}.`);
+      } else {
+        await setWished(me, id, true);
+        wish = [...wish.filter((x) => x !== id), id];
+        msg('wishlist', `${name(id)} added to your wishlist.`);
+      }
       fresh = id;
       picker.close();
-      msg(`${byId.get(id)?.make} ${byId.get(id)?.model} added to your garage.`);
       render();
       document.querySelector('.mg-tile.is-new')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     } catch {
       b.disabled = false;
       picker.close();
-      msg('Could not add the vehicle — please try again.', true);
+      msg(pickFor, 'Could not add the car — please try again.', true);
     }
   });
   pq.addEventListener('input', renderPicker);
   // Escape in a search field would only clear the text -- close the picker right away.
   pq.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); picker.close(); } });
   $('mg-picker-close').addEventListener('click', () => picker.close());
-  // band action "Add a vehicle" (DEC-0188): same picker as the + slot; signed out it starts the Discord sign-in
-  $('acc-cta')?.addEventListener('click', () => { if (me) openPicker(); else if (backendConfigured) $('acc-signin').click(); });
   picker.addEventListener('click', (e) => { if (e.target === picker) picker.close(); }); // click on backdrop
+  // band action (DEC-0188/0189): picker for the list on screen; signed out it starts the Discord sign-in
+  cta?.addEventListener('click', () => { if (me) openPicker(view); else if (backendConfigured) $('acc-signin').click(); });
 
   async function init(session: any) {
     $('acc-auth').hidden = Boolean(session);
     $('acc-body').hidden = !session;
+    show(viewFromHash(), false);
     if (!session) return;
     me = await currentDriverId();
-    if (!me) { msg('Your driver profile is not ready yet — reload the page in a moment.', true); return; }
-    owned = await fetchOwnedList();
+    if (!me) { msg('cars', 'Your driver profile is not ready yet — reload the page in a moment.', true); return; }
+    [owned, wish] = await Promise.all([fetchOwnedList(), fetchWishList()]);
     render();
   }
 

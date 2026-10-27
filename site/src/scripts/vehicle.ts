@@ -3,7 +3,7 @@
 // step falls back to what the HTML already shows.
 // COPY STATUS: hint and status texts are Claude placeholders -> Codex (DEC-0088).
 import { backendConfigured, getSupabase } from './supabase-client';
-import { currentDriverId, fetchOwned, setOwned } from './owned';
+import { currentDriverId, fetchOwned, setOwned, fetchWishList, setWished } from './owned';
 import { getSelected, toggleSelected, onCompareChange } from './compare';
 import { bubble, hideBubble } from './bubble';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
@@ -30,6 +30,7 @@ function init(root: HTMLElement) {
   const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
   let me: string | null = null;
   let owned = new Set<string>();
+  let wished = new Set<string>();
   let classRows: ClassRow[] | null = null; // live rows once real laps exist
 
   const login = (extra = '') => {
@@ -94,7 +95,9 @@ function init(root: HTMLElement) {
     try {
       await setOwned(me, carId, next);
       next ? owned.add(carId) : owned.delete(carId);
+      if (next) wished.delete(carId); // the database took it off the wishlist
       paintGarage();
+      paintWish();
       if (carId === id) { ownerCount = Math.max(0, ownerCount + (next ? 1 : -1)); paintOwners(); }
       if (next) {
         let seen = false;
@@ -107,6 +110,35 @@ function init(root: HTMLElement) {
     if (btn) btn.disabled = false;
   }
   garBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleGarage(id, garBtn, 'own'); });
+
+  // ---- Wishlist (RS-0087, DEC-0189) -------------------------------------------
+  // Heart next to "Add to My Garage", only while you don't own the car; owning
+  // it takes it off the wishlist (the database does that itself).
+  const wishBtn = $('vh-wish') as HTMLButtonElement;
+  function paintWish() {
+    const on = wished.has(id);
+    wishBtn.hidden = owned.has(id);
+    wishBtn.setAttribute('aria-pressed', String(on));
+    const label = on ? 'On your wishlist · click to remove' : 'Add to wishlist';
+    wishBtn.title = label;
+    wishBtn.setAttribute('aria-label', label);
+  }
+  wishBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (!me) { bubble(wishBtn, `Log in to keep a wishlist.${loginBtn('wish')}`, 6000); return; }
+    const next = !wished.has(id);
+    wishBtn.disabled = true;
+    try {
+      await setWished(me, id, next);
+      next ? wished.add(id) : wished.delete(id);
+      paintWish();
+      if (next) bubble(wishBtn, `On your wishlist. You find it under <a href="${base}account/#wishlist">My Garage → Wishlist</a>.`, 5000);
+      else hideBubble();
+    } catch {
+      bubble(wishBtn, 'Could not save. Please try again.');
+    }
+    wishBtn.disabled = false;
+  });
 
   // ---- owner count -------------------------------------------------------------
   let ownerCount = 0;
@@ -161,7 +193,7 @@ function init(root: HTMLElement) {
   document.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
     const lb = t.closest<HTMLElement>('[data-login]');
-    if (lb) { login(lb.dataset.login === 'own' ? 'own' : ''); return; }
+    if (lb) { login(lb.dataset.login === 'own' || lb.dataset.login === 'wish' ? lb.dataset.login : ''); return; }
     const cmp = t.closest<HTMLElement>('[data-compare]');
     if (cmp) { e.preventDefault(); e.stopPropagation(); toggleCompare(cmp.dataset.compare!, cmp); return; }
     const gar = t.closest<HTMLElement>('[data-garage]');
@@ -246,20 +278,25 @@ function init(root: HTMLElement) {
     loadGellhorn().catch(() => { /* keep the sample */ });
     const url = new URL(location.href);
     const pendingOwn = url.searchParams.get('own') === '1';
-    if (pendingOwn) { url.searchParams.delete('own'); history.replaceState(null, '', url.pathname + url.search + url.hash); }
+    const pendingWish = url.searchParams.get('wish') === '1';
+    if (pendingOwn || pendingWish) { url.searchParams.delete('own'); url.searchParams.delete('wish'); history.replaceState(null, '', url.pathname + url.search + url.hash); }
     const sb = getSupabase();
-    const [ownedSet, countRes, mineRes] = await Promise.all([
+    const [ownedSet, countRes, mineRes, , wishList] = await Promise.all([
       me ? fetchOwned() : Promise.resolve(new Set<string>()),
       sb.from('public_vehicle_owner_counts').select('owner_count').eq('vehicle_id', id).maybeSingle(),
       me ? sb.from('vehicle_ratings').select('stars').eq('driver_id', me).eq('vehicle_id', id).maybeSingle() : Promise.resolve({ data: null }),
       loadRatingSummary(),
+      me ? fetchWishList() : Promise.resolve([] as string[]),
     ]);
     owned = ownedSet;
+    wished = new Set(wishList as string[]);
     ownerCount = Number((countRes as { data: { owner_count?: number } | null }).data?.owner_count ?? 0);
     mine = (mineRes as { data: { stars?: number } | null }).data?.stars ?? null;
     paintGarage();
+    paintWish();
     paintOwners();
     paintRating();
     if (pendingOwn && me && !owned.has(id)) toggleGarage(id, garBtn);
+    if (pendingWish && me && !owned.has(id) && !wished.has(id)) wishBtn.click();
   })().catch(() => { /* keep the static page */ });
 }

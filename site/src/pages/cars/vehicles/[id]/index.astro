@@ -112,6 +112,7 @@ const ico = {
   check: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
   house: '<svg class="ico vh-g-house" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12M7 21v-7h10v7"/></svg>',
   houseCheck: '<svg class="ico vh-g-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/></svg>',
+  heart: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
   timer: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>',
 };
 const star = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.3L14.38 9.62L22.08 9.62L15.85 14.15L18.23 21.48L12 16.95L5.77 21.48L8.15 14.15L1.92 9.62L9.62 9.62Z"/></svg>';
@@ -157,6 +158,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         <div class="vh-actions">
           <button type="button" class="btn btn-s vh-cmp" id="vh-cmp" aria-pressed="false"><Fragment set:html={ico.plus} /><Fragment set:html={ico.check} /><span data-l>Compare</span></button>
           <button type="button" class="btn btn-s vh-gar" id="vh-gar" aria-pressed="false"><Fragment set:html={ico.house} /><Fragment set:html={ico.houseCheck} /><span data-l>Add to My Garage</span></button>
+          <!-- Wishlist (RS-0087, DEC-0189): only while you don't own the car -->
+          <button type="button" class="btn btn-s vh-wish" id="vh-wish" aria-pressed="false" aria-label="Add to wishlist" title="Add to wishlist"><Fragment set:html={ico.heart} /></button>
         </div>
       </div>
     </section>
@@ -349,7 +352,11 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vh-gar :global(.vh-g-check), .vh-gar[aria-pressed="true"] :global(.vh-g-house) { display: none; }
   .vh-gar[aria-pressed="true"] :global(.vh-g-check) { display: block; }
   .vh-gar[aria-pressed="true"] { background: var(--lr-lime-fill); border-color: var(--lr-lime-border); color: var(--lr-lime); }
-  .vh-gar:disabled, .vh-cmp:disabled { opacity: .6; cursor: progress; }
+  .vh-gar:disabled, .vh-cmp:disabled, .vh-wish:disabled { opacity: .6; cursor: progress; }
+  .vh-actions .vh-wish { min-width: 0; width: 48px; padding: 0; flex: none; }
+  .vh-wish[hidden] { display: none; }
+  .vh-wish[aria-pressed="true"] { border-color: var(--lr-pink); color: var(--lr-pink); }
+  .vh-wish[aria-pressed="true"] :global(.ico) { fill: currentColor; }
 
   /* ---- photo + panel: panel exactly as high as the 16:9 photo (DEC-0118) ---- */
   .vs { display: grid; grid-template-columns: minmax(0, 1.42fr) minmax(0, 1fr); gap: 20px; margin-top: 22px; align-items: start; }
@@ -530,8 +537,9 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
     .vs-photo { order: 1; margin-top: 16px; border-radius: 0; }
     .vs-photo.is-ph { border-left: 0; border-right: 0; }
     .vs-ph-logo { width: 96px; height: 96px; }
-    .vh-actions { order: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 14px; }
-    .vh-actions .btn { min-width: 0; padding: 0 12px; }
+    .vh-actions { order: 2; display: flex; gap: 10px; padding-top: 14px; }
+    .vh-actions .btn { flex: 1 1 0; min-width: 0; padding: 0 12px; }
+    .vh-actions .vh-wish { flex: none; padding: 0; }
     .vs-panel { order: 3; margin: 14px clamp(1.25rem, 4vw, 2.5rem) 0; padding: 12px; }
     .vsec { order: 4; }
     .vt { padding: 10px 12px; }
@@ -560,6 +568,14 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
     .vm-cards > :global(.vcard) { flex: 0 0 78%; scroll-snap-align: start; }
     .vmore-card { flex-wrap: wrap; align-items: flex-start; padding: 16px; }
     .vmore-all { flex-basis: 100%; }
+  }
+  /* narrow phones: three buttons in one row only fit without the icons in Compare / Garage
+     (the state still shows in text and colour); the heart keeps its icon (DEC-0189) */
+  @media (max-width: 420px) {
+    .vh-cmp :global(.ico), .vh-gar :global(.ico) { display: none !important; }
+    .vh-actions { gap: 8px; }
+    .vh-actions .btn { flex: 1 1 auto; padding: 0 10px; font-size: 14px; }
+    .vh-actions .vh-wish { flex: none; padding: 0; }
   }
 </style>
 
