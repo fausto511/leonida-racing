@@ -1,7 +1,12 @@
 ---
-// My Account > Crew (RS-0026): own membership (join / pending / leave),
-// crews I lead (same editor as the moderator panel, personal mode) and the
-// Crew Leader / Event Host application.
+// My Account > Crews (RS-0026; redesign DEC-0190, Fausto 27.10.2026).
+// Order follows urgency: 1. "Waiting for you" (invites to me + join requests
+// for crews I lead or co-run), 2. My crews (the standard crew cards, an open
+// request as a dashed card, "+ Find another crew"), 3. Manage (HubEditor in
+// crew mode: Members | Crew card | Discord feed; a row of crew buttons when
+// someone runs several crews), 4. Crew Leader application.
+// COPY STATUS: membership texts approved (Codex 2026-10-02, Fausto); new texts
+// of DEC-0190 are Claude placeholders, Codex review pending (DEC-0088).
 import Base from '../../../layouts/Base.astro';
 import AccountHead from '../../../components/AccountHead.astro';
 import HubEditor from '../../../components/HubEditor.astro';
@@ -12,11 +17,11 @@ const base = import.meta.env.BASE_URL;
 ---
 <Base
   title="My Crews — My Account"
-  description="Your crew membership and, for crew leaders, crew management."
+  description="Your crews, invites and join requests, and crew management for crew leaders."
   section="account"
   noindex
 >
-  <AccountHead active="crew" cta={{ label: 'Find a crew', href: `${import.meta.env.BASE_URL}community/crews/` }} />
+  <AccountHead active="crew" cta={{ label: 'Find a crew', href: `${base}community/crews/` }} />
   <section class="wrap account-wrap">
 
     <div id="acc-auth" class="acc-auth lr-empty-panel" hidden>
@@ -24,16 +29,37 @@ const base = import.meta.env.BASE_URL;
       <button type="button" id="acc-signin" class="btn btn-discord">Sign in with Discord</button>
     </div>
 
-    <div id="acc-body" hidden>
-      <h2 class="section-heading">My Crews</h2>
-      <div id="membership" class="membership"></div>
+    <div id="acc-body" class="cr-secs" hidden>
+      <section id="cr-wait" hidden>
+        <div class="cr-head"><div>
+          <h2 class="lr-h2 lr-h2-s cr-h2">Waiting for you <span class="cr-count" id="cr-wait-n"></span></h2>
+          <p class="cr-lede">Answer these first. The number on the tab counts them.</p>
+        </div></div>
+        <div class="cr-wait" id="cr-wait-list"></div>
+      </section>
 
-      <div id="lead-block" hidden>
-        <h2 class="section-heading">Crew Management</h2>
-        <p class="section-lede">Edit your crew card, accept join requests and manage members. Changes go live immediately.</p>
-        <DiscordFeedSteps source="crew" />
-        <HubEditor mode="crew" />
-      </div>
+      <section>
+        <div class="cr-head">
+          <div>
+            <h2 class="lr-h2 lr-h2-s">My crews</h2>
+            <p class="cr-lede" id="cr-lede">Your active crew’s tag appears next to your name, also on leaderboards. You can be in up to five crews; open requests count too.</p>
+          </div>
+          <div class="cr-meter" id="cr-meter" hidden><b id="cr-used">0</b> of 5 crews<span class="cr-pips" id="cr-pips" aria-hidden="true"></span></div>
+        </div>
+        <p class="cr-msg lr-note" id="cr-msg" role="status" hidden></p>
+        <div id="membership"></div>
+      </section>
+
+      <section id="lead-block" hidden>
+        <div class="cr-head">
+          <div>
+            <h2 class="lr-h2 lr-h2-s cr-h2" id="cr-manage-h">Manage your crew</h2>
+            <p class="cr-lede" id="cr-manage-lede">Changes go live right away.</p>
+          </div>
+          <span class="cr-live" id="cr-live" hidden></span>
+        </div>
+        <HubEditor mode="crew"><DiscordFeedSteps slot="discord" source="crew" open /></HubEditor>
+      </section>
 
       <RoleApply focus="crew_leader" />
     </div>
@@ -44,135 +70,236 @@ const base = import.meta.env.BASE_URL;
   [hidden] { display: none !important; }
   .account-wrap { padding-top: var(--lr-gap-head); } /* DEC-0188; the footer brings the 64px gap below */
   .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
-  .section-heading { margin: 2.5rem 0 .3rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
-  #acc-body > .section-heading:first-child { margin-top: 0; }
-  .section-lede { margin: 0 0 1.2rem; color: var(--gh-muted); font-size: .88rem; }
-  .membership { margin-top: 1rem; }
-  :global(.mem-current) { display: grid; grid-template-columns: minmax(0, 24rem) 1fr; gap: 1.2rem; align-items: start; }
-  @media (max-width: 760px) { :global(.mem-current) { grid-template-columns: 1fr; } }
-  :global(.mem-side) { display: flex; flex-direction: column; align-items: flex-start; gap: .7rem; font-size: .88rem; color: var(--gh-muted); }
-  :global(.mem-side p) { margin: 0; }
-  :global(.mem-side .btn) { font-size: .8rem; }
-  :global(.mem-msg) { margin: 0 0 1rem; font-size: .84rem; color: #D9F58E; }
-  :global(.mem-msg.is-error) { color: var(--lr-coral); }
-  :global(.mem-head) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8rem 1.2rem; margin-bottom: 1.2rem; }
-  :global(.mem-head p) { margin: 0; color: var(--gh-muted); font-size: .88rem; max-width: 52ch; }
-  :global(.mem-head strong) { color: var(--gh-text); }
-  :global(.mem-current + .mem-current) { margin-top: 1.2rem; }
-  :global(.mem-invites) { display: flex; flex-direction: column; gap: .7rem; margin-bottom: 1.2rem; }
-  :global(.mem-invite-card) { border-color: var(--gh-yellow); }
-  :global(.mem-invite-actions) { display: flex; gap: .5rem; }
-  :global(.mem-pick) { margin-top: 1.4rem; }
-  :global(.mem-pick-head) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8rem 1.2rem; margin-bottom: 1rem; }
-  :global(.mem-pick-head p) { margin: 0; color: var(--gh-muted); font-size: .9rem; max-width: 56ch; }
-  :global(.mem-pick-head strong) { color: var(--gh-text); }
-  :global(.mem-pending) { display: flex; flex-direction: column; gap: .7rem; margin-top: 1.2rem; }
+  .cr-secs:not([hidden]) { display: flex; flex-direction: column; gap: var(--lr-gap-sec); }
+  .cr-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 20px; }
+  .cr-h2 { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .cr-lede { margin: 8px 0 0; max-width: 640px; font-size: 15px; line-height: 1.5; color: var(--lr-soft); }
+  .cr-count { min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; background: var(--lr-orange); color: var(--lr-on-orange); font-family: var(--gh-font-body); font-size: 13px; font-weight: 700; display: inline-grid; place-items: center; box-sizing: border-box; }
+  .cr-meter { min-width: 200px; font-size: 14px; color: var(--lr-soft); }
+  .cr-meter b { font-family: var(--gh-font-display); font-weight: 800; font-size: 20px; color: var(--lr-text); font-variant-numeric: tabular-nums; }
+  .cr-pips { display: flex; gap: 4px; margin-top: 8px; }
+  :global(.cr-pips i) { flex: 1; height: 4px; border-radius: 2px; background: var(--lr-raised); }
+  :global(.cr-pips i.on) { background: var(--lr-orange); }
+  :global(.cr-pips i.wait) { background: var(--lr-orange-border); }
+  .cr-msg { margin: 0 0 16px; }
+  .cr-live { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--lr-muted); }
+  :global(.cr-live::before) { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--lr-muted); }
+  :global(.cr-live.is-live::before) { background: var(--lr-lime); }
+
+  /* waiting list: crew tag as anchor, one sentence, who/when below, buttons right */
+  .cr-wait { background: var(--lr-card); border: 1px solid var(--lr-orange-border); border-radius: 8px; overflow: hidden; }
+  :global(.cr-wgroup + .cr-wgroup) { border-top: 1px solid var(--lr-line); }
+  :global(.cr-wsub) { margin: 0; padding: 14px 18px 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-muted); }
+  :global(.cr-wrow) { display: grid; grid-template-columns: 5rem minmax(0, 1fr) auto; align-items: center; gap: 12px 16px; padding: 14px 18px; }
+  :global(.cr-wrow + .cr-wrow) { border-top: 1px solid var(--lr-line-soft); }
+  :global(.cr-wrow .crew-tag) { justify-self: start; }
+  :global(.cr-wt) { font-size: 15px; font-weight: 600; line-height: 1.35; }
+  :global(.cr-ws) { margin-top: 2px; font-size: 13px; color: var(--lr-muted); }
+  :global(.cr-wacts) { display: flex; gap: 8px; }
+  @media (max-width: 560px) {
+    :global(.cr-wrow) { grid-template-columns: 4.4rem minmax(0, 1fr); }
+    :global(.cr-wacts) { grid-column: 1 / -1; }
+    :global(.cr-wacts .btn) { flex: 1; }
+  }
+
+  /* my crews: the standard crew cards (data/hub.ts crewCardHtml), only the foot buttons differ */
+  :global(#membership .crew-card.is-request) { border-style: dashed; }
+  :global(#membership .crew-card.is-request::before) { opacity: .4; }
+  :global(#membership .crew-actions) { display: flex; align-items: center; gap: 8px; }
+  :global(.cr-slot) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 120px; padding: 20px; border: 1px dashed var(--lr-line-strong); border-radius: 8px; color: var(--lr-soft); font-size: 14px; text-align: center; text-decoration: none; }
+  :global(.cr-slot:hover), :global(.cr-slot:focus-visible) { border-color: var(--lr-orange); background: var(--lr-orange-tint); color: var(--lr-text); outline: none; }
+  :global(.cr-slot-plus) { width: 44px; height: 44px; border-radius: 50%; border: 1px solid currentColor; display: grid; place-items: center; font-size: 22px; line-height: 1; }
+  :global(.cr-slot strong) { color: var(--lr-text); font-weight: 600; font-size: 15px; }
 </style>
 
 <script>
   import { backendConfigured, getSupabase } from '../../../scripts/supabase-client';
   import { crewCardHtml, crewTagHtml, esc, PICK_CREW_TAGS } from '../../../data/hub';
-
   const base = import.meta.env.BASE_URL;
-  const authEl = document.getElementById('acc-auth')!;
-  const bodyEl = document.getElementById('acc-body')!;
-  const memEl = document.getElementById('membership')!;
+  const $ = (id: string) => document.getElementById(id)!;
+  const authEl = $('acc-auth');
+  const bodyEl = $('acc-body');
+  const memEl = $('membership');
   let me: string | null = null;
   let leaderIds: string[] = [];
   let commissionerIds: string[] = [];
   let pickCrews: any[] = []; // "Pick a crew" (DEC-0144)
   // Up to 5 crews incl. open requests; one active crew is the main crew (DEC-0093).
-  // COPY STATUS: membership texts approved (Codex 2026-10-02, Fausto);
-  // invite texts (RS-0063) are Claude placeholders, Codex review pending.
   const LIMIT = 5;
+  const CREW_COLS = 'crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_official,join_mode';
   let mine: any[] = [];
+  let requests: any[] = []; // join requests for crews I lead or co-run (DEC-0190)
   let crewData = new Map<string, any>();
+  const d = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '');
 
   // Leader block visibility comes from the editor itself (same role check).
   document.addEventListener('hc-access', (e: any) => {
-    document.getElementById('lead-block')!.hidden = !e.detail.hasAccess;
+    $('lead-block').hidden = !e.detail.hasAccess;
     leaderIds = e.detail.leaderCrewIds ?? [];
     commissionerIds = e.detail.commissionerCrewIds ?? [];
-    render();
+    if (me) load();
+  });
+  // section heading follows the crew picked in the editor
+  document.addEventListener('hc-crew-open', (e: any) => {
+    const c = e.detail;
+    $('cr-manage-h').innerHTML = `Manage ${crewTagHtml(c.tag, c.color)} ${esc(c.name)}`;
+    const several = leaderIds.length + commissionerIds.length > 1;
+    $('cr-manage-lede').textContent = (c.lead ? 'You lead this crew.' : 'You co-run this crew as a commissioner.') + (several ? ' Pick another crew above to switch.' : '') + ' Changes go live right away.';
+    const live = $('cr-live');
+    live.hidden = false;
+    live.textContent = c.published ? 'Live on the site' : 'Draft — a moderator publishes it';
+    live.className = `cr-live${c.published ? ' is-live' : ''}`;
   });
 
+  let loadSeq = 0; // hc-access and init can both start a load; only the newest one renders
   async function load() {
+    const seq = ++loadSeq;
     const sb = getSupabase();
     let res: any = await sb.from('crew_membership_overview').select('membership_id, crew_id, status, crew_name, tag, color, is_primary, requested_at, invited_by_name').eq('driver_id', me!).order('requested_at');
     if (res.error) res = await sb.from('crew_membership_overview').select('membership_id, crew_id, status, crew_name, tag, color, is_primary, requested_at').eq('driver_id', me!).order('requested_at');
-    if (res.error) res = await sb.from('crew_membership_overview').select('membership_id, crew_id, status, crew_name, tag, color, requested_at').eq('driver_id', me!).order('requested_at');
     mine = res.data ?? [];
-    const activeIds = mine.filter((m) => m.status === 'active').map((m) => m.crew_id);
+    const managed = [...leaderIds, ...commissionerIds];
+    requests = [];
+    if (managed.length) {
+      const r = await sb.from('crew_membership_overview').select('membership_id, crew_id, driver_id, display_name, crew_name, tag, color, requested_at').eq('status', 'pending').in('crew_id', managed).order('requested_at');
+      requests = ((r.data ?? []) as any[]).filter((m) => m.driver_id !== me);
+    }
+    const ids = mine.filter((m) => m.status === 'active' || m.status === 'pending').map((m) => m.crew_id);
     crewData = new Map();
-    if (activeIds.length) {
-      const c = await sb.from('crews').select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_official,join_mode').in('crew_id', activeIds);
+    if (ids.length) {
+      const c = await sb.from('crews').select(CREW_COLS).in('crew_id', ids);
       for (const row of (c.data ?? []) as any[]) crewData.set(row.crew_id, row);
     }
     pickCrews = [];
-    if (!mine.some((m) => m.status === 'active' || m.status === 'pending')) {
-      const p = await sb.from('crews').select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_official,join_mode').eq('is_published', true).in('tag', PICK_CREW_TAGS);
+    if (!ids.length) {
+      const p = await sb.from('crews').select(CREW_COLS).eq('is_published', true).in('tag', PICK_CREW_TAGS);
       pickCrews = ((p.data ?? []) as any[]).sort((a, b) => PICK_CREW_TAGS.indexOf(a.tag) - PICK_CREW_TAGS.indexOf(b.tag));
     }
+    if (seq !== loadSeq) return;
     render();
   }
 
-  function render(note = '', isError = false) {
+  function note(text = '', isError = false) {
+    const el = $('cr-msg');
+    el.textContent = text;
+    el.className = `cr-msg lr-note${isError ? ' is-error' : ''}`;
+    el.hidden = !text;
+  }
+
+  function renderWaiting() {
+    const invites = mine.filter((m) => m.status === 'invited');
+    const total = invites.length + requests.length;
+    $('cr-wait').hidden = !total;
+    $('cr-wait-n').textContent = String(total);
+    // tab badge = what waits here (invites + requests for crews I lead or co-run)
+    const badge = document.querySelector<HTMLElement>('[data-acc-tab="crew"] .acc-tab-count');
+    if (badge) { badge.textContent = String(total); badge.hidden = !total; }
+    const used = mine.filter((m) => m.status === 'active' || m.status === 'pending').length;
+    const row = (tag: string, color: string, title: string, sub: string, acts: string) =>
+      `<div class="cr-wrow">${crewTagHtml(tag, color)}<div><div class="cr-wt">${title}</div><div class="cr-ws">${sub}</div></div><div class="cr-wacts">${acts}</div></div>`;
+    const inv = invites.length ? `<div class="cr-wgroup"><p class="cr-wsub">Invites for you</p>${invites.map((m) => row(m.tag, m.color,
+      `${esc(m.crew_name)} invited you`,
+      `${m.invited_by_name ? `Invite from ${esc(m.invited_by_name)} · ` : ''}${esc(d(m.requested_at))}`,
+      `<button type="button" class="btn btn-p btn-md" data-accept="${esc(m.crew_id)}"${used >= LIMIT ? ` disabled title="You are already in ${LIMIT} crews (open requests included)"` : ''}>Accept</button><button type="button" class="btn btn-s btn-md" data-decline="${esc(m.crew_id)}">Decline</button>`)).join('')}</div>` : '';
+    const req = requests.length ? `<div class="cr-wgroup"><p class="cr-wsub">Requests to join your crew</p>${requests.map((m) => row(m.tag, m.color,
+      `${esc(m.display_name)} wants to join ${esc(m.crew_name)}`,
+      `Asked ${esc(d(m.requested_at))}`,
+      `<button type="button" class="btn btn-p btn-md" data-approve="${esc(m.membership_id)}" data-name="${esc(m.display_name)}" data-crew="${esc(m.crew_name)}">Approve</button><button type="button" class="btn btn-s btn-md" data-reject="${esc(m.membership_id)}" data-label="Decline">Decline</button>`)).join('')}</div>` : '';
+    $('cr-wait-list').innerHTML = inv + req;
+  }
+
+  function render() {
+    renderWaiting();
     const active = mine.filter((m) => m.status === 'active').sort((a, b) => Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary)));
     const pending = mine.filter((m) => m.status === 'pending');
-    const invites = mine.filter((m) => m.status === 'invited');
     const used = active.length + pending.length; // invites don't count until accepted (DEC-0094)
-    const invHtml = invites.length ? `<div class="mem-invites">${invites.map((m) => `<div class="mem-empty-card lr-empty-panel mem-invite-card"><p>${crewTagHtml(m.tag, m.color, 'sm')} <strong>${esc(m.crew_name)}</strong> invited you to join their crew${m.invited_by_name ? ` (invite from ${esc(m.invited_by_name)})` : ''}.</p><span class="mem-invite-actions"><button type="button" class="btn btn-p" data-accept="${esc(m.crew_id)}"${used >= LIMIT ? ` disabled title="You are already in ${LIMIT} crews (open requests included)"` : ''}>Accept</button><button type="button" class="btn btn-s" data-decline="${esc(m.crew_id)}">Decline</button></span></div>`).join('')}</div>` : '';
-    const msg = note ? `<p class="mem-msg${isError ? ' is-error' : ''}">${esc(note)}</p>` : '';
-    const find = used < LIMIT ? `<a class="btn btn-s" href="${base}community/crews/">Find a Crew</a>` : '';
-    if (!active.length && !pending.length) {
-      // "Pick a crew" (DEC-0144): the five crews run by this site, one click to join, plus a clear way to all crews.
-      // COPY STATUS: Codex 20.10. (Crew-Beitritt-Verwaltung-Events-Texte-2026-10-20.md).
-      const picks = pickCrews.length ? `<div class="mem-pick"><div class="mem-pick-head"><p><strong>Pick a crew to get started.</strong> Join one of these open crews right away, or browse the directory for more. Choose your Active Crew in My Account to display its tag next to your name.</p><a class="btn btn-s" href="${base}community/crews/">Find a Crew</a></div><div class="crew-grid">${pickCrews.map((c) => crewCardHtml(c, undefined, { actions: c.join_mode === 'open' ? `<button type="button" class="crew-link crew-action-btn" data-pick="${esc(c.crew_id)}">Join Crew</button>` : `<a class="crew-link crew-action-btn" href="${base}community/crews/#crew-${encodeURIComponent(c.crew_id)}">Request Invite</a>` })).join('')}</div></div>` : '';
-      memEl.innerHTML = `${invHtml}<div class="mem-empty-card lr-empty-panel"><p><strong>You’re not in a crew yet.</strong> Find one that fits how you play. You can join up to five crews, including pending requests.</p>${picks ? '' : find}</div>${msg}${picks}`;
+    // "x of 5 crews": one bar per place, light bar = open request
+    $('cr-meter').hidden = !used;
+    $('cr-used').textContent = String(used);
+    $('cr-pips').innerHTML = Array.from({ length: LIMIT }, (_, i) => `<i class="${i < active.length ? 'on' : i < used ? 'wait' : ''}"></i>`).join('');
+    const slot = used < LIMIT
+      ? `<a class="cr-slot" href="${base}community/crews/"><span class="cr-slot-plus" aria-hidden="true">+</span><strong>${used ? 'Find another crew' : 'Find a crew'}</strong><span>${used ? `${LIMIT - used} place${LIMIT - used === 1 ? '' : 's'} left` : 'All crews in Community'}</span></a>`
+      : '';
+    if (!used) {
+      // "Pick a crew" (DEC-0144): the crews run by this site, one click to join, plus the way to all crews.
+      // COPY STATUS: Codex 20.10. (Crew-Beitritt-Verwaltung-Events-Texte-2026-10-20.md); shortened lede: Claude placeholder.
+      $('cr-lede').textContent = 'You’re not in a crew yet. Join one of our open crews right away, or find one that fits how you play. You can join up to five crews, including pending requests.';
+      memEl.innerHTML = `<div class="crew-grid">${pickCrews.map((c) => crewCardHtml(c, undefined, { actions: c.join_mode === 'open' ? `<button type="button" class="crew-link crew-action-btn" data-pick="${esc(c.crew_id)}">Join Crew</button>` : `<a class="crew-link crew-action-btn" href="${base}community/crews/#crew-${encodeURIComponent(c.crew_id)}">Request Invite</a>` })).join('')}${slot}</div>`;
       return;
     }
-    const head = `<div class="mem-head"><p>You're in <strong>${active.length}</strong> crew${active.length === 1 ? '' : 's'}${pending.length ? ` with <strong>${pending.length}</strong> request${pending.length === 1 ? '' : 's'} pending` : ''} (${used}/${LIMIT}). Your <strong>Active Crew</strong> tag appears next to your name, including on leaderboards.</p>${find}</div>`;
-    // Cards side by side like in The Hub; status and buttons in the card's bottom strip (Fausto 2026-10-07).
-    const cards = `<div class="crew-grid">${active.map((m) => {
+    $('cr-lede').textContent = 'Your active crew’s tag appears next to your name, also on leaderboards. You can be in up to five crews; open requests count too.';
+    // Standard crew cards (Fausto 27.10.: no own card variant); only the foot buttons differ. COPY: Claude placeholder.
+    const cards = active.map((m) => {
       const c = crewData.get(m.crew_id);
       if (!c) return '';
       const leads = leaderIds.includes(m.crew_id);
-      // Fausto 20.10.: one row, only real buttons; roles are a status -> badges at the top. COPY: Claude placeholder.
       const role = leads ? '<span class="crew-badge b-role">Crew Leader</span>' : commissionerIds.includes(m.crew_id) ? '<span class="crew-badge b-role">Commissioner</span>' : '';
-      const actions = (m.is_primary ? '<span class="crew-pill" title="Your tag appears next to your name">Active crew</span>'
+      const actions = (m.is_primary ? '<span class="lr-status is-ok" title="Your tag appears next to your name">Active crew</span>'
           : active.length < 2 ? '' : `<button type="button" class="crew-btn crew-action-btn" data-primary="${esc(m.crew_id)}" title="Show this crew's tag next to your name">Set active</button>`)
         + `<button type="button" class="crew-btn crew-btn-leave crew-action-btn" data-leave="${esc(m.membership_id)}" data-kind="${leads ? 'leave-leader' : 'leave'}"${leads ? ' title="Leaving also ends your leader role"' : ''}>Leave</button>`;
       return crewCardHtml(c, undefined, { actions, badges: role });
-    }).join('')}</div>`;
-    const reqs = pending.length ? `<div class="mem-pending">${pending.map((m) => `<div class="mem-empty-card lr-empty-panel"><p>Your request to join ${crewTagHtml(m.tag, m.color, 'sm')} <strong>${esc(m.crew_name)}</strong> is awaiting approval.</p><button type="button" class="btn btn-s" data-leave="${esc(m.membership_id)}" data-kind="withdraw">Withdraw</button></div>`).join('')}</div>` : '';
-    memEl.innerHTML = invHtml + head + msg + cards + reqs;
+    });
+    const reqCards = pending.map((m) => {
+      const c = crewData.get(m.crew_id);
+      if (!c) return '';
+      const html = crewCardHtml(c, undefined, { actions: `<span class="lr-status" title="Requested ${esc(d(m.requested_at))}">Request sent</span><button type="button" class="crew-btn crew-btn-leave crew-action-btn" data-leave="${esc(m.membership_id)}" data-kind="withdraw">Withdraw</button>` });
+      return html.replace('<article class="crew-card"', '<article class="crew-card is-request"');
+    });
+    memEl.innerHTML = `<div class="crew-grid">${cards.join('')}${reqCards.join('')}${slot}</div>`;
   }
 
-  memEl.addEventListener('click', async (e) => {
+  async function afterChange(text: string, isError: boolean) {
+    await load();
+    note(text, isError);
+    document.dispatchEvent(new CustomEvent('hc-refresh')); // the editor's member list
+  }
+
+  $('cr-wait-list').addEventListener('click', async (e) => {
     const t = e.target as HTMLElement;
+    const sb = getSupabase();
     const acc = t.closest<HTMLButtonElement>('[data-accept]');
     const dec = t.closest<HTMLButtonElement>('[data-decline]');
     if (acc || dec) {
       (acc ?? dec)!.disabled = true;
-      const { error } = await getSupabase().rpc(acc ? 'accept_crew_invite' : 'decline_crew_invite', { p_crew: (acc ?? dec)!.dataset[acc ? 'accept' : 'decline'] });
-      await load();
-      render(error ? (/crew_limit/.test(error.message) ? `You are already in ${LIMIT} crews (open requests included).` : 'That did not work. Please try again.') : acc ? 'Welcome to the crew!' : 'Invite declined.', Boolean(error));
+      const { error } = await sb.rpc(acc ? 'accept_crew_invite' : 'decline_crew_invite', { p_crew: (acc ?? dec)!.dataset[acc ? 'accept' : 'decline'] });
+      await afterChange(error ? (/crew_limit/.test(error.message) ? `You are already in ${LIMIT} crews (open requests included).` : 'That did not work. Please try again.') : acc ? 'Welcome to the crew!' : 'Invite declined.', Boolean(error));
       return;
     }
+    const ap = t.closest<HTMLButtonElement>('[data-approve]');
+    if (ap) {
+      ap.disabled = true;
+      const { error } = await sb.from('crew_memberships').update({ status: 'active' }).eq('membership_id', ap.dataset.approve!);
+      await afterChange(error ? `Could not approve: ${error.message}` : `${ap.dataset.name} is now in ${ap.dataset.crew}.`, Boolean(error));
+      return;
+    }
+    const rj = t.closest<HTMLButtonElement>('[data-reject]');
+    if (rj) {
+      // two clicks (DEC-0175)
+      if (rj.dataset.armed !== '1') {
+        rj.dataset.armed = '1'; rj.textContent = 'Click again to decline';
+        setTimeout(() => { if (rj.isConnected && rj.dataset.armed === '1') { rj.dataset.armed = ''; rj.textContent = 'Decline'; } }, 4000);
+        return;
+      }
+      rj.disabled = true;
+      const { error } = await sb.from('crew_memberships').delete().eq('membership_id', rj.dataset.reject!);
+      await afterChange(error ? 'That did not work. Please try again.' : 'Request declined.', Boolean(error));
+    }
+  });
+
+  memEl.addEventListener('click', async (e) => {
+    const t = e.target as HTMLElement;
     const pk = t.closest<HTMLButtonElement>('[data-pick]');
     if (pk && me) {
       pk.disabled = true;
       const { error } = await getSupabase().from('crew_memberships').insert({ crew_id: pk.dataset.pick, driver_id: me });
-      await load();
-      render(error ? (/crew_banned/.test(error.message) ? 'You can\u2019t join this crew.' : 'That did not work. Please try again.') : 'Welcome to the crew!', Boolean(error));
+      await afterChange(error ? (/crew_banned/.test(error.message) ? 'You can’t join this crew.' : 'That did not work. Please try again.') : 'Welcome to the crew!', Boolean(error));
       return;
     }
     const p = t.closest<HTMLButtonElement>('[data-primary]');
     if (p) {
       p.disabled = true;
       const { error } = await getSupabase().rpc('set_primary_crew', { p_crew: p.dataset.primary });
-      await load();
-      render(error ? 'Could not change your Active Crew. Please try again.' : 'Active Crew updated.', Boolean(error));
+      await afterChange(error ? 'Could not change your Active Crew. Please try again.' : 'Active Crew updated.', Boolean(error));
       return;
     }
     const b = t.closest<HTMLButtonElement>('[data-leave]');
@@ -187,9 +314,8 @@ const base = import.meta.env.BASE_URL;
     }
     b.disabled = true;
     const { error } = await getSupabase().from('crew_memberships').delete().eq('membership_id', b.dataset.leave!);
-    if (!error && b.dataset.kind === 'leave-leader') { location.reload(); return; } // Crew Management section must disappear
-    await load();
-    render(error ? 'That did not work. Please try again.' : b.dataset.kind === 'leave' ? 'You left the crew.' : 'Request withdrawn.', Boolean(error));
+    if (!error && b.dataset.kind === 'leave-leader') { location.reload(); return; } // Manage section must disappear
+    await afterChange(error ? 'That did not work. Please try again.' : b.dataset.kind === 'withdraw' ? 'Request withdrawn.' : 'You left the crew.', Boolean(error));
   });
 
   async function init(session: any) {
@@ -205,7 +331,7 @@ const base = import.meta.env.BASE_URL;
     const sb = getSupabase();
     sb.auth.getSession().then(({ data }) => init(data?.session ?? null));
     sb.auth.onAuthStateChange((ev, s) => { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') init(s); });
-    document.getElementById('acc-signin')!.addEventListener('click', () => {
+    $('acc-signin').addEventListener('click', () => {
       sb.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: window.location.origin + window.location.pathname, scopes: 'identify email guilds.join' } });
     });
   }

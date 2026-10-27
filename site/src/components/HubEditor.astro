@@ -50,6 +50,15 @@ const base = import.meta.env.BASE_URL;
 
         <div class="panel editor-panel">
           <p class="editor-placeholder" id="editor-placeholder">Select an entry on the left or create a new one.</p>
+          <!-- My Account > Crews (DEC-0190): Members (default) | Crew card | Discord feed -->
+          {mode === 'crew' && (
+            <div class="hc-cv" id="hc-cv" role="tablist" aria-label="Manage crew" hidden>
+              <button type="button" role="tab" data-cv="members" aria-selected="true">Members <span class="hc-cv-n" id="hc-cv-n"></span></button>
+              <button type="button" role="tab" data-cv="card" aria-selected="false">Crew card</button>
+              <button type="button" role="tab" data-cv="discord" aria-selected="false">Discord feed</button>
+            </div>
+          )}
+          {mode === 'crew' && (<div id="hc-discord" class="hc-discord" hidden><slot name="discord" /></div>)}
 
           <!-- CREW FORM -->
           <form id="crew-form" class="hc-form" hidden novalidate>
@@ -308,6 +317,40 @@ const base = import.meta.env.BASE_URL;
   .preview-wrap { margin-top: 1.5rem; padding-top: 1.1rem; border-top: 1px solid var(--gh-line); }
   .preview-label { margin: 0 0 .7rem; color: var(--gh-muted); font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
   .crew-grid.preview { grid-template-columns: minmax(0, 24rem); }
+
+  /* ---- My Account > Crews (DEC-0190): no list column; with several crews the list becomes a
+     row of crew buttons; Members | Crew card | Discord feed switch; preview next to the form ---- */
+  #hc-root[data-mode="crew"] .mod-layout { display: block; }
+  #hc-root[data-mode="crew"] .list-panel { position: static; padding: 0; margin-bottom: 16px; border: 0; background: none; }
+  #hc-root[data-mode="crew"] .list-panel.is-single { display: none; }
+  #hc-root[data-mode="crew"] .list-head { display: none; }
+  #hc-root[data-mode="crew"] .list { flex-direction: row; flex-wrap: wrap; gap: 8px; max-height: none; overflow: visible; }
+  :global(#hc-root[data-mode="crew"] .li) { width: auto; min-height: 44px; padding: 0 14px 0 8px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; }
+  :global(#hc-root[data-mode="crew"] .li:hover) { border-color: var(--lr-text); }
+  :global(#hc-root[data-mode="crew"] .li.is-active) { border-color: var(--lr-orange); background: var(--lr-orange-tint); }
+  :global(#hc-root[data-mode="crew"] .li-sub) { display: none; }
+  :global(#hc-root[data-mode="crew"] .li-title) { font-size: 14px; font-weight: 600; }
+  #hc-root[data-mode="crew"] .editor-panel { padding: 0; min-height: 0; border: 0; background: none; }
+  #hc-root[data-mode="crew"] .editor-placeholder { display: none; }
+  .hc-cv { display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 24px; max-width: 100%; overflow-x: auto; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
+  .hc-cv[hidden] { display: none; }
+  .hc-cv button { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border: 0; border-radius: 5px; background: transparent; color: var(--lr-muted); font: 600 14px var(--gh-font-body); white-space: nowrap; cursor: pointer; }
+  .hc-cv button:hover { color: var(--lr-text); }
+  .hc-cv button[aria-selected="true"] { background: var(--lr-raised); color: var(--lr-text); }
+  .hc-cv-n { color: var(--lr-muted); font-variant-numeric: tabular-nums; }
+  #hc-root[data-mode="crew"] #crew-form .form-head { display: none; } /* title and live state sit in the section head */
+  #hc-root[data-mode="crew"] #members-panel { margin-top: 0; padding-top: 0; border-top: 0; }
+  #hc-root[data-mode="crew"] #members-panel .form-head { display: none; } /* the count sits in the switch */
+  :global(#hc-root[data-mode="crew"] .mem-group-title:first-child), #hc-root[data-mode="crew"] .mem-invite .mem-group-title { margin-top: 0; }
+  :global(#hc-root[data-mode="crew"] .mem-actions .btn) { min-height: 32px; padding: 0 12px; font-size: 13px; } /* btn-sm in list rows (DEC-0175) */
+  #hc-root[data-mode="crew"] .mem-invite-search { max-width: 520px; }
+  #hc-root[data-mode="crew"] #members-pending { display: none; } /* requests are answered at the top of the page */
+  @media (min-width: 861px) {
+    #hc-root[data-mode="crew"] #crew-form:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); gap: 0 32px; align-items: start; }
+    #hc-root[data-mode="crew"] #crew-form > :not(.grid):not(.preview-wrap) { grid-column: 1 / -1; }
+    #hc-root[data-mode="crew"] #crew-form .preview-wrap { position: sticky; top: 24px; margin-top: 0; padding-top: 0; border-top: 0; }
+    #hc-root[data-mode="crew"] #crew-form .crew-grid.preview { grid-template-columns: minmax(0, 1fr); }
+  }
   .rsvp-panel { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--gh-line); }
   :global(.rsvp-count) { margin: 0 0 .3rem; font-size: .9rem; }
   :global(.rsvp-names) { margin: 0; color: var(--gh-muted); font-size: .84rem; }
@@ -469,6 +512,8 @@ const base = import.meta.env.BASE_URL;
       return `<button type="button" class="li${id === selectedId ? ' is-active' : ''}" data-id="${esc(id)}"><span class="li-main"><span class="li-title">${r.status === 'cancelled' ? '✕ ' : ''}${esc(r.title)}</span><span class="li-sub">${esc(when)}</span></span>${pill}</button>`;
     }).join('');
     listEmptyEl.hidden = rows.length > 0;
+    // My Account > Crews: one crew = no picker row (DEC-0190)
+    if (MODE === 'crew') listEl.closest('.list-panel')!.classList.toggle('is-single', rows.length < 2);
   }
 
   async function loadAll() {
@@ -507,6 +552,30 @@ const base = import.meta.env.BASE_URL;
     sel.value = current;
   }
 
+  // ---- My Account > Crews (DEC-0190): Members | Crew card | Discord feed
+  let crewView: 'members' | 'card' | 'discord' = 'members';
+  function applyCrewView() {
+    if (MODE !== 'crew') return;
+    const has = Boolean(selectedId);
+    $('hc-cv').hidden = !has;
+    if (!has) return;
+    crewForm.hidden = crewView !== 'card';
+    $('members-panel').hidden = crewView !== 'members';
+    $('hc-discord').hidden = crewView !== 'discord';
+    $('hc-cv').querySelectorAll<HTMLElement>('[data-cv]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.cv === crewView)));
+  }
+  if (MODE === 'crew') {
+    $('hc-cv').addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLElement>('[data-cv]');
+      if (!b) return;
+      crewView = b.dataset.cv as typeof crewView;
+      applyCrewView();
+      renderMembers(); // resets the delete button once the crew card is visible
+    });
+    // the page answers join requests at the top and asks the editor to refresh (DEC-0190)
+    document.addEventListener('hc-refresh', async () => { if (contentEl.hidden) return; await loadMembers(); renderList(); renderMembers(); });
+  }
+
   function showForm(which: Kind | null) {
     placeholderEl.hidden = which !== null;
     crewForm.hidden = which !== 'crews';
@@ -515,6 +584,7 @@ const base = import.meta.env.BASE_URL;
     $('roles-panel').hidden = which !== 'roles';
     $('requests-panel').hidden = which !== 'requests';
     $('members-panel').hidden = which !== 'crews' || !selectedId;
+    applyCrewView();
   }
 
   // ------------------------------------------------------------ members
@@ -554,6 +624,7 @@ const base = import.meta.env.BASE_URL;
       ? `<p class="mem-group-title">Open invites (${invited.length}/20)</p>` + invited.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">invited ${esc(d(m.requested_at))}${m.invited_by_name ? ` by ${esc(m.invited_by_name)}` : ''}</span><span class="mem-actions"><button type="button" class="btn btn-danger btn-md" data-drop="${esc(m.membership_id)}" data-label="Withdraw">Withdraw</button></span></div>`).join('')
       : '';
     $('members-sub').textContent = `${active.length} member${active.length === 1 ? '' : 's'} on this site`;
+    if (MODE === 'crew') $('hc-cv-n').textContent = String(active.length);
     $('members-pending').innerHTML = `<p class="mem-group-title">Join requests</p>` + (pending.length
       ? pending.map((m) => `<div class="mem-row is-pending"><span class="mem-name">${esc(m.display_name)}</span><span class="mem-date">asked ${esc(d(m.requested_at))}</span><span class="mem-actions"><button type="button" class="btn btn-p btn-md" data-approve="${esc(m.membership_id)}">Approve</button><button type="button" class="btn btn-danger btn-md" data-drop="${esc(m.membership_id)}" data-label="Decline">Decline</button></span></div>`).join('')
       : `<p class="mem-empty">${crews.find((c) => c.crew_id === selectedId)?.join_mode === 'open' ? 'Your crew is open: drivers join right away, no requests to approve.' : 'No open requests.'}</p>`);
@@ -772,6 +843,7 @@ const base = import.meta.env.BASE_URL;
     markInvalid(crewForm, []);
     msg(crewForm, '');
     showForm('crews');
+    if (MODE === 'crew' && row) rootEl.dispatchEvent(new CustomEvent('hc-crew-open', { bubbles: true, detail: { crew_id: row.crew_id, name: row.name, tag: row.tag, color: row.color, lead: leaderCrewIds.has(row.crew_id), published: Boolean(row.is_published) } }));
     renderCrewPreview();
     renderList();
     renderMembers();
@@ -1408,8 +1480,8 @@ const base = import.meta.env.BASE_URL;
     }
     syncRoleCrew();
     await loadAll();
-    // A leader with exactly one crew: open it right away.
-    if (MODE === 'crew' && visibleCrews().length === 1) openCrew(visibleCrews()[0]);
+    // My Account > Crews (DEC-0190): open the first crew; with several, the row of crew buttons switches
+    if (MODE === 'crew' && visibleCrews().length >= 1) openCrew(visibleCrews()[0]);
     if (MODE === 'events') placeholderEl.textContent = canCreateEvent() ? 'Select one of your events on the left or create a new one.' : 'Select an event on the left.';
     if (MODE === 'tracks') placeholderEl.textContent = 'Select one of your tracks on the left or submit a new one.';
   }
