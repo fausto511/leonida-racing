@@ -7,8 +7,17 @@
 // join the switch after launch. Copy marked as placeholder until Codex (DEC-0088).
 import Base from '../../layouts/Base.astro';
 import AccountHead from '../../components/AccountHead.astro';
-import { vehicleOptions } from '../../data/vehicles';
+import CarCard from '../../components/CarCard.astro';
+import { vehicleOptions, fastestGellhornLapMs } from '../../data/vehicles';
+import { isNewInGame } from '../../data/releases';
 const base = import.meta.env.BASE_URL;
+// Gellhorn rank per class, same as on the Cars page (CarsBrowser)
+const rankInClass = new Map<string, number>();
+for (const cls of new Set(vehicleOptions.flatMap((v) => v.classes))) {
+  vehicleOptions.filter((v) => v.classes[0] === cls && fastestGellhornLapMs(v.id) != null)
+    .sort((a, b) => fastestGellhornLapMs(a.id)! - fastestGellhornLapMs(b.id)!)
+    .forEach((v, i) => rankInClass.set(v.id, i + 1));
+}
 const vehicleIndex = [...vehicleOptions]
   .sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`))
   .map((v) => ({ id: v.id, make: v.make, model: v.model, cls: v.classes[0] ?? 'Other', classes: v.classes.join(' / '), logo: v.logoSlug, photo: Boolean(v.photo) }));
@@ -58,6 +67,15 @@ const vehicleIndex = [...vehicleOptions]
     </div>
   </section>
 
+  <!-- The standard car card of the Cars page for every car (Fausto 27.10.: one card per object, only
+       the buttons differ). The page clones the cards it needs into My cars / Wishlist. -->
+  <template id="mg-cards">
+    {vehicleOptions.map((v) => (
+      <CarCard vehicle={v} variant="cars" isNew={isNewInGame(v.releaseId)}
+        lap={rankInClass.has(v.id) ? { rank: rankInClass.get(v.id)!, ms: fastestGellhornLapMs(v.id)! } : null} />
+    ))}
+  </template>
+
   <dialog class="mg-picker" id="mg-picker" aria-labelledby="mg-picker-title">
     <div class="mg-picker-head">
       <h2 id="mg-picker-title">Add a car you own</h2>
@@ -91,42 +109,34 @@ const vehicleIndex = [...vehicleOptions]
   .mg-msg[hidden] { display: none; }
   :global(.mg-undo) { padding: 0; border: 0; background: none; color: var(--lr-orange); font: 600 14px var(--gh-font-body); cursor: pointer; }
   :global(.mg-undo:hover) { color: var(--lr-pink); }
-  .mg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
-  @media (max-width: 560px) { .mg-grid { grid-template-columns: 1fr 1fr; gap: 12px; } .mg-seg { display: flex; } .mg-seg button { flex: 1; justify-content: center; } }
-
-  /* car tile: photo, name below (like the car cards on Cars), hover per DEC-0180 */
-  :global(.mg-tile) { position: relative; display: flex; flex-direction: column; background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: 8px; overflow: hidden; }
-  :global(.mg-tile.is-new) { animation: mg-in .45s ease-out; border-color: var(--lr-orange); }
+  /* same grid as the Cars page: 4 / 3 / 2 columns, list rows on phones (DEC-0117) */
+  .mg-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  @media (max-width: 1100px) { .mg-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 900px) { .mg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 760px) { .mg-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; } }
+  @media (max-width: 560px) { .mg-seg { display: flex; } .mg-seg button { flex: 1; justify-content: center; } }
+  :global(.mg-grid .vcard.is-new) { animation: mg-in .45s ease-out; border-color: var(--lr-orange); }
   @keyframes mg-in { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { :global(.mg-tile.is-new) { animation: none; } }
-  :global(.mg-photo) { position: relative; aspect-ratio: 16 / 10; background: var(--lr-raised); }
-  :global(.mg-photo img) { width: 100%; height: 100%; object-fit: cover; display: block; }
-  :global(.mg-photo img.mg-ph) { opacity: .5; }
-  :global(.mg-remove) { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--lr-line-hover); background: var(--lr-dark-80); color: var(--lr-text); font-size: 13px; cursor: pointer; display: grid; place-items: center; }
-  :global(.mg-remove:hover) { border-color: var(--lr-text); }
-  :global(.mg-body) { display: flex; flex-direction: column; gap: 10px; flex: 1; padding: 12px 14px 14px; }
-  :global(.mg-name) { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  @media (prefers-reduced-motion: reduce) { :global(.mg-grid .vcard.is-new) { animation: none; } }
+  /* wishlist: heart (pressed = on the list) next to the garage button, like the vehicle page */
+  :global(.mg-acts) { display: flex; gap: 8px; flex: none; }
+  :global(.mg-heart[aria-pressed="true"]) { border-color: var(--lr-pink) !important; color: var(--lr-pink) !important; background: transparent !important; }
+  :global(.mg-heart svg) { fill: none; }
+  :global(.mg-heart[aria-pressed="true"] svg) { fill: currentColor !important; }
+  @media (max-width: 760px) {
+    /* list rows: heart takes the top-right spot that holds Compare on the Cars page */
+    :global(.mg-grid .vc-list .mg-heart) { position: absolute; top: 10px; right: 8px; width: 40px; height: 40px; }
+  }
   :global(.mg-logo) { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--lr-text); padding: 4px; display: inline-flex; box-sizing: border-box; }
   :global(.mg-logo img) { width: 100%; height: 100%; object-fit: contain; }
-  :global(.mg-name a) { display: block; color: var(--lr-text); font-weight: 600; font-size: 15px; line-height: 1.25; text-decoration: none; }
-  :global(.mg-name a:hover) { color: var(--lr-orange); }
-  :global(.mg-name small) { display: block; margin-top: 2px; color: var(--lr-muted); font-size: 12px; }
-  :global(.mg-foot) { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--lr-line-soft); font-size: 13px; }
-  :global(.mg-foot a) { color: var(--lr-muted); font-weight: 600; text-decoration: none; white-space: nowrap; }
-  :global(.mg-foot a:hover) { color: var(--lr-text); }
-  @media (max-width: 560px) {
-    :global(.mg-body) { padding: 10px 10px 12px; }
-    :global(.mg-logo) { width: 24px; height: 24px; }
-    :global(.mg-name a) { font-size: 14px; }
-    :global(.mg-foot .mg-long) { display: none; }
-  }
 
   /* "+" slot at the end of each list */
-  :global(.mg-slot) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 220px; padding: 20px; border: 1px dashed var(--lr-line-strong); border-radius: 8px; background: transparent; color: var(--lr-soft); font: inherit; font-size: 14px; text-align: center; cursor: pointer; }
+  :global(.mg-slot) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 240px; padding: 20px; border: 1px dashed var(--lr-line-strong); border-radius: 8px; background: transparent; color: var(--lr-soft); font: inherit; font-size: 14px; text-align: center; cursor: pointer; }
   :global(.mg-slot:hover), :global(.mg-slot:focus-visible) { border-color: var(--lr-orange); background: var(--lr-orange-tint); color: var(--lr-text); outline: none; }
   :global(.mg-slot-plus) { width: 44px; height: 44px; border-radius: 50%; border: 1px solid currentColor; display: grid; place-items: center; font-size: 22px; line-height: 1; }
   :global(.mg-slot strong) { color: var(--lr-text); font-weight: 600; font-size: 15px; }
-  @media (max-width: 560px) { :global(.mg-slot) { min-height: 180px; } }
+  :global(.mg-slot-t) { display: flex; flex-direction: column; gap: 4px; }
+  @media (max-width: 760px) { :global(.mg-slot) { min-height: 118px; flex-direction: row; gap: 14px; } }
 
   /* picker */
   .mg-picker { width: min(34rem, calc(100vw - 2rem)); max-height: min(40rem, calc(100vh - 3rem)); padding: 0; border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg, 12px); background: var(--gh-surface); color: var(--gh-text); }
@@ -192,32 +202,60 @@ const vehicleIndex = [...vehicleOptions]
     }, { once: true });
   }
 
-  function tile(x: V, list: View) {
-    const foot = list === 'cars'
-      ? `<a rel="nofollow" href="${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(x.id)}">Gellhorn<span class="mg-long"> leaderboard</span> →</a>`
-      : `<button type="button" class="btn btn-s btn-sm" data-own="${esc(x.id)}">I own it</button><a rel="nofollow" href="${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(x.id)}">Gellhorn →</a>`;
-    return `<article class="mg-tile lr-hcard${x.id === fresh ? ' is-new' : ''}">
-      <div class="mg-photo lr-hmedia">
-        ${x.photo
-          ? `<img class="lr-hzoom" src="${base}images/vehicles/${esc(x.id)}-640.webp" alt="" loading="lazy" width="640" height="360" />`
-          : `<img class="mg-ph lr-hzoom" src="${base}images/garage/garage-hero-placeholder-640.webp" alt="" loading="lazy" width="640" height="360" />`}
-        <button type="button" class="mg-remove" data-remove="${esc(x.id)}" data-list="${list}" title="Remove" aria-label="Remove ${esc(x.make)} ${esc(x.model)} from ${list === 'cars' ? 'My cars' : 'your wishlist'}">✕</button>
-      </div>
-      <div class="mg-body">
-        <div class="mg-name">${logo(x)}<span><a href="${base}cars/vehicles/${esc(x.id)}/">${esc(x.make)} ${esc(x.model)}</a><small>${esc(x.classes)}</small></span></div>
-        <div class="mg-foot">${foot}</div>
-      </div>
-    </article>`;
+  // Standard car card (CarCard, Cars page) cloned from <template id="mg-cards">; only the buttons differ
+  // (Fausto 27.10.): no Compare "+"; the garage button keeps its Cars-page meaning (pressed = you own it,
+  // click on My cars = remove; click on the wishlist = you own it now); wishlist cards add the heart.
+  const tpl = document.getElementById('mg-cards') as HTMLTemplateElement;
+  const HEART_PATH = '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>';
+  function card(x: V, list: View): HTMLElement | null {
+    const src = tpl.content.querySelector<HTMLElement>(`.vcard[data-id="${CSS.escape(x.id)}"]`);
+    if (!src) return null;
+    const el = src.cloneNode(true) as HTMLElement;
+    el.querySelector('.vc-cmp')?.remove();
+    if (x.id === fresh) el.classList.add('is-new');
+    const gar = el.querySelector<HTMLButtonElement>('.vc-garage')!;
+    const label = `${x.make} ${x.model}`;
+    if (list === 'cars') {
+      gar.setAttribute('aria-pressed', 'true');
+      gar.dataset.remove = x.id; gar.dataset.list = 'cars';
+      gar.title = 'In My Garage · click to remove';
+      gar.setAttribute('aria-label', `Remove ${label} from My cars`);
+    } else {
+      gar.dataset.own = x.id;
+      gar.title = 'I own it · moves the car to My cars';
+      gar.setAttribute('aria-label', `I own the ${label}`);
+      const heart = gar.cloneNode(false) as HTMLButtonElement; // same size/scoped style as the garage button
+      delete heart.dataset.garage; delete heart.dataset.own; // keep data-astro-cid-*: it carries the card's scoped style
+      heart.className = `${gar.className} mg-heart`;
+      heart.setAttribute('aria-pressed', 'true');
+      heart.dataset.remove = x.id; heart.dataset.list = 'wishlist';
+      heart.title = 'On your wishlist · click to remove';
+      heart.setAttribute('aria-label', `Remove ${label} from your wishlist`);
+      // keep the scoped style of the card's own icon: clone its <svg> and swap the drawing for a heart
+      const svg = gar.querySelector('svg')!.cloneNode(false) as SVGElement;
+      svg.removeAttribute('class');
+      svg.innerHTML = HEART_PATH;
+      heart.replaceChildren(svg);
+      const acts = document.createElement('span');
+      acts.className = 'mg-acts';
+      gar.replaceWith(acts);
+      acts.append(heart, gar);
+    }
+    return el;
   }
   const slot = (list: View, title: string, sub: string) => `<button type="button" class="mg-slot" data-add="${list}" aria-haspopup="dialog">
-      <span class="mg-slot-plus" aria-hidden="true">+</span><strong>${title}</strong><span>${sub}</span></button>`;
+      <span class="mg-slot-plus" aria-hidden="true">+</span><span class="mg-slot-t"><strong>${title}</strong><span>${sub}</span></span></button>`;
 
   function render() {
     const cars = owned.map((id) => byId.get(id)).filter(Boolean) as V[];
     const wl = wish.map((id) => byId.get(id)).filter(Boolean) as V[];
-    $('mg-grid-cars').innerHTML = cars.map((x) => tile(x, 'cars')).join('') + slot('cars', cars.length ? 'Add another car' : 'Add your first car', 'Pick a car you own');
-    // both lists work the same (Fausto 27.10.): tiles, then the "+" slot that opens the picker
-    $('mg-grid-wish').innerHTML = wl.map((x) => tile(x, 'wishlist')).join('') + slot('wishlist', wl.length ? 'Add another car' : 'Add your first car', 'Pick a car you want');
+    const fill = (grid: HTMLElement, xs: V[], list: View, slotHtml: string) => {
+      grid.replaceChildren(...(xs.map((x) => card(x, list)).filter(Boolean) as HTMLElement[]));
+      grid.insertAdjacentHTML('beforeend', slotHtml);
+    };
+    fill($('mg-grid-cars'), cars, 'cars', slot('cars', cars.length ? 'Add another car' : 'Add your first car', 'Pick a car you own'));
+    // both lists work the same (Fausto 27.10.): cards, then the "+" slot that opens the picker
+    fill($('mg-grid-wish'), wl, 'wishlist', slot('wishlist', wl.length ? 'Add another car' : 'Add your first car', 'Pick a car you want'));
     $('mg-n-cars').textContent = String(cars.length);
     $('mg-n-wish').textContent = String(wl.length);
     $('mg-own-n').textContent = String(cars.length);
@@ -331,7 +369,7 @@ const vehicleIndex = [...vehicleOptions]
       fresh = id;
       picker.close();
       render();
-      document.querySelector('.mg-tile.is-new')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      document.querySelector('.mg-grid .vcard.is-new')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     } catch {
       b.disabled = false;
       picker.close();
