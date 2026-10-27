@@ -2,14 +2,14 @@
 // My Account header (DEC-0188, Fausto 27.10.2026): one compact plain band for
 // every account tab -- eyebrow, title, the tab's one main action top right
 // (full width under the title on phones) and the tab row along the bottom edge.
-// Tab order: Garage (start page /account/) · My laps · Crew · Events · Tracks · Settings.
+// Tab order: My Garage (start page /account/) · My laps · Crew · Events · Tracks · Settings.
 // CTA labels are placeholders until Codex delivers the copy (DEC-0088).
 interface Cta { label: string; href?: string; id?: string }
 interface Props { active: 'garage' | 'laps' | 'crew' | 'events' | 'tracks' | 'settings'; cta?: Cta }
 const { active, cta } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const links = [
-  { key: 'garage', label: 'Garage', href: `${base}account/` },
+  { key: 'garage', label: 'My garage', href: `${base}account/` }, // as in the header menu, sentence case like "My laps" (Fausto 27.10.)
   { key: 'laps', label: 'My laps', href: `${base}account/laps/` },
   { key: 'crew', label: 'Crew', href: `${base}account/crew/` },
   { key: 'events', label: 'Events', href: `${base}account/events/` },
