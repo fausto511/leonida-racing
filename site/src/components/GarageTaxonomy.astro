@@ -161,7 +161,7 @@ const more = custom
       </div>
       )}
       {custom?.garageTile ? (
-        <a class="garage-tile lr-hcard" id="garage-tile" href={`${base}account/garage/`}>
+        <a class="garage-tile lr-hcard" id="garage-tile" href={`${base}account/`}>
           <span class="gt-top"><span class="gt-eb">My Garage</span><span class="arrow gt-cta" id="gt-cta">Log in to start →</span></span>
           <span class="gt-val"><span id="gt-owned">0</span> <small>/ {N} owned</small></span>
           <span class="mbar"><i id="gt-bar" style="width:0%"></i></span>
@@ -174,7 +174,7 @@ const more = custom
           <div class="gl-row"><span>Fastest at Gellhorn</span>{fastest
             ? <b><a href={`${base}cars/vehicles/${fastest.id}/`}>{fastest.model}</a>{' · '}<span class="tnum">{lapTime(lapOf(fastest)!)}</span></b>
             : <b class="is-tba">{noLap}</b>}</div>
-          <a class="gl-row gl-garage" id="garage-tile" data-glance href={`${base}account/garage/`}>
+          <a class="gl-row gl-garage" id="garage-tile" data-glance href={`${base}account/`}>
             <span>In your garage</span><span class="arrow gt-cta" id="gt-cta">Log in to save cars →</span>
             <span id="gt-owned" hidden>0</span>
             <span class="mbar"><i id="gt-bar" style="width:0%"></i></span>
@@ -190,7 +190,7 @@ const more = custom
         <div class="gl-row"><span>Highest top speed</span>{topSpeed
           ? <b><a href={`${base}cars/vehicles/${topSpeed.id}/`}>{shortName(topSpeed)}</a>{' · '}<span class="tnum">{speedOf(topSpeed)} mph</span></b>
           : <b class="is-tba">{noSpeed}</b>}</div>
-        <a class="gl-row gl-garage" id="garage-tile" data-glance href={`${base}account/garage/`}>
+        <a class="gl-row gl-garage" id="garage-tile" data-glance href={`${base}account/`}>
           <span>In your garage</span><span class="arrow gt-cta" id="gt-cta">Log in to save cars →</span>
           <span id="gt-owned" hidden>0</span>
           <span class="mbar"><i id="gt-bar" style="width:0%"></i></span>

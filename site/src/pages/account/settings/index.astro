@@ -4,7 +4,7 @@
 // more: changing the display name is the way to stay unrecognised; deleting
 // the account removes all personal data, reviewed times stay as "Deleted driver".
 import Base from '../../../layouts/Base.astro';
-import AccountSubnav from '../../../components/AccountSubnav.astro';
+import AccountHead from '../../../components/AccountHead.astro';
 ---
 <Base
   title="Settings — My Account"
@@ -12,10 +12,8 @@ import AccountSubnav from '../../../components/AccountSubnav.astro';
   section="account"
   noindex
 >
+  <AccountHead active="settings" />
   <section class="wrap account-wrap">
-    <p class="eyebrow">Private Driver Area</p>
-    <h1 class="display account-title">My Account</h1>
-    <AccountSubnav active="settings" />
 
     <div id="acc-auth" class="acc-auth lr-empty-panel" hidden>
       <p>Sign in with Discord to change your settings.</p>
@@ -74,8 +72,7 @@ import AccountSubnav from '../../../components/AccountSubnav.astro';
 
 <style>
   [hidden] { display: none !important; }
-  .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
-  .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .account-wrap { padding-top: var(--lr-gap-head); } /* DEC-0188; the footer brings the 64px gap below */
   .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
   .settings-card { padding: var(--gh-pad-card); display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1.5rem; }
   /* inputs start at the same height; the button lines up with them (label row = 1.55rem) */

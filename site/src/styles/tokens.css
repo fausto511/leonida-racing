@@ -261,6 +261,12 @@ a[target="_blank"]:not(.btn):not([class*="btn"]):not(.lr-noext):not([href^="http
 .btn-danger { background: transparent; border-color: var(--lr-line-strong); color: var(--lr-text); }
 .btn-danger:hover { background: transparent; border-color: var(--lr-text); }
 .btn[data-armed="1"], .btn.is-armed { background: var(--lr-coral-fill); border-color: var(--lr-coral); color: var(--lr-coral); }
+/* Status tag (DEC-0188, account + moderation lists): neutral = in progress / nothing to do;
+   .is-ok lime = published · .is-fix orange = the driver has to act · .is-no coral + border = rejected */
+.lr-status { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--lr-raised); color: var(--lr-text); font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap; }
+.lr-status.is-ok { background: var(--lr-lime-fill); color: var(--lr-lime); }
+.lr-status.is-fix { background: var(--lr-orange-fill); color: var(--lr-orange); }
+.lr-status.is-no { background: var(--lr-coral-fill); color: var(--lr-coral); box-shadow: inset 0 0 0 1px var(--lr-coral-border); }
 /* arrow text link (mockup .arrow): "Open the Guide →" */
 /* Arrow link "go further" (DEC-0170): section-head "more" links, card actions, end of link lists — 14px, 600, orange, hover pink, no underline.
    Exceptions by design: link inside an info line (grey, e.g. vehicle make line) and links on the Discord gradient band (white, underlined). */

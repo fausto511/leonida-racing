@@ -1,0 +1,451 @@
+---
+import Base from '../../../layouts/Base.astro';
+import AccountHead from '../../../components/AccountHead.astro';
+const base = import.meta.env.BASE_URL;
+---
+<Base
+  title="My Account"
+  description="Your private driver area: vehicle records and submissions."
+  section="account"
+  noindex
+>
+  <AccountHead active="laps" cta={{ label: 'Submit a lap', href: `${import.meta.env.BASE_URL}time-attack/submit/` }} />
+  <section class="wrap account-wrap">
+
+    <div id="backend-notice" class="notice lr-note lr-note-warn" hidden>
+      <strong>Backend not connected yet.</strong>
+      <span>This page reads and writes the real <code>drivers</code>/<code>runs</code> tables via Supabase, but no Supabase project is configured for this build (see <code>SETUP-BACKEND.md</code>). Sign-in and data are disabled until <code>PUBLIC_SUPABASE_URL</code> and <code>PUBLIC_SUPABASE_ANON_KEY</code> are set.</span>
+    </div>
+
+    <div id="auth-box" class="auth-box lr-empty-panel" hidden>
+      <p>Sign in with Discord to see your driver overview.</p>
+      <button type="button" id="discord-signin-btn" class="btn btn-discord">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.92 3.58 14.74 3.99C12.9 3.71 11.07 3.71 9.26 3.99C9.09 3.58 8.83 3.06 8.62 2.67C6.88 2.97 5.21 3.5 3.66 4.23C0.53 8.97 -0.32 13.58 0.1 18.14C2.18 19.69 4.19 20.63 6.17 21.25C6.66 20.58 7.1 19.86 7.48 19.11C6.76 18.83 6.07 18.5 5.43 18.11C5.6 17.98 5.77 17.85 5.93 17.71C9.88 19.56 14.17 19.56 18.07 17.71C18.23 17.85 18.4 17.98 18.57 18.11C17.92 18.5 17.24 18.84 16.52 19.11C16.9 19.86 17.33 20.58 17.82 21.25C19.8 20.63 21.82 19.69 23.9 18.14C24.4 12.86 23.05 8.28 20.33 4.23ZM8.01 15.34C6.83 15.34 5.86 14.23 5.86 12.88C5.86 11.53 6.81 10.43 8.01 10.43C9.22 10.43 10.19 11.53 10.17 12.88C10.17 14.23 9.22 15.34 8.01 15.34ZM15.99 15.34C14.8 15.34 13.83 14.23 13.83 12.88C13.83 11.53 14.78 10.43 15.99 10.43C17.19 10.43 18.17 11.53 18.14 12.88C18.14 14.23 17.19 15.34 15.99 15.34Z"/></svg>
+        Sign in with Discord
+      </button>
+    </div>
+
+    <div id="account-content" class="acc-secs" hidden>
+      <section>
+        <div class="acc-sec-h">
+          <div>
+            <h2 class="lr-h2 lr-h2-s">My Records</h2>
+            <p class="acc-lede">Your personal best per vehicle. Rank only shows once that lap is actually published.</p>
+          </div>
+          <a class="arrow" href={`${base}time-attack/gellhorn-international-raceway/#leaderboard`}>Open the leaderboard →</a>
+        </div>
+        <div class="acc-table-card">
+          <table class="acc-table">
+            <thead>
+              <tr>
+                <th scope="col">Vehicle</th>
+                <th scope="col">Personal Best</th>
+                <th scope="col">Track</th>
+                <th scope="col">Rank</th>
+              </tr>
+            </thead>
+            <tbody id="records-tbody"></tbody>
+          </table>
+          <p id="records-empty" class="empty-note" hidden>
+            No vehicle records yet. <a href={`${base}time-attack/submit/`}>Submit your first lap</a>.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <div class="acc-sec-h">
+          <div>
+            <h2 class="lr-h2 lr-h2-s">My Submissions</h2>
+            <p class="acc-lede">Every lap you've submitted, including ones still in review.</p>
+          </div>
+        </div>
+        <p id="submissions-msg" class="lr-note is-error acc-msg" role="status" hidden></p>
+        <div class="acc-table-card">
+          <table class="acc-table">
+            <thead>
+              <tr>
+                <th scope="col">Vehicle</th>
+                <th scope="col">Track</th>
+                <th scope="col">Lap Time</th>
+                <th scope="col">Status</th>
+                <th scope="col">Submitted</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="submissions-tbody"></tbody>
+          </table>
+          <p id="submissions-empty" class="empty-note" hidden>
+            No submissions yet. <a href={`${base}time-attack/submit/`}>Submit your first lap</a>.
+          </p>
+        </div>
+      </section>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Native [hidden] must win over any later display: rule on the same
+     element -- same reasoning as time-attack/submit/index.astro. */
+  [hidden] { display: none !important; }
+
+  .account-wrap { padding-top: var(--lr-gap-head); } /* DEC-0188; the footer brings the 64px gap below */
+  .notice { margin-bottom: 1.5rem; } /* box: .lr-note .lr-note-warn (DEC-0186) */
+  .auth-box { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
+
+  /* My laps (DEC-0188): sections 64px apart, H2 24px + lede, tables in a card; phones get a list */
+  .acc-secs:not([hidden]) { display: flex; flex-direction: column; gap: var(--lr-gap-sec); }
+  .acc-sec-h { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; margin-bottom: 16px; }
+  .acc-lede { margin: 8px 0 0; max-width: 640px; font-size: 15px; line-height: 1.5; color: var(--lr-soft); }
+  .acc-sec-h .arrow { white-space: nowrap; }
+  .acc-msg { margin: 0 0 16px; }
+  .acc-table-card { background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: 8px; overflow: hidden; }
+  .acc-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .acc-table th { text-align: left; padding: 12px 18px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-muted); border-bottom: 1px solid var(--lr-line); white-space: nowrap; }
+  /* :global() below: the data rows are inserted at runtime via innerHTML, so
+     Astro's scoped attribute never reaches them. */
+  :global(.acc-table td) { padding: 12px 18px; border-bottom: 1px solid var(--lr-line-soft); white-space: nowrap; font-variant-numeric: tabular-nums; vertical-align: middle; }
+  :global(.acc-table tbody tr:last-child td) { border-bottom: 0; }
+  :global(.acc-table tbody tr:hover) { background: var(--lr-white-hover, rgba(251,247,234,.06)); }
+  :global(.acc-table .rec-link) { color: var(--lr-text); text-decoration: none; }
+  :global(.acc-table .rec-link:hover) { color: var(--lr-orange); }
+  :global(.acc-table .c-time) { font-weight: 600; }
+  :global(.acc-table .rank-cell) { font-family: var(--gh-font-display); font-weight: 800; }
+  :global(.acc-table .c-act) { text-align: right; }
+  :global(.acc-table .c-act .btn + .btn) { margin-left: 8px; }
+  :global(.acc-table .m) { display: none; }
+  .empty-note { margin: 0; padding: 18px; color: var(--lr-muted); font-size: 14px; }
+  .empty-note a { color: var(--lr-text); text-decoration: underline; }
+  @media (max-width: 760px) {
+    .acc-table thead { display: none; }
+    :global(.acc-table), :global(.acc-table tbody) { display: block; }
+    :global(.acc-table tr) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--lr-line-soft); }
+    :global(.acc-table tbody tr:last-child) { border-bottom: 0; }
+    :global(.acc-table td) { display: block; padding: 0; border: 0; white-space: normal; }
+    :global(.acc-table .c-car) { font-weight: 600; min-width: 0; }
+    :global(.acc-table .c-time) { text-align: right; }
+    :global(.acc-table .c-track), :global(.acc-table .c-date) { display: none; }
+    :global(.acc-table .c-meta), :global(.acc-table .c-rank) { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--lr-muted); font-size: 13px; }
+    /* actions get their own line on phones, so status and date never get squeezed */
+    :global(.acc-table .c-act) { grid-column: 1 / -1; text-align: left; margin-top: 4px; }
+    :global(.acc-table .c-act:empty) { display: none; }
+    :global(.acc-table .m) { display: inline; }
+  }
+</style>
+
+<script>
+  import { getSupabase, backendConfigured, SUPABASE_URL, SUPABASE_ANON_KEY } from '../../../scripts/supabase-client';
+
+  // No separate env var -- withdraw-run lives at the standard Supabase
+  // Edge Function path under the same project, same pattern as every
+  // other *_URL in this codebase deriving from PUBLIC_SUPABASE_URL.
+  const WITHDRAW_RUN_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/withdraw-run` : '';
+  const ADD_VIDEO_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/add-video-evidence` : '';
+
+  const noticeEl = document.getElementById('backend-notice');
+  const authBoxEl = document.getElementById('auth-box');
+  const contentEl = document.getElementById('account-content');
+
+  const recordsTbodyEl = document.getElementById('records-tbody');
+  const recordsEmptyEl = document.getElementById('records-empty');
+  const submissionsTbodyEl = document.getElementById('submissions-tbody');
+  const submissionsEmptyEl = document.getElementById('submissions-empty');
+  const submissionsMsgEl = document.getElementById('submissions-msg');
+
+  if (!backendConfigured) {
+    noticeEl.hidden = false;
+  } else {
+    authBoxEl.hidden = false;
+  }
+
+  let currentSession = null;
+  let currentDriverRow = null;
+
+  // Same mm:ss.mmm formatting as the lap-time input elsewhere on the site,
+  // just the inverse direction (ms -> text instead of text -> ms).
+  function formatLapTime(ms) {
+    if (ms == null) return '—';
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    const millis = ms % 1000;
+    return `${minutes}:${String(seconds).padStart(2, '0')}.${String(millis).padStart(3, '0')}`;
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function vehicleLabel(v) {
+    if (!v) return 'Unknown Vehicle';
+    return `${v.make} ${v.model}`;
+  }
+
+  // Cross-links (Fausto, 2026-10-01): vehicle -> its Garage page, track ->
+  // its leaderboard filtered to that vehicle, so you see where you stand.
+  const BASE = import.meta.env.BASE_URL;
+  const TRACK_PAGES = { 'gellhorn-international-raceway': 'time-attack/gellhorn-international-raceway/' };
+  const linkAttr = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  function vehicleCell(run) {
+    const label = vehicleLabel(run.vehicles);
+    return run.vehicle_id && run.vehicles ? `<a class="rec-link" href="${BASE}cars/vehicles/${linkAttr(run.vehicle_id)}/">${label}</a>` : label;
+  }
+  function leaderboardHref(run) {
+    const page = TRACK_PAGES[run.track_id];
+    return page ? `${BASE}${page}?vehicle=${encodeURIComponent(run.vehicle_id)}#leaderboard` : null;
+  }
+  function trackCell(run) {
+    const name = run.tracks?.name ?? '—';
+    const href = leaderboardHref(run);
+    return href ? `<a class="rec-link" href="${href}">${name}</a>` : name;
+  }
+
+  // review_status/publication_status -> a single human label + pill style,
+  // matching the statuses the moderate-submission function actually writes
+  // (spec 5.2/6.1-6.3). No status this maps is invented; every value comes
+  // straight from the runs table CHECK constraints.
+  function statusInfo(run) {
+    // Colours (DEC-0188): coral = rejected, orange = the driver has to act,
+    // lime = published, neutral = waiting on a moderator / nothing to do.
+    if (run.review_status === 'rejected') return { label: 'Rejected', cls: 'is-no' };
+    if (run.review_status === 'invalidated') return { label: 'Invalidated', cls: 'is-no' };
+    if (run.review_status === 'needs_correction') return { label: 'Needs Correction', cls: 'is-fix' };
+    if (run.review_status === 'under_review') return { label: 'Under Review', cls: '' };
+    if (run.review_status === 'submitted' || run.review_status === 'draft') return { label: 'Pending Review', cls: '' };
+    if (run.publication_status === 'official') return { label: 'Official', cls: 'is-ok' };
+    if (run.publication_status === 'provisional') return { label: 'Provisional', cls: 'is-ok' };
+    return { label: 'Accepted', cls: '' };
+  }
+
+  // Lets a driver pull back their own screenshot submission before a
+  // moderator has looked at it (publication_status still 'hidden'). Once
+  // a moderator has acted, withdraw-run itself refuses (409) -- deleting
+  // an already-reviewed run isn't allowed this way, on purpose: it would
+  // let a driver yank a real, already-accepted time right before it
+  // matters. The server re-checks ownership and status itself; this is
+  // just the UI trigger.
+  async function withdrawRun(runId, btnEl) {
+    if (!currentSession) return;
+    // two clicks instead of a browser dialog (DEC-0175): the first arms the button
+    if (btnEl.dataset.armed !== '1') {
+      btnEl.dataset.armed = '1';
+      btnEl.textContent = 'Click again to withdraw';
+      btnEl.title = 'Deletes this submission and its screenshot permanently.';
+      setTimeout(() => { if (btnEl.isConnected && btnEl.dataset.armed === '1') { btnEl.dataset.armed = ''; btnEl.textContent = 'Withdraw'; } }, 4000);
+      return;
+    }
+    btnEl.dataset.armed = '';
+    btnEl.disabled = true;
+    btnEl.textContent = 'Withdrawing…';
+    submissionsMsgEl.hidden = true;
+    try {
+      const res = await fetch(WITHDRAW_RUN_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${currentSession.access_token}`,
+          apikey: SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ run_id: runId }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error === 'already_reviewed'
+        ? 'Already reviewed by a moderator -- can no longer be withdrawn this way.'
+        : (body.error ?? `withdraw-run returned ${res.status}`));
+      await loadAccountData();
+    } catch (err) {
+      submissionsMsgEl.hidden = false;
+      submissionsMsgEl.textContent = err instanceof Error ? err.message : 'Could not withdraw -- please try again.';
+      btnEl.disabled = false;
+      btnEl.textContent = 'Withdraw';
+    }
+  }
+
+  // Lets a driver attach a video link to an already-submitted run --
+  // screenshot-only at first, video found/uploaded later. Same
+  // re-verification happens server-side (ownership, not already
+  // rejected/invalidated/verified); this is just the UI trigger.
+  async function addVideo(runId, btnEl) {
+    if (!currentSession) return;
+    const url = window.prompt('Paste the video link (YouTube, etc.) for this run:');
+    if (!url || !url.trim()) return;
+    btnEl.disabled = true;
+    const originalLabel = btnEl.textContent;
+    btnEl.textContent = 'Adding…';
+    submissionsMsgEl.hidden = true;
+    try {
+      const res = await fetch(ADD_VIDEO_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${currentSession.access_token}`,
+          apikey: SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ run_id: runId, video_url: url.trim() }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.detail ?? body.error ?? `add-video-evidence returned ${res.status}`);
+      await loadAccountData();
+    } catch (err) {
+      submissionsMsgEl.hidden = false;
+      submissionsMsgEl.textContent = err instanceof Error ? err.message : 'Could not add video -- please try again.';
+      btnEl.disabled = false;
+      btnEl.textContent = originalLabel;
+    }
+  }
+
+  function renderAuthState() {
+    if (!backendConfigured) return;
+    if (currentSession) {
+      authBoxEl.hidden = true;
+      contentEl.hidden = false;
+      loadAccountData();
+    } else {
+      authBoxEl.hidden = false;
+      contentEl.hidden = true;
+      currentDriverRow = null;
+    }
+  }
+
+  // getSession() and onAuthStateChange both start a load on page open; the
+  // records loop awaits per vehicle, so two overlapping loads used to append
+  // every record twice. Only the newest load may write rows.
+  let loadSeq = 0;
+  async function loadAccountData() {
+    const seq = ++loadSeq;
+    const sb = getSupabase();
+
+    const { data: driverRow, error: driverErr } = await sb
+      .from('drivers')
+      .select('driver_id, display_name')
+      .eq('auth_user_id', currentSession.user.id)
+      .maybeSingle();
+
+    if (driverErr || !driverRow) {
+      recordsEmptyEl.hidden = false;
+      recordsEmptyEl.textContent = 'Could not load your driver profile yet. Try reloading.';
+      return;
+    }
+    currentDriverRow = driverRow;
+
+    // My Submissions: every run of this driver, any status, most recent
+    // first -- this is the activity log, unlike My Records below.
+    const { data: allRuns, error: allRunsErr } = await sb
+      .from('runs')
+      .select('run_id, vehicle_id, track_id, lap_time_ms, review_status, publication_status, verification_tier, submitted_at, created_at, vehicles(make, model), tracks(name)')
+      .eq('driver_id', driverRow.driver_id)
+      .order('created_at', { ascending: false });
+    if (seq !== loadSeq) return;
+
+    submissionsTbodyEl.innerHTML = '';
+    if (allRunsErr) {
+      submissionsEmptyEl.hidden = false;
+      submissionsEmptyEl.textContent = 'Could not load your submissions yet. Try reloading.';
+    } else if (!allRuns || allRuns.length === 0) {
+      submissionsEmptyEl.hidden = false;
+    } else {
+      submissionsEmptyEl.hidden = true;
+      for (const run of allRuns) {
+        const tr = document.createElement('tr');
+        const info = statusInfo(run);
+        const canWithdraw = run.publication_status === 'hidden';
+        const canAddVideo = run.review_status !== 'rejected' && run.review_status !== 'invalidated'
+          && run.verification_tier !== 'verified';
+        const actionButtons = [
+          canAddVideo ? '<button type="button" class="btn btn-s btn-sm add-video-btn" data-run-id="' + run.run_id + '">+ Video</button>' : '',
+          canWithdraw ? '<button type="button" class="btn btn-danger btn-sm withdraw-btn" data-run-id="' + run.run_id + '">Withdraw</button>' : '',
+        ].filter(Boolean).join('');
+        const date = formatDate(run.submitted_at ?? run.created_at);
+        tr.innerHTML = `<td class="c-car">${vehicleCell(run)}</td><td class="c-track">${trackCell(run)}</td><td class="c-time">${formatLapTime(run.lap_time_ms)}</td><td class="c-meta"><span class="lr-status ${info.cls}">${info.label}</span><span class="m">· ${date}</span></td><td class="c-date">${date}</td><td class="c-act">${actionButtons}</td>`;
+        submissionsTbodyEl.appendChild(tr);
+      }
+    }
+
+    // My Records: personal best per vehicle, excluding rejected/invalidated
+    // runs (those never were a valid record to begin with).
+    const validRuns = (allRuns ?? []).filter(
+      (r) => r.review_status !== 'rejected' && r.review_status !== 'invalidated'
+    );
+    validRuns.sort((a, b) => a.lap_time_ms - b.lap_time_ms);
+    const bestByVehicle = new Map();
+    for (const run of validRuns) {
+      if (!bestByVehicle.has(run.vehicle_id)) bestByVehicle.set(run.vehicle_id, run);
+    }
+
+    // Rank per vehicle: only meaningful once that vehicle's PB is actually
+    // published (provisional/official), since that's the only data anyone
+    // else can see. Computed against public_leaderboard -- the only public
+    // read of run data (see the view's own comment in the schema) -- by
+    // taking each OTHER driver's best time for that vehicle and counting how
+    // many beat mine. Not deduped server-side, so done here client-side.
+    recordsTbodyEl.innerHTML = '';
+    if (bestByVehicle.size === 0) {
+      recordsEmptyEl.hidden = false;
+    } else {
+      recordsEmptyEl.hidden = true;
+      for (const run of bestByVehicle.values()) {
+        const tr = document.createElement('tr');
+        const isPublished = run.publication_status === 'provisional' || run.publication_status === 'official';
+        let rankCell = '—';
+        if (isPublished) {
+          // Group by driver_id, not the `driver` display label -- several
+          // deleted accounts all show as "Deleted driver" (DEC-0079), and
+          // display names are not unique either.
+          const { data: lbRows } = await sb
+            .from('public_leaderboard')
+            .select('driver_id, lap_time_ms')
+            .eq('vehicle_id', run.vehicle_id)
+            .eq('platform', 'ps5'); // DEC-0073: PS5 board only
+          if (seq !== loadSeq) return;
+          const bestPerDriver = new Map();
+          for (const row of lbRows ?? []) {
+            const prev = bestPerDriver.get(row.driver_id);
+            if (prev == null || row.lap_time_ms < prev) bestPerDriver.set(row.driver_id, row.lap_time_ms);
+          }
+          const faster = [...bestPerDriver.values()].filter((ms) => ms < run.lap_time_ms).length;
+          rankCell = `#${faster + 1}`;
+        }
+        const rankHtml = rankCell !== '—' && leaderboardHref(run) ? `<a class="rec-link" href="${leaderboardHref(run)}" title="Open this vehicle's leaderboard">${rankCell}</a>` : rankCell;
+        tr.innerHTML = `<td class="c-car">${vehicleCell(run)}</td><td class="c-time">${formatLapTime(run.lap_time_ms)}</td><td class="c-track">${trackCell(run)}</td><td class="c-rank"><span class="m">Rank</span><span class="rank-cell">${rankHtml}</span></td>`;
+        recordsTbodyEl.appendChild(tr);
+      }
+    }
+  }
+
+  if (backendConfigured) {
+    const sbInit = getSupabase();
+    sbInit.auth.getSession().then(({ data }) => {
+      currentSession = data?.session ?? null;
+      renderAuthState();
+    });
+    sbInit.auth.onAuthStateChange((_event, session) => {
+      currentSession = session;
+      renderAuthState();
+    });
+
+    submissionsTbodyEl.addEventListener('click', (ev) => {
+      const withdrawBtn = ev.target.closest('.withdraw-btn');
+      if (withdrawBtn) {
+        withdrawRun(withdrawBtn.dataset.runId, withdrawBtn);
+        return;
+      }
+      const videoBtn = ev.target.closest('.add-video-btn');
+      if (videoBtn) {
+        addVideo(videoBtn.dataset.runId, videoBtn);
+      }
+    });
+
+    document.getElementById('discord-signin-btn').addEventListener('click', async () => {
+      const sb = getSupabase();
+      await sb.auth.signInWithOAuth({
+        provider: 'discord',
+        // guilds.join on top of identify+email -- Header.astro's
+        // onAuthStateChange listener (present on every page) picks up
+        // the resulting provider_token and auto-adds the driver to our
+        // Discord server. Scopes are replaced, not extended, by this
+        // option, hence listing identify+email explicitly too.
+        options: { redirectTo: window.location.origin + window.location.pathname + window.location.search, scopes: 'identify email guilds.join' },
+      });
+    });
+  }
+</script>

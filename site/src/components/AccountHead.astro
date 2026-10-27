@@ -1,0 +1,92 @@
+---
+// My Account header (DEC-0188, Fausto 27.10.2026): one compact plain band for
+// every account tab -- eyebrow, title, the tab's one main action top right
+// (full width under the title on phones) and the tab row along the bottom edge.
+// Tab order: Garage (start page /account/) · My laps · Crew · Events · Tracks · Settings.
+// CTA labels are placeholders until Codex delivers the copy (DEC-0088).
+interface Cta { label: string; href?: string; id?: string }
+interface Props { active: 'garage' | 'laps' | 'crew' | 'events' | 'tracks' | 'settings'; cta?: Cta }
+const { active, cta } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const links = [
+  { key: 'garage', label: 'Garage', href: `${base}account/` },
+  { key: 'laps', label: 'My laps', href: `${base}account/laps/` },
+  { key: 'crew', label: 'Crew', href: `${base}account/crew/` },
+  { key: 'events', label: 'Events', href: `${base}account/events/` },
+  { key: 'tracks', label: 'Tracks', href: `${base}account/tracks/` },
+  { key: 'settings', label: 'Settings', href: `${base}account/settings/` },
+];
+---
+<section class="acc-band lr-band-plain">
+  <div class="wrap acc-band-in">
+    <div class="acc-band-text">
+      <p class="eyebrow">Private Driver Area</p>
+      <h1 class="display lr-t2">My Account</h1>
+    </div>
+    {cta && (
+      <div class="acc-band-act">
+        {cta.href
+          ? <a class="btn btn-p" href={cta.href}>{cta.label}</a>
+          : <button type="button" class="btn btn-p" id={cta.id}>{cta.label}</button>}
+      </div>
+    )}
+    <nav class="acc-tabs" aria-label="My Account">
+      {links.map((l) => (
+        <a href={l.href} class:list={['acc-tab', { 'is-active': active === l.key }]} aria-current={active === l.key ? 'page' : undefined} data-acc-tab={l.key}>{l.label}<span class="acc-tab-count" hidden></span></a>
+      ))}
+    </nav>
+  </div>
+</section>
+
+<style>
+  .acc-band-in { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px 24px; padding-top: 40px; }
+  .acc-band-text .eyebrow { display: flex; width: fit-content; margin: 0; }
+  .acc-band-text .lr-t2 { margin: 12px 0 0; line-height: .95; }
+  .acc-band-act { align-self: end; }
+  .acc-tabs { grid-column: 1 / -1; display: flex; gap: 4px; margin: 16px 0 0 -16px; /* first label lines up with the title */ overflow-x: auto; scrollbar-width: none; }
+  .acc-tabs::-webkit-scrollbar { display: none; }
+  .acc-tab { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; color: var(--lr-muted); text-decoration: none; font-family: var(--gh-font-body); font-weight: 600; font-size: 14px; white-space: nowrap; }
+  .acc-tab::after { content: ""; position: absolute; left: 16px; right: 16px; bottom: 0; height: 2px; border-radius: 2px; background: transparent; }
+  .acc-tab:hover, .acc-tab.is-active { color: var(--lr-text); }
+  .acc-tab.is-active::after { background: var(--lr-orange); }
+  .acc-tab:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: -2px; border-radius: 6px; }
+  .acc-tab-count { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--lr-orange); color: var(--lr-on-orange); font-style: normal; font-size: 12px; font-weight: 700; display: inline-grid; place-items: center; box-sizing: border-box; }
+  .acc-tab-count[hidden] { display: none; }
+  @media (max-width: 860px) {
+    .acc-band-in { padding-top: 24px; grid-template-columns: 1fr; }
+    .acc-band-act .btn { width: 100%; }
+    /* the tab row runs edge to edge and scrolls; the fade on the right shows there is more */
+    .acc-tabs { margin-inline: calc(-1 * clamp(1.25rem, 4vw, 2.5rem)); padding-inline: calc(clamp(1.25rem, 4vw, 2.5rem) - 12px); -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+    .acc-tab { padding: 0 12px; }
+    .acc-tab::after { left: 12px; right: 12px; }
+  }
+</style>
+
+<script>
+  // Badge on the Crew tab: open join requests for crews I lead + invites for me.
+  import { backendConfigured, getSupabase } from '../scripts/supabase-client';
+  // keep the active tab in view on phones (the row scrolls sideways)
+  document.querySelector('.acc-tab.is-active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  async function badge() {
+    if (!backendConfigured) return;
+    const sb = getSupabase();
+    const { data: s } = await sb.auth.getSession();
+    const session = s?.session;
+    if (!session) return;
+    const own = await sb.from('drivers').select('driver_id').eq('auth_user_id', session.user.id).maybeSingle();
+    const me = own.data?.driver_id;
+    if (!me) return;
+    const roles = await sb.from('hub_roles').select('crew_id').eq('driver_id', me).eq('role', 'crew_leader');
+    const ids = (roles.data ?? []).map((r: any) => r.crew_id).filter(Boolean);
+    // + crew invites waiting for me (RS-0063)
+    const inv = await sb.from('crew_memberships').select('membership_id', { count: 'exact', head: true }).eq('driver_id', me).eq('status', 'invited');
+    let count = inv.count ?? 0;
+    if (ids.length) {
+      const req = await sb.from('crew_membership_overview').select('membership_id', { count: 'exact', head: true }).eq('status', 'pending').in('crew_id', ids);
+      count += req.count ?? 0;
+    }
+    const el = document.querySelector<HTMLElement>('[data-acc-tab="crew"] .acc-tab-count');
+    if (el && count) { el.textContent = String(count); el.hidden = false; el.setAttribute('aria-label', `${count} open`); }
+  }
+  badge();
+</script>

@@ -114,7 +114,7 @@ function init(root: HTMLElement) {
     const t = $('vs-own-t')!;
     const mine = owned.has(id);
     // V3 (Fausto 15.10.): number from the first other driver on; only you -> "It's in your garage"
-    if (mine && ownerCount <= 1) t.innerHTML = `It's in <a class="vs-own-btn" href="${base}account/garage/">your garage</a>`;
+    if (mine && ownerCount <= 1) t.innerHTML = `It's in <a class="vs-own-btn" href="${base}account/">your garage</a>`;
     else if (ownerCount >= 1) t.innerHTML = `<b>${ownerCount}</b> ${ownerCount === 1 ? 'driver has' : 'drivers have'} it in their garage${mine ? ' (you too)' : ''}`;
     else t.innerHTML = 'Be the first to add it to <button type="button" class="vs-own-btn" data-add-garage>your garage</button>';
   }

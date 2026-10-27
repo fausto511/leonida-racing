@@ -3,7 +3,7 @@
 // and crew leaders (same editor as the moderator panel, personal mode) and
 // the Crew Leader / Event Host application.
 import Base from '../../../layouts/Base.astro';
-import AccountSubnav from '../../../components/AccountSubnav.astro';
+import AccountHead from '../../../components/AccountHead.astro';
 import HubEditor from '../../../components/HubEditor.astro';
 import DiscordFeedSteps from '../../../components/DiscordFeedSteps.astro';
 import RoleApply from '../../../components/RoleApply.astro';
@@ -16,10 +16,8 @@ const base = import.meta.env.BASE_URL;
   section="account"
   noindex
 >
+  <AccountHead active="events" cta={{ label: 'Find events', href: `${import.meta.env.BASE_URL}community/events/` }} />
   <section class="wrap account-wrap">
-    <p class="eyebrow">Private Driver Area</p>
-    <h1 class="display account-title">My Account</h1>
-    <AccountSubnav active="events" />
 
     <div id="acc-auth" class="acc-auth lr-empty-panel" hidden>
       <p>Sign in with Discord to see your events.</p>
@@ -29,7 +27,7 @@ const base = import.meta.env.BASE_URL;
     <div id="acc-body" hidden>
       <div class="panel ev-cta">
         <p><strong>Looking for something to drive?</strong> Races, league rounds, community playlists, and car meets from across the GTA VI scene—all in one calendar.</p>
-        <a class="btn btn-p" href={`${base}community/events/`}>Find Events</a>
+        <a class="btn btn-s" href={`${base}community/events/`}>Find Events</a>
       </div>
 
       <h2 class="section-heading">Events I'm going to</h2>
@@ -55,8 +53,7 @@ const base = import.meta.env.BASE_URL;
 
 <style>
   [hidden] { display: none !important; }
-  .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
-  .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .account-wrap { padding-top: var(--lr-gap-head); } /* DEC-0188; the footer brings the 64px gap below */
   .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
   .ev-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.2rem; }
   .ev-cta p { margin: 0; color: var(--gh-muted); font-size: .9rem; max-width: 40rem; }

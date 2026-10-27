@@ -2,7 +2,7 @@
 // My Account > Tracks (RS-0045): creators submit and edit their race jobs
 // (HubEditor, personal mode "tracks"); everyone else can apply as creator.
 import Base from '../../../layouts/Base.astro';
-import AccountSubnav from '../../../components/AccountSubnav.astro';
+import AccountHead from '../../../components/AccountHead.astro';
 import HubEditor from '../../../components/HubEditor.astro';
 import RoleApply from '../../../components/RoleApply.astro';
 import '../../../styles/hub.css';
@@ -14,10 +14,8 @@ const base = import.meta.env.BASE_URL;
   section="account"
   noindex
 >
+  <AccountHead active="tracks" cta={{ label: 'Find tracks', href: `${import.meta.env.BASE_URL}community/tracks/` }} />
   <section class="wrap account-wrap">
-    <p class="eyebrow">Private Driver Area</p>
-    <h1 class="display account-title">My Account</h1>
-    <AccountSubnav active="tracks" />
 
     <div id="acc-auth" class="acc-auth lr-empty-panel" hidden>
       <p>Log in to view saved tracks or submit your own.</p>
@@ -47,8 +45,7 @@ const base = import.meta.env.BASE_URL;
 
 <style>
   [hidden] { display: none !important; }
-  .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
-  .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .account-wrap { padding-top: var(--lr-gap-head); } /* DEC-0188; the footer brings the 64px gap below */
   .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
   .section-heading { margin: 2.5rem 0 .3rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
   .section-lede { margin: 0 0 1.2rem; color: var(--gh-muted); font-size: .88rem; }

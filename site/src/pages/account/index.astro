@@ -1,452 +1,243 @@
 ---
+// My Account > Garage (RS-0032, DEC-0074): every vehicle the driver owns.
+// Slot layout (Fausto, 2026-09-26): owned vehicles as garage tiles, followed
+// by one empty "+" slot. The slot opens a vehicle picker (search + list by
+// class); the picked car fills the slot and a new empty slot appears after it.
+// Vehicles can also be marked with "I own this vehicle" on their Garage page.
+// Private: only the driver sees this list.
 import Base from '../../layouts/Base.astro';
-import AccountSubnav from '../../components/AccountSubnav.astro';
+import AccountHead from '../../components/AccountHead.astro';
+import { vehicleOptions } from '../../data/vehicles';
+const base = import.meta.env.BASE_URL;
+const vehicleIndex = [...vehicleOptions]
+  .sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`))
+  .map((v) => ({ id: v.id, make: v.make, model: v.model, cls: v.classes[0] ?? 'Other', classes: v.classes.join(' / '), logo: v.logoSlug, photo: Boolean(v.photo) }));
 ---
 <Base
-  title="My Account"
-  description="Your private driver area: vehicle records and submissions."
+  title="My Garage — My Account"
+  description="The GTA VI vehicles you own."
   section="account"
   noindex
 >
+  <AccountHead active="garage" cta={{ label: 'Add a vehicle', id: 'acc-cta' }} />
   <section class="wrap account-wrap">
-    <p class="eyebrow">Private Driver Area</p>
-    <h1 class="display account-title">My Account</h1>
-    <AccountSubnav active="time-attack" />
 
-    <div id="backend-notice" class="notice lr-note lr-note-warn" hidden>
-      <strong>Backend not connected yet.</strong>
-      <span>This page reads and writes the real <code>drivers</code>/<code>runs</code> tables via Supabase, but no Supabase project is configured for this build (see <code>SETUP-BACKEND.md</code>). Sign-in and data are disabled until <code>PUBLIC_SUPABASE_URL</code> and <code>PUBLIC_SUPABASE_ANON_KEY</code> are set.</span>
+    <div id="acc-auth" class="acc-auth lr-empty-panel" hidden>
+      <p>Sign in with Discord to see your garage.</p>
+      <button type="button" id="acc-signin" class="btn btn-discord">Sign in with Discord</button>
     </div>
 
-    <div id="auth-box" class="auth-box lr-empty-panel" hidden>
-      <p>Sign in with Discord to see your driver overview.</p>
-      <button type="button" id="discord-signin-btn" class="btn btn-discord">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.92 3.58 14.74 3.99C12.9 3.71 11.07 3.71 9.26 3.99C9.09 3.58 8.83 3.06 8.62 2.67C6.88 2.97 5.21 3.5 3.66 4.23C0.53 8.97 -0.32 13.58 0.1 18.14C2.18 19.69 4.19 20.63 6.17 21.25C6.66 20.58 7.1 19.86 7.48 19.11C6.76 18.83 6.07 18.5 5.43 18.11C5.6 17.98 5.77 17.85 5.93 17.71C9.88 19.56 14.17 19.56 18.07 17.71C18.23 17.85 18.4 17.98 18.57 18.11C17.92 18.5 17.24 18.84 16.52 19.11C16.9 19.86 17.33 20.58 17.82 21.25C19.8 20.63 21.82 19.69 23.9 18.14C24.4 12.86 23.05 8.28 20.33 4.23ZM8.01 15.34C6.83 15.34 5.86 14.23 5.86 12.88C5.86 11.53 6.81 10.43 8.01 10.43C9.22 10.43 10.19 11.53 10.17 12.88C10.17 14.23 9.22 15.34 8.01 15.34ZM15.99 15.34C14.8 15.34 13.83 14.23 13.83 12.88C13.83 11.53 14.78 10.43 15.99 10.43C17.19 10.43 18.17 11.53 18.14 12.88C18.14 14.23 17.19 15.34 15.99 15.34Z"/></svg>
-        Sign in with Discord
-      </button>
-    </div>
-
-    <div id="account-content" hidden>
-      <h2 class="section-heading">My Records</h2>
-      <p class="section-lede">Your personal best per vehicle. Rank only shows once that lap is actually published.</p>
-      <div class="panel table-wrap">
-        <table class="records-table">
-          <thead>
-            <tr>
-              <th scope="col">Vehicle</th>
-              <th scope="col">Personal Best</th>
-              <th scope="col">Track</th>
-              <th scope="col">Rank</th>
-            </tr>
-          </thead>
-          <tbody id="records-tbody"></tbody>
-        </table>
-        <p id="records-empty" class="empty-note" hidden>
-          No vehicle records yet. <a href="../time-attack/submit/">Submit your first lap</a>.
-        </p>
-      </div>
-
-      <h2 class="section-heading">My Submissions</h2>
-      <p class="section-lede">Every lap you've submitted, including ones still in review.</p>
-      <div class="panel table-wrap">
-        <table class="records-table">
-          <thead>
-            <tr>
-              <th scope="col">Vehicle</th>
-              <th scope="col">Track</th>
-              <th scope="col">Lap Time</th>
-              <th scope="col">Status</th>
-              <th scope="col">Submitted</th>
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="submissions-tbody"></tbody>
-        </table>
-        <p id="submissions-empty" class="empty-note" hidden>
-          No submissions yet. <a href="../time-attack/submit/">Submit your first lap</a>.
-        </p>
-        <p id="submissions-msg" class="settings-msg" hidden></p>
-      </div>
-
+    <div id="acc-body" hidden>
+      <h2 class="section-heading">My Garage <span class="mg-count" id="mg-count"></span></h2>
+      <p class="section-lede">Vehicles you own in GTA VI. Only you can see this list. Add vehicles below, or switch on “I own this vehicle” from any vehicle page in <a href={`${base}cars/`}>The Garage</a>.</p>
+      <p class="mg-msg" id="mg-msg" role="status" hidden></p>
+      <div class="mg-grid" id="mg-grid"></div>
     </div>
   </section>
+
+  <dialog class="mg-picker" id="mg-picker" aria-labelledby="mg-picker-title">
+    <div class="mg-picker-head">
+      <h2 id="mg-picker-title">Add a vehicle you own</h2>
+      <button type="button" class="mg-picker-close" id="mg-picker-close" aria-label="Close">✕</button>
+    </div>
+    <label class="ui-search mg-picker-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="mg-picker-q" placeholder="Search make or model" aria-label="Search vehicles" autocomplete="off" />
+    </label>
+    <div class="mg-picker-list" id="mg-picker-list"></div>
+  </dialog>
 </Base>
 
 <style>
-  /* Native [hidden] must win over any later display: rule on the same
-     element -- same reasoning as time-attack/submit/index.astro. */
   [hidden] { display: none !important; }
+  .account-wrap { padding-top: var(--lr-gap-head); } /* DEC-0188; the footer brings the 64px gap below */
+  .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
+  .section-heading { margin: 0 0 .3rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
+  .mg-count { color: var(--gh-muted); font-size: .95rem; }
+  .section-lede { margin: 0 0 1.4rem; color: var(--gh-muted); font-size: .88rem; max-width: 42rem; }
+  .section-lede a { color: var(--gh-text); }
+  .mg-msg { margin: -.6rem 0 1rem; font-size: .82rem; color: var(--gh-muted); }
+  .mg-msg.is-error { color: var(--lr-coral); }
+  .mg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr)); gap: var(--gh-gap-card, 1rem); }
 
-  .account-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
-  .account-title { margin: .4rem 0 1.2rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  /* owned vehicle tile -- same language as The Garage tiles */
+  :global(.mg-tile) { position: relative; border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg, 12px); overflow: hidden; background: var(--gh-surface); display: flex; flex-direction: column; }
+  :global(.mg-tile.is-new) { animation: mg-in .45s ease-out; border-color: var(--gh-yellow); }
+  @keyframes mg-in { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+  :global(.mg-photo) { position: relative; aspect-ratio: 16 / 9; background: #0e0e13; }
+  :global(.mg-photo img.mg-bg) { width: 100%; height: 100%; object-fit: cover; opacity: .55; display: block; }
+  :global(.mg-photo img.mg-real) { opacity: 1; }
+  :global(.mg-name) { position: absolute; inset: auto 0 0 0; padding: .6rem .75rem; background: linear-gradient(to top, rgba(11,11,20,.95), transparent); display: flex; align-items: center; gap: .55rem; }
+  :global(.mg-logo) { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--gh-text); padding: 4px; display: inline-flex; }
+  :global(.mg-logo img) { width: 100%; height: 100%; object-fit: contain; }
+  :global(.mg-name a) { color: var(--gh-text); font-weight: 800; text-decoration: none; line-height: 1.15; }
+  :global(.mg-name a:hover) { text-decoration: underline; text-underline-offset: 3px; }
+  :global(.mg-name small) { display: block; color: var(--gh-muted); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+  :global(.mg-remove) { position: absolute; top: .55rem; right: .55rem; width: 1.9rem; height: 1.9rem; border-radius: 50%; border: 1px solid var(--lr-line-hover); background: var(--lr-dark-80); color: var(--gh-text); font-size: .8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  :global(.mg-remove:hover) { border-color: var(--gh-red); color: var(--gh-red); }
+  :global(.mg-foot) { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .6rem .75rem; font-size: .76rem; }
+  :global(.mg-foot a) { color: var(--gh-muted); font-weight: 700; text-decoration: none; }
+  :global(.mg-foot a:hover) { color: var(--gh-text); }
 
-  .notice { margin-bottom: 1.5rem; } /* box: .lr-note .lr-note-warn (DEC-0186) */
+  /* empty "+" slot */
+  :global(.mg-slot) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .55rem; min-height: 12.5rem; padding: 1.2rem; border: 2px dashed var(--gh-line); border-radius: var(--gh-radius-lg, 12px); background: transparent; color: var(--gh-muted); font: inherit; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+  :global(.mg-slot:hover), :global(.mg-slot:focus-visible) { border-color: var(--gh-yellow); color: var(--gh-text); background: var(--lr-orange-tint); outline: none; }
+  :global(.mg-slot-plus) { width: 3rem; height: 3rem; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; line-height: 1; }
+  :global(.mg-slot strong) { font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1rem; color: var(--gh-text); }
+  :global(.mg-slot span.mg-slot-sub) { font-size: .78rem; }
 
-  .auth-box { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
-
-  .section-heading { margin: 2.5rem 0 .3rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
-  .section-heading:first-of-type { margin-top: 0; }
-  .section-lede { margin: 0 0 1.2rem; color: var(--gh-muted); font-size: .88rem; }
-
-  .table-wrap { padding: 0; overflow-x: auto; }
-  .records-table { width: 100%; border-collapse: collapse; font-size: .88rem; min-width: 32rem; }
-  .records-table th { text-align: left; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gh-muted); font-weight: 700; padding: .8rem 1.1rem; border-bottom: 1px solid var(--gh-line); white-space: nowrap; }
-  /* :global() below: the actual data rows (tbody) are inserted at runtime
-     via innerHTML from live Supabase data (see loadAccountData()), so
-     Astro's scoped-CSS attribute never reaches those <td> elements --
-     without :global() this rule silently never applied and every cell fell
-     back to the browser's default ~1px td padding, which is exactly why
-     the table looked cramped no matter what padding was set here. Same
-     class of bug as the status-pill/rank-cell fix above, just missed on
-     this base rule the first time round. */
-  :global(.records-table td) { padding: .8rem 1.1rem; border-bottom: 1px solid var(--gh-line); white-space: nowrap; }
-  :global(.records-table tbody tr:last-child td) { border-bottom: none; }
-  :global(.rec-link) { color: var(--gh-text); text-decoration: underline; text-decoration-color: var(--gh-muted); text-underline-offset: 3px; }
-  :global(.rec-link:hover) { color: var(--gh-yellow); text-decoration-color: currentColor; }
-  /* :global() below: these classes are only ever added at runtime via
-     innerHTML in the <script> block (record rows are rendered from live
-     Supabase data), so Astro's scoped-CSS attribute is never attached to
-     them -- without :global() these rules would be dead code. */
-  :global(.rank-cell) { font-family: var(--gh-font-display); font-weight: 900; }
-  :global(.status-pill) { display: inline-block; padding: .2rem .55rem; border-radius: 999px; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-  :global(.status-pending) { background: var(--lr-orange-fill); color: var(--gh-yellow); }
-  :global(.status-live) { background: var(--lr-lime-fill); color: #D9F58E; }
-  :global(.status-rejected) { background: var(--lr-pink-fill); color: var(--gh-red); }
-  :global(.status-muted) { background: var(--gh-surface-soft); color: var(--gh-muted); }
-  .empty-note { margin: 0; padding: 1.1rem; color: var(--lr-muted); font-size: 14px; }
-  .empty-note a { color: var(--gh-text); text-decoration: underline; }
-
-  .settings-card { padding: var(--gh-pad-card); display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.5rem; }
-  .settings-card .field { display: flex; flex-direction: column; gap: .4rem; flex: 1 1 16rem; }
-  .settings-card .field span { font-weight: 700; font-size: .85rem; }
-  .account-status { padding-left: 1.75rem; border-left: 1px solid var(--gh-line); }
-  .account-status-row { display: flex; align-items: center; flex-wrap: wrap; gap: .9rem; padding-block: .05rem; }
-  .account-status-row p { margin: 0; font-size: .88rem; }
-  .settings-card input[type="text"] {
-    height: var(--lr-field-h); box-sizing: border-box; padding: 0 14px; border-radius: var(--gh-radius); border: 1px solid var(--lr-line-strong);
-    background: var(--gh-bg); color: var(--gh-text); font-size: 14px; font-family: var(--gh-font-body);
+  /* picker */
+  .mg-picker { width: min(34rem, calc(100vw - 2rem)); max-height: min(40rem, calc(100vh - 3rem)); padding: 0; border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg, 12px); background: var(--gh-surface); color: var(--gh-text); }
+  .mg-picker[open] { display: flex; flex-direction: column; }
+  .mg-picker::backdrop { background: rgba(8,8,12,.7); }
+  .mg-picker-head { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.1rem .6rem; }
+  .mg-picker-head h2 { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.1rem; }
+  .mg-picker-close { width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--gh-line); background: transparent; color: var(--gh-text); cursor: pointer; }
+  .mg-picker-search { margin: 0 1.1rem .8rem; }
+  .mg-picker-list { overflow-y: auto; padding: 0 .6rem .8rem; }
+  :global(.mg-group) { margin: .7rem .5rem .3rem; color: var(--gh-muted); font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--gh-line); padding-bottom: .3rem; }
+  :global(.mg-opt) { display: flex; align-items: center; gap: .6rem; width: 100%; padding: .5rem .5rem; border: none; border-radius: var(--gh-radius); background: transparent; color: var(--gh-text); font: inherit; font-size: .9rem; text-align: left; cursor: pointer; }
+  :global(.mg-opt:hover:not(:disabled)), :global(.mg-opt:focus-visible) { background: var(--gh-surface-soft, var(--lr-white-hover)); outline: none; }
+  :global(.mg-opt .mg-logo) { width: 26px; height: 26px; }
+  :global(.mg-opt .mg-make) { color: var(--gh-muted); font-size: .8rem; }
+  :global(.mg-opt:disabled) { cursor: default; opacity: .55; }
+  :global(.mg-opt .mg-have) { margin-left: auto; font-size: .68rem; font-weight: 800; text-transform: uppercase; color: var(--gh-yellow); }
+  :global(.mg-none) { padding: 1rem .5rem; color: var(--lr-muted); font-size: 14px; }
+  @media (max-width: 560px) {
+    .mg-picker { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; border-radius: 0; border: none; }
   }
-  .settings-card input:focus { outline: none; border-color: var(--lr-field-focus); }
-  .settings-msg { flex-basis: 100%; margin: 0; font-size: .82rem; }
-  .settings-msg.is-error { color: var(--lr-coral); }
-  .settings-msg.is-ok { color: #D9F58E; }
-  .withdraw-btn, .add-video-btn { padding: .4rem .9rem; font-size: .72rem; letter-spacing: .01em; }
-  .actions-cell { display: flex; flex-wrap: wrap; gap: .4rem; }
-  .field-checkbox { flex-direction: row; align-items: flex-start; gap: .6rem; }
-  .field-checkbox input[type="checkbox"] { width: 1.1rem; height: 1.1rem; margin-top: .15rem; accent-color: var(--gh-yellow); }
-  .field-checkbox span { font-size: .85rem; color: var(--gh-muted); }
 </style>
 
+<script define:vars={{ vehicleIndex }}>
+  window.__mgVehicles = vehicleIndex;
+</script>
+
 <script>
-  import { getSupabase, backendConfigured, SUPABASE_URL } from '../../scripts/supabase-client';
+  import { backendConfigured, getSupabase } from '../../scripts/supabase-client';
+  import { currentDriverId, fetchOwnedList, setOwned } from '../../scripts/owned';
+  import { esc } from '../../data/hub';
 
-  // No separate env var -- withdraw-run lives at the standard Supabase
-  // Edge Function path under the same project, same pattern as every
-  // other *_URL in this codebase deriving from PUBLIC_SUPABASE_URL.
-  const WITHDRAW_RUN_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/withdraw-run` : '';
-  const ADD_VIDEO_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/add-video-evidence` : '';
+  type V = { id: string; make: string; model: string; cls: string; classes: string; logo: string; photo: boolean };
+  const all = (window as any).__mgVehicles as V[];
+  const byId = new Map(all.map((v) => [v.id, v]));
+  const base = import.meta.env.BASE_URL;
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  const grid = $('mg-grid');
+  const picker = $<HTMLDialogElement>('mg-picker');
+  const pq = $<HTMLInputElement>('mg-picker-q');
+  const plist = $('mg-picker-list');
+  let me: string | null = null;
+  let owned: string[] = []; // in the order they were added
+  let fresh: string | null = null;
 
-  const noticeEl = document.getElementById('backend-notice');
-  const authBoxEl = document.getElementById('auth-box');
-  const contentEl = document.getElementById('account-content');
+  const logo = (v: V) => `<span class="mg-logo"><img src="${base}images/logos/${esc(v.logo)}-gta-6-logo.svg" alt="" width="22" height="22" loading="lazy" /></span>`;
 
-  const recordsTbodyEl = document.getElementById('records-tbody');
-  const recordsEmptyEl = document.getElementById('records-empty');
-  const submissionsTbodyEl = document.getElementById('submissions-tbody');
-  const submissionsEmptyEl = document.getElementById('submissions-empty');
-  const submissionsMsgEl = document.getElementById('submissions-msg');
-
-  if (!backendConfigured) {
-    noticeEl.hidden = false;
-  } else {
-    authBoxEl.hidden = false;
+  function msg(text: string, error = false) {
+    const el = $('mg-msg');
+    el.textContent = text; el.hidden = !text; el.className = `mg-msg${error ? ' is-error' : ''}`;
   }
 
-  let currentSession = null;
-  let currentDriverRow = null;
-
-  // Same mm:ss.mmm formatting as the lap-time input elsewhere on the site,
-  // just the inverse direction (ms -> text instead of text -> ms).
-  function formatLapTime(ms) {
-    if (ms == null) return '—';
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    const millis = ms % 1000;
-    return `${minutes}:${String(seconds).padStart(2, '0')}.${String(millis).padStart(3, '0')}`;
+  function render() {
+    $('mg-count').textContent = owned.length ? `· ${owned.length} vehicle${owned.length === 1 ? '' : 's'}` : '';
+    const tiles = owned.map((id) => byId.get(id)).filter(Boolean).map((v) => {
+      const x = v as V;
+      return `<article class="mg-tile${x.id === fresh ? ' is-new' : ''}">
+        <div class="mg-photo">
+          ${x.photo
+            ? `<img class="mg-bg mg-real" src="${base}images/vehicles/${esc(x.id)}-640.webp" alt="" loading="lazy" width="640" height="360" />`
+            : `<img class="mg-bg" src="${base}images/garage/garage-hero-placeholder-640.webp" alt="" loading="lazy" width="640" height="360" />`}
+          <button type="button" class="mg-remove" data-remove="${esc(x.id)}" title="Remove from my garage" aria-label="Remove ${esc(x.make)} ${esc(x.model)} from my garage">✕</button>
+          <div class="mg-name">${logo(x)}<span><a href="${base}cars/vehicles/${esc(x.id)}/">${esc(x.make)} ${esc(x.model)}</a><small>${esc(x.classes)}</small></span></div>
+        </div>
+        <div class="mg-foot"><a rel="nofollow" href="${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(x.id)}">Gellhorn leaderboard →</a></div>
+      </article>`;
+    });
+    const slot = `<button type="button" class="mg-slot" id="mg-slot" aria-haspopup="dialog">
+        <span class="mg-slot-plus" aria-hidden="true">+</span>
+        <strong>${owned.length ? 'Add another vehicle' : 'Add your first vehicle'}</strong>
+        <span class="mg-slot-sub">Pick a car you own</span>
+      </button>`;
+    grid.innerHTML = tiles.join('') + slot;
+    fresh = null;
   }
 
-  function formatDate(iso) {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  function renderPicker() {
+    const q = pq.value.trim().toLowerCase();
+    const have = new Set(owned);
+    const list = all.filter((v) => !q || `${v.make} ${v.model} ${v.classes}`.toLowerCase().includes(q));
+    const groups = new Map<string, V[]>();
+    list.forEach((v) => groups.set(v.cls, [...(groups.get(v.cls) ?? []), v]));
+    plist.innerHTML = list.length
+      ? [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([cls, vs]) =>
+          `<p class="mg-group">${esc(cls)}</p>` + vs.map((v) =>
+            `<button type="button" class="mg-opt" data-pick="${esc(v.id)}"${have.has(v.id) ? ' disabled' : ''}>${logo(v)}<span><span class="mg-make">${esc(v.make)}</span> ${esc(v.model)}</span>${have.has(v.id) ? '<span class="mg-have">In garage</span>' : ''}</button>`).join('')).join('')
+      : '<p class="mg-none">No vehicle matches your search.</p>';
   }
 
-  function vehicleLabel(v) {
-    if (!v) return 'Unknown Vehicle';
-    return `${v.make} ${v.model}`;
+  function openPicker() {
+    pq.value = '';
+    renderPicker();
+    picker.showModal();
+    plist.scrollTop = 0;
+    // no auto-focus on phones: the keyboard would cover the list
+    if (window.matchMedia('(pointer: fine)').matches) pq.focus();
   }
 
-  // Cross-links (Fausto, 2026-10-01): vehicle -> its Garage page, track ->
-  // its leaderboard filtered to that vehicle, so you see where you stand.
-  const BASE = import.meta.env.BASE_URL;
-  const TRACK_PAGES = { 'gellhorn-international-raceway': 'time-attack/gellhorn-international-raceway/' };
-  const linkAttr = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  function vehicleCell(run) {
-    const label = vehicleLabel(run.vehicles);
-    return run.vehicle_id && run.vehicles ? `<a class="rec-link" href="${BASE}cars/vehicles/${linkAttr(run.vehicle_id)}/">${label}</a>` : label;
-  }
-  function leaderboardHref(run) {
-    const page = TRACK_PAGES[run.track_id];
-    return page ? `${BASE}${page}?vehicle=${encodeURIComponent(run.vehicle_id)}#leaderboard` : null;
-  }
-  function trackCell(run) {
-    const name = run.tracks?.name ?? '—';
-    const href = leaderboardHref(run);
-    return href ? `<a class="rec-link" href="${href}">${name}</a>` : name;
-  }
+  grid.addEventListener('click', async (e) => {
+    const t = e.target as HTMLElement;
+    if (t.closest('#mg-slot')) { openPicker(); return; }
+    const b = t.closest<HTMLButtonElement>('[data-remove]');
+    if (!b || !me) return;
+    const id = b.dataset.remove!;
+    b.disabled = true;
+    try { await setOwned(me, id, false); owned = owned.filter((x) => x !== id); msg(`${byId.get(id)?.make} ${byId.get(id)?.model} removed.`); }
+    catch { b.disabled = false; msg('Could not remove the vehicle — please try again.', true); return; }
+    render();
+  });
 
-  // review_status/publication_status -> a single human label + pill style,
-  // matching the statuses the moderate-submission function actually writes
-  // (spec 5.2/6.1-6.3). No status this maps is invented; every value comes
-  // straight from the runs table CHECK constraints.
-  function statusInfo(run) {
-    if (run.review_status === 'rejected') return { label: 'Rejected', cls: 'status-rejected' };
-    if (run.review_status === 'invalidated') return { label: 'Invalidated', cls: 'status-rejected' };
-    if (run.review_status === 'needs_correction') return { label: 'Needs Correction', cls: 'status-pending' };
-    if (run.review_status === 'under_review') return { label: 'Under Review', cls: 'status-pending' };
-    if (run.review_status === 'submitted' || run.review_status === 'draft') return { label: 'Pending Review', cls: 'status-pending' };
-    if (run.publication_status === 'official') return { label: 'Official', cls: 'status-live' };
-    if (run.publication_status === 'provisional') return { label: 'Provisional', cls: 'status-live' };
-    return { label: 'Accepted', cls: 'status-muted' };
-  }
-
-  // Lets a driver pull back their own screenshot submission before a
-  // moderator has looked at it (publication_status still 'hidden'). Once
-  // a moderator has acted, withdraw-run itself refuses (409) -- deleting
-  // an already-reviewed run isn't allowed this way, on purpose: it would
-  // let a driver yank a real, already-accepted time right before it
-  // matters. The server re-checks ownership and status itself; this is
-  // just the UI trigger.
-  async function withdrawRun(runId, btnEl) {
-    if (!currentSession) return;
-    const ok = window.confirm('Withdraw this submission? This deletes it and its screenshot permanently.');
-    if (!ok) return;
-    btnEl.disabled = true;
-    btnEl.textContent = 'Withdrawing…';
-    submissionsMsgEl.hidden = true;
+  plist.addEventListener('click', async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-pick]');
+    if (!b || b.disabled || !me) return;
+    const id = b.dataset.pick!;
+    b.disabled = true;
     try {
-      const res = await fetch(WITHDRAW_RUN_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${currentSession.access_token}`,
-          apikey: SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ run_id: runId }),
-      });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error === 'already_reviewed'
-        ? 'Already reviewed by a moderator -- can no longer be withdrawn this way.'
-        : (body.error ?? `withdraw-run returned ${res.status}`));
-      await loadAccountData();
-    } catch (err) {
-      submissionsMsgEl.hidden = false;
-      submissionsMsgEl.className = 'settings-msg is-error';
-      submissionsMsgEl.textContent = err instanceof Error ? err.message : 'Could not withdraw -- please try again.';
-      btnEl.disabled = false;
-      btnEl.textContent = 'Withdraw';
+      await setOwned(me, id, true);
+      owned = [...owned.filter((x) => x !== id), id];
+      fresh = id;
+      picker.close();
+      msg(`${byId.get(id)?.make} ${byId.get(id)?.model} added to your garage.`);
+      render();
+      document.querySelector('.mg-tile.is-new')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    } catch {
+      b.disabled = false;
+      picker.close();
+      msg('Could not add the vehicle — please try again.', true);
     }
-  }
+  });
+  pq.addEventListener('input', renderPicker);
+  // Escape in a search field would only clear the text -- close the picker right away.
+  pq.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); picker.close(); } });
+  $('mg-picker-close').addEventListener('click', () => picker.close());
+  // band action "Add a vehicle" (DEC-0188): same picker as the + slot; signed out it starts the Discord sign-in
+  $('acc-cta')?.addEventListener('click', () => { if (me) openPicker(); else if (backendConfigured) $('acc-signin').click(); });
+  picker.addEventListener('click', (e) => { if (e.target === picker) picker.close(); }); // click on backdrop
 
-  // Lets a driver attach a video link to an already-submitted run --
-  // screenshot-only at first, video found/uploaded later. Same
-  // re-verification happens server-side (ownership, not already
-  // rejected/invalidated/verified); this is just the UI trigger.
-  async function addVideo(runId, btnEl) {
-    if (!currentSession) return;
-    const url = window.prompt('Paste the video link (YouTube, etc.) for this run:');
-    if (!url || !url.trim()) return;
-    btnEl.disabled = true;
-    const originalLabel = btnEl.textContent;
-    btnEl.textContent = 'Adding…';
-    submissionsMsgEl.hidden = true;
-    try {
-      const res = await fetch(ADD_VIDEO_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${currentSession.access_token}`,
-          apikey: SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ run_id: runId, video_url: url.trim() }),
-      });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.detail ?? body.error ?? `add-video-evidence returned ${res.status}`);
-      await loadAccountData();
-    } catch (err) {
-      submissionsMsgEl.hidden = false;
-      submissionsMsgEl.className = 'settings-msg is-error';
-      submissionsMsgEl.textContent = err instanceof Error ? err.message : 'Could not add video -- please try again.';
-      btnEl.disabled = false;
-      btnEl.textContent = originalLabel;
-    }
-  }
-
-  function renderAuthState() {
-    if (!backendConfigured) return;
-    if (currentSession) {
-      authBoxEl.hidden = true;
-      contentEl.hidden = false;
-      loadAccountData();
-    } else {
-      authBoxEl.hidden = false;
-      contentEl.hidden = true;
-      currentDriverRow = null;
-    }
-  }
-
-  async function loadAccountData() {
-    const sb = getSupabase();
-
-    const { data: driverRow, error: driverErr } = await sb
-      .from('drivers')
-      .select('driver_id, display_name')
-      .eq('auth_user_id', currentSession.user.id)
-      .maybeSingle();
-
-    if (driverErr || !driverRow) {
-      recordsEmptyEl.hidden = false;
-      recordsEmptyEl.textContent = 'Could not load your driver profile yet. Try reloading.';
-      return;
-    }
-    currentDriverRow = driverRow;
-
-    // My Submissions: every run of this driver, any status, most recent
-    // first -- this is the activity log, unlike My Records below.
-    const { data: allRuns, error: allRunsErr } = await sb
-      .from('runs')
-      .select('run_id, vehicle_id, track_id, lap_time_ms, review_status, publication_status, verification_tier, submitted_at, created_at, vehicles(make, model), tracks(name)')
-      .eq('driver_id', driverRow.driver_id)
-      .order('created_at', { ascending: false });
-
-    submissionsTbodyEl.innerHTML = '';
-    if (allRunsErr) {
-      submissionsEmptyEl.hidden = false;
-      submissionsEmptyEl.textContent = 'Could not load your submissions yet. Try reloading.';
-    } else if (!allRuns || allRuns.length === 0) {
-      submissionsEmptyEl.hidden = false;
-    } else {
-      submissionsEmptyEl.hidden = true;
-      for (const run of allRuns) {
-        const tr = document.createElement('tr');
-        const info = statusInfo(run);
-        const canWithdraw = run.publication_status === 'hidden';
-        const canAddVideo = run.review_status !== 'rejected' && run.review_status !== 'invalidated'
-          && run.verification_tier !== 'verified';
-        const actionButtons = [
-          canWithdraw ? '<button type="button" class="btn btn-danger withdraw-btn" data-run-id="' + run.run_id + '">Withdraw</button>' : '',
-          canAddVideo ? '<button type="button" class="btn btn-s add-video-btn" data-run-id="' + run.run_id + '">+ Video</button>' : '',
-        ].filter(Boolean).join(' ') || '—';
-        tr.innerHTML = `
-          <td>${vehicleCell(run)}</td>
-          <td>${trackCell(run)}</td>
-          <td>${formatLapTime(run.lap_time_ms)}</td>
-          <td><span class="status-pill ${info.cls}">${info.label}</span></td>
-          <td>${formatDate(run.submitted_at ?? run.created_at)}</td>
-          <td class="actions-cell">${actionButtons}</td>
-        `;
-        submissionsTbodyEl.appendChild(tr);
-      }
-    }
-
-    // My Records: personal best per vehicle, excluding rejected/invalidated
-    // runs (those never were a valid record to begin with).
-    const validRuns = (allRuns ?? []).filter(
-      (r) => r.review_status !== 'rejected' && r.review_status !== 'invalidated'
-    );
-    validRuns.sort((a, b) => a.lap_time_ms - b.lap_time_ms);
-    const bestByVehicle = new Map();
-    for (const run of validRuns) {
-      if (!bestByVehicle.has(run.vehicle_id)) bestByVehicle.set(run.vehicle_id, run);
-    }
-
-    // Rank per vehicle: only meaningful once that vehicle's PB is actually
-    // published (provisional/official), since that's the only data anyone
-    // else can see. Computed against public_leaderboard -- the only public
-    // read of run data (see the view's own comment in the schema) -- by
-    // taking each OTHER driver's best time for that vehicle and counting how
-    // many beat mine. Not deduped server-side, so done here client-side.
-    recordsTbodyEl.innerHTML = '';
-    if (bestByVehicle.size === 0) {
-      recordsEmptyEl.hidden = false;
-    } else {
-      recordsEmptyEl.hidden = true;
-      for (const run of bestByVehicle.values()) {
-        const tr = document.createElement('tr');
-        const isPublished = run.publication_status === 'provisional' || run.publication_status === 'official';
-        let rankCell = '—';
-        if (isPublished) {
-          // Group by driver_id, not the `driver` display label -- several
-          // deleted accounts all show as "Deleted driver" (DEC-0079), and
-          // display names are not unique either.
-          const { data: lbRows } = await sb
-            .from('public_leaderboard')
-            .select('driver_id, lap_time_ms')
-            .eq('vehicle_id', run.vehicle_id)
-            .eq('platform', 'ps5'); // DEC-0073: PS5 board only
-          const bestPerDriver = new Map();
-          for (const row of lbRows ?? []) {
-            const prev = bestPerDriver.get(row.driver_id);
-            if (prev == null || row.lap_time_ms < prev) bestPerDriver.set(row.driver_id, row.lap_time_ms);
-          }
-          const faster = [...bestPerDriver.values()].filter((ms) => ms < run.lap_time_ms).length;
-          rankCell = `#${faster + 1}`;
-        }
-        tr.innerHTML = `
-          <td>${vehicleCell(run)}</td>
-          <td>${formatLapTime(run.lap_time_ms)}</td>
-          <td>${trackCell(run)}</td>
-          <td class="rank-cell">${rankCell !== '—' && leaderboardHref(run) ? `<a class="rec-link" href="${leaderboardHref(run)}" title="Open this vehicle's leaderboard">${rankCell}</a>` : rankCell}</td>
-        `;
-        recordsTbodyEl.appendChild(tr);
-      }
-    }
+  async function init(session: any) {
+    $('acc-auth').hidden = Boolean(session);
+    $('acc-body').hidden = !session;
+    if (!session) return;
+    me = await currentDriverId();
+    if (!me) { msg('Your driver profile is not ready yet — reload the page in a moment.', true); return; }
+    owned = await fetchOwnedList();
+    render();
   }
 
   if (backendConfigured) {
-    const sbInit = getSupabase();
-    sbInit.auth.getSession().then(({ data }) => {
-      currentSession = data?.session ?? null;
-      renderAuthState();
-    });
-    sbInit.auth.onAuthStateChange((_event, session) => {
-      currentSession = session;
-      renderAuthState();
-    });
-
-    submissionsTbodyEl.addEventListener('click', (ev) => {
-      const withdrawBtn = ev.target.closest('.withdraw-btn');
-      if (withdrawBtn) {
-        withdrawRun(withdrawBtn.dataset.runId, withdrawBtn);
-        return;
-      }
-      const videoBtn = ev.target.closest('.add-video-btn');
-      if (videoBtn) {
-        addVideo(videoBtn.dataset.runId, videoBtn);
-      }
-    });
-
-    document.getElementById('discord-signin-btn').addEventListener('click', async () => {
-      const sb = getSupabase();
-      await sb.auth.signInWithOAuth({
-        provider: 'discord',
-        // guilds.join on top of identify+email -- Header.astro's
-        // onAuthStateChange listener (present on every page) picks up
-        // the resulting provider_token and auto-adds the driver to our
-        // Discord server. Scopes are replaced, not extended, by this
-        // option, hence listing identify+email explicitly too.
-        options: { redirectTo: window.location.origin + window.location.pathname + window.location.search, scopes: 'identify email guilds.join' },
-      });
+    const sb = getSupabase();
+    sb.auth.getSession().then(({ data }) => init(data?.session ?? null));
+    sb.auth.onAuthStateChange((ev, s) => { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') init(s); });
+    $('acc-signin').addEventListener('click', () => {
+      sb.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: window.location.origin + window.location.pathname, scopes: 'identify email guilds.join' } });
     });
   }
 </script>
