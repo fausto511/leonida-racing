@@ -97,7 +97,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       <div id="account-menu-dropdown" class="account-dropdown" hidden role="menu">
         <a href={`${base}account/`} role="menuitem">My garage</a>
         <a href={`${base}account/laps/`} role="menuitem">My laps</a>
-        <a href={`${base}account/crew/`} role="menuitem" id="account-menu-crew">My crew</a>
+        <a href={`${base}account/crew/`} role="menuitem" id="account-menu-crew">My crews</a>
         <a href={DISCORD_INVITE_URL} role="menuitem" target="_blank" rel="noopener">Open Discord server</a>
         <a href={`${base}account/settings/`} role="menuitem">Settings</a>
         <!-- Only shown to moderators. Cosmetic: moderator pages and RLS check access themselves. -->
@@ -320,7 +320,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       checkedFor = session.user.id;
       moderatorLinkEl.textContent = 'Moderator';
       moderatorLinkEl.setAttribute('href', `${base}moderator/`);
-      crewLinkEl.textContent = 'My crew';
+      crewLinkEl.textContent = 'My crews';
       // `moderators` is only readable by moderators themselves (RLS).
       const { data, error } = await supabase.from('moderators').select('driver_id').limit(1);
       const isMod = !error && Array.isArray(data) && data.length > 0;
@@ -352,7 +352,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         pending = count ?? 0;
       }
       const total = (inv.count ?? 0) + pending;
-      if (total) crewLinkEl.textContent = `My crew (${total} new)`;
+      if (total) crewLinkEl.textContent = `My crews (${total} new)`;
     }
 
     function renderAuthState(session: any) {

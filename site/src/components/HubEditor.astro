@@ -454,7 +454,7 @@ const base = import.meta.env.BASE_URL;
     if (kind === 'requests') { renderRequestsList(); return; }
     if (kind === 'tracks') { renderTracksList(); return; }
     const rows = kind === 'crews' ? visibleCrews() : visibleEvents();
-    listTitleEl.textContent = kind === 'crews' ? (isMod ? 'Crews' : 'My crew') : (isMod ? 'Events' : 'My events');
+    listTitleEl.textContent = kind === 'crews' ? (isMod ? 'Crews' : 'My crews') : (isMod ? 'Events' : 'My events');
     newBtn.textContent = kind === 'crews' ? '+ New crew' : '+ New event';
     newBtn.hidden = kind === 'crews' ? !isMod : !canCreateEvent();
     listEl.innerHTML = rows.map((r) => {
