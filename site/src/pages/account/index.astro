@@ -49,7 +49,7 @@ const vehicleIndex = [...vehicleOptions]
         <div class="mg-head">
           <div>
             <h2 class="lr-h2 lr-h2-s">Wishlist</h2>
-            <p class="mg-lede">Cars you want next. Only you can see this list. When you buy one, mark it as owned and it moves to My cars.</p>
+            <p class="mg-lede">Cars you want next. Only you can see this list. Add them here or with the heart on any car page. When you buy one, mark it as owned and it moves to My cars.</p>
           </div>
         </div>
         <p class="mg-msg lr-note" id="mg-msg-wish" role="status" hidden></p>
@@ -127,7 +127,6 @@ const vehicleIndex = [...vehicleOptions]
   :global(.mg-slot-plus) { width: 44px; height: 44px; border-radius: 50%; border: 1px solid currentColor; display: grid; place-items: center; font-size: 22px; line-height: 1; }
   :global(.mg-slot strong) { color: var(--lr-text); font-weight: 600; font-size: 15px; }
   @media (max-width: 560px) { :global(.mg-slot) { min-height: 180px; } }
-  :global(.mg-empty) { grid-column: 1 / -1; }
 
   /* picker */
   .mg-picker { width: min(34rem, calc(100vw - 2rem)); max-height: min(40rem, calc(100vh - 3rem)); padding: 0; border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg, 12px); background: var(--gh-surface); color: var(--gh-text); }
@@ -217,9 +216,8 @@ const vehicleIndex = [...vehicleOptions]
     const cars = owned.map((id) => byId.get(id)).filter(Boolean) as V[];
     const wl = wish.map((id) => byId.get(id)).filter(Boolean) as V[];
     $('mg-grid-cars').innerHTML = cars.map((x) => tile(x, 'cars')).join('') + slot('cars', cars.length ? 'Add another car' : 'Add your first car', 'Pick a car you own');
-    $('mg-grid-wish').innerHTML = wl.length
-      ? wl.map((x) => tile(x, 'wishlist')).join('') + slot('wishlist', 'Add a car', 'Pick a car you want')
-      : `<div class="mg-empty lr-empty-panel"><p><strong>Your wishlist is empty.</strong> Tap the heart on any car page to keep it here for later.</p><a class="btn btn-s btn-md" href="${base}cars/">Browse cars</a></div>`;
+    // both lists work the same (Fausto 27.10.): tiles, then the "+" slot that opens the picker
+    $('mg-grid-wish').innerHTML = wl.map((x) => tile(x, 'wishlist')).join('') + slot('wishlist', wl.length ? 'Add another car' : 'Add your first car', 'Pick a car you want');
     $('mg-n-cars').textContent = String(cars.length);
     $('mg-n-wish').textContent = String(wl.length);
     $('mg-own-n').textContent = String(cars.length);
