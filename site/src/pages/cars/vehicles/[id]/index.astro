@@ -76,15 +76,21 @@ const haveRealLaps = vehicleOptions.some((v) => realBest(v.id) != null);
 const sample = !haveRealLaps;
 const submitHref = `${base}time-attack/submit/`;
 const lbHref = `${base}time-attack/gellhorn-international-raceway/?vehicle=${encodeURIComponent(vehicle.id)}#leaderboard`;
-const driverRows = sample ? vehicleRows(sampleEntries, vehicle.id, false).slice(0, GELLHORN_ROWS) : [];
-const driversHtml = driverRows.length
-  ? driverRows.map(({ e, rank }) => driverRowHtml({ rank, driver: e.driver, ms: e.lap_time_ms })).join('') + openRowHtml()
-  : startTileHtml(vehicle.model, submitHref);
-const classRows: ClassRow[] = sample ? sampleClassRows(sampleEntries, classCars.map((v) => v.id)) : classCars.map((v) => ({ id: v.id, ms: realBest(v.id) }));
+// SEO (Fausto 27.10.2026): the HTML only carries real data. Sample rows travel in data-sample attributes
+// and are painted by scripts/vehicle.ts, so crawlers never index fictional drivers or times.
+const driverRows: unknown[] = [];
+const driversHtml = startTileHtml(vehicle.model, submitHref);
+const sampleDriverRows = sample ? vehicleRows(sampleEntries, vehicle.id, false).slice(0, GELLHORN_ROWS) : [];
+const sampleDriversHtml = sampleDriverRows.length ? sampleDriverRows.map(({ e, rank }) => driverRowHtml({ rank, driver: e.driver, ms: e.lap_time_ms })).join('') + openRowHtml() : '';
+const sampleClass: ClassRow[] = sample ? sampleClassRows(sampleEntries, classCars.map((v) => v.id)) : [];
+const classRows: ClassRow[] = classCars.map((v) => ({ id: v.id, ms: realBest(v.id) }));
 // "See all": the class leaderboard at Gellhorn (class filter, Fausto 17.10.)
 const classMoreHref = `${base}time-attack/gellhorn-international-raceway/?class=${encodeURIComponent(cls)}#leaderboard`;
 const classHtml = classRowsHtml(classRows, vehicle.id, classMoreHref);
 const classTimed = classRows.filter((r) => r.ms != null).length;
+const csubFor = (timed: number) => timed < classCars.length ? `${timed} of ${classCars.length} cars have a lap · tap a car to open it` : `Best lap per car · tap a car to open it`;
+const sampleClassHtml = sample ? classRowsHtml(sampleClass, vehicle.id, classMoreHref) : '';
+const sampleCsub = sample ? csubFor(sampleClass.filter((r) => r.ms != null).length) : '';
 
 // ---- Similar cars (Fausto 2026-10-06 scoring) + compare tile ----------------
 const family = vehicle.family ? familyMembers(vehicle.family).filter((v) => v.id !== vehicle.id && v.releaseId).sort(compareGarageOrder) : [];
@@ -102,6 +108,8 @@ const rivalsSimilar = (similarAll.length > 3 ? similarAll.slice(3, 5) : similarA
 const rivals = rivalsLap ?? rivalsSimilar;
 const rivalsSub = rivalsLap ? 'Its closest rivals at Gellhorn' : 'Most similar cars until it has a lap';
 const rivalsHtml = rivals.map((r) => rivalHtml(r.id, r.note, vehicle.id)).join('');
+const sampleRivals = sample ? rivalsFromClass(sampleClass, vehicle.id) : null;
+const sampleRivalsHtml = sampleRivals ? sampleRivals.map((r) => rivalHtml(r.id, r.note, vehicle.id)).join('') : '';
 
 // ---- photo ----------------------------------------------------------------
 const photo = vehicle.photo ? `${base}images/vehicles/${vehicle.id}` : null;
@@ -218,13 +226,13 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <h2 class="lr-h2 vsec-title display">{vehicle.model} at Gellhorn</h2>
           <p class="vsec-sub">Best laps driven in this car, and where it stands in its class.</p>
         </div>
-        <span class="vsec-flag" id="vg-flag" hidden={!sample}>Sample until launch</span>
+        <span class="vsec-flag" id="vg-flag" hidden>Sample until launch</span>
       </div>
       <div class="vg">
         <div class="vg-card">
           <div class="vg-h"><h3>Fastest drivers in this car</h3><p>Gellhorn International Raceway</p></div>
           <div class="vg-cols" id="vg-dhead" hidden={!driverRows.length}><span>#</span><span>Driver</span><span>Lap</span></div>
-          <div class="vg-rows" id="vg-drivers" set:html={driversHtml} />
+          <div class="vg-rows" id="vg-drivers" data-sample={sampleDriversHtml || undefined} set:html={driversHtml} />
           <div class="vg-btns">
             <a class="btn btn-p" href={submitHref} id="vg-set" hidden={!driverRows.length}><Fragment set:html={ico.timer} /><span data-l>Set a Gellhorn time</span></a>
             <a class="btn btn-s" href={lbHref} id="vg-lb" hidden={!driverRows.length}>Full leaderboard</a>
@@ -232,9 +240,9 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           </div>
         </div>
         <div class="vg-card">
-          <div class="vg-h"><h3>{cls} by best lap</h3><p id="vg-csub">{classTimed < classCars.length ? `${classTimed} of ${classCars.length} cars have a lap · tap a car to open it` : `Best lap per car · tap a car to open it`}</p></div>
+          <div class="vg-h"><h3>{cls} by best lap</h3><p id="vg-csub" data-sample={sampleCsub || undefined}>{csubFor(classTimed)}</p></div>
           <div class="vg-cols vg-cols-c"><span>#</span><span>Car</span><span>Gap</span><span>Best lap</span></div>
-          <div class="vg-rows" id="vg-class" data-more={classMoreHref} set:html={classHtml} />
+          <div class="vg-rows" id="vg-class" data-more={classMoreHref} data-sample={sampleClassHtml || undefined} set:html={classHtml} />
           <div class="vg-btns">
             <a class="btn btn-s" href={`${base}cars/compare/`} id="vg-vsleader" data-vs-leader>Compare with the class leader</a>
           </div>
@@ -286,7 +294,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
             <p class="eyebrow">Head to head</p>
             <h3>Compare the {vehicle.model}</h3>
             <p class="vh2h-sub" id="vh2h-sub">{rivalsSub}</p>
-            <div class="vh2h-list" id="vh2h-list" set:html={rivalsHtml} />
+            <div class="vh2h-list" id="vh2h-list" data-sample={sampleRivalsHtml || undefined} set:html={rivalsHtml} />
             <a class="btn btn-s" href={`${base}cars/compare/`} data-pick-any><Fragment set:html={ico.plus} />Pick any car</a>
           </div>
         </div>

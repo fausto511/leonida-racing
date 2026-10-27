@@ -181,8 +181,8 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         </div>
       </div>
       <div class="tband-board">
-        <div class="tband-head"><h3 id="tband-title">Top 5 · overall</h3><span class="muted" id="tband-flag">sample until launch</span></div>
-        <div class="tband-rows" id="tband-rows" set:html={sampleTopHtml} />
+        <div class="tband-head"><h3 id="tband-title">Top 5 · overall</h3><span class="muted" id="tband-flag" hidden>sample until launch</span></div>
+        <div class="tband-rows" id="tband-rows" data-sample={sampleTopHtml} />
         <div class="tband-chips">
           <span class="tband-chips-label">By class</span>
           {TA_CHIPS.map((c) => <a href={`${TA}?class=${classSlug(c)}`} class="chip chip-sm">{c}</a>)}

@@ -97,6 +97,15 @@ async function loadLiveCrews(ownCrewIds: Set<string>) {
 // ---------------------------------------------------------------------------
 // Time Attack band
 // ---------------------------------------------------------------------------
+
+// Sample rows live in data-sample (not crawlable text, SEO 27.10.2026); live rows replace them (renderBand).
+{
+  const rowsEl = document.getElementById('tband-rows');
+  if (rowsEl?.dataset.sample && !rowsEl.innerHTML.trim()) {
+    rowsEl.innerHTML = rowsEl.dataset.sample;
+    const flag = document.getElementById('tband-flag'); if (flag) flag.hidden = false;
+  }
+}
 type RankRow = { scope: string; scope_key: string; rank: number; run_id: string; driver_id: string; driver: string; make: string; model: string; lap_time_ms: number; gap_to_ahead_ms: number | null; classes?: string[] };
 const RANK_COLS = 'scope,scope_key,rank,run_id,driver_id,driver,make,model,lap_time_ms,gap_to_ahead_ms,classes';
 

@@ -270,7 +270,23 @@ function init(root: HTMLElement) {
     $('vg-set')!.querySelector('[data-l]')!.textContent = myRow ? 'Beat your time' : 'Set a Gellhorn time';
   }
 
+  // ---- sample until launch: painted from data-sample (never in the crawlable HTML) ----
+  function showSample() {
+    const drv = $('vg-drivers'), cl = $('vg-class'), cs = $('vg-csub'), rl = $('vh2h-list');
+    if (!drv?.dataset.sample) return;
+    drv.innerHTML = drv.dataset.sample;
+    ($('vg-dhead') as HTMLElement).hidden = false;
+    ($('vg-set') as HTMLElement).hidden = false;
+    ($('vg-lb') as HTMLElement).hidden = false;
+    ($('vg-how') as HTMLElement).hidden = true;
+    if (cl?.dataset.sample) cl.innerHTML = cl.dataset.sample;
+    if (cs?.dataset.sample) cs.textContent = cs.dataset.sample;
+    if (rl?.dataset.sample) { rl.innerHTML = rl.dataset.sample; const sub = $('vh2h-sub'); if (sub) sub.textContent = 'Its closest rivals at Gellhorn'; }
+    $('vg-flag')!.hidden = false;
+  }
+
   // ---- start -----------------------------------------------------------------
+  showSample();
   paintRating();
   if (!backendConfigured) return;
   (async () => {
