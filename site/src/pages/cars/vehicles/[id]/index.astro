@@ -360,7 +360,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vs-ph-logo { position: relative; width: 170px; height: 170px; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-ph); }
   .vs-ph-pill { position: absolute; right: 14px; bottom: 14px; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: var(--lr-dark-80); font-size: 13px; font-weight: 600; }
   .vs-ph-pill .ico { width: 14px; height: 14px; }
-  .vs-panel { position: relative; display: flex; flex-direction: column; min-height: 0; padding: 16px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }
+  .vs-panel { position: relative; display: flex; flex-direction: column; min-height: 0; padding: 16px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
   /* row height comes from the photo only; the panel fills it (DEC-0118) */
   @media (min-width: 1280px) {
     .vs { align-items: stretch; }
@@ -412,7 +412,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
 
   /* ---- Gellhorn ---- */
   .vg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
-  .vg-card { display: flex; flex-direction: column; min-width: 0; padding: 20px 20px 20px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }
+  .vg-card { display: flex; flex-direction: column; min-width: 0; padding: 20px 20px 20px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
   .vg-h h3 { margin: 0; font-size: var(--lr-h3); font-weight: 700; }
   .vg-h p { margin: 2px 0 0; font-size: 14px; color: var(--lr-soft); }
   .vg-cols { display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; margin-top: 14px; padding: 8px 14px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-muted); }
@@ -430,7 +430,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vg-rows :global(.vg-time) { text-align: right; }
   .vg-rows :global(.vg-row.me) { background: var(--lr-raised); border-radius: 6px; color: var(--lr-text); font-weight: 600; }
   .vg-rows :global(.vg-you) { display: inline-flex; margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: var(--lr-pink-fill-hover); color: var(--lr-pink); font-size: 11px; font-weight: 700; font-style: normal; text-transform: uppercase; }
-  .vg-rows :global(.vg-open) { margin-top: 6px; border-top: 1px solid var(--lr-line-strong); color: var(--lr-muted); }
+  .vg-rows :global(.vg-open) { margin-top: 6px; border-top: 1px solid var(--lr-line); color: var(--lr-muted); }
   .vg-rows :global(.vg-crow) { grid-template-columns: 40px 64px 1fr 66px 70px; min-height: 44px; }
   .vg-rows :global(.vg-more) { grid-template-columns: 40px 1fr auto; text-decoration: none; }
   .vg-rows :global(.vg-more:hover) { color: var(--lr-text); }
@@ -460,7 +460,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .va-sources a { color: var(--lr-soft); text-decoration: underline; text-underline-offset: 3px; }
   .va-sources a:hover { color: var(--lr-text); }
   .va-p { margin: 0 0 14px; font-size: 18px; line-height: 1.6; color: var(--lr-text); }
-  .va-card { flex: 1; display: flex; flex-direction: column; justify-content: space-around; margin: 8px 0 0; padding: 4px 20px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }
+  .va-card { flex: 1; display: flex; flex-direction: column; justify-content: space-around; margin: 8px 0 0; padding: 4px 20px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
   .va-card > div { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0; font-size: 15px; }
   .va-card > div + div { border-top: 1px solid var(--lr-line); }
   .va-card dt { color: var(--lr-soft); white-space: nowrap; }
@@ -494,7 +494,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
 
   /* ---- More from ---- */
   .vmore { display: flex; flex-direction: column; gap: 16px; padding-top: 20px; }
-  .vmore-card { display: flex; align-items: center; gap: 18px; padding: 18px 22px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }
+  .vmore-card { display: flex; align-items: center; gap: 18px; padding: 18px 22px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
   .vmore-logo { width: 40px; height: 40px; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-info); flex: none; }
   .vmore-main { flex: 1; min-width: 0; }
   .vmore-t { margin: 0 0 10px; font-size: 17px; }

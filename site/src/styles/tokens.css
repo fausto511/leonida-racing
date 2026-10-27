@@ -21,8 +21,8 @@
   --lr-raised: #1C1C2A;      /* image areas, hover, own row */
   /* lines and borders: 4 levels only (Fausto 23.10.2026, DEC-0172) */
   --lr-line-soft: rgba(200,200,222,.10);    /* fine dividers inside cards */
-  --lr-line: rgba(200,200,222,.16);         /* default border / divider */
-  --lr-line-strong: rgba(200,200,222,.24);  /* inputs, chips, emphasised borders */
+  --lr-line: rgba(200,200,222,.16);         /* everything that only structures: cards, panels, notes, header/band/section lines (DEC-0184) */
+  --lr-line-strong: rgba(200,200,222,.24);  /* controls only: inputs, buttons, chips; also the dashed empty box (DEC-0184) */
   --lr-line-hover: rgba(200,200,222,.40);   /* hover / focus borders */
   --lr-field-h: 44px;            /* every input, select, search and segmented toggle (DEC-0178) */
   --lr-field-focus: var(--lr-orange); /* border colour of a focused field */
@@ -198,7 +198,7 @@ a { color: inherit; }
    .lr-note-warn  orange: worth knowing before you continue (title in orange)
    .lr-note-err   coral: something went wrong (also .lr-note.is-error, set by scripts)
    An optional <strong> first line is the title. No left-bar variant any more. */
-.lr-note { display: block; padding: 12px 14px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
+.lr-note { display: block; padding: 12px 14px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
 .lr-note[hidden] { display: none; }
 .lr-note strong { display: block; margin-bottom: 2px; color: var(--lr-text); font-weight: 600; }
 .lr-note code { color: var(--lr-text); }
@@ -359,7 +359,7 @@ main:focus { outline: none; }
 .lr-band-in.is-compact { min-height: 220px; padding-bottom: 32px; }
 /* Header without a photo (Fausto 22.10.2026, DEC-0152): dark card colour with a soft pink/orange glow,
    so the head stands apart without distracting. Use on every band that has no image. */
-.lr-band-plain { position: relative; border-bottom: 1px solid var(--lr-line-strong); background:
+.lr-band-plain { position: relative; border-bottom: 1px solid var(--lr-line); background:
   radial-gradient(120% 140% at 100% 0%, rgba(242,75,157,.14), transparent 55%),
   radial-gradient(90% 120% at 85% 100%, rgba(255,149,90,.10), transparent 60%),
   var(--lr-card); }

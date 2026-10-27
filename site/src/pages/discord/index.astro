@@ -195,7 +195,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
 
 <style>
   /* ---- band (same build as the class pages, DEC-0130) ---- */
-  .db { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line-strong); }
+  .db { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
   .db picture, .db-bg, .db-t { position: absolute; inset: 0; width: 100%; height: 100%; }
   .db-bg { object-fit: cover; object-position: 60% 45%; }
   .db-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; }
@@ -205,7 +205,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .db-act { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-top: 18px; }
   .dico { width: 20px; height: 20px; fill: currentColor; flex: none; }
   .db-note { font-size: 13px; color: var(--lr-soft); }
-  .glance { flex: none; width: 360px; margin-top: 8px; padding: 18px 18px 12px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
+  .glance { flex: none; width: 360px; margin-top: 8px; padding: 18px 18px 12px; border: 1px solid var(--lr-line); border-radius: 8px; background: rgba(20,20,31,.88); backdrop-filter: blur(6px); }
   .glance-eb { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .gl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 9px 0; border-top: 1px solid var(--lr-line); font-size: 15px; color: var(--lr-soft); }
   .gl-row:first-of-type { border-top: 0; }
@@ -220,7 +220,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .dsec-small { margin: 14px 0 0; font-size: 14px; line-height: 1.55; color: var(--lr-soft); max-width: 760px; }
 
   .areas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-  .area { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 20px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }
+  .area { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 20px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chan { font-size: 13px; font-weight: 600; color: var(--lr-soft); background: var(--lr-raised); border-radius: 4px; padding: 3px 7px; }
   .area-t { margin: 4px 0 0; font-size: var(--lr-h3-s); font-weight: 700; line-height: 1.25; }
@@ -260,13 +260,13 @@ const dash = '<span class="no" aria-label="No">–</span>';
 
   /* ---- steps ---- */
   .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-  .step { display: flex; flex-direction: column; gap: 8px; padding: 20px; border-radius: 8px; background: var(--lr-card); border: 1px solid var(--lr-line-strong); }
+  .step { display: flex; flex-direction: column; gap: 8px; padding: 20px; border-radius: 8px; background: var(--lr-card); border: 1px solid var(--lr-line); }
   /* .step-n: look from .lr-step-n (DEC-0183) */
   .step-t { margin: 6px 0 0; font-size: var(--lr-h3-s); font-weight: 700; }
   .step-p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--lr-soft); flex: 1; }
 
   /* ---- tiers table ---- */
-  .tiers-wrap { overflow-x: auto; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }
+  .tiers-wrap { overflow-x: auto; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
   .tiers { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 560px; }
   .tiers th, .tiers td { padding: 12px 16px; border-top: 1px solid var(--lr-line); text-align: center; }
   .tiers thead th { border-top: 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-soft); }
@@ -278,10 +278,10 @@ const dash = '<span class="no" aria-label="No">–</span>';
 
   /* ---- rules + bot ---- */
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
-  .rules { padding: 22px 24px; border-radius: 8px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); }
+  .rules { padding: 22px 24px; border-radius: 8px; border: 1px solid var(--lr-line); background: var(--lr-card); }
   .rules ul { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 1.5; color: var(--lr-text); }
   .bot > .dsec-eb { margin: 0; } /* the card gap already gives 8px */
-  .bot { display: flex; flex-direction: column; gap: 8px; padding: 22px 24px; border-radius: 8px; border: 1px solid var(--lr-line-strong); background: linear-gradient(140deg, rgba(42,31,158,.35), rgba(177,42,140,.25) 55%, rgba(242,106,61,.18)), var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
+  .bot { display: flex; flex-direction: column; gap: 8px; padding: 22px 24px; border-radius: 8px; border: 1px solid var(--lr-line); background: linear-gradient(140deg, rgba(42,31,158,.35), rgba(177,42,140,.25) 55%, rgba(242,106,61,.18)), var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
   .bot-t { margin: 0; }
   .bot-p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--lr-text); }
   .bot-cmds { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }
