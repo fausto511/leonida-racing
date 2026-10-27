@@ -39,6 +39,7 @@ Vor Beginn der Historie (Einrichtung September 2026):
 - 20261008120000_discord_role_sync.sql
 - 20261008100000_crew_leader_leave_and_delete_crew.sql (am 17.10. aus der SQL-Editor-Datei nachgetragen)
 - 20261020101600_community_tracks_saved_and_ratings.sql (Fausto am 20.10. über den SQL-Editor, nachdem Claudes `apply_migration` abgebrochen wurde; Objekte direkt danach geprüft, DEC-0146)
+- 20261027143900_wishlist_vehicles.sql (Fausto am 27.10. über den SQL-Editor, nachdem Claudes `apply_migration` zweimal abgebrochen wurde – abgelaufene Freigabe, dann unbeantwortete Rückfrage; Objekte direkt danach geprüft, RS-0087; Zeitstempel = Einspielzeit, nur zur Einordnung)
 - 20261008150000_driver_psn_name.sql
 - 20261008160000_vehicle_values_sell_price_tuning_index.sql (am 17.10. aus der SQL-Editor-Datei nachgetragen; Zeitstempel nur zur Einordnung nach 20261008152155)
 - 20261014120000_redesign_phase0.sql
