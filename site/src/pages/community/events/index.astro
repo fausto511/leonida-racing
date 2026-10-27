@@ -89,7 +89,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   .ec-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
   .ec-bg, .ec-o { position: absolute; inset: 0; width: 100%; height: 100%; }
   .ec-bg { object-fit: cover; object-position: 50% 55%; }
-  .ec-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: start; }
+  .ec-hero { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 380px; gap: 40px; align-items: start; }
   /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
   .ec-hero > .ec-tile { align-self: end; margin-top: 0; }
   .ec-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid var(--lr-line); border-radius: 8px; padding: 18px; }
@@ -158,8 +158,9 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
   @media (max-width: 900px) {
     .ec-hero { grid-template-columns: 1fr; gap: 18px; }
       .ec-tile { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 4px 14px; padding: 14px 16px; }
-    .ec-tile .t { grid-column: 1; margin: 0; font-family: var(--gh-font-body); font-size: 16px; font-weight: 700; text-transform: none; }
-    .ec-tile .btn { grid-column: 2; grid-row: 1 / span 2; }
+    .ec-tile .eb { grid-column: 1 / -1; } /* label on its own line, no wrapping next to the button (DEC-0185) */
+    .ec-tile .t { grid-column: 1; grid-row: 2; margin: 0; font-family: var(--gh-font-body); font-size: 16px; font-weight: 700; text-transform: none; }
+    .ec-tile .btn { grid-column: 2; grid-row: 2; }
     .ec-bar { border-bottom: 0; padding-bottom: 0; }
     .tz { display: none; }
     .chips { flex-wrap: nowrap; overflow-x: auto; margin-right: -16px; padding-right: 16px; scrollbar-width: none; }

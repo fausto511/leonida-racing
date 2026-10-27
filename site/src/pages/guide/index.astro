@@ -200,14 +200,14 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   /* ---- band (DEC-0139 standard, T1) ---- */
   .gd-band { position: relative; overflow: hidden; border-bottom: 1px solid var(--lr-line); }
   .gd-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
-  .gd-hero { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 40px; align-items: start; }
+  .gd-hero { display: grid; grid-template-columns: minmax(0,1fr) 380px; gap: 40px; align-items: start; }
   /* Tile sits on the lower edge of the photo band (Fausto 22.10.2026, DEC-0154): text top, tile bottom. */
   .gd-hero > .gd-tile { align-self: end; margin-top: 0; }
   .gd-tile { background: rgba(20,20,31,.88); backdrop-filter: blur(8px); border: 1px solid var(--lr-line); border-radius: 8px; padding: 18px; }
   .gd-tile-eb { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
   .gd-glance { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
   .gd-glance > * { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 6px; border: 1px solid var(--lr-line); background: var(--lr-dark-60); color: var(--lr-text); text-decoration: none; }
-  .gd-glance strong { font-family: var(--gh-font-display); font-size: 30px; font-weight: 800; line-height: 1; color: var(--lr-lime); }
+  .gd-glance strong { font-family: var(--gh-font-display); font-size: 30px; font-weight: 800; line-height: 1; color: var(--lr-text); } /* white like Gellhorn; lime = verified only (DEC-0185) */
   .gd-glance strong.is-date { font-size: 22px; line-height: 30px; color: var(--lr-text); }
   .gd-glance span { font-size: 12px; line-height: 1.3; color: var(--lr-muted); }
 
