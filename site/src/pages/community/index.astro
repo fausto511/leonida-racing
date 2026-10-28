@@ -6,6 +6,8 @@
 // tiles: Events = carmeet11, Crews = crews (2), Tracks = Visual/Racing/hotlap-gir-3 (1). COPY STATUS: mockup placeholders -> Codex review (DEC-0088).
 import Base from '../../layouts/Base.astro';
 import DiscordBand from '../../components/DiscordBand.astro';
+import CommunityAbout from '../../components/CommunityAbout.astro';
+import { communityAbout } from '../../data/community-about';
 import '../../styles/hub.css';
 import { buildEvents, buildCrews, eventRowHtml, eventOpenSpotHtml, crewCardHtml } from '../../data/hub';
 
@@ -104,6 +106,8 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
     <div class="crew-grid cm-crews-grid" id="hub-crew-root" set:html={crewsHtml + startCrew} />
     <a class="btn btn-s cm-more-btn" href={`${base}community/crews/`}>Browse all crews</a>
   </section>
+
+  <CommunityAbout about={communityAbout.community} />
 
   <DiscordBand />
 </Base>

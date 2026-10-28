@@ -1,0 +1,19 @@
+---
+// About block at the bottom of the community pages (same look as the class/manufacturer "About", .tabout).
+import type { CommunityAbout } from '../data/community-about';
+interface Props { about: CommunityAbout }
+const { about } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const withBase = (s: string) => s.replaceAll('{base}', base);
+---
+<section class="wrap cabout" aria-labelledby="cabout-h">
+  <h2 class="lr-h2 cabout-h" id="cabout-h">{about.title}</h2>
+  {about.paras.map((p) => <p set:html={withBase(p)} />)}
+</section>
+
+<style>
+  .cabout { margin-top: var(--lr-gap-sec); padding-top: 32px; border-top: 1px solid var(--lr-line); }
+  .cabout-h { margin: 0 0 12px; }
+  .cabout p { max-width: 820px; margin: 0 0 14px; font-size: 17px; line-height: 1.7; color: var(--lr-text); }
+  .cabout p :global(a) { color: var(--lr-orange); }
+</style>

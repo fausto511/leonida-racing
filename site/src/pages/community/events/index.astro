@@ -6,6 +6,8 @@
 // Discord band. No sub-nav. COPY STATUS: mockup placeholders -> Codex review (DEC-0088).
 import Base from '../../../layouts/Base.astro';
 import DiscordBand from '../../../components/DiscordBand.astro';
+import CommunityAbout from '../../../components/CommunityAbout.astro';
+import { communityAbout } from '../../../data/community-about';
 import '../../../styles/hub.css';
 import { buildEvents, eventRowHtml } from '../../../data/hub';
 import { DISCORD_INVITE_URL } from '../../../data/site';
@@ -79,6 +81,8 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
       </div>
     </aside>
   </div>
+
+  <CommunityAbout about={communityAbout.events} />
 
   <DiscordBand />
 </Base>

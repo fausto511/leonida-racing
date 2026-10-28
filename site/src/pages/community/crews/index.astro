@@ -6,6 +6,8 @@
 // Deep links: ?q=TAG (leaderboard crew tag), #crew-<id> (home). COPY STATUS: mockup placeholders -> Codex review (DEC-0088).
 import Base from '../../../layouts/Base.astro';
 import DiscordBand from '../../../components/DiscordBand.astro';
+import CommunityAbout from '../../../components/CommunityAbout.astro';
+import { communityAbout } from '../../../data/community-about';
 import '../../../styles/hub.css';
 import { CLOSE_SVG } from '../../../data/site';
 import { buildCrews, crewCardHtml, crewRegionLabels } from '../../../data/hub';
@@ -74,6 +76,8 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
     <p class="hub-empty lr-empty" id="crew-empty" hidden>No crews match these filters.</p>
     <div class="cr-more"><button type="button" class="btn btn-s" id="cr-more" hidden>Show more crews</button></div>
   </section>
+
+  <CommunityAbout about={communityAbout.crews} />
 
   <DiscordBand />
 </Base>
