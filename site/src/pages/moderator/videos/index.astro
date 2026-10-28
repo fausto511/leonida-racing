@@ -33,8 +33,15 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
         <label>Display name
           <input type="text" name="display_name" required maxlength="80" placeholder="How it's shown in Discord" />
         </label>
-        <label class="vc-check"><input type="checkbox" name="gta_only" checked /> Only GTA videos <small>title must mention GTA, Vice City or Leonida</small></label>
+        <label class="vc-filterfield">Which videos
+          <select name="filter">
+            <option value="gta" selected>GTA only</option>
+            <option value="cars">GTA + cars &amp; racing</option>
+            <option value="all">All videos</option>
+          </select>
+        </label>
         <button type="submit" class="btn btn-p">Add channel</button>
+        <p class="vc-hint"><strong>GTA only:</strong> title mentions GTA, Vice City or Leonida. <strong>GTA + cars &amp; racing:</strong> also needs a car or racing word, or a car brand like Pegassi or Grotti. Use this for general GTA creators. Keep Rockstar on GTA only, because their trailer titles rarely name cars.</p>
       </form>
       <p id="vc-error" class="vc-error" hidden></p>
       <div id="vc-list"></div>
@@ -54,10 +61,11 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   .vc-form { display: grid; grid-template-columns: 9rem 1fr 14rem; gap: .8rem 1rem; align-items: end; padding: 1rem 1.1rem; margin-bottom: 1.2rem; }
   .vc-form label { display: flex; flex-direction: column; gap: .35rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
   .vc-form input[type="text"], .vc-form select { padding: .55rem .7rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text); font: inherit; font-size: .9rem; text-transform: none; letter-spacing: 0; }
-  .vc-form .vc-check { flex-direction: row; align-items: center; gap: .5rem; text-transform: none; letter-spacing: 0; font-size: .85rem; color: var(--gh-text); grid-column: 1 / 3; }
-  .vc-form .vc-check small { color: var(--gh-muted); font-weight: 400; }
+  .vc-form .vc-filterfield { grid-column: 1 / 3; max-width: 20rem; }
+  .vc-form .vc-hint { grid-column: 1 / -1; margin: 0; color: var(--gh-muted); font-size: .8rem; line-height: 1.5; }
+  .vc-form .vc-hint strong { color: var(--gh-text); }
   .vc-form .btn { justify-self: end; }
-  @media (max-width: 760px) { .vc-form { grid-template-columns: 1fr; } .vc-form .vc-check { grid-column: auto; } .vc-form .btn { justify-self: stretch; } }
+  @media (max-width: 760px) { .vc-form { grid-template-columns: 1fr; } .vc-form .vc-filterfield { grid-column: auto; max-width: none; } .vc-form .btn { justify-self: stretch; } }
   .vc-error { color: var(--lr-coral); font-size: .85rem; }
   :global(.vc-card) { display: grid; grid-template-columns: 1fr auto; gap: .4rem 1rem; align-items: center; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); background: var(--gh-surface); padding: .85rem 1.05rem; margin-bottom: .6rem; }
   :global(.vc-card.is-off) { opacity: .6; }
@@ -65,6 +73,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   :global(.vc-meta) { margin: .15rem 0 0; color: var(--gh-muted); font-size: .8rem; overflow-wrap: anywhere; }
   :global(.vc-warn) { margin: .3rem 0 0; color: var(--lr-coral); font-size: .8rem; }
   :global(.vc-actions) { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
+  :global(.vc-filter) { min-height: 34px; padding: .3rem .55rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text); font: inherit; font-size: .76rem; }
   :global(.vc-actions .btn) { min-height: 34px; font-size: .74rem; padding: .4rem .8rem; }
   :global(.vc-pill) { display: inline-block; padding: .1rem .5rem; border-radius: 999px; border: 1px solid var(--gh-line); font-size: .7rem; font-weight: 700; margin-right: .35rem; }
   @media (max-width: 560px) { :global(.vc-card) { grid-template-columns: 1fr; } :global(.vc-actions) { justify-content: flex-start; } }
@@ -85,6 +94,11 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
 
   function showError(msg: string | null) { $('vc-error').textContent = msg ?? ''; $('vc-error').hidden = !msg; }
 
+  const FILTERS: [string, string][] = [['gta', 'GTA only'], ['cars', 'GTA + cars & racing'], ['all', 'All videos']];
+  const filterOf = (c: any) => (c.cars_only ? 'cars' : c.gta_only ? 'gta' : 'all');
+  const filterLabel = (c: any) => FILTERS.find(([v]) => v === filterOf(c))![1];
+  const filterCols = (v: string) => ({ gta_only: v !== 'all', cars_only: v === 'cars' });
+
   function render() {
     $('vc-list').innerHTML = rows.length ? rows.map((c) => {
       const last = recent[c.channel_id];
@@ -92,12 +106,12 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
       return `<article class="vc-card${c.is_active ? '' : ' is-off'}">
         <div>
           <p class="vc-name"><span class="vc-pill">${c.platform === 'twitch' ? 'Twitch' : 'YouTube'}</span>${esc(c.display_name)}</p>
-          <p class="vc-meta"><a href="${esc(link(c))}" target="_blank" rel="noopener noreferrer">${esc(c.input)} ↗</a> · ${c.gta_only ? 'GTA only' : 'all videos'}${status ? ` · ${status}` : ''}</p>
+          <p class="vc-meta"><a href="${esc(link(c))}" target="_blank" rel="noopener noreferrer">${esc(c.input)} ↗</a> · ${filterLabel(c)}${status ? ` · ${status}` : ''}</p>
           ${last ? `<p class="vc-meta">Last ${last.posted_at ? 'posted' : 'seen'}: ${esc(last.title ?? '')}${last.skipped_reason ? ` (skipped: ${esc(last.skipped_reason)})` : ''}</p>` : ''}
           ${c.last_error ? `<p class="vc-warn">${esc(c.last_error)}</p>` : ''}
         </div>
         <div class="vc-actions">
-          <button type="button" class="btn btn-s" data-act="gta" data-id="${esc(c.channel_id)}">${c.gta_only ? 'Post all videos' : 'GTA only'}</button>
+          <select class="vc-filter" data-id="${esc(c.channel_id)}" aria-label="Which videos">${FILTERS.map(([v, l]) => `<option value="${v}"${filterOf(c) === v ? ' selected' : ''}>${l}</option>`).join('')}</select>
           <button type="button" class="btn btn-s" data-act="pause" data-id="${esc(c.channel_id)}">${c.is_active ? 'Pause' : 'Resume'}</button>
           <button type="button" class="btn btn-s" data-act="delete" data-id="${esc(c.channel_id)}">Remove</button>
         </div>
@@ -129,7 +143,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
     if (platform === 'twitch') input = input.replace(/^.*twitch\.tv\//i, '').replace(/[/?#].*$/, '').toLowerCase();
     if (platform === 'youtube' && /twitch\.tv/i.test(input)) { showError('That looks like a Twitch link. Pick Twitch as the platform.'); return; }
     if (platform === 'twitch' && !/^[a-z0-9_]{3,25}$/.test(input)) { showError('Twitch: enter the channel name or the twitch.tv/name link.'); return; }
-    const { error } = await getSupabase().from('video_channels').insert({ platform, input, display_name, gta_only: f.get('gta_only') === 'on', created_by: me,
+    const { error } = await getSupabase().from('video_channels').insert({ platform, input, display_name, ...filterCols(String(f.get('filter'))), created_by: me,
       external_id: platform === 'twitch' ? input : (input.match(/UC[\w-]{22}/)?.[0] ?? null) });
     if (error) { showError(error.code === '23505' ? 'This channel is already on the list.' : `Couldn't add it: ${error.message}`); return; }
     (ev.target as HTMLFormElement).reset();
@@ -147,9 +161,17 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
     if (b.dataset.act === 'delete') {
       if (!confirm(`Remove ${c.display_name}? Posts already in Discord stay.`)) return;
       res = await sb.from('video_channels').delete().eq('channel_id', c.channel_id);
-    } else if (b.dataset.act === 'pause') res = await sb.from('video_channels').update({ is_active: !c.is_active }).eq('channel_id', c.channel_id);
-    else res = await sb.from('video_channels').update({ gta_only: !c.gta_only }).eq('channel_id', c.channel_id);
+    } else res = await sb.from('video_channels').update({ is_active: !c.is_active }).eq('channel_id', c.channel_id);
     if (res.error) showError(res.error.message);
+    await load();
+  });
+
+  $('vc-list').addEventListener('change', async (ev) => {
+    const sel = (ev.target as HTMLElement).closest<HTMLSelectElement>('select.vc-filter');
+    if (!sel) return;
+    showError(null);
+    const { error } = await getSupabase().from('video_channels').update(filterCols(sel.value)).eq('channel_id', sel.dataset.id!);
+    if (error) showError(error.message);
     await load();
   });
 

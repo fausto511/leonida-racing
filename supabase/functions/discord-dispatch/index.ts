@@ -47,7 +47,7 @@
 // checks the moderators' channel list (video_channels): YouTube via the public channel RSS feed,
 // Twitch via the Helix API (secrets TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET; skipped without them).
 // New items go to every feed with source 'videos'. The first check of a channel only records
-// what is already there (no backlog flood). gta_only: title (or Twitch category) must mention GTA.
+// what is already there (no backlog flood). gta_only: title (or Twitch category) must mention GTA; cars_only: title must also name a car/racing term.
 // COPY STATUS: all user-facing texts are Claude placeholders, Codex review pending.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -770,6 +770,9 @@ async function postEventsPanel(channelId: string) {
 
 // ---------- videos & streams (28.10.2026) ----------
 const GTA_RE = /\b(gta|grand theft auto|vice city|leonida)\b|gta ?(6|vi)\b/i;
+// cars_only: title must also name a car/racing term or an in-game manufacturer (list agreed 28.10.2026;
+// "stay tuned" is excluded, ambiguous brand words like Obey/Emperor/Coil are left out on purpose).
+const CARS_RE = new RegExp("(?<![\\p{L}\\p{N}_])(cars?|vehicles?|supercars?|hypercars?|sports ?cars?|muscle ?cars?|lowriders?|jdm|suvs?|sedans?|coupes?|off-?road|races?|racing|racers?|time attack|lap ?times?|lap records?|raceway|motorsports?|gellhorn|drift(?:s|ing)?|carmeets?|burnouts?|tuning|(?<!stay )tuned|top speed|garages?|driving|handling|annis|bravado|canis|declasse|dinka|dundreary|enus|gallivanter|granforma|grotti|imponte|invetero|karin|lampadati|maibatsu|ocelot|pegassi|pfister|progen|schyster|truffade|[uü]bermacht|vapid|zirconium)(?![\\p{L}\\p{N}_])", "iu");
 const YT_HEADERS = { "Accept-Language": "en", "Cookie": "SOCS=CAI; CONSENT=YES+1", "User-Agent": "Mozilla/5.0 (compatible; LeonidaRacingBot/1.0; +https://leonidaracing.com/discord/bot/)" };
 const xmlText = (s: string) => s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, "&").trim();
 async function resolveYouTube(input: string): Promise<string | null> {
@@ -866,6 +869,7 @@ async function handleVideos() {
         if (!ch.primed && ch.platform === "youtube") reason = "already there when the channel was added";
         else if (it.published_at && Date.now() - new Date(it.published_at).getTime() > 3 * 864e5) reason = "older than 3 days";
         else if (ch.gta_only && !GTA_RE.test(`${it.title} ${it.extra ?? ""}`)) reason = "not about GTA";
+        else if (ch.cars_only && !CARS_RE.test(it.title)) reason = "not about cars or racing";
         const { error: insErr } = await db.from("video_items").insert({ platform: ch.platform, item_id: it.item_id, channel_id: ch.channel_id, title: it.title.slice(0, 300), url: it.url, published_at: it.published_at, skipped_reason: reason });
         if (insErr) continue; // another run got it
         recorded++;
