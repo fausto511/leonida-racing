@@ -40,7 +40,8 @@ const SITE = "https://leonidaracing.com";
 const BOT_GUIDE = `${SITE}/discord/bot/`; // bot info page (DEC-0134)
 // Guild install with bot user + slash commands. Permissions: View Channels, Send Messages, Embed Links, Manage Events + Create Events (server events), Connect (needed to update server events an admin moved to a voice channel).
 const INVITE = `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot+applications.commands&permissions=17600777047040&integration_type=0`;
-const YELLOW = 0xffd74c;
+// Leonida Racing palette (DEC-0173): orange = our embeds
+const ORANGE = 0xff955a;
 const DISCORD_BOT_TOKEN = Deno.env.get("DISCORD_BOT_TOKEN") ?? "";
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 
@@ -85,10 +86,10 @@ const COMMANDS = [
     ] },
   { name: "event", description: "Show one event", dm_permission: false,
     options: [{ type: 3, name: "event", description: "Start typing the event name", required: true, autocomplete: true }] },
-  { name: "car", description: "Vehicle card from The Garage", dm_permission: false,
+  { name: "car", description: "Vehicle card from Leonida Racing", dm_permission: false,
     options: [{ type: 3, name: "vehicle", description: "Start typing a make or model", required: true, autocomplete: true }] },
   { name: "create-event", description: "Create an event on Leonida Racing", dm_permission: false },
-  { name: "compare", description: "Put 2 to 4 cars from The Garage side by side", dm_permission: false,
+  { name: "compare", description: "Put 2 to 4 cars side by side", dm_permission: false,
     options: [1, 2, 3, 4].map((n) => ({ type: 3, name: `car${n}`, description: n <= 2 ? "Start typing a make or model" : "Optional: another car", required: n <= 2, autocomplete: true })) },
   { name: "crew", description: "Crew card from Leonida Racing", dm_permission: false,
     options: [{ type: 3, name: "crew", description: "Start typing a crew name or tag", required: true, autocomplete: true }] },
@@ -110,6 +111,9 @@ const COMMANDS = [
       { type: 1, name: "vehicles", description: "Post new vehicles into a channel", options: [
         { type: 7, name: "channel", description: "Channel for the vehicle posts", required: true, channel_types: [0, 5] },
       ] },
+      { type: 1, name: "videos", description: "Post new GTA videos and live streams from creators we follow", options: [
+        { type: 7, name: "channel", description: "Channel for the video and stream posts", required: true, channel_types: [0, 5] },
+      ] },
       { type: 1, name: "list", description: "Show this server's feeds" },
       { type: 1, name: "edit", description: "Change a feed's options", options: [
         { type: 3, name: "feed", description: "Feed to change", required: true, autocomplete: true },
@@ -123,7 +127,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-10-17.1"; // + /leonida help
+const COMMANDS_VERSION = "2026-10-28.1"; // + /leonida feed videos
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
@@ -219,7 +223,7 @@ async function eventEmbed(e: any) {
     { name: "Going", value: goingValue(e, going, e.registration === "closed"), inline: true },
   ];
   return {
-    author: { name: typeLine(e) }, title: clip(e.title, 256), url: eventUrl(e), color: YELLOW, fields,
+    author: { name: typeLine(e) }, title: clip(e.title, 256), url: eventUrl(e), color: ORANGE, fields,
     image: { url: `${SITE}/images/hub/hub-events-1672.jpg` },
     footer: { text: "Leonida Racing · leonidaracing.com" },
   };
@@ -235,7 +239,7 @@ async function cmdEvents(i: any) {
   }
   const lines = list.map((e) => `**[${clip(e.title, 80)}](${eventUrl(e)})**\n<t:${unix(e.starts_at)}:f> · <t:${unix(e.starts_at)}:R> · ${EVENT_TYPES[e.event_type] ?? e.event_type} · ${hostLabel(e)}`);
   return reply({
-    embeds: [{ title: `Upcoming events${what ? ` · ${what}` : ""}`, description: lines.join("\n\n"), color: YELLOW, footer: { text: "Leonida Racing · times shown in your time zone" } }],
+    embeds: [{ title: `Upcoming events${what ? ` · ${what}` : ""}`, description: lines.join("\n\n"), color: ORANGE, footer: { text: "Leonida Racing · times shown in your time zone" } }],
     components: [row(linkButton("Full calendar", `${SITE}/community/events/`), addButton)],
   });
 }
@@ -261,11 +265,11 @@ async function cmdCar(i: any) {
   if (v.first_seen_in) fields.push({ name: "First seen in", value: v.first_seen_in, inline: false });
   return reply({
     embeds: [{
-      title: `${v.make} ${v.model}`, url, color: YELLOW, fields,
+      title: `${v.make} ${v.model}`, url, color: ORANGE, fields,
       ...(v.has_photo ? { image: { url: `${SITE}/images/vehicles/${v.vehicle_id}-1280.webp` } } : {}),
-      footer: { text: "Leonida Racing · The Garage" },
+      footer: { text: "Leonida Racing · Cars" },
     }],
-    components: [row(linkButton("Open in The Garage", url), addButton)],
+    components: [row(linkButton("Open car page", url), addButton)],
   });
 }
 
@@ -311,9 +315,9 @@ async function cmdCompare(i: any) {
   const url = `${SITE}/cars/compare/?cars=${cars.map((c) => c.vehicle_id).join(",")}`;
   const photos = cars.filter((c) => c.has_photo);
   const embeds: any[] = [{
-    title: clip(cars.map((c) => c.model).join(" vs "), 256), url, color: YELLOW, description: notes, fields,
+    title: clip(cars.map((c) => c.model).join(" vs "), 256), url, color: ORANGE, description: notes, fields,
     ...(photos[0] ? { image: { url: `${SITE}/images/vehicles/${photos[0].vehicle_id}-1280.webp` } } : {}),
-    footer: { text: "Leonida Racing \u00b7 The Garage" },
+    footer: { text: "Leonida Racing \u00b7 Cars" },
   }];
   // Extra embeds with the same url are shown as one image grid on desktop.
   for (const c of photos.slice(1)) embeds.push({ url, image: { url: `${SITE}/images/vehicles/${c.vehicle_id}-1280.webp` } });
@@ -342,12 +346,12 @@ async function cmdCrew(i: any) {
   ];
   if (c.member_count != null) fields.push({ name: "Members", value: String(c.member_count), inline: true });
   if (next) fields.push({ name: "Next event", value: `[${clip(next.title, 80)}](${SITE}/community/events/#event-${next.event_id})\n<t:${unix(next.starts_at)}:f> \u00b7 <t:${unix(next.starts_at)}:R>`, inline: false });
-  const color = /^#[0-9a-f]{6}$/i.test(c.color ?? "") ? parseInt(c.color.slice(1), 16) : YELLOW;
+  const color = /^#[0-9a-f]{6}$/i.test(c.color ?? "") ? parseInt(c.color.slice(1), 16) : ORANGE;
   const dc = safeHttps(c.discord_url), sc = safeHttps(c.social_club_url);
   const buttons = [linkButton("View crew", url), ...(dc ? [linkButton("Crew Discord", dc)] : []), ...(sc ? [linkButton("Social Club", sc)] : []), addButton];
   return reply({
     embeds: [{
-      author: badges ? { name: badges } : undefined, title: clip(`${c.name} [${c.tag}]`, 256), url, color: color || 0x111111,
+      author: badges ? { name: badges } : undefined, title: clip(`${c.name} [${c.tag}]`, 256), url, color: color || 0x0b0b14,
       description: c.description ? clip(String(c.description), 400) : undefined, fields,
       footer: { text: "Leonida Racing \u00b7 Crews" },
     }],
@@ -388,7 +392,7 @@ async function autocomplete(i: any) {
 
 // ---------- feeds (package 2) ----------
 const PERM_ADMIN = 1n << 3n, PERM_MANAGE_GUILD = 1n << 5n, PERM_CREATE_EVENTS = 1n << 44n; // creating scheduled events needs CREATE_EVENTS
-const SOURCES: Record<string, string> = { crew: "Crew", host: "Host profile", public: "Public calendar", vehicles: "New vehicles" };
+const SOURCES: Record<string, string> = { crew: "Crew", host: "Host profile", public: "Public calendar", vehicles: "New vehicles", videos: "Videos & streams" };
 const canManage = (i: any) => { const p = BigInt(i.member?.permissions ?? "0"); return (p & PERM_ADMIN) !== 0n || (p & PERM_MANAGE_GUILD) !== 0n; };
 const discordId = (i: any): string => i.member?.user?.id ?? i.user?.id ?? "";
 const api = (path: string, init: RequestInit = {}) => fetch(`https://discord.com/api/v10${path}`, {
@@ -427,6 +431,7 @@ const profileButton = row(linkButton("Create Your Driver Profile", `${SITE}/acco
 
 function feedLabel(f: any, names: { crews: Record<string, string>; hosts: Record<string, string> }) {
   if (f.source === "vehicles") return "New vehicles";
+  if (f.source === "videos") return "Videos & streams";
   const src = f.source === "crew" ? `Crew: ${names.crews[f.crew_id] ?? "unknown crew"}`
     : f.source === "host" ? `Host: ${names.hosts[f.host_driver_id] ?? "unknown host"}` : "Public calendar";
   const filters = [...(f.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p), ...(f.event_types ?? []).map((t: string) => EVENT_TYPES[t] ?? t)];
@@ -442,7 +447,7 @@ async function feedsWithNames(guildId: string) {
   if (hostIds.length) for (const d of (await db.from("drivers").select("driver_id,display_name").in("driver_id", hostIds)).data ?? []) hosts[d.driver_id] = d.display_name;
   return { feeds, names: { crews, hosts } };
 }
-const optionsLine = (f: any) => f.source === "vehicles" ? "One post per new vehicle, a summary when several arrive at once" : [
+const optionsLine = (f: any) => f.source === "videos" ? "New videos and live streams from the creators Leonida Racing follows" : f.source === "vehicles" ? "One post per new vehicle, a summary when several arrive at once" : [
   `Server events: ${f.native_events ? "on" : "off"}`,
   `Reminders: ${REMINDERS[f.reminders] ?? f.reminders}`,
   ...(f.reminders !== "off" ? [`Mentions: ${f.mention_attendees ? "on" : "off"}`] : []),
@@ -454,10 +459,11 @@ async function cmdLeonida(i: any) {
   switch (subPath(i)) {
     case "feed add": return deferEphemeral(i, () => feedAdd(i));
     case "feed vehicles": return deferEphemeral(i, () => feedAdd(i, "vehicles"));
+    case "feed videos": return deferEphemeral(i, () => feedAdd(i, "videos"));
     case "feed list": return deferEphemeral(i, () => feedList(i));
     case "feed edit": return deferEphemeral(i, () => feedEdit(i));
     case "feed remove": return deferEphemeral(i, () => feedRemove(i));
-    case "help": return ephemeral("Leonida Racing posts GTA VI events, new vehicles and reminders into your channels.\n• **/leonida feed add** – events from the public calendar, your crew or your host profile\n• **/leonida feed vehicles** – new cars from The Garage\n• **/leonida feed list / edit / remove** – manage this server's feeds\nEveryone can use **/events**, **/event**, **/car**, **/compare** and **/crew**.\nSetup guide, permissions and FAQ are on the bot page.", [row(linkButton("Bot guide", BOT_GUIDE))]);
+    case "help": return ephemeral("Leonida Racing brings event cards, reminders and vehicle posts into your channels.\n• **/leonida feed add** — follow the public calendar, your crew or your host profile\n• **/leonida feed vehicles** — follow new additions to Cars\n• **/leonida feed videos** — new GTA videos and live streams from creators we follow\n• **/leonida feed list** — check your feeds and reported problems\n• **/leonida feed edit** or **remove** — change or stop a feed\nEveryone with access to the commands can use **/events**, **/event**, **/car**, **/compare** and **/crew**.\nOpen the bot guide for setup, permissions and FAQs." /* Codex 18.10. */, [row(linkButton("Bot guide", BOT_GUIDE))]);
   }
   return ephemeral("This action isn't available yet.");
 }
@@ -482,10 +488,10 @@ async function feedAdd(i: any, forceSource?: string) {
   };
   let srcText = "the public calendar";
   const notes: string[] = [];
-  if (source === "vehicles") {
-    if (platform || eventType || nativeEvents || reminders !== "off" || mention) notes.push("Event options don't apply to vehicle feeds and were ignored.");
+  if (source === "vehicles" || source === "videos") {
+    if (platform || eventType || nativeEvents || reminders !== "off" || mention) notes.push("Event options don't apply to this feed and were ignored.");
     Object.assign(row_, { platforms: null, event_types: null, native_events: false, reminders: "off", mention_attendees: false });
-    srcText = "new vehicles";
+    srcText = source === "videos" ? "new videos and live streams" : "new vehicles";
   } else if (source === "public") {
     if (!platform) return { content: "Please choose a platform for the public calendar, so the channel only gets events you can join." };
   } else {
@@ -509,7 +515,7 @@ async function feedAdd(i: any, forceSource?: string) {
   const filters = [platform && PLATFORMS[platform], eventType && EVENT_TYPES[eventType]].filter(Boolean).join(" · ");
   const post = await api(`/channels/${channelId}/messages`, { method: "POST", body: JSON.stringify({
     allowed_mentions: { parse: [] },
-    embeds: [{ color: YELLOW, description: source === "vehicles" ? `This channel now receives **${srcText}** via Leonida Racing.` : `This channel now receives events from **${srcText}**${filters ? ` (${filters})` : ""} via Leonida Racing.`, footer: { text: "Leonida Racing · leonidaracing.com" } }],
+    embeds: [{ color: ORANGE, description: source === "vehicles" || source === "videos" ? `This channel now receives **${srcText}** via Leonida Racing.` : `This channel now receives events from **${srcText}**${filters ? ` (${filters})` : ""} via Leonida Racing.`, footer: { text: "Leonida Racing · leonidaracing.com" } }],
   }) });
   if (!post.ok) {
     console.log("feed add test post", post.status, await post.text());
@@ -520,9 +526,9 @@ async function feedAdd(i: any, forceSource?: string) {
     if (error.code === "23505") return { content: `<#${channelId}> already has this feed.` };
     throw error;
   }
-  if (source !== "vehicles" && nativeEvents && (BigInt(i.app_permissions ?? "0") & PERM_CREATE_EVENTS) === 0n) notes.push("Adding to server events is switched on, but Leonida Racing doesn't have the “Create Events” permission yet. Until it does, only the posts in the channel will appear.");
-  if (source !== "vehicles" && mention && reminders === "off") notes.push("Mentions only apply to reminders, which are off for this feed.");
-  return { content: [`Feed added: <#${channelId}> · ${srcText}${source !== "vehicles" && filters ? ` · ${filters}` : ""}.`, ...notes].join("\n"), components: [row(linkButton("Bot guide", BOT_GUIDE))] };
+  if (source !== "vehicles" && source !== "videos" && nativeEvents && (BigInt(i.app_permissions ?? "0") & PERM_CREATE_EVENTS) === 0n) notes.push("Adding to server events is switched on, but Leonida Racing doesn't have the “Create Events” permission yet. Until it does, only the posts in the channel will appear.");
+  if (source !== "vehicles" && source !== "videos" && mention && reminders === "off") notes.push("Mentions only apply to reminders, which are off for this feed.");
+  return { content: [`Feed added: <#${channelId}> · ${srcText}${source !== "vehicles" && source !== "videos" && filters ? ` · ${filters}` : ""}.`, ...notes].join("\n"), components: [row(linkButton("Bot guide", BOT_GUIDE))] };
 }
 
 async function feedList(i: any) {
@@ -541,7 +547,7 @@ async function feedOfGuild(i: any) {
 async function feedEdit(i: any) {
   const f = await feedOfGuild(i);
   if (!f) return { content: "I couldn't find that feed on this server. Pick one from the suggestions while typing." };
-  if (f.source === "vehicles") return { content: "Vehicle feeds have no options to change." };
+  if (f.source === "vehicles" || f.source === "videos") return { content: "This feed has no options to change." };
   const patch: Record<string, unknown> = {};
   for (const [o, col] of [["add_to_server_events", "native_events"], ["reminders", "reminders"], ["mention_attendees", "mention_attendees"]]) { const v = opt(i, o); if (v !== undefined) patch[col] = v; }
   if (!Object.keys(patch).length) return { content: "Nothing to change. Pick at least one option." };
@@ -655,7 +661,7 @@ async function lfgCard(l: any) {
   return {
     content: "", allowed_mentions: { parse: [] },
     embeds: [{
-      title: `${a.emoji} ${a.label} \u00b7 looking for ${LFG_PLAYERS[l.players] ?? l.players}`, color: YELLOW,
+      title: `${a.emoji} ${a.label} \u00b7 looking for ${LFG_PLAYERS[l.players] ?? l.players}`, color: ORANGE,
       description: `Hop in ${l.voice_channel_id ? `<#${l.voice_channel_id}>` : "the voice"} and say hi.\nEnds <t:${unix(l.expires_at)}:R>.`,
       fields: [
         { name: "Host", value: `<@${l.host_discord_id}>${psn?.psn_name ? `\nPSN: ${psn.psn_name}` : ""}`, inline: true },
@@ -673,7 +679,7 @@ async function lfgCard(l: any) {
 }
 const lfgEndingCard = (l: any) => ({
   content: "", allowed_mentions: { parse: [] }, components: [],
-  embeds: [{ title: `${LFG_ACTIVITIES[l.activity]?.label ?? l.activity} \u00b7 wrapping up`, color: 0x5c5c6e, description: "This search is closing. The voice disappears in a minute." }],
+  embeds: [{ title: `${LFG_ACTIVITIES[l.activity]?.label ?? l.activity} \u00b7 wrapping up`, color: 0x55556a, description: "This search is closing. The voice disappears in a minute." }],
 });
 const lfgActivityMenu = () => [{ type: 1, components: [{ type: 3, custom_id: "lfg:act", placeholder: "What are you up for?",
   options: Object.entries(LFG_ACTIVITIES).map(([value, a]) => ({ label: a.label, value })) }] }];

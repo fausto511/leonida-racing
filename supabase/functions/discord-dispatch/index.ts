@@ -43,13 +43,19 @@
 // reports, community tracks) are posted, bundled, to the private #mod-alerts channel (found by name).
 // Events panel (DEC-0137, 17.10.2026): body {"panel": "events", "channel_id": "..."} posts or updates the
 // "Host your own event" panel and pins it. Body {"channels": true} lists the official server's channels.
+// Videos & streams (Fausto 28.10.2026): body {"videos": true} (cron job "discord-videos", every 10 min)
+// checks the moderators' channel list (video_channels): YouTube via the public channel RSS feed,
+// Twitch via the Helix API (secrets TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET; skipped without them).
+// New items go to every feed with source 'videos'. The first check of a channel only records
+// what is already there (no backlog flood). gta_only: title (or Twitch category) must mention GTA.
 // COPY STATUS: all user-facing texts are Claude placeholders, Codex review pending.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const APP_ID = "1552506662533861376";
 const SITE = "https://leonidaracing.com";
 const INVITE = `https://discord.com/oauth2/authorize?client_id=${APP_ID}&scope=bot+applications.commands&permissions=17600777047040&integration_type=0`;
-const YELLOW = 0xffd74c, GREY = 0x5c5c6e;
+// Leonida Racing palette (DEC-0173/0177): orange = our embeds, coral = cancelled, disabled grey = ended
+const ORANGE = 0xff955a, CORAL = 0xff8a8a, GREY = 0x55556a;
 const TOKEN = Deno.env.get("DISCORD_BOT_TOKEN") ?? "";
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 
@@ -218,7 +224,9 @@ async function retention() {
     if (gone.length) { const { count } = await db.from("discord_role_state").delete({ count: "exact" }).in("discord_user_id", gone); states += count ?? 0; }
   }
   const { count: alerts } = await db.from("discord_mod_alerts").delete({ count: "exact" }).lt("created_at", new Date(Date.now() - 30 * 864e5).toISOString());
-  return { roleJobsRemoved: jobs ?? 0, pingStampsRemoved: pings ?? 0, roleStatesRemoved: states, modAlertsRemoved: alerts ?? 0 };
+  // video_items only prevent double posts; RSS shows the last 15 videos, so 90 days is plenty
+  const { count: vids } = await db.from("video_items").delete({ count: "exact" }).lt("created_at", new Date(Date.now() - 90 * 864e5).toISOString());
+  return { roleJobsRemoved: jobs ?? 0, pingStampsRemoved: pings ?? 0, roleStatesRemoved: states, modAlertsRemoved: alerts ?? 0, videoItemsRemoved: vids ?? 0 };
 }
 
 // ---------- new vehicles (DEC-0106) ----------
@@ -238,9 +246,9 @@ function vehicleCard(v: any) {
   if (v.real_life_inspiration) fields.push({ name: "Real-life inspiration", value: v.real_life_inspiration, inline: false });
   if (v.first_seen_in) fields.push({ name: "First seen in", value: v.first_seen_in, inline: false });
   return {
-    embeds: [{ author: { name: "New in The Garage" }, title: `${v.make} ${v.model}`, url, color: YELLOW, fields,
-      ...(v._photo ? { image: { url: vehicleImg(v) } } : {}), footer: { text: "Leonida Racing \u00b7 The Garage" } }],
-    components: [row(linkButton("Open in The Garage", url), linkButton("Add to your server", INVITE))],
+    embeds: [{ author: { name: "New in Cars" }, title: `${v.make} ${v.model}`, url, color: ORANGE, fields,
+      ...(v._photo ? { image: { url: vehicleImg(v) } } : {}), footer: { text: "Leonida Racing \u00b7 Cars" } }],
+    components: [row(linkButton("Open car page", url), linkButton("Add to your server", INVITE))],
     allowed_mentions: { parse: [] },
   };
 }
@@ -250,9 +258,9 @@ function vehicleDigest(vs: any[]) {
   if (vs.length > shown.length) lines.push(`\u2026and ${vs.length - shown.length} more`);
   const pic = vs.find((v) => v._photo);
   return {
-    embeds: [{ author: { name: "New in The Garage" }, title: `${vs.length} new vehicles`, url: `${SITE}/cars/`, color: YELLOW,
-      description: clip(lines.join("\n"), 4000), ...(pic ? { image: { url: vehicleImg(pic) } } : {}), footer: { text: "Leonida Racing \u00b7 The Garage" } }],
-    components: [row(linkButton("Open The Garage", `${SITE}/cars/`), linkButton("Add to your server", INVITE))],
+    embeds: [{ author: { name: "New in Cars" }, title: `${vs.length} new vehicles`, url: `${SITE}/cars/`, color: ORANGE,
+      description: clip(lines.join("\n"), 4000), ...(pic ? { image: { url: vehicleImg(pic) } } : {}), footer: { text: "Leonida Racing \u00b7 Cars" } }],
+    components: [row(linkButton("Browse cars", `${SITE}/cars/`), linkButton("Add to your server", INVITE))],
     allowed_mentions: { parse: [] },
   };
 }
@@ -310,7 +318,7 @@ function card(e: any, going: number) {
   ];
   const embed: Record<string, unknown> = {
     author: { name: typeLine(e) }, title: clip(cancelled ? `Cancelled: ${e.title}` : e.title, 256), url: eventUrl(e),
-    color: cancelled ? GREY : YELLOW, fields,
+    color: cancelled ? CORAL : ORANGE, fields,
     footer: { text: "Leonida Racing · times shown in your time zone" },
   };
   if (cancelled) embed.description = "This event has been cancelled.";
@@ -505,7 +513,7 @@ async function handleEvent(eventId: string) {
 
 async function handleBackfill(feedId: string) {
   const { data: f } = await db.from("discord_feeds").select("*").eq("feed_id", feedId).maybeSingle();
-  if (!f || f.source === "vehicles") return; // vehicle feeds only get vehicles added from now on
+  if (!f || f.source === "vehicles" || f.source === "videos") return; // these only get new items from now on
   const { data: upcoming } = await db.from("hub_events").select(EVENT_COLS).eq("is_published", true).neq("status", "cancelled")
     .gte("starts_at", new Date(Date.now() - 3 * 3600e3).toISOString()).order("starts_at").limit(25);
   const { data: refs } = await db.from("discord_messages").select("event_id").eq("feed_id", feedId);
@@ -722,7 +730,7 @@ async function handleModAlerts(): Promise<number> {
   const links: string[] = [...new Set<string>(rows.map((r: any) => String(r.link)))];
   const res = await discord("POST", `/channels/${channel}/messages`, {
     allowed_mentions: { parse: [] },
-    embeds: [{ color: YELLOW, title: rows.length === 1 ? "Waiting for review" : `${rows.length} things waiting for review`,
+    embeds: [{ color: ORANGE, title: rows.length === 1 ? "Waiting for review" : `${rows.length} things waiting for review`,
       description: clip(rows.map(line).join("\n"), 4000), footer: { text: "Leonida Racing \u00b7 mod alerts" }, timestamp: new Date().toISOString() }],
     components: links.length <= 5 ? [row(...links.map((l) => linkButton(l === "moderator/" ? "Lap times" : l.includes("hub") ? "Hub requests" : l.includes("reports") ? "Lap reports" : l.includes("content") ? "Content reports" : "Open", `${SITE}/${l}`)))] : [],
   });
@@ -736,7 +744,7 @@ async function handleModAlerts(): Promise<number> {
 // ---------- events panel (DEC-0137) ----------
 const EVENTS_PANEL = {
   allowed_mentions: { parse: [] },
-  embeds: [{ color: YELLOW, title: "Host your own event",
+  embeds: [{ color: ORANGE, title: "Host your own event",
     description: "Race, car meet, cruise or league night \u2013 create it on leonidaracing.com. Once it's published, it shows up on this server automatically, with sign-up buttons.\n\n**First time?** Apply as event host on the same page. A mod confirms it within 24 hours, then you can publish.",
     footer: { text: "Leonida Racing \u00b7 no commands needed" } }],
   components: [row(linkButton("Create Event", `${SITE}/account/events/`), linkButton("Event calendar", `${SITE}/community/events/`))],
@@ -760,6 +768,123 @@ async function postEventsPanel(channelId: string) {
   return { ok: true, message_id: msgId, pinned: pin.ok, pinStatus: pin.status };
 }
 
+// ---------- videos & streams (28.10.2026) ----------
+const GTA_RE = /\b(gta|grand theft auto|vice city|leonida)\b|gta ?(6|vi)\b/i;
+const YT_HEADERS = { "Accept-Language": "en", "Cookie": "SOCS=CAI; CONSENT=YES+1", "User-Agent": "Mozilla/5.0 (compatible; LeonidaRacingBot/1.0; +https://leonidaracing.com/discord/bot/)" };
+const xmlText = (s: string) => s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, "&").trim();
+async function resolveYouTube(input: string): Promise<string | null> {
+  const direct = input.match(/(UC[\w-]{22})/);
+  if (direct) return direct[1];
+  let url = input.trim();
+  if (/^@[\w.-]+$/.test(url)) url = `https://www.youtube.com/${url}`;
+  else if (!/^https?:\/\//.test(url)) url = `https://www.youtube.com/@${url.replace(/^@/, "")}`;
+  try {
+    const r = await fetch(url, { headers: YT_HEADERS, redirect: "follow" });
+    if (!r.ok) return null;
+    const html = await r.text();
+    const m = html.match(/"externalId":"(UC[\w-]{22})"/) ?? html.match(/<meta itemprop="identifier" content="(UC[\w-]{22})"/)
+      ?? html.match(/youtube\.com\/channel\/(UC[\w-]{22})/) ?? html.match(/"channelId":"(UC[\w-]{22})"/);
+    return m ? m[1] : null;
+  } catch { return null; }
+}
+type VItem = { item_id: string; title: string; url: string; published_at: string | null; extra?: string };
+async function youtubeItems(channelId: string): Promise<VItem[] | string> {
+  try {
+    const r = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, { headers: YT_HEADERS });
+    if (!r.ok) return `YouTube feed answered ${r.status}`;
+    const xml = await r.text();
+    return [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map(([, e]) => {
+      const id = e.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] ?? "";
+      return { item_id: id, title: xmlText(e.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? ""), url: `https://www.youtube.com/watch?v=${id}`,
+        published_at: e.match(/<published>([^<]+)<\/published>/)?.[1] ?? null };
+    }).filter((x) => x.item_id);
+  } catch (err) { return `YouTube feed failed: ${String(err).slice(0, 120)}`; }
+}
+async function twitchToken(): Promise<string | null> {
+  const id = Deno.env.get("TWITCH_CLIENT_ID"), secret = Deno.env.get("TWITCH_CLIENT_SECRET");
+  if (!id || !secret) return null;
+  const { data } = await db.from("discord_bot_state").select("value").eq("key", "twitch_token").maybeSingle();
+  try { const t = JSON.parse(data?.value ?? "{}"); if (t.token && t.exp > Date.now() + 600e3) return t.token; } catch { /* new one */ }
+  const r = await fetch("https://id.twitch.tv/oauth2/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ client_id: id, client_secret: secret, grant_type: "client_credentials" }) });
+  if (!r.ok) { console.log("twitch token failed", r.status); return null; }
+  const j = await r.json();
+  await db.from("discord_bot_state").upsert({ key: "twitch_token", value: JSON.stringify({ token: j.access_token, exp: Date.now() + j.expires_in * 1000 }), updated_at: new Date().toISOString() });
+  return j.access_token;
+}
+function videoMessage(ch: any, it: VItem, live: boolean) {
+  const head = live ? `\u{1F534} **${ch.display_name}** is live${it.extra ? ` \u00b7 ${it.extra}` : ""}` : `\u{1F3AC} **${ch.display_name}** posted a new video`;
+  return {
+    content: `${head}\n${it.url}`, // Discord shows YouTube's / Twitch's own preview (playable for YouTube)
+    allowed_mentions: { parse: [] },
+    components: [row(linkButton(live ? "Watch live" : "Watch", it.url), linkButton("Add to your server", INVITE))],
+  };
+}
+async function handleVideos() {
+  const { data: chans } = await db.from("video_channels").select("*").eq("is_active", true).order("created_at").limit(200);
+  const { data: feeds } = await db.from("discord_feeds").select("*").eq("source", "videos");
+  if (!chans?.length) return { channels: 0, posted: 0 };
+  let posted = 0, recorded = 0;
+  const twitch = chans.filter((c: any) => c.platform === "twitch");
+  const twitchLive = new Map<string, any>();
+  if (twitch.length) {
+    const token = await twitchToken();
+    if (!token) { for (const c of twitch) await db.from("video_channels").update({ last_error: "Twitch not connected yet (missing TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET)", last_checked_at: new Date().toISOString() }).eq("channel_id", c.channel_id); }
+    else {
+      for (let n = 0; n < twitch.length; n += 100) {
+        const logins = twitch.slice(n, n + 100).map((c: any) => (c.external_id ?? String(c.input).replace(/^.*twitch\.tv\//i, "").replace(/[/?#].*$/, "")).toLowerCase());
+        const r = await fetch(`https://api.twitch.tv/helix/streams?${logins.map((l: string) => `user_login=${encodeURIComponent(l)}`).join("&")}&first=100`,
+          { headers: { "Client-Id": Deno.env.get("TWITCH_CLIENT_ID")!, Authorization: `Bearer ${token}` } });
+        if (!r.ok) { console.log("twitch streams failed", r.status, (await r.text()).slice(0, 200)); if (r.status === 401) await db.from("discord_bot_state").delete().eq("key", "twitch_token"); continue; }
+        for (const s of (await r.json()).data ?? []) twitchLive.set(String(s.user_login).toLowerCase(), s);
+      }
+    }
+  }
+  for (const ch of chans as any[]) {
+    let items: VItem[] = [];
+    let error: string | null = null;
+    const patch: Record<string, unknown> = { last_checked_at: new Date().toISOString() };
+    if (ch.platform === "youtube") {
+      let ext = ch.external_id;
+      if (!ext) { ext = await resolveYouTube(ch.input); if (ext) patch.external_id = ext; }
+      if (!ext) error = "Couldn't find this YouTube channel. Paste the channel link (youtube.com/@name or youtube.com/channel/UC...).";
+      else { const res = await youtubeItems(ext); if (typeof res === "string") error = res; else items = res; }
+    } else {
+      if (!Deno.env.get("TWITCH_CLIENT_ID")) continue; // error already stored above
+      const login = (ch.external_id ?? String(ch.input).replace(/^.*twitch\.tv\//i, "").replace(/[/?#].*$/, "")).toLowerCase();
+      if (!ch.external_id) patch.external_id = login;
+      const s = twitchLive.get(login);
+      if (s) items = [{ item_id: String(s.id), title: String(s.title ?? ""), url: `https://www.twitch.tv/${login}`, published_at: s.started_at ?? null, extra: s.game_name || undefined }];
+    }
+    patch.last_error = error;
+    if (error) { await db.from("video_channels").update(patch).eq("channel_id", ch.channel_id); continue; }
+    if (items.length) {
+      const { data: known } = await db.from("video_items").select("item_id").eq("platform", ch.platform).in("item_id", items.map((i) => i.item_id));
+      const seen = new Set((known ?? []).map((k: any) => k.item_id));
+      for (const it of items.filter((i) => !seen.has(i.item_id)).reverse()) { // oldest first
+        let reason: string | null = null;
+        if (!ch.primed && ch.platform === "youtube") reason = "already there when the channel was added";
+        else if (it.published_at && Date.now() - new Date(it.published_at).getTime() > 3 * 864e5) reason = "older than 3 days";
+        else if (ch.gta_only && !GTA_RE.test(`${it.title} ${it.extra ?? ""}`)) reason = "not about GTA";
+        const { error: insErr } = await db.from("video_items").insert({ platform: ch.platform, item_id: it.item_id, channel_id: ch.channel_id, title: it.title.slice(0, 300), url: it.url, published_at: it.published_at, skipped_reason: reason });
+        if (insErr) continue; // another run got it
+        recorded++;
+        if (reason) continue;
+        for (const f of feeds ?? []) {
+          const r = await discord("POST", `/channels/${f.channel_id}/messages`, videoMessage(ch, it, ch.platform === "twitch"));
+          if (!r.ok) { if (!(await handleGone(f, r))) { await feedError(f, describeFail(r, "post in the channel")); console.log("video post failed", f.feed_id, r.status, r.text.slice(0, 200)); } }
+          else if (f.last_error) await feedError(f, null);
+        }
+        await db.from("video_items").update({ posted_at: new Date().toISOString() }).eq("platform", ch.platform).eq("item_id", it.item_id);
+        posted++;
+      }
+    }
+    if (!ch.primed) patch.primed = true;
+    await db.from("video_channels").update(patch).eq("channel_id", ch.channel_id);
+  }
+  return { channels: chans.length, recorded, posted, feeds: (feeds ?? []).length };
+}
+
 // ---------- entry ----------
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
@@ -768,6 +893,7 @@ Deno.serve(async (req) => {
   if (!TOKEN) return json({ error: "DISCORD_BOT_TOKEN missing" }, 500);
   const body = await req.json().catch(() => ({}));
   if (body?.housekeeping === true) return json(await housekeeping());
+  if (body?.videos === true) return json(await handleVideos());
   if (body?.channels === true) {
     const r = await discord("GET", `/guilds/${ROLE_GUILD}/channels`);
     return json(r.ok ? (r.data as any[]).map((c) => ({ id: c.id, name: c.name, type: c.type, parent: c.parent_id })) : { error: r.status });
