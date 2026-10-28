@@ -111,7 +111,7 @@ export const botFeatures: { title: string; text: string }[] = [
 
 export const botSetup: { title: string; text: string }[] = [
   { title: "Add the bot", text: "Open the bot invite, choose Add to server and select your server. You need Manage Server or Administrator there. Check that the bot can access the channel you want to use." },
-  { title: "Run /leonida feed add", text: "Choose a channel and event source with /leonida feed add. Public-calendar feeds require a platform filter. Crew and host feeds require the matching website role. Add server events and reminders if you want them." },
+  { title: "Run /leonida feed events", text: "Choose a channel and event source with /leonida feed events. Public-calendar feeds require a platform filter. Crew and host feeds require the matching website role. Add server events and reminders if you want them." },
   { title: "Check your feed", text: "The bot posts a setup confirmation in the chosen channel. Matching upcoming events are queued for delivery. Use /leonida feed list to check the feed and any reported problems." },
 ];
 
@@ -122,12 +122,13 @@ export const botCommands: { cmd: string; text: string; who: string }[] = [
   { cmd: "/compare", text: "Put two to four cars side by side, with a link to the full comparison.", who: "Everyone" },
   { cmd: "/crew", text: "Show a crew card: platforms, focus, region, language and next event.", who: "Everyone" },
   { cmd: "/create-event", text: "Open the event form on Leonida Racing. Event publication follows the website’s host and review requirements.", who: "Everyone" },
-  { cmd: "/leonida feed add", text: "Post events from your crew, your host profile or the public calendar into a channel.", who: "Manage Server" },
+  { cmd: "/help", text: "See what the bot can do. Server admins also get the feed setup commands.", who: "Everyone" },
+  { cmd: "/leonida feed events", text: "Post events from your crew, your host profile or the public calendar into a channel.", who: "Manage Server" },
   { cmd: "/leonida feed vehicles", text: "Post new additions to Cars documented in official GTA VI material.", who: "Manage Server" },
+  { cmd: "/leonida feed videos", text: "Post new GTA videos and live streams from the creators Leonida Racing follows.", who: "Manage Server" },
   { cmd: "/leonida feed list", text: "See your feeds and any reported problems.", who: "Manage Server" },
   { cmd: "/leonida feed edit", text: "Change an event feed’s options: server events, reminders, mentions.", who: "Manage Server" },
   { cmd: "/leonida feed remove", text: "Stop a feed. Existing channel posts stay.", who: "Manage Server" },
-  { cmd: "/leonida help", text: "Open the setup help and bot guide.", who: "Manage Server" },
 ];
 
 export const botPerms: { p: string; why: string }[] = [
@@ -139,7 +140,7 @@ export const botPerms: { p: string; why: string }[] = [
 export const botFaq: { q: string; a: string }[] = [
   { q: "Is the bot free?", a: "Yes. Adding it, feeds and every command are free." },
   { q: "The bot shows as offline. Is it broken?", a: "Not necessarily. This bot handles commands through HTTP rather than keeping a permanent Discord connection, so it may appear offline. Try a command; if it fails, check the bot’s channel permissions and any feed errors." },
-  { q: "I can’t see the /leonida commands.", a: "Feed setup and /leonida help require Manage Server or Administrator. Check your server permissions and that the bot was added to the server with commands enabled. Refresh Discord if the command list has not updated." },
+  { q: "I can’t see the /leonida commands.", a: "Feed setup requires Manage Server or Administrator. Check your server permissions and that the bot was added to the server with commands enabled. Refresh Discord if the command list has not updated." },
   { q: "Do I need a Leonida Racing account?", a: "You do not need a website account to set up a public-calendar or vehicle feed, but you do need Manage Server in Discord. A crew or host feed also requires a linked website account with the matching confirmed role. Event sign-ups require a free linked account." },
   { q: "Can I edit an event in Discord?", a: "Title, time and description always come from the website, so change them there. In your server’s Events list you can swap the cover image or move the event to a voice channel; the bot keeps those changes. Changes in Discord never reach the website." },
   { q: "What happens when an event is cancelled?", a: "Once processed, the card is marked Cancelled and its sign-up buttons are removed. If server events are enabled, the bot also removes the linked server event. Missing permissions or API errors can delay updates." },

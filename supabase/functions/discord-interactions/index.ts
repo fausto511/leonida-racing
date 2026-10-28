@@ -8,7 +8,8 @@
 // what the website shows publicly (published events, Garage vehicles). Website + DB stay the single source of truth.
 //
 // Package 1: /events, /event, /car, /create-event.
-// Package 2: /leonida feed add|list|edit|remove (table discord_feeds).
+// Package 2: /leonida feed events|vehicles|videos|list|edit|remove (table discord_feeds; "events" was "add" until 28.10.2026).
+// /help (28.10.2026): for everyone; admins (Manage Server) also get the feed commands.
 // Package 4: I'm in / Withdraw buttons on the cards (rpc discord_rsvp).
 // /ping (DEC-0129, 15.10.2026): official server only (registered as a guild command).
 // Verified Event Host pings Event / Playlist / LFG Pings in #events or #playlists;
@@ -89,14 +90,15 @@ const COMMANDS = [
   { name: "car", description: "Vehicle card from Leonida Racing", dm_permission: false,
     options: [{ type: 3, name: "vehicle", description: "Start typing a make or model", required: true, autocomplete: true }] },
   { name: "create-event", description: "Create an event on Leonida Racing", dm_permission: false },
+  { name: "help", description: "What the Leonida Racing bot can do", dm_permission: false },
   { name: "compare", description: "Put 2 to 4 cars side by side", dm_permission: false,
     options: [1, 2, 3, 4].map((n) => ({ type: 3, name: `car${n}`, description: n <= 2 ? "Start typing a make or model" : "Optional: another car", required: n <= 2, autocomplete: true })) },
   { name: "crew", description: "Crew card from Leonida Racing", dm_permission: false,
     options: [{ type: 3, name: "crew", description: "Start typing a crew name or tag", required: true, autocomplete: true }] },
   // Setup command: always "Manage Server" only (also checked at runtime).
   { name: "leonida", description: "Set up Leonida Racing on this server", default_member_permissions: "32", dm_permission: false,
-    options: [{ type: 1, name: "help", description: "How the Leonida Racing bot works" }, { type: 2, name: "feed", description: "Leonida Racing feeds for this server", options: [
-      { type: 1, name: "add", description: "Post events from a source into a channel", options: [
+    options: [{ type: 2, name: "feed", description: "Leonida Racing feeds for this server", options: [
+      { type: 1, name: "events", description: "Post events from the public calendar, your crew or your host profile into a channel", options: [
         { type: 7, name: "channel", description: "Channel for the event posts", required: true, channel_types: [0, 5] },
         { type: 3, name: "source", description: "Which events", required: true, choices: [
           { name: "My crew", value: "crew" }, { name: "My host profile", value: "host" }, { name: "Public calendar", value: "public" }] },
@@ -127,7 +129,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-10-28.1"; // + /leonida feed videos
+const COMMANDS_VERSION = "2026-10-28.2"; // /help for everyone, feed add -> feed events
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
@@ -359,6 +361,29 @@ async function cmdCrew(i: any) {
   });
 }
 
+// /help (28.10.2026): everyone sees the commands they can use; admins also get the feed setup.
+function cmdHelp(i: any) {
+  const lines = [
+    "**Leonida Racing** brings GTA VI events, cars and crews from leonidaracing.com into Discord.",
+    "",
+    "**Commands for everyone**",
+    "\u2022 **/events** \u2014 upcoming events, filter by type or platform",
+    "\u2022 **/event** \u2014 one event with start time, host and sign-ups",
+    "\u2022 **/car** \u2014 a car's card \u00b7 **/compare** \u2014 2 to 4 cars side by side",
+    "\u2022 **/crew** \u2014 a crew's card with its next event",
+    "\u2022 **/create-event** \u2014 host your own event on the website",
+    "",
+    "**Buttons**",
+    "\u2022 **I'm in / Withdraw** on event cards \u2014 sign up right from Discord (free Leonida Racing account)",
+  ];
+  if (OFFICIAL_GUILD && i.guild_id === OFFICIAL_GUILD) lines.push("\u2022 **Find Players** in #lfg \u2014 start a search with its own voice channel", "\u2022 Role menus in #roles \u2014 pick region, platform, language and pings", "\u2022 **/ping** \u2014 Verified Event Hosts ping the right crowd in #events or #playlists");
+  if (canManage(i)) lines.push("", "**Server setup** (you have Manage Server)",
+    "\u2022 **/leonida feed events** \u2014 post events from the public calendar, your crew or your host profile",
+    "\u2022 **/leonida feed vehicles** \u2014 new cars", "\u2022 **/leonida feed videos** \u2014 new GTA videos and live streams from creators we follow",
+    "\u2022 **/leonida feed list / edit / remove** \u2014 check, change or stop a feed");
+  return ephemeral(lines.join("\n"), [row(linkButton("Bot guide", BOT_GUIDE), addButton)]);
+}
+
 function cmdCreateEvent() {
   return ephemeral("Create your event on Leonida Racing. Once it's published, servers that follow your crew or the public calendar get it automatically.",
     [row(linkButton("Create Event", `${SITE}/account/events/`))]);
@@ -457,13 +482,12 @@ async function cmdLeonida(i: any) {
   if (!i.guild_id) return ephemeral("This command only works on a server.");
   if (!canManage(i)) return ephemeral("Only members with the “Manage Server” permission can set up Leonida Racing feeds.");
   switch (subPath(i)) {
-    case "feed add": return deferEphemeral(i, () => feedAdd(i));
+    case "feed events": return deferEphemeral(i, () => feedAdd(i));
     case "feed vehicles": return deferEphemeral(i, () => feedAdd(i, "vehicles"));
     case "feed videos": return deferEphemeral(i, () => feedAdd(i, "videos"));
     case "feed list": return deferEphemeral(i, () => feedList(i));
     case "feed edit": return deferEphemeral(i, () => feedEdit(i));
     case "feed remove": return deferEphemeral(i, () => feedRemove(i));
-    case "help": return ephemeral("Leonida Racing brings event cards, reminders and vehicle posts into your channels.\n• **/leonida feed add** — follow the public calendar, your crew or your host profile\n• **/leonida feed vehicles** — follow new additions to Cars\n• **/leonida feed videos** — new GTA videos and live streams from creators we follow\n• **/leonida feed list** — check your feeds and reported problems\n• **/leonida feed edit** or **remove** — change or stop a feed\nEveryone with access to the commands can use **/events**, **/event**, **/car**, **/compare** and **/crew**.\nOpen the bot guide for setup, permissions and FAQs." /* Codex 18.10. */, [row(linkButton("Bot guide", BOT_GUIDE))]);
   }
   return ephemeral("This action isn't available yet.");
 }
@@ -533,7 +557,7 @@ async function feedAdd(i: any, forceSource?: string) {
 
 async function feedList(i: any) {
   const { feeds, names } = await feedsWithNames(i.guild_id);
-  if (!feeds.length) return { content: "This server has no Leonida Racing feeds yet. Add one with /leonida feed add." };
+  if (!feeds.length) return { content: "This server has no Leonida Racing feeds yet. Add one with /leonida feed events." };
   const lines = feeds.map((f, n) => `**${n + 1}.** <#${f.channel_id}> · ${feedLabel(f, names)}\n${optionsLine(f)}${f.last_error ? `\n⚠️ Last problem: ${clip(f.last_error, 150)}` : ""}`);
   return { content: clip(lines.join("\n\n"), 1900) };
 }
@@ -803,6 +827,7 @@ Deno.serve(async (req) => {
         case "compare": return await cmdCompare(i);
         case "crew": return await cmdCrew(i);
         case "create-event": return cmdCreateEvent();
+        case "help": return cmdHelp(i);
         case "leonida": return await cmdLeonida(i);
         case "ping": return await cmdPing(i);
       }
