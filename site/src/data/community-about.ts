@@ -17,7 +17,7 @@ export const communityAbout: Record<'community' | 'events' | 'crews', CommunityA
     paras: [
       'A race puts you on the grid. <a href="{base}time-attack/gellhorn-international-raceway/">Time Attack</a> gives you a clock to chase. Leagues bring drivers back for the next round, while car meets and cruises leave more room to enjoy the builds and the company. The event calendar brings those plans together, with start times shown in your local time so you can spend less time converting time zones.',
       'Every event card shows who’s hosting and what the night involves. Spot still open? Hit “I’m in.” Share it with the drivers you want next to you.',
-      'Got an evening of your own in mind? Apply to <a href="{base}account/events/">become a host</a> through your account. Hosts enter and publish their own events, from a relaxed cruise to a grid that expects everyone to know the braking point.',
+      'Got an evening of your own in mind? Apply to <a href="{base}account/events/">become a host</a> through your account. Hosts enter and publish their own events, from a relaxed cruise to a grid that expects everyone to know the braking point. Your event goes into a public calendar with its own link to share, instead of getting lost in a group chat.',
     ],
   },
   crews: {
@@ -25,7 +25,7 @@ export const communityAbout: Record<'community' | 'events' | 'crews', CommunityA
     paras: [
       'Some crews live for <a href="{base}community/events/">league nights</a>. Others would rather put a meet together, trade builds, or take the long way across Leonida. Look through the crew profiles for the people, language, and driving interests that fit you. Each listing brings a crew’s tag, color, and members together, with a leader and any commissioners helping run things.',
       'Open crews: hit “Join Crew” and you’re in. “Request Invite” sends a request for the crew to review. Official crews are run by us or by the original creators; Featured ones are picked by our team. None of them are run or endorsed by Rockstar.',
-      'Already have a group you drive with? <a href="{base}account/crew/">Start a crew</a> through your account and submit its profile for moderation. Give other drivers a useful picture of what you enjoy and how you play. A matching tag is a start; enjoying the same kind of night is what matters.',
+      'Already have a group you drive with? <a href="{base}account/crew/">Start a crew</a> through your account and submit its profile for moderation. Plenty of good crews never make it past their own group chat; a listing here puts yours in front of drivers who are looking for exactly that. A matching tag is a start; enjoying the same kind of night is what matters.',
     ],
   },
 };
