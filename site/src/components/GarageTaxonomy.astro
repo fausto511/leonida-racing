@@ -394,10 +394,13 @@ const more = custom
   .tm-t { font-size: 19px; font-weight: 700; line-height: 1.25; }
   .tm-s { font-size: 15px; line-height: 1.45; color: var(--lr-soft); }
   .tm-a { margin-top: 6px; }
-  .tabout { margin-top: var(--lr-gap-sec); padding-top: 32px; border-top: 1px solid var(--lr-line); }
+  /* About (DEC-0191, Fausto 28.10.): full width; divider line with 32px above and below = 64px section gap (DEC-0179) */
+  .tabout { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--lr-line); }
   .tabout-h { margin: 0 0 12px; }
-  .tabout p { max-width: 820px; margin: 0 0 14px; font-size: 17px; line-height: 1.7; color: var(--lr-text); }
-  .tlinks { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; margin-top: 40px; padding-top: 32px; padding-bottom: 32px; border-top: 1px solid var(--lr-line); }
+  .tabout p { margin: 0 0 14px; font-size: 17px; line-height: 1.7; color: var(--lr-text); }
+  .tabout p:last-child { margin-bottom: 0; }
+  .tlinks { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; margin-top: 32px; padding-top: 32px; padding-bottom: 32px; border-top: 1px solid var(--lr-line); }
+  @media (max-width: 760px) { .tabout, .tlinks { margin-top: 24px; padding-top: 24px; } }
   .tls { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 15px; }
   .tls a, .tls > span { color: var(--lr-text); text-decoration: none; }
   .tls a:hover { color: var(--lr-orange); }

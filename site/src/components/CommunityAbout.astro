@@ -1,5 +1,5 @@
 ---
-// About block at the bottom of the community pages (same look as the class/manufacturer "About", .tabout).
+// About block at the bottom of the community pages; same look as the class/manufacturer "About" (.tabout, DEC-0191).
 import type { CommunityAbout } from '../data/community-about';
 interface Props { about: CommunityAbout }
 const { about } = Astro.props;
@@ -12,8 +12,14 @@ const withBase = (s: string) => s.replaceAll('{base}', base);
 </section>
 
 <style>
-  .cabout { margin-top: var(--lr-gap-sec); padding-top: 32px; border-top: 1px solid var(--lr-line); }
+  /* Text section at the bottom (DEC-0191, Fausto 28.10.): full width; a divider line splits the
+     64px section gap (DEC-0179) into 32 above and 32 below; 64px down to the Discord band. */
+  .cabout { margin-top: 32px; padding-top: 32px; padding-bottom: var(--lr-gap-sec); border-top: 1px solid var(--lr-line); }
   .cabout-h { margin: 0 0 12px; }
-  .cabout p { max-width: 820px; margin: 0 0 14px; font-size: 17px; line-height: 1.7; color: var(--lr-text); }
+  .cabout p { margin: 0 0 14px; font-size: 17px; line-height: 1.7; color: var(--lr-text); }
+  .cabout p:last-child { margin-bottom: 0; }
   .cabout p :global(a) { color: var(--lr-orange); }
+  /* the section above ends at its content, the gap comes from here */
+  :global(.wrap:has(+ .cabout)) { padding-bottom: 0 !important; }
+  @media (max-width: 760px) { .cabout { margin-top: 24px; padding-top: 24px; } }
 </style>
