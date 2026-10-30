@@ -431,3 +431,5 @@ svg[viewBox="0 0 24 24"] :is(path, circle, rect, line, polyline, polygon, ellips
 .lr-star { display: inline-block; width: 1em; height: 1em; vertical-align: -.125em; flex: none; fill: currentColor; }
 :where(button):has(> .lr-star:only-child) { display: inline-grid; place-items: center; }
 .ico-discord, .ico-discord svg { color: var(--lr-discord); fill: var(--lr-discord); }
+/* Units (DEC-0197): both values are in the page, <html data-units> picks one. No JS = imperial. */
+html[data-units="metric"] .u-imp, html:not([data-units="metric"]) .u-met { display: none; }

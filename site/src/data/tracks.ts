@@ -4,6 +4,7 @@
 // One renderer, used at build time (flagged samples) and at runtime (live rows).
 import { esc } from './hub';
 import { STAR_SVG } from './site';
+import { lengthHtml } from './units';
 
 export type TrackLayout = 'circuit' | 'point-to-point';
 // PLACEHOLDER list (GTA Online race types) until GTA VI's race types are
@@ -52,7 +53,7 @@ const iconUsers = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" s
 const iconRoute = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>';
 
 export const kmToMi = (km: number) => km * 0.621371;
-const fmtLen = (km: number) => `${km.toLocaleString('en-US', { maximumFractionDigits: 1 })} km · ${kmToMi(km).toLocaleString('en-US', { maximumFractionDigits: 1 })} mi`;
+// DEC-0197: one unit, the one chosen for the site (both in the markup, CSS shows one)
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 
 const iconSave = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
@@ -88,7 +89,7 @@ export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; previe
     <h3 class="tr-title">${esc(t.title)}</h3>
     ${t.creator_name ? `<p class="tr-by">by <strong>${esc(t.creator_name)}</strong></p>` : ''}
     <p class="tr-facts">
-      <span>${iconRoute}${esc(fmtLen(t.length_km))}</span>
+      <span>${iconRoute}${lengthHtml(t.length_km)}</span>
       <span>${iconUsers}${esc(players)} players</span>
       <span class="tr-classes">${t.vehicle_classes.map(esc).join(' · ')}</span>
     </p>

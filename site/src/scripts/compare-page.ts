@@ -8,6 +8,7 @@ import { getSelected, setSelectedList } from './compare';
 import { bubble, hideBubble } from './bubble';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
 import { lapTime } from '../data/leaderboard';
+import { speedHtml, speedText, currentUnits } from '../data/units';
 import { CLOSE_SVG, STAR_SVG } from '../data/site';
 // check icon instead of the ✓ glyph (DEC-0158)
 const CHECK_SVG = '<svg class="cp-ck" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
@@ -146,7 +147,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     const list = cars();
     const box = $('cp-take');
     if (list.length < 2) { box.innerHTML = ''; return; }
-    const v = verdict(list);
+    const v = verdict(list, (mph) => speedText(Math.round(mph), currentUnits()));
     const rules = `<div class="tk-rules" id="tk-rules" hidden><b>How we judge</b><ul>
 <li>Only our stock Gellhorn reference lap and the in-game price count. Community laps depend on the driver, so they never decide.</li>
 <li>Best value: a car that is at most ${(VALUE_MAX_SLOWER_MS / 1000).toFixed(1)} s slower than the fastest pick and at least ${Math.round(VALUE_MIN_CHEAPER * 100)} % cheaper. Faster and cheaper at once is a clear pick.</li>
@@ -204,7 +205,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
         const x = mine.get(c.id);
         return x ? { m: lapTime(x.ms), s: `#${x.rank} in this car`, mine: true } : { m: `<a class="tv-link" href="${base}time-attack/submit/">Set a time →</a>`, raw: 'none' };
       } } as Row] : []),
-      { label: 'Top speed', sub: 'Stock', dir: 'max', cells: (c) => c.speed != null ? { m: `${Math.round(c.speed)} mph`, v: c.speed } : { m: tb('Measured after launch', 'After launch'), raw: 'mal', tba: true } },
+      { label: 'Top speed', sub: 'Stock', dir: 'max', cells: (c) => c.speed != null ? { m: speedHtml(Math.round(c.speed)), raw: String(Math.round(c.speed)), v: c.speed } : { m: tb('Measured after launch', 'After launch'), raw: 'mal', tba: true } },
     ];
     const price: Row[] = [
       { label: 'Price', dir: 'min', cells: (c) => c.price != null
@@ -303,6 +304,9 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
         : `<div class="lock"><div class="lock-m"><h3>Suggestions unlock with prices and lap times</h3><p>We will suggest ${esc(cls)} cars that are about as fast as your pick but clearly cheaper. Until then, browse the class.</p></div><a class="btn btn-s" href="${base}cars/?class=${encodeURIComponent(cls)}">All ${esc(cls)} cars</a></div>`;
     box.innerHTML = `<div><p class="cp-eb">Cheaper alternatives</p>${left}</div><div><p class="cp-eb">Value map</p><div class="vmap"><div class="vmap-h"><span>${esc(cls)} cars · price vs. Gellhorn reference lap (stock)</span><span>Higher = faster</span></div>${mapSvg(cls, list, alts.map((a) => a.car))}</div></div>`;
   }
+
+  // units switch in the footer (DEC-0197): the sentence in "Our take" is plain text, so redraw
+  document.addEventListener('lr-units', () => renderTake());
 
   function render() {
     renderStrip(); renderTake(); renderTable(); renderBottom();

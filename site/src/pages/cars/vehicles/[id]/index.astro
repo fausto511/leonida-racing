@@ -8,6 +8,7 @@ import Base from '../../../../layouts/Base.astro';
 import CarCard from '../../../../components/CarCard.astro';
 import { MAKES_WITHOUT_LOGO, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs } from '../../../../data/vehicles';
 import { groupedTitles } from '../../../../data/gta-titles';
+import { speedHtml } from '../../../../data/units';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
 import { vehicleSources } from '../../../../data/vehicle-sources';
 import { vehicleSeeAlso } from '../../../../data/vehicle-see-also';
@@ -194,7 +195,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           </div>
           <div class="vt">
             <span class="vt-l">Top speed</span>
-            <b class:list={['vt-v tnum', { 'is-tba': speed == null }]}>{speed != null ? `${speed} mph` : 'TBA'}</b>
+            <b class:list={['vt-v tnum', { 'is-tba': speed == null }]}>{speed != null ? <Fragment set:html={speedHtml(speed)} /> : 'TBA'}</b>
             <span class="vt-s">{speedRank != null ? `#${speedRank} of ${classCars.length} in ${cls}` : 'Measured after launch'}</span>
           </div>
           <div class="vt" id="vt-lap">

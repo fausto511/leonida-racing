@@ -185,7 +185,7 @@ const base = import.meta.env.BASE_URL;
               <label class="span2">Track name *<input type="text" name="title" maxlength="60" required /></label>
               <label class="span2">Social Club link * <small>the job's page on Social Club — we check the details there</small><input type="url" name="social_club_url" placeholder="https://socialclub.rockstargames.com/job/…" required /></label>
               <label>Layout *<select name="layout">{Object.entries(layoutLabels).map(([k, v]) => <option value={k}>{v}</option>)}</select></label>
-              <label>Length (km) * <small>as shown on Social Club</small><input type="number" name="length_km" min="0.1" max="500" step="0.01" required /></label>
+              <label>Length * <small>as shown on Social Club, in km or miles</small><span class="len-in"><input type="number" name="length_km" min="0.1" max="500" step="0.01" required /><select name="length_unit" aria-label="Length unit"><option value="km">km</option><option value="mi">mi</option></select></span></label>
               <label>Players from *<input type="number" name="players_min" min="1" max="64" step="1" value="2" required /></label>
               <label>Players up to *<input type="number" name="players_max" min="1" max="64" step="1" value="16" required /></label>
               <fieldset class="span2"><legend>Race type * <small>one or more</small></legend>
@@ -287,6 +287,8 @@ const base = import.meta.env.BASE_URL;
   @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
   .dist-note { margin: 0; font-size: .82rem; line-height: 1.5; color: var(--gh-muted); }
   .span2 { grid-column: 1 / -1; }
+  /* track length: number + unit side by side (DEC-0197) */
+  .len-in { display: grid; grid-template-columns: minmax(0, 1fr) 84px; gap: 8px; }
   .hc-form label, .hc-form legend { display: flex; flex-direction: column; gap: .35rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
   .hc-form small { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--gh-muted); opacity: .8; }
   .hc-form input[type="text"], .hc-form input[type="url"], .hc-form input[type="number"], .hc-form input[type="datetime-local"], .hc-form select, .hc-form textarea {
@@ -418,6 +420,7 @@ const base = import.meta.env.BASE_URL;
   import { ACTIVE_PLATFORMS } from '../data/platforms';
   import { languageLabel } from '../data/languages';
   import { trackRowHtml, type CommunityTrack } from '../data/tracks';
+  import { MI_PER_KM, currentUnits } from '../data/units';
   // DEC-0073: only active platforms can be saved; PS5 is always set while it is the only one.
   const platformsFrom = (fd: FormData) => {
     const picked = (fd.getAll('platforms') as string[]).filter((p) => (ACTIVE_PLATFORMS as readonly string[]).includes(p as never));
@@ -1165,6 +1168,7 @@ const base = import.meta.env.BASE_URL;
 
   // ------------------------------------------------------------ track form (RS-0045)
   const tf = trackForm.elements as any;
+  let lenUnit = 'km'; // unit the length field currently shows (DEC-0197)
   const trackUrlOk = (u: string) => /^https:\/\/socialclub\.rockstargames\.com\//.test(u);
 
   function renderTracksList() {
@@ -1192,7 +1196,8 @@ const base = import.meta.env.BASE_URL;
       vehicle_classes: fd.getAll('vehicle_classes').map(String),
       players_min: Math.round(num('players_min')),
       players_max: Math.round(num('players_max')),
-      length_km: Math.round(num('length_km') * 100) / 100,
+      // entered in km or miles (DEC-0197), always stored in km
+      length_km: Math.round((fd.get('length_unit') === 'mi' ? num('length_km') / MI_PER_KM : num('length_km')) * 100) / 100,
       is_published: fd.get('is_published') === 'on',
       review_note: blank(fd.get('review_note')),
     };
@@ -1209,7 +1214,7 @@ const base = import.meta.env.BASE_URL;
     return bad;
   }
   const trackFieldHelp: Record<string, string> = {
-    title: 'track name (2–60 characters)', social_club_url: 'Social Club link (https://socialclub.rockstargames.com/…)', length_km: 'length in km (up to 500)',
+    title: 'track name (2–60 characters)', social_club_url: 'Social Club link (https://socialclub.rockstargames.com/…)', length_km: 'length (up to 500 km / 310 mi)',
     players_min: 'players from (1–64)', players_max: 'players up to (1–64, not less than "from")', race_types: 'pick at least one race type', vehicle_classes: 'pick at least one vehicle class',
   };
 
@@ -1232,6 +1237,11 @@ const base = import.meta.env.BASE_URL;
     $('track-form-title').textContent = row ? `Edit: ${row.title}` : 'New track';
     const r = row ?? { layout: 'circuit', players_min: 2, players_max: 16, race_types: [], vehicle_classes: [] };
     for (const k of ['title', 'social_club_url', 'layout', 'length_km', 'players_min', 'players_max', 'review_note']) tf[k].value = r[k] ?? '';
+    // length in the site's units (DEC-0197); stored value is km
+    tf.length_unit.value = currentUnits() === 'imperial' ? 'mi' : 'km';
+    lenUnit = tf.length_unit.value;
+    if (lenUnit === 'mi' && r.length_km) tf.length_km.value = String(Math.round(Number(r.length_km) * MI_PER_KM * 100) / 100);
+    tf.length_km.max = lenUnit === 'mi' ? '310.68' : '500';
     tf.is_published.checked = Boolean(r.is_published);
     trackForm.querySelectorAll<HTMLInputElement>('input[name="race_types"]').forEach((i) => (i.checked = (r.race_types ?? []).includes(i.value)));
     trackForm.querySelectorAll<HTMLInputElement>('input[name="vehicle_classes"]').forEach((i) => (i.checked = (r.vehicle_classes ?? []).includes(i.value)));
@@ -1247,6 +1257,13 @@ const base = import.meta.env.BASE_URL;
     renderTrackPreview();
     renderList();
   }
+  // switching km <-> mi converts the number, so the length stays the same
+  tf.length_unit.addEventListener('change', () => {
+    const to = tf.length_unit.value; const v = Number(tf.length_km.value);
+    if (v > 0 && to !== lenUnit) tf.length_km.value = String(Math.round((to === 'mi' ? v * MI_PER_KM : v / MI_PER_KM) * 100) / 100);
+    tf.length_km.max = to === 'mi' ? '310.68' : '500';
+    lenUnit = to;
+  });
   trackForm.addEventListener('input', renderTrackPreview);
   trackForm.addEventListener('change', renderTrackPreview);
 

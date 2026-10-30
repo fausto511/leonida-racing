@@ -5,6 +5,7 @@
 // the account removes all personal data, reviewed times stay as "Deleted driver".
 import Base from '../../../layouts/Base.astro';
 import AccountHead from '../../../components/AccountHead.astro';
+import UnitsSwitch from '../../../components/UnitsSwitch.astro';
 ---
 <Base
   title="Settings — My Account"
@@ -39,6 +40,18 @@ import AccountHead from '../../../components/AccountHead.astro';
           </div>
           <div class="set-acts"><button type="button" id="save-name-btn" class="btn btn-p">Save</button></div>
           <p id="settings-msg" class="lr-note set-msg" role="status" hidden></p>
+        </div>
+      </section>
+
+      <!-- DEC-0197: units for the whole site; same switch as in the footer. Texts: Claude placeholders for Codex -->
+      <section>
+        <h2 class="lr-h2 lr-h2-s set-h">Units</h2>
+        <div class="set-card set-row">
+          <div class="set-field">
+            <span class="set-label">Speed and distance</span>
+            <small class="set-hint">Chosen from your device's time zone until you change it here or in the footer. Saved in this browser.</small>
+          </div>
+          <UnitsSwitch label="Speed and distance" />
         </div>
       </section>
 

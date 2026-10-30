@@ -12,7 +12,7 @@
 import Base from '../../../layouts/Base.astro';
 import DiscordBand from '../../../components/DiscordBand.astro';
 import { rankings, rankingEntries, rankingIndexable, RANKING_MIN_ENTRIES } from '../../../data/rankings';
-import { formatVehicleValue, valueSourceLabels, bandVehicle, type VehicleOption } from '../../../data/vehicles';
+import { formatVehicleValueHtml, valueSourceLabels, bandVehicle, type VehicleOption } from '../../../data/vehicles';
 import { classPages } from '../../../data/garage-taxonomy';
 import { releaseById } from '../../../data/releases';
 
@@ -107,7 +107,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
         <div class="gl-row gl-cov"><span>Cars ranked</span><b class="tnum">{entries.length} of {r.scope.length}</b>
           <span class="mbar" aria-hidden="true"><i style={`width:${pct}%`}></i></span></div>
         <div class="gl-row"><span>{topLabel}</span>{top
-          ? <b><a href={`${base}cars/vehicles/${top.vehicle.id}/`}>{top.vehicle.model}</a>{' · '}<span class="tnum">{formatVehicleValue(top.value)}</span></b>
+          ? <b><a href={`${base}cars/vehicles/${top.vehicle.id}/`}>{top.vehicle.model}</a>{' · '}<span class="tnum" set:html={formatVehicleValueHtml(top.value)} /></b>
           : <b class="is-tba">{isPrice ? 'No price yet' : 'No result yet'}</b>}</div>
         <div class="gl-row"><span>Values</span><b>{measuredAs}</b></div>
         <p class="gl-note">Coverage is based on revealed cars listed in our database for this ranking.</p>
@@ -141,7 +141,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
                   <td class="c-pos tnum">{i + 1}</td>
                   <td><a class="rk-car" href={`${base}cars/vehicles/${e.vehicle.id}/`}><span class="rk-logo"><img src={logo(e.vehicle)} alt="" width="30" height="30" loading="lazy" /></span><span class="rk-nm"><small>{e.vehicle.make}</small><b>{e.vehicle.model}</b></span></a></td>
                   <td class="c-cls">{e.vehicle.classes[0]}</td>
-                  <td class="c-val tnum">{formatVehicleValue(e.value)}</td>
+                  <td class="c-val tnum" set:html={formatVehicleValueHtml(e.value)} />
                   <td class="c-src">{source(e)}</td>
                 </tr>
               ))}

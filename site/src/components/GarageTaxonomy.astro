@@ -10,6 +10,7 @@ import CarsBrowser from './CarsBrowser.astro';
 import { compareGarageOrder, vehicleOptions, vehicleValues, fastestGellhornLapMs, bandVehicle, type VehicleOption } from '../data/vehicles';
 import { classPages, manufacturerPages, classSlug, type TaxonomyPage } from '../data/garage-taxonomy';
 import { lapTime } from '../data/leaderboard';
+import { speedHtml } from '../data/units';
 import { taxonomyCopy } from '../data/taxonomy-copy';
 import { LAUNCH_DATE, LAUNCH_AT } from '../data/launch';
 import '../styles/garage-tile.css';
@@ -194,7 +195,7 @@ const more = custom
           ? <b><a href={`${base}cars/vehicles/${fastest.id}/`}>{shortName(fastest)}</a>{' · '}<span class="tnum">{lapTime(lapOf(fastest)!)}</span></b>
           : <b class="is-tba">{noLap}</b>}</div>
         <div class="gl-row"><span>Highest top speed</span>{topSpeed
-          ? <b><a href={`${base}cars/vehicles/${topSpeed.id}/`}>{shortName(topSpeed)}</a>{' · '}<span class="tnum">{speedOf(topSpeed)} mph</span></b>
+          ? <b><a href={`${base}cars/vehicles/${topSpeed.id}/`}>{shortName(topSpeed)}</a>{' · '}<span class="tnum" set:html={speedHtml(speedOf(topSpeed)!)} /></b>
           : <b class="is-tba">{noSpeed}</b>}</div>
         <a class="gl-row gl-garage" id="garage-tile" data-glance href={`${base}account/`}>
           <span>In your garage</span><span class="arrow gt-cta" id="gt-cta">Log in to save cars →</span>

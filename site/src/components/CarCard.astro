@@ -6,6 +6,7 @@
 // COPY STATUS: "TBA" / "No Gellhorn lap yet" are Claude placeholders -> Codex (DEC-0088).
 import { vehicleValues, type VehicleOption } from '../data/vehicles';
 import { lapTime } from '../data/leaderboard';
+import { speedHtml } from '../data/units';
 
 interface Props {
   vehicle: VehicleOption;
@@ -58,7 +59,7 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     <div class="vc-brand"><img src={`${base}images/logos/${v.logoSlug}-gta-6-logo.svg`} alt="" width="20" height="20" loading="lazy" />{v.make}</div>
     <a href={href} class="vc-name">{v.model}</a>
     <div class="vc-stats">
-      <span class:list={[{ 'vc-tba': !price }]}>{price ? fmtPrice(price) : 'Price TBA'}</span>{' · '}<span class:list={[{ 'vc-tba': !speed }]}>{speed ? `${speed} mph` : 'Top speed TBA'}</span>
+      <span class:list={[{ 'vc-tba': !price }]}>{price ? fmtPrice(price) : 'Price TBA'}</span>{' · '}<span class:list={[{ 'vc-tba': !speed }]}>{speed ? <Fragment set:html={speedHtml(speed)} /> : 'Top speed TBA'}</span>
     </div>
     {cars && acq && <div class="vc-edition">{acq}</div>}
     <div class="vc-based">{v.realLifeInspiration ? `Based on ${v.realLifeInspiration}` : ' '}</div>

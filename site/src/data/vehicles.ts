@@ -45,6 +45,7 @@ export interface VehicleOption {
 // vehicles.generated.json is written by site/scripts/fetch-vehicles.mjs before
 // every CI build; edit vehicles in Moderator > Vehicles, never in this file.
 import generated from './vehicles.generated.json';
+import { speedHtml } from './units';
 
 interface GeneratedVehicle {
   vehicle_id: string; make: string; model: string; manufacturer_logo_slug: string; classes: string[];
@@ -168,6 +169,11 @@ export function formatVehicleValue(v: VehicleValue): string {
   if (v.metric === 'top_speed_mph') return `${v.value.toFixed(1)} mph`;
   const ms = Math.round(v.value); const m = Math.floor(ms / 60000); const s = (ms % 60000) / 1000;
   return `${m}:${s.toFixed(3).padStart(6, '0')}`;
+}
+/** same as formatVehicleValue, but speeds in both units (DEC-0197; render with set:html) */
+export function formatVehicleValueHtml(v: VehicleValue): string {
+  if (v.metric === 'top_speed_mph') return speedHtml(v.value, 1, 1);
+  return formatVehicleValue(v).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]!));
 }
 
 // Makes without a usable logo yet (RS-0073: GranForma, only a small emblem in

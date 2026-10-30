@@ -9,6 +9,7 @@ import { backendConfigured, getSupabase } from './supabase-client';
 import { CLOSE_SVG } from '../data/site';
 import { releaseById } from '../data/releases';
 import { lapTime } from '../data/leaderboard';
+import { speedText, currentUnits, KMH_PER_MPH } from '../data/units';
 
 const PAGE = 24;
 const MAX_COMPARE = 4;
@@ -49,7 +50,7 @@ const AVAIL: Record<string, string> = { base: 'Base game', 'pre-order': 'Pre-Ord
 const ORIGIN: Record<string, string> = { new: 'New in GTA VI', returning: 'Returning' };
 const SEP = ' · ';
 const fmtMoney = (n: number) => (n >= 1e6 ? `$${+(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `$${+(n / 1e3).toFixed(1)}k` : `$${Math.round(n)}`);
-const FMT: Record<RangeKey, (n: number) => string> = { price: fmtMoney, speed: (n) => `${Math.round(n)} mph`, lap: (n) => lapTime(Math.round(n)) };
+const FMT: Record<RangeKey, (n: number) => string> = { price: fmtMoney, speed: (n) => speedText(n, currentUnits(), 0, 0), lap: (n) => lapTime(Math.round(n)) };
 const RANGE_NAME: Record<RangeKey, string> = { price: 'Price', speed: 'Top speed', lap: 'Lap' };
 function valueLabel(g: Group, v: string) {
   if (g === 'make') return makeName.get(v) ?? v;
@@ -192,6 +193,8 @@ function toPos(k: RangeKey, v: number | null, end: 'lo' | 'hi'): number {
 function niceValue(k: RangeKey, v: number): number {
   if (k === 'price') { const p = Math.pow(10, Math.floor(Math.log10(v)) - 1); return Math.round(v / p) * p; }
   if (k === 'lap') return Math.round(v / 100) * 100;
+  // top speed snaps to whole km/h or whole mph, whichever the visitor reads (DEC-0197); stored in mph
+  if (k === 'speed' && currentUnits() === 'metric') return Math.round(v * KMH_PER_MPH) / KMH_PER_MPH;
   return Math.round(v);
 }
 /** paint one slider block from a range */
@@ -299,7 +302,8 @@ function render() {
 }
 
 // ---- URL --------------------------------------------------------------------
-const rangeParam = (r: Range) => `${r[0] ?? ''}~${r[1] ?? ''}`;
+const r2 = (x: number | null) => (x == null ? '' : String(Math.round(x * 100) / 100)); // km/h steps are fractional mph
+const rangeParam = (r: Range) => `${r2(r[0])}~${r2(r[1])}`;
 function syncUrl() {
   const p = new URLSearchParams();
   if (state.q) p.set('q', state.q);
@@ -586,6 +590,8 @@ document.addEventListener('keydown', (e) => {
 // ---- start ------------------------------------------------------------------
 readUrl();
 render();
+// units switch in the footer (DEC-0197): chips and slider labels are text, so redraw them
+document.addEventListener('lr-units', () => { render(); paintDraft(); });
 renderCompare();
 onCompareChange(renderCompare); // the compare bar (CompareBar.astro) can remove cars too
 loadOwned();

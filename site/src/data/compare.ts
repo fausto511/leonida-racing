@@ -38,7 +38,8 @@ export interface Verdict {
 }
 
 /** null = not enough data (price + reference lap for at least 2 cars) */
-export function verdict(cars: CmpCar[]): Verdict | null {
+/** fmtSpeed: how the top speed reads in the sentence (DEC-0197: the page passes the chosen units) */
+export function verdict(cars: CmpCar[], fmtSpeed: (mph: number) => string = (mph) => `${Math.round(mph)} mph`): Verdict | null {
   const priced = cars.filter((c) => c.price != null && c.ref != null);
   if (priced.length < 2) return null;
   const withRef = cars.filter((c) => c.ref != null).sort((a, b) => a.ref! - b.ref!);
@@ -70,7 +71,7 @@ export function verdict(cars: CmpCar[]): Verdict | null {
   if (withSpeed.length >= 2) {
     const s = withSpeed[0];
     const gap = s.ref != null && fastest.ref != null && s.id !== fastest.id ? ` but ${secs(s.ref - fastest.ref!)} slower around Gellhorn` : '';
-    speed = { car: s, text: `${Math.round(s.speed!)} mph, the highest here${gap}.` };
+    speed = { car: s, text: `${fmtSpeed(s.speed!)}, the highest here${gap}.` };
   }
   return { value, valueNote, fastest: fastestOut, speed };
 }

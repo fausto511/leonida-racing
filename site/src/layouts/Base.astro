@@ -10,6 +10,7 @@ import Footer from '../components/Footer.astro';
 import CompareBar from '../components/CompareBar.astro';
 
 import { SITE_NAME, SITE_TAGLINE } from '../data/site';
+import { IMPERIAL_TZ_SRC, UNITS_KEY } from '../data/units';
 // Preconnect to Supabase so live data (events, crews, leaderboard) starts sooner (Lighthouse network tree, 22.10.).
 const supabaseOrigin = (() => { try { return new URL(import.meta.env.PUBLIC_SUPABASE_URL ?? '').origin; } catch { return null; } })();
 
@@ -69,6 +70,17 @@ if (breadcrumbs.length) {
 <html lang="en" style="background:#0B0B14;color-scheme:dark">
   <head>
     <meta charset="utf-8" />
+    <!-- Units before first paint (DEC-0197): own choice in this browser, else from the device's time zone. -->
+    <script is:inline define:vars={{ tzSrc: IMPERIAL_TZ_SRC, unitsKey: UNITS_KEY }}>
+      var u = null;
+      try { u = localStorage.getItem(unitsKey); } catch (e) {}
+      if (u !== 'metric' && u !== 'imperial') {
+        var tz = '';
+        try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+        u = new RegExp(tzSrc).test(tz) ? 'imperial' : 'metric';
+      }
+      document.documentElement.setAttribute('data-units', u);
+    </script>
     <link rel="preload" href={fontDisplayUrl} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={fontTextUrl} as="font" type="font/woff2" crossorigin />
     {supabaseOrigin && <link rel="preconnect" href={supabaseOrigin} crossorigin />}
