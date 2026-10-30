@@ -15,7 +15,7 @@ import { vehicleOptions } from './vehicles';
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
 // Bump on EVERY content change to the Guide (visible as "Last updated" + Article dateModified) — Fausto 27.10.2026.
-export const GUIDE_UPDATED = '2026-10-27';
+export const GUIDE_UPDATED = '2026-10-30';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -127,6 +127,9 @@ const R_SUPPORT = 'https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy
 const EXT_LOOK = 'https://www.youtube.com/watch?v=tJbzMqJGH4k';
 const TSA = 'https://www.thesixthaxis.com/2026/06/24/gta-6-ultimate-edition-pre-order-bonus-and-vintage-vice-city-pack-revealed/';
 const FAMITSU = 'https://www.famitsu.com/article/202608/85753';
+const EDGE_GR = 'https://www.gamesradar.com/edge/gtavi-cover/';
+const GTAVICE_EDGE = 'https://www.gtavice.net/news/gta-vi-edge-preview-reveals-huge-new-details-on-gameplay-police-relationships-and-more';
+const VCH_EDGE = 'https://www.vicecityhustle.com/news/gta-6-edge-430-k9-units-cash-gated-story';
 const DAZED = 'https://www.dazeddigital.com/life-culture/article/70859/1/gta-6-grand-theft-auto-vi-rockstar-exclusive-deep-dive-game-unparalleled-world';
 
 /** hrefs are relative to the site base. */
@@ -200,13 +203,17 @@ export const guideSections: GuideSection[] = [
     paragraphs: [
       `Stealing a parked car in GTA VI is no longer described as the same one-button job for every vehicle. Nelson says some cars remain inaccessible early in the story until Jason or Lucia obtains the right tools. Drivers can still be carjacked, but unattended vehicles may demand a quieter or more technical approach.`,
       `Check the car before you commit. Nelson describes a <strong>phone scanner</strong> that shows whether a vehicle is locked, has an alarm, or carries a tracker. It also shows what the car is worth at a Pay ’n’ Spray or specialty car fence and how much it would cost to register it for yourself. A Slim Jim works for one car; another needs a key cloner.`,
+      `Edge identifies <strong>WAINK</strong> as the app listing cars wanted by fences, including their security and tracking details. The fence usually has equipment to block a tracker’s signal at the drop-off.`,
       `Stolen cars can be sold or registered as personal vehicles. Nelson told Famitsu that an unregistered stolen vehicle remains available for a while, appears with a gray radar icon, and disappears when the game is restarted. Registration makes the vehicle yours, while the complete list of eligible vehicles and the later-game ownership limit remain unannounced.`,
       `An <strong>advanced tracker</strong> can turn a slow getaway into a police alert: Nelson says it pings your location when you drive too slowly. Condition matters at delivery, too. A car fence pays less for damage, and you can repair the car before selling it.`,
+      `The driver can be a problem before you even reach the ignition. Edge describes motorists who flee and others who fight back with a weapon. An owner can also report a theft after you have driven away.`,
       `A car fence can also point you toward a specific job. In the demo, one has supplied a door code for a <strong>police impound lot</strong>, where Jason and Lucia can steal the requested car together or alone. This is a theft job, not an explanation of how to recover your own impounded vehicle. Nelson also says there are points in the story where earning money through activities such as stealing and selling cars is needed to advance the mission flow.`,
     ],
     sources: [
       { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration.' },
       { label: 'Famitsu — Exclusive Interview with Rob Nelson', url: FAMITSU, note: 'August 28, 2026: vehicle registration, three initial storage spaces, purchasable garages, and the persistence rules for unregistered stolen vehicles.' },
+      { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: WAINK, car security, trackers, and delivery condition. Checked October 30, 2026.' },
+      { label: 'Vice City Hustle — GTA 6 Edge: K9 Units, Scooter Bros, Cash Gates', url: VCH_EDGE, note: 'October 29, 2026: secondary Edge coverage of WAINK, personal-vehicle delivery, and fuel. Not a separate demonstration. Checked October 30, 2026.' },
     ],
   },
   {
@@ -218,9 +225,11 @@ export const guideSections: GuideSection[] = [
       `The police response depends on what has been reported and what officers know. Nelson says a crime needs a witness or an alarm to reach the law. Police can know your appearance, your clothes, your vehicle, and that Jason and Lucia are traveling together. In the demonstration, switching to a car they do not recognize lowers their perception of you; splitting the pair up can help, too.`,
       `A baseball cap is not a complete escape plan. Nelson puts on glasses and a cap, then points out that the police still know his outfit. The same limitation applies to a haircut. A clothing store or a spare outfit from your personal vehicle gives you another option; in the shopping demonstration, he says buying and wearing a new outfit removes his current heat.`,
       `Sometimes the better exit is on foot. Nelson says a three-star pursuit in the city can be difficult to shake in a car unless it is very fast or you have a sports bike. His usual recommendation in that situation is to leave the streets and use the alleys. You can also wait for an area’s police search to die down instead of driving straight back into it.`,
+      `Edge’s pursuit adds spike strips laid across the road.`,
     ],
     sources: [
       { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration: reporting, recognition, outfit changes, vehicle swaps, splitting up, and escape advice.' },
+      { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: spike strips during a police pursuit. Checked October 30, 2026.' },
     ],
   },
   {
@@ -232,7 +241,7 @@ export const guideSections: GuideSection[] = [
       `GTA VI has personal vehicles and expandable garage storage. Nelson told Famitsu that players begin with room for three vehicles. If all three spaces are occupied, one vehicle must be sold before another can be registered as personal. Buying garages around the map expands that capacity. Rockstar has not announced the later-game ownership limit, whether individual properties have different capacities, or how freely vehicles can be moved between garages.`,
       `Rockstar’s Ultimate Edition includes Jason’s Safehouse Vehicles and the Ganado Retro Build. It also includes the <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a> with a garage, while the Vintage Vice City Pack includes the <a href="{base}cars/vehicles/vapid-stanier-55/">’55 Vapid Stanier Sedan</a> with a garage.`,
       `The accompanying Rockstar press material identifies those locations as Paradise Garage in Watson Bay and Shore Court Garage near Ocean Beach. They are personal garages, not confirmed tuning shops.`,
-      `Your personal vehicle also acts as a mobile stash: Nelson says you can call it at any time and keep spare outfits and purchased weapons in the back. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1069s" rel="noopener">17:49</a> in the Extended Look, Lucia changes her outfit while sitting in the car with Jason.`,
+      `Your personal vehicle also acts as a mobile stash for spare outfits and purchased weapons. Edge names the delivery service <strong>Scooter Bros</strong>: pay through the phone app, and a driver brings your car in seconds before leaving on a scooter. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1069s" rel="noopener">17:49</a> in the Extended Look, Lucia changes her outfit while sitting in the car with Jason.`,
     ],
     sources: [
       { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration.' },
@@ -241,6 +250,8 @@ export const guideSections: GuideSection[] = [
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: '“Jason’s Safehouse Vehicles,” “Ganado Retro Build,” and “’67 Vapid Dominator Buggy.”' },
       { label: 'Rockstar Support — GTA VI Platforms, Editions, and Versions', url: R_SUPPORT, note: 'edition and pre-order package contents.' },
       { label: 'TheSixthAxis — GTA VI Ultimate Edition and Vintage Vice City Pack', url: TSA, note: 'June 24, 2026: documentation of Rockstar’s accompanying descriptions for Paradise Garage and Shore Court Garage.' },
+      { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: Scooter Bros delivery and vehicle storage. Checked October 30, 2026.' },
+      { label: 'Vice City Hustle — GTA 6 Edge: K9 Units, Scooter Bros, Cash Gates', url: VCH_EDGE, note: 'October 29, 2026: secondary Edge coverage of WAINK, personal-vehicle delivery, and fuel. Not a separate demonstration. Checked October 30, 2026.' },
     ],
   },
   {
@@ -248,13 +259,16 @@ export const guideSections: GuideSection[] = [
     title: 'Fuel, EV Charging, and Gas-Station Repairs',
     status: 'Reported from a Rockstar Demo',
     paragraphs: [
-      `A getaway car may need a little more planning than a full throttle pedal. <strong>GamesRadar</strong> reports TGG’s account of a Rockstar North preview: a gas-station interaction offered refueling or vehicle repair, with the fill-up estimated at around ten seconds. That timing is the previewer’s estimate, not a fixed specification for every car.`,
-      `<strong>PC Gamer</strong> also reports EV charging in the same preview account. These are reported demo features, not a published rulebook for fuel consumption, charging speed, prices, or race conditions. Whether the systems can be disabled or apply differently across missions and racing remains unresolved.`,
+      `Edge reports a fuel gauge and engine-health readout for every vehicle. Refueling is described as quick, with cars covering long distances between stops.`,
+      `<strong>GamesRadar</strong> reports TGG’s account of a Rockstar North preview: a gas-station interaction offered refueling or vehicle repair, with the fill-up estimated at around ten seconds. That timing is the previewer’s estimate, not a fixed specification for every car.`,
+      `<strong>PC Gamer</strong> also reports EV charging in the same preview account. Charging and gas-station repairs are reported demo features, not a published rulebook for fuel consumption, charging speed, prices, or race conditions. Whether the systems can be disabled or apply differently across missions and racing remains unresolved.`,
     ],
     sources: [
       { label: 'TGG — GTA 6: Vehicles Work Differently Now', url: 'https://www.youtube.com/watch?v=5PEKC28azRU&t=558s', note: 'Original creator report; chapter “Fuel & EV Charging” starts at 9:18.' },
       { label: 'GamesRadar — Rockstar boss on GTA 6’s refueling system', url: 'https://www.gamesradar.com/games/grand-theft-auto/rockstar-boss-says-well-see-what-people-say-about-gta-6s-controversial-refueling-system-but-thinks-its-so-fast-that-you-cant-complain/', note: 'September 3, 2026: explicitly attributes the refuel/repair interaction and approximate timing to TGG’s preview account.' },
       { label: 'PC Gamer — GTA 6’s reported refuelling action', url: 'https://www.pcgamer.com/games/grand-theft-auto/grand-theft-auto-6s-controversial-refuelling-action-reportedly-takes-about-10-seconds-to-perform-which-rockstars-co-studio-head-says-is-pretty-fast-for-a-fill-up/', note: 'September 5, 2026: reports charging and refueling via TGG/GamesRadar; the same report chain, not another independent demo.' },
+      { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: fuel and engine-health displays; qualitative refueling description. Checked October 30, 2026.' },
+      { label: 'Vice City Hustle — GTA 6 Edge: K9 Units, Scooter Bros, Cash Gates', url: VCH_EDGE, note: 'October 29, 2026: secondary Edge coverage of WAINK, personal-vehicle delivery, and fuel. Not a separate demonstration. Checked October 30, 2026.' },
     ],
   },
   {
@@ -297,8 +311,9 @@ export const guideSections: GuideSection[] = [
     paragraphs: [
       `GTA VI includes structured circuit, off-road, and street racing. Rockstar’s Extended Look shows all three with an active race HUD rather than presenting them only as background scenes.`,
       `At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1061s" rel="noopener">17:41</a>, 16 cars race two laps on a wet paved circuit, with position, lap, and timing information on screen. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1115s" rel="noopener">18:35</a>, a 12-entry field of quads, motorcycles, and off-road pickups runs two laps on a dirt course. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1221s" rel="noopener">20:21</a>, a six-car street race tracks progress as a percentage. These are the events shown, not a fixed rule for grid sizes or race distances.`,
+      `Racing can interrupt a getaway, too. Edge describes a customized 4x4 with purple underglow challenging Nelson’s station wagon on the highway. Its occupants keep taunting him until he accepts, and a passenger hangs out of the window as they pull ahead.`,
       `The footage shows organized racing, but the full event rules remain open: entry requirements, eligible classes, rewards, championships, and online support. A race shown in the story-game presentation does not establish a GTA VI Online racing mode.`,
-      `The same street race shows a nitrous boost in use. Which cars can run it, how you get it, and whether every event allows it are separate questions the footage does not answer.`,
+      `Nitrous returns in the street race shown in the Extended Look. Which cars can run it, how you get it, and whether every event allows it are separate questions the footage does not answer.`,
       `For your own car comparisons, keep <strong>top speed</strong> separate from <strong>lap time</strong>. One measures speed; the other includes the corners, braking, and acceleration of a particular route. Our car rankings distinguish reference testing from driver leaderboard results. Compare the same tuning category and read the test conditions before treating two times as equivalent.`,
     ],
     cta: { label: 'Go to Time Attack', href: 'time-attack/gellhorn-international-raceway/' },
@@ -306,6 +321,9 @@ export const guideSections: GuideSection[] = [
       { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: `${EXT_LOOK}&t=1061s`, note: 'August 27, 2026: circuit race at approximately 17:41–17:47, off-road race at 18:35–18:39, and street race with nitrous at 20:21–20:25.' },
       { label: 'Rockstar Newswire — An Extended Look', url: 'https://www.rockstargames.com/newswire/article/4k138k8okkk483/grand-theft-auto-vi-an-extended-look-now-playing', note: 'confirms the presentation was captured entirely from in-game PlayStation 5 footage.' },
       { label: 'Game Informer — GTA VI: Welcome to Leonida', url: 'https://gameinformer.com/feature/2026/09/29/grand-theft-auto-vi-welcome-to-leonida', note: 'September 29, 2026: Rockstar cover story additionally identifies street and off-road racing among the activities; full article access may require a subscription.' },
+      { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: highway challenge involving a customized 4x4 with purple underglow. Checked October 30, 2026.' },
+      { label: 'GTAVice — Edge preview and print-only Phil Hooker Q&A', url: GTAVICE_EDGE, note: 'October 29, 2026: secondary coverage, including attributed excerpts from the print-only Q&A and the reported 23-station total. Checked October 30, 2026.' },
+      { label: 'Rockstar Support — GTAV Title Update 1.47 Notes', url: 'https://support.rockstargames.com/articles/6clYU1N1kk9hiaBceBu81d/gtav-title-update-1-47-notes-ps4-xbox-one-pc', note: 'Rockstar refers to Nitro Boost on Arena contender vehicles in GTA Online. Historical context only; not evidence of GTA VI upgrade availability. Checked October 30, 2026.' },
     ],
   },
   {
@@ -332,17 +350,20 @@ export const guideSections: GuideSection[] = [
     title: 'Car Meets, Street Takeovers, and Car Culture',
     status: 'Shown by Rockstar',
     paragraphs: [
-      `Car culture is part of GTA VI’s world before the first garage door even opens. Trailer 1 shows a street takeover built around burnouts, crowds, and heavily customized cars. The Extended Look later shows a parking-lot meet with multiple builds gathered in one place.`,
-      `Donks, lifted trucks, off-road builds, custom interiors, wheels, liveries, and painted graphics appear throughout Rockstar’s material. Rideout Customs branding was visible in Trailer 1 before Rockstar formally named the shop. <strong>Vice Vinyl</strong> appears in the same footage, but Rockstar has not explained whether it is a business, a product brand, or environmental detail.`,
-      `These scenes establish the look and presence of Leonida’s car culture. They do not yet confirm player-hosted meets, takeover events, judging systems, or rewards.`,
-      `A good drive needs something on the radio, too. Rockstar’s October 8 reveal previews six stations, with styles ranging from Latin and country to metal, pop and southern hip-hop. Its official music page also describes in-game podcasts. Those previews are a taste of Leonida’s airwaves, not the complete radio lineup or a confirmed playlist for racing events.`,
+      `Rockstar puts car culture front and center in GTA VI’s trailers. Street takeovers, parking-lot meets, donks, lifted trucks, and off-road parties keep bringing the camera back to the cars and the people around them. Taken together, they suggest car culture will play a bigger role in GTA VI.`,
+      `Trailer 1 moves from a woman dancing on a car roof to a passenger standing in a moving pickup’s open doorway. At around <a href="https://www.youtube.com/watch?v=QdBZY2fkU-0&amp;t=55s" rel="noopener">0:55</a>, the <strong>Thrillbilly Mud Club</strong> name appears over a muddy off-road gathering. Later, at around <a href="https://www.youtube.com/watch?v=QdBZY2fkU-0&amp;t=68s" rel="noopener">1:08</a>, a car-scene clip carries <strong>High Rollerz Lifestyle</strong> branding and the handle <strong>@HighRollerzMag</strong>.`,
+      `The details matter as much as the gatherings. Trailer 2 shows <strong>swangas</strong>, the outward-projecting wire wheels associated with Houston’s slab scene, adding a new wheel style to GTA. Rideout Customs and Vice Vinyl branding also appears in Trailer 1, alongside the customized vehicles. Rockstar has since named Rideout Customs as a mod shop; Vice Vinyl’s role remains unexplained.`,
+      `These scenes give the culture its own people, builds, and places to gather. Which moments become player-controlled actions, and whether you can organize meets or takeovers with judging and rewards, remain open.`,
+      `A good drive needs something on the radio, too. Rockstar’s October 8 reveal previews six stations, with styles ranging from Latin and country to metal, pop and southern hip-hop. Its official music page also describes in-game podcasts. GTAVice’s coverage of Edge’s print edition reports 23 radio stations in total. The station previews are not a complete playlist or a confirmed soundtrack for racing events.`,
     ],
     cta: { label: 'Find Community Events', href: 'community/events/' },
     sources: [
       { label: 'Rockstar Games — The Music of GTA VI', url: MUSIC, note: 'Official station previews and in-game podcasts; announcement dated October 8, 2026 in Newswire.' },
-      { label: 'Rockstar Games — GTA VI Trailer 1', url: 'https://www.youtube.com/watch?v=QdBZY2fkU-0', note: 'approximately 0:45–0:52: street takeover, customized vehicles, Rideout Customs and Vice Vinyl branding.' },
+      { label: 'Rockstar Games — GTA VI Trailer 1', url: 'https://www.youtube.com/watch?v=QdBZY2fkU-0', note: 'Approximately 0:44: roof dancing; 0:45–0:47: takeover; 0:52–0:53: pickup and open-door passenger, Rideout Customs and Vice Vinyl branding; 0:55–0:57: Thrillbilly Mud Club; 1:08: High Rollerz Lifestyle / @HighRollerzMag. Key frames checked October 30, 2026.' },
+      { label: 'Rockstar Games — GTA VI Trailer 2', url: 'https://www.youtube.com/watch?v=VQRLujxTm3c&t=126s', note: 'Approximately 2:06: customized red sedan with projecting wire wheels (swangas). Checked October 30, 2026.' },
       { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: EXT_LOOK, note: 'approximately 26:06: parking-lot car-meet scene.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: 'official mod-shop and custom-vehicle imagery.' },
+      { label: 'GTAVice — Edge preview and print-only Phil Hooker Q&A', url: GTAVICE_EDGE, note: 'October 29, 2026: secondary coverage, including attributed excerpts from the print-only Q&A and the reported 23-station total. Checked October 30, 2026.' },
     ],
   },
   {
@@ -376,7 +397,7 @@ export const guideCoverage: { name: string; text: string }[] = [
 /** FAQ: the same text is used for the visible answers and FAQPage JSON-LD. */
 export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'Is Gellhorn International Raceway based on Sebring?', a: 'Sebring is a rumored inspiration discussed by The Drive and Jalopnik. Parts of that comparison rely on leaked maps. The official material reviewed here does not confirm a Sebring connection or establish that Gellhorn copies its layout, length, or corners.' },
-  { q: 'Do cars need fuel or charging in GTA VI?', a: 'Refueling and EV charging have been reported from TGG’s Rockstar North preview, as covered by GamesRadar and PC Gamer. Consumption rates, charging times, settings, and how these systems apply to racing remain unresolved.' },
+  { q: 'Do cars need fuel or charging in GTA VI?', a: 'Edge reports vehicle fuel gauges and quick refueling. EV charging is separately reported from TGG’s Rockstar North preview. Consumption rates, charging times, settings, and race-specific rules remain unresolved.' },
   { q: 'Can you repair cars at gas stations in GTA VI?', a: 'GamesRadar reports that TGG’s Rockstar preview included a gas-station choice between refueling and vehicle repair. That does not establish the services available at every station or their prices.' },
   { q: 'Does GTA VI have nitrous?', a: 'Yes. Nitrous is used in the street race shown in Rockstar’s Extended Look. Which cars can run it, how you get it, and the rules for individual events are not shown.' },
   { q: 'Are GTA VI Online races confirmed by the gameplay footage?', a: 'The circuit, off-road, and street races shown in the Extended Look do not establish an online racing mode. Online event formats, multiplayer grids, cross-play, and Race Creator support need their own confirmation.' },
@@ -384,7 +405,7 @@ export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'How does the vehicle scanner work in GTA VI?', a: 'Rob Nelson describes a phone scanner that shows whether a car is locked, has an alarm or tracker, what it is worth at a Pay ’n’ Spray or specialty car fence, and what it costs to register for yourself. Different vehicles can require tools such as a Slim Jim or key cloner.' },
   { q: 'Can changing cars or clothes help you escape the police in GTA VI?', a: 'Yes. In Nelson’s demonstration, switching to a car the police do not recognize lowers their perception of you. He also says buying and wearing a new outfit removes his current heat. Glasses, a cap, or a haircut alone do not address clothing the police already recognize.' },
   { q: 'Is GranForma replacing Pegassi for the Zorrusso in GTA VI?', a: 'The Zorrusso-associated car shown in Rockstar images published with Bloomberg’s October 14 feature carries GranForma lettering instead of the familiar Pegassi branding. Whether GranForma is the manufacturer, a customizer or a particular version remains unresolved. It does not establish a replacement for Pegassi across the lineup.', aHtml: 'The <a href="{base}cars/vehicles/granforma-zorrusso/">Zorrusso</a>-associated car shown in Rockstar images published with Bloomberg’s October 14 feature carries GranForma lettering instead of the familiar Pegassi branding. Whether GranForma is the manufacturer, a customizer or a particular version remains unresolved. It does not establish a replacement for Pegassi across the lineup.' },
-  { q: 'Can I call my personal vehicle in GTA VI?', a: 'Nelson says personal vehicles can be called and carry spare outfits and purchased weapons. Delivery conditions remain unspecified.' },
+  { q: 'Can I call my personal vehicle in GTA VI?', a: 'Yes. Edge describes Scooter Bros, a paid phone-app service that delivers your personal car. Delivery fees and restrictions have not been fully detailed.' },
   { q: 'Which cars has Rockstar confirmed for GTA VI?', a: 'Rockstar has named cars including the ’95 Grotti Cheetah and ’67 Vapid Dominator Buggy. More cars appear in official footage without being named; their model names are often community identifications. Rockstar has not published a complete official lineup. Our Cars section focuses on racing-relevant cars.', aHtml: 'Rockstar has named cars including the <a href="{base}cars/vehicles/grotti-cheetah-95/">’95 Grotti Cheetah</a> and <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a>. More cars appear in official footage without being named; their model names are often community identifications. Rockstar has not published a complete official lineup. Our <a href="{base}cars/">Cars section</a> focuses on racing-relevant cars.' },
   { q: 'How does stealing cars work in GTA VI?', a: 'Rockstar North’s Rob Nelson described a tiered system. Some parked vehicles require tools such as a Slim Jim or key cloner, while occupied vehicles can still be carjacked. A phone scanner can provide information about a vehicle’s security, tracker, value, and registration cost.' },
   { q: 'Can stolen cars become personal vehicles?', a: 'Yes. A stolen car can be registered as a personal vehicle. Unregistered stolen vehicles remain temporarily but disappear when the game is restarted. Players begin with storage for three vehicles and can buy garages to expand it; the complete list of eligible vehicles and the later-game ownership limit remain unannounced.' },
