@@ -59,6 +59,13 @@ const base = import.meta.env.BASE_URL;
             </div>
           )}
           {mode === 'crew' && (<div id="hc-discord" class="hc-discord" hidden><slot name="discord" /></div>)}
+          <!-- My Account > Events (DEC-0195): Event details | Sign-ups -->
+          {mode === 'events' && (
+            <div class="hc-cv" id="hc-ev-cv" role="tablist" aria-label="Edit event" hidden>
+              <button type="button" role="tab" data-ev="details" aria-selected="true">Event details</button>
+              <button type="button" role="tab" data-ev="sign" aria-selected="false">Sign-ups <span class="hc-cv-n" id="hc-ev-n"></span></button>
+            </div>
+          )}
 
           <!-- CREW FORM -->
           <form id="crew-form" class="hc-form" hidden novalidate>
@@ -158,7 +165,7 @@ const base = import.meta.env.BASE_URL;
               <label class="span2" data-mod-only>Note to the host <small>optional, e.g. why the event is hidden or what to fix</small><textarea name="moderation_note" maxlength="300" rows="2"></textarea></label>
             </div>
             <div class="preview-wrap"><p class="preview-label">Preview</p><div class="ev-list preview" id="event-preview"></div></div>
-            <div class="rsvp-panel" id="rsvp-panel" hidden><p class="preview-label">Sign-ups</p><div id="rsvp-list"></div><div id="rsvp-bans"></div><p class="form-msg" id="rsvp-msg" aria-live="polite"></p></div>
+            <div class="rsvp-panel" id="rsvp-panel" hidden><p class="preview-label">Sign-ups</p>{mode === 'events' && <p class="lr-note rsvp-note">Players who sign up will use your Discord invite or PlayStation name to reach you. Make sure each event has the right contact details.</p>}<div id="rsvp-list"></div><div id="rsvp-bans"></div><p class="form-msg" id="rsvp-msg" aria-live="polite"></p></div>
             <div class="form-actions">
               <button type="submit" class="btn btn-p">Save</button>
               <button type="button" class="btn btn-danger" data-action="delete" hidden>Delete</button>
@@ -317,6 +324,30 @@ const base = import.meta.env.BASE_URL;
   .preview-wrap { margin-top: 1.5rem; padding-top: 1.1rem; border-top: 1px solid var(--gh-line); }
   .preview-label { margin: 0 0 .7rem; color: var(--gh-muted); font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
   .crew-grid.preview { grid-template-columns: minmax(0, 24rem); }
+
+  /* ---- personal views in My Account (DEC-0195): labels in sentence case like every other form
+     (14px/600), hints 13px soft; the moderator panel keeps its compact labels for now ---- */
+  #hc-root:not([data-mode="moderator"]) .hc-form label, #hc-root:not([data-mode="moderator"]) .hc-form legend { font-size: 14px; font-weight: 600; color: var(--lr-text); text-transform: none; letter-spacing: 0; gap: 8px; }
+  #hc-root:not([data-mode="moderator"]) .hc-form small { font-size: 13px; color: var(--lr-soft); opacity: 1; font-weight: 400; }
+  #hc-root:not([data-mode="moderator"]) .grid { gap: 20px 24px; }
+
+  /* ---- My Account > Events (DEC-0195): the page lists the events; the editor only opens on Edit /
+     Create, with Event details | Sign-ups and the preview next to the form ---- */
+  #hc-root[data-mode="events"] .mod-layout { display: block; }
+  #hc-root[data-mode="events"] .list-panel, #hc-root[data-mode="events"] .editor-placeholder { display: none; }
+  #hc-root[data-mode="events"] .editor-panel { padding: 0; min-height: 0; border: 0; background: none; }
+  #hc-root[data-mode="events"] #event-form .form-head { display: none; }
+  #hc-root[data-mode="events"] #event-form.cv-sign > :not(.rsvp-panel) { display: none; }
+  #hc-root[data-mode="events"] #event-form:not(.cv-sign) .rsvp-panel { display: none; }
+  #hc-root[data-mode="events"] #event-form.cv-sign .rsvp-panel { margin-top: 0; padding-top: 0; border-top: 0; }
+  #hc-root[data-mode="events"] #event-form.cv-sign .rsvp-panel .preview-label { display: none; }
+  #hc-root[data-mode="events"] .rsvp-note { margin: 0 0 16px; } /* copy approved (Codex 2026-10-02, Fausto), moved here from the old sign-ups box (DEC-0195) */
+  :global(#hc-root[data-mode="events"] .rsvp-panel .mem-actions .btn) { min-height: 32px; padding: 0 12px; font-size: 13px; }
+  @media (min-width: 861px) {
+    #hc-root[data-mode="events"] #event-form:not([hidden]):not(.cv-sign) { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr); gap: 0 32px; align-items: start; }
+    #hc-root[data-mode="events"] #event-form:not(.cv-sign) > :not(.grid):not(.preview-wrap) { grid-column: 1 / -1; }
+    #hc-root[data-mode="events"] #event-form .preview-wrap { position: sticky; top: 24px; margin-top: 0; padding-top: 0; border-top: 0; }
+  }
 
   /* ---- My Account > Crews (DEC-0190): no list column; with several crews the list becomes a
      row of crew buttons; Members | Crew card | Discord feed switch; preview next to the form ---- */
@@ -576,6 +607,34 @@ const base = import.meta.env.BASE_URL;
     document.addEventListener('hc-refresh', async () => { if (contentEl.hidden) return; await loadMembers(); renderList(); renderMembers(); });
   }
 
+  // ---- My Account > Events (DEC-0195): the page opens the editor (Edit / Create) and refreshes its
+  // list when the editor saved or deleted an event
+  let evView: 'details' | 'sign' = 'details';
+  function applyEventView() {
+    if (MODE !== 'events') return;
+    const cv = $('hc-ev-cv');
+    cv.hidden = eventForm.hidden || !selectedId;
+    if (!selectedId) evView = 'details';
+    eventForm.classList.toggle('cv-sign', evView === 'sign');
+    cv.querySelectorAll<HTMLElement>('[data-ev]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.ev === evView)));
+  }
+  if (MODE === 'events') {
+    $('hc-ev-cv').addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLElement>('[data-ev]');
+      if (!b) return;
+      evView = b.dataset.ev as typeof evView;
+      applyEventView();
+    });
+    document.addEventListener('hc-open-event', (e: any) => {
+      if (contentEl.hidden) return;
+      const id = e.detail?.id ?? null;
+      evView = e.detail?.view === 'sign' ? 'sign' : 'details';
+      if (id) { const row = events.find((x) => x.event_id === id); if (row) openEvent(row); }
+      else if (canCreateEvent()) openEvent(null);
+    });
+  }
+  const eventsChanged = () => { if (MODE === 'events') rootEl.dispatchEvent(new CustomEvent('hc-events-changed', { bubbles: true })); };
+
   function showForm(which: Kind | null) {
     placeholderEl.hidden = which !== null;
     crewForm.hidden = which !== 'crews';
@@ -585,6 +644,7 @@ const base = import.meta.env.BASE_URL;
     $('requests-panel').hidden = which !== 'requests';
     $('members-panel').hidden = which !== 'crews' || !selectedId;
     applyCrewView();
+    applyEventView();
   }
 
   // ------------------------------------------------------------ members
@@ -966,7 +1026,7 @@ const base = import.meta.env.BASE_URL;
       streams: (() => { const u = streamUrlFromForm(); const pl = u ? streamPlatform(u) : null; return pl ? [{ platform: pl, url: u }] : []; })(),
     };
     const root = $('event-preview');
-    root.innerHTML = eventRowHtml(preview);
+    root.innerHTML = eventRowHtml(preview, { full: true, side: '' }); // same row as the calendar (DEC-0195)
     localizeTimes(root);
     $('event-desc-count').textContent = String((ef.description.value || '').length);
   }
@@ -1029,6 +1089,7 @@ const base = import.meta.env.BASE_URL;
       + (kicked.length ? `<p class="mem-group-title">Removed from this event</p>` + kicked.map((r) => row(r, b('unkick', r, 'Allow Again', 'btn-s'))).join('') : '');
     $('rsvp-bans').innerHTML = bans.length ? `<p class="mem-group-title">Banned from all your events (${bans.length})</p>` + bans.map((r) => row(r, b('unban', r, 'Unban', 'btn-s'), `since ${new Date(r.banned_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}`)).join('') : '';
     const m = $('rsvp-msg'); m.textContent = message; m.className = `form-msg ${message ? (isError ? 'is-error' : 'is-ok') : ''}`;
+    if (MODE === 'events') $('hc-ev-n').textContent = pr.error ? '' : String(going.length);
   }
   $('rsvp-panel').addEventListener('click', async (e) => {
     const t = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-ract]');
@@ -1077,6 +1138,7 @@ const base = import.meta.env.BASE_URL;
     await loadAll();
     openEvent(events.find((x) => x.event_id === data.event_id) ?? data);
     msg(eventForm, data.is_published ? 'Saved — live in the calendar.' : 'Saved — hidden (moderator setting).');
+    eventsChanged();
   });
 
   // ------------------------------------------------------------ track form (RS-0045)
@@ -1219,6 +1281,7 @@ const base = import.meta.env.BASE_URL;
       showForm(null);
       await loadAll();
       placeholderEl.textContent = 'Deleted.';
+      if (form === eventForm) eventsChanged();
     });
   });
 

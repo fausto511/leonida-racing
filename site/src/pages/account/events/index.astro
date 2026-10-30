@@ -1,7 +1,10 @@
 ---
-// My Account > Events (RS-0026): link to the calendar, own events for hosts
-// and crew leaders (same editor as the moderator panel, personal mode) and
-// the Crew Leader / Event Host application.
+// My Account > Events (RS-0026; redesign DEC-0195, Fausto 30.10.2026).
+// 1. Events I'm going to: the calendar's event rows (same row as Community > Events), "+ Find more events".
+// 2. Events you host (event hosts): the same rows; the right-hand slot shows status, "x going" and Edit
+//    instead of the sign-up button. "+ Create an event", past events folded. Edit / Create opens the
+//    editor (HubEditor, events mode) under the list: Event details | Sign-ups. Discord feed folded below.
+// 3. Event Host application.
 import Base from '../../../layouts/Base.astro';
 import AccountHead from '../../../components/AccountHead.astro';
 import HubEditor from '../../../components/HubEditor.astro';
@@ -12,11 +15,11 @@ const base = import.meta.env.BASE_URL;
 ---
 <Base
   title="My Events — My Account"
-  description="Find events and, for event hosts, manage your own events."
+  description="Your event sign-ups and, for event hosts, the events you run."
   section="account"
   noindex
 >
-  <AccountHead active="events" cta={{ label: 'Find events', href: `${import.meta.env.BASE_URL}community/events/` }} />
+  <AccountHead active="events" cta={{ label: 'Find events', href: `${base}community/events/` }} />
   <section class="wrap account-wrap">
 
     <div id="acc-auth" class="acc-auth lr-empty-panel" hidden>
@@ -24,27 +27,30 @@ const base = import.meta.env.BASE_URL;
       <button type="button" id="acc-signin" class="btn btn-discord">Sign in with Discord</button>
     </div>
 
-    <div id="acc-body" hidden>
-      <div class="panel ev-cta">
-        <p><strong>Looking for something to drive?</strong> Races, league rounds, community playlists, and car meets from across the GTA VI scene—all in one calendar.</p>
-        <a class="btn btn-s" href={`${base}community/events/`}>Find Events</a>
-      </div>
+    <div id="acc-body" class="evs-secs" hidden>
+      <section>
+        <div class="evs-head"><div>
+          <h2 class="lr-h2 lr-h2-s">Events I'm going to</h2>
+          <p class="evs-lede">Your sign-ups, soonest first. Start times are in your local time.</p>
+        </div></div>
+        <div id="my-rsvps" class="ev-list"></div>
+      </section>
 
-      <h2 class="section-heading">Events I'm going to</h2>
-      <div id="my-rsvps" class="my-rsvps"></div>
-
-      <div id="host-block" hidden>
-        <h2 class="section-heading">My Events</h2>
-        <p class="section-lede">Create and edit the events you run. Every event is public and shows up in the calendar right away — you can see who signed up in each event.</p>
-        <DiscordFeedSteps source="host" />
-        <!-- Sign-ups overview for hosts (Fausto, 2026-10-01). Copy approved (Codex 2026-10-02, Fausto). -->
-        <div class="panel host-signups" id="host-signups" hidden>
-          <p class="host-signups-title">Sign-ups for Your Upcoming Events</p>
-          <div id="host-signups-list"></div>
-          <p class="host-signups-note">Players who sign up will use your Discord invite or PlayStation name to reach you. Make sure each event has the right contact details.</p>
+      <section id="host-block" hidden>
+        <div class="evs-head"><div>
+          <h2 class="lr-h2 lr-h2-s">Events you host</h2>
+          <p class="evs-lede">Every event is public and shows up in the calendar right away. Players who sign up will use your Discord invite or PlayStation name to reach you. Make sure each event has the right contact details. Edit an event to change it or to see who signed up.</p>
+        </div></div>
+        <div id="host-list" class="ev-list"></div>
+        <div class="evs-editor" id="host-editor" hidden>
+          <div class="evs-editor-top">
+            <h3 class="evs-editor-t" id="host-editor-t">Edit event</h3>
+            <button type="button" class="btn btn-s btn-sm" id="host-editor-close">Close</button>
+          </div>
+          <HubEditor mode="events" />
         </div>
-        <HubEditor mode="events" />
-      </div>
+        <div class="evs-dfs"><DiscordFeedSteps source="host" /></div>
+      </section>
 
       <RoleApply focus="event_host" />
     </div>
@@ -55,91 +61,130 @@ const base = import.meta.env.BASE_URL;
   [hidden] { display: none !important; }
   .account-wrap { padding-top: var(--lr-gap-head); } /* DEC-0188; the footer brings the 64px gap below */
   .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
-  .ev-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.2rem; }
-  .ev-cta p { margin: 0; color: var(--gh-muted); font-size: .9rem; max-width: 40rem; }
-  .ev-cta strong { color: var(--gh-text); }
-  .section-heading { margin: 2.5rem 0 .3rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.3rem; }
-  .section-lede { margin: 0 0 1.2rem; color: var(--gh-muted); font-size: .88rem; }
-  :global(.rsvp-row) { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding: .75rem 1rem; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); background: var(--gh-surface); margin-bottom: .5rem; font-size: .88rem; }
-  :global(.rsvp-row .rsvp-when) { color: var(--gh-muted); min-width: 10rem; }
-  :global(.rsvp-row .rsvp-title) { flex: 1 1 12rem; font-weight: 700; }
-  :global(.rsvp-row .btn) { min-height: 36px; font-size: .76rem; padding: .4rem .8rem; }
-  :global(.rsvp-psn) { color: var(--gh-muted); font-size: .8rem; }
-  :global(.rsvp-psn strong) { color: var(--gh-text); }
-  .host-signups { margin-bottom: 1.25rem; padding: 1rem 1.1rem; }
-  .host-signups-title { margin: 0 0 .6rem; font-weight: 800; }
-  .host-signups-note { margin: .6rem 0 0; color: var(--gh-muted); font-size: .8rem; }
-  :global(.hs-row) { display: flex; flex-wrap: wrap; gap: .25rem 1rem; padding: .6rem 0; border-top: 1px solid var(--gh-line); font-size: .86rem; }
-  :global(.hs-row .hs-title) { flex: 1 1 12rem; font-weight: 700; }
-  :global(.hs-row .hs-count) { color: var(--gh-text); }
-  :global(.hs-row .hs-names) { flex: 1 1 100%; color: var(--gh-muted); font-size: .8rem; }
-  :global(.rsvp-empty) { margin: 0; color: var(--lr-muted); font-size: 14px; }
+  .evs-secs:not([hidden]) { display: flex; flex-direction: column; gap: var(--lr-gap-sec); }
+  .evs-head { margin-bottom: 20px; }
+  .evs-lede { margin: 8px 0 0; max-width: 640px; font-size: 15px; line-height: 1.5; color: var(--lr-soft); }
+  /* "+" row at the end of a list, like the "+" tiles in My garage / Crews */
+  :global(.evs-slot) { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; min-height: 72px; padding: 0 18px; border: 0; border-top: 1px dashed var(--lr-line-strong); background: transparent; color: var(--lr-soft); font: inherit; font-size: 14px; text-decoration: none; cursor: pointer; }
+  :global(.evs-slot:first-child) { border-top: 0; }
+  :global(.evs-slot:hover), :global(.evs-slot:focus-visible) { background: var(--lr-orange-tint); color: var(--lr-text); outline: none; }
+  :global(.evs-slot-plus) { width: 36px; height: 36px; border-radius: 50%; border: 1px solid currentColor; display: grid; place-items: center; font-size: 18px; line-height: 1; }
+  :global(.evs-slot strong) { color: var(--lr-text); font-weight: 600; font-size: 15px; }
+  /* host rows: right-hand slot */
+  :global(.evs-side) { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; text-align: right; }
+  :global(.evs-going) { font-size: 14px; color: var(--lr-soft); white-space: nowrap; }
+  :global(.evs-going b) { color: var(--lr-text); font-family: var(--gh-font-display); font-size: 18px; font-weight: 800; }
+  :global(.evs-past) { border-top: 1px solid var(--lr-line-soft); }
+  :global(.evs-past > summary) { cursor: pointer; padding: 14px 20px; list-style: none; font-size: 14px; font-weight: 600; color: var(--lr-muted); }
+  :global(.evs-past > summary::-webkit-details-marker) { display: none; }
+  :global(.evs-past > summary:hover) { color: var(--lr-text); }
+  :global(.evs-past .ev-row) { opacity: .7; }
+  .evs-editor { margin-top: 24px; padding: 24px; border: 1px solid var(--lr-orange-border); border-radius: 8px; background: var(--lr-card); }
+  .evs-editor-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+  .evs-editor-t { margin: 0; font-size: 18px; font-weight: 700; }
+  .evs-dfs { margin-top: 16px; }
+  @media (max-width: 760px) { .evs-editor { padding: 16px; } :global(.evs-side) { align-items: flex-start; text-align: left; } }
 </style>
 
 <script>
   import { backendConfigured, getSupabase } from '../../../scripts/supabase-client';
   import { esc, eventRowHtml, localizeTimes, type HubEvent } from '../../../data/hub';
   import { createEventRsvp } from '../../../scripts/event-rsvp';
-  document.addEventListener('hc-access', (e: any) => {
-    document.getElementById('host-block')!.hidden = !e.detail.hasAccess;
-  });
   const base = import.meta.env.BASE_URL;
-  const listEl = document.getElementById('my-rsvps')!;
+  const $ = (id: string) => document.getElementById(id)!;
+  const listEl = $('my-rsvps');
+  const hostEl = $('host-list');
   let me: string | null = null;
-  // Sample sign-ups (RS-0033) count only while no real events are published.
-  // Full event rows like in the calendar (Fausto 2026-10-04): same markup,
-  // same "Going ✓" / next-step block, PSN profile link and host Discord.
+  let isHost = false;
+  const EVENT_COLS = 'event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,created_by,is_published,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)';
+  const slot = (label: string, attrs: string, tag = 'a') => `<${tag} class="evs-slot" ${attrs}><span class="evs-slot-plus" aria-hidden="true">+</span><strong>${label}</strong></${tag}>`;
+
+  document.addEventListener('hc-access', (e: any) => {
+    isHost = Boolean(e.detail.hasAccess);
+    $('host-block').hidden = !isHost;
+    if (me && isHost) loadHosted();
+  });
+
+  // 1. Events I'm going to: the calendar row (full), sign-up state on the right (Going ✓ / next steps)
   const rsvp = createEventRsvp(listEl);
-  const EVENT_COLS = 'event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,created_by,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)';
   async function loadMine() {
     const since = new Date(Date.now() - 6 * 3600e3).toISOString();
     const { data } = await getSupabase().from('hub_event_rsvps').select(`event_id, event:hub_events(${EVENT_COLS})`).eq('driver_id', me!);
-    let events: HubEvent[] = ((data ?? []) as any[]).map((r) => r.event).filter((e) => e && e.starts_at >= since);
-    let live = true;
-    events.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
-    if (!events.length) {
-      listEl.innerHTML = `<p class="rsvp-empty">You haven't signed up for any upcoming event. <a href="${base}community/events/">Browse the calendar</a>.</p>`;
-      return;
-    }
-    listEl.innerHTML = `<div class="ev-list">${events.map((e) => eventRowHtml(e, { rsvp: true, sample: !live })).join('')}</div>`;
+    const events: HubEvent[] = ((data ?? []) as any[]).map((r) => r.event).filter((e) => e && e.starts_at >= since)
+      .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+    listEl.innerHTML = events.map((e) => eventRowHtml(e, { rsvp: true, full: true })).join('')
+      + slot(events.length ? 'Find more events' : 'Find an event', `href="${base}community/events/"`);
     localizeTimes(listEl);
-    rsvp.setEvents(events, live);
-    rsvp.renderRsvps();
-    if (live) await rsvp.connect();
+    if (events.length) { rsvp.setEvents(events, true); rsvp.renderRsvps(); await rsvp.connect(); }
   }
+
+  // 2. Events you host: same rows; right-hand slot = status, "x going", Edit
+  async function loadHosted() {
+    const sb = getSupabase();
+    const { data } = await sb.from('hub_events').select(EVENT_COLS).eq('created_by', me!).order('starts_at');
+    const all = (data ?? []) as any[];
+    const since = Date.now() - 6 * 3600e3;
+    const upcoming = all.filter((e) => new Date(e.starts_at).getTime() >= since);
+    const past = all.filter((e) => new Date(e.starts_at).getTime() < since).reverse();
+    const counts = new Map<string, number>();
+    if (all.length) {
+      const { data: rs } = await sb.from('public_event_rsvps').select('event_id').in('event_id', all.map((e) => e.event_id));
+      for (const r of (rs ?? []) as any[]) counts.set(r.event_id, (counts.get(r.event_id) ?? 0) + 1);
+    }
+    const side = (e: any, wasPast: boolean) => {
+      const n = counts.get(e.event_id) ?? 0;
+      const status = e.status === 'cancelled' ? '' : e.is_published ? '<span class="lr-status is-ok">Live</span>' : '<span class="lr-status" title="Hidden by a moderator">Hidden</span>';
+      return `<div class="evs-side">${status}<span class="evs-going"><b>${n}</b>${e.max_participants ? ` / ${e.max_participants}` : ''} ${wasPast ? 'went' : 'going'}</span><button type="button" class="btn btn-s btn-sm" data-edit="${esc(e.event_id)}">Edit</button></div>`;
+    };
+    const row = (e: any, wasPast = false) => eventRowHtml(e, { full: true, side: side(e, wasPast) });
+    hostEl.innerHTML = upcoming.map((e) => row(e)).join('')
+      + slot('Create an event', 'type="button" data-new', 'button')
+      + (past.length ? `<details class="evs-past"><summary>Past events (${past.length})</summary>${past.map((e) => row(e, true)).join('')}</details>` : '');
+    localizeTimes(hostEl);
+  }
+
+  // Edit / Create -> editor under the list
+  function openEditor(id: string | null, title: string) {
+    $('host-editor').hidden = false;
+    $('host-editor-t').textContent = title;
+    document.dispatchEvent(new CustomEvent('hc-open-event', { detail: { id } }));
+    $('host-editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  hostEl.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const ed = t.closest<HTMLElement>('[data-edit]');
+    if (ed) { openEditor(ed.dataset.edit!, `Edit: ${ed.closest('.ev-row')?.querySelector('.ev-title')?.textContent ?? 'event'}`); return; }
+    if (t.closest('[data-new]')) openEditor(null, 'New event');
+  });
+  $('host-editor-close').addEventListener('click', () => { $('host-editor').hidden = true; });
+  document.addEventListener('hc-events-changed', () => {
+    loadHosted();
+    if ((document.getElementById('event-form') as HTMLElement)?.hidden) $('host-editor').hidden = true; // deleted
+    else $('host-editor-t').textContent = `Edit: ${(document.querySelector('#event-form [name="title"]') as HTMLInputElement)?.value || 'event'}`;
+  });
+
+  // Share (same behaviour as the calendar): link to the event in the calendar
+  document.addEventListener('click', (e) => {
+    const s = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-share]');
+    if (!s || !s.closest('#acc-body')) return;
+    const url = `${location.origin}${base}community/events/#event-${s.dataset.share}`;
+    if (navigator.share) navigator.share({ title: s.dataset.title, url }).catch(() => {});
+    else navigator.clipboard?.writeText(url).then(() => { const o = s.innerHTML; s.textContent = 'Link copied'; setTimeout(() => { s.innerHTML = o; }, 1500); }).catch(() => {});
+  });
+
   async function init(session: any) {
-    document.getElementById('acc-auth')!.hidden = Boolean(session);
-    document.getElementById('acc-body')!.hidden = !session;
+    $('acc-auth').hidden = Boolean(session);
+    $('acc-body').hidden = !session;
     if (!session) return;
     const own = await getSupabase().from('drivers').select('driver_id').eq('auth_user_id', session.user.id).maybeSingle();
     me = own.data?.driver_id ?? null;
-    if (me) { await loadMine(); await loadHostSignups(); }
-  }
-  // Hosts: sign-ups per own upcoming event, without opening each event.
-  async function loadHostSignups() {
-    const box = document.getElementById('host-signups')!;
-    const since = new Date(Date.now() - 6 * 3600e3).toISOString();
-    const sb = getSupabase();
-    const { data: evs } = await sb.from('hub_events').select('event_id, title, starts_at, status, max_participants').eq('created_by', me!).gte('starts_at', since).order('starts_at');
-    const list = (evs ?? []) as any[];
-    if (!list.length) { box.hidden = true; return; }
-    const { data: rs } = await sb.from('public_event_rsvps').select('event_id, display_name, created_at').in('event_id', list.map((e) => e.event_id)).order('created_at');
-    const by = new Map<string, (string | null)[]>();
-    for (const r of (rs ?? []) as any[]) { if (!by.has(r.event_id)) by.set(r.event_id, []); by.get(r.event_id)!.push(r.display_name); }
-    document.getElementById('host-signups-list')!.innerHTML = list.map((e) => {
-      const names = by.get(e.event_id) ?? [];
-      const named = names.filter(Boolean).map((n) => esc(n as string));
-      const anon = names.length - named.length;
-      const who = names.length ? `${named.join(', ')}${anon ? `${named.length ? ' + ' : ''}${anon} anonymous` : ''}` : 'No sign-ups yet';
-      return `<div class="hs-row"><span class="rsvp-when">${esc(new Date(e.starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }))}</span><span class="hs-title">${e.status === 'cancelled' ? '✕ ' : ''}${esc(e.title)}</span><span class="hs-count"><strong>${names.length}${e.max_participants ? ' / ' + e.max_participants : ''}</strong> going</span><span class="hs-names">${who}</span></div>`;
-    }).join('');
-    box.hidden = false;
+    if (me) { await loadMine(); if (isHost) await loadHosted(); }
   }
   if (backendConfigured) {
     const sb = getSupabase();
     sb.auth.getSession().then(({ data }) => init(data?.session ?? null));
     sb.auth.onAuthStateChange((ev, s) => { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') init(s); });
-    document.getElementById('acc-signin')!.addEventListener('click', () => {
+    $('acc-signin').addEventListener('click', () => {
       sb.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: window.location.origin + window.location.pathname, scopes: 'identify email guilds.join' } });
     });
   }

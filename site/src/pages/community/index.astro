@@ -15,7 +15,7 @@ const base = import.meta.env.BASE_URL;
 const EV_N = 4;
 const CREW_N = 5;
 const upcoming = buildEvents.filter((e) => e.status !== 'cancelled').slice(0, EV_N);
-const nextEventsHtml = (upcoming.length ? upcoming.map((e) => eventRowHtml(e, { rsvp: true })).join('') : '<p class="ev-empty">No upcoming events yet.</p>') + eventOpenSpotHtml();
+const nextEventsHtml = (upcoming.length ? upcoming.map((e) => eventRowHtml(e, { rsvp: true, full: true })).join('') : '<p class="ev-empty">No upcoming events yet.</p>') + eventOpenSpotHtml();
 const featured = [...buildCrews.filter((c) => c.is_featured), ...buildCrews.filter((c) => !c.is_featured)].slice(0, CREW_N);
 const crewsHtml = featured.map((c) => crewCardHtml(c)).join('');
 const evChips: [string, string][] = [['', 'All events'], ['race', 'Races'], ['time-attack', 'Time Attack'], ['league', 'Leagues'], ['car-meet', 'Car meets'], ['cruise', 'Cruises']];
@@ -222,7 +222,7 @@ const cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke=
   const typeLabel: Record<string, string> = { race: 'races', 'time-attack': 'Time Attack events', league: 'league rounds', 'car-meet': 'car meets', cruise: 'cruises' };
   function drawEvents() {
     const list = events.filter((e) => !evType || e.event_type === evType).slice(0, EV_N);
-    evRoot.innerHTML = (list.length ? list.map((e) => eventRowHtml(e, { rsvp: true, sample: !evLive })).join('') : `<p class="ev-empty">No upcoming ${typeLabel[evType] ?? 'events'} yet.</p>`) + eventOpenSpotHtml();
+    evRoot.innerHTML = (list.length ? list.map((e) => eventRowHtml(e, { rsvp: true, sample: !evLive, full: true })).join('') : `<p class="ev-empty">No upcoming ${typeLabel[evType] ?? 'events'} yet.</p>`) + eventOpenSpotHtml();
     localizeTimes(evRoot);
     rsvp.setEvents(list, evLive);
     rsvp.renderRsvps();
