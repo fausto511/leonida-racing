@@ -20,32 +20,35 @@ import AccountHead from '../../../components/AccountHead.astro';
       <button type="button" id="acc-signin" class="btn btn-discord">Sign in with Discord</button>
     </div>
 
-    <div id="acc-body" hidden>
-      <div class="panel settings-card">
-        <label class="field">
-          <span>Display Name</span>
-          <input id="display-name-input" type="text" maxlength="40" />
-          <small class="field-hint">Shown on leaderboards, crews and events. Don't want to be recognised? Just pick a different name.</small>
-        </label>
-        <label class="field">
-          <span>PSN Name <small class="opt">optional</small></span>
-          <input id="psn-name-input" type="text" maxlength="16" placeholder="e.g. Racer_01" autocomplete="off" spellcheck="false" />
-          <small class="field-hint">Only used so others can add you on PlayStation: it is filled in for you when you create an event. Leave it empty to keep it to yourself.</small>
-        </label>
-        <button type="button" id="save-name-btn" class="btn btn-s">Save</button>
-
-        <div class="field account-status">
-          <span>Account</span>
-          <div class="account-status-row">
-            <p>Signed in as <strong id="auth-user-label"></strong>.</p>
-            <button type="button" id="discord-signout-btn" class="btn btn-s">Sign out</button>
+    <div id="acc-body" class="set-secs" hidden>
+      <!-- DEC-0194: two sections like the other tabs; texts unchanged except the two headings (Claude placeholders) -->
+      <section>
+        <h2 class="lr-h2 lr-h2-s set-h">Profile</h2>
+        <div class="set-card">
+          <div class="set-fields">
+            <label class="set-field">
+              <span class="set-label">Display name</span>
+              <input id="display-name-input" type="text" maxlength="40" />
+              <small class="set-hint">Shown on leaderboards, crews and events. Don't want to be recognised? Just pick a different name.</small>
+            </label>
+            <label class="set-field">
+              <span class="set-label">PSN name <span class="set-opt">optional</span></span>
+              <input id="psn-name-input" type="text" maxlength="16" placeholder="e.g. Racer_01" autocomplete="off" spellcheck="false" />
+              <small class="set-hint">Only used so others can add you on PlayStation: it is filled in for you when you create an event. Leave it empty to keep it to yourself.</small>
+            </label>
           </div>
+          <div class="set-acts"><button type="button" id="save-name-btn" class="btn btn-p">Save</button></div>
+          <p id="settings-msg" class="lr-note set-msg" role="status" hidden></p>
         </div>
+      </section>
 
-        <p id="settings-msg" class="settings-msg" hidden></p>
-      </div>
-
-      <details class="panel danger" id="danger">
+      <section>
+        <h2 class="lr-h2 lr-h2-s set-h">Account</h2>
+        <div class="set-card set-row">
+          <p>Signed in as <strong id="auth-user-label"></strong>.</p>
+          <button type="button" id="discord-signout-btn" class="btn btn-s btn-md">Sign out</button>
+        </div>
+        <details class="panel danger" id="danger">
         <summary>Delete my account</summary>
         <div class="danger-body">
           <p class="danger-alt"><strong>Just want to stay unrecognised?</strong> You don't need to delete anything — <a href="#display-name-input" id="to-name">change your display name</a> and your times show under the new name.</p>
@@ -59,9 +62,10 @@ import AccountHead from '../../../components/AccountHead.astro';
             <input type="text" id="del-confirm" autocomplete="off" spellcheck="false" />
           </label>
           <button type="button" class="btn btn-danger" id="del-btn" disabled>Delete my account</button>
-          <p class="settings-msg" id="del-msg" hidden></p>
+          <p class="lr-note set-msg" id="del-msg" role="status" hidden></p>
         </div>
-      </details>
+        </details>
+      </section>
     </div>
 
     <div class="panel deleted-box" id="deleted-box" hidden>
@@ -74,39 +78,47 @@ import AccountHead from '../../../components/AccountHead.astro';
   [hidden] { display: none !important; }
   .account-wrap { padding-top: var(--lr-gap-head); } /* DEC-0188; the footer brings the 64px gap below */
   .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
-  .settings-card { padding: var(--gh-pad-card); display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1.5rem; }
-  /* inputs start at the same height; the button lines up with them (label row = 1.55rem) */
-  #save-name-btn { margin-top: 1.55rem; }
-  .settings-card .field { display: flex; flex-direction: column; gap: .4rem; flex: 1 1 16rem; }
-  .settings-card .field > span { font-weight: 700; font-size: .85rem; }
-  .field-hint { color: var(--gh-muted); font-size: .76rem; }
-  .field .opt { font-weight: 400; color: var(--gh-muted); font-size: .76rem; }
-  .account-status { padding-left: 1.75rem; border-left: 1px solid var(--gh-line); }
-  .account-status-row { display: flex; align-items: center; flex-wrap: wrap; gap: .9rem; padding-block: .05rem; }
-  .account-status-row p { margin: 0; font-size: .88rem; }
-  .settings-card input[type="text"], .danger input { height: var(--lr-field-h); box-sizing: border-box; padding: 0 14px; border-radius: var(--gh-radius); border: 1px solid var(--lr-line-strong); background: var(--gh-bg); color: var(--gh-text); font-size: 14px; font-family: var(--gh-font-body); }
-  .settings-card input:focus, .danger input:focus { outline: none; border-color: var(--lr-field-focus); }
-  .settings-msg { flex-basis: 100%; margin: 0; font-size: .82rem; }
-  .settings-msg.is-error { color: var(--lr-coral); }
-  .settings-msg.is-ok { color: #D9F58E; }
-  .danger { margin-top: 2rem; padding: 0; }
-  .danger summary { cursor: pointer; padding: 1rem 1.2rem; color: var(--gh-text); font-weight: 700; font-size: .88rem; list-style: none; }
-  .danger summary:hover { color: var(--gh-text); }
+  /* DEC-0194: sections 64px apart, H2 24px, one card per section, labels 14/600, hints 13 soft */
+  .set-secs:not([hidden]) { display: flex; flex-direction: column; gap: var(--lr-gap-sec); }
+  .set-h { margin: 0 0 20px; }
+  .set-card { padding: 24px; background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: 8px; }
+  .set-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
+  .set-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .set-label { font-size: 14px; font-weight: 600; color: var(--lr-text); }
+  .set-opt { margin-left: 6px; font-weight: 400; color: var(--lr-muted); }
+  .set-hint { font-size: 13px; line-height: 1.45; color: var(--lr-soft); }
+  .set-field input, .danger input { height: var(--lr-field-h); box-sizing: border-box; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: var(--lr-bg); color: var(--lr-text); font-size: 14px; font-family: var(--gh-font-body); }
+  .set-field input:focus, .danger input:focus { outline: none; border-color: var(--lr-field-focus); }
+  .set-acts { margin-top: 20px; }
+  .set-msg { margin: 16px 0 0; }
+  .set-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+  .set-row p { margin: 0; font-size: 15px; color: var(--lr-soft); }
+  .set-row strong { color: var(--lr-text); font-weight: 600; }
+  /* delete: collapsed by default, neutral; the button turns coral once DELETE is typed (armed, DEC-0175) */
+  .danger { margin-top: 16px; padding: 0; background: var(--lr-card); border: 1px solid var(--lr-line); border-radius: 8px; }
+  .danger summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 0 24px; cursor: pointer; list-style: none; font-size: 15px; font-weight: 600; color: var(--lr-text); }
   .danger summary::-webkit-details-marker { display: none; }
-  .danger summary::after { content: ' ▾'; font-size: .75rem; color: var(--gh-muted); }
-  .danger[open] summary::after { content: ' ▴'; }
-  .danger-body { padding: 0 1.2rem 1.2rem; font-size: .86rem; color: var(--gh-muted); max-width: 46rem; }
-  .danger-body p { margin: 0 0 .7rem; }
-  .danger-body ul { margin: 0 0 1rem; padding-left: 1.1rem; display: grid; gap: .35rem; }
-  .danger-body strong { color: var(--gh-text); }
-  .danger-alt { padding: .75rem .9rem; border-radius: var(--gh-radius); background: var(--lr-orange-tint); border: 1px solid var(--lr-orange-border); }
-  .danger-alt a { color: var(--gh-text); }
-  .danger-alt + .danger-alt { margin-top: -.2rem; }
-  .danger-confirm { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .9rem; max-width: 18rem; color: var(--gh-text); font-weight: 700; font-size: .82rem; }
-  .danger-confirm code { color: var(--gh-red); }
+  .danger summary::after { content: ""; width: 8px; height: 8px; margin-right: 4px; border-right: 2px solid var(--lr-muted); border-bottom: 2px solid var(--lr-muted); transform: rotate(45deg); transition: transform .15s; }
+  .danger[open] summary::after { transform: rotate(-135deg); }
+  .danger summary:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: -2px; border-radius: 8px; }
+  .danger-body { padding: 0 24px 24px; max-width: 760px; font-size: 15px; line-height: 1.5; color: var(--lr-soft); }
+  .danger-body p { margin: 0 0 12px; }
+  .danger-body ul { margin: 0 0 20px; padding-left: 20px; display: grid; gap: 6px; }
+  .danger-body strong { color: var(--lr-text); font-weight: 600; }
+  .danger-alt { padding: 12px 14px; border-radius: 8px; border: 1px solid var(--lr-line); background: var(--lr-white-hover); font-size: 14px; } /* note box (DEC-0186), neutral: it is an alternative, not a warning */
+  .danger-alt a { color: var(--lr-text); }
+  .danger-confirm { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-width: 18rem; font-size: 14px; font-weight: 600; color: var(--lr-text); }
+  .danger-confirm code { color: var(--lr-coral); }
+  #del-btn:not(:disabled) { background: var(--lr-coral-fill); border-color: var(--lr-coral); color: var(--lr-coral); }
   .deleted-box { padding: 1rem 1.2rem; }
   .deleted-box p { margin: 0; font-size: .9rem; }
-  @media (max-width: 700px) { .account-status { padding-left: 0; border-left: none; } }
+  @media (max-width: 760px) {
+    .set-fields { grid-template-columns: 1fr; }
+    .set-card { padding: 20px; }
+    .set-acts .btn { width: 100%; }
+    .danger summary { padding: 0 20px; }
+    .danger-body { padding: 0 20px 20px; }
+  }
 </style>
 
 <script>
@@ -126,7 +138,7 @@ import AccountHead from '../../../components/AccountHead.astro';
 
   function msg(el: HTMLElement, text: string, ok: boolean) {
     el.hidden = false;
-    el.className = `settings-msg ${ok ? 'is-ok' : 'is-error'}`;
+    el.className = `lr-note set-msg${ok ? '' : ' is-error'}`; // notice box (DEC-0186)
     el.textContent = text;
   }
 
