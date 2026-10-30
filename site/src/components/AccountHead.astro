@@ -63,7 +63,7 @@ const links = [
 </style>
 
 <script>
-  // Badge on the Crew tab: open join requests for crews I lead + invites for me.
+  // Badges: Crews tab = open join requests for crews I lead + invites for me; My laps = laps to fix.
   import { backendConfigured, getSupabase } from '../scripts/supabase-client';
   // keep the active tab in view on phones (the row scrolls sideways)
   document.querySelector('.acc-tab.is-active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
@@ -87,6 +87,10 @@ const links = [
     }
     const el = document.querySelector<HTMLElement>('[data-acc-tab="crew"] .acc-tab-count');
     if (el && count) { el.textContent = String(count); el.hidden = false; el.setAttribute('aria-label', `${count} open`); }
+    // Badge on My laps: laps a moderator sent back for correction (RS-0091)
+    const fix = await sb.from('runs').select('run_id', { count: 'exact', head: true }).eq('driver_id', me).eq('review_status', 'needs_correction');
+    const lapsEl = document.querySelector<HTMLElement>('[data-acc-tab="laps"] .acc-tab-count');
+    if (lapsEl && fix.count) { lapsEl.textContent = String(fix.count); lapsEl.hidden = false; lapsEl.setAttribute('aria-label', `${fix.count} to fix`); }
   }
   badge();
 </script>

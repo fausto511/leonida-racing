@@ -93,10 +93,11 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         <img id="account-avatar-img" class="account-avatar" alt="" width="36" height="36" hidden />
         <span id="account-avatar-fallback" class="account-avatar account-avatar-fallback" aria-hidden="true"></span>
         <svg class="ico chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        <span class="account-dot" id="account-dot" hidden></span>
       </button>
       <div id="account-menu-dropdown" class="account-dropdown" hidden role="menu">
         <a href={`${base}account/`} role="menuitem">My garage</a>
-        <a href={`${base}account/laps/`} role="menuitem">My laps</a>
+        <a href={`${base}account/laps/`} role="menuitem" id="account-menu-laps">My laps</a>
         <a href={`${base}account/crew/`} role="menuitem" id="account-menu-crew">My crews</a>
         <a href={DISCORD_INVITE_URL} role="menuitem" target="_blank" rel="noopener">Open Discord server</a>
         <a href={`${base}account/settings/`} role="menuitem">Settings</a>
@@ -176,6 +177,10 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .account-trigger { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 8px 0 4px; border: 0; border-radius: 999px; background: var(--lr-white-hover); color: var(--lr-text); cursor: pointer; }
   .account-trigger:hover { background: var(--lr-white-active); }
   .account-trigger .chev { width: 14px; height: 14px; }
+  /* something waits for you (lap to fix, crew invite/request) -- RS-0091 */
+  .account-trigger { position: relative; }
+  .account-dot { position: absolute; top: 3px; left: 31px; width: 10px; height: 10px; border-radius: 50%; background: var(--lr-orange); box-shadow: 0 0 0 2px var(--lr-bg); }
+  .account-dot[hidden] { display: none; }
   .account-avatar { width: 36px; height: 36px; border-radius: 999px; object-fit: cover; }
   .account-avatar-fallback { display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #2A1F9E, #B12A8C 60%, #F26A3D); color: var(--lr-text); font-weight: 700; font-size: 13px; }
   .account-avatar-fallback:empty::before { content: ''; }
@@ -296,6 +301,8 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
     const logoutBtnEl = document.getElementById('account-menu-logout')!;
     const moderatorLinkEl = document.getElementById('account-menu-moderator') as HTMLAnchorElement;
     const crewLinkEl = document.getElementById('account-menu-crew') as HTMLAnchorElement;
+    const lapsLinkEl = document.getElementById('account-menu-laps') as HTMLAnchorElement;
+    const dotEl = document.getElementById('account-dot') as HTMLElement;
     const discordBtnEl = document.getElementById('discord-login') as HTMLAnchorElement;
     let isLoggedIn = false;
 
@@ -321,6 +328,8 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       moderatorLinkEl.textContent = 'Moderator';
       moderatorLinkEl.setAttribute('href', `${base}moderator/`);
       crewLinkEl.textContent = 'My crews';
+      lapsLinkEl.textContent = 'My laps';
+      dotEl.hidden = true;
       // `moderators` is only readable by moderators themselves (RLS).
       const { data, error } = await supabase.from('moderators').select('driver_id').limit(1);
       const isMod = !error && Array.isArray(data) && data.length > 0;
@@ -353,6 +362,13 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       }
       const total = (inv.count ?? 0) + pending;
       if (total) crewLinkEl.textContent = `My crews (${total} new)`;
+      // Laps a moderator sent back for correction (RS-0091)
+      const fix = await supabase.from('runs').select('run_id', { count: 'exact', head: true }).eq('driver_id', me).eq('review_status', 'needs_correction');
+      const toFix = fix.count ?? 0;
+      if (toFix) lapsLinkEl.textContent = `My laps (${toFix} to fix)`;
+      const mine = total + toFix;
+      dotEl.hidden = !mine;
+      if (mine) document.getElementById('account-menu-trigger')?.setAttribute('aria-label', `Account menu, ${mine} waiting for you`);
     }
 
     function renderAuthState(session: any) {
