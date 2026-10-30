@@ -10,6 +10,10 @@
 // enforce_verification_requires_video enforces this independently too —
 // this function's own check exists so a caller gets a clean 422 instead of
 // a raw Postgres error).
+//
+// v5 (30.10.2026, RS-0091): request_correction also stores the reason in
+// runs.correction_note, which the driver sees in My laps and answers via the
+// correct-run function.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
@@ -141,6 +145,7 @@ Deno.serve(async (req) => {
         .eq("type", "video_link")
         .eq("visibility", "public")
         .eq("retention_state", "active")
+        .limit(1)
         .maybeSingle();
       if (!videoEvidence) {
         return jsonResponse(
@@ -197,7 +202,8 @@ Deno.serve(async (req) => {
       if (!reason) return jsonResponse({ error: "reason is required" }, 400);
       const run = await loadRun(run_id);
       if (!run) return jsonResponse({ error: "run not found" }, 404);
-      const update = { review_status: "needs_correction", publication_status: "hidden" };
+      // RS-0091: the reason is what the driver reads in My laps
+      const update = { review_status: "needs_correction", publication_status: "hidden", correction_note: reason.slice(0, 1000) };
       const { error } = await admin.from("runs").update(update).eq("run_id", run_id);
       if (error) return jsonResponse({ error: error.message }, 422);
       await logAction(run_id, null, "request_correction", { review_status: run.review_status }, update, reason);

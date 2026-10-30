@@ -150,6 +150,7 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
   :global(.decision-msg.is-error) { color: var(--lr-coral); }
   :global(.decision-msg.is-ok) { color: #D9F58E; }
   :global(.decision-hint) { margin: .4rem 0 0; color: var(--gh-muted); font-size: .76rem; }
+  :global(.corr-note) { margin: 0 0 16px; } /* RS-0091: correction asked / done */
 
   :global(.override-box) { border-color: var(--gh-yellow); }
   :global(.override-grid) { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .9rem; margin-bottom: .3rem; }
@@ -408,6 +409,7 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
         `run_id, driver_id, vehicle_id, track_id, lap_time_ms, platform,
          vehicle_text_observed, vehicle_state, game_version, standard_version,
          review_status, publication_status, verification_tier, display_name_consent,
+         correction_note, corrected_at, correction_prev,
          submitted_at, driven_at, created_at,
          drivers(display_name),
          vehicles(make, model),
@@ -465,6 +467,8 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
       .map((run) => {
         const tags = [];
         if (run.review_status === 'needs_correction') tags.push('<span class="queue-tag tag-correction">Needs Correction</span>');
+        // RS-0091: the driver sent a correction -> check again
+        else if (run.corrected_at && ['submitted', 'under_review'].includes(run.review_status)) tags.push('<span class="queue-tag tag-correction">Corrected</span>');
         if (hasPublicVideo(run)) tags.push('<span class="queue-tag tag-video">Video</span>');
         const isActive = run.run_id === selectedRunId;
         return `
@@ -518,8 +522,25 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
     await loadAutomatedChecks(run);
   }
 
+  // RS-0091: what was asked and what the driver changed
+  function correctionHtml(run) {
+    const e = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    if (run.review_status === 'needs_correction') {
+      return `<p class="lr-note lr-note-warn corr-note"><b>Waiting for the driver.</b> Asked: “${e(run.correction_note ?? '—')}”</p>`;
+    }
+    if (!run.corrected_at) return '';
+    const p = run.correction_prev ?? {};
+    const changes = [];
+    if (p.vehicle_id && p.vehicle_id !== run.vehicle_id) changes.push(`car was ${e(p.vehicle_label ?? p.vehicle_id)}`);
+    if (p.lap_time_ms && p.lap_time_ms !== run.lap_time_ms) changes.push(`time was ${formatLapTime(p.lap_time_ms)}`);
+    if (p.new_screenshot) changes.push('new screenshot (shown below; the old one stays on file)');
+    return `<p class="lr-note corr-note"><b>Corrected by the driver</b> on ${new Date(run.corrected_at).toLocaleString()}. You asked: “${e(run.correction_note ?? '—')}” ${changes.length ? `Changes: ${changes.join(', ')}.` : 'No field changed.'}</p>`;
+  }
+
   function renderReviewPanel(run) {
-    const screenshotEvidence = (run.evidence ?? []).find((e) => e.type === 'screenshot');
+    // newest screenshot first: a correction (RS-0091) can add a second one
+    const shots = (run.evidence ?? []).filter((e) => e.type === 'screenshot').sort((a, b) => String(b.submitted_at).localeCompare(String(a.submitted_at)));
+    const screenshotEvidence = shots[0];
     const videoEvidence = (run.evidence ?? []).find((e) => e.type === 'video_link');
     const canVerify = hasPublicVideo(run);
     const isAccepted = run.review_status === 'accepted';
@@ -537,6 +558,7 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
         </div>
       </div>
 
+      ${correctionHtml(run)}
       <div class="review-grid">
         <div class="review-box">
           <div class="review-box-head"><h3>Evidence</h3><span>Moderator only</span></div>
@@ -624,6 +646,7 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
       <div class="review-box decision-box">
         <div class="review-box-head"><h3>Decision</h3><span>Reason required for correction, reject or invalidate</span></div>
         <textarea id="decision-reason" placeholder="Moderator reason / internal note"></textarea>
+        <p class="decision-hint">For “Request Correction” the driver sees this reason in My laps – write it to them, e.g. “The screenshot shows a Pfister Comet, please pick that car.”</p>
         <div class="decision-actions">
           ${!isAccepted ? `<button type="button" class="btn btn-s" data-action="request_correction">Request Correction</button>` : ''}
           ${!isAccepted ? `<button type="button" class="btn btn-danger" data-action="reject">Reject</button>` : ''}

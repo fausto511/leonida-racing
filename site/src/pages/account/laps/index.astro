@@ -1,7 +1,11 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import AccountHead from '../../../components/AccountHead.astro';
+import { vehicleOptions } from '../../../data/vehicles';
 const base = import.meta.env.BASE_URL;
+// "Correct this lap" (RS-0091): every car, grouped by make, for the car field
+const makes = [...new Set(vehicleOptions.map((v) => v.make))].sort((a, b) => a.localeCompare(b));
+const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) => v.make === m).sort((a, b) => a.model.localeCompare(b.model)) }));
 ---
 <Base
   title="My Account"
@@ -69,7 +73,8 @@ const base = import.meta.env.BASE_URL;
                 <th scope="col">Lap Time</th>
                 <th scope="col">Status</th>
                 <th scope="col">Submitted</th>
-                <th scope="col"><span class="sr-only">Actions</span></th>
+                <th scope="col" class="c-act"><span class="sr-only">Video</span></th>
+                <th scope="col" class="c-act"><span class="sr-only">Withdraw</span></th>
               </tr>
             </thead>
             <tbody id="submissions-tbody"></tbody>
@@ -80,6 +85,43 @@ const base = import.meta.env.BASE_URL;
         </div>
       </section>
     </div>
+
+    <!-- RS-0091: inline forms in My Submissions. Texts are Claude placeholders for Codex (DEC-0088). -->
+    <template id="fix-tpl">
+      <form class="fix-form" novalidate>
+        <div class="fix-fields">
+          <label class="fix-field"><span class="fix-label">Car</span>
+            <select name="vehicle_id">{carsByMake.map((g) => <optgroup label={g.make}>{g.cars.map((v) => <option value={v.id}>{v.make} {v.model}</option>)}</optgroup>)}</select>
+          </label>
+          <label class="fix-field"><span class="fix-label">Lap time</span>
+            <input name="lap_time" type="text" inputmode="numeric" autocomplete="off" placeholder="1:24.683" />
+            <small class="fix-hint">Just type the digits: 124683 becomes 1:24.683.</small>
+          </label>
+          <label class="fix-field fix-wide"><span class="fix-label">New screenshot <span class="fix-opt">optional</span></span>
+            <input name="shot" type="file" accept="image/*" />
+            <small class="fix-hint">Only needed if the moderator asked for a clearer screenshot. Otherwise your current one stays.</small>
+          </label>
+        </div>
+        <p class="lr-note is-error fix-msg" role="status" hidden></p>
+        <div class="fix-acts">
+          <button type="submit" class="btn btn-p btn-md">Send for review</button>
+          <button type="button" class="btn btn-s btn-md" data-sub-cancel>Cancel</button>
+        </div>
+      </form>
+    </template>
+    <template id="vid-tpl">
+      <form class="fix-form vid-form" novalidate>
+        <label class="fix-field fix-wide"><span class="fix-label">Video link</span>
+          <input name="video_url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://youtube.com/watch?v=…" />
+          <small class="fix-hint">The full, uncut lap. A moderator watches it before your time counts as video-verified.</small>
+        </label>
+        <p class="lr-note is-error fix-msg" role="status" hidden></p>
+        <div class="fix-acts">
+          <button type="submit" class="btn btn-p btn-md">Add video</button>
+          <button type="button" class="btn btn-s btn-md" data-sub-cancel>Cancel</button>
+        </div>
+      </form>
+    </template>
   </section>
 </Base>
 
@@ -111,11 +153,42 @@ const base = import.meta.env.BASE_URL;
   :global(.acc-table .c-time) { font-weight: 600; }
   :global(.acc-table .rank-cell) { font-family: var(--gh-font-display); font-weight: 800; }
   :global(.acc-table .c-act) { text-align: right; }
-  :global(.acc-table .c-act .btn + .btn) { margin-left: 8px; }
+  :global(.acc-table .c-act) { width: 1%; }
+  :global(.acc-table .c-act + .c-act) { padding-left: 0; } /* Video and Withdraw each in their own column (Fausto 30.10.) */
   :global(.acc-table .m) { display: none; }
   .empty-note { margin: 0; padding: 18px; color: var(--lr-muted); font-size: 14px; }
   .empty-note a { color: var(--lr-text); text-decoration: underline; }
+  /* RS-0091: a second row under a submission for the correction request and the inline forms */
+  :global(.acc-table tr.has-sub td) { border-bottom: 0; }
+  :global(.acc-table tr.sub-row:hover) { background: none; }
+  :global(.acc-table tr.sub-row > td) { padding: 0 18px 16px; white-space: normal; }
+  :global(.sub-box) { display: flex; flex-direction: column; gap: 14px; }
+  :global(.fix-note) { margin: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+  :global(.fix-note p) { margin: 0; max-width: 720px; }
+  :global(.fix-note b) { display: block; margin-bottom: 2px; color: var(--lr-text); font-weight: 600; }
+  :global(.fix-form) { display: flex; flex-direction: column; gap: 16px; padding: 18px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-bg); }
+  :global(.fix-fields) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
+  :global(.fix-field) { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  :global(.fix-wide) { grid-column: 1 / -1; }
+  :global(.fix-label) { font-size: 14px; font-weight: 600; color: var(--lr-text); }
+  :global(.fix-opt) { margin-left: 6px; font-weight: 400; color: var(--lr-muted); }
+  :global(.fix-hint) { font-size: 13px; line-height: 1.45; color: var(--lr-soft); }
+  :global(.fix-field :is(input:not([type="file"]), select)) { height: var(--lr-field-h); box-sizing: border-box; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: var(--lr-card); color: var(--lr-text); font: 14px var(--gh-font-body); color-scheme: dark; }
+  :global(.fix-field input[type="file"]) { font: 14px var(--gh-font-body); color: var(--lr-soft); }
+  :global(.fix-field input[type="file"]::file-selector-button) { height: 36px; margin-right: 12px; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; color: var(--lr-text); font: 600 14px var(--gh-font-body); cursor: pointer; }
+  :global(.fix-field input[type="file"]::file-selector-button:hover) { border-color: var(--lr-text); }
+  :global(.acc-table [hidden]) { display: none !important; } /* rows are built at runtime, the scoped [hidden] rule above does not reach them */
+  :global(.fix-field :is(input, select):focus) { outline: none; border-color: var(--lr-field-focus); }
+  :global(.fix-field [aria-invalid="true"]) { border-color: var(--lr-coral); }
+  :global(.fix-msg) { margin: 0; }
+  :global(.fix-acts) { display: flex; flex-wrap: wrap; gap: 10px; }
   @media (max-width: 760px) {
+    :global(.acc-table tr.has-sub) { border-bottom: 0; }
+    :global(.acc-table tr.sub-row) { padding-top: 0; }
+    :global(.acc-table tr.sub-row > td) { grid-column: 1 / -1; padding: 0; }
+    :global(.fix-fields) { grid-template-columns: 1fr; }
+    :global(.fix-form) { padding: 14px; }
+    :global(.fix-acts .btn) { flex: 1 1 auto; }
     .acc-table thead { display: none; }
     :global(.acc-table), :global(.acc-table tbody) { display: block; }
     :global(.acc-table tr) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--lr-line-soft); }
@@ -126,20 +199,25 @@ const base = import.meta.env.BASE_URL;
     :global(.acc-table .c-track), :global(.acc-table .c-date) { display: none; }
     :global(.acc-table .c-meta), :global(.acc-table .c-rank) { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--lr-muted); font-size: 13px; }
     /* actions get their own line on phones, so status and date never get squeezed */
-    :global(.acc-table .c-act) { grid-column: 1 / -1; text-align: left; margin-top: 4px; }
-    :global(.acc-table .c-act:empty) { display: none; }
+    /* phones: + Video always left, Withdraw always right, on one line */
+    :global(.acc-table .c-act) { width: auto; }
+    :global(.acc-table .c-vid) { grid-column: 1; justify-self: start; margin-top: 4px; }
+    :global(.acc-table .c-wd) { grid-column: 2; justify-self: end; margin-top: 4px; }
+    :global(.acc-table :is(.c-vid, .c-wd):empty) { display: none; }
     :global(.acc-table .m) { display: inline; }
   }
 </style>
 
 <script>
   import { getSupabase, backendConfigured, SUPABASE_URL, SUPABASE_ANON_KEY } from '../../../scripts/supabase-client';
+  import { normalizeLapTime, parseLapTimeToMs, fmtLapMs, prepareImage, safeName } from '../../../scripts/lap-input';
 
   // No separate env var -- withdraw-run lives at the standard Supabase
   // Edge Function path under the same project, same pattern as every
   // other *_URL in this codebase deriving from PUBLIC_SUPABASE_URL.
   const WITHDRAW_RUN_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/withdraw-run` : '';
   const ADD_VIDEO_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/add-video-evidence` : '';
+  const CORRECT_RUN_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/correct-run` : '';
 
   const noticeEl = document.getElementById('backend-notice');
   const authBoxEl = document.getElementById('auth-box');
@@ -261,36 +339,108 @@ const base = import.meta.env.BASE_URL;
     }
   }
 
-  // Lets a driver attach a video link to an already-submitted run --
-  // screenshot-only at first, video found/uploaded later. Same
-  // re-verification happens server-side (ownership, not already
-  // rejected/invalidated/verified); this is just the UI trigger.
-  async function addVideo(runId, btnEl) {
-    if (!currentSession) return;
-    const url = window.prompt('Paste the video link (YouTube, etc.) for this run:');
-    if (!url || !url.trim()) return;
-    btnEl.disabled = true;
-    const originalLabel = btnEl.textContent;
-    btnEl.textContent = 'Adding…';
-    submissionsMsgEl.hidden = true;
+  // ---- inline forms under a submission (RS-0091): "+ Video" and "Correct this lap" ----
+  // One open form at a time; it sits in the row's second line (tr.sub-row).
+  const runsById = new Map();
+  const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  function subRowFor(runId) {
+    const main = submissionsTbodyEl.querySelector(`tr[data-run="${runId}"]`);
+    let sub = submissionsTbodyEl.querySelector(`tr.sub-row[data-for="${runId}"]`);
+    if (!sub) {
+      sub = document.createElement('tr');
+      sub.className = 'sub-row';
+      sub.dataset.for = runId;
+      sub.innerHTML = '<td colspan="7"><div class="sub-box"></div></td>';
+      main.after(sub);
+      main.classList.add('has-sub');
+    }
+    return sub;
+  }
+  function closeForms() {
+    submissionsTbodyEl.querySelectorAll('.fix-form').forEach((f) => {
+      const sub = f.closest('tr.sub-row');
+      f.remove();
+      // a row that only held the form goes away again
+      if (sub && !sub.querySelector('.fix-note')) { submissionsTbodyEl.querySelector(`tr[data-run="${sub.dataset.for}"]`)?.classList.remove('has-sub'); sub.remove(); }
+    });
+    submissionsTbodyEl.querySelectorAll('[data-fix-open]').forEach((b) => (b.hidden = false));
+  }
+  function openForm(runId, kind) {
+    closeForms();
+    const run = runsById.get(runId);
+    if (!run) return;
+    const sub = subRowFor(runId);
+    const tpl = document.getElementById(kind === 'video' ? 'vid-tpl' : 'fix-tpl');
+    const form = tpl.content.firstElementChild.cloneNode(true);
+    form.dataset.run = runId;
+    form.dataset.kind = kind;
+    if (kind === 'fix') {
+      form.vehicle_id.value = run.vehicle_id;
+      form.lap_time.value = fmtLapMs(run.lap_time_ms);
+      form.lap_time.addEventListener('blur', () => { const n = normalizeLapTime(form.lap_time.value); if (n) form.lap_time.value = n; });
+      sub.querySelector('[data-fix-open]')?.setAttribute('hidden', '');
+    }
+    sub.querySelector('.sub-box').appendChild(form);
+    (kind === 'fix' ? form.vehicle_id : form.video_url).focus();
+  }
+  function formError(form, text) {
+    const m = form.querySelector('.fix-msg');
+    m.textContent = text; m.hidden = !text;
+  }
+  async function callFn(url, payload) {
+    const sb = getSupabase();
+    const { data: fresh } = await sb.auth.getSession();
+    const token = fresh?.session?.access_token ?? currentSession?.access_token;
+    if (!token) throw new Error('Your login expired. Please log in again.');
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, apikey: SUPABASE_ANON_KEY },
+      body: JSON.stringify(payload),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.detail ?? body.error ?? `Request failed (${res.status})`);
+    return body;
+  }
+  async function submitVideo(form) {
+    const url = form.video_url.value.trim();
+    let ok = false;
+    try { ok = /^https?:$/.test(new URL(url).protocol); } catch {}
+    form.video_url.setAttribute('aria-invalid', String(!ok));
+    if (!ok) { formError(form, 'Paste the full link to your video, starting with https://'); return; }
+    const btn = form.querySelector('[type="submit"]');
+    btn.disabled = true; btn.textContent = 'Adding…'; formError(form, '');
     try {
-      const res = await fetch(ADD_VIDEO_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${currentSession.access_token}`,
-          apikey: SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ run_id: runId, video_url: url.trim() }),
-      });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.detail ?? body.error ?? `add-video-evidence returned ${res.status}`);
+      await callFn(ADD_VIDEO_URL, { run_id: form.dataset.run, video_url: url });
       await loadAccountData();
     } catch (err) {
-      submissionsMsgEl.hidden = false;
-      submissionsMsgEl.textContent = err instanceof Error ? err.message : 'Could not add video -- please try again.';
-      btnEl.disabled = false;
-      btnEl.textContent = originalLabel;
+      formError(form, err instanceof Error ? err.message : 'Could not add the video. Please try again.');
+      btn.disabled = false; btn.textContent = 'Add video';
+    }
+  }
+  async function submitFix(form) {
+    const run = runsById.get(form.dataset.run);
+    const ms = parseLapTimeToMs(form.lap_time.value);
+    form.lap_time.setAttribute('aria-invalid', String(ms === null));
+    if (ms === null) { formError(form, 'Enter the lap time, e.g. 124683 or 1:24.683.'); return; }
+    const file = form.shot.files?.[0] ?? null;
+    const btn = form.querySelector('[type="submit"]');
+    btn.disabled = true; formError(form, '');
+    try {
+      let screenshot = null;
+      if (file) {
+        btn.textContent = 'Uploading screenshot…';
+        const shot = await prepareImage(file);
+        const path = `${currentSession.user.id}/${Date.now()}-${safeName(shot.name)}`;
+        const { error: upErr } = await getSupabase().storage.from('lap-evidence').upload(path, shot.blob, { contentType: shot.type });
+        if (upErr) throw new Error('Screenshot upload failed. Check your connection and try again.');
+        screenshot = { storage_reference: path, mime_type: shot.type, byte_size: shot.size };
+      }
+      btn.textContent = 'Sending…';
+      await callFn(CORRECT_RUN_URL, { run_id: run.run_id, vehicle_id: form.vehicle_id.value, lap_time_ms: ms, screenshot });
+      await loadAccountData();
+    } catch (err) {
+      formError(form, err instanceof Error ? err.message : 'Could not send the correction. Please try again.');
+      btn.disabled = false; btn.textContent = 'Send for review';
     }
   }
 
@@ -332,7 +482,7 @@ const base = import.meta.env.BASE_URL;
     // first -- this is the activity log, unlike My Records below.
     const { data: allRuns, error: allRunsErr } = await sb
       .from('runs')
-      .select('run_id, vehicle_id, track_id, lap_time_ms, review_status, publication_status, verification_tier, submitted_at, created_at, vehicles(make, model), tracks(name)')
+      .select('run_id, vehicle_id, track_id, lap_time_ms, review_status, publication_status, verification_tier, correction_note, submitted_at, created_at, vehicles(make, model), tracks(name)')
       .eq('driver_id', driverRow.driver_id)
       .order('created_at', { ascending: false });
     if (seq !== loadSeq) return;
@@ -345,19 +495,25 @@ const base = import.meta.env.BASE_URL;
       submissionsEmptyEl.hidden = false;
     } else {
       submissionsEmptyEl.hidden = true;
+      runsById.clear();
       for (const run of allRuns) {
+        runsById.set(run.run_id, run);
         const tr = document.createElement('tr');
+        tr.dataset.run = run.run_id;
         const info = statusInfo(run);
         const canWithdraw = run.publication_status === 'hidden';
         const canAddVideo = run.review_status !== 'rejected' && run.review_status !== 'invalidated'
           && run.verification_tier !== 'verified';
-        const actionButtons = [
-          canAddVideo ? '<button type="button" class="btn btn-s btn-sm add-video-btn" data-run-id="' + run.run_id + '">+ Video</button>' : '',
-          canWithdraw ? '<button type="button" class="btn btn-danger btn-sm withdraw-btn" data-run-id="' + run.run_id + '">Withdraw</button>' : '',
-        ].filter(Boolean).join('');
+        const videoBtn = canAddVideo ? '<button type="button" class="btn btn-s btn-sm add-video-btn" data-run-id="' + run.run_id + '">+ Video</button>' : '';
+        const withdrawBtn = canWithdraw ? '<button type="button" class="btn btn-danger btn-sm withdraw-btn" data-run-id="' + run.run_id + '">Withdraw</button>' : '';
         const date = formatDate(run.submitted_at ?? run.created_at);
-        tr.innerHTML = `<td class="c-car">${vehicleCell(run)}</td><td class="c-track">${trackCell(run)}</td><td class="c-time">${formatLapTime(run.lap_time_ms)}</td><td class="c-meta"><span class="lr-status ${info.cls}">${info.label}</span><span class="m">· ${date}</span></td><td class="c-date">${date}</td><td class="c-act">${actionButtons}</td>`;
+        tr.innerHTML = `<td class="c-car">${vehicleCell(run)}</td><td class="c-track">${trackCell(run)}</td><td class="c-time">${formatLapTime(run.lap_time_ms)}</td><td class="c-meta"><span class="lr-status ${info.cls}">${info.label}</span><span class="m">· ${date}</span></td><td class="c-date">${date}</td><td class="c-act c-vid">${videoBtn}</td><td class="c-act c-wd">${withdrawBtn}</td>`;
         submissionsTbodyEl.appendChild(tr);
+        // RS-0091: what the moderator wants corrected, right under the lap
+        if (run.review_status === 'needs_correction') {
+          const sub = subRowFor(run.run_id);
+          sub.querySelector('.sub-box').innerHTML = `<div class="lr-note lr-note-warn fix-note"><p><b>A moderator asked for a correction</b>${run.correction_note ? esc(run.correction_note) : 'Check the car and lap time against your screenshot.'}</p><button type="button" class="btn btn-p btn-sm" data-fix-open="${run.run_id}">Correct this lap</button></div>`;
+        }
       }
     }
 
@@ -430,9 +586,16 @@ const base = import.meta.env.BASE_URL;
         return;
       }
       const videoBtn = ev.target.closest('.add-video-btn');
-      if (videoBtn) {
-        addVideo(videoBtn.dataset.runId, videoBtn);
-      }
+      if (videoBtn) { openForm(videoBtn.dataset.runId, 'video'); return; }
+      const fixBtn = ev.target.closest('[data-fix-open]');
+      if (fixBtn) { openForm(fixBtn.dataset.fixOpen, 'fix'); return; }
+      if (ev.target.closest('[data-sub-cancel]')) closeForms();
+    });
+    submissionsTbodyEl.addEventListener('submit', (ev) => {
+      const form = ev.target.closest('.fix-form');
+      if (!form) return;
+      ev.preventDefault();
+      if (form.dataset.kind === 'video') submitVideo(form); else submitFix(form);
     });
 
     document.getElementById('discord-signin-btn').addEventListener('click', async () => {
