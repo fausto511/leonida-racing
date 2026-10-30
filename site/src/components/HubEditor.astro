@@ -78,6 +78,7 @@ const base = import.meta.env.BASE_URL;
             <div class="grid">
               <label class="span2">Crew name * <small>max. 22 characters</small><input type="text" name="name" maxlength="22" required /></label>
               <label>Crew tag * <small>exactly 4 letters/digits</small><input type="text" name="tag" maxlength="4" required class="tag-input" /></label>
+              <p class="span2 track-note lr-note" id="crew-identity-note" hidden>Crew name and tag are locked once the crew is live. Need a change? Ask a moderator.</p>
               <label>Crew color *<span class="color-row"><input type="color" name="color_picker" value="#F24B9D" /><input type="text" name="color" value="#F24B9D" maxlength="7" /></span></label>
               <label data-mod-only>URL slug * <small>auto from name</small><input type="text" name="slug" maxlength="48" required /></label>
               <fieldset class="span2 platforms-set"><legend>Platforms</legend>
@@ -246,6 +247,7 @@ const base = import.meta.env.BASE_URL;
 </div>
 
 <style>
+  #crew-form input[readonly] { opacity: .6; cursor: not-allowed; }
   [hidden] { display: none !important; }
   .notice { margin-bottom: 1.5rem; } /* box: .lr-note .lr-note-warn (DEC-0186) */
   .auth-box { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
@@ -916,6 +918,10 @@ const base = import.meta.env.BASE_URL;
       el.disabled = co && !['color', 'color_picker', 'join_mode'].includes(el.name);
     });
     $('crew-comm-note').hidden = !co;
+    // Name and tag are locked after approval (DB trigger crews_protect_identity, 30.10.2026)
+    const idLocked = Boolean(row) && !isMod;
+    cf.name.readOnly = idLocked; cf.tag.readOnly = idLocked;
+    $('crew-identity-note').hidden = !idLocked || co;
     showModNote('crew-mod-note', r, isMod);
     const ps = crewForm.querySelector<HTMLElement>('.pub-state')!;
     ps.textContent = r.is_published ? 'Live on the site' : 'Draft — a moderator publishes it';
