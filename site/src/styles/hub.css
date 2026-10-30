@@ -279,13 +279,16 @@ a.crew-pill { text-decoration: none; }
 .tr-row[hidden] { display: none; }
 .tr-main { min-width: 0; }
 .tr-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.tr-title { margin: 10px 0 0; font-size: var(--lr-h3); font-weight: 700; line-height: 1.25; }
+.tr-title { margin: 0; font-size: var(--lr-h3); font-weight: 700; line-height: 1.25; }
 .tr-by { margin: 4px 0 0; font-size: 14px; color: var(--lr-muted); }
 .tr-by strong { color: var(--lr-text); font-weight: 600; }
 .tr-facts { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 10px 0 0; font-size: 14px; color: var(--lr-soft); }
 .tr-facts > span { display: inline-flex; align-items: center; gap: 6px; }
 .tr-classes { color: var(--lr-text); }
-.tr-dates { margin: 8px 0 0; color: var(--lr-muted); font-size: 12px; }
+.tr-dates { margin: 0; color: var(--lr-muted); font-size: 12px; }
+/* foot (DEC-0196, like the event row): chips left; added/updated + Report right */
+.tr-foot { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: -8px; } /* no line, like the event row foot */
+.tr-foot-r { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 /* Rating line (DEC-0146): average from 3 ratings + "Your rating" stars (hover fills up to the star) */
 .tr-rate { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; margin: 10px 0 0; font-size: 14px; color: var(--lr-muted); }
 .tr-avg b { color: var(--lr-lime); font-weight: 700; }
@@ -301,7 +304,7 @@ a.crew-pill { text-decoration: none; }
 .tr-side { display: flex; align-items: center; gap: 10px; }
 .tr-sc { white-space: nowrap; }
 .tr-sc.is-disabled { opacity: .45; cursor: not-allowed; }
-.tr-report { align-self: center; }
+.tr-report { font-size: 13px; }
 /* Save toggle: "Save" -> "Saved" (lime); hover on saved shows "Remove" (coral), same idea as the crew buttons */
 .tr-save { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .tr-save:hover { border-color: var(--lr-text); }
@@ -316,7 +319,7 @@ a.crew-pill { text-decoration: none; }
   .tr-row { grid-template-columns: 1fr; gap: 14px; padding: 16px; }
   .tr-side { display: grid; grid-template-columns: auto minmax(0,1fr); }
   .tr-sc { justify-content: center; }
-  .tr-report { grid-column: 1 / -1; justify-self: start; }
+
 }
 
 .ev-next-psn { display: inline-flex; align-items: center; gap: .45rem; color: var(--gh-muted); font-size: .8rem; }

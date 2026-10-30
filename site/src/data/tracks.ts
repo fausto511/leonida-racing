@@ -72,17 +72,19 @@ export function trackRateHtml(id: string, r: { avg?: number | null; count?: numb
   return `<p class="tr-rate">${avg}${stars}</p>`;
 }
 
-export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; preview?: boolean; saved?: boolean; rating?: { avg?: number | null; count?: number; my?: number; canRate?: boolean; unavailable?: boolean } } = {}): string {
+// Track row everywhere (DEC-0196, like the event row DEC-0195): title, creator, facts, rating; right:
+// Save + Open Social Club (or opts.side, e.g. status + Edit for own tracks); foot: chips left,
+// added/updated + Report right (chips moved out of the top).
+export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; preview?: boolean; saved?: boolean; side?: string; rating?: { avg?: number | null; count?: number; my?: number; canRate?: boolean; unavailable?: boolean } } = {}): string {
   const sc = t.social_club_url && /^https:\/\/socialclub\.rockstargames\.com\//.test(t.social_club_url) ? t.social_club_url : null;
   const players = t.players_min === t.players_max ? `${t.players_max}` : `${t.players_min}–${t.players_max}`;
   const edited = t.updated_at.slice(0, 10) !== t.created_at.slice(0, 10);
+  const sideDefault = `    ${opts.preview ? '' : trackSaveBtn(t.track_id, Boolean(opts.saved))}
+    ${sc
+      ? `<a class="btn btn-s btn-md tr-sc" href="${esc(sc)}" target="_blank" rel="noopener" title="Open the job on Social Club to bookmark it for the game">Open Social Club <span class="lr-ext-after" aria-hidden="true"></span></a>`
+      : `<span class="btn btn-s btn-md tr-sc is-disabled" aria-disabled="true" title="Sample track — no real job">Open Social Club <span class="lr-ext-after" aria-hidden="true"></span></span>`}`;
   return `<article class="tr-row" data-track-id="${esc(t.track_id)}" data-layout="${esc(t.layout)}" data-types="${esc(t.race_types.join('|'))}" data-classes="${esc(t.vehicle_classes.join('|'))}" data-pmin="${t.players_min}" data-pmax="${t.players_max}">
   <div class="tr-main">
-    <div class="tr-chips">
-      ${t.race_types.map((r) => `<span class="chip chip-type">${esc(raceTypeLabels[r] ?? r)}</span>`).join('')}
-      <span class="chip">${esc(layoutLabels[t.layout] ?? t.layout)}</span>
-      ${opts.sample && !opts.preview ? '<span class="chip chip-sample" title="Example track — not a real job">Sample</span>' : ''}
-    </div>
     <h3 class="tr-title">${esc(t.title)}</h3>
     ${t.creator_name ? `<p class="tr-by">by <strong>${esc(t.creator_name)}</strong></p>` : ''}
     <p class="tr-facts">
@@ -91,14 +93,17 @@ export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; previe
       <span class="tr-classes">${t.vehicle_classes.map(esc).join(' · ')}</span>
     </p>
     ${opts.preview ? '' : trackRateHtml(t.track_id, opts.rating)}
-    <p class="tr-dates">Added ${esc(fmtDate(t.created_at))}${edited ? ` · updated ${esc(fmtDate(t.updated_at))}` : ''}</p>
   </div>
   <div class="tr-side">
-    ${opts.preview ? '' : trackSaveBtn(t.track_id, Boolean(opts.saved))}
-    ${sc
-      ? `<a class="btn btn-s tr-sc" href="${esc(sc)}" target="_blank" rel="noopener" title="Open the job on Social Club to bookmark it for the game">Open Social Club <span class="lr-ext-after" aria-hidden="true"></span></a>`
-      : `<span class="btn btn-s tr-sc is-disabled" aria-disabled="true" title="Sample track — no real job">Open Social Club <span class="lr-ext-after" aria-hidden="true"></span></span>`}
-    ${!opts.sample ? `<a class="ev-report tr-report" href="${esc(`${import.meta.env.BASE_URL}report-content/`)}" title="Report this track to the moderators">Report</a>` : ''}
+${opts.side ?? sideDefault}
+  </div>
+  <div class="tr-foot">
+    <div class="tr-chips">
+      ${t.race_types.map((r) => `<span class="chip chip-type">${esc(raceTypeLabels[r] ?? r)}</span>`).join('')}
+      <span class="chip">${esc(layoutLabels[t.layout] ?? t.layout)}</span>
+      ${opts.sample && !opts.preview ? '<span class="chip chip-sample" title="Example track — not a real job">Sample</span>' : ''}
+    </div>
+    <div class="tr-foot-r"><span class="tr-dates">Added ${esc(fmtDate(t.created_at))}${edited ? ` · updated ${esc(fmtDate(t.updated_at))}` : ''}</span>${!opts.sample ? `<a class="ev-report tr-report" href="${esc(`${import.meta.env.BASE_URL}report-content/`)}" title="Report this track to the moderators">Report</a>` : ''}</div>
   </div>
 </article>`;
 }

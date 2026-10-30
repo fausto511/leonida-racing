@@ -349,6 +349,18 @@ const base = import.meta.env.BASE_URL;
     #hc-root[data-mode="events"] #event-form .preview-wrap { position: sticky; top: 24px; margin-top: 0; padding-top: 0; border-top: 0; }
   }
 
+  /* ---- My Account > Tracks (DEC-0196): same as Events -- the page lists the tracks, the editor only
+     opens on Edit / Submit, preview next to the form ---- */
+  #hc-root[data-mode="tracks"] .mod-layout { display: block; }
+  #hc-root[data-mode="tracks"] .list-panel, #hc-root[data-mode="tracks"] .editor-placeholder { display: none; }
+  #hc-root[data-mode="tracks"] .editor-panel { padding: 0; min-height: 0; border: 0; background: none; }
+  #hc-root[data-mode="tracks"] #track-form .form-head { display: none; }
+  @media (min-width: 861px) {
+    #hc-root[data-mode="tracks"] #track-form:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr); gap: 0 32px; align-items: start; }
+    #hc-root[data-mode="tracks"] #track-form > :not(.grid):not(.preview-wrap) { grid-column: 1 / -1; }
+    #hc-root[data-mode="tracks"] #track-form .preview-wrap { position: sticky; top: 24px; margin-top: 0; padding-top: 0; border-top: 0; }
+  }
+
   /* ---- My Account > Crews (DEC-0190): no list column; with several crews the list becomes a
      row of crew buttons; Members | Crew card | Discord feed switch; preview next to the form ---- */
   #hc-root[data-mode="crew"] .mod-layout { display: block; }
@@ -634,6 +646,16 @@ const base = import.meta.env.BASE_URL;
     });
   }
   const eventsChanged = () => { if (MODE === 'events') rootEl.dispatchEvent(new CustomEvent('hc-events-changed', { bubbles: true })); };
+  // ---- My Account > Tracks (DEC-0196): same pattern as Events
+  if (MODE === 'tracks') {
+    document.addEventListener('hc-open-track', (e: any) => {
+      if (contentEl.hidden) return;
+      const id = e.detail?.id ?? null;
+      if (id) { const row = tracks.find((x) => x.track_id === id); if (row) openTrack(row); }
+      else if (isMod || isCreator) openTrack(null);
+    });
+  }
+  const tracksChanged = () => { if (MODE === 'tracks') rootEl.dispatchEvent(new CustomEvent('hc-tracks-changed', { bubbles: true })); };
 
   function showForm(which: Kind | null) {
     placeholderEl.hidden = which !== null;
@@ -1244,6 +1266,7 @@ const base = import.meta.env.BASE_URL;
     await loadAll();
     openTrack(data);
     msg(trackForm, data.is_published ? 'Saved — live on the Tracks page.' : isMod ? 'Saved — not published.' : 'Saved — a moderator checks it before it goes live.');
+    tracksChanged();
   });
 
   // ------------------------------------------------------------ delete (two-step, no browser dialog)
@@ -1282,6 +1305,7 @@ const base = import.meta.env.BASE_URL;
       await loadAll();
       placeholderEl.textContent = 'Deleted.';
       if (form === eventForm) eventsChanged();
+      if (form === trackForm) tracksChanged();
     });
   });
 
