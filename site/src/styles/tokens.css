@@ -433,3 +433,7 @@ svg[viewBox="0 0 24 24"] :is(path, circle, rect, line, polyline, polygon, ellips
 .ico-discord, .ico-discord svg { color: var(--lr-discord); fill: var(--lr-discord); }
 /* Units (DEC-0197): both values are in the page, <html data-units> picks one. No JS = imperial. */
 html[data-units="metric"] .u-imp, html:not([data-units="metric"]) .u-met { display: none; }
+
+/* no-emoji note under a text field (scripts/no-emoji.ts, Fausto 31.10.2026) */
+.lr-noemoji { position: absolute; z-index: 1000; padding: 6px 10px; border-radius: 6px; background: var(--lr-card); border: 1px solid var(--lr-orange-border); color: var(--lr-orange); font-size: 12px; font-weight: 600; pointer-events: none; }
+.lr-noemoji[hidden] { display: none; }
