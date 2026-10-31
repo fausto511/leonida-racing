@@ -161,6 +161,8 @@ const steps = [
 <script>
   import { sampleTracks, trackRowHtml, type CommunityTrack } from '../../../data/tracks';
   import { fetchLiveTracks } from '../../../scripts/hub-live';
+  import { wireSelectLabels } from '../../../scripts/sel-label';
+  wireSelectLabels();
   import { loadSaved, toggleSaved, loginToSave, loadRatings, rateTrack, loginToRate, type SavedState, type Ratings } from '../../../scripts/track-saves';
   const $ = (id: string) => document.getElementById(id)!;
   const root = $('tr-root'), emptyEl = $('tr-empty'), flagEl = $('tr-flag'), msgEl = $('tr-msg');

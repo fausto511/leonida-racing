@@ -178,6 +178,8 @@ const dc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
   import { createCrewMembership, CREW_LIMIT, type CrewMine } from '../../../scripts/crew-membership';
   import { languageLabel } from '../../../data/languages';
   import { fetchLiveCrews, fetchRoster } from '../../../scripts/hub-live';
+  import { wireSelectLabels } from '../../../scripts/sel-label';
+  wireSelectLabels();
 
   const base = import.meta.env.BASE_URL;
   const PAGE = 12;
