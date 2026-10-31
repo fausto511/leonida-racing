@@ -1,4 +1,4 @@
-// Site dropdown (Fausto 31.10.2026, DEC-0200): every <select> gets the same look instead of the
+// Site dropdown (Fausto 31.10.2026, DEC-0202): every <select> gets the same look instead of the
 // browser's own grey list. The native <select> stays in the page (forms, change events, values,
 // screen readers' fallback); a button shows its value and opens our list. On phones the list
 // opens as a sheet from the bottom with big touch targets.
