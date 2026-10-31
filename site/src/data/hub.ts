@@ -35,6 +35,8 @@ export interface HubCrew {
   is_featured?: boolean;
   /** set by moderators: "Official" badge (site crews, original creators; Fausto 2026-10-07) */
   is_official?: boolean;
+  /** DEC-0201: external crew listed by the end of GTA VI launch week; set on approval, kept for good */
+  is_launch_crew?: boolean;
   /** DEC-0144: 'open' = join at once, 'request' = leader/commissioner approves (default) */
   join_mode?: 'open' | 'request';
 }
@@ -246,6 +248,8 @@ export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: bo
   const chips = shown.map((f) => `<span class="crew-chip">${esc(f)}</span>`).concat(rest.length ? [`<span class="crew-chip" title="${esc(rest.join(', '))}">+${rest.length}</span>`] : []).join('');
   const badges = [
     c.is_official ? '<span class="crew-badge b-official" title="Official crew of this site or of the original creators">Official</span>' : '',
+    // DEC-0201. COPY: Claude placeholder, Codex review pending.
+    c.is_launch_crew ? '<span class="crew-badge b-launch" title="Listed by launch week of GTA VI">Launch Crew</span>' : '',
     c.is_featured ? '<span class="crew-badge b-featured">Featured</span>' : '',
     c.is_partner ? '<span class="crew-badge b-partner">Partner</span>' : '',
     opts.badges ?? '',

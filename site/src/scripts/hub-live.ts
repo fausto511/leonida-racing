@@ -11,7 +11,7 @@ export async function fetchLiveCrews(): Promise<HubCrew[] | null> {
   try {
     const { data, error } = await getSupabase()
       .from('crews')
-      .select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_featured,is_official,sort_order,join_mode')
+      .select('crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_featured,is_official,is_launch_crew,sort_order,join_mode')
       .eq('is_published', true)
       // Featured crews first, then by sort order (lower = earlier) -- Fausto 2026-10-07.
       // 100 = default = no fixed spot, so unset crews come after the ones placed on purpose (Fausto 2026-10-14).

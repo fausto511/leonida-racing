@@ -56,7 +56,7 @@ await writeFile(OUT, JSON.stringify(data, null, 1) + '\n');
 // browser still refreshes them live. Test events are hidden by RLS for anon.
 const since = new Date(Date.now() - 6 * 3600e3).toISOString();
 const [crews, events] = await Promise.all([
-  get('crews?is_published=eq.true&select=crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_featured,is_official,sort_order,join_mode&order=is_featured.desc,sort_order.asc,name.asc'),
+  get('crews?is_published=eq.true&select=crew_id,slug,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_partner,is_featured,is_official,is_launch_crew,sort_order,join_mode&order=is_featured.desc,sort_order.asc,name.asc'),
   get(`hub_events?is_published=eq.true&starts_at=gte.${encodeURIComponent(since)}&select=event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)&order=starts_at.asc&limit=200`),
 ]);
 const COMMUNITY_OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src/data/community.generated.json');

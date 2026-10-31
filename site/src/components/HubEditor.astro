@@ -106,6 +106,7 @@ const base = import.meta.env.BASE_URL;
               <label class="span2">Join mode<select name="join_mode"><option value="request">Request — approval required</option><option value="open">Open — join right away</option></select><small class="jm-hint" id="jm-hint" hidden>Switching to Open accepts all pending requests.</small></label>
               <p class="span2 track-note lr-note lr-note-warn" id="crew-comm-note" hidden>As a commissioner, you can manage requests, invitations and member bans, and change the crew color and join mode. You can’t remove the leader or other commissioners. Other crew settings and role changes are handled by the leader.</p>
               <label class="check" data-mod-only><input type="checkbox" name="is_official" /> Official crew <small>this site's own crews or the original creators</small></label>
+              <label class="check" data-mod-only><input type="checkbox" name="is_launch_crew" /> Launch Crew <small>DEC-0201: set automatically on approval; tick only to correct</small></label>
               <label class="check" data-mod-only><input type="checkbox" name="is_partner" /> Partner crew</label>
               <label class="check" data-mod-only><input type="checkbox" name="is_featured" /> Featured crew <small>shown first on the home page, Hub overview and crew list</small></label>
               <label data-mod-only>Sort order <small>lower = earlier · 100 = no fixed spot</small><input type="number" name="sort_order" step="1" value="100" /></label>
@@ -846,6 +847,7 @@ const base = import.meta.env.BASE_URL;
       is_partner: fd.get('is_partner') === 'on',
       is_featured: fd.get('is_featured') === 'on',
       is_official: fd.get('is_official') === 'on',
+      is_launch_crew: fd.get('is_launch_crew') === 'on',
       sort_order: Math.round(Number(String(fd.get('sort_order') ?? '').trim() || 100)),  // empty = 100 = no fixed spot
       is_published: fd.get('is_published') === 'on',
       join_mode: (fd.get('join_mode') === 'open' ? 'open' : 'request') as 'open' | 'request',
@@ -906,6 +908,7 @@ const base = import.meta.env.BASE_URL;
     cf.is_partner.checked = Boolean(r.is_partner);
     cf.is_featured.checked = Boolean(r.is_featured);
     cf.is_official.checked = Boolean(r.is_official);
+    cf.is_launch_crew.checked = Boolean(r.is_launch_crew);
     cf.is_published.checked = Boolean(r.is_published);
     cf.moderation_note.value = r.moderation_note ?? '';
     cf.join_mode.value = r.join_mode === 'open' ? 'open' : 'request';
@@ -970,7 +973,7 @@ const base = import.meta.env.BASE_URL;
       return;
     }
     const c: any = crewFromForm();
-    if (!isMod) { delete c.slug; delete c.is_partner; delete c.is_featured; delete c.is_official; delete c.sort_order; delete c.is_published; }
+    if (!isMod) { delete c.slug; delete c.is_partner; delete c.is_featured; delete c.is_official; delete c.is_launch_crew; delete c.sort_order; delete c.is_published; }
     const bad = validateCrew({ ...crewFromForm(), ...(isMod ? {} : { slug: crews.find((x) => x.crew_id === selectedId)?.slug ?? 'x' }) });
     markInvalid(crewForm, bad);
     if (bad.length) { msg(crewForm, `Please fix: ${bad.map((b) => crewFieldHelp[b] ?? b).join('; ')}.`, true); return; }
