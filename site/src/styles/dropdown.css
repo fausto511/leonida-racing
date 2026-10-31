@@ -1,0 +1,86 @@
+/* Site dropdown (DEC-0200, Fausto 31.10.2026) – scripts/lr-select.ts.
+   One look for every <select>: field button, raised list with orange check, search in long lists,
+   sheet from the bottom on phones. The same list look is used by the custom menus
+   (Cars filters, account menu). */
+
+.lr-dd { position: relative; display: inline-flex; min-width: 0; vertical-align: middle; }
+.lr-dd[hidden] { display: none !important; }
+.lr-dd-block { display: flex; width: 100%; }
+.lr-dd-native { position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; opacity: 0; pointer-events: none; margin: 0 !important; }
+
+/* field button (forms): same box as the inputs */
+.lr-dd-btn {
+  display: inline-flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; min-width: 0; height: var(--lr-field-h); box-sizing: border-box; padding: 0 12px 0 14px;
+  border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--gh-bg, var(--lr-bg));
+  color: var(--lr-text); font: 400 14px var(--gh-font-body); text-align: left; cursor: pointer;
+  transition: border-color .12s;
+}
+.lr-dd-btn:hover:not(:disabled) { border-color: var(--lr-line-hover); }
+.lr-dd-btn:focus-visible, .lr-dd.is-open .lr-dd-btn { outline: none; border-color: var(--lr-field-focus); }
+.lr-dd-btn:disabled { opacity: .45; cursor: not-allowed; }
+.lr-dd-v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lr-dd-chev { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--lr-muted); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .15s; }
+.lr-dd.is-open .lr-dd-chev, .is-open > .lr-dd .lr-dd-chev { transform: rotate(180deg); stroke: var(--lr-text); }
+[aria-invalid="true"] + .lr-dd-btn { border-color: var(--lr-coral); }
+
+/* inside a filter box (label.sel: "Layout  All ⌄"): only the value, the box is the label */
+.lr-dd-inline .lr-dd-btn { width: auto; height: auto; padding: 0; border: 0; background: none; font-weight: 600; gap: 6px; }
+label.sel .lr-dd-inline .lr-dd-v { max-width: 12rem; }
+.lr-dd-inline .lr-dd-btn:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 4px; border-radius: 4px; }
+label.sel.is-open { border-color: var(--lr-field-focus) !important; }
+label.sel:has(.lr-dd-inline) { padding-right: 12px !important; }
+label.sel:has(.lr-dd-inline)::after { display: none !important; }
+
+/* the list */
+.lr-dd-panel {
+  position: fixed; z-index: 1000; display: flex; flex-direction: column; max-width: min(380px, calc(100vw - 16px));
+  padding: 6px; box-sizing: border-box; overflow: hidden;
+  background: linear-gradient(180deg, rgba(251, 247, 234, .045), rgba(251, 247, 234, 0) 60px), var(--lr-raised);
+  border: 1px solid var(--lr-line-strong); border-radius: 10px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, .55), 0 2px 8px rgba(0, 0, 0, .35);
+  animation: lr-dd-in .13s ease-out;
+  font-family: var(--gh-font-body);
+}
+@keyframes lr-dd-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .lr-dd-panel { animation: none; } }
+.lr-dd-list { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; outline: none; }
+/* one scrollbar look in every list: our dropdown, the Cars menus (Fausto 31.10.) */
+.lr-dd-list, .menu-scroll, .account-dropdown { scrollbar-width: thin; scrollbar-color: rgba(200, 200, 222, .28) transparent; overscroll-behavior: contain; }
+.lr-dd-list::-webkit-scrollbar, .menu-scroll::-webkit-scrollbar { width: 8px; }
+.lr-dd-list::-webkit-scrollbar-track, .menu-scroll::-webkit-scrollbar-track { background: transparent; }
+.lr-dd-list::-webkit-scrollbar-thumb, .menu-scroll::-webkit-scrollbar-thumb { background: rgba(200, 200, 222, .28); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+.lr-dd-i {
+  display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 0 10px 0 12px; border-radius: 6px;
+  color: var(--lr-soft); font-size: 14px; line-height: 1.25; cursor: pointer; user-select: none;
+}
+.lr-dd-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lr-dd-n { color: var(--lr-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lr-dd-i.is-act { background: var(--lr-white-hover); color: var(--lr-text); }
+.lr-dd-i.on { color: var(--lr-text); font-weight: 600; }
+.lr-dd-check { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--lr-orange); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
+.lr-dd-i.on .lr-dd-check { visibility: visible; }
+.lr-dd-i[aria-disabled="true"] { color: var(--lr-muted); opacity: .55; cursor: not-allowed; }
+.lr-dd-i[hidden], .lr-dd-h[hidden] { display: none; }
+.lr-dd-h { padding: 12px 12px 6px; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); }
+.lr-dd-h:first-child { padding-top: 6px; }
+.lr-dd-q { display: flex; align-items: center; gap: 8px; height: 38px; margin: 0 0 6px; padding: 0 10px; border: 1px solid var(--lr-line); border-radius: 6px; background: var(--lr-bg); flex: none; }
+.lr-dd-q:focus-within { border-color: var(--lr-field-focus); }
+.lr-dd-q svg { flex: none; width: 15px; height: 15px; fill: none; stroke: var(--lr-muted); stroke-width: 2.2; stroke-linecap: round; }
+.lr-dd-q input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: none; color: var(--lr-text); font: 14px var(--gh-font-body); }
+.lr-dd-none { margin: 0; padding: 10px 12px; color: var(--lr-muted); font-size: 13px; }
+
+/* phones: sheet from the bottom, bigger rows */
+.lr-dd-back { position: fixed; inset: 0; z-index: 999; background: rgba(5, 5, 10, .6); animation: lr-dd-fade .15s ease-out; }
+@keyframes lr-dd-fade { from { opacity: 0; } }
+.lr-dd-panel.is-sheet {
+  left: 0; right: 0; bottom: 0; top: auto; max-width: none; max-height: 72vh; padding: 0 10px calc(10px + env(safe-area-inset-bottom, 0px));
+  border-radius: 16px 16px 0 0; border-bottom: 0; animation: lr-dd-up .2s ease-out;
+}
+@keyframes lr-dd-up { from { transform: translateY(24px); opacity: .6; } }
+.lr-dd-sh { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 56px; padding: 0 4px 0 8px; flex: none; }
+.lr-dd-sh b { font: 700 15px var(--gh-font-body); color: var(--lr-text); }
+.lr-dd-x { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--lr-white-hover); color: var(--lr-text); cursor: pointer; }
+.lr-dd-x svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.is-sheet .lr-dd-i { min-height: 48px; font-size: 15px; }
+.is-sheet .lr-dd-q { height: 44px; }

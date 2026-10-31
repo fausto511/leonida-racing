@@ -6,7 +6,7 @@ export function wireSelectLabels(root: ParentNode = document): void {
     const sel = label.querySelector('select');
     if (!sel) return;
     label.addEventListener('click', (e) => {
-      if (e.target === sel || sel.disabled) return;
+      if (e.target === sel || sel.disabled || sel.classList.contains('lr-dd-native')) return; // our dropdown (lr-select.ts) opens itself
       e.preventDefault();
       sel.focus();
       try { (sel as HTMLSelectElement & { showPicker?: () => void }).showPicker?.(); } catch { /* not allowed here: focus is enough */ }
