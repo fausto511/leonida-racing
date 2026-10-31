@@ -18,7 +18,7 @@ const upcoming = buildEvents.filter((e) => e.status !== 'cancelled').slice(0, EV
 const nextEventsHtml = (upcoming.length ? upcoming.map((e) => eventRowHtml(e, { rsvp: true, full: true })).join('') : '<p class="ev-empty">No upcoming events yet.</p>') + eventOpenSpotHtml();
 const featured = [...buildCrews.filter((c) => c.is_featured), ...buildCrews.filter((c) => !c.is_featured)].slice(0, CREW_N);
 const crewsHtml = featured.map((c) => crewCardHtml(c)).join('');
-const evChips: [string, string][] = [['', 'All events'], ['race', 'Races'], ['time-attack', 'Time Attack'], ['league', 'Leagues'], ['car-meet', 'Car meets'], ['cruise', 'Cruises']];
+const evChips: [string, string][] = [['', 'All events'], ['race', 'Races'], ['time-attack', 'Time Attack'], ['league', 'Leagues'], ['car-meet', 'Car meets'], ['cruise', 'Cruises'], ['other', 'Other']];
 const crewChips: [string, string][] = [['', 'Featured'], ['racing', 'Racing'], ['time-attack', 'Time Attack'], ['league', 'League'], ['drift', 'Drift'], ['car-meet', 'Car meet'], ['cruise', 'Cruise']];
 const entries = [
   { href: `${base}community/events/`, img: 'events', eb: 'Calendar', title: 'Events', text: 'Races, leagues, car meets and cruises, all in your local time.', short: 'Races, leagues, meets and cruises', cta: 'Open calendar' },
