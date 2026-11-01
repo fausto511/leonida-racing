@@ -55,7 +55,7 @@ export async function fetchLiveEvents(): Promise<HubEvent[] | null> {
     const since = new Date(Date.now() - 6 * 3600 * 1000).toISOString();
     const { data, error } = await getSupabase()
       .from('hub_events')
-      .select('event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,created_by,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)')
+      .select('event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,members_only,created_by,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)')
       .eq('is_published', true)
       .gte('starts_at', since)
       .order('starts_at', { ascending: true })

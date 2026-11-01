@@ -95,6 +95,8 @@ export interface HubEvent {
   registration?: 'open' | 'closed';
   /** stream links (RS-0058); own table, several per event possible */
   streams?: EventStream[];
+  /** DEC-0205: only members of the host crew can see it and sign up */
+  members_only?: boolean;
   /** sample events only: fictional drivers already signed up */
   sample_going?: string[];
 }
@@ -314,6 +316,7 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
     eventDiscordHtml(e, Boolean(opts.sample)),
     eventStreamHtml(e, Boolean(opts.sample)),
     plats ? `<span class="ev-plat">${esc(plats)}</span>` : '',
+    e.members_only ? '<span class="ev-plat ev-crew-only" title="Only crew members can see this event and sign up">Crew only</span>' : '',
     join && !cancelled ? `<a class="ev-info" href="${esc(join)}" target="_blank" rel="noopener">Event info</a>` : '',
     !opts.sample ? `<a class="ev-report" href="${esc(`${import.meta.env.BASE_URL}report-content/?event=${encodeURIComponent(e.event_id)}`)}" title="Report this event to the moderators">Report</a>` : '',
   ].filter(Boolean).join('<span class="dot" aria-hidden="true">·</span>');

@@ -372,7 +372,7 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
     btn.disabled = true;
     const since = new Date(Date.now() - 6 * 3600 * 1000).toISOString();
     const { data } = await getSupabase().from('hub_events')
-      .select('event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)')
+      .select('event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,members_only,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)')
       .eq('is_published', true).lt('starts_at', since).order('starts_at', { ascending: false }).limit(30);
     const past = (data ?? []) as unknown as HubEvent[];
     const g = groupsOf(past);
