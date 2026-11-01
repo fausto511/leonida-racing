@@ -104,7 +104,7 @@ const COMMANDS = [
           { name: "My crew", value: "crew" }, { name: "My host profile", value: "host" }, { name: "Public calendar", value: "public" }] },
         { type: 3, name: "platform", description: "Only this platform (required for the public calendar)", required: false, choices: Object.entries(PLATFORMS).map(([value, name]) => ({ name, value })) },
         { type: 3, name: "event_type", description: "Only this event type", required: false, choices: Object.entries(EVENT_TYPES).map(([value, name]) => ({ name, value })) },
-        { type: 3, name: "crew", description: "Your crew (only needed if you lead more than one)", required: false, autocomplete: true },
+        { type: 3, name: "crew", description: "Your crew (only needed if you lead or co-run more than one)", required: false, autocomplete: true },
         { type: 5, name: "add_to_server_events", description: "Also add each event to this server's Events (top of the channel list)", required: false },
         { type: 3, name: "reminders", description: "Reminder posts before the start", required: false, choices: REMINDER_CHOICES },
         { type: 5, name: "mention_attendees", description: "Mention drivers who are in when posting reminders", required: false },
@@ -193,7 +193,7 @@ let commandsChecked = false;
 // ---------- data ----------
 const EVENT_COLS = "event_id,title,event_type,starts_at,ends_at,platforms,host_name,status,max_participants,registration,discord_url,host:crews(name,tag,discord_url),creator:drivers!hub_events_created_by_fkey(display_name,deleted_at)";
 async function upcomingEvents(type?: string, platform?: string, limit = 5) {
-  let q = db.from("hub_events").select(EVENT_COLS).eq("is_published", true).eq("is_test", false).neq("status", "cancelled")
+  let q = db.from("hub_events").select(EVENT_COLS).eq("is_published", true).eq("is_test", false).eq("members_only", false).neq("status", "cancelled")
     .gte("starts_at", new Date(Date.now() - 3 * 3600e3).toISOString()).order("starts_at").limit(limit);
   if (type) q = q.eq("event_type", type);
   if (platform) q = q.contains("platforms", [platform]);
@@ -248,7 +248,7 @@ async function cmdEvents(i: any) {
 
 async function cmdEvent(i: any) {
   const id = String(opt(i, "event") ?? "");
-  const { data: e } = await db.from("hub_events").select(EVENT_COLS).eq("event_id", id).eq("is_published", true).eq("is_test", false).maybeSingle();
+  const { data: e } = await db.from("hub_events").select(EVENT_COLS).eq("event_id", id).eq("is_published", true).eq("is_test", false).eq("members_only", false).maybeSingle();
   if (!e) return ephemeral("I couldn't find that event. Pick one from the suggestions while typing.");
   return reply({ embeds: [await eventEmbed(e)], components: [row(linkButton("Details", eventUrl(e)), addButton)] });
 }
@@ -337,7 +337,7 @@ async function cmdCrew(i: any) {
   const { data: c } = await db.from("crews").select("crew_id,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_official,is_partner")
     .eq("crew_id", id).eq("is_published", true).maybeSingle();
   if (!c) return ephemeral("I couldn't find that crew. Pick one from the suggestions while typing.");
-  const { data: next } = await db.from("hub_events").select("event_id,title,starts_at").eq("host_crew_id", c.crew_id).eq("is_published", true).eq("is_test", false)
+  const { data: next } = await db.from("hub_events").select("event_id,title,starts_at").eq("host_crew_id", c.crew_id).eq("is_published", true).eq("is_test", false).eq("members_only", false)
     .neq("status", "cancelled").gte("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle();
   const url = `${SITE}/community/crews/#crew-${c.crew_id}`;
   const badges = [c.is_official ? "Official" : "", c.is_partner ? "Partner" : ""].filter(Boolean).join(" \u00b7 ");
@@ -395,7 +395,7 @@ async function autocomplete(i: any) {
   const term = String(focused?.value ?? "").trim();
   let choices: { name: string; value: string }[] = [];
   if (i.data?.name === "event") {
-    let q = db.from("hub_events").select("event_id,title,starts_at").eq("is_published", true).eq("is_test", false).neq("status", "cancelled")
+    let q = db.from("hub_events").select("event_id,title,starts_at").eq("is_published", true).eq("is_test", false).eq("members_only", false).neq("status", "cancelled")
       .gte("starts_at", new Date(Date.now() - 3 * 3600e3).toISOString()).order("starts_at").limit(25);
     if (term) q = q.ilike("title", `%${term}%`);
     const { data } = await q;
@@ -447,7 +447,8 @@ async function rolesOf(driverId: string) {
   return (data ?? []) as { role: string; crew_id: string | null }[];
 }
 async function leaderCrews(driverId: string) {
-  const ids = (await rolesOf(driverId)).filter((r) => r.role === "crew_leader" && r.crew_id).map((r) => r.crew_id!);
+  // Crew leaders and commissioners can set up the crew feed (DEC-0205).
+  const ids = (await rolesOf(driverId)).filter((r) => (r.role === "crew_leader" || r.role === "crew_commissioner") && r.crew_id).map((r) => r.crew_id!);
   if (!ids.length) return [];
   const { data } = await db.from("crews").select("crew_id,name,tag").in("crew_id", ids).order("name");
   return (data ?? []) as { crew_id: string; name: string; tag: string }[];
@@ -524,11 +525,12 @@ async function feedAdd(i: any, forceSource?: string) {
     row_.created_by_driver_id = driver.driver_id;
     if (source === "crew") {
       const crews = await leaderCrews(driver.driver_id);
-      if (!crews.length) return { content: "You need to be a crew leader on Leonida Racing to add a crew feed. You can apply on the website; a moderator reviews it.", components: [row(linkButton("Apply as Crew Leader", `${SITE}/account/crew/`))] };
+      if (!crews.length) return { content: "You need to be a crew leader or commissioner on Leonida Racing to add a crew feed. You can apply on the website; a moderator reviews it.", components: [row(linkButton("Apply as Crew Leader", `${SITE}/account/crew/`))] };
       const picked = opt(i, "crew") as string | undefined;
       const crew = picked ? crews.find((c) => c.crew_id === picked) : crews.length === 1 ? crews[0] : undefined;
-      if (!crew) return { content: picked ? "You don't lead that crew on Leonida Racing." : "You lead more than one crew. Pick one with the crew option." };
+      if (!crew) return { content: picked ? "You're not the leader or a commissioner of that crew on Leonida Racing." : "You lead or co-run more than one crew. Pick one with the crew option." };
       row_.crew_id = crew.crew_id; srcText = `${crew.name} [${crew.tag}]`;
+      notes.push("Crew-only events of this crew appear in this channel too."); // DEC-0205
     } else if (source === "host") {
       if (!(await rolesOf(driver.driver_id)).some((r) => r.role === "event_host")) return { content: "You need the host role on Leonida Racing to add a host feed. You can apply on the website; a moderator reviews it.", components: [row(linkButton("Apply as Event Host", `${SITE}/account/events/`))] };
       row_.host_driver_id = driver.driver_id; srcText = `events hosted by ${driver.display_name}`;
@@ -642,6 +644,9 @@ async function rsvpButton(i: any) {
     case "closed": return ephemeral(`Sign-ups for **${r.title}** are closed.`);
     case "cancelled": return ephemeral(`**${r.title}** has been cancelled.`);
     case "past": return ephemeral(`**${r.title}** is already over.`);
+    // DEC-0205 / RS-0098. COPY STATUS: Claude placeholders, Codex review pending.
+    case "members_only": return ephemeral(`**${r.title}** is for crew members only. Join the crew on Leonida Racing to sign up.`, hostRow);
+    case "blocked": return ephemeral(`You can't sign up for **${r.title}**.`);
   }
   return ephemeral("This action isn't available yet.");
 }

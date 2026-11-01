@@ -99,7 +99,7 @@ async function discord(method: string, path: string, body?: unknown): Promise<DR
 }
 
 // ---------- data ----------
-const EVENT_COLS = "event_id,title,event_type,starts_at,ends_at,platforms,host_name,host_crew_id,created_by,status,is_published,is_test,max_participants,registration,discord_url,description,host:crews(name,tag,discord_url),creator:drivers!hub_events_created_by_fkey(display_name,deleted_at)";
+const EVENT_COLS = "event_id,title,event_type,starts_at,ends_at,platforms,host_name,host_crew_id,created_by,status,is_published,is_test,members_only,max_participants,registration,discord_url,description,host:crews(name,tag,discord_url),creator:drivers!hub_events_created_by_fkey(display_name,deleted_at)";
 async function loadEvent(id: string) {
   const { data } = await db.from("hub_events").select(EVENT_COLS).eq("event_id", id).maybeSingle();
   return data as any | null;
@@ -126,6 +126,8 @@ function feedMatches(f: any, e: any) {
 async function wants(f: any, e: any | null) {
   if (!e || !e.is_published) return false;
   if (e.is_test && !(await testGuilds()).has(f.guild_id)) return false;
+  // Crew-only events (DEC-0205) reach only the crew feeds of that crew.
+  if (e.members_only && !(f.source === "crew" && f.crew_id === e.host_crew_id)) return false;
   return feedMatches(f, e);
 }
 async function feedError(f: any, msg: string | null) {
@@ -319,7 +321,7 @@ function card(e: any, going: number) {
   const embed: Record<string, unknown> = {
     author: { name: typeLine(e) }, title: clip(cancelled ? `Cancelled: ${e.title}` : e.title, 256), url: eventUrl(e),
     color: cancelled ? CORAL : ORANGE, fields,
-    footer: { text: "Leonida Racing · times shown in your time zone" },
+    footer: { text: e.members_only ? "Crew members only · Leonida Racing · times shown in your time zone" : "Leonida Racing · times shown in your time zone" },
   };
   if (cancelled) embed.description = "This event has been cancelled.";
   else if (e.description) embed.description = clip(String(e.description), 300);
