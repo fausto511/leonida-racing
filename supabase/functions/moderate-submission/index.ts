@@ -14,6 +14,11 @@
 // v5 (30.10.2026, RS-0091): request_correction also stores the reason in
 // runs.correction_note, which the driver sees in My laps and answers via the
 // correct-run function.
+//
+// v6 (01.11.2026, RS-0099): reject / invalidate / request_correction on a video-verified
+// lap failed (DB check verified_requires_accepted). Such a lap now drops back to
+// verification_tier 'video_submitted' (the video stays attached). This also removes its
+// Gellhorn record post on Discord (DEC-0206).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
@@ -97,6 +102,9 @@ Deno.serve(async (req) => {
     return data;
   }
 
+  // A lap that is no longer accepted can't stay 'verified' (DB check verified_requires_accepted).
+  const unverify = (run: any) => (run.verification_tier === "verified" ? { verification_tier: "video_submitted" } : {});
+
   async function logAction(
     runId: string | null,
     evidenceId: string | null,
@@ -175,10 +183,10 @@ Deno.serve(async (req) => {
       if (!reason) return jsonResponse({ error: "reason is required to reject a run" }, 400);
       const run = await loadRun(run_id);
       if (!run) return jsonResponse({ error: "run not found" }, 404);
-      const update = { review_status: "rejected", publication_status: "hidden" };
+      const update = { review_status: "rejected", publication_status: "hidden", ...unverify(run) };
       const { error } = await admin.from("runs").update(update).eq("run_id", run_id);
       if (error) return jsonResponse({ error: error.message }, 422);
-      await logAction(run_id, null, "reject", { review_status: run.review_status }, update, reason);
+      await logAction(run_id, null, "reject", { review_status: run.review_status, publication_status: run.publication_status, verification_tier: run.verification_tier }, update, reason);
       return jsonResponse({ ok: true });
     }
 
@@ -190,10 +198,10 @@ Deno.serve(async (req) => {
       if (!reason) return jsonResponse({ error: "reason is required to invalidate a run" }, 400);
       const run = await loadRun(run_id);
       if (!run) return jsonResponse({ error: "run not found" }, 404);
-      const update = { review_status: "invalidated", publication_status: "archived" };
+      const update = { review_status: "invalidated", publication_status: "archived", ...unverify(run) };
       const { error } = await admin.from("runs").update(update).eq("run_id", run_id);
       if (error) return jsonResponse({ error: error.message }, 422);
-      await logAction(run_id, null, "invalidate", { review_status: run.review_status }, update, reason);
+      await logAction(run_id, null, "invalidate", { review_status: run.review_status, publication_status: run.publication_status, verification_tier: run.verification_tier }, update, reason);
       return jsonResponse({ ok: true });
     }
 
@@ -203,10 +211,10 @@ Deno.serve(async (req) => {
       const run = await loadRun(run_id);
       if (!run) return jsonResponse({ error: "run not found" }, 404);
       // RS-0091: the reason is what the driver reads in My laps
-      const update = { review_status: "needs_correction", publication_status: "hidden", correction_note: reason.slice(0, 1000) };
+      const update = { review_status: "needs_correction", publication_status: "hidden", correction_note: reason.slice(0, 1000), ...unverify(run) };
       const { error } = await admin.from("runs").update(update).eq("run_id", run_id);
       if (error) return jsonResponse({ error: error.message }, 422);
-      await logAction(run_id, null, "request_correction", { review_status: run.review_status }, update, reason);
+      await logAction(run_id, null, "request_correction", { review_status: run.review_status, publication_status: run.publication_status, verification_tier: run.verification_tier }, update, reason);
       return jsonResponse({ ok: true });
     }
 

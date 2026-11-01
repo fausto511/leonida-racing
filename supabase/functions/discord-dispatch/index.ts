@@ -49,6 +49,10 @@
 // New items go to every feed with source 'videos'. The first check of a channel only records
 // what is already there (no backlog flood). gta_only: title (or Twitch category) must mention GTA; cars_only: title must also name a car/racing term.
 // Crew-only events (DEC-0205, 01.11.2026): only crew feeds of the host crew get them.
+// Gellhorn record feed (DEC-0206, RS-0099, 01.11.2026): feed source 'gellhorn' (all laps, or crew_id = only laps
+// of that crew's active members). Outbox 'record' (lap became video-verified; the DB re-checks the record when
+// posting, only times that beat an existing time) and 'record_sync' (posted lap invalidated / renamed driver ->
+// edit or delete the post). Several records at once -> one summary post. See "Gellhorn records" below.
 // COPY STATUS: all user-facing texts are Claude placeholders, Codex review pending.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -316,6 +320,165 @@ async function handleVehicles(): Promise<number> {
   return ready.length;
 }
 
+
+// ---------- Gellhorn records (DEC-0206, RS-0099) ----------
+// What counts as a record is decided in the DB (gellhorn_run_records): track overall, class or vehicle,
+// same leaderboard as the website, lap video-verified, and it must beat an existing time. No lap date/time
+// in the post, driver name as on the leaderboard (deleted accounts stay "Deleted driver"), nobody is @-mentioned.
+const TRACK_URL = `${SITE}/time-attack/gellhorn-international-raceway/`;
+const RECORD_DIGEST_FROM = 4;   // 4+ records for one feed at once -> one summary post
+const RECORD_DIGEST_MAX = 15;
+const UNKNOWN_MESSAGE = 10008;
+const RUN_PLATFORMS: Record<string, string> = { ps5: "PS5", xbox_series: "Xbox Series X|S" };
+const SCOPE_ORDER: Record<string, number> = { overall: 0, class: 1, vehicle: 2 };
+const lapTime = (ms: number) => `${Math.floor(ms / 60000)}:${((ms % 60000) / 1000).toFixed(3).padStart(6, "0")}`;
+const esc = (s: string) => String(s ?? "").replace(/([\\*_~`|>\[\]])/g, "\\$1");
+const carName = (x: any) => `${x.make} ${x.model}`;
+const recordName = (r: any, x: any) => r.scope === "overall" ? "Track record" : r.scope === "class" ? `${r.key} class record` : `${carName(x)} record`;
+const recordTitle = (r: any, x: any) => r.scope === "overall" ? "New track record" : r.scope === "class" ? `New ${r.key} class record` : `New ${carName(x)} record`;
+const safeUrl = (u: unknown) => (typeof u === "string" && u.length <= 512 && /^https?:\/\/[^\s<>]+$/i.test(u) ? u : null);
+type RecItem = { info: any; driver: string };
+
+function recordCard(x: RecItem) {
+  const info = x.info;
+  const [top, ...more] = info.records as any[];
+  const lines = [
+    `**${esc(x.driver)}** · ${esc(carName(info))} · ${RUN_PLATFORMS[info.platform] ?? info.platform}`,
+    `**${lapTime(info.lap_time_ms)}** · ${((top.prev_ms - info.lap_time_ms) / 1000).toFixed(3)} s faster than the previous record (${lapTime(top.prev_ms)})`,
+  ];
+  if (more.length) lines.push(`Also: ${more.map((r) => recordName(r, info)).join(" · ")}`);
+  const video = safeUrl(info.video_url);
+  return {
+    allowed_mentions: { parse: [] },
+    embeds: [{ author: { name: "Gellhorn International Raceway" }, title: recordTitle(top, info), url: TRACK_URL, color: ORANGE,
+      description: lines.join("\n"), footer: { text: "Leonida Racing · video-verified lap" } }],
+    components: [row(...(video ? [linkButton("Watch the lap", video)] : []), linkButton("Leaderboard", TRACK_URL), linkButton("Add to your server", INVITE))],
+  };
+}
+function recordDigest(items: RecItem[]) {
+  const lines = items.map(({ info, driver }) => {
+    const recs = (info.records as any[]).map((r) => recordName(r, info)).join(" + ");
+    const video = safeUrl(info.video_url);
+    return `• **${esc(driver)}** · ${esc(carName(info))} · **${lapTime(info.lap_time_ms)}** · ${recs}${video ? ` · [video](${video})` : ""}`;
+  });
+  return {
+    allowed_mentions: { parse: [] },
+    embeds: [{ author: { name: "Gellhorn International Raceway" }, title: `${items.length} new records`, url: TRACK_URL, color: ORANGE,
+      description: clip(lines.join("\n"), 4000), footer: { text: "Leonida Racing · video-verified laps" } }],
+    components: [row(linkButton("Leaderboard", TRACK_URL), linkButton("Add to your server", INVITE))],
+  };
+}
+const renderRecords = (items: RecItem[]) => (items.length === 1 ? recordCard(items[0]) : recordDigest(items));
+const recordSort = (a: any, b: any) => (SCOPE_ORDER[a.records[0].scope] - SCOPE_ORDER[b.records[0].scope]) || (a.lap_time_ms - b.lap_time_ms);
+
+async function driverNames(runIds: string[]): Promise<Record<string, string>> {
+  const out: Record<string, string> = {};
+  if (!runIds.length) return out;
+  const { data, error } = await db.rpc("gellhorn_driver_names", { p_run_ids: runIds });
+  if (error) throw new Error(`driver names: ${error.message}`);
+  for (const r of (data ?? []) as any[]) out[r.run_id] = r.driver;
+  return out;
+}
+
+// Posted lap changed: edit (name, other laps of a summary) or delete the post when the lap no longer counts.
+async function syncRecordPosts(runId: string) {
+  const { data: posts } = await db.from("discord_record_posts").select("*").eq("run_id", runId);
+  if (!posts?.length) return;
+  const { data: counts, error } = await db.rpc("gellhorn_run_counts", { p_run_id: runId });
+  if (error) throw new Error(`run counts: ${error.message}`);
+  for (const p of posts as any[]) {
+    const { data: f } = await db.from("discord_feeds").select("*").eq("feed_id", p.feed_id).maybeSingle();
+    if (!f) continue; // feed removed -> rows are gone with it
+    const { data: group } = await db.from("discord_record_posts").select("*").eq("feed_id", p.feed_id).eq("message_id", p.message_id);
+    const keep = ((group ?? []) as any[]).filter((g) => counts || g.run_id !== runId);
+    const path = `/channels/${p.channel_id}/messages/${p.message_id}`;
+    let r: DResult;
+    if (!keep.length) r = await discord("DELETE", path);
+    else {
+      const names = await driverNames(keep.map((g) => g.run_id));
+      const items = keep.map((g) => ({ info: g.info, driver: names[g.run_id] ?? "Deleted driver" })).sort((a, b) => recordSort(a.info, b.info));
+      r = await discord("PATCH", path, renderRecords(items));
+    }
+    if (r.ok || (r.status === 404 && r.data?.code === UNKNOWN_MESSAGE)) {
+      // message gone (deleted here or by the server's admins): forget the whole message
+      if (!r.ok || !keep.length) await db.from("discord_record_posts").delete().eq("feed_id", p.feed_id).eq("message_id", p.message_id);
+      else if (!counts) await db.from("discord_record_posts").delete().eq("feed_id", p.feed_id).eq("run_id", runId);
+      if (f.last_error) await feedError(f, null);
+      continue;
+    }
+    if (await handleGone(f, r)) continue;
+    await feedError(f, describeFail(r, keep.length ? "edit messages in the channel" : "delete messages in the channel"));
+    throw new Error(`record post ${keep.length ? "edit" : "delete"} failed ${r.status} ${r.text.slice(0, 200)}`);
+  }
+}
+
+async function postNewRecords(runIds: string[]): Promise<number> {
+  const infos: any[] = [];
+  for (const id of runIds) {
+    const { data, error } = await db.rpc("gellhorn_run_records", { p_run_id: id });
+    if (error) throw new Error(`run records: ${error.message}`);
+    if (data) infos.push(data);
+  }
+  if (!infos.length) return 0;
+  infos.sort(recordSort);
+  const names = await driverNames(infos.map((x) => x.run_id));
+  const perFeed = new Map<string, { f: any; items: RecItem[] }>();
+  for (const info of infos) {
+    const { data: feeds, error } = await db.rpc("gellhorn_record_feeds", { p_run_id: info.run_id });
+    if (error) throw new Error(`record feeds: ${error.message}`);
+    const { data: done } = await db.from("discord_record_posts").select("feed_id").eq("run_id", info.run_id);
+    const posted = new Set((done ?? []).map((d: any) => d.feed_id));
+    for (const f of (feeds ?? []) as any[]) {
+      if (posted.has(f.feed_id)) continue;
+      if (!perFeed.has(f.feed_id)) perFeed.set(f.feed_id, { f, items: [] });
+      perFeed.get(f.feed_id)!.items.push({ info, driver: names[info.run_id] ?? "Deleted driver" });
+    }
+  }
+  let posts = 0;
+  for (const { f, items } of perFeed.values()) {
+    const msgs: RecItem[][] = [];
+    if (items.length >= RECORD_DIGEST_FROM) for (let n = 0; n < items.length; n += RECORD_DIGEST_MAX) msgs.push(items.slice(n, n + RECORD_DIGEST_MAX));
+    else for (const it of items) msgs.push([it]);
+    let ok = true;
+    for (const m of msgs) {
+      const r = await discord("POST", `/channels/${f.channel_id}/messages`, renderRecords(m));
+      if (!r.ok) {
+        ok = false;
+        if (!(await handleGone(f, r))) { await feedError(f, describeFail(r, "post in the channel")); console.log("record post failed", f.feed_id, r.status, r.text.slice(0, 300)); }
+        break;
+      }
+      await db.from("discord_record_posts").upsert(m.map((x) => ({ feed_id: f.feed_id, run_id: x.info.run_id, channel_id: f.channel_id, message_id: r.data.id, info: x.info })));
+      posts++;
+    }
+    if (ok) await feedError(f, null);
+  }
+  console.log("records", infos.length, "posts", posts, "feeds", perFeed.size);
+  return posts;
+}
+
+async function handleRecords(): Promise<number> {
+  const { data: rows, error } = await db.rpc("discord_claim_records");
+  if (error) { console.error("records claim", error.message); return 0; }
+  if (!rows?.length) return 0;
+  const retry = async (list: any[], err: unknown) => {
+    for (const r of list) {
+      await db.from("discord_outbox").update(r.attempts < 5
+        ? { processed_at: null, not_before: new Date(Date.now() + r.attempts * 120_000).toISOString(), last_error: String(err).slice(0, 500) }
+        : { last_error: String(err).slice(0, 500) }).eq("id", r.id);
+    }
+  };
+  let n = 0;
+  const syncRows = (rows as any[]).filter((r) => r.kind === "record_sync");
+  for (const id of new Set<string>(syncRows.map((r) => r.run_id))) {
+    try { await syncRecordPosts(id); n++; } catch (err) { console.error("record sync", id, err); await retry(syncRows.filter((r) => r.run_id === id), err); }
+  }
+  const newRows = (rows as any[]).filter((r) => r.kind === "record");
+  if (newRows.length) {
+    try { n += await postNewRecords([...new Set<string>(newRows.map((r) => r.run_id))]); } catch (err) { console.error("records", err); await retry(newRows, err); }
+  }
+  return n;
+}
+
 // ---------- card ----------
 function card(e: any, going: number) {
   const cancelled = e.status === "cancelled";
@@ -512,7 +675,7 @@ async function handleEvent(eventId: string) {
     const ors = ["source.eq.public"];
     if (e.host_crew_id) ors.push(`crew_id.eq.${e.host_crew_id}`);
     if (e.created_by) ors.push(`host_driver_id.eq.${e.created_by}`);
-    const { data } = await db.from("discord_feeds").select("*").or(ors.join(","));
+    const { data } = await db.from("discord_feeds").select("*").in("source", ["public", "crew", "host"]).or(ors.join(","));
     for (const f of data ?? []) feeds.set(f.feed_id, f);
   }
   const { data: refs } = await db.from("discord_messages").select("feed_id").eq("event_id", eventId);
@@ -526,7 +689,7 @@ async function handleEvent(eventId: string) {
 
 async function handleBackfill(feedId: string) {
   const { data: f } = await db.from("discord_feeds").select("*").eq("feed_id", feedId).maybeSingle();
-  if (!f || f.source === "vehicles" || f.source === "videos") return; // these only get new items from now on
+  if (!f || f.source === "vehicles" || f.source === "videos" || f.source === "gellhorn") return; // these only get new items from now on
   const { data: upcoming } = await db.from("hub_events").select(EVENT_COLS).eq("is_published", true).neq("status", "cancelled")
     .gte("starts_at", new Date(Date.now() - 3 * 3600e3).toISOString()).order("starts_at").limit(25);
   const { data: refs } = await db.from("discord_messages").select("event_id").eq("feed_id", feedId);
@@ -925,6 +1088,7 @@ Deno.serve(async (req) => {
   try { done += await handleReminders(); } catch (err) { failed++; console.error("reminders", err); }
   try { done += await handleLfg(); } catch (err) { failed++; console.error("lfg", err); }
   try { done += await handleModAlerts(); } catch (err) { failed++; console.error("mod alerts", err); }
+  try { done += await handleRecords(); } catch (err) { failed++; console.error("records", err); }
   while (Date.now() - started < TIME_BUDGET_MS) {
     const { data: rows, error } = await db.rpc("discord_claim_outbox", { p_limit: 10 });
     if (error) { console.error(error); break; }

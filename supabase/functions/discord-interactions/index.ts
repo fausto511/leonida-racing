@@ -10,6 +10,9 @@
 // Package 1: /events, /event, /car, /create-event.
 // Package 2: /leonida feed events|vehicles|videos|list|edit|remove (table discord_feeds; "events" was "add" until 28.10.2026).
 // /help (28.10.2026): for everyone; admins (Manage Server) also get the feed commands.
+// /leonida feed gellhorn (DEC-0206, RS-0099, 01.11.2026): new video-verified lap records on Gellhorn
+// International Raceway, all of them or only those of one crew's members (crew option: leaders/commissioners).
+// The posts themselves come from discord-dispatch.
 // Package 4: I'm in / Withdraw buttons on the cards (rpc discord_rsvp).
 // /ping (DEC-0129, 15.10.2026): official server only (registered as a guild command).
 // Verified Event Host pings Event / Playlist / LFG Pings in #events or #playlists;
@@ -116,6 +119,12 @@ const COMMANDS = [
       { type: 1, name: "videos", description: "Post new GTA videos and live streams from creators we follow", options: [
         { type: 7, name: "channel", description: "Channel for the video and stream posts", required: true, channel_types: [0, 5] },
       ] },
+      { type: 1, name: "gellhorn", description: "Post new lap records from Gellhorn International Raceway", options: [
+        { type: 7, name: "channel", description: "Channel for the record posts", required: true, channel_types: [0, 5] },
+        { type: 3, name: "records", description: "Which records (default: all)", required: false, choices: [
+          { name: "All records", value: "all" }, { name: "Only my crew's drivers", value: "crew" }] },
+        { type: 3, name: "crew", description: "Your crew (only needed if you lead or co-run more than one)", required: false, autocomplete: true },
+      ] },
       { type: 1, name: "list", description: "Show this server's feeds" },
       { type: 1, name: "edit", description: "Change a feed's options", options: [
         { type: 3, name: "feed", description: "Feed to change", required: true, autocomplete: true },
@@ -129,7 +138,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-10-28.2"; // /help for everyone, feed add -> feed events
+const COMMANDS_VERSION = "2026-11-01.1"; // feed gellhorn (DEC-0206)
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
@@ -380,6 +389,7 @@ function cmdHelp(i: any) {
   if (canManage(i)) lines.push("", "**Server setup** (you have Manage Server)",
     "\u2022 **/leonida feed events** \u2014 post events from the public calendar, your crew or your host profile",
     "\u2022 **/leonida feed vehicles** \u2014 new cars", "\u2022 **/leonida feed videos** \u2014 new GTA videos and live streams from creators we follow",
+    "\u2022 **/leonida feed gellhorn** \u2014 new lap records on Gellhorn International Raceway, all or just your crew's",
     "\u2022 **/leonida feed list / edit / remove** \u2014 check, change or stop a feed");
   return ephemeral(lines.join("\n"), [row(linkButton("Bot guide", BOT_GUIDE), addButton)]);
 }
@@ -417,7 +427,9 @@ async function autocomplete(i: any) {
 
 // ---------- feeds (package 2) ----------
 const PERM_ADMIN = 1n << 3n, PERM_MANAGE_GUILD = 1n << 5n, PERM_CREATE_EVENTS = 1n << 44n; // creating scheduled events needs CREATE_EVENTS
-const SOURCES: Record<string, string> = { crew: "Crew", host: "Host profile", public: "Public calendar", vehicles: "New vehicles", videos: "Videos & streams" };
+const SOURCES: Record<string, string> = { crew: "Crew", host: "Host profile", public: "Public calendar", vehicles: "New vehicles", videos: "Videos & streams", gellhorn: "Gellhorn records" };
+// Feeds without event options (no platform, type, server events, reminders).
+const NO_EVENT_OPTIONS = new Set(["vehicles", "videos", "gellhorn"]);
 const canManage = (i: any) => { const p = BigInt(i.member?.permissions ?? "0"); return (p & PERM_ADMIN) !== 0n || (p & PERM_MANAGE_GUILD) !== 0n; };
 const discordId = (i: any): string => i.member?.user?.id ?? i.user?.id ?? "";
 const api = (path: string, init: RequestInit = {}) => fetch(`https://discord.com/api/v10${path}`, {
@@ -458,6 +470,7 @@ const profileButton = row(linkButton("Create Your Driver Profile", `${SITE}/acco
 function feedLabel(f: any, names: { crews: Record<string, string>; hosts: Record<string, string> }) {
   if (f.source === "vehicles") return "New vehicles";
   if (f.source === "videos") return "Videos & streams";
+  if (f.source === "gellhorn") return f.crew_id ? `Gellhorn records · Crew: ${names.crews[f.crew_id] ?? "unknown crew"}` : "Gellhorn records · all drivers";
   const src = f.source === "crew" ? `Crew: ${names.crews[f.crew_id] ?? "unknown crew"}`
     : f.source === "host" ? `Host: ${names.hosts[f.host_driver_id] ?? "unknown host"}` : "Public calendar";
   const filters = [...(f.platforms ?? []).map((p: string) => PLATFORMS[p] ?? p), ...(f.event_types ?? []).map((t: string) => EVENT_TYPES[t] ?? t)];
@@ -473,7 +486,8 @@ async function feedsWithNames(guildId: string) {
   if (hostIds.length) for (const d of (await db.from("drivers").select("driver_id,display_name").in("driver_id", hostIds)).data ?? []) hosts[d.driver_id] = d.display_name;
   return { feeds, names: { crews, hosts } };
 }
-const optionsLine = (f: any) => f.source === "videos" ? "New videos and live streams from the creators Leonida Racing follows" : f.source === "vehicles" ? "One post per new vehicle, a summary when several arrive at once" : [
+const optionsLine = (f: any) => f.source === "gellhorn" ? `New track, class and vehicle records with a checked video${f.crew_id ? ", set by this crew's members" : ""}; a summary when several arrive at once`
+  : f.source === "videos" ? "New videos and live streams from the creators Leonida Racing follows" : f.source === "vehicles" ? "One post per new vehicle, a summary when several arrive at once" : [
   `Server events: ${f.native_events ? "on" : "off"}`,
   `Reminders: ${REMINDERS[f.reminders] ?? f.reminders}`,
   ...(f.reminders !== "off" ? [`Mentions: ${f.mention_attendees ? "on" : "off"}`] : []),
@@ -486,6 +500,7 @@ async function cmdLeonida(i: any) {
     case "feed events": return deferEphemeral(i, () => feedAdd(i));
     case "feed vehicles": return deferEphemeral(i, () => feedAdd(i, "vehicles"));
     case "feed videos": return deferEphemeral(i, () => feedAdd(i, "videos"));
+    case "feed gellhorn": return deferEphemeral(i, () => feedAdd(i, "gellhorn"));
     case "feed list": return deferEphemeral(i, () => feedList(i));
     case "feed edit": return deferEphemeral(i, () => feedEdit(i));
     case "feed remove": return deferEphemeral(i, () => feedRemove(i));
@@ -517,6 +532,21 @@ async function feedAdd(i: any, forceSource?: string) {
     if (platform || eventType || nativeEvents || reminders !== "off" || mention) notes.push("Event options don't apply to this feed and were ignored.");
     Object.assign(row_, { platforms: null, event_types: null, native_events: false, reminders: "off", mention_attendees: false });
     srcText = source === "videos" ? "new videos and live streams" : "new vehicles";
+  } else if (source === "gellhorn") {
+    // DEC-0206: all records, or only those of one crew's members (crew leaders / commissioners only)
+    Object.assign(row_, { platforms: null, event_types: null, native_events: false, reminders: "off", mention_attendees: false });
+    srcText = "new Gellhorn lap records";
+    if ((opt(i, "records") ?? "all") === "crew") {
+      const driver = await driverByDiscord(who);
+      if (!driver) return { content: "To follow your crew's records, link this Discord account to a Leonida Racing driver profile first.", components: [profileButton] };
+      const crews = await leaderCrews(driver.driver_id);
+      if (!crews.length) return { content: "Only crew leaders and commissioners on Leonida Racing can add a crew records feed. Pick “All records” instead, or apply as crew leader on the website.", components: [row(linkButton("Apply as Crew Leader", `${SITE}/account/crew/`))] };
+      const picked = opt(i, "crew") as string | undefined;
+      const crew = picked ? crews.find((c) => c.crew_id === picked) : crews.length === 1 ? crews[0] : undefined;
+      if (!crew) return { content: picked ? "You're not the leader or a commissioner of that crew on Leonida Racing." : "You lead or co-run more than one crew. Pick one with the crew option." };
+      row_.crew_id = crew.crew_id; row_.created_by_driver_id = driver.driver_id;
+      srcText = `new Gellhorn lap records by ${crew.name} [${crew.tag}]`;
+    }
   } else if (source === "public") {
     if (!platform) return { content: "Please choose a platform for the public calendar, so the channel only gets events you can join." };
   } else {
@@ -541,7 +571,7 @@ async function feedAdd(i: any, forceSource?: string) {
   const filters = [platform && PLATFORMS[platform], eventType && EVENT_TYPES[eventType]].filter(Boolean).join(" · ");
   const post = await api(`/channels/${channelId}/messages`, { method: "POST", body: JSON.stringify({
     allowed_mentions: { parse: [] },
-    embeds: [{ color: ORANGE, description: source === "vehicles" || source === "videos" ? `This channel now receives **${srcText}** via Leonida Racing.` : `This channel now receives events from **${srcText}**${filters ? ` (${filters})` : ""} via Leonida Racing.`, footer: { text: "Leonida Racing · leonidaracing.com" } }],
+    embeds: [{ color: ORANGE, description: NO_EVENT_OPTIONS.has(source) ? `This channel now receives **${srcText}** via Leonida Racing.` : `This channel now receives events from **${srcText}**${filters ? ` (${filters})` : ""} via Leonida Racing.`, footer: { text: "Leonida Racing · leonidaracing.com" } }],
   }) });
   if (!post.ok) {
     console.log("feed add test post", post.status, await post.text());
@@ -552,9 +582,9 @@ async function feedAdd(i: any, forceSource?: string) {
     if (error.code === "23505") return { content: `<#${channelId}> already has this feed.` };
     throw error;
   }
-  if (source !== "vehicles" && source !== "videos" && nativeEvents && (BigInt(i.app_permissions ?? "0") & PERM_CREATE_EVENTS) === 0n) notes.push("Adding to server events is switched on, but Leonida Racing doesn't have the “Create Events” permission yet. Until it does, only the posts in the channel will appear.");
-  if (source !== "vehicles" && source !== "videos" && mention && reminders === "off") notes.push("Mentions only apply to reminders, which are off for this feed.");
-  return { content: [`Feed added: <#${channelId}> · ${srcText}${source !== "vehicles" && source !== "videos" && filters ? ` · ${filters}` : ""}.`, ...notes].join("\n"), components: [row(linkButton("Bot guide", BOT_GUIDE))] };
+  if (!NO_EVENT_OPTIONS.has(source) && nativeEvents && (BigInt(i.app_permissions ?? "0") & PERM_CREATE_EVENTS) === 0n) notes.push("Adding to server events is switched on, but Leonida Racing doesn't have the “Create Events” permission yet. Until it does, only the posts in the channel will appear.");
+  if (!NO_EVENT_OPTIONS.has(source) && mention && reminders === "off") notes.push("Mentions only apply to reminders, which are off for this feed.");
+  return { content: [`Feed added: <#${channelId}> · ${srcText}${!NO_EVENT_OPTIONS.has(source) && filters ? ` · ${filters}` : ""}.`, ...notes].join("\n"), components: [row(linkButton("Bot guide", BOT_GUIDE))] };
 }
 
 async function feedList(i: any) {
@@ -573,7 +603,7 @@ async function feedOfGuild(i: any) {
 async function feedEdit(i: any) {
   const f = await feedOfGuild(i);
   if (!f) return { content: "I couldn't find that feed on this server. Pick one from the suggestions while typing." };
-  if (f.source === "vehicles" || f.source === "videos") return { content: "This feed has no options to change." };
+  if (NO_EVENT_OPTIONS.has(f.source)) return { content: "This feed has no options to change." };
   const patch: Record<string, unknown> = {};
   for (const [o, col] of [["add_to_server_events", "native_events"], ["reminders", "reminders"], ["mention_attendees", "mention_attendees"]]) { const v = opt(i, o); if (v !== undefined) patch[col] = v; }
   if (!Object.keys(patch).length) return { content: "Nothing to change. Pick at least one option." };
