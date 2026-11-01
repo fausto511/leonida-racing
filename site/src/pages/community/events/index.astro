@@ -323,7 +323,10 @@ const dcCard = `<div class="dc-card"><h3 data-dc-t>Find people to race with</h3>
     if (t.closest('[data-join],[data-leave]')) setTimeout(() => { drawCal(); drawStrip(); }, 600);
     const s = t.closest<HTMLButtonElement>('[data-share]');
     if (s) {
-      const url = `${location.origin}${location.pathname}#event-${s.dataset.share}`;
+      // Share link goes through /community/events/share/<type>/ so link previews show the
+      // event type's image; that page forwards to the calendar entry (Fausto 01.11.2026).
+      const type = s.closest<HTMLElement>('[data-type]')?.dataset.type;
+      const url = type ? `${location.origin}${import.meta.env.BASE_URL}community/events/share/${type}/#event-${s.dataset.share}` : `${location.origin}${location.pathname}#event-${s.dataset.share}`;
       if (navigator.share) navigator.share({ title: s.dataset.title, url }).catch(() => {});
       else navigator.clipboard?.writeText(url).then(() => { const o = s.innerHTML; s.textContent = 'Link copied'; setTimeout(() => { s.innerHTML = o; }, 1500); }).catch(() => {});
     }

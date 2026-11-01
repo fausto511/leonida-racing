@@ -107,17 +107,19 @@ export const platformLabels: Record<Platform, string> = { ps5: 'PS5', xbox: 'Xbo
 /** Platform chips: only active platforms (DEC-0073: PS5 at launch). */
 const platformChips = (list: Platform[]) => list.filter((p) => (ACTIVE_PLATFORMS as readonly string[]).includes(p)).map((p) => `<span class="chip chip-platform">${esc(platformShort[p] ?? p)}</span>`).join('');
 export const platformShort: Record<Platform, string> = { ps5: 'PS5', xbox: 'XBOX' };
-/** Card image per event type (home page strip). All types share one
- *  PLACEHOLDER until Fausto delivers a fixed image per type -- then only
- *  this map changes (02-Feature-und-Tool-Ideen: feste Event-Bilder). */
+/** Fixed image per event type (Fausto 01.11.2026): Discord cards / server events and the
+ *  share preview (Facebook, X ...). Not shown on the website itself for now.
+ *  Files: images/hub/event-<type>-{640,1080,1672}.webp + -1672.jpg, images/og/og-event-<type>.jpg (1200x630).
+ *  Same map in supabase/functions/discord-dispatch (EVENT_IMAGE). */
 export const eventTypeImages: Record<EventType, string> = {
-  race: 'images/hub/hub-events',
-  'time-attack': 'images/hub/hub-events',
-  league: 'images/hub/hub-events',
-  'car-meet': 'images/hub/hub-events',
-  cruise: 'images/hub/hub-events',
-  other: 'images/hub/hub-events',
+  race: 'images/hub/event-race',
+  'time-attack': 'images/hub/event-time-attack',
+  league: 'images/hub/event-league',
+  'car-meet': 'images/hub/event-car-meet',
+  cruise: 'images/hub/event-cruise',
+  other: 'images/hub/event-other',
 };
+export const eventTypeOgImage = (t: EventType) => `images/og/og-event-${t}.jpg`;
 
 export const focusLabels: Record<CrewFocus, string> = {
   racing: 'Racing',

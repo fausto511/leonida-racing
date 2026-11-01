@@ -48,6 +48,7 @@
 // Twitch via the Helix API (secrets TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET; skipped without them).
 // New items go to every feed with source 'videos'. The first check of a channel only records
 // what is already there (no backlog flood). gta_only: title (or Twitch category) must mention GTA; cars_only: title must also name a car/racing term.
+// Crew-only events (DEC-0205, 01.11.2026): only crew feeds of the host crew get them.
 // COPY STATUS: all user-facing texts are Claude placeholders, Codex review pending.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -61,8 +62,18 @@ const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SE
 
 const EVENT_TYPES: Record<string, string> = { race: "Race", "time-attack": "Time Attack", league: "League", "car-meet": "Car Meet", cruise: "Cruise", other: "Other" };
 const PLATFORMS: Record<string, string> = { ps5: "PS5", xbox: "Xbox Series X|S" };
-// One image for all types until Fausto delivers one per type (same as site/src/data/hub.ts).
-const EVENT_IMAGE: Record<string, string> = { race: "hub-events", "time-attack": "hub-events", league: "hub-events", "car-meet": "hub-events", cruise: "hub-events", other: "hub-events" };
+// Fixed image per event type (Fausto 01.11.2026, same as site/src/data/hub.ts eventTypeImages).
+// Until the website serves a type's image, the old shared image is used (checked every 10 min).
+const EVENT_IMAGE: Record<string, string> = { race: "event-race", "time-attack": "event-time-attack", league: "event-league", "car-meet": "event-car-meet", cruise: "event-cruise", other: "event-other" };
+let IMG: Record<string, string> = {};
+let imgCheckedAt = 0;
+async function refreshEventImages() {
+  if (Date.now() - imgCheckedAt < 10 * 60e3) return;
+  imgCheckedAt = Date.now();
+  const m: Record<string, string> = {};
+  for (const [t, n] of Object.entries(EVENT_IMAGE)) m[t] = (await live(`${SITE}/images/hub/${n}-1672.jpg`)) ? n : "hub-events";
+  IMG = m;
+}
 const DEFAULT_DURATION_MS = 2 * 3600e3;
 const TIME_BUDGET_MS = 40_000;
 
@@ -325,7 +336,7 @@ function card(e: any, going: number) {
   };
   if (cancelled) embed.description = "This event has been cancelled.";
   else if (e.description) embed.description = clip(String(e.description), 300);
-  if (!cancelled) embed.image = { url: `${SITE}/images/hub/${EVENT_IMAGE[e.event_type] ?? "hub-events"}-1672.jpg` };
+  if (!cancelled) embed.image = { url: `${SITE}/images/hub/${IMG[e.event_type] ?? "hub-events"}-1672.jpg` };
   // Package 4: I'm in / Withdraw (handled by discord-interactions, rpc discord_rsvp).
   const full = !!e.max_participants && going >= e.max_participants;
   const buttons: Record<string, unknown>[] = [];
@@ -342,7 +353,7 @@ function card(e: any, going: number) {
 // about 2.5:1). Fetched once per type per function instance from the website.
 const coverCache = new Map<string, string | null>();
 async function coverImage(type: string): Promise<string | null> {
-  const name = EVENT_IMAGE[type] ?? "hub-events";
+  const name = IMG[type] ?? "hub-events";
   if (coverCache.has(name)) return coverCache.get(name)!;
   let uri: string | null = null;
   try {
@@ -898,6 +909,7 @@ Deno.serve(async (req) => {
   if (ok !== true) return json({ error: "forbidden" }, 403);
   if (!TOKEN) return json({ error: "DISCORD_BOT_TOKEN missing" }, 500);
   const body = await req.json().catch(() => ({}));
+  try { await refreshEventImages(); } catch (err) { console.error("event images", err); }
   if (body?.housekeeping === true) return json(await housekeeping());
   if (body?.videos === true) return json(await handleVideos());
   if (body?.channels === true) {
