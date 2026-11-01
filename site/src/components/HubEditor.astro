@@ -155,7 +155,7 @@ const base = import.meta.env.BASE_URL;
                   : <label class="check is-soon" title={comingLater(p)}><input type="checkbox" disabled /> {p.label} <span class="soon">Coming later</span></label>)}
               </fieldset>
               <label>Host PSN name <small>so players can add you on PlayStation</small><input type="text" name="host_name" maxlength="16" placeholder="e.g. Racer_01" autocomplete="off" /></label>
-              <label>Host crew <small>optional — its tag is shown next to your name</small><select name="host_crew_id"><option value="">— none —</option></select></label>
+              <label>Host crew <small>optional — only crews you lead or are a commissioner of; its tag is shown next to your name</small><select name="host_crew_id"><option value="">— none —</option></select></label>
               <label>Location <small>optional — more places are added after release</small><select name="location"><option value="">— not specified —</option></select></label>
               <label class="span2">Discord invite <small>where participants meet you — a PSN name or a Discord (yours or your crew's) is required. Tip: create the invite in your rules or info channel, newcomers land right there.</small><input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
               <label>Max. participants <small>optional, e.g. lobby size</small><input type="number" name="max_participants" min="2" max="500" step="1" /></label>
@@ -526,6 +526,7 @@ const base = import.meta.env.BASE_URL;
     if (/not_commissioner/.test(m)) return 'Make this member a commissioner first.';
     if (/not_member/.test(m)) return 'This driver is not an active member of the crew.';
     if (/crew_banned/.test(m)) return 'This driver is banned from your crew. Unban them first.';
+    if (/crew_invite_taken/.test(m)) return 'This Discord invite belongs to a crew on Leonida Racing. Use your own invite, or pick that crew as host crew (crew leaders and commissioners only).';
     if (/row-level security/.test(m)) return 'Not allowed — your account is not a moderator.';
     if (/check constraint/.test(m)) return `The database rejected a value (${m.match(/"([^"]+)"/)?.[1] ?? 'check'}). Please review the fields.`;
     return m;
@@ -558,7 +559,9 @@ const base = import.meta.env.BASE_URL;
         return `<button type="button" class="li${id === selectedId ? ' is-active' : ''}" data-id="${esc(id)}">${crewTagHtml(r.tag, r.color, 'sm')}<span class="li-main"><span class="li-title">${esc(r.name)}</span><span class="li-sub">/${esc(r.slug)}</span></span>${reqPill}${pill}</button>`;
       }
       const when = new Date(r.starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
-      return `<button type="button" class="li${id === selectedId ? ' is-active' : ''}" data-id="${esc(id)}"><span class="li-main"><span class="li-title">${r.status === 'cancelled' ? '✕ ' : ''}${esc(r.title)}</span><span class="li-sub">${esc(when)}</span></span>${pill}</button>`;
+      // DEC-0204: the event lost its crew (host is no longer leader/commissioner)
+      const notice = r.host_notice ? `<span class="li-pill req" title="${esc(eventNoticeText(r.host_notice))}">Check</span>` : '';
+      return `<button type="button" class="li${id === selectedId ? ' is-active' : ''}" data-id="${esc(id)}"><span class="li-main"><span class="li-title">${r.status === 'cancelled' ? '✕ ' : ''}${esc(r.title)}</span><span class="li-sub">${esc(when)}</span></span>${notice}${pill}</button>`;
     }).join('');
     listEmptyEl.hidden = rows.length > 0;
     // My Account > Crews: one crew = no picker row (DEC-0190)
@@ -595,8 +598,8 @@ const base = import.meta.env.BASE_URL;
   function fillHostSelect() {
     const sel = eventForm.elements.namedItem('host_crew_id') as HTMLSelectElement;
     const current = sel.value;
-    // Moderators: any crew. Hosts: no crew, or a crew they are an active member of.
-    const options = isMod ? crews : crews.filter((c) => memberCrewIds.has(c.crew_id));
+    // Moderators: any crew. Hosts: no crew, or a crew they lead or are commissioner of (DEC-0204).
+    const options = isMod ? crews : crews.filter((c) => isStaffOf(c.crew_id));
     sel.innerHTML = '<option value="">— none —</option>' + options.map((c) => `<option value="${esc(c.crew_id)}">${esc(c.tag)} · ${esc(c.name)}${c.is_published ? '' : ' (draft)'}</option>`).join('');
     sel.value = current;
   }
@@ -886,8 +889,17 @@ const base = import.meta.env.BASE_URL;
   // Moderator note shown to the crew leader / host (2026-10-02), like tracks.
   // unpublishedMeansHidden: events are published on creation, so unpublished
   // = hidden by a moderator; new crews start as drafts, so not for crews.
+  // DEC-0204. COPY STATUS: Claude placeholders, Codex review pending.
+  function eventNoticeText(n: string | null | undefined) {
+    if (n === 'crew_removed') return "This event no longer runs under your crew, because you're no longer its leader or commissioner. It stays live with your own contact details. Saving the event hides this note.";
+    if (n === 'crew_removed_hidden') return "This event lost its crew, because you're no longer its leader or commissioner, and it has no contact left, so it's hidden. Add your PSN name or a Discord invite and save to publish it again.";
+    return '';
+  }
+
   function showModNote(id: string, r: any, mod: boolean, unpublishedMeansHidden = false) {
     const el = $(id);
+    const notice = eventNoticeText(r.host_notice);
+    if (notice) { el.hidden = false; el.textContent = r.moderation_note ? `${notice} Moderator note: ${r.moderation_note}` : notice; return; }
     const hidden = unpublishedMeansHidden && r.is_published === false;
     el.hidden = mod || (!r.moderation_note && !hidden);
     el.textContent = r.moderation_note
@@ -1039,6 +1051,9 @@ const base = import.meta.env.BASE_URL;
     if (e.host_name && !/^[A-Za-z][A-Za-z0-9_-]{2,15}$/.test(e.host_name)) bad.push('host_name');
     const hostCrew = crews.find((c) => c.crew_id === e.host_crew_id);
     if (!e.host_name && !e.discord_url && !hostCrew?.discord_url) bad.push('contact_required');
+    // DEC-0204: a crew's invite only with that crew as host crew (DB: hub_events_crew_invite_guard)
+    const code = inviteCode(e.discord_url);
+    if (code && !isMod && crews.some((c) => inviteCode(c.discord_url) === code) && inviteCode(hostCrew?.discord_url) !== code) bad.push('crew_invite_taken');
     if (e.max_participants != null && (!Number.isInteger(e.max_participants) || e.max_participants < 2 || e.max_participants > 500)) bad.push('max_participants');
     const su = streamUrlFromForm();
     if (su && !streamPlatform(su)) bad.push('stream_url');
@@ -1047,7 +1062,8 @@ const base = import.meta.env.BASE_URL;
     else if (!su && !selectedId && e.registration === 'closed') bad.push('closed_needs_stream');
     return bad;
   }
-  const eventFieldHelp: Record<string, string> = { title: 'title (3–80 characters)', starts_at: 'start date/time', starts_before_launch: 'events can start on Nov 19, 2026 (GTA VI launch day) at the earliest', ends_at: 'end must be after start', discord_url: 'Discord invite (https://discord.gg/… or https://discord.com/invite/…)', host_name: 'PSN name (3–16 characters, starts with a letter; letters, digits, - and _)', contact_required: 'add your PSN name or a Discord invite (or pick a host crew that has one), so players can reach you', max_participants: 'max. participants between 2 and 500', stream_url: 'a Twitch channel, YouTube video/live/channel, or Kick channel URL (https://…)', closed_needs_stream: 'an event with closed sign-ups needs a stream link (Twitch, YouTube, or Kick), so people can at least watch it' };
+  const inviteCode = (u?: string | null) => (u ?? '').match(/^https:\/\/(?:discord\.gg|discord\.com\/invite)\/([A-Za-z0-9-]+)/)?.[1].toLowerCase() ?? null;
+  const eventFieldHelp: Record<string, string> = { crew_invite_taken: "this Discord invite belongs to a crew on Leonida Racing. Use your own invite, or pick that crew as host crew (crew leaders and commissioners only)", title: 'title (3–80 characters)', starts_at: 'start date/time', starts_before_launch: 'events can start on Nov 19, 2026 (GTA VI launch day) at the earliest', ends_at: 'end must be after start', discord_url: 'Discord invite (https://discord.gg/… or https://discord.com/invite/…)', host_name: 'PSN name (3–16 characters, starts with a letter; letters, digits, - and _)', contact_required: 'add your PSN name or a Discord invite (or pick a host crew that has one), so players can reach you', max_participants: 'max. participants between 2 and 500', stream_url: 'a Twitch channel, YouTube video/live/channel, or Kick channel URL (https://…)', closed_needs_stream: 'an event with closed sign-ups needs a stream link (Twitch, YouTube, or Kick), so people can at least watch it' };
 
   function renderEventPreview() {
     const e = eventFromForm();
