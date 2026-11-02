@@ -269,10 +269,11 @@ async function cmdEvent(i: any) {
 // ---------- car card + Rate this car (RS-0100) ----------
 // COPY STATUS: labels are Claude placeholders, Codex review pending.
 const RATE_LABELS: Record<number, string> = { 5: "Dream car", 4: "Great", 3: "Decent", 2: "Meh", 1: "Not for me" };
-const stars = (n: number) => "\u2605".repeat(n);
+// Coloured star emoji, only as many as the rating: easy to tell apart at a glance (Fausto 02.11.: outlined vs. filled was hard to see).
+const stars = (n: number) => "\u2B50".repeat(n);
 const rateRow = (vehicleId: string, variant: string) => ({ type: 1, components: [{ type: 3, custom_id: `rate:${variant}:${vehicleId}`, placeholder: "Rate this car",
-  options: [5, 4, 3, 2, 1].map((n) => ({ label: `${stars(n)}${"\u2606".repeat(5 - n)}`, value: String(n), description: RATE_LABELS[n] })) }] });
-const ratingLine = (avg: number | null, count: number | null) => (avg != null && (count ?? 0) >= 3 ? `\u2605 ${Number(avg).toFixed(1)} \u00b7 ${count} ratings` : undefined);
+  options: [5, 4, 3, 2, 1].map((n) => ({ label: stars(n), value: String(n), description: `${n} of 5 \u00b7 ${RATE_LABELS[n]}` })) }] });
+const ratingLine = (avg: number | null, count: number | null) => (avg != null && (count ?? 0) >= 3 ? `\u2B50 ${Number(avg).toFixed(1)} \u00b7 ${count} ratings` : undefined);
 const CAR_COLS = "vehicle_id,make,model,classes,drive,seats,real_life_inspiration,first_seen_in,has_photo";
 async function carRating(id: string) {
   const { data } = await db.from("public_vehicle_ratings").select("rating_avg,rating_count").eq("vehicle_id", id).maybeSingle();
