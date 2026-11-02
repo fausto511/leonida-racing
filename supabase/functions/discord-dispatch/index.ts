@@ -274,7 +274,7 @@ function vehicleCard(v: any) {
 // COPY STATUS: labels are Claude placeholders (same as discord-interactions), Codex review pending.
 const RATE_LABELS: Record<number, string> = { 5: "Dream car", 4: "Great", 3: "Decent", 2: "Meh", 1: "Not for me" };
 const rateRow = (vehicleId: string) => ({ type: 1, components: [{ type: 3, custom_id: `rate:n:${vehicleId}`, placeholder: "Rate this car",
-  options: [5, 4, 3, 2, 1].map((n) => ({ label: `${"\u2605".repeat(n)}${"\u2606".repeat(5 - n)}`, value: String(n), description: RATE_LABELS[n] })) }] });
+  options: [5, 4, 3, 2, 1].map((n) => ({ label: "\u2B50".repeat(n), value: String(n), description: `${n} of 5 \u00b7 ${RATE_LABELS[n]}` })) }] });
 function vehicleDigest(vs: any[]) {
   const shown = vs.slice(0, 15);
   const lines = shown.map((v) => `\u2022 [${v.make} ${v.model}](${vehicleUrl(v)})${(v.classes ?? []).length ? ` \u00b7 ${v.classes.join(", ")}` : ""}`);
@@ -914,7 +914,7 @@ async function handleModAlerts(): Promise<number> {
     allowed_mentions: { parse: [] },
     embeds: [{ color: ORANGE, title: rows.length === 1 ? "Waiting for review" : `${rows.length} things waiting for review`,
       description: clip(rows.map(line).join("\n"), 4000), footer: { text: "Leonida Racing \u00b7 mod alerts" }, timestamp: new Date().toISOString() }],
-    components: links.length <= 5 ? [row(...links.map((l) => linkButton(l === "moderator/" ? "Lap times" : l.includes("hub") ? "Hub requests" : l.includes("reports") ? "Lap reports" : l.includes("content") ? "Content reports" : "Open", `${SITE}/${l}`)))] : [],
+    components: links.length <= 5 ? [row(...links.map((l) => linkButton(l === "moderator/" ? "Lap times" : l.includes("hub") ? "Hub & event review" : l.includes("reports") ? "Lap reports" : l.includes("content") ? "Content reports" : "Open", `${SITE}/${l}`)))] : [],
   });
   if (res.ok) { await db.from("discord_mod_alerts").update({ sent_at: new Date().toISOString() }).in("id", ids); return rows.length; }
   console.log("mod alert post failed", res.status, res.text.slice(0, 200));
@@ -923,11 +923,11 @@ async function handleModAlerts(): Promise<number> {
   return 0;
 }
 
-// ---------- events panel (DEC-0137) ----------
+// ---------- events panel (DEC-0137; text for host stages DEC-0209, Claude placeholder, Codex pending) ----------
 const EVENTS_PANEL = {
   allowed_mentions: { parse: [] },
   embeds: [{ color: ORANGE, title: "Host your own event",
-    description: "Race, car meet, cruise or league night \u2013 create it on leonidaracing.com. Once it's published, it shows up on this server automatically, with sign-up buttons.\n\n**First time?** Apply as event host on the same page. A mod confirms it within 24 hours, then you can publish.",
+    description: "Race, car meet, cruise or league night \u2013 create it on leonidaracing.com. Once it's published, it shows up on this server automatically, with sign-up buttons.\n\n**First time?** A moderator reviews your first events before they go live, so submit them at least 24 hours ahead. Run good events and a moderator can unlock publishing without review.",
     footer: { text: "Leonida Racing \u00b7 no commands needed" } }],
   components: [row(linkButton("Create Event", `${SITE}/account/events/`), linkButton("Event calendar", `${SITE}/community/events/`))],
 };
