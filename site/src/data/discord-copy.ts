@@ -42,7 +42,7 @@ export const discordLfg = {
 export const discordSteps: { title: string; text: string }[] = [
   { title: "Join the server", text: "Open the invite and join the server. No Leonida Racing account is needed to chat in the open channels or join voice." },
   { title: "Grab your roles", text: "In #roles, choose your region, platforms, languages, interests and notification pings. You can change your picks anytime; each menu saves your full selection for that group." },
-  { title: "Log in on Leonida Racing", text: "Sign in with Discord on the website for Registered Driver on this server. A Crew Leader, Event Host or Creator role confirmed on the website adds its matching Verified role." },
+  { title: "Log in on Leonida Racing", text: "Log in with Discord on the website for Registered Driver on this server. A Crew Leader, Event Host or Creator role confirmed on the website adds its matching Verified role." },
 ];
 
 // Rights per tier (DEC-0129). true = yes, false = no, string = condition.
@@ -73,7 +73,7 @@ export const discordFaq: { q: string; a: string }[] = [
   { q: "What is the Leonida Racing Discord?", a: "An independent Discord community for GTA racers and car enthusiasts, getting ready for GTA VI. Meet drivers and crews, find groups, talk builds and share photos, videos and race jobs." },
   { q: "Is it free?", a: "Yes. Joining the server and using the community features costs nothing. Some actions, including starting an LFG search and signing up for a calendar event, require a free Leonida Racing account." },
   { q: "Is this an official Rockstar Games server?", a: "No. Leonida Racing is an independent community project and is not affiliated with Rockstar Games or Take-Two Interactive." },
-  { q: "Do I need a Leonida Racing account?", a: "Not to join the server, chat or join an existing LFG search. Sign in with Discord on the website for Registered Driver, event sign-ups and the option to start your own LFG search. Registered Driver also adds server permissions such as link previews and polls where the channel allows them. You do not need a separate Leonida Racing password." },
+  { q: "Do I need a Leonida Racing account?", a: "Not to join the server, chat or join an existing LFG search. Log in with Discord on the website for Registered Driver, event sign-ups and the option to start your own LFG search. Registered Driver also adds server permissions such as link previews and polls where the channel allows them. You do not need a separate Leonida Racing password." },
   { q: "Which platforms is it for?", a: "The community has PlayStation, Xbox and PC roles. Choose yours in #roles to find people on the same platform. These community roles do not confirm GTA VI availability on a particular system." },
   { q: "Is it only for racing?", a: "Racing is the core, but car meets, cruises, photo sessions, builds and crews all have their own place." },
   { q: "Which languages can I use?", a: "The general channels are English. Deutsch, Español, Français, Italiano and Português each have their own text and voice channel; pick the language role in #roles to see them." },

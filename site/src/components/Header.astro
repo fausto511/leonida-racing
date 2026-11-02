@@ -321,6 +321,11 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
 
     // Moderator link + "new" counts (moderation queue, crew invites/requests).
     let checkedFor: string | null = null;
+    // Screen-reader name of the avatar button: name and open items in one label (Codex 02.11., Fausto 03.11.)
+    let menuName = '';
+    let menuCount = 0;
+    const setMenuLabel = () => triggerEl.setAttribute('aria-label', `Account menu${menuName ? ` for ${menuName}` : ''}${menuCount ? `, ${menuCount} ${menuCount === 1 ? 'item needs' : 'items need'} your attention` : ''}`);
+
     async function updateMenuCounts(session: any) {
       if (!session) { moderatorLinkEl.hidden = true; checkedFor = null; return; }
       if (checkedFor === session.user.id) return;
@@ -330,6 +335,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       crewLinkEl.textContent = 'My crews';
       lapsLinkEl.textContent = 'My laps';
       dotEl.hidden = true;
+      menuCount = 0;
       // `moderators` is only readable by moderators themselves (RLS).
       const { data, error } = await supabase.from('moderators').select('driver_id').limit(1);
       const isMod = !error && Array.isArray(data) && data.length > 0;
@@ -368,7 +374,8 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       if (toFix) lapsLinkEl.textContent = `My laps (${toFix} to fix)`;
       const mine = total + toFix;
       dotEl.hidden = !mine;
-      if (mine) document.getElementById('account-menu-trigger')?.setAttribute('aria-label', `Account menu, ${mine} waiting for you`);
+      menuCount = mine;
+      setMenuLabel();
     }
 
     function renderAuthState(session: any) {
@@ -380,7 +387,8 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         const meta = session.user.user_metadata ?? {};
         const avatarUrl = meta.avatar_url ?? null;
         const label = meta.full_name ?? meta.name ?? session.user.email ?? '?';
-        triggerEl.setAttribute('aria-label', `Account menu (${label})`);
+        menuName = String(label);
+        setMenuLabel();
         if (avatarUrl) {
           avatarImgEl.src = avatarUrl;
           avatarImgEl.hidden = false;

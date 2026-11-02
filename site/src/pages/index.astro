@@ -53,14 +53,14 @@ const crewsHtml = skel(4, true);
 const GUIDE_CARD: Record<string, { img: string; line: string; title?: string }> = {
   // racing / vehicles / customization: image, title and sentence from the mockup (DEC-0116 board Home)
   racing: { img: 'guide/street-race', title: 'Racing in GTA VI', line: 'Circuit, off-road, and street racing, each shown with a live race HUD.' },
-  vehicles: { img: 'guide/classic-collection-car', title: 'Vehicles in GTA VI', line: '311 entries in the GTABase vehicle database. Which names Rockstar confirmed, and which are community IDs.' },
-  customization: { img: 'guide/rideout-customs', title: 'Customization and mod shops', line: 'Two named mod shops, from detailed interiors and donk builds to lifted off-road rigs.' },
+  vehicles: { img: 'guide/classic-collection-car', title: 'Vehicles in GTA VI', line: 'Which names Rockstar confirmed, and which are community IDs.' },
+  customization: { img: 'guide/rideout-customs', title: 'Customization and mod shops', line: 'Named mod shops, from detailed interiors and donk builds to lifted off-road rigs.' },
   driving: { img: 'guide/driving', line: 'What Rockstar has said about the rebuilt driving physics so far.' },
   theft: { img: 'guide/slim-jim', line: 'Stealing, scanning, selling and registering cars, as Rockstar described it.' },
   ownership: { img: 'guide/safehouse', line: 'Garages, storage spaces and the safehouse vehicles shown so far.' },
   classics: { img: 'guide/classic-collection-wyman', line: 'Classic cars, restoration and special builds from the Ultimate Edition.' },
   gellhorn: { img: 'guide/circuit-empty', line: 'The paved circuit behind Gellhorn Time Attack, and what is known about it.' },
-  'car-culture': { img: 'guide/car-meet', line: 'Car meets and street takeovers as they appear in official footage.' },
+  'car-culture': { img: 'guide/car-meet', line: 'Car meets, takeovers and the details that give Leonida’s car scene its character.' },
 };
 const guideCards = guideSections.filter((s) => s.id !== 'not-confirmed' && GUIDE_CARD[s.id]);
 const guideFixed = guideCards.find((s) => s.id === 'racing')!;
@@ -197,7 +197,8 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       <div class="hsec-titles">
         <p class="eyebrow">Cars</p>
         <h2 class="lr-h2 display hsec-title">Fastest at Gellhorn</h2>
-        <p class="hsec-sub">The cars holding each class record right now. Beat a time and the spot is yours.</p>
+        <!-- Two states (Fausto 03.11.2026): until the first published lap the cards are photo picks, not record holders -->
+        <p class="hsec-sub">{anyLap ? 'The cars holding each class record right now. Beat a time and the spot is yours.' : 'No class records yet. Put down the first lap and the spot is yours.'}</p>
       </div>
       <a href={`${base}cars/`} class="arrow">All {N} cars →</a>
     </div>
@@ -213,7 +214,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       <div class="hsec-titles">
         <p class="eyebrow">Community</p>
         <h2 class="lr-h2 display hsec-title">Races, meets and crews</h2>
-        <p class="hsec-sub">Find your next race or car meet, sign up in one click, and connect with crews that run the way you do.</p>
+        <p class="hsec-sub">Find your next race or car meet, grab your spot, and connect with crews that run the way you do.</p>
       </div>
       <a href={`${base}community/`} class="arrow">Open Community →</a>
     </div>
