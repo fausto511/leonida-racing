@@ -1,0 +1,193 @@
+---
+// Moderator > Hub: Event review (RS-0097, DEC-0137 / DEC-0209).
+// 1. Submissions waiting for review (stage 1/2 hosts): Approve / Needs changes / Reject (reason required).
+// 2. Changes to live events (title, description, Discord invite): live vs. new, Approve / Reject.
+// 3. Waiting for the host (needs changes): reason shown, Approve / Reject still possible.
+// 4. Hosts: stage 1-3, daily limit (stage 3), blocked. Rows exist for everyone who submitted.
+// The database (moderate_event, set_event_host) checks moderator rights and the rules.
+// Mod alerts in #mod-alerts link to moderator/hub/, this section sits on top of that page.
+// COPY STATUS: Claude placeholders, internal page (moderators only).
+import '../styles/hub.css';
+---
+<section class="er" id="er-root" hidden>
+  <div class="er-head">
+    <h2 class="er-title">Event review <span class="er-count" id="er-count"></span></h2>
+    <button type="button" class="btn btn-s btn-sm" id="er-reload">Reload</button>
+  </div>
+  <p class="er-msg" id="er-msg" aria-live="polite"></p>
+  <div id="er-pending"></div>
+  <div id="er-changes"></div>
+  <div id="er-waiting"></div>
+  <details class="er-hosts" id="er-hosts-box">
+    <summary>Hosts &amp; stages <span id="er-hosts-n"></span></summary>
+    <p class="er-hint">Stage 1: one event in review. Stage 2: up to 3 in review (gets the Event Host role). Stage 3: publishes without review, daily limit per 24 hours. Blocked: can't submit new events. Hosts appear here after their first submission.</p>
+    <div class="er-table-wrap"><table class="er-table">
+      <thead><tr><th>Host</th><th>Stage</th><th>Daily limit</th><th>Blocked</th><th>Approved without changes</th><th></th></tr></thead>
+      <tbody id="er-hosts"></tbody>
+    </table></div>
+  </details>
+</section>
+
+<style>
+  .er[hidden], .er [hidden] { display: none !important; }
+  .er { margin-bottom: 2rem; padding: 1.1rem 1.2rem; border: 1px solid var(--lr-orange-border); border-radius: 8px; background: var(--lr-card); }
+  .er-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .er-title { margin: 0; font-size: 1.15rem; }
+  .er-count { color: var(--gh-yellow); }
+  .er-msg { margin: .5rem 0 0; font-size: .85rem; min-height: 1em; }
+  .er-msg.is-error { color: var(--lr-coral); } .er-msg.is-ok { color: var(--lr-lime); }
+  :global(.er-group-t) { margin: 1.2rem 0 .6rem; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--gh-muted); }
+  :global(.er-card) { margin-bottom: .9rem; padding: .9rem 1rem; border: 1px solid var(--gh-line); border-radius: 6px; }
+  :global(.er-meta) { display: flex; flex-wrap: wrap; gap: .4rem 1rem; margin-bottom: .6rem; font-size: .8rem; color: var(--gh-muted); }
+  :global(.er-meta strong) { color: var(--gh-text); }
+  :global(.er-warn) { color: var(--lr-orange); }
+  :global(.er-note) { margin: .5rem 0 0; font-size: .85rem; }
+  :global(.er-diff) { width: 100%; border-collapse: collapse; font-size: .85rem; margin: .3rem 0 .6rem; }
+  :global(.er-diff th), :global(.er-diff td) { text-align: left; vertical-align: top; padding: .4rem .5rem; border-bottom: 1px solid var(--gh-line); }
+  :global(.er-diff th) { color: var(--gh-muted); font-size: .7rem; text-transform: uppercase; width: 8rem; }
+  :global(.er-diff td) { white-space: pre-wrap; word-break: break-word; }
+  :global(.er-diff .is-new) { color: var(--lr-lime); }
+  :global(.er-actions) { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .7rem; }
+  :global(.er-actions textarea) { flex: 1 1 18rem; min-height: 2.4rem; padding: .45rem .6rem; border: 1px solid var(--gh-line); border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: .85rem; }
+  .er-hosts { margin-top: 1.2rem; }
+  .er-hosts > summary { cursor: pointer; font-weight: 700; font-size: .9rem; }
+  .er-hint { font-size: .8rem; color: var(--gh-muted); max-width: 48rem; }
+  .er-table-wrap { overflow-x: auto; }
+  .er-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .er-table th, .er-table td { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid var(--gh-line); white-space: nowrap; }
+  .er-table th { color: var(--gh-muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
+  :global(.er-table select), :global(.er-table input[type="number"]) { padding: .25rem .4rem; border: 1px solid var(--gh-line); border-radius: 4px; background: transparent; color: inherit; font: inherit; }
+  :global(.er-table input[type="number"]) { width: 4.5rem; }
+  :global(.er-sugg) { margin-left: .4rem; padding: .05rem .4rem; border-radius: 999px; border: 1px solid var(--lr-orange-border); color: var(--gh-yellow); font-size: .68rem; font-weight: 700; }
+</style>
+
+<script>
+  import { backendConfigured, getSupabase } from '../scripts/supabase-client';
+  import { esc, eventRowHtml, localizeTimes } from '../data/hub';
+
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const root = $('er-root');
+  const COLS = 'event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,members_only,created_by,is_published,review_status,created_at,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)';
+  const FIELD: Record<string, string> = { title: 'Title', description: 'Description', discord_url: 'Discord invite' };
+  let names = new Map<string, string>();
+  let hosts = new Map<string, any>();
+
+  function say(t: string, err = false) { const m = $('er-msg'); m.textContent = t; m.className = `er-msg ${t ? (err ? 'is-error' : 'is-ok') : ''}`; }
+  const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  const hostLine = (e: any, rv: any) => {
+    const h = hosts.get(e.created_by);
+    const soon = new Date(e.starts_at).getTime() - Date.now() < 24 * 3600e3;
+    return `<div class="er-meta"><span>Host <strong>${esc(names.get(e.created_by) ?? 'Unknown')}</strong>${h ? ` · stage ${h.level}${h.blocked ? ' · blocked' : ''}` : ''}</span>`
+      + `${rv?.submitted_at ? `<span>Submitted ${esc(when(rv.submitted_at))}</span>` : ''}`
+      + `<span${soon ? ' class="er-warn"' : ''}>Starts ${esc(when(e.starts_at))}${soon ? ' — less than 24 h' : ''}</span>`
+      + `${rv?.changes_requested ? '<span>Resubmitted after a change request</span>' : ''}</div>`;
+  };
+  const actions = (id: string, kind: 'event' | 'changes') => `<div class="er-actions" data-id="${esc(id)}">`
+    + (kind === 'event'
+      ? `<button type="button" class="btn btn-p btn-sm" data-act="approve">Approve</button><textarea maxlength="300" placeholder="Reason for the host (required for Needs changes / Reject)"></textarea><button type="button" class="btn btn-s btn-sm" data-act="needs_changes">Needs changes</button><button type="button" class="btn btn-danger btn-sm" data-act="reject">Reject</button>`
+      : `<button type="button" class="btn btn-p btn-sm" data-act="approve_changes">Approve changes</button><textarea maxlength="300" placeholder="Reason for the host (required to reject)"></textarea><button type="button" class="btn btn-danger btn-sm" data-act="reject_changes">Reject changes</button>`)
+    + '</div>';
+
+  async function load() {
+    const sb = getSupabase();
+    const [rvRes, hostRes] = await Promise.all([
+      sb.from('hub_event_reviews').select('*'),
+      sb.from('event_hosts').select('*').order('updated_at', { ascending: false }),
+    ]);
+    const reviews = new Map(((rvRes.data ?? []) as any[]).map((r) => [r.event_id, r]));
+    const changeIds = [...reviews.values()].filter((r) => r.pending).map((r) => r.event_id);
+    const [inRev, changed] = await Promise.all([
+      sb.from('hub_events').select(COLS).in('review_status', ['pending', 'needs_changes']).order('starts_at'),
+      changeIds.length ? sb.from('hub_events').select(COLS).in('event_id', changeIds).eq('review_status', 'approved').order('starts_at') : Promise.resolve({ data: [], error: null }),
+    ]);
+    if (rvRes.error || hostRes.error || inRev.error || changed.error) { say(`Could not load: ${(rvRes.error || hostRes.error || inRev.error || changed.error)!.message}`, true); return; }
+    const evs = (inRev.data ?? []) as any[];
+    const chg = ((changed.data ?? []) as any[]).filter((e) => new Date(e.starts_at).getTime() > Date.now());
+    hosts = new Map(((hostRes.data ?? []) as any[]).map((h) => [h.driver_id, h]));
+    const ids = [...new Set([...evs, ...chg].map((e) => e.created_by).concat([...hosts.keys()]).filter(Boolean))];
+    if (ids.length) {
+      const { data } = await sb.from('drivers').select('driver_id,display_name').in('driver_id', ids);
+      names = new Map(((data ?? []) as any[]).map((d) => [d.driver_id, d.display_name]));
+    }
+    const pending = evs.filter((e) => e.review_status === 'pending');
+    const waiting = evs.filter((e) => e.review_status === 'needs_changes');
+    const card = (e: any, body: string) => `<div class="er-card">${hostLine(e, reviews.get(e.event_id))}${body}</div>`;
+    const row = (e: any) => `<div class="ev-list">${eventRowHtml(e, { full: true, side: '' })}</div>`;
+    $('er-pending').innerHTML = `<p class="er-group-t">Waiting for review (${pending.length})</p>`
+      + (pending.length ? pending.map((e) => card(e, row(e) + actions(e.event_id, 'event'))).join('') : '<p class="er-note">Nothing to review.</p>');
+    $('er-changes').innerHTML = chg.length ? `<p class="er-group-t">Changes to live events (${chg.length})</p>` + chg.map((e) => {
+      const p = reviews.get(e.event_id).pending ?? {};
+      const diff = Object.keys(p).map((k) => `<tr><th>${esc(FIELD[k] ?? k)}</th><td>${esc(e[k] ?? '—')}</td><td class="is-new">${esc(p[k] ?? '— (removed)')}</td></tr>`).join('');
+      return card(e, `<p class="er-note"><strong>${esc(e.title)}</strong> · live since approval</p><table class="er-diff"><thead><tr><th>Field</th><th>Live now</th><th>New</th></tr></thead><tbody>${diff}</tbody></table>` + actions(e.event_id, 'changes'));
+    }).join('') : '';
+    $('er-waiting').innerHTML = waiting.length ? `<p class="er-group-t">Waiting for the host (${waiting.length})</p>`
+      + waiting.map((e) => card(e, `<p class="er-note">Your note: ${esc(reviews.get(e.event_id)?.note ?? '—')}</p>` + row(e) + actions(e.event_id, 'event'))).join('') : '';
+    localizeTimes(root);
+    const open = pending.length + chg.length;
+    $('er-count').textContent = open ? `(${open})` : '';
+    renderHosts();
+  }
+
+  function renderHosts() {
+    const rows = [...hosts.values()];
+    $('er-hosts-n').textContent = `(${rows.length})`;
+    $('er-hosts').innerHTML = rows.length ? rows.map((h) => `<tr data-driver="${esc(h.driver_id)}">
+      <td>${esc(names.get(h.driver_id) ?? 'Unknown')}${h.stage3_suggested_at && h.level < 3 ? '<span class="er-sugg" title="5 events approved without changes">Stage 3 suggested</span>' : ''}</td>
+      <td><select name="level">${[1, 2, 3].map((n) => `<option value="${n}"${n === h.level ? ' selected' : ''}>${n}</option>`).join('')}</select></td>
+      <td><input type="number" name="daily_limit" min="1" max="20" value="${h.daily_limit}" /></td>
+      <td><input type="checkbox" name="blocked"${h.blocked ? ' checked' : ''} /></td>
+      <td>${h.clean_approvals}</td>
+      <td><button type="button" class="btn btn-s btn-sm" data-save>Save</button></td>
+    </tr>`).join('') : '<tr><td colspan="6">No hosts yet.</td></tr>';
+  }
+
+  const errText = (m: string) => /note_required/.test(m) ? 'Add a reason for the host first.'
+    : /already_started/.test(m) ? 'The event has already started — it can no longer be approved.'
+    : /not_in_review|no_pending_changes/.test(m) ? 'This was already handled — reloaded.'
+    : m;
+
+  root.addEventListener('click', async (ev) => {
+    const t = ev.target as HTMLElement;
+    const btn = t.closest<HTMLButtonElement>('[data-act]');
+    if (btn) {
+      const box = btn.closest<HTMLElement>('.er-actions')!;
+      const note = (box.querySelector('textarea') as HTMLTextAreaElement).value.trim();
+      const act = btn.dataset.act!;
+      if (['needs_changes', 'reject', 'reject_changes'].includes(act) && !note) { say('Add a reason for the host first.', true); box.querySelector('textarea')!.focus(); return; }
+      box.querySelectorAll('button').forEach((b) => (b.disabled = true));
+      const { error } = await getSupabase().rpc('moderate_event', { p_event: box.dataset.id, p_action: act, p_note: note || null });
+      const done: Record<string, string> = { approve: 'Approved — the event is live.', needs_changes: 'Sent back to the host with your note.', reject: 'Rejected.', approve_changes: 'Changes approved — now live.', reject_changes: 'Changes rejected — the live version stays.' };
+      say(error ? errText(error.message) : done[act], Boolean(error));
+      await load();
+      document.dispatchEvent(new CustomEvent('er-changed'));
+      return;
+    }
+    const save = t.closest<HTMLButtonElement>('[data-save]');
+    if (save) {
+      const tr = save.closest<HTMLElement>('tr')!;
+      const lvl = Number((tr.querySelector('[name="level"]') as HTMLSelectElement).value);
+      const lim = Number((tr.querySelector('[name="daily_limit"]') as HTMLInputElement).value);
+      const blocked = (tr.querySelector('[name="blocked"]') as HTMLInputElement).checked;
+      if (!Number.isInteger(lim) || lim < 1 || lim > 20) { say('Daily limit must be between 1 and 20.', true); return; }
+      save.disabled = true;
+      const { error } = await getSupabase().rpc('set_event_host', { p_driver: tr.dataset.driver, p_level: lvl, p_blocked: blocked, p_daily_limit: lim });
+      say(error ? error.message : `Saved: ${names.get(tr.dataset.driver!) ?? 'host'} is now stage ${lvl}${blocked ? ' (blocked)' : ''}.`, Boolean(error));
+      await load();
+    }
+  });
+  $('er-reload').addEventListener('click', () => { say(''); load(); });
+
+  async function init(session: any) {
+    root.hidden = true;
+    if (!session) return;
+    const mod = await getSupabase().from('moderators').select('driver_id').limit(1);
+    if (mod.error || !mod.data?.length) return;
+    root.hidden = false;
+    await load();
+  }
+  if (backendConfigured) {
+    const sb = getSupabase();
+    sb.auth.getSession().then(({ data }) => init(data?.session ?? null));
+    sb.auth.onAuthStateChange((ev, s) => { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') init(s); });
+  }
+</script>

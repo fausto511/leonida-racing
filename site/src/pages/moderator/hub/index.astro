@@ -2,9 +2,11 @@
 // Moderator: Hub-Inhalte (Crews, Events, Rollen, Rollen-Antraege).
 // Seit RS-0026 nur fuer Moderatoren; Crew Leader / Event Hosts pflegen ihre
 // Crew bzw. Events in My Account (gleiche Komponente, persoenlicher Modus).
+// RS-0097: Event review (Host-Stufen, DEC-0209) oben auf der Seite; Mod-Alerts verlinken hierher.
 import Base from '../../../layouts/Base.astro';
 import ModeratorNav from '../../../components/ModeratorNav.astro';
 import HubEditor from '../../../components/HubEditor.astro';
+import EventReview from '../../../components/EventReview.astro';
 ---
 <Base
   title="Hub Content — Moderator"
@@ -16,7 +18,8 @@ import HubEditor from '../../../components/HubEditor.astro';
     <ModeratorNav active="hub" />
     <p class="eyebrow">The Hub Operations</p>
     <h1 class="display mod-title">Hub Content</h1>
-    <p class="mod-lede">Create and edit the crews and events shown in The Hub, review Crew Leader / Event Host requests and manage roles. Only entries marked <strong>Published</strong> are visible on the public site.</p>
+    <p class="mod-lede">Create and edit the crews and events shown in The Hub, review events submitted by hosts, review Crew Leader / Creator requests and manage roles. Only entries marked <strong>Published</strong> are visible on the public site.</p>
+    <EventReview />
     <HubEditor mode="moderator" />
   </section>
 </Base>

@@ -4,12 +4,14 @@
 // 2. Events you host (event hosts): the same rows; the right-hand slot shows status, "x going" and Edit
 //    instead of the sign-up button. "+ Create an event", past events folded. Edit / Create opens the
 //    editor (HubEditor, events mode) under the list: Event details | Sign-ups. Discord feed folded below.
-// 3. Event Host application.
+// 3. RS-0097 / DEC-0209: no host application any more. Every account can submit events; "How hosting
+//    works" explains the three host stages (own stage highlighted, no number for stage 3).
+//    COPY STATUS: Claude placeholders, Codex review pending.
 import Base from '../../../layouts/Base.astro';
 import AccountHead from '../../../components/AccountHead.astro';
 import HubEditor from '../../../components/HubEditor.astro';
 import DiscordFeedSteps from '../../../components/DiscordFeedSteps.astro';
-import RoleApply from '../../../components/RoleApply.astro';
+import { DISCORD_INVITE_URL } from '../../../data/site';
 import '../../../styles/hub.css';
 const base = import.meta.env.BASE_URL;
 ---
@@ -39,8 +41,21 @@ const base = import.meta.env.BASE_URL;
       <section id="host-block" hidden>
         <div class="evs-head"><div>
           <h2 class="lr-h2 lr-h2-s">Events you host</h2>
-          <p class="evs-lede">Every event is public and shows up in the calendar right away. Players who sign up will use your Discord invite or PlayStation name to reach you. Make sure each event has the right contact details. Edit an event to change it or to see who signed up.</p>
+          <p class="evs-lede"><span id="host-lede-review">A moderator reviews each event before it goes live in the calendar.</span> Players who sign up will use your Discord invite or PlayStation name to reach you. Make sure each event has the right contact details. Edit an event to change it or to see who signed up.</p>
         </div></div>
+        <div class="evs-how" id="host-how">
+          <p class="evs-how-t">How hosting works</p>
+          <ol class="evs-steps">
+            <li data-step="1"><strong>New host</strong><span>A moderator reviews your first event before it goes live. One event in review at a time.</span></li>
+            <li data-step="2"><strong>Event Host</strong><span>After your first approved event you get the Event Host role and can have up to 3 events in review.</span></li>
+            <li data-step="3"><strong>Trusted host</strong><span>Run good events and a moderator can unlock publishing without review.</span></li>
+          </ol>
+          <p class="evs-how-note">Events need to start at least 24 hours after you submit them, so there's time to review. <span id="host-quota"></span></p>
+        </div>
+        <div class="evs-blocked lr-note lr-note-warn" id="host-blocked" hidden>
+          <span>You can't submit events right now. If you think this is a mistake, contact a moderator on our Discord.</span>
+          <a class="btn btn-s btn-sm" href={DISCORD_INVITE_URL} target="_blank" rel="noopener">Open Discord</a>
+        </div>
         <div id="host-list" class="ev-list"></div>
         <div class="evs-editor" id="host-editor" hidden>
           <div class="evs-editor-top">
@@ -52,7 +67,6 @@ const base = import.meta.env.BASE_URL;
         <div class="evs-dfs"><DiscordFeedSteps source="host" /></div>
       </section>
 
-      <RoleApply focus="event_host" />
     </div>
   </section>
 </Base>
@@ -83,7 +97,21 @@ const base = import.meta.env.BASE_URL;
   .evs-editor-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
   .evs-editor-t { margin: 0; font-size: 18px; font-weight: 700; }
   .evs-dfs { margin-top: 16px; }
-  @media (max-width: 760px) { .evs-editor { padding: 16px; } :global(.evs-side) { align-items: flex-start; text-align: left; } }
+  .evs-how { margin-bottom: 20px; padding: 18px 20px; border: 1px solid var(--lr-line-soft); border-radius: 8px; background: var(--lr-card); }
+  .evs-how-t { margin: 0 0 12px; font-size: 15px; font-weight: 700; }
+  .evs-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; counter-reset: st; }
+  .evs-steps li { counter-increment: st; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border: 1px solid var(--lr-line-soft); border-radius: 6px; font-size: 14px; line-height: 1.45; color: var(--lr-soft); }
+  .evs-steps li strong { color: var(--lr-text); font-size: 15px; }
+  .evs-steps li strong::before { content: counter(st) ". "; color: var(--lr-muted); }
+  .evs-steps li.is-current { border-color: var(--lr-orange-border); background: var(--lr-orange-tint); }
+  .evs-steps li.is-current strong::after { content: "  · You"; color: var(--lr-orange); font-size: 13px; font-weight: 600; }
+  .evs-how-note { margin: 12px 0 0; font-size: 14px; color: var(--lr-soft); }
+  .evs-blocked { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+  :global(.evs-why) { max-width: 260px; font-size: 13px; line-height: 1.4; color: var(--lr-soft); }
+  :global(.evs-slot[disabled]) { cursor: default; opacity: .6; }
+  :global(.evs-slot[disabled]:hover) { background: transparent; color: var(--lr-soft); }
+  :global(.evs-slot small) { color: var(--lr-muted); font-size: 13px; }
+  @media (max-width: 760px) { .evs-steps { grid-template-columns: 1fr; } .evs-editor { padding: 16px; } :global(.evs-side) { align-items: flex-start; text-align: left; } }
 </style>
 
 <script>
@@ -96,14 +124,27 @@ const base = import.meta.env.BASE_URL;
   const hostEl = $('host-list');
   let me: string | null = null;
   let isHost = false;
-  const EVENT_COLS = 'event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,members_only,created_by,is_published,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)';
-  const slot = (label: string, attrs: string, tag = 'a') => `<${tag} class="evs-slot" ${attrs}><span class="evs-slot-plus" aria-hidden="true">+</span><strong>${label}</strong></${tag}>`;
+  let hostStatus: any = null;
+  const EVENT_COLS = 'event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,members_only,created_by,is_published,review_status,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)';
+  const slot = (label: string, attrs: string, tag = 'a', sub = '') => `<${tag} class="evs-slot" ${attrs}><span class="evs-slot-plus" aria-hidden="true">+</span><strong>${label}</strong>${sub ? `<small>${sub}</small>` : ''}</${tag}>`;
 
   document.addEventListener('hc-access', (e: any) => {
-    isHost = Boolean(e.detail.hasAccess);
+    isHost = Boolean(e.detail.hasAccess); // every signed-in driver (DEC-0209)
+    hostStatus = e.detail.hostStatus ?? null;
     $('host-block').hidden = !isHost;
     if (me && isHost) loadHosted();
   });
+
+  // DEC-0209: own stage, limits, blocked note
+  function renderHostInfo() {
+    const st = hostStatus ?? { level: 1, blocked: false, open: 0, open_limit: 1 };
+    document.querySelectorAll<HTMLElement>('#host-how [data-step]').forEach((li) => li.classList.toggle('is-current', Number(li.dataset.step) === st.level));
+    $('host-lede-review').textContent = st.level === 3 && !st.blocked ? 'Your events go live in the calendar right away.' : 'A moderator reviews each event before it goes live in the calendar.';
+    $('host-quota').textContent = st.level === 3 ? `Created in the last 24 hours: ${st.created_24h} of ${st.daily_limit}.` : `In review now: ${st.open} of ${st.open_limit}.`;
+    ($('host-quota').parentElement as HTMLElement).firstChild!.textContent = st.level === 3 ? '' : "Events need to start at least 24 hours after you submit them, so there's time to review. ";
+    $('host-blocked').hidden = !st.blocked;
+  }
+  const canSubmit = () => { const st = hostStatus; return Boolean(st) && !st.blocked && (st.level === 3 ? st.created_24h < st.daily_limit : st.open < st.open_limit); };
 
   // 1. Events I'm going to: the calendar row (full), sign-up state on the right (Going ✓ / next steps)
   const rsvp = createEventRsvp(listEl);
@@ -127,18 +168,42 @@ const base = import.meta.env.BASE_URL;
     const upcoming = all.filter((e) => new Date(e.starts_at).getTime() >= since);
     const past = all.filter((e) => new Date(e.starts_at).getTime() < since).reverse();
     const counts = new Map<string, number>();
+    const reviews = new Map<string, any>();
+    const st = await sb.rpc('my_event_host_status');
+    if (st.data) hostStatus = st.data;
+    renderHostInfo();
     if (all.length) {
-      const { data: rs } = await sb.from('public_event_rsvps').select('event_id').in('event_id', all.map((e) => e.event_id));
+      const ids = all.map((e) => e.event_id);
+      const [{ data: rs }, { data: rv }] = await Promise.all([
+        sb.from('public_event_rsvps').select('event_id').in('event_id', ids),
+        sb.from('hub_event_reviews').select('event_id,note,pending,edit_note').in('event_id', ids),
+      ]);
       for (const r of (rs ?? []) as any[]) counts.set(r.event_id, (counts.get(r.event_id) ?? 0) + 1);
+      for (const r of (rv ?? []) as any[]) reviews.set(r.event_id, r);
     }
     const side = (e: any, wasPast: boolean) => {
       const n = counts.get(e.event_id) ?? 0;
+      const rv = reviews.get(e.event_id);
+      const rs = e.review_status ?? 'approved';
+      const edit = `<button type="button" class="btn btn-s btn-sm" data-edit="${esc(e.event_id)}">Edit</button>`;
+      if (rs === 'rejected' || rs === 'expired') {
+        const why = rs === 'rejected' ? (rv?.note ? `Moderator note: ${esc(rv.note)}` : '') : 'The start time passed before a moderator reviewed it.';
+        return `<div class="evs-side"><span class="lr-status is-no">${rs === 'rejected' ? 'Not approved' : 'Expired'}</span>${why ? `<span class="evs-why">${why}</span>` : ''}</div>`;
+      }
+      if (rs === 'pending') return `<div class="evs-side"><span class="lr-status">In review</span>${edit}</div>`;
+      if (rs === 'needs_changes') return `<div class="evs-side"><span class="lr-status is-fix">Needs changes</span>${rv?.note ? `<span class="evs-why">${esc(rv.note)}</span>` : ''}${edit}</div>`;
       const status = e.status === 'cancelled' ? '' : e.is_published ? '<span class="lr-status is-ok">Live</span>' : '<span class="lr-status" title="Hidden by a moderator">Hidden</span>';
-      return `<div class="evs-side">${status}<span class="evs-going"><b>${n}</b>${e.max_participants ? ` / ${e.max_participants}` : ''} ${wasPast ? 'went' : 'going'}</span><button type="button" class="btn btn-s btn-sm" data-edit="${esc(e.event_id)}">Edit</button></div>`;
+      const chg = rv?.pending ? '<span class="lr-status is-fix" title="The calendar shows the previous version until a moderator approves your changes">Changes in review</span>' : '';
+      return `<div class="evs-side">${status}${chg}<span class="evs-going"><b>${n}</b>${e.max_participants ? ` / ${e.max_participants}` : ''} ${wasPast ? 'went' : 'going'}</span>${edit}</div>`;
     };
     const row = (e: any, wasPast = false) => eventRowHtml(e, { full: true, side: side(e, wasPast) });
+    const st0 = hostStatus ?? { level: 1, blocked: false, open: 0, open_limit: 1 };
+    const create = st0.blocked ? ''
+      : !canSubmit() ? slot('Create an event', 'type="button" disabled', 'button', st0.level === 3 ? `you've reached ${st0.daily_limit} new events in 24 hours` : `${st0.open} of ${st0.open_limit} events in review — wait for a moderator`)
+      : st0.level === 1 && !all.length ? slot('Become an Event Host', 'type="button" data-new', 'button', 'create your first event')
+      : slot('Create an event', 'type="button" data-new', 'button');
     hostEl.innerHTML = upcoming.map((e) => row(e)).join('')
-      + slot('Create an event', 'type="button" data-new', 'button')
+      + create
       + (past.length ? `<details class="evs-past"><summary>Past events (${past.length})</summary>${past.map((e) => row(e, true)).join('')}</details>` : '');
     localizeTimes(hostEl);
   }
@@ -154,7 +219,7 @@ const base = import.meta.env.BASE_URL;
     const t = e.target as HTMLElement;
     const ed = t.closest<HTMLElement>('[data-edit]');
     if (ed) { openEditor(ed.dataset.edit!, `Edit: ${ed.closest('.ev-row')?.querySelector('.ev-title')?.textContent ?? 'event'}`); return; }
-    if (t.closest('[data-new]')) openEditor(null, 'New event');
+    if (t.closest('[data-new]') && canSubmit()) openEditor(null, 'New event');
   });
   $('host-editor-close').addEventListener('click', () => { $('host-editor').hidden = true; });
   document.addEventListener('hc-events-changed', () => {
