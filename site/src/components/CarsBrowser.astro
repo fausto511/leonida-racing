@@ -90,7 +90,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
           {makes.map(([slug, name]) => <button type="button" class="menu-i" data-pick-make={slug}>{name}<span>{makeCounts.get(slug)}</span></button>)}
         </div>
       </div>}
-      <span class="ctl ctl-off" title="Tiers arrive after launch" aria-disabled="true">Tier<Fragment set:html={chev} /></span>
+      <span class="ctl ctl-off" title="Tiers coming soon" aria-disabled="true">Tier<Fragment set:html={chev} /></span>
       <div class="dd dd-l">
         <label class="ctl ctl-price" id="ctl-price">Max $<input type="text" id="f-max" inputmode="decimal" placeholder="e.g. 750k" aria-label="Maximum price" autocomplete="off" /></label>
         <div class="menu menu-price" data-menu="max" hidden>
@@ -132,7 +132,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
           <button type="button" class="menu-i" data-sort="speed" data-needs="speed">Top speed</button>
           <button type="button" class="menu-i" data-sort="lap" data-needs="lap">Gellhorn lap time</button>
           <span class="menu-sep"></span>
-          <button type="button" class="menu-i" disabled title="After launch">Most owned<span>after launch</span></button>
+          <button type="button" class="menu-i" disabled title="Not enough data to sort">Most owned<span>coming soon</span></button>
           <button type="button" class="menu-i" data-sort="recent">Recently added</button>
         </div>
       </div>
@@ -156,7 +156,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
       <div class="empty-drops" id="empty-drops"></div>
       <div id="closest-wrap" hidden>
         <h3 class="closest-title">Closest matches</h3>
-        <p class="muted closest-sub">These miss one of your filters. The difference is marked on each card.</p>
+        <p class="muted closest-sub">These cars miss one filter. Each card shows which one.</p>
         <div class="cars-grid" id="closest"></div>
       </div>
     </div>
@@ -179,19 +179,19 @@ function mc(group: string, value: string | number, label: string, n: number | un
 <div class="dsg rng" data-range="price"><h4>Price <em data-sel="price"></em></h4>
         <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum price" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum price" /></div>
         <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
-        <p class="rng-off">Prices arrive after launch.</p>
+        <p class="rng-off">Prices coming soon.</p>
       </div>
       <div class="dsg rng" data-range="speed"><h4>Top speed <em data-sel="speed"></em></h4>
         <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum top speed" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum top speed" /></div>
         <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
-        <p class="rng-off">Top speeds arrive with measured data after launch.</p>
+        <p class="rng-off">Top-speed filtering needs more measured data.</p>
       </div>
       <div class="dsg rng" data-range="lap"><h4>Gellhorn lap time <em data-sel="lap"></em></h4>
         <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum gellhorn lap time" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum gellhorn lap time" /></div>
         <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
-        <p class="rng-off">Lap times arrive after launch.</p>
+        <p class="rng-off">Lap-time filtering needs more lap data.</p>
       </div>
-      <div class="dsg"><h4>Dealer</h4><div class="mchips"><span class="mc off">Dealer names after launch</span></div></div>
+      <div class="dsg"><h4>Dealer</h4><div class="mchips"><span class="mc off">Dealer names coming soon</span></div></div>
       {scope !== 'make' && <div class="dsg dsg-wide">
         <h4>Manufacturer <em data-sel="make"></em><input type="search" class="dsp-msearch" id="dsp-msearch" placeholder={`Search ${makes.length} brands`} aria-label="Search manufacturers" /></h4>
         <div class="mlist" set:html={makes.map(([slug, name]) => mc('make', slug, name, makeCounts.get(slug))).join('')} />

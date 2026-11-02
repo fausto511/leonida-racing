@@ -277,7 +277,7 @@ function render() {
   if (!matches.length) {
     $('empty-drops').innerHTML = keys.map((k) => {
       const n = countWith(without(state, k));
-      return n ? `<button type="button" class="btn btn-s btn-md" data-drop="${k}">Without ${esc(filterLabel(k))} → ${n} ${n === 1 ? 'car' : 'cars'}</button>` : '';
+      return n ? `<button type="button" class="btn btn-s btn-md" data-drop="${k}">Remove ${esc(filterLabel(k))} → ${n} ${n === 1 ? 'car' : 'cars'}</button>` : '';
     }).join('');
     // S1: only say "no car named …" when the search text alone finds nothing
     const qHits = state.q ? cards.filter((c) => !fails(c, state).includes('q')).length : 0;
@@ -286,7 +286,7 @@ function render() {
       ? 'Try removing a filter.'
       : qHits
         ? `<b>“${esc(state.q)}”</b> matches ${qHits} ${qHits === 1 ? 'car' : 'cars'}, but none with your other filters.`
-        : `No car named <b>“${esc(state.q)}”</b>.${dym ? ` Did you mean <a href="#" data-dym="${esc(dym.dataset.name!)}">${esc(dym.querySelector('.vc-brand')!.textContent!.trim())} ${esc(dym.querySelector('.vc-name')!.textContent!.trim())}</a>?` : ''}`;
+        : `No car matches <b>“${esc(state.q)}”</b>.${dym ? ` Did you mean <a href="#" data-dym="${esc(dym.dataset.name!)}">${esc(dym.querySelector('.vc-brand')!.textContent!.trim())} ${esc(dym.querySelector('.vc-name')!.textContent!.trim())}</a>?` : ''}`;
     const near = cards.map((c) => ({ c, f: fails(c, state) })).filter((x) => x.f.length === 1 && x.f[0] !== 'q').sort((a, b) => sortKey(a.c, b.c)).slice(0, 4);
     $('closest-wrap').hidden = !near.length;
     $('closest').innerHTML = '';
@@ -495,9 +495,9 @@ let qTimer = 0;
 const maxInput = $('f-max') as HTMLInputElement;
 if (!DOMAIN.price.has) {
   maxInput.disabled = true;
-  maxInput.placeholder = 'after launch';
+  maxInput.placeholder = 'TBA'; // short: the field only fits ~9 characters (Fausto 03.11.: coming soon; TBA as on the cards)
   $('ctl-price').classList.add('ctl-off');
-  $('ctl-price').title = 'Prices arrive after launch';
+  $('ctl-price').title = 'Prices coming soon';
 } else {
   maxInput.addEventListener('focus', () => { closeMenus(); document.querySelector<HTMLElement>('[data-menu="max"]')!.hidden = false; });
   const applyMax = () => { state.ranges.price = [state.ranges.price[0], parseMoney(maxInput.value)]; render(); };
@@ -515,8 +515,8 @@ if (!DOMAIN.price.has) {
 document.querySelectorAll<HTMLButtonElement>('[data-needs]').forEach((b) => {
   if (DOMAIN[b.dataset.needs as RangeKey].has) return;
   b.disabled = true;
-  b.title = 'After launch';
-  if (!b.querySelector('span')) b.insertAdjacentHTML('beforeend', '<span>after launch</span>');
+  b.title = 'Not enough data to sort';
+  if (!b.querySelector('span')) b.insertAdjacentHTML('beforeend', '<span>coming soon</span>');
 });
 
 // ---- detailed search / filter sheet ------------------------------------------
