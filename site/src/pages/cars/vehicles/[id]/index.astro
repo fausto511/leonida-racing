@@ -191,17 +191,17 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <div class="vt">
             <span class="vt-l">Price</span>
             <b class:list={['vt-v tnum', { 'is-tba': price == null }]}>{price != null ? money(price) : 'TBA'}</b>
-            <span class="vt-s">{price != null ? (acq ? `${acq} · store price` : 'Store price') : 'Not announced yet'}</span>
+            <span class="vt-s">{price != null ? (acq ? `${acq} · store price` : 'Store price') : 'Coming soon'}</span>
           </div>
           <div class="vt">
             <span class="vt-l">Top speed</span>
             <b class:list={['vt-v tnum', { 'is-tba': speed == null }]}>{speed != null ? <Fragment set:html={speedHtml(speed)} /> : 'TBA'}</b>
-            <span class="vt-s">{speedRank != null ? `#${speedRank} of ${classCars.length} in ${cls}` : 'Measured after launch'}</span>
+            <span class="vt-s">{speedRank != null ? `#${speedRank} of ${classCars.length} in ${cls}` : 'Coming soon'}</span>
           </div>
           <div class="vt" id="vt-lap">
             <span class="vt-l">Gellhorn <span class="vt-opt">best </span>lap</span>
             <b class:list={['vt-v tnum', { 'is-tba': myLap == null }]} data-v>{myLap != null ? lapTime(myLap) : 'No lap yet'}</b>
-            <a class="vt-s vt-link" href="#gellhorn" data-s>{lapRank != null ? `#${lapRank} of ${classCars.length} in ${cls} ↓` : 'Set the first time ↓'}</a>
+            <a class="vt-s vt-link" href="#gellhorn" data-s>{lapRank != null ? `#${lapRank} of ${classCars.length} in ${cls} ↓` : 'Submit the first lap ↓'}</a>
           </div>
           <div class="vt vr" id="vr">
             <span class="vt-l">Driver rating</span>
@@ -210,8 +210,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           </div>
         </div>
         <dl class="vs-rows">
-          <div><dt>Where to get</dt><dd class:list={{ 'is-tba': !vehicle.acquisition }}>{vehicle.acquisition ? acqNotes[vehicle.acquisition] : 'After launch'}</dd></div>
-          <div><dt>Sell value</dt><dd class:list={{ 'is-tba': vehicle.sellable !== 'no' && sell == null }}>{vehicle.sellable === 'no' ? "Can't be sold" : sell != null ? money(sell) : 'After launch'}</dd></div>
+          <div><dt>Where to get</dt><dd class:list={{ 'is-tba': !vehicle.acquisition }}>{vehicle.acquisition ? acqNotes[vehicle.acquisition] : 'Coming soon'}</dd></div>
+          <div><dt>Sell value</dt><dd class:list={{ 'is-tba': vehicle.sellable !== 'no' && sell == null }}>{vehicle.sellable === 'no' ? "Can't be sold" : sell != null ? money(sell) : 'Coming soon'}</dd></div>
           <div><dt>Drive{' · '}Seats</dt><dd>{vehicle.drive === 'n/a' && !vehicle.seats ? 'TBA' : <>{vehicle.drive}{' · '}{vehicle.seats} {vehicle.seats === 1 ? 'seat' : 'seats'}</>}</dd></div>
           <div><dt>Release</dt><dd class:list={{ 'is-tba': !release }}>{release?.date ? <>{release.name}{' · '}<time datetime={release.date}>{releaseDate}</time></> : releaseText}</dd></div>
         </dl>
@@ -227,7 +227,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <h2 class="lr-h2 vsec-title display">{vehicle.model} at Gellhorn</h2>
           <p class="vsec-sub">Best laps driven in this car, and where it stands in its class.</p>
         </div>
-        <span class="vsec-flag" id="vg-flag" hidden>Sample until launch</span>
+        <span class="vsec-flag" id="vg-flag" title="Fictional drivers and times. Real laps replace them as soon as the first ones are published." hidden>Sample until first laps</span>
       </div>
       <div class="vg">
         <div class="vg-card">

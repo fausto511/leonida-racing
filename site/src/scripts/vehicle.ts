@@ -132,7 +132,7 @@ function init(root: HTMLElement) {
       await setWished(me, id, next);
       next ? wished.add(id) : wished.delete(id);
       paintWish();
-      if (next) bubble(wishBtn, `On your wishlist. You find it under <a href="${base}account/#wishlist">My Garage → Wishlist</a>.`, 5000);
+      if (next) bubble(wishBtn, `Added to your wishlist. View it in <a href="${base}account/#wishlist">My garage → Wishlist</a>.`, 5000);
       else hideBubble();
     } catch {
       bubble(wishBtn, 'Could not save. Please try again.');
@@ -245,7 +245,7 @@ function init(root: HTMLElement) {
       const rank = 1 + classRows.filter((r) => r.ms != null && r.ms < mineBest).length;
       v.textContent = lapTime(mineBest); v.classList.remove('is-tba');
       s.textContent = `#${rank} of ${classIds.length} in ${cls} ↓`;
-    } else { v.textContent = 'No lap yet'; v.classList.add('is-tba'); s.textContent = 'Set the first time ↓'; }
+    } else { v.textContent = 'No lap yet'; v.classList.add('is-tba'); s.textContent = 'Submit the first lap ↓'; }
     // rivals
     const rv = rivalsFromClass(classRows, id);
     if (rv) { $('vh2h-list') && ($('vh2h-list')!.innerHTML = rv.map((r) => rivalHtml(r.id, r.note, id)).join('')); $('vh2h-sub') && ($('vh2h-sub')!.textContent = 'Its closest rivals at Gellhorn'); }
