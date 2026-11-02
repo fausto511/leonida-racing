@@ -86,7 +86,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     const cls = list[0]?.cls ?? null;
     const pool = ALL.filter((c) => c.release && !ids.includes(c.id) && (!cls || c.classes.includes(cls)))
       .sort((a, b) => Number(b.photo) - Number(a.photo) || a.model.localeCompare(b.model));
-    return { label: cls ? `Popular in ${cls}` : 'Popular cars', list: pool.slice(0, 3) };
+    return { label: cls ? `More in ${cls}` : 'More cars', list: pool.slice(0, 3) }; // not "Popular": picked by photo, then name
   }
   function slot(): string {
     const s = suggestions();
@@ -151,14 +151,14 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     const rules = `<div class="tk-rules" id="tk-rules" hidden><b>How we judge</b><ul>
 <li>Only our stock Gellhorn reference lap and the in-game price count. Community laps depend on the driver, so they never decide.</li>
 <li>Best value: a car that is at most ${(VALUE_MAX_SLOWER_MS / 1000).toFixed(1)} s slower than the fastest pick and at least ${Math.round(VALUE_MIN_CHEAPER * 100)} % cheaper. Faster and cheaper at once is a clear pick.</li>
-<li>Edition, bonus and GTA+ cars count like any other car. We only mark that they can't be bought later.</li>
+<li>Edition, bonus and GTA+ cars count like any other car. We only mark how you get them.</li>
 <li>Top speed is its own category and doesn't decide the value.</li></ul></div>`;
     if (!v) {
       const miss = list.map((c) => {
         const m = [c.price == null ? 'price' : '', c.ref == null ? 'reference lap' : ''].filter(Boolean);
         return `<span>${esc(c.model)}: ${m.length ? m.map((x) => `<em>${x}</em>`).join(' · ') : 'ready'}</span>`;
       }).join('');
-      box.innerHTML = `<p class="cp-eb">Our take</p><div class="lock"><div class="lock-m"><h3>Our verdict unlocks after launch</h3><p>We pick the best value, the fastest and the top-speed king as soon as the in-game price and our Gellhorn reference lap are known for at least two of these cars.</p><div class="lock-miss">${miss}</div></div><button type="button" class="btn btn-s" data-how>How we judge</button></div>${rules}`;
+      box.innerHTML = `<p class="cp-eb">Our take</p><div class="lock"><div class="lock-m"><h3>Our verdict unlocks with prices and lap times</h3><p>We pick the best value, the fastest and the top-speed king as soon as the in-game price and our Gellhorn reference lap are known for at least two of these cars.</p><div class="lock-miss">${miss}</div></div><button type="button" class="btn btn-s" data-how>How we judge</button></div>${rules}`;
       return;
     }
     const card = (eb: string, x: { car: CmpCar; text: string } | null, link: [string, string], best = false) => x
@@ -194,7 +194,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     const perf: Row[] = [
       { label: 'Gellhorn reference lap', sub: 'Stock · our test driver', dir: 'min', cells: (c) => c.ref != null
         ? { m: lapTime(c.ref), s: c.ref === minRef ? (refs.length > 1 ? 'Fastest' : '') : `+${secs(c.ref - minRef!)}`, v: c.ref }
-        : { m: tb('Measured after launch', 'After launch'), raw: 'mal', tba: true } },
+        : { m: tb('Coming soon', 'Soon'), raw: 'mal', tba: true } },
       { label: 'Best community lap', sub: 'Fastest driver in this car', dir: 'min', cells: (c) => {
         const t = community.get(c.id);
         if (t == null) return { m: `<a class="tv-link" href="${base}time-attack/submit/">${tb('Set the first time →', 'Set a time')}</a>`, raw: 'none' };
@@ -205,20 +205,20 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
         const x = mine.get(c.id);
         return x ? { m: lapTime(x.ms), s: `#${x.rank} in this car`, mine: true } : { m: `<a class="tv-link" href="${base}time-attack/submit/">Set a time →</a>`, raw: 'none' };
       } } as Row] : []),
-      { label: 'Top speed', sub: 'Stock', dir: 'max', cells: (c) => c.speed != null ? { m: speedHtml(Math.round(c.speed)), raw: String(Math.round(c.speed)), v: c.speed } : { m: tb('Measured after launch', 'After launch'), raw: 'mal', tba: true } },
+      { label: 'Top speed', sub: 'Stock', dir: 'max', cells: (c) => c.speed != null ? { m: speedHtml(Math.round(c.speed)), raw: String(Math.round(c.speed)), v: c.speed } : { m: tb('Coming soon', 'Soon'), raw: 'mal', tba: true } },
     ];
     const price: Row[] = [
       { label: 'Price', dir: 'min', cells: (c) => c.price != null
-        ? { m: money(c.price), s: [c.price === minPrice ? (prices.length > 1 ? 'Cheapest' : '') : cheapest ? `+${moneyShort(c.price - minPrice!)} vs ${cheapest.model}` : '', limited(c) ? "Can't be bought later" : ''].filter(Boolean).join('\u2002·\u2002'), v: c.price }
-        : { m: tb('Not announced yet', 'Not announced'), raw: 'na', tba: true } },
+        ? { m: money(c.price), s: [c.price === minPrice ? (prices.length > 1 ? 'Cheapest' : '') : cheapest ? `+${moneyShort(c.price - minPrice!)} vs ${cheapest.model}` : '', limited(c) ? (acqNote[c.acq!] ?? '') : ''].filter(Boolean).join('\u2002·\u2002'), v: c.price }
+        : { m: tb('Coming soon', 'Soon'), raw: 'na', tba: true } },
       { label: 'Sell value', sub: 'Base price, no upgrades', dir: 'max', cells: (c) => c.sellable === 'no' ? { m: "Can't be sold" }
-        : c.sell != null ? { m: money(c.sell), v: c.sell } : { m: 'After launch', tba: true } },
+        : c.sell != null ? { m: money(c.sell), v: c.sell } : { m: 'Coming soon', tba: true } },
     ];
     const car: Row[] = [
       { label: 'Class', cells: (c) => ({ m: esc(c.classes.join(' / ')) }) },
       { label: 'Drive', cells: (c) => ({ m: esc(c.drive) }) },
       { label: 'Seats', cells: (c) => ({ m: String(c.seats) }) },
-      { label: 'Where to get', cells: (c) => c.acq ? { m: acqNote[c.acq] ?? esc(c.acq), s: "Can't be bought later" } : { m: 'After launch', tba: true } },
+      { label: 'Where to get', cells: (c) => c.acq ? { m: acqNote[c.acq] ?? esc(c.acq) } : { m: 'Coming soon', tba: true } },
       { label: 'Based on', cells: (c) => c.based ? { m: esc(c.based) } : { m: 'Under review', tba: true } },
     ];
     const comm: Row[] = [
@@ -270,7 +270,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     const grid = [0, 1, 2, 3].map((i) => `<line x1="${L}" x2="${W - R}" y1="${T + i * (H - T - B) / 3}" y2="${T + i * (H - T - B) / 3}" stroke="rgba(200,200,222,.10)"/>`).join('')
       + [0, 1, 2, 3, 4].map((i) => `<line y1="${T}" y2="${H - B}" x1="${L + i * (W - L - R) / 4}" x2="${L + i * (W - L - R) / 4}" stroke="rgba(200,200,222,.10)"/>`).join('');
     if (pts.length < 2) {
-      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map, fills in after launch">${grid}<text x="${(W + L) / 2}" y="${H / 2 - 4}" text-anchor="middle" fill="#B4B4C2" font-size="15">Fills in after launch</text><text x="${(W + L) / 2}" y="${H / 2 + 16}" text-anchor="middle" fill="#9C9CAB" font-size="12">once prices and Gellhorn reference laps are in</text><text x="${(W + L) / 2}" y="${H - 6}" text-anchor="middle" fill="#9C9CAB" font-size="11">Price →</text></svg>`;
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map, coming soon once prices and Gellhorn reference laps are in">${grid}<text x="${(W + L) / 2}" y="${H / 2 - 4}" text-anchor="middle" fill="#B4B4C2" font-size="15">Coming soon</text><text x="${(W + L) / 2}" y="${H / 2 + 16}" text-anchor="middle" fill="#9C9CAB" font-size="12">once prices and Gellhorn reference laps are in</text><text x="${(W + L) / 2}" y="${H - 6}" text-anchor="middle" fill="#9C9CAB" font-size="11">Price →</text></svg>`;
     }
     const px = pts.map((c) => c.price!), py = pts.map((c) => c.ref!);
     const x0 = Math.min(...px), x1 = Math.max(...px), y0 = Math.min(...py), y1 = Math.max(...py);

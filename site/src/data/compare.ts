@@ -21,10 +21,10 @@ export interface CmpCar {
 }
 
 /** Edition / bonus / GTA+ cars: judged like every other car (Fausto 15.10.), only marked
- *  because they can't be bought later. */
+ *  with how you get them. Not "can't be bought later": nobody knows that (Fausto 03.11.). */
 export const limited = (c: CmpCar) => Boolean(c.acq);
 const LIMITED_NOTE: Record<string, string> = { 'ultimate-edition': 'Ultimate Edition only', 'pre-order': 'Pre-order bonus only', 'gta-plus': 'GTA+ only' };
-export const limitedNote = (c: CmpCar) => (c.acq ? `${LIMITED_NOTE[c.acq] ?? 'Limited'}: can't be bought later.` : '');
+export const limitedNote = (c: CmpCar) => (c.acq ? `${LIMITED_NOTE[c.acq] ?? 'Limited'}.` : '');
 
 export const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 export const moneyShort = (n: number) => (n >= 1e6 ? `$${(n / 1e6).toFixed(n % 1e6 ? 1 : 0)}M` : `$${Math.round(n / 1000)}k`);
@@ -44,8 +44,9 @@ export function verdict(cars: CmpCar[], fmtSpeed: (mph: number) => string = (mph
   if (priced.length < 2) return null;
   const withRef = cars.filter((c) => c.ref != null).sort((a, b) => a.ref! - b.ref!);
   const fastest = withRef[0];
-  const n = cars.length === 2 ? 'two' : cars.length === 3 ? 'three' : 'four';
-  const fastestOut = { car: fastest, text: `Quickest reference lap of the ${n}. Worth it if you chase every tenth.` };
+  // "of the four" only when every car has a reference lap; otherwise "here" (Codex 02.11.)
+  const n = withRef.length < cars.length ? '' : cars.length === 2 ? 'two' : cars.length === 3 ? 'three' : 'four';
+  const fastestOut = { car: fastest, text: `Quickest reference lap ${n ? `of the ${n}` : 'here'}. Worth it if you chase every tenth.` };
 
   // value: only cars you can buy
   const buyable = [...priced].sort((a, b) => a.ref! - b.ref!);
