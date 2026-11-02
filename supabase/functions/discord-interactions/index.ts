@@ -13,6 +13,10 @@
 // /leonida feed gellhorn (DEC-0206, RS-0099, 01.11.2026): new video-verified lap records on Gellhorn
 // International Raceway, all of them or only those of one crew's members (crew option: leaders/commissioners).
 // The posts themselves come from discord-dispatch.
+// Rate this car (RS-0100, 02.11.2026): the /car card (and single "New in Cars" posts from discord-dispatch) carry a
+// select "rate:<c|n>:<vehicle_id>". Same table and rules as the website (rpc discord_rate_vehicle, ratings open at
+// launch). On save the card is rebuilt (average from 3 ratings, select back to its placeholder), the voter gets a
+// private confirmation; nobody else sees who rated what.
 // Package 4: I'm in / Withdraw buttons on the cards (rpc discord_rsvp).
 // /ping (DEC-0129, 15.10.2026): official server only (registered as a guild command).
 // Verified Event Host pings Event / Playlist / LFG Pings in #events or #playlists;
@@ -262,28 +266,77 @@ async function cmdEvent(i: any) {
   return reply({ embeds: [await eventEmbed(e)], components: [row(linkButton("Details", eventUrl(e)), addButton)] });
 }
 
-async function cmdCar(i: any) {
-  const id = String(opt(i, "vehicle") ?? "");
-  const { data: v } = await db.from("vehicles").select("vehicle_id,make,model,classes,drive,seats,real_life_inspiration,first_seen_in,has_photo").eq("vehicle_id", id).not("release_id", "is", null).maybeSingle();
-  if (!v) return ephemeral("I couldn't find that vehicle. Pick one from the suggestions while typing.");
+// ---------- car card + Rate this car (RS-0100) ----------
+// COPY STATUS: labels are Claude placeholders, Codex review pending.
+const RATE_LABELS: Record<number, string> = { 5: "Dream car", 4: "Great", 3: "Decent", 2: "Meh", 1: "Not for me" };
+const stars = (n: number) => "\u2605".repeat(n);
+const rateRow = (vehicleId: string, variant: string) => ({ type: 1, components: [{ type: 3, custom_id: `rate:${variant}:${vehicleId}`, placeholder: "Rate this car",
+  options: [5, 4, 3, 2, 1].map((n) => ({ label: `${stars(n)}${"\u2606".repeat(5 - n)}`, value: String(n), description: RATE_LABELS[n] })) }] });
+const ratingLine = (avg: number | null, count: number | null) => (avg != null && (count ?? 0) >= 3 ? `\u2605 ${Number(avg).toFixed(1)} \u00b7 ${count} ratings` : undefined);
+const CAR_COLS = "vehicle_id,make,model,classes,drive,seats,real_life_inspiration,first_seen_in,has_photo";
+async function carRating(id: string) {
+  const { data } = await db.from("public_vehicle_ratings").select("rating_avg,rating_count").eq("vehicle_id", id).maybeSingle();
+  return data as { rating_avg: number; rating_count: number } | null;
+}
+// variant "c" = /car answer, "n" = "New in Cars" post from discord-dispatch (same look as there)
+function carMessage(v: any, avg: number | null, count: number | null, variant: string) {
   const url = `${SITE}/cars/vehicles/${v.vehicle_id}/`;
   const fields = [
-    { name: "Class", value: (v.classes ?? []).join(", ") || "—", inline: true },
-    { name: "Drivetrain", value: v.drive || "—", inline: true },
-    { name: "Seats", value: v.seats ? String(v.seats) : "—", inline: true },
+    { name: "Class", value: (v.classes ?? []).join(", ") || "\u2014", inline: true },
+    { name: "Drivetrain", value: v.drive || "\u2014", inline: true },
+    { name: "Seats", value: v.seats ? String(v.seats) : "\u2014", inline: true },
   ];
   if (v.real_life_inspiration) fields.push({ name: "Real-life inspiration", value: v.real_life_inspiration, inline: false });
   if (v.first_seen_in) fields.push({ name: "First seen in", value: v.first_seen_in, inline: false });
-  return reply({
+  return {
     embeds: [{
-      title: `${v.make} ${v.model}`, url, color: ORANGE, fields,
+      ...(variant === "n" ? { author: { name: "New in Cars" } } : {}),
+      title: `${v.make} ${v.model}`, url, color: ORANGE, description: ratingLine(avg, count), fields,
       ...(v.has_photo ? { image: { url: `${SITE}/images/vehicles/${v.vehicle_id}-1280.webp` } } : {}),
-      footer: { text: "Leonida Racing · Cars" },
+      footer: { text: "Leonida Racing \u00b7 Cars" },
     }],
-    components: [row(linkButton("Open car page", url), addButton)],
-  });
+    components: [row(linkButton("Open car page", url), addButton), rateRow(v.vehicle_id, variant)],
+    allowed_mentions: { parse: [] },
+  };
+}
+async function rateSelect(i: any) {
+  const [, variant, vehicleId] = String(i.data?.custom_id ?? "").split(":");
+  const n = Number(i.data?.values?.[0]);
+  const { data, error } = await db.rpc("discord_rate_vehicle", { p_discord_id: discordId(i), p_vehicle: vehicleId ?? "", p_stars: n });
+  if (error) throw error;
+  const r = data as any;
+  switch (r.status) {
+    case "no_profile": return ephemeral("Rate cars with a free Leonida Racing account. It uses this Discord login, so it takes one click.", [profileButton]);
+    case "not_open": return ephemeral("Car ratings open when GTA VI is out: <t:1794996000:F>. Your vote counts from then on.");
+    case "not_found": return ephemeral("This car can't be rated.");
+    case "saved": break;
+    default: return ephemeral("Something went wrong on our side. Please try again in a moment.");
+  }
+  const { data: v } = await db.from("vehicles").select(CAR_COLS).eq("vehicle_id", vehicleId).maybeSingle();
+  const name = v ? `${v.make} ${v.model}` : "this car";
+  const text = r.prev && r.prev !== r.stars ? `Changed from ${stars(r.prev)} to ${stars(r.stars)} for **${name}**.` : `Saved: ${stars(r.stars)} (${r.stars}/5) for **${name}**. You can change it any time, here or on the car page.`;
+  // Private confirmation as a follow-up; the card itself is updated in place (type 7).
+  // A follow-up only works once Discord has the type 7 answer -> short wait, one retry.
+  bg((async () => {
+    for (const wait of [700, 2000]) {
+      await new Promise((res) => setTimeout(res, wait));
+      const f = await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: text, flags: 64, allowed_mentions: { parse: [] } }) });
+      if (f.ok) return;
+      console.log("rating follow-up failed", f.status, (await f.text()).slice(0, 200));
+    }
+  })());
+  if (!v) return json({ type: 6 });
+  return json({ type: 7, data: carMessage(v, r.avg, r.count, variant === "n" ? "n" : "c") });
 }
 
+async function cmdCar(i: any) {
+  const id = String(opt(i, "vehicle") ?? "");
+  const { data: v } = await db.from("vehicles").select(CAR_COLS).eq("vehicle_id", id).not("release_id", "is", null).maybeSingle();
+  if (!v) return ephemeral("I couldn't find that vehicle. Pick one from the suggestions while typing.");
+  const rt = await carRating(v.vehicle_id);
+  return reply(carMessage(v, rt?.rating_avg ?? null, rt?.rating_count ?? null, "c"));
+}
 // ---------- /compare ----------
 const COMPARE_TRACK = "gellhorn-international-raceway", COMPARE_PLATFORM = "ps5"; // same as the compare page
 const ACQ: Record<string, string> = { "pre-order": "Pre-order bonus", "ultimate-edition": "Ultimate Edition exclusive", "gta-plus": "GTA+ members only" };
@@ -854,6 +907,7 @@ Deno.serve(async (req) => {
     if (i.type === 3 && String(i.data?.custom_id ?? "").startsWith("rsvp:")) return await rsvpButton(i);
     if (i.type === 3 && String(i.data?.custom_id ?? "").startsWith("roles:")) return rolePicker(i);
     if (i.type === 3 && String(i.data?.custom_id ?? "").startsWith("lfg:")) return await lfgComponent(i);
+    if (i.type === 3 && String(i.data?.custom_id ?? "").startsWith("rate:")) return await rateSelect(i);
     if (i.type === 2) {
       switch (i.data?.name) {
         case "events": return await cmdEvents(i);

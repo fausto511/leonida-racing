@@ -49,6 +49,7 @@
 // New items go to every feed with source 'videos'. The first check of a channel only records
 // what is already there (no backlog flood). gta_only: title (or Twitch category) must mention GTA; cars_only: title must also name a car/racing term.
 // Crew-only events (DEC-0205, 01.11.2026): only crew feeds of the host crew get them.
+// Rate this car (RS-0100, 02.11.2026): single "New in Cars" cards carry the rating select (handled by discord-interactions).
 // Gellhorn record feed (DEC-0206, RS-0099, 01.11.2026): feed source 'gellhorn' (all laps, or crew_id = only laps
 // of that crew's active members). Outbox 'record' (lap became video-verified; the DB re-checks the record when
 // posting, only times that beat an existing time) and 'record_sync' (posted lap invalidated / renamed driver ->
@@ -265,10 +266,15 @@ function vehicleCard(v: any) {
   return {
     embeds: [{ author: { name: "New in Cars" }, title: `${v.make} ${v.model}`, url, color: ORANGE, fields,
       ...(v._photo ? { image: { url: vehicleImg(v) } } : {}), footer: { text: "Leonida Racing \u00b7 Cars" } }],
-    components: [row(linkButton("Open car page", url), linkButton("Add to your server", INVITE))],
+    // Rate this car (RS-0100): handled by discord-interactions (custom_id rate:n:<vehicle_id>), same select as /car.
+    components: [row(linkButton("Open car page", url), linkButton("Add to your server", INVITE)), rateRow(v.vehicle_id)],
     allowed_mentions: { parse: [] },
   };
 }
+// COPY STATUS: labels are Claude placeholders (same as discord-interactions), Codex review pending.
+const RATE_LABELS: Record<number, string> = { 5: "Dream car", 4: "Great", 3: "Decent", 2: "Meh", 1: "Not for me" };
+const rateRow = (vehicleId: string) => ({ type: 1, components: [{ type: 3, custom_id: `rate:n:${vehicleId}`, placeholder: "Rate this car",
+  options: [5, 4, 3, 2, 1].map((n) => ({ label: `${"\u2605".repeat(n)}${"\u2606".repeat(5 - n)}`, value: String(n), description: RATE_LABELS[n] })) }] });
 function vehicleDigest(vs: any[]) {
   const shown = vs.slice(0, 15);
   const lines = shown.map((v) => `\u2022 [${v.make} ${v.model}](${vehicleUrl(v)})${(v.classes ?? []).length ? ` \u00b7 ${v.classes.join(", ")}` : ""}`);
