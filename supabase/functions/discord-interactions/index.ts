@@ -17,7 +17,16 @@
 // select "rate:<c|n>:<vehicle_id>". Same table and rules as the website (rpc discord_rate_vehicle, ratings open at
 // launch). On save the card is rebuilt (average from 3 ratings, select back to its placeholder), the voter gets a
 // private confirmation; nobody else sees who rated what.
+// /leaderboard (RS-0101, Fausto 02.11.2026): Gellhorn top 10, overall / one class / one car, optionally video-verified
+// only, plus the caller's own place if they are further down. Same board as the website (PS5, best lap per driver
+// overall and per class, views public_leaderboard / public_leaderboard_verified); public reply.
 // Package 4: I'm in / Withdraw buttons on the cards (rpc discord_rsvp).
+// /edit-event (DEC-0100, RS-0097, Fausto 02.11.2026): the host edits title, start, description and max.
+// participants of an own upcoming event in a Discord form (modal "evedit:<event_id>"). Saved through
+// rpc discord_edit_event as that driver, so the website rules apply (host stages DEC-0209: title /
+// description wait for review at stage 1/2, time only while >= 24 h away). Times in the form are UTC;
+// the reply shows them in the user's own time zone. Named like /create-event (not "/event edit", because
+// /event already takes an event option and can't also have subcommands).
 // /ping (DEC-0129, 15.10.2026): official server only (registered as a guild command).
 // Verified Event Host pings Event / Playlist / LFG Pings in #events or #playlists;
 // allowed_mentions limits the ping to exactly that role (never @everyone/@here).
@@ -84,6 +93,8 @@ const GUILD_COMMANDS = [
     ] },
 ];
 
+// Classes for /leaderboard (same as vehicles.classes / the website's class chips).
+const LB_CLASSES = ["Super", "Sports", "Sports Classics", "Muscle", "Coupes", "Sedans", "SUVs", "Off-Road"];
 // /events, /event, /car, /create-event are open to everyone (Fausto 2026-10-07):
 // read-only or link-only; publishing events still needs the host role on the website.
 const COMMANDS = [
@@ -97,11 +108,19 @@ const COMMANDS = [
   { name: "car", description: "Vehicle card from Leonida Racing", dm_permission: false,
     options: [{ type: 3, name: "vehicle", description: "Start typing a make or model", required: true, autocomplete: true }] },
   { name: "create-event", description: "Create an event on Leonida Racing", dm_permission: false },
+  { name: "edit-event", description: "Edit one of your events on Leonida Racing", dm_permission: false,
+    options: [{ type: 3, name: "event", description: "Start typing the name of your event", required: true, autocomplete: true }] },
   { name: "help", description: "What the Leonida Racing bot can do", dm_permission: false },
   { name: "compare", description: "Put 2 to 4 cars side by side", dm_permission: false,
     options: [1, 2, 3, 4].map((n) => ({ type: 3, name: `car${n}`, description: n <= 2 ? "Start typing a make or model" : "Optional: another car", required: n <= 2, autocomplete: true })) },
   { name: "crew", description: "Crew card from Leonida Racing", dm_permission: false,
     options: [{ type: 3, name: "crew", description: "Start typing a crew name or tag", required: true, autocomplete: true }] },
+  { name: "leaderboard", description: "Top 10 lap times at Gellhorn International Raceway", dm_permission: false,
+    options: [
+      { type: 3, name: "class", description: "Only this class", required: false, choices: LB_CLASSES.map((c) => ({ name: c, value: c })) },
+      { type: 3, name: "car", description: "Only this car (start typing a make or model)", required: false, autocomplete: true },
+      { type: 5, name: "verified", description: "Only laps with a checked video", required: false },
+    ] },
   // Setup command: always "Manage Server" only (also checked at runtime).
   { name: "leonida", description: "Set up Leonida Racing on this server", default_member_permissions: "32", dm_permission: false,
     options: [{ type: 2, name: "feed", description: "Leonida Racing feeds for this server", options: [
@@ -142,7 +161,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-11-01.1"; // feed gellhorn (DEC-0206)
+const COMMANDS_VERSION = "2026-11-02.2"; // /edit-event (DEC-0100)
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
@@ -338,6 +357,90 @@ async function cmdCar(i: any) {
   const rt = await carRating(v.vehicle_id);
   return reply(carMessage(v, rt?.rating_avg ?? null, rt?.rating_count ?? null, "c"));
 }
+
+// ---------- /leaderboard (RS-0101) ----------
+// COPY STATUS: texts are Claude placeholders, Codex review pending.
+const LB_TRACK = "gellhorn-international-raceway", LB_PLATFORM = "ps5"; // website board: PS5 only (DEC-0073)
+const LB_TOP = 10;
+const LB_URL = `${SITE}/time-attack/gellhorn-international-raceway/`;
+// LB-PURE-START (pure helpers, tested outside Discord)
+type LbRow = { driver: string; driver_id: string; vehicle_id: string; make: string; model: string; lap_time_ms: number; video_verified: boolean };
+const mdEsc = (t: string) => String(t ?? "").replace(/([\\*_~`|>\[\]])/g, "\\$1");
+const lbTime = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}.${String(ms % 1000).padStart(3, "0")}`;
+const lbByTime = (a: LbRow, b: LbRow) => a.lap_time_ms - b.lap_time_ms || String(a.driver).localeCompare(String(b.driver));
+// Same as the website: one car -> every driver's best on it; otherwise every driver once with his fastest car.
+function lbRank(rows: LbRow[], vehicleId: string | null, allowed: Set<string> | null): LbRow[] {
+  if (vehicleId) return rows.filter((r) => r.vehicle_id === vehicleId).sort(lbByTime);
+  const best = new Map<string, LbRow>();
+  for (const r of rows) {
+    if (allowed && !allowed.has(r.vehicle_id)) continue;
+    const cur = best.get(r.driver_id);
+    if (!cur || lbByTime(r, cur) < 0) best.set(r.driver_id, r);
+  }
+  return [...best.values()].sort(lbByTime);
+}
+function lbLine(r: LbRow, rank: number, leader: number, showCar: boolean, tag: string | undefined, me: boolean) {
+  const gap = rank === 1 ? "" : ` · +${((r.lap_time_ms - leader) / 1000).toFixed(3)}`;
+  return `**${rank}.** ${mdEsc(r.driver)}${tag ? ` [${mdEsc(tag)}]` : ""}${me ? " ← you" : ""}${showCar ? ` · ${mdEsc(`${r.make} ${r.model}`)}` : ""} · **${lbTime(r.lap_time_ms)}**${gap}${r.video_verified ? " ✅" : ""}`;
+}
+// LB-PURE-END
+async function cmdLeaderboard(i: any) {
+  const cls = opt(i, "class") as string | undefined;
+  const carId = (opt(i, "car") as string | undefined) || null;
+  const verified = opt(i, "verified") === true;
+  let car: any = null;
+  if (carId) {
+    const { data } = await db.from("vehicles").select("vehicle_id,make,model").eq("vehicle_id", carId).not("release_id", "is", null).maybeSingle();
+    if (!data) return { content: "I couldn't find that car. Pick one from the suggestions while typing." };
+    car = data;
+  }
+  let allowed: Set<string> | null = null;
+  if (cls && !car) {
+    const { data } = await db.from("vehicles").select("vehicle_id").contains("classes", [cls]);
+    allowed = new Set((data ?? []).map((v: any) => v.vehicle_id));
+  }
+  const { data: raw, error } = await db.from(verified ? "public_leaderboard_verified" : "public_leaderboard")
+    .select("driver,driver_id,vehicle_id,make,model,lap_time_ms,video_verified").eq("track_id", LB_TRACK).eq("platform", LB_PLATFORM).order("lap_time_ms");
+  if (error) throw error;
+  const ranked = lbRank((raw ?? []) as LbRow[], car?.vehicle_id ?? null, allowed);
+  const scope = car ? `${car.make} ${car.model}` : cls ? `${cls} class` : "Overall";
+  const params = new URLSearchParams();
+  if (car) params.set("vehicle", car.vehicle_id); else if (cls) params.set("class", cls);
+  if (verified) params.set("verified", "1");
+  const url = `${LB_URL}${params.toString() ? `?${params}` : ""}#leaderboard`;
+  const buttons = row(linkButton("Full leaderboard", url), linkButton("Submit a lap", `${SITE}/time-attack/submit/`), addButton);
+  const title = `Gellhorn leaderboard · ${scope}${verified ? " · video verified" : ""}`;
+  if (!ranked.length) {
+    return { embeds: [{ author: { name: "Gellhorn International Raceway · PS5" }, title, url, color: ORANGE,
+      description: `No ${verified ? "video-verified " : ""}times here yet. Be the first: submit a lap.`, footer: { text: "Leonida Racing · Time Attack" } }], components: [buttons] };
+  }
+  const me = await driverByDiscord(discordId(i));
+  const myRank = me ? ranked.findIndex((r) => r.driver_id === me.driver_id) : -1;
+  const shown = ranked.slice(0, LB_TOP);
+  const ids = [...new Set([...shown.map((r) => r.driver_id), ...(myRank >= LB_TOP ? [ranked[myRank].driver_id] : [])])];
+  // Crew tag like the website: main crew (is_primary) of published crews
+  const tags = new Map<string, string>();
+  const { data: roster } = await db.from("public_crew_roster").select("driver_id,tag,is_primary").in("driver_id", ids);
+  for (const r of (roster ?? []) as any[]) if (!tags.has(r.driver_id) || r.is_primary) tags.set(r.driver_id, r.tag);
+  const leader = ranked[0].lap_time_ms;
+  const lines = shown.map((r, n) => lbLine(r, n + 1, leader, !car, tags.get(r.driver_id), n === myRank));
+  if (myRank >= LB_TOP) lines.push("…", lbLine(ranked[myRank], myRank + 1, leader, !car, tags.get(ranked[myRank].driver_id), true));
+  const anyVerified = shown.some((r) => r.video_verified) || (myRank >= LB_TOP && ranked[myRank].video_verified);
+  return { embeds: [{ author: { name: "Gellhorn International Raceway · PS5" }, title, url, color: ORANGE, description: clip(lines.join("\n"), 4000),
+    footer: { text: `${ranked.length} driver${ranked.length === 1 ? "" : "s"}${anyVerified ? " · ✅ video verified" : ""} · Leonida Racing` } }], components: [buttons] };
+}
+// Public deferred reply (the leaderboard needs a few queries): answer within 3 s, fill in afterwards.
+function deferPublic(i: any, work: () => Promise<Record<string, unknown>>) {
+  bg((async () => {
+    let out: Record<string, unknown>;
+    try { out = await work(); } catch (e) { console.error(e); out = { content: "Something went wrong on our side. Please try again in a moment." }; }
+    await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}/messages/@original`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ components: [], allowed_mentions: { parse: [] }, ...out }),
+    });
+  })());
+  return json({ type: 5 });
+}
+
 // ---------- /compare ----------
 const COMPARE_TRACK = "gellhorn-international-raceway", COMPARE_PLATFORM = "ps5"; // same as the compare page
 const ACQ: Record<string, string> = { "pre-order": "Pre-order bonus", "ultimate-edition": "Ultimate Edition exclusive", "gta-plus": "GTA+ members only" };
@@ -434,7 +537,8 @@ function cmdHelp(i: any) {
     "\u2022 **/event** \u2014 one event with start time, host and sign-ups",
     "\u2022 **/car** \u2014 a car's card \u00b7 **/compare** \u2014 2 to 4 cars side by side",
     "\u2022 **/crew** \u2014 a crew's card with its next event",
-    "\u2022 **/create-event** \u2014 host your own event on the website",
+    "\u2022 **/leaderboard** \u2014 Gellhorn top 10, overall, by class or by car, with your own place",
+    "\u2022 **/create-event** \u2014 host your own event on the website \u00b7 **/edit-event** \u2014 change one of your events",
     "",
     "**Buttons**",
     "\u2022 **I'm in / Withdraw** on event cards \u2014 sign up right from Discord (free Leonida Racing account)",
@@ -449,8 +553,77 @@ function cmdHelp(i: any) {
 }
 
 function cmdCreateEvent() {
-  return ephemeral("Create your event on Leonida Racing. Once it's published, servers that follow your crew or the public calendar get it automatically.",
+  return ephemeral("Create your event on Leonida Racing. A moderator reviews your first events before they go live; once it's published, servers that follow your crew or the public calendar get it automatically.",
     [row(linkButton("Create Event", `${SITE}/account/events/`))]);
+}
+
+// ---------- /edit-event (DEC-0100) ----------
+// COPY STATUS: Claude placeholders, Codex review pending.
+const utcText = (iso: string) => new Date(iso).toISOString().slice(0, 16).replace("T", " ");
+// "2026-11-20 20:00", optional "UTC" / "Z" / "+01:00"; no zone = UTC
+function parseStart(v: string): string | null {
+  const m = v.trim().match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})\s*(utc|z|[+-]\d{2}:?\d{2})?$/i);
+  if (!m) return null;
+  let zone = (m[6] ?? "Z").toUpperCase();
+  if (zone === "UTC") zone = "Z";
+  if (zone !== "Z" && !zone.includes(":")) zone = zone.slice(0, 3) + ":" + zone.slice(3);
+  const d = new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4].padStart(2, "0")}:${m[5]}:00${zone}`);
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
+const textInput = (id: string, label: string, style: 1 | 2, value: string, required: boolean, min: number, max: number, placeholder?: string) =>
+  ({ type: 1, components: [{ type: 4, custom_id: id, label, style, value: value || undefined, required, min_length: min, max_length: max, ...(placeholder ? { placeholder } : {}) }] });
+async function cmdEditEvent(i: any) {
+  const { data: d } = await db.from("drivers").select("driver_id").eq("discord_user_id", discordId(i)).is("deleted_at", null).maybeSingle();
+  if (!d) return ephemeral("Sign in on Leonida Racing with this Discord account first, then you can edit your events here.", [row(linkButton("Sign in", `${SITE}/account/`))]);
+  const id = String(opt(i, "event") ?? "");
+  const { data: e } = await db.from("hub_events").select("event_id,title,starts_at,description,max_participants,review_status,created_by").eq("event_id", id).maybeSingle();
+  if (!e || e.created_by !== d.driver_id) return ephemeral("I couldn't find that event among yours. Pick one from the suggestions while typing.");
+  if (e.review_status === "rejected" || e.review_status === "expired") return ephemeral("This event can't be changed any more.", [row(linkButton("My events", `${SITE}/account/events/`))]);
+  if (new Date(e.starts_at).getTime() <= Date.now()) return ephemeral("This event has already started.");
+  const { data: rv } = await db.from("hub_event_reviews").select("pending").eq("event_id", id).maybeSingle();
+  const p = (rv?.pending ?? {}) as Record<string, string | null>; // changes waiting for review: edit those, like on the website
+  const title = p.title ?? e.title, desc = ("description" in p ? p.description : e.description) ?? "";
+  return json({ type: 9, data: { custom_id: `evedit:${e.event_id}`, title: "Edit event", components: [
+    textInput("title", "Title", 1, title, true, 3, 80),
+    textInput("start", "Start (UTC) \u2013 YYYY-MM-DD HH:MM", 1, utcText(e.starts_at), true, 16, 22, "2026-11-20 20:00"),
+    textInput("description", "Description", 2, desc, false, 0, 600),
+    textInput("max", "Max. participants (2\u2013500, empty = no limit)", 1, e.max_participants ? String(e.max_participants) : "", false, 0, 3),
+  ] } });
+}
+const EDIT_ERRORS: [RegExp, string][] = [
+  [/lead_time/, "The event has to start at least 24 hours from now, so a moderator has time to review it."],
+  [/time_locked/, "The start time can only change while the event is at least 24 hours away."],
+  [/not_editable/, "This event can't be changed any more."],
+  [/not_before_launch/, "Events can start on Nov 19, 2026 (GTA VI launch day) at the earliest."],
+  [/emoji/i, "Please remove emoji from the title and description."],
+  [/title_check/, "The title needs 3 to 80 characters."],
+  [/max_participants/, "Max. participants must be between 2 and 500."],
+];
+async function submitEditEvent(i: any) {
+  const id = String(i.data.custom_id).slice(7);
+  const val = (k: string) => String(i.data.components?.flatMap((r: any) => r.components ?? []).find((c: any) => c.custom_id === k)?.value ?? "").trim();
+  const start = parseStart(val("start"));
+  if (!start) return ephemeral(`I couldn't read the start time \u201c${clip(val("start"), 30)}\u201d. Use YYYY-MM-DD HH:MM in UTC, e.g. 2026-11-20 20:00. Nothing was changed.`);
+  const maxRaw = val("max");
+  const max = maxRaw === "" ? null : Number(maxRaw);
+  if (max !== null && (!Number.isInteger(max) || max < 2 || max > 500)) return ephemeral("Max. participants must be a whole number between 2 and 500, or empty. Nothing was changed.");
+  const { data, error } = await db.rpc("discord_edit_event", { p_discord_id: discordId(i), p_event: id, p_title: val("title"), p_starts_at: start, p_description: val("description"), p_max: max });
+  if (error) { console.error("discord_edit_event", error); return ephemeral("Something went wrong on our side. Nothing was changed. Please try again in a moment."); }
+  const r = data as any;
+  const btn = [row(linkButton("My events", `${SITE}/account/events/`))];
+  if (r.status === "no_profile") return ephemeral("Sign in on Leonida Racing with this Discord account first.", btn);
+  if (r.status === "not_found") return ephemeral("I couldn't find that event among yours.", btn);
+  if (r.status === "started") return ephemeral("This event has already started. Nothing was changed.", btn);
+  if (r.status === "error") {
+    const hit = EDIT_ERRORS.find(([re]) => re.test(String(r.message ?? "")));
+    return ephemeral(`${hit ? hit[1] : "The website didn't accept this change."} Nothing was changed.`, btn);
+  }
+  const when = `Starts <t:${unix(r.starts_at)}:F> (your time).`;
+  const text = r.review_status === "pending" ? `Saved. Your event is still in review; a moderator checks it before it goes live. ${when}`
+    : r.review_status === "needs_changes" ? `Saved and sent to the moderators again. ${when}`
+    : r.pending ? `Saved. Time and participant limit are live now; the new title or description goes live once a moderator approves it. ${when}`
+    : `Saved \u2014 live on Leonida Racing and on every server that shows this event. ${when}`;
+  return ephemeral(text, btn);
 }
 
 // ---------- autocomplete ----------
@@ -464,13 +637,22 @@ async function autocomplete(i: any) {
     if (term) q = q.ilike("title", `%${term}%`);
     const { data } = await q;
     choices = (data ?? []).map((e: any) => ({ name: clip(`${e.title} · ${new Date(e.starts_at).toISOString().slice(0, 10)}`, 100), value: e.event_id }));
+  } else if (i.data?.name === "edit-event") {
+    const { data: d } = await db.from("drivers").select("driver_id").eq("discord_user_id", discordId(i)).is("deleted_at", null).maybeSingle();
+    if (d) {
+      let q = db.from("hub_events").select("event_id,title,starts_at,review_status").eq("created_by", d.driver_id).in("review_status", ["approved", "pending", "needs_changes"])
+        .gte("starts_at", new Date().toISOString()).order("starts_at").limit(25);
+      if (term) q = q.ilike("title", `%${term.replace(/[%_]/g, "")}%`);
+      const { data } = await q;
+      choices = (data ?? []).map((e: any) => ({ name: clip(`${e.title} · ${new Date(e.starts_at).toISOString().slice(0, 16).replace("T", " ")} UTC${e.review_status === "approved" ? "" : " · in review"}`, 100), value: e.event_id }));
+    }
   } else if (i.data?.name === "crew") {
     let q = db.from("crews").select("crew_id,name,tag").eq("is_published", true).order("name").limit(25);
     const t = term.replace(/[,()%]/g, "");
     if (t) q = q.or(`name.ilike.%${t}%,tag.ilike.%${t}%`);
     const { data } = await q;
     choices = (data ?? []).map((c: any) => ({ name: clip(`${c.name} [${c.tag}]`, 100), value: c.crew_id }));
-  } else if (i.data?.name === "car" || i.data?.name === "compare") {
+  } else if (i.data?.name === "car" || i.data?.name === "compare" || i.data?.name === "leaderboard") {
     let q = db.from("vehicles").select("vehicle_id,make,model").not("release_id", "is", null).order("make").order("model").limit(25); // officially shown only
     if (term) q = q.or(`model.ilike.%${term.replace(/[,()%]/g, "")}%,make.ilike.%${term.replace(/[,()%]/g, "")}%`);
     const { data } = await q;
@@ -616,7 +798,7 @@ async function feedAdd(i: any, forceSource?: string) {
       row_.crew_id = crew.crew_id; srcText = `${crew.name} [${crew.tag}]`;
       notes.push("Crew-only events of this crew appear in this channel too."); // DEC-0205
     } else if (source === "host") {
-      if (!(await rolesOf(driver.driver_id)).some((r) => r.role === "event_host")) return { content: "You need the host role on Leonida Racing to add a host feed. You can apply on the website; a moderator reviews it.", components: [row(linkButton("Apply as Event Host", `${SITE}/account/events/`))] };
+      if (!(await rolesOf(driver.driver_id)).some((r) => r.role === "event_host")) return { content: "You need the Event Host role on Leonida Racing to add a host feed. You get it with your first approved event.", components: [row(linkButton("Create an event", `${SITE}/account/events/`))] };
       row_.host_driver_id = driver.driver_id; srcText = `events hosted by ${driver.display_name}`;
     } else return { content: "Unknown source." };
   }
@@ -741,7 +923,7 @@ async function cmdPing(i: any) {
   const { data: ids } = await db.from("discord_bot_state").select("value").eq("key", "role_ids").maybeSingle();
   let hostRole = ""; try { hostRole = JSON.parse(ids?.value ?? "{}").event_host ?? ""; } catch { /* none */ }
   const roles: string[] = i.member?.roles ?? [];
-  if (!hostRole || !roles.includes(hostRole)) return ephemeral("This one is for Verified Event Hosts. Get your Event Host role confirmed on Leonida Racing: My Account \u2192 Events.");
+  if (!hostRole || !roles.includes(hostRole)) return ephemeral("This one is for Verified Event Hosts. You get the role with your first approved event on Leonida Racing: My Account \u2192 Events.");
   if (!PING_CHANNELS.includes(i.channel_id)) return ephemeral("Use /ping in #events or #playlists to reach your crowd.");
   const t = PING_TARGETS[String(opt(i, "audience") ?? "")];
   const text = String(opt(i, "message") ?? "").trim();
@@ -909,6 +1091,7 @@ Deno.serve(async (req) => {
     if (i.type === 3 && String(i.data?.custom_id ?? "").startsWith("roles:")) return rolePicker(i);
     if (i.type === 3 && String(i.data?.custom_id ?? "").startsWith("lfg:")) return await lfgComponent(i);
     if (i.type === 3 && String(i.data?.custom_id ?? "").startsWith("rate:")) return await rateSelect(i);
+    if (i.type === 5 && String(i.data?.custom_id ?? "").startsWith("evedit:")) return await submitEditEvent(i);
     if (i.type === 2) {
       switch (i.data?.name) {
         case "events": return await cmdEvents(i);
@@ -916,7 +1099,9 @@ Deno.serve(async (req) => {
         case "car": return await cmdCar(i);
         case "compare": return await cmdCompare(i);
         case "crew": return await cmdCrew(i);
+        case "leaderboard": return deferPublic(i, () => cmdLeaderboard(i));
         case "create-event": return cmdCreateEvent();
+        case "edit-event": return await cmdEditEvent(i);
         case "help": return cmdHelp(i);
         case "leonida": return await cmdLeonida(i);
         case "ping": return await cmdPing(i);
