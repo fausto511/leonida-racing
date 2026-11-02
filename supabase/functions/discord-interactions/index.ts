@@ -21,8 +21,9 @@
 // only, plus the caller's own place if they are further down. Same board as the website (PS5, best lap per driver
 // overall and per class, views public_leaderboard / public_leaderboard_verified); public reply.
 // Package 4: I'm in / Withdraw buttons on the cards (rpc discord_rsvp).
-// /edit-event (DEC-0100, RS-0097, Fausto 02.11.2026): the host edits title, start, description and max.
-// participants of an own upcoming event in a Discord form (modal "evedit:<event_id>"). Saved through
+// /edit-event (DEC-0100, RS-0097, Fausto 02.11.2026): private panel for an own upcoming event with
+// Edit details (form "evedit:<event_id>": title, start, end, description, max. participants),
+// Close / Open sign-ups and Cancel event (buttons "evbtn:...", rpc discord_event_action). Saved through
 // rpc discord_edit_event as that driver, so the website rules apply (host stages DEC-0209: title /
 // description wait for review at stage 1/2, time only while >= 24 h away). Times in the form are UTC;
 // the reply shows them in the user's own time zone. Named like /create-event (not "/event edit", because
@@ -572,20 +573,46 @@ function parseStart(v: string): string | null {
 }
 const textInput = (id: string, label: string, style: 1 | 2, value: string, required: boolean, min: number, max: number, placeholder?: string) =>
   ({ type: 1, components: [{ type: 4, custom_id: id, label, style, value: value || undefined, required, min_length: min, max_length: max, ...(placeholder ? { placeholder } : {}) }] });
-async function cmdEditEvent(i: any) {
-  const { data: d } = await db.from("drivers").select("driver_id").eq("discord_user_id", discordId(i)).is("deleted_at", null).maybeSingle();
-  if (!d) return ephemeral("Sign in on Leonida Racing with this Discord account first, then you can edit your events here.", [row(linkButton("Sign in", `${SITE}/account/`))]);
-  const id = String(opt(i, "event") ?? "");
-  const { data: e } = await db.from("hub_events").select("event_id,title,starts_at,description,max_participants,review_status,created_by").eq("event_id", id).maybeSingle();
-  if (!e || e.created_by !== d.driver_id) return ephemeral("I couldn't find that event among yours. Pick one from the suggestions while typing.");
-  if (e.review_status === "rejected" || e.review_status === "expired") return ephemeral("This event can't be changed any more.", [row(linkButton("My events", `${SITE}/account/events/`))]);
-  if (new Date(e.starts_at).getTime() <= Date.now()) return ephemeral("This event has already started.");
+// /edit-event opens a private panel for the event: Edit details (form), Close / Open sign-ups,
+// Cancel event (asks first), Edit on website (everything else: type, platforms, location, crew, contact).
+async function ownEvent(i: any, id: string): Promise<{ e: any; pending: Record<string, string | null> | null } | string> {
+  const d = await driverByDiscord(discordId(i));
+  if (!d) return "Sign in on Leonida Racing with this Discord account first, then you can edit your events here.";
+  const { data: e } = await db.from("hub_events").select("event_id,title,starts_at,ends_at,description,max_participants,registration,status,review_status,created_by").eq("event_id", id).maybeSingle();
+  if (!e || e.created_by !== d.driver_id) return "I couldn't find that event among yours. Pick one from the suggestions while typing.";
+  if (e.review_status === "rejected" || e.review_status === "expired") return "This event can't be changed any more.";
+  if (new Date(e.starts_at).getTime() <= Date.now()) return "This event has already started.";
   const { data: rv } = await db.from("hub_event_reviews").select("pending").eq("event_id", id).maybeSingle();
-  const p = (rv?.pending ?? {}) as Record<string, string | null>; // changes waiting for review: edit those, like on the website
-  const title = p.title ?? e.title, desc = ("description" in p ? p.description : e.description) ?? "";
+  return { e, pending: (rv?.pending ?? null) as Record<string, string | null> | null };
+}
+const evBtn = (label: string, style: number, action: string, id: string) => ({ type: 2, style, label, custom_id: `evbtn:${action}:${id}` });
+function editPanel(e: any, pending: Record<string, unknown> | null, note = "") {
+  const state = e.status === "cancelled" ? "Cancelled" : e.review_status === "pending" ? "In review" : e.review_status === "needs_changes" ? "Needs changes (see My events)" : "Live";
+  const lines = [
+    ...(note ? [note, ""] : []),
+    `**${clip(e.title, 80)}**`,
+    `Starts <t:${unix(e.starts_at)}:F> (your time)${e.ends_at ? ` \u00b7 ends <t:${unix(e.ends_at)}:t>` : ""}`,
+    `${state} \u00b7 Sign-ups ${e.registration === "closed" ? "closed" : "open"}${e.max_participants ? ` \u00b7 max. ${e.max_participants}` : ""}`,
+    ...(pending ? ["Changes to the title or description are waiting for a moderator."] : []),
+  ];
+  const buttons: unknown[] = [evBtn("Edit details", 1, "edit", e.event_id)];
+  if (e.status !== "cancelled") buttons.push(
+    e.registration === "closed" ? evBtn("Open sign-ups", 2, "open", e.event_id) : evBtn("Close sign-ups", 2, "close", e.event_id),
+    evBtn("Cancel event", 4, "cancel", e.event_id));
+  buttons.push(linkButton("Edit on website", `${SITE}/account/events/`));
+  return { content: lines.join("\n"), flags: 64, components: [row(...buttons)], allowed_mentions: { parse: [] } };
+}
+async function cmdEditEvent(i: any) {
+  const r = await ownEvent(i, String(opt(i, "event") ?? ""));
+  if (typeof r === "string") return ephemeral(r, [row(linkButton("My events", `${SITE}/account/events/`))]);
+  return reply(editPanel(r.e, r.pending));
+}
+function editModal(e: any, p: Record<string, string | null> | null) {
+  const title = p?.title ?? e.title, desc = (p && "description" in p ? p.description : e.description) ?? "";
   return json({ type: 9, data: { custom_id: `evedit:${e.event_id}`, title: "Edit event", components: [
     textInput("title", "Title", 1, title, true, 3, 80),
     textInput("start", "Start (UTC) \u2013 YYYY-MM-DD HH:MM", 1, utcText(e.starts_at), true, 16, 22, "2026-11-20 20:00"),
+    textInput("end", "End (UTC, optional) \u2013 YYYY-MM-DD HH:MM", 1, e.ends_at ? utcText(e.ends_at) : "", false, 0, 22, "2026-11-20 22:00"),
     textInput("description", "Description", 2, desc, false, 0, 600),
     textInput("max", "Max. participants (2\u2013500, empty = no limit)", 1, e.max_participants ? String(e.max_participants) : "", false, 0, 3),
   ] } });
@@ -595,35 +622,53 @@ const EDIT_ERRORS: [RegExp, string][] = [
   [/time_locked/, "The start time can only change while the event is at least 24 hours away."],
   [/not_editable/, "This event can't be changed any more."],
   [/not_before_launch/, "Events can start on Nov 19, 2026 (GTA VI launch day) at the earliest."],
+  [/hub_events_check/, "The end has to be after the start."],
   [/emoji/i, "Please remove emoji from the title and description."],
   [/title_check/, "The title needs 3 to 80 characters."],
   [/max_participants/, "Max. participants must be between 2 and 500."],
 ];
+const editError = (m: unknown) => (EDIT_ERRORS.find(([re]) => re.test(String(m ?? "")))?.[1] ?? "The website didn't accept this change.") + " Nothing was changed.";
+// Panel buttons (custom_id "evbtn:<action>:<event_id>")
+async function editButton(i: any) {
+  const [, action, id] = String(i.data?.custom_id ?? "").split(":");
+  const r = await ownEvent(i, id ?? "");
+  if (typeof r === "string") return json({ type: 7, data: { content: r, components: [row(linkButton("My events", `${SITE}/account/events/`))] } });
+  if (action === "edit") return editModal(r.e, r.pending);
+  if (action === "cancel") return json({ type: 7, data: { content: `Cancel **${clip(r.e.title, 80)}**? Everyone who signed up sees it as cancelled, on the website and in Discord.`,
+    components: [row(evBtn("Yes, cancel event", 4, "cancelyes", id), evBtn("Back", 2, "back", id))] } });
+  if (action === "back") return json({ type: 7, data: editPanel(r.e, r.pending) });
+  if (!["close", "open", "cancelyes"].includes(action)) return json({ type: 7, data: editPanel(r.e, r.pending, "This button doesn't work anymore.") });
+  const { data, error } = await db.rpc("discord_event_action", { p_discord_id: discordId(i), p_event: id, p_action: action === "cancelyes" ? "cancel" : action });
+  if (error) { console.error("discord_event_action", error); return json({ type: 7, data: editPanel(r.e, r.pending, "Something went wrong on our side. Nothing was changed.") }); }
+  const res = data as any;
+  if (res.status !== "saved") return json({ type: 7, data: editPanel(r.e, r.pending, res.status === "error" ? editError(res.message) : "Nothing was changed.") });
+  const note = action === "close" ? "Sign-ups closed. People who already signed up stay in." : action === "open" ? "Sign-ups open again." : "Event cancelled.";
+  const fresh = await ownEvent(i, id);
+  return json({ type: 7, data: typeof fresh === "string" ? { content: note, components: [] } : editPanel(fresh.e, fresh.pending, `${note} Cards on all servers update within a minute.`) });
+}
 async function submitEditEvent(i: any) {
   const id = String(i.data.custom_id).slice(7);
   const val = (k: string) => String(i.data.components?.flatMap((r: any) => r.components ?? []).find((c: any) => c.custom_id === k)?.value ?? "").trim();
+  // Answer: update the panel the form was opened from (type 7); if that fails Discord shows nothing, so the panel always carries the result.
+  const panel = async (note: string) => { const r = await ownEvent(i, id); return json({ type: 7, data: typeof r === "string" ? { content: `${note}\n${r}`, components: [] } : editPanel(r.e, r.pending, note) }); };
   const start = parseStart(val("start"));
-  if (!start) return ephemeral(`I couldn't read the start time \u201c${clip(val("start"), 30)}\u201d. Use YYYY-MM-DD HH:MM in UTC, e.g. 2026-11-20 20:00. Nothing was changed.`);
+  if (!start) return await panel(`I couldn't read the start time \u201c${clip(val("start"), 30)}\u201d. Use YYYY-MM-DD HH:MM in UTC, e.g. 2026-11-20 20:00. Nothing was changed.`);
+  const endRaw = val("end");
+  const end = endRaw === "" ? null : parseStart(endRaw);
+  if (endRaw !== "" && !end) return await panel(`I couldn't read the end time \u201c${clip(endRaw, 30)}\u201d. Use YYYY-MM-DD HH:MM in UTC, or leave it empty. Nothing was changed.`);
+  if (end && end <= start) return await panel("The end has to be after the start. Nothing was changed.");
   const maxRaw = val("max");
   const max = maxRaw === "" ? null : Number(maxRaw);
-  if (max !== null && (!Number.isInteger(max) || max < 2 || max > 500)) return ephemeral("Max. participants must be a whole number between 2 and 500, or empty. Nothing was changed.");
-  const { data, error } = await db.rpc("discord_edit_event", { p_discord_id: discordId(i), p_event: id, p_title: val("title"), p_starts_at: start, p_description: val("description"), p_max: max });
-  if (error) { console.error("discord_edit_event", error); return ephemeral("Something went wrong on our side. Nothing was changed. Please try again in a moment."); }
+  if (max !== null && (!Number.isInteger(max) || max < 2 || max > 500)) return await panel("Max. participants must be a whole number between 2 and 500, or empty. Nothing was changed.");
+  const { data, error } = await db.rpc("discord_edit_event", { p_discord_id: discordId(i), p_event: id, p_title: val("title"), p_starts_at: start, p_ends_at: end, p_description: val("description"), p_max: max });
+  if (error) { console.error("discord_edit_event", error); return await panel("Something went wrong on our side. Nothing was changed. Please try again in a moment."); }
   const r = data as any;
-  const btn = [row(linkButton("My events", `${SITE}/account/events/`))];
-  if (r.status === "no_profile") return ephemeral("Sign in on Leonida Racing with this Discord account first.", btn);
-  if (r.status === "not_found") return ephemeral("I couldn't find that event among yours.", btn);
-  if (r.status === "started") return ephemeral("This event has already started. Nothing was changed.", btn);
-  if (r.status === "error") {
-    const hit = EDIT_ERRORS.find(([re]) => re.test(String(r.message ?? "")));
-    return ephemeral(`${hit ? hit[1] : "The website didn't accept this change."} Nothing was changed.`, btn);
-  }
-  const when = `Starts <t:${unix(r.starts_at)}:F> (your time).`;
-  const text = r.review_status === "pending" ? `Saved. Your event is still in review; a moderator checks it before it goes live. ${when}`
-    : r.review_status === "needs_changes" ? `Saved and sent to the moderators again. ${when}`
-    : r.pending ? `Saved. Time and participant limit are live now; the new title or description goes live once a moderator approves it. ${when}`
-    : `Saved \u2014 live on Leonida Racing and on every server that shows this event. ${when}`;
-  return ephemeral(text, btn);
+  if (r.status === "error") return await panel(editError(r.message));
+  if (r.status !== "saved") return await panel(r.status === "started" ? "This event has already started. Nothing was changed." : "I couldn't find that event among yours. Nothing was changed.");
+  return await panel(r.review_status === "pending" ? "Saved. Your event is still in review; a moderator checks it before it goes live."
+    : r.review_status === "needs_changes" ? "Saved and sent to the moderators again."
+    : r.pending ? "Saved. Time, end and participant limit are live now; the new title or description goes live once a moderator approves it."
+    : "Saved \u2014 live on Leonida Racing and on every server that shows this event.");
 }
 
 // ---------- autocomplete ----------
@@ -1092,6 +1137,7 @@ Deno.serve(async (req) => {
     if (i.type === 3 && String(i.data?.custom_id ?? "").startsWith("lfg:")) return await lfgComponent(i);
     if (i.type === 3 && String(i.data?.custom_id ?? "").startsWith("rate:")) return await rateSelect(i);
     if (i.type === 5 && String(i.data?.custom_id ?? "").startsWith("evedit:")) return await submitEditEvent(i);
+    if (i.type === 3 && String(i.data?.custom_id ?? "").startsWith("evbtn:")) return await editButton(i);
     if (i.type === 2) {
       switch (i.data?.name) {
         case "events": return await cmdEvents(i);
