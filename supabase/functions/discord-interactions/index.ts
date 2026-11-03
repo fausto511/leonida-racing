@@ -120,6 +120,7 @@ const COMMANDS = [
     options: [
       { type: 3, name: "class", description: "Only this class", required: false, choices: LB_CLASSES.map((c) => ({ name: c, value: c })) },
       { type: 3, name: "car", description: "Only this car (start typing a make or model)", required: false, autocomplete: true },
+      { type: 3, name: "manufacturer", description: "Only cars from this manufacturer", required: false, autocomplete: true },
       { type: 5, name: "verified", description: "Only laps with a checked video", required: false },
     ] },
   // Setup command: always "Manage Server" only (also checked at runtime).
@@ -162,7 +163,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-11-02.2"; // /edit-event (DEC-0100)
+const COMMANDS_VERSION = "2026-11-03.1"; // /leaderboard manufacturer filter
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
@@ -224,14 +225,38 @@ async function registerCommands() {
 let commandsChecked = false;
 
 // ---------- data ----------
-const EVENT_COLS = "event_id,title,event_type,starts_at,ends_at,platforms,host_name,status,max_participants,registration,discord_url,host:crews(name,tag,discord_url),creator:drivers!hub_events_created_by_fkey(display_name,deleted_at)";
+const EVENT_COLS = "event_id,series_id,title,event_type,starts_at,ends_at,platforms,host_name,status,max_participants,registration,discord_url,series:hub_event_series(kind,freq,weekday,monthly_nth),host:crews(name,tag,discord_url),creator:drivers!hub_events_created_by_fkey(display_name,deleted_at)";
 async function upcomingEvents(type?: string, platform?: string, limit = 5) {
   let q = db.from("hub_events").select(EVENT_COLS).eq("is_published", true).eq("is_test", false).eq("members_only", false).neq("status", "cancelled")
-    .gte("starts_at", new Date(Date.now() - 3 * 3600e3).toISOString()).order("starts_at").limit(limit);
+    .gte("starts_at", new Date(Date.now() - 3 * 3600e3).toISOString()).order("starts_at").limit(60);
   if (type) q = q.eq("event_type", type);
   if (platform) q = q.contains("platforms", [platform]);
   const { data } = await q;
-  return (data ?? []) as any[];
+  // Series / seasons (RS-0095): only the next date of each, like the Discord feed
+  const seen = new Set<string>();
+  const out: any[] = [];
+  for (const e of (data ?? []) as any[]) {
+    if (e.series_id && new Date(e.ends_at ?? new Date(e.starts_at).getTime() + 2 * 3600e3).getTime() < Date.now()) continue;
+    if (e.series_id) { if (seen.has(e.series_id)) continue; seen.add(e.series_id); }
+    out.push(e);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+// "Round 3 of 10" (seasons) / "Weekly · Fri" (series). COPY STATUS: Claude placeholders, same as the website.
+const WD = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const NTH: Record<string, string> = { "1": "1st", "2": "2nd", "3": "3rd", "4": "4th", "-1": "last" };
+async function seriesTag(e: any): Promise<string> {
+  const s = e.series;
+  if (!e.series_id || !s) return "";
+  if (s.kind === "league") {
+    const { data } = await db.from("hub_events").select("event_id").eq("series_id", e.series_id).neq("status", "cancelled").order("starts_at").order("event_id");
+    const list = (data ?? []) as any[];
+    const n = list.findIndex((x) => x.event_id === e.event_id);
+    return n >= 0 ? `Round ${n + 1} of ${list.length}` : "Season";
+  }
+  const wd = WD[((s.weekday ?? 1) - 1) % 7];
+  return s.freq === "weekly" ? `Weekly \u00b7 ${wd}` : s.freq === "biweekly" ? `Every 2 weeks \u00b7 ${wd}` : `Monthly \u00b7 ${NTH[String(s.monthly_nth)] ?? ""} ${wd}`;
 }
 async function goingCount(eventId: string) {
   const { count } = await db.from("hub_event_rsvps").select("event_id", { count: "exact", head: true }).eq("event_id", eventId);
@@ -257,8 +282,9 @@ async function eventEmbed(e: any) {
     { name: "Host", value: withTag(e, psnOrName(e)), inline: true },
     { name: "Going", value: goingValue(e, going, e.registration === "closed"), inline: true },
   ];
+  const tag = await seriesTag(e);
   return {
-    author: { name: typeLine(e) }, title: clip(e.title, 256), url: eventUrl(e), color: ORANGE, fields,
+    author: { name: typeLine(e) }, title: clip(`${e.title}${tag ? ` \u00b7 ${tag}` : ""}`, 256), url: eventUrl(e), color: ORANGE, fields,
     image: { url: `${SITE}/images/hub/hub-events-1672.jpg` },
     footer: { text: "Leonida Racing · leonidaracing.com" },
   };
@@ -272,7 +298,8 @@ async function cmdEvents(i: any) {
   if (!list.length) {
     return reply({ content: `No upcoming events${what ? ` (${what})` : ""} right now.`, components: [row(linkButton("Open the calendar", `${SITE}/community/events/`), addButton)] });
   }
-  const lines = list.map((e) => `**[${clip(e.title, 80)}](${eventUrl(e)})**\n<t:${unix(e.starts_at)}:f> · <t:${unix(e.starts_at)}:R> · ${EVENT_TYPES[e.event_type] ?? e.event_type} · ${hostLabel(e)}`);
+  const tags = await Promise.all(list.map((e) => seriesTag(e)));
+  const lines = list.map((e, n) => `**[${clip(e.title, 80)}](${eventUrl(e)})**${tags[n] ? ` · ${tags[n]}` : ""}\n<t:${unix(e.starts_at)}:f> · <t:${unix(e.starts_at)}:R> · ${EVENT_TYPES[e.event_type] ?? e.event_type} · ${hostLabel(e)}`);
   return reply({
     embeds: [{ title: `Upcoming events${what ? ` · ${what}` : ""}`, description: lines.join("\n\n"), color: ORANGE, footer: { text: "Leonida Racing · times shown in your time zone" } }],
     components: [row(linkButton("Full calendar", `${SITE}/community/events/`), addButton)],
@@ -389,6 +416,7 @@ async function cmdLeaderboard(i: any) {
   const cls = opt(i, "class") as string | undefined;
   const carId = (opt(i, "car") as string | undefined) || null;
   const verified = opt(i, "verified") === true;
+  const mk = (opt(i, "manufacturer") as string | undefined) || null;
   let car: any = null;
   if (carId) {
     const { data } = await db.from("vehicles").select("vehicle_id,make,model").eq("vehicle_id", carId).not("release_id", "is", null).maybeSingle();
@@ -396,17 +424,26 @@ async function cmdLeaderboard(i: any) {
     car = data;
   }
   let allowed: Set<string> | null = null;
-  if (cls && !car) {
-    const { data } = await db.from("vehicles").select("vehicle_id").contains("classes", [cls]);
+  let makeName: string | null = null;
+  if ((cls || mk) && !car) {
+    let q = db.from("vehicles").select("vehicle_id,make").limit(2000);
+    if (cls) q = q.contains("classes", [cls]);
+    if (mk) q = q.eq("manufacturer_logo_slug", mk);
+    const { data } = await q;
     allowed = new Set((data ?? []).map((v: any) => v.vehicle_id));
+    if (mk) {
+      makeName = (data ?? [])[0]?.make ?? null;
+      if (!makeName) { const { data: m } = await db.from("vehicles").select("make").eq("manufacturer_logo_slug", mk).limit(1).maybeSingle(); makeName = m?.make ?? null; }
+      if (!makeName) return { content: "I couldn't find that manufacturer. Pick one from the suggestions while typing." };
+    }
   }
   const { data: raw, error } = await db.from(verified ? "public_leaderboard_verified" : "public_leaderboard")
     .select("driver,driver_id,vehicle_id,make,model,lap_time_ms,video_verified").eq("track_id", LB_TRACK).eq("platform", LB_PLATFORM).order("lap_time_ms");
   if (error) throw error;
   const ranked = lbRank((raw ?? []) as LbRow[], car?.vehicle_id ?? null, allowed);
-  const scope = car ? `${car.make} ${car.model}` : cls ? `${cls} class` : "Overall";
+  const scope = car ? `${car.make} ${car.model}` : [makeName, cls && `${cls} class`].filter(Boolean).join(" \u00b7 ") || "Overall";
   const params = new URLSearchParams();
-  if (car) params.set("vehicle", car.vehicle_id); else if (cls) params.set("class", cls);
+  if (car) params.set("vehicle", car.vehicle_id); else { if (cls) params.set("class", cls); if (mk) params.set("make", mk); }
   if (verified) params.set("verified", "1");
   const url = `${LB_URL}${params.toString() ? `?${params}` : ""}#leaderboard`;
   const buttons = row(linkButton("Full leaderboard", url), linkButton("Submit a lap", `${SITE}/time-attack/submit/`), addButton);
@@ -538,7 +575,7 @@ function cmdHelp(i: any) {
     "\u2022 **/event** \u2014 one event with start time, host and sign-ups",
     "\u2022 **/car** \u2014 a car's card \u00b7 **/compare** \u2014 2 to 4 cars side by side",
     "\u2022 **/crew** \u2014 a crew's card with its next event",
-    "\u2022 **/leaderboard** \u2014 Gellhorn top 10, overall, by class or by car, with your own place",
+    "\u2022 **/leaderboard** \u2014 Gellhorn top 10, overall, by class, manufacturer or car, with your own place",
     "\u2022 **/create-event** \u2014 host your own event on the website \u00b7 **/edit-event** \u2014 change one of your events",
     "",
     "**Buttons**",
@@ -578,7 +615,7 @@ const textInput = (id: string, label: string, style: 1 | 2, value: string, requi
 async function ownEvent(i: any, id: string): Promise<{ e: any; pending: Record<string, string | null> | null } | string> {
   const d = await driverByDiscord(discordId(i));
   if (!d) return "Sign in on Leonida Racing with this Discord account first, then you can edit your events here.";
-  const { data: e } = await db.from("hub_events").select("event_id,title,starts_at,ends_at,description,max_participants,registration,status,review_status,created_by").eq("event_id", id).maybeSingle();
+  const { data: e } = await db.from("hub_events").select("event_id,series_id,title,starts_at,ends_at,description,max_participants,registration,status,review_status,created_by,series:hub_event_series(kind)").eq("event_id", id).maybeSingle();
   if (!e || e.created_by !== d.driver_id) return "I couldn't find that event among yours. Pick one from the suggestions while typing.";
   if (e.review_status === "rejected" || e.review_status === "expired") return "This event can't be changed any more.";
   if (new Date(e.starts_at).getTime() <= Date.now()) return "This event has already started.";
@@ -594,8 +631,10 @@ function editPanel(e: any, pending: Record<string, unknown> | null, note = "") {
     `Starts <t:${unix(e.starts_at)}:F> (your time)${e.ends_at ? ` \u00b7 ends <t:${unix(e.ends_at)}:t>` : ""}`,
     `${state} \u00b7 Sign-ups ${e.registration === "closed" ? "closed" : "open"}${e.max_participants ? ` \u00b7 max. ${e.max_participants}` : ""}`,
     ...(pending ? ["Changes to the title or description are waiting for a moderator."] : []),
+    // RS-0095. COPY STATUS: Claude placeholder.
+    ...(e.series_id ? [`This is one ${e.series?.kind === "league" ? "round of a season" : "date of a series"}. Here you can move it, close its sign-ups or cancel it. Title, description and limit are changed for all ${e.series?.kind === "league" ? "rounds" : "dates"} under Your series on the website.`] : []),
   ];
-  const buttons: unknown[] = [evBtn("Edit details", 1, "edit", e.event_id)];
+  const buttons: unknown[] = [evBtn(e.series_id ? "Change time" : "Edit details", 1, "edit", e.event_id)];
   if (e.status !== "cancelled") buttons.push(
     e.registration === "closed" ? evBtn("Open sign-ups", 2, "open", e.event_id) : evBtn("Close sign-ups", 2, "close", e.event_id),
     evBtn("Cancel event", 4, "cancel", e.event_id));
@@ -609,6 +648,10 @@ async function cmdEditEvent(i: any) {
 }
 function editModal(e: any, p: Record<string, string | null> | null) {
   const title = p?.title ?? e.title, desc = (p && "description" in p ? p.description : e.description) ?? "";
+  if (e.series_id) return json({ type: 9, data: { custom_id: `evedit:${e.event_id}`, title: "Change time", components: [
+    textInput("start", "Start (UTC) \u2013 YYYY-MM-DD HH:MM", 1, utcText(e.starts_at), true, 16, 22, "2026-11-20 20:00"),
+    textInput("end", "End (UTC, optional) \u2013 YYYY-MM-DD HH:MM", 1, e.ends_at ? utcText(e.ends_at) : "", false, 0, 22, "2026-11-20 22:00"),
+  ] } });
   return json({ type: 9, data: { custom_id: `evedit:${e.event_id}`, title: "Edit event", components: [
     textInput("title", "Title", 1, title, true, 3, 80),
     textInput("start", "Start (UTC) \u2013 YYYY-MM-DD HH:MM", 1, utcText(e.starts_at), true, 16, 22, "2026-11-20 20:00"),
@@ -621,6 +664,7 @@ const EDIT_ERRORS: [RegExp, string][] = [
   [/lead_time/, "The event has to start at least 24 hours from now, so a moderator has time to review it."],
   [/time_locked/, "The start time can only change while the event is at least 24 hours away."],
   [/not_editable/, "This event can't be changed any more."],
+  [/edit_series/, "This is part of a series or season: change title, description and limit under Your series on the website."],
   [/not_before_launch/, "Events can start on Nov 19, 2026 (GTA VI launch day) at the earliest."],
   [/hub_events_check/, "The end has to be after the start."],
   [/emoji/i, "Please remove emoji from the title and description."],
@@ -657,10 +701,14 @@ async function submitEditEvent(i: any) {
   const end = endRaw === "" ? null : parseStart(endRaw);
   if (endRaw !== "" && !end) return await panel(`I couldn't read the end time \u201c${clip(endRaw, 30)}\u201d. Use YYYY-MM-DD HH:MM in UTC, or leave it empty. Nothing was changed.`);
   if (end && end <= start) return await panel("The end has to be after the start. Nothing was changed.");
-  const maxRaw = val("max");
+  // Dates of a series / rounds of a season: only the time comes from the form, the rest stays as it is
+  const cur = await ownEvent(i, id);
+  if (typeof cur === "string") return await panel(cur);
+  const isSeries = Boolean(cur.e.series_id);
+  const maxRaw = isSeries ? (cur.e.max_participants ? String(cur.e.max_participants) : "") : val("max");
   const max = maxRaw === "" ? null : Number(maxRaw);
   if (max !== null && (!Number.isInteger(max) || max < 2 || max > 500)) return await panel("Max. participants must be a whole number between 2 and 500, or empty. Nothing was changed.");
-  const { data, error } = await db.rpc("discord_edit_event", { p_discord_id: discordId(i), p_event: id, p_title: val("title"), p_starts_at: start, p_ends_at: end, p_description: val("description"), p_max: max });
+  const { data, error } = await db.rpc("discord_edit_event", { p_discord_id: discordId(i), p_event: id, p_title: isSeries ? cur.e.title : val("title"), p_starts_at: start, p_ends_at: end, p_description: isSeries ? (cur.e.description ?? "") : val("description"), p_max: max });
   if (error) { console.error("discord_edit_event", error); return await panel("Something went wrong on our side. Nothing was changed. Please try again in a moment."); }
   const r = data as any;
   if (r.status === "error") return await panel(editError(r.message));
@@ -697,6 +745,14 @@ async function autocomplete(i: any) {
     if (t) q = q.or(`name.ilike.%${t}%,tag.ilike.%${t}%`);
     const { data } = await q;
     choices = (data ?? []).map((c: any) => ({ name: clip(`${c.name} [${c.tag}]`, 100), value: c.crew_id }));
+  } else if (i.data?.name === "leaderboard" && focused?.name === "manufacturer") {
+    const t = term.replace(/[,()%]/g, "");
+    let q = db.from("vehicles").select("make,manufacturer_logo_slug").not("release_id", "is", null).not("manufacturer_logo_slug", "is", null).order("make").limit(1000);
+    if (t) q = q.ilike("make", `%${t}%`);
+    const { data } = await q;
+    const seen = new Map<string, string>();
+    for (const v of (data ?? []) as any[]) if (!seen.has(v.manufacturer_logo_slug)) seen.set(v.manufacturer_logo_slug, v.make);
+    choices = [...seen].slice(0, 25).map(([slug, make]) => ({ name: clip(make, 100), value: slug }));
   } else if (i.data?.name === "car" || i.data?.name === "compare" || i.data?.name === "leaderboard") {
     let q = db.from("vehicles").select("vehicle_id,make,model").not("release_id", "is", null).order("make").order("model").limit(25); // officially shown only
     if (term) q = q.or(`model.ilike.%${term.replace(/[,()%]/g, "")}%,make.ilike.%${term.replace(/[,()%]/g, "")}%`);
@@ -944,6 +1000,24 @@ async function rsvpButton(i: any) {
   reach.push(linkButton("Details", `${SITE}/community/events/#event-${eventId}`));
   const hostRow = [row(...reach)];
   const psn = r.host_name ? ` Host on PSN: **${r.host_name}** (send a friend request via the button below).` : "";
+  // Seasons (RS-0095 part 2): the buttons stand for the whole season. COPY STATUS: Claude placeholders.
+  if (r.season) {
+    const t = String(r.title ?? "").replace(/ \(whole season\)$/, "");
+    switch (r.status) {
+      case "no_profile": return ephemeral("To join, create your Leonida Racing driver profile first. It uses this Discord account, so it takes one click. Then press \u201cJoin season\u201d again.", [profileButton]);
+      case "in": return ephemeral(`You're in for the whole season of **${t}** \u2014 every round, ${count} drivers.${psn}${r.discord_url ? " Join the host's Discord for the lobby invites." : ""}`, hostRow);
+      case "already": return ephemeral(`You're already in for the season of **${t}** (${count} drivers).${psn}`, hostRow);
+      case "out": return ephemeral(`You left the season of **${t}**. You're no longer signed up for its rounds.`);
+      case "not_in": return ephemeral(`You weren't signed up for the season of **${t}**.`);
+      case "full": return ephemeral(`Sorry, the season of **${t}** is full (${count}).`);
+      case "closed": return ephemeral(`Sign-ups for the season of **${t}** are closed.`);
+      case "cancelled": return ephemeral(`This round of **${t}** has been cancelled. You can still join the season on the next round's card.`);
+      case "past": return ephemeral(`The season of **${t}** is already over.`);
+      case "members_only": return ephemeral(`The season of **${t}** is for crew members only. Join the crew on Leonida Racing to sign up.`, hostRow);
+      case "blocked": return ephemeral(`You can't join the season of **${t}**.`);
+      case "not_found": return ephemeral("This season isn't open for sign-ups.");
+    }
+  }
   switch (r.status) {
     case "no_profile": return ephemeral("To sign up, create your Leonida Racing driver profile first. It uses this Discord account, so it takes one click. Then press \u201cI'm in\u201d again.", [profileButton]);
     case "not_found": return ephemeral("This event isn't available anymore.");
