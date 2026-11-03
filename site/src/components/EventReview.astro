@@ -132,13 +132,22 @@ import '../styles/hub.css';
 
   // ---- Series (RS-0095). COPY STATUS: Claude placeholders, Codex review pending. ----
   let seriesOpen = 0;
-  const RULE = (s: any) => `${seriesLabel(s)} · ${String(s.local_time).slice(0, 5)} (${String(s.tz).replace(/_/g, ' ')})`;
+  let leagueRounds = new Map<string, any[]>();
+  const RULE = (s: any) => s.kind === 'league'
+    ? `Season · ${(leagueRounds.get(s.series_id) ?? []).length} rounds: ${(leagueRounds.get(s.series_id) ?? []).map((x) => when(x.starts_at)).join(', ')}`
+    : `${seriesLabel(s)} · ${String(s.local_time).slice(0, 5)} (${String(s.tz).replace(/_/g, ' ')})`;
   async function loadSeries() {
     const sb = getSupabase();
     const { data, error } = await sb.from('hub_event_series').select('*').eq('status', 'active')
       .or('review_status.in.(pending,needs_changes),pending.not.is.null,mod_alert_at.not.is.null').order('created_at');
     if (error) { $('er-series').innerHTML = `<p class="er-note er-warn">Series could not be loaded: ${esc(error.message)}</p>`; seriesOpen = 0; return; }
     const rows = (data ?? []) as any[];
+    const lg = rows.filter((r) => r.kind === 'league').map((r) => r.series_id);
+    leagueRounds = new Map();
+    if (lg.length) {
+      const rd = await sb.from('hub_events').select('series_id,starts_at,status').in('series_id', lg).neq('status', 'cancelled').order('starts_at');
+      for (const x of (rd.data ?? []) as any[]) { if (!leagueRounds.has(x.series_id)) leagueRounds.set(x.series_id, []); leagueRounds.get(x.series_id)!.push(x); }
+    }
     const missing = rows.map((r) => r.created_by).filter((id) => id && !names.has(id));
     if (missing.length) {
       const d = await sb.from('drivers').select('driver_id,display_name').in('driver_id', missing);
@@ -160,14 +169,14 @@ import '../styles/hub.css';
       + `<p class="er-note">${r.host_name ? `PSN ${esc(r.host_name)}` : ''}${r.host_name && r.discord_url ? ' · ' : ''}${r.discord_url ? `Discord ${esc(r.discord_url)}` : ''}</p>`;
     const acts = (id: string, kind: 'review' | 'changes' | 'quiet') => `<div class="er-actions" data-series="${esc(id)}">`
       + (kind === 'review'
-        ? `<button type="button" class="btn btn-p btn-sm" data-sact="approve">Approve series</button><textarea maxlength="300" placeholder="Reason for the host (required for Needs changes / Reject)"></textarea><button type="button" class="btn btn-s btn-sm" data-sact="needs_changes">Needs changes</button><button type="button" class="btn btn-danger btn-sm" data-sact="reject">Reject</button>`
+        ? `<button type="button" class="btn btn-p btn-sm" data-sact="approve">Approve</button><textarea maxlength="300" placeholder="Reason for the host (required for Needs changes / Reject)"></textarea><button type="button" class="btn btn-s btn-sm" data-sact="needs_changes">Needs changes</button><button type="button" class="btn btn-danger btn-sm" data-sact="reject">Reject</button>`
         : kind === 'changes'
         ? `<button type="button" class="btn btn-p btn-sm" data-sact="approve_changes">Approve changes</button><textarea maxlength="300" placeholder="Reason for the host (required to reject)"></textarea><button type="button" class="btn btn-danger btn-sm" data-sact="reject_changes">Reject changes</button>`
         : `<button type="button" class="btn btn-p btn-sm" data-sact="keep">Keep running</button><textarea maxlength="300" placeholder="Reason for the host (required to cancel)"></textarea><button type="button" class="btn btn-danger btn-sm" data-sact="cancel">Cancel series</button>`)
       + '</div>';
     const card = (r: any, inner: string) => `<div class="er-card">${meta(r)}${inner}</div>`;
     let html = '';
-    if (review.length) html += `<p class="er-group-t">New series (${review.length})</p>` + review.map((r) => card(r, body(r) + '<p class="er-note">Approving publishes all upcoming dates of this series.</p>' + acts(r.series_id, 'review'))).join('');
+    if (review.length) html += `<p class="er-group-t">New series &amp; seasons (${review.length})</p>` + review.map((r) => card(r, body(r) + `<p class="er-note">Approving publishes all upcoming ${r.kind === 'league' ? 'rounds of this season' : 'dates of this series'}.</p>` + acts(r.series_id, 'review'))).join('');
     if (chg.length) html += `<p class="er-group-t">Changes to live series (${chg.length})</p>` + chg.map((r) => {
       const p = r.pending ?? {};
       const diff = Object.keys(p).map((k) => `<tr><th>${esc(FIELD[k] ?? k)}</th><td>${esc(r[k] ?? '—')}</td><td class="is-new">${esc(p[k] ?? '— (removed)')}</td></tr>`).join('');

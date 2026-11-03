@@ -291,12 +291,13 @@ export function psnProfileUrl(name: string): string {
 }
 
 /** RS-0095 / DEC-0203: recurring series rhythm. weekday ISO (1 = Mon) in the host's time zone. */
-export interface EventSeriesInfo { series_id?: string; freq: 'weekly' | 'biweekly' | 'monthly'; weekday: number; monthly_nth: number | null; }
+export interface EventSeriesInfo { series_id?: string; kind?: 'recurring' | 'league'; freq: 'weekly' | 'biweekly' | 'monthly' | null; weekday: number | null; monthly_nth: number | null; round_no?: number; round_total?: number; }
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const NTH: Record<string, string> = { '1': '1st', '2': '2nd', '3': '3rd', '4': '4th', '-1': 'last' };
 // COPY STATUS: Claude placeholders, Codex review pending.
 export function seriesLabel(s: EventSeriesInfo): string {
-  const wd = WEEKDAYS[(s.weekday - 1) % 7] ?? '';
+  if (s.kind === 'league') return s.round_no ? `Round ${s.round_no} of ${s.round_total}` : 'Season';
+  const wd = WEEKDAYS[((s.weekday ?? 1) - 1) % 7] ?? '';
   if (s.freq === 'weekly') return `Weekly · ${wd}`;
   if (s.freq === 'biweekly') return `Every 2 weeks · ${wd}`;
   return `Monthly · ${NTH[String(s.monthly_nth)] ?? ''} ${wd}`;

@@ -52,9 +52,20 @@ export async function attachSeries(rows: HubEvent[]): Promise<void> {
   const ids = [...new Set(rows.map((r) => r.series_id).filter(Boolean) as string[])];
   if (!ids.length || !backendConfigured) return;
   try {
-    const { data } = await getSupabase().from('public_event_series').select('series_id,freq,weekday,monthly_nth').in('series_id', ids);
+    const sb = getSupabase();
+    const { data } = await sb.from('public_event_series').select('series_id,kind,freq,weekday,monthly_nth').in('series_id', ids);
     const byId = new Map(((data ?? []) as EventSeriesInfo[]).map((s) => [s.series_id!, s]));
-    rows.forEach((r) => { if (r.series_id) r.series = byId.get(r.series_id) ?? null; });
+    // seasons (RS-0095 part 2): "Round 3 of 10" per event
+    const lg = rows.filter((r) => r.series_id && byId.get(r.series_id)?.kind === 'league').map((r) => r.event_id);
+    const rounds = new Map<string, { round_no: number; round_total: number }>();
+    if (lg.length) {
+      const { data: rd } = await sb.from('event_series_rounds').select('event_id,round_no,round_total').in('event_id', lg);
+      for (const x of (rd ?? []) as any[]) rounds.set(x.event_id, x);
+    }
+    rows.forEach((r) => {
+      const s = r.series_id ? byId.get(r.series_id) : undefined;
+      r.series = s ? { ...s, ...(rounds.get(r.event_id) ?? {}) } : null;
+    });
   } catch { /* badge is optional */ }
 }
 

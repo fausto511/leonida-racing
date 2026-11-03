@@ -115,7 +115,7 @@ async function discord(method: string, path: string, body?: unknown): Promise<DR
 }
 
 // ---------- data ----------
-const EVENT_COLS = "event_id,series_id,title,event_type,starts_at,ends_at,platforms,host_name,host_crew_id,created_by,status,is_published,is_test,members_only,max_participants,registration,discord_url,description,host:crews(name,tag,discord_url),creator:drivers!hub_events_created_by_fkey(display_name,deleted_at)";
+const EVENT_COLS = "event_id,series_id,title,event_type,starts_at,ends_at,platforms,host_name,host_crew_id,created_by,status,is_published,is_test,members_only,max_participants,registration,discord_url,description,series:hub_event_series(kind),host:crews(name,tag,discord_url),creator:drivers!hub_events_created_by_fkey(display_name,deleted_at)";
 async function loadEvent(id: string) {
   const { data } = await db.from("hub_events").select(EVENT_COLS).eq("event_id", id).maybeSingle();
   return data as any | null;
@@ -148,6 +148,13 @@ async function seriesNext(seriesId: string): Promise<any | null> {
     .eq("is_published", true).neq("status", "cancelled")
     .gte("starts_at", new Date(Date.now() - 24 * 3600e3).toISOString()).order("starts_at").limit(5);
   return (data ?? []).find((x: any) => new Date(x.ends_at ?? new Date(x.starts_at).getTime() + 2 * 3600e3).getTime() >= Date.now()) ?? null;
+}
+// Seasons (RS-0095 part 2): "Round 3 of 10" on the card, sign-up buttons = whole season.
+async function roundOf(e: any): Promise<{ no: number; total: number } | null> {
+  const { data } = await db.from("hub_events").select("event_id").eq("series_id", e.series_id).neq("status", "cancelled").order("starts_at").order("event_id");
+  const list = (data ?? []) as any[];
+  const i = list.findIndex((x) => x.event_id === e.event_id);
+  return i >= 0 ? { no: i + 1, total: list.length } : null;
 }
 async function seriesWants(e: any) {
   const nx = await seriesNext(e.series_id);
@@ -515,7 +522,7 @@ function card(e: any, going: number) {
     { name: "Going", value: goingValue(e, going, !cancelled && e.registration === "closed"), inline: true },
   ];
   const embed: Record<string, unknown> = {
-    author: { name: typeLine(e) }, title: clip(cancelled ? `Cancelled: ${e.title}` : e.title, 256), url: eventUrl(e),
+    author: { name: typeLine(e) }, title: clip(`${cancelled ? "Cancelled: " : ""}${e.title}${e._round ? ` \u00b7 Round ${e._round.no} of ${e._round.total}` : ""}`, 256), url: eventUrl(e),
     color: cancelled ? CORAL : ORANGE, fields,
     footer: { text: e.members_only ? "Crew members only · Leonida Racing · times shown in your time zone" : "Leonida Racing · times shown in your time zone" },
   };
@@ -526,8 +533,9 @@ function card(e: any, going: number) {
   const full = !!e.max_participants && going >= e.max_participants;
   const buttons: Record<string, unknown>[] = [];
   if (!cancelled) {
-    buttons.push({ type: 2, style: 3, label: full ? "Full" : e.registration === "closed" ? "Sign-ups closed" : "I'm in", custom_id: `rsvp:in:${e.event_id}`, disabled: full || e.registration === "closed" });
-    buttons.push({ type: 2, style: 2, label: "Withdraw", custom_id: `rsvp:out:${e.event_id}` });
+    const season = e.series?.kind === "league";
+    buttons.push({ type: 2, style: 3, label: full ? "Full" : e.registration === "closed" ? "Sign-ups closed" : season ? "Join season" : "I'm in", custom_id: `rsvp:in:${e.event_id}`, disabled: full || e.registration === "closed" });
+    buttons.push({ type: 2, style: 2, label: season ? "Leave season" : "Withdraw", custom_id: `rsvp:out:${e.event_id}` });
   }
   buttons.push(linkButton("Details", eventUrl(e)));
   if (!cancelled && hostDiscord) buttons.push(linkButton("Host Discord", hostDiscord));
@@ -593,6 +601,7 @@ async function sync(f: any, eventId: string, e: any | null, going: number, depth
   const { data: ref } = await db.from("discord_messages").select("*").eq("feed_id", f.feed_id).eq("event_id", eventId).maybeSingle();
   const want = await wants(f, e);
   const now = Date.now();
+  if (want && e.series?.kind === "league" && e._round === undefined) e._round = await roundOf(e);
 
   if (!want) {
     if (!ref) return;

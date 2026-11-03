@@ -13,8 +13,15 @@ export function createEventRsvp(root: HTMLElement) {
   let mine = new Set<string>();
   let session: any = null;
   let me: string | null = null;
+  const confirmLeave = new Set<string>();
   let note: { id: string; text: string; err?: boolean; discord?: string | null } | null = null;
 
+  // RS-0095 part 2: rounds of a season -- sign-up is for the whole season (COPY: Claude placeholders)
+  const isSeason = (e?: HubEvent) => e?.series?.kind === 'league';
+  const SEASON_MSG: Record<string, string> = {
+    full: 'The season is full.', closed: 'Sign-ups for this season are closed.', past: 'This season is already over.',
+    members_only: 'This season is for crew members only.', blocked: 'The host removed you from this season.', not_found: 'This season is not open for sign-ups.',
+  };
   const isOver = (e: HubEvent) => new Date(e.ends_at ?? new Date(new Date(e.starts_at).getTime() + 3 * 3600e3).toISOString()) < new Date();
 
   // Next step after "I'm in": one button per way to reach the host, each in the
@@ -60,7 +67,7 @@ export function createEventRsvp(root: HTMLElement) {
       else if (closed) action = '';
       else if (e.registration === 'closed') action = '<span class="ev-full">Sign-ups Closed</span>';
       else if (full) action = '<span class="ev-full">Full</span>';
-      else action = `<button type="button" class="btn btn-md ev-rsvp-btn" data-join="${esc(id)}">I'm in</button>`;
+      else action = `<button type="button" class="btn btn-md ev-rsvp-btn" data-join="${esc(id)}">${isSeason(e) ? 'Join season' : "I'm in"}</button>`;
       const msg = note && note.id === id ? `<span class="ev-rsvp-msg${note.err ? ' is-error' : ''}">${esc(note.text)}</span>` : '';
       slot.innerHTML = `${list}${action}${msg}`;
       // Next step after "I'm in" (Fausto, 2026-10-01): signing up alone is
@@ -102,8 +109,17 @@ export function createEventRsvp(root: HTMLElement) {
       return;
     }
     if (!me) return;
-    const { error } = await getSupabase().from('hub_event_rsvps').insert({ event_id: id, driver_id: me });
     const ev = events.find((x) => x.event_id === id);
+    if (isSeason(ev)) {
+      const { data, error: err } = await getSupabase().rpc('join_season', { p_series: ev!.series_id });
+      const st = (data as any)?.status;
+      note = err || !['in', 'already'].includes(st)
+        ? { id, text: SEASON_MSG[st] ?? 'Could not sign up — please try again.', err: true }
+        : { id, text: 'You’re in for the whole season — every round is in My Account > Events.', discord: eventDiscord(ev!) };
+      await loadRsvps();
+      return;
+    }
+    const { error } = await getSupabase().from('hub_event_rsvps').insert({ event_id: id, driver_id: me });
     // DEC-0144: kicked from this event / banned by the host -> say so (COPY: Claude placeholder)
     const block = error ? (await getSupabase().rpc('my_event_block', { p_event: id })).data : null;
     note = error ? { id, text: block === 'banned' ? 'The host has banned you from their events.' : block === 'kicked' ? 'The host removed you from this event. You can\u2019t sign up again unless the removal is lifted.' : 'Could not sign up — the event may be full or already over.', err: true } : { id, text: 'You\u2019re in!', discord: ev ? eventDiscord(ev) : null };
@@ -112,6 +128,15 @@ export function createEventRsvp(root: HTMLElement) {
   async function leave(id: string) {
     if (!live) { mine = setSampleRsvp(id, false); note = { id, text: 'Cancelled.' }; renderRsvps(); return; }
     if (!me) return;
+    const sev = events.find((x) => x.event_id === id);
+    if (isSeason(sev)) {
+      if (!confirmLeave.has(id)) { confirmLeave.add(id); note = { id, text: 'This takes you out of the whole season. Click Going again to confirm.' }; renderRsvps(); return; }
+      confirmLeave.delete(id);
+      const { error: err } = await getSupabase().rpc('leave_season', { p_series: sev!.series_id });
+      note = err ? { id, text: 'That did not work — please try again.', err: true } : { id, text: 'You left the season.' };
+      await loadRsvps();
+      return;
+    }
     const { error } = await getSupabase().from('hub_event_rsvps').delete().eq('event_id', id).eq('driver_id', me);
     note = error ? { id, text: 'That did not work — please try again.', err: true } : { id, text: 'Cancelled.' };
     await loadRsvps();

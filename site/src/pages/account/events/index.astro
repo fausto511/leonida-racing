@@ -35,6 +35,7 @@ const base = import.meta.env.BASE_URL;
           <h2 class="lr-h2 lr-h2-s">Events I'm going to</h2>
           <p class="evs-lede">Your sign-ups, soonest first. Start times are in your local time.</p>
         </div></div>
+        <div id="my-seasons" class="evs-myseasons"></div>
         <div id="my-rsvps" class="ev-list"></div>
       </section>
 
@@ -74,10 +75,10 @@ const base = import.meta.env.BASE_URL;
             <p class="lr-note" id="series-form-note"></p>
             <div class="evs-sgrid">
               <label class="span2">Title *<input type="text" name="title" maxlength="80" required /></label>
-              <label>Repeat<select name="freq"><option value="weekly">Every week</option><option value="biweekly">Every 2 weeks</option><option value="monthly">Every month</option></select></label>
-              <label data-sf-monthly>On the<select name="monthly_nth"><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="-1">last</option></select></label>
-              <label>First date <small>sets the weekday</small><input type="date" name="anchor_date" required /></label>
-              <label>Start time <small id="sf-tz"></small><input type="time" name="local_time" required /></label>
+              <label data-sf-rule>Repeat<select name="freq"><option value="weekly">Every week</option><option value="biweekly">Every 2 weeks</option><option value="monthly">Every month</option></select></label>
+              <label data-sf-monthly data-sf-rule>On the<select name="monthly_nth"><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="-1">last</option></select></label>
+              <label data-sf-rule>First date <small>sets the weekday</small><input type="date" name="anchor_date" required /></label>
+              <label data-sf-rule>Start time <small id="sf-tz"></small><input type="time" name="local_time" required /></label>
               <label>Duration <small>minutes, optional</small><input type="number" name="duration_min" min="15" max="1440" step="5" /></label>
               <label>Max. participants <small>optional</small><input type="number" name="max_participants" min="2" max="500" step="1" /></label>
               <label>Sign-ups<select name="registration"><option value="open">Open</option><option value="closed">Closed — Listed, No Sign-ups</option></select></label>
@@ -85,8 +86,18 @@ const base = import.meta.env.BASE_URL;
               <label class="span2">Discord invite<input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
               <label class="span2">Description <small>max. 600</small><textarea name="description" maxlength="600" rows="3"></textarea></label>
             </div>
+            <div class="evs-rounds" data-sf-rounds hidden>
+              <p class="evs-rounds-t">Upcoming rounds <small>2 to 15 rounds in total, past rounds included. Rounds you remove are cancelled if drivers are signed up.</small></p>
+              <ol id="sf-rounds"></ol>
+              <button type="button" class="btn btn-s btn-sm" id="sf-add">+ Add round</button>
+            </div>
             <div class="evs-sactions"><button type="submit" class="btn btn-p">Save series</button><p class="evs-msg" id="series-form-msg" aria-live="polite"></p></div>
           </form>
+          <div class="evs-sform" id="season-entries" hidden>
+            <div class="evs-editor-top"><h3 class="evs-editor-t" id="season-entries-t">Drivers in this season</h3><button type="button" class="btn btn-s btn-sm" id="season-entries-close">Close</button></div>
+            <p class="lr-note">Removing a driver frees the spot right away. It doesn't block them: they can sign up again while there's room. To keep someone out, kick or ban them from a round (Edit on the round).</p>
+            <div id="season-entries-list"></div>
+          </div>
         </div>
         <div class="evs-dfs"><DiscordFeedSteps source="host" /></div>
       </section>
@@ -136,6 +147,15 @@ const base = import.meta.env.BASE_URL;
   .evs-sgrid label small { font-weight: 400; color: var(--lr-muted); }
   .evs-sgrid .span2 { grid-column: span 2; }
   .evs-sgrid :is(input, select, textarea) { padding: 8px 10px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; color: inherit; font: inherit; font-weight: 400; }
+  .evs-rounds { margin-top: 14px; }
+  .evs-rounds-t { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+  .evs-rounds-t small { display: block; font-weight: 400; color: var(--lr-muted); }
+  #sf-rounds { margin: 0 0 10px; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+  :global(#sf-rounds li) { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; }
+  :global(#sf-rounds input) { padding: 6px 8px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; color: inherit; font: inherit; }
+  :global(.evs-erow) { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--lr-line-soft); font-size: 14px; }
+  .evs-myseasons:empty { display: none; }
+  .evs-myseasons { margin-bottom: 14px; }
   .evs-sactions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; }
   @media (max-width: 760px) { .evs-sgrid { grid-template-columns: 1fr; } .evs-sgrid .span2 { grid-column: auto; } }
   .evs-how { margin-bottom: 20px; padding: 18px 20px; border: 1px solid var(--lr-line-soft); border-radius: 8px; background: var(--lr-card); }
@@ -191,7 +211,24 @@ const base = import.meta.env.BASE_URL;
 
   // 1. Events I'm going to: the calendar row (full), sign-up state on the right (Going ✓ / next steps)
   const rsvp = createEventRsvp(listEl);
+  // seasons I'm in / was removed from (RS-0095 part 2). COPY: Claude placeholders.
+  async function loadMySeasons() {
+    const { data } = await getSupabase().rpc('my_seasons');
+    const rows = (data ?? []) as any[];
+    $('my-seasons').innerHTML = rows.map((r) => r.entry_status === 'removed'
+      ? `<div class="evs-srow"><div><h4>${esc(r.title)}</h4><p class="evs-warn">The host removed you from this season, so you're no longer signed up for its rounds. You can sign up again while there's room.</p></div></div>`
+      : `<div class="evs-srow"><div><h4>${esc(r.title)}</h4><p>Season · ${r.rounds_done} of ${r.rounds_total} rounds done${r.next_starts_at ? ` · next round ${esc(new Date(r.next_starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }))}` : ''}</p></div>${r.series_status === 'active' ? `<div class="evs-sbtns"><button type="button" class="btn btn-s btn-sm" data-sleave="${esc(r.series_id)}">Leave season</button></div>` : ''}</div>`).join('');
+  }
+  $('my-seasons').addEventListener('click', async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-sleave]');
+    if (!b) return;
+    if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Click again to leave'; setTimeout(() => { if (b.isConnected) { b.dataset.armed = ''; b.textContent = 'Leave season'; } }, 4000); return; }
+    b.disabled = true;
+    await getSupabase().rpc('leave_season', { p_series: b.dataset.sleave });
+    await loadMine();
+  });
   async function loadMine() {
+    loadMySeasons();
     const since = new Date(Date.now() - 6 * 3600e3).toISOString();
     const { data } = await getSupabase().from('hub_event_rsvps').select(`event_id, event:hub_events(${EVENT_COLS})`).eq('driver_id', me!);
     const events: HubEvent[] = ((data ?? []) as any[]).map((r) => r.event).filter((e) => e && e.starts_at >= since)
@@ -256,10 +293,20 @@ const base = import.meta.env.BASE_URL;
 
   // ---- Your series (RS-0095) ----
   let seriesRows: any[] = [];
+  let seasonRounds = new Map<string, any[]>();
+  const toLocal = (iso: string) => { const d = new Date(iso); const z = (n: number) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`; };
+  function roundLi(eventId: string, value: string, locked: boolean) {
+    return `<li data-eid="${esc(eventId)}"><input type="datetime-local" value="${esc(value)}"${locked ? ' readonly title="Less than 24 hours away"' : ''} aria-label="Round start" />${locked ? '' : '<button type="button" class="btn btn-s btn-sm" data-rdel>Remove</button>'}</li>`;
+  }
   let editSeries: any = null;
   const sMsg = (t: string, err = false) => { const m = $('series-msg'); m.textContent = t; m.className = `evs-msg${err ? ' is-error' : ''}`; };
   const fmtTime = (t: string) => String(t ?? '').slice(0, 5);
   const seriesErr = (m: string) => /series_limit/.test(m) ? 'You can run up to 3 series at a time.'
+    : /rounds_count/.test(m) ? 'A season has 2 to 15 rounds (past rounds included).'
+    : /round_past/.test(m) ? 'All rounds have to be in the future.'
+    : /starts_before_launch|not_before_launch/.test(m) ? 'Rounds can start on Nov 19, 2026 (GTA VI launch day) at the earliest.'
+    : /time_locked/.test(m) ? "Rounds less than 24 hours away can't be moved or removed."
+    : /lead_time/.test(m) ? 'New rounds have to start at least 24 hours from now.'
     : /contact_required/.test(m) ? 'Add your PSN name or a Discord invite, so players can reach you.'
     : /not_editable/.test(m) ? "This series can't be changed any more." : m;
   async function loadSeries() {
@@ -267,8 +314,25 @@ const base = import.meta.env.BASE_URL;
     const cutoff = Date.now() - 30 * 864e5;
     seriesRows = ((data ?? []) as any[]).filter((r) => r.status === 'active' || new Date(r.ended_at ?? r.updated_at).getTime() > cutoff);
     $('series-block').hidden = seriesRows.length === 0;
+    // seasons (RS-0095 part 2): rounds and entries
+    const lgIds = seriesRows.filter((r) => r.kind === 'league').map((r) => r.series_id);
+    seasonRounds = new Map(); const entriesIn = new Map<string, number>();
+    if (lgIds.length) {
+      const [rd, en] = await Promise.all([
+        getSupabase().from('hub_events').select('event_id,series_id,starts_at,status').in('series_id', lgIds).order('starts_at'),
+        getSupabase().from('hub_series_entries').select('series_id,status').in('series_id', lgIds).eq('status', 'in'),
+      ]);
+      for (const x of (rd.data ?? []) as any[]) { if (!seasonRounds.has(x.series_id)) seasonRounds.set(x.series_id, []); seasonRounds.get(x.series_id)!.push(x); }
+      for (const x of (en.data ?? []) as any[]) entriesIn.set(x.series_id, (entriesIn.get(x.series_id) ?? 0) + 1);
+    }
     $('series-list').innerHTML = seriesRows.map((r) => {
-      const label = `${seriesLabel(r)} · ${fmtTime(r.local_time)} (${r.tz.replace(/_/g, ' ')})`;
+      const lg = r.kind === 'league';
+      const rounds = (seasonRounds.get(r.series_id) ?? []).filter((x) => x.status !== 'cancelled');
+      const nxt = rounds.find((x) => new Date(x.starts_at).getTime() > Date.now());
+      const nIn = entriesIn.get(r.series_id) ?? 0;
+      const label = lg
+        ? `Season · ${rounds.length} rounds${nxt ? ` · next: ${new Date(nxt.starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}` : ''} · ${nIn}${r.max_participants ? ` / ${r.max_participants}` : ''} drivers in`
+        : `${seriesLabel(r)} · ${fmtTime(r.local_time)} (${r.tz.replace(/_/g, ' ')})`;
       const pill = r.status === 'cancelled' ? '<span class="lr-status is-no">Cancelled by a moderator</span>'
         : r.status === 'ended' ? (r.review_status === 'rejected' ? '<span class="lr-status is-no">Not approved</span>' : '<span class="lr-status">Ended</span>')
         : r.review_status === 'pending' ? '<span class="lr-status">In review</span>'
@@ -279,11 +343,13 @@ const base = import.meta.env.BASE_URL;
         r.pending ? '<p class="evs-warn">Changes to the title, description or Discord invite are waiting for a moderator.</p>' : '',
         r.edit_note ? `<p>Your last changes were not approved. Moderator note: ${esc(r.edit_note)}</p>` : '',
         r.status === 'active' && r.empty_count >= 2 ? `<p class="evs-warn">Nobody signed up for the last ${r.empty_count} dates. Is the series still running?</p>` : '',
+        lg && r.status === 'active' && r.warned_at && nIn === 0 ? '<p class="evs-warn">Round 1 starts within 48 hours and nobody has signed up yet.</p>' : '',
       ].join('');
       const btns = r.status !== 'active' ? '' : [
         r.empty_count >= 2 ? `<button type="button" class="btn btn-p btn-sm" data-skeep="${esc(r.series_id)}">Keep it running</button>` : '',
-        r.review_status === 'rejected' ? '' : `<button type="button" class="btn btn-s btn-sm" data-sedit="${esc(r.series_id)}">Edit series</button>`,
-        `<button type="button" class="btn btn-danger btn-sm" data-send="${esc(r.series_id)}">End series</button>`,
+        r.review_status === 'rejected' ? '' : `<button type="button" class="btn btn-s btn-sm" data-sedit="${esc(r.series_id)}">${lg ? 'Edit season' : 'Edit series'}</button>`,
+        lg && r.review_status === 'approved' ? `<button type="button" class="btn btn-s btn-sm" data-sentries="${esc(r.series_id)}">Drivers (${nIn})</button>` : '',
+        `<button type="button" class="btn btn-danger btn-sm" data-send="${esc(r.series_id)}">${lg ? 'End season' : 'End series'}</button>`,
       ].join('');
       return `<div class="evs-srow"><div><h4>${esc(r.title)}</h4><p>${esc(label)}</p>${notes}</div><div class="evs-sbtns">${pill}${btns}</div></div>`;
     }).join('');
@@ -295,21 +361,35 @@ const base = import.meta.env.BASE_URL;
     const p = r.pending ?? {};
     f.title.value = p.title ?? r.title; f.description.value = ('description' in p ? p.description : r.description) ?? '';
     f.discord_url.value = ('discord_url' in p ? p.discord_url : r.discord_url) ?? '';
-    f.freq.value = r.freq; f.monthly_nth.value = String(r.monthly_nth ?? 1); f.anchor_date.value = r.anchor_date;
+    const lg = r.kind === 'league';
+    document.querySelectorAll<HTMLElement>('#series-form [data-sf-rule]').forEach((el) => (el.hidden = lg));
+    (document.querySelector('[data-sf-rounds]') as HTMLElement).hidden = !lg;
+    f.anchor_date.required = !lg; f.local_time.required = !lg;
+    if (lg) {
+      const lockMs = (hostStatus?.level ?? 1) < 3 ? 24 * 3600e3 : 0;
+      $('sf-rounds').innerHTML = (seasonRounds.get(r.series_id) ?? [])
+        .filter((x) => x.status !== 'cancelled' && new Date(x.starts_at).getTime() > Date.now())
+        .map((x) => roundLi(x.event_id, toLocal(x.starts_at), new Date(x.starts_at).getTime() < Date.now() + lockMs)).join('');
+    }
+    f.freq.value = r.freq ?? 'weekly'; f.monthly_nth.value = String(r.monthly_nth ?? 1); f.anchor_date.value = r.anchor_date ?? '';
     f.local_time.value = fmtTime(r.local_time); f.duration_min.value = r.duration_min ?? ''; f.max_participants.value = r.max_participants ?? '';
     f.registration.value = r.registration; f.host_name.value = r.host_name ?? '';
     $('sf-tz').textContent = `time zone ${r.tz.replace(/_/g, ' ')}`;
-    $('series-form-t').textContent = `Edit series: ${r.title}`;
-    $('series-form-note').textContent = (hostStatus?.level ?? 1) < 3 && r.review_status === 'approved'
+    $('series-form-t').textContent = `${lg ? 'Edit season' : 'Edit series'}: ${r.title}`;
+    $('series-form-note').textContent = lg
+      ? ((hostStatus?.level ?? 1) < 3 && r.review_status === 'approved' ? 'Changes to the title, description and Discord invite are checked by a moderator first. Rounds, limit and sign-ups change right away. Rounds less than 24 hours away stay as they are.' : 'Changes apply to all upcoming rounds.')
+      : (hostStatus?.level ?? 1) < 3 && r.review_status === 'approved'
       ? 'Changes to the title, description and Discord invite are checked by a moderator first; everything else applies to all upcoming dates right away. Changing the rhythm or time moves upcoming dates without sign-ups; dates with sign-ups stay as they are (cancel them one by one if needed).'
       : 'Changes apply to all upcoming dates. Changing the rhythm or time moves upcoming dates without sign-ups; dates with sign-ups stay as they are.';
-    syncSf();
+    if (!lg) syncSf();
     $('series-form-msg').textContent = '';
     $('series-form').hidden = false;
     $('series-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-  function syncSf() { (document.querySelector('[data-sf-monthly]') as HTMLElement).hidden = sf().freq.value !== 'monthly'; }
+  function syncSf() { if (editSeries?.kind === 'league') return; (document.querySelector('[data-sf-monthly]') as HTMLElement).hidden = sf().freq.value !== 'monthly'; }
   $('series-form').addEventListener('change', syncSf);
+  $('sf-add').addEventListener('click', () => { if ($('sf-rounds').children.length < 15) $('sf-rounds').insertAdjacentHTML('beforeend', roundLi('', '', false)); });
+  $('sf-rounds').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('[data-rdel]'); if (b) b.closest('li')?.remove(); });
   $('series-close').addEventListener('click', () => { $('series-form').hidden = true; editSeries = null; });
   $('series-form').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -323,6 +403,20 @@ const base = import.meta.env.BASE_URL;
       duration_min: num(f.duration_min.value), max_participants: num(f.max_participants.value), registration: f.registration.value,
     };
     const m = $('series-form-msg');
+    if (editSeries.kind === 'league') {
+      for (const k of ['freq', 'monthly_nth', 'anchor_date', 'weekday', 'local_time']) delete payload[k];
+      const rounds = [...$('sf-rounds').querySelectorAll<HTMLElement>('li')].map((li) => ({ event_id: li.dataset.eid || null, v: (li.querySelector('input') as HTMLInputElement).value }));
+      if (String(payload.title).length < 3 || rounds.some((x) => !x.v)) { m.textContent = 'Please fill in the title and a date for every round.'; m.className = 'evs-msg is-error'; return; }
+      const sb = getSupabase();
+      const { data, error } = await sb.rpc('update_event_series', { p_series: editSeries.series_id, p: payload });
+      if (error) { m.textContent = seriesErr(error.message); m.className = 'evs-msg is-error'; return; }
+      const r2 = await sb.rpc('set_season_rounds', { p_series: editSeries.series_id, p_rounds: rounds.map((x) => ({ event_id: x.event_id, starts_at: new Date(x.v).toISOString() })) });
+      if (r2.error) { m.textContent = `Details saved, but the rounds were not: ${seriesErr(r2.error.message)}`; m.className = 'evs-msg is-error'; await loadHosted(); return; }
+      $('series-form').hidden = true; editSeries = null;
+      sMsg((data as any)?.pending ? 'Saved. The new title, description or Discord invite go live once a moderator approves them; rounds and everything else apply now.' : 'Season saved.');
+      await loadHosted();
+      return;
+    }
     if (String(payload.title).length < 3 || !payload.anchor_date || !payload.local_time) { m.textContent = 'Please fill in title, first date and start time.'; m.className = 'evs-msg is-error'; return; }
     const { data, error } = await getSupabase().rpc('update_event_series', { p_series: editSeries.series_id, p: payload });
     if (error) { m.textContent = seriesErr(error.message); m.className = 'evs-msg is-error'; return; }
@@ -334,6 +428,8 @@ const base = import.meta.env.BASE_URL;
     const t = e.target as HTMLElement;
     const ed = t.closest<HTMLElement>('[data-sedit]');
     if (ed) { const r = seriesRows.find((x) => x.series_id === ed.dataset.sedit); if (r) openSeriesForm(r); return; }
+    const se = t.closest<HTMLElement>('[data-sentries]');
+    if (se) { openEntries(se.dataset.sentries!); return; }
     const kp = t.closest<HTMLButtonElement>('[data-skeep]');
     if (kp) { kp.disabled = true; const { error } = await getSupabase().rpc('keep_event_series', { p_series: kp.dataset.skeep }); sMsg(error ? seriesErr(error.message) : 'Thanks — the series keeps running.', Boolean(error)); await loadSeries(); return; }
     const en = t.closest<HTMLButtonElement>('[data-send]');
@@ -345,6 +441,31 @@ const base = import.meta.env.BASE_URL;
       await loadHosted();
     }
   });
+  // season drivers: free a spot (DEC-0203)
+  let entriesSeries: string | null = null;
+  async function openEntries(id: string) {
+    entriesSeries = id;
+    const r = seriesRows.find((x) => x.series_id === id);
+    $('season-entries-t').textContent = `Drivers in ${r?.title ?? 'this season'}`;
+    $('season-entries').hidden = false;
+    const { data, error } = await getSupabase().rpc('season_entries', { p_series: id });
+    const rows = (data ?? []) as any[];
+    $('season-entries-list').innerHTML = error ? `<p class="evs-msg is-error">${esc(error.message)}</p>`
+      : rows.length ? rows.map((x) => `<div class="evs-erow"><span>${esc(x.display_name ?? 'Deleted driver')}${x.status === 'removed' ? ' · removed' : ''}</span>${x.status === 'in' ? `<button type="button" class="btn btn-danger btn-sm" data-eremove="${esc(x.driver_id)}">Remove</button>` : ''}</div>`).join('')
+      : '<p class="lr-note">Nobody has signed up yet.</p>';
+    $('season-entries').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  $('season-entries-close').addEventListener('click', () => { $('season-entries').hidden = true; entriesSeries = null; });
+  $('season-entries-list').addEventListener('click', async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-eremove]');
+    if (!b || !entriesSeries) return;
+    if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Click again to remove'; setTimeout(() => { if (b.isConnected) { b.dataset.armed = ''; b.textContent = 'Remove'; } }, 4000); return; }
+    b.disabled = true;
+    const { error } = await getSupabase().rpc('remove_season_entry', { p_series: entriesSeries, p_driver: b.dataset.eremove });
+    sMsg(error ? seriesErr(error.message) : 'Driver removed — the spot is free again.', Boolean(error));
+    const id = entriesSeries; await loadSeries(); openEntries(id);
+  });
+
   document.addEventListener('hc-series-changed', (e: any) => {
     $('host-editor').hidden = true;
     sMsg(e.detail?.message ?? '');

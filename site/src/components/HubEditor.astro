@@ -151,8 +151,13 @@ const base = import.meta.env.BASE_URL;
               <label>Start * <small id="tz-hint">your local time</small><input type="datetime-local" name="starts_at" min="2026-11-19T00:00" required /></label>
               <label>End <small>optional</small><input type="datetime-local" name="ends_at" /></label>
               <!-- RS-0095 / DEC-0203: recurring series (new events only). COPY STATUS: Claude placeholders. -->
-              <label data-series-new hidden>Repeat <small>a series always shows the next 4 dates</small><select name="repeat"><option value="">Does not repeat</option><option value="weekly">Every week</option><option value="biweekly">Every 2 weeks</option><option value="monthly">Every month</option></select></label>
+              <label data-series-new hidden>Repeat <small>a series always shows the next 4 dates</small><select name="repeat"><option value="">Does not repeat</option><option value="weekly">Every week</option><option value="biweekly">Every 2 weeks</option><option value="monthly">Every month</option><option value="league">Championship / league season (fixed rounds)</option></select></label>
               <label data-series-monthly hidden>Every month on the <select name="monthly_nth"><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="-1">last</option></select> <small id="series-wd">weekday of the start date</small></label>
+              <div class="span2 season-box" data-season hidden>
+                <p class="lr-note">Round 1 is the start above. Add the other rounds (2 to 15 in total). Drivers sign up once for the whole season; Max. participants counts for the season.</p>
+                <ol class="season-rounds" id="season-rounds" start="2"></ol>
+                <button type="button" class="btn btn-s btn-sm" id="season-add">+ Add round</button>
+              </div>
               <p class="span2 lr-note" id="event-series-note" hidden></p>
               <fieldset class="span2 platforms-set"><legend>Platforms</legend>
                 {PLATFORMS.map((p) => p.active
@@ -292,6 +297,10 @@ const base = import.meta.env.BASE_URL;
   .pub-toggle input { width: 1rem; height: 1rem; accent-color: var(--lr-orange); }
   .pub-toggle:has(input:checked) { border-color: #D9F58E; color: #D9F58E; }
 
+  .season-box { display: flex; flex-direction: column; gap: .5rem; align-items: flex-start; }
+  .season-rounds { margin: 0; padding-left: 1.6rem; display: flex; flex-direction: column; gap: .4rem; }
+  :global(.season-rounds li) { display: flex; gap: .5rem; align-items: center; }
+  :global(.season-rounds input) { padding: .35rem .5rem; border: 1px solid var(--gh-line); border-radius: 6px; background: transparent; color: inherit; font: inherit; }
   .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.1rem; }
   @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
   .dist-note { margin: 0; font-size: .82rem; line-height: 1.5; color: var(--gh-muted); }
@@ -534,6 +543,10 @@ const base = import.meta.env.BASE_URL;
     const m = e.message || '';
     if (e.code === '23505' || /duplicate key/.test(m)) return 'This URL slug is already used by another crew — change it.';
     if (/crews_tag_check/.test(m)) return 'Crew tag must be exactly 4 letters/digits.';
+    if (/season_limit/.test(m)) return 'You can run up to 3 seasons at a time. End one under Your series first.';
+    if (/rounds_count/.test(m)) return 'A season has 2 to 15 rounds.';
+    if (/starts_before_launch|not_before_launch/.test(m)) return 'Rounds can start on Nov 19, 2026 (GTA VI launch day) at the earliest.';
+    if (/round_past/.test(m)) return 'All rounds have to be in the future.';
     if (/series_limit/.test(m)) return 'You can run up to 3 series at a time. End one under Your series first.';
     if (/edit_series/.test(m)) return 'This date is part of a series — change title, description and details in the series.';
     if (/cancel_instead/.test(m)) return "Dates of a series can't be deleted. Cancel this date instead (Status: Cancelled).";
@@ -940,6 +953,7 @@ const base = import.meta.env.BASE_URL;
     const isNew = !row && MODE === 'events';
     eventForm.querySelectorAll<HTMLElement>('[data-series-new]').forEach((el) => (el.hidden = !isNew));
     if (!isNew) ef.repeat.value = '';
+    resetRounds();
     syncRepeat();
     const occ = Boolean(row?.series_id) && !isMod;
     for (const n of SERIES_LOCKED) {
@@ -955,6 +969,8 @@ const base = import.meta.env.BASE_URL;
   function syncRepeat() {
     const rep = ef.repeat.value;
     eventForm.querySelectorAll<HTMLElement>('[data-series-monthly]').forEach((el) => (el.hidden = rep !== 'monthly'));
+    eventForm.querySelectorAll<HTMLElement>('[data-season]').forEach((el) => (el.hidden = rep !== 'league'));
+    if (rep === 'league' && !$('season-rounds').children.length) addRound();
     const st = ef.starts_at.value ? new Date(ef.starts_at.value) : null;
     if (st) {
       $('series-wd').textContent = WD_LONG[isoWeekday(st) - 1];
@@ -963,6 +979,18 @@ const base = import.meta.env.BASE_URL;
     const sl = ef.stream_url.closest('label') as HTMLElement | null;
     if (sl) sl.hidden = Boolean(rep);
   }
+
+  // RS-0095 part 2: rounds 2..15 of a new season (round 1 = Start)
+  function addRound(value = '') {
+    const list = $('season-rounds');
+    if (list.children.length >= 14) return;
+    const li = document.createElement('li');
+    li.innerHTML = `<input type="datetime-local" data-round min="2026-11-19T00:00" aria-label="Round start" /><button type="button" class="btn btn-s btn-sm" data-round-del>Remove</button>`;
+    (li.querySelector('input') as HTMLInputElement).value = value;
+    list.appendChild(li);
+    ($('season-add') as HTMLButtonElement).disabled = list.children.length >= 14;
+  }
+  function resetRounds() { $('season-rounds').innerHTML = ''; ($('season-add') as HTMLButtonElement).disabled = false; }
 
   // Review state of an event (DEC-0209). Hosts: pending edits are loaded into the form,
   // so saving again keeps them. COPY STATUS: Claude placeholders, Codex review pending.
@@ -1102,6 +1130,11 @@ const base = import.meta.env.BASE_URL;
   // ------------------------------------------------------------ event form
   const ef = eventForm.elements as any;
   ef.repeat.addEventListener('change', syncRepeat);
+  $('season-add').addEventListener('click', () => addRound());
+  $('season-rounds').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest('[data-round-del]');
+    if (b) { b.closest('li')?.remove(); ($('season-add') as HTMLButtonElement).disabled = $('season-rounds').children.length >= 14; }
+  });
   ef.starts_at.addEventListener('change', syncRepeat);
   ef.monthly_nth.addEventListener('change', () => { ef.monthly_nth.dataset.touched = '1'; });
   $('tz-hint').textContent = `your local time (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
@@ -1300,6 +1333,34 @@ const base = import.meta.env.BASE_URL;
       openEvent(events.find((x) => x.event_id === id) ?? null);
       msg(eventForm, 'Saved — this date only.');
       eventsChanged();
+      return;
+    }
+    // RS-0095 part 2: new league season (fixed rounds)
+    if (!selectedId && MODE === 'events' && ef.repeat.value === 'league') {
+      const e1 = eventFromForm();
+      const bad1 = validateEvent(e1);
+      const extra = [...$('season-rounds').querySelectorAll<HTMLInputElement>('[data-round]')].map((i) => i.value).filter(Boolean);
+      const rounds = [ef.starts_at.value, ...extra].filter(Boolean).map((v) => new Date(v).toISOString());
+      markInvalid(eventForm, bad1);
+      if (bad1.length) { msg(eventForm, `Please fix: ${bad1.map((b) => eventFieldHelp[b] ?? b).join('; ')}.`, true); return; }
+      if (new Set(rounds).size < 2 || rounds.length > 15) { msg(eventForm, 'A season has 2 to 15 rounds — add at least one more round date.', true); return; }
+      const dur = e1.ends_at ? Math.round((new Date(e1.ends_at).getTime() - new Date(e1.starts_at!).getTime()) / 60000) : null;
+      const payload = {
+        title: e1.title, description: e1.description, event_type: e1.event_type, platforms: e1.platforms, host_name: e1.host_name,
+        host_crew_id: e1.host_crew_id, location: e1.location, discord_url: e1.discord_url, max_participants: e1.max_participants,
+        registration: e1.registration, members_only: e1.members_only, rounds,
+        tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC', duration_min: dur && dur >= 15 && dur <= 1440 ? dur : null,
+      };
+      const { data, error } = await sb0.rpc('create_league_season', { p: payload });
+      if (error) { msg(eventForm, dbError(error), true); return; }
+      await loadAll();
+      eventsChanged();
+      const pending = (data as any)?.review_status !== 'approved';
+      selectedId = null;
+      showForm(null);
+      document.dispatchEvent(new CustomEvent('hc-series-changed', { detail: { message: pending
+        ? 'Season submitted — a moderator reviews it before the rounds go live. All rounds are in your list.'
+        : 'Season created — all rounds are in the calendar.' } }));
       return;
     }
     // RS-0095: new recurring series
