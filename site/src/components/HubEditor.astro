@@ -165,8 +165,8 @@ const base = import.meta.env.BASE_URL;
                   : <label class="check is-soon" title={comingLater(p)}><input type="checkbox" disabled /> {p.label} <span class="soon">Coming later</span></label>)}
               </fieldset>
               <label>Host PSN name <small>so players can add you on PlayStation</small><input type="text" name="host_name" maxlength="16" placeholder="e.g. Racer_01" autocomplete="off" /></label>
-              <label>Host crew <small>optional — only crews you lead or are a commissioner of; its tag is shown next to your name</small><select name="host_crew_id"><option value="">— none —</option></select></label>
-              <label class="check span2" id="ev-members-wrap"><input type="checkbox" name="members_only" /> Crew members only <small>only active members of the host crew see this event and can sign up (DEC-0205)</small></label>
+              <label>Host crew <small>optional — only crews you lead or are a commissioner of; its tag is shown next to your name</small><select name="host_crew_id"><option value="">No host crew</option></select></label>
+              <label class="check span2" id="ev-members-wrap"><input type="checkbox" name="members_only" /> Crew members only <small>only active members of the host crew see this event and can sign up</small></label>
               <label>Location <small>optional — more places are added after release</small><select name="location"><option value="">— not specified —</option></select></label>
               <label class="span2">Discord invite <small>where participants meet you — a PSN name or a Discord (yours or your crew's) is required. Tip: create the invite in your rules or info channel, newcomers land right there.</small><input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
               <label>Max. participants <small>optional, e.g. lobby size</small><input type="number" name="max_participants" min="2" max="500" step="1" /></label>
@@ -649,7 +649,7 @@ const base = import.meta.env.BASE_URL;
     const current = sel.value;
     // Moderators: any crew. Hosts: no crew, or a crew they lead or are commissioner of (DEC-0204).
     const options = isMod ? crews : crews.filter((c) => isStaffOf(c.crew_id));
-    sel.innerHTML = '<option value="">— none —</option>' + options.map((c) => `<option value="${esc(c.crew_id)}">${esc(c.tag)} · ${esc(c.name)}${c.is_published ? '' : ' (draft)'}</option>`).join('');
+    sel.innerHTML = '<option value="">No host crew</option>' + options.map((c) => `<option value="${esc(c.crew_id)}">${esc(c.tag)} · ${esc(c.name)}${c.is_published ? '' : ' (draft)'}</option>`).join('');
     sel.value = current;
   }
 
@@ -940,9 +940,9 @@ const base = import.meta.env.BASE_URL;
   // = hidden by a moderator; new crews start as drafts, so not for crews.
   // DEC-0204. COPY STATUS: Claude placeholders, Codex review pending.
   function eventNoticeText(n: string | null | undefined) {
-    if (n === 'crew_removed') return "This event no longer runs under your crew, because you're no longer its leader or commissioner. It stays live with your own contact details. Saving the event hides this note.";
-    if (n === 'crew_removed_private') return "This crew-only event lost its crew, because you're no longer its leader or commissioner, so it's hidden. If you save it now, it becomes a public event in the calendar.";
-    if (n === 'crew_removed_hidden') return "This event lost its crew, because you're no longer its leader or commissioner, and it has no contact left, so it's hidden. Add your PSN name or a Discord invite and save to publish it again.";
+    if (n === 'crew_removed') return "This event no longer runs under your crew, because its crew was removed or you're no longer its leader or commissioner. It stays live with your own contact details. Saving the event hides this note.";
+    if (n === 'crew_removed_private') return "This crew-only event lost its crew, because the crew was removed or you're no longer its leader or commissioner, so it's hidden. If you save it now, it becomes a public event in the calendar.";
+    if (n === 'crew_removed_hidden') return "This event lost its crew, because the crew was removed or you're no longer its leader or commissioner, and it has no contact left, so it's hidden. Add your PSN name or a Discord invite and save to publish it again.";
     return '';
   }
 

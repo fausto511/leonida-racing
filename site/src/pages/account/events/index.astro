@@ -275,9 +275,9 @@ const base = import.meta.env.BASE_URL;
       }
       if (rs === 'pending') return `<div class="evs-side"><span class="lr-status">In review</span>${edit}</div>`;
       if (rs === 'needs_changes') return `<div class="evs-side"><span class="lr-status is-fix">Needs changes</span>${rv?.note ? `<span class="evs-why">${esc(rv.note)}</span>` : ''}${edit}</div>`;
-      const status = e.status === 'cancelled' ? '' : e.is_published ? '<span class="lr-status is-ok">Live</span>' : '<span class="lr-status" title="Hidden by a moderator">Hidden</span>';
+      const status = e.status === 'cancelled' ? '' : e.is_published ? '<span class="lr-status is-ok">Live</span>' : '<span class="lr-status" title="Not live in the calendar">Hidden</span>';
       const chg = rv?.pending ? '<span class="lr-status is-fix" title="The calendar shows the previous version until a moderator approves your changes">Changes in review</span>' : '';
-      return `<div class="evs-side">${status}${chg}<span class="evs-going"><b>${n}</b>${e.max_participants ? ` / ${e.max_participants}` : ''} ${wasPast ? 'went' : 'going'}</span>${edit}</div>`;
+      return `<div class="evs-side">${status}${chg}<span class="evs-going"><b>${n}</b>${e.max_participants ? ` / ${e.max_participants}` : ''} ${wasPast ? 'signed up' : 'going'}</span>${edit}</div>`;
     };
     const row = (e: any, wasPast = false) => eventRowHtml(e, { full: true, side: side(e, wasPast) });
     const st0 = hostStatus ?? { level: 1, blocked: false, open: 0, open_limit: 1 };
