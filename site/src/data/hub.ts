@@ -97,6 +97,9 @@ export interface HubEvent {
   streams?: EventStream[];
   /** DEC-0205: only members of the host crew can see it and sign up */
   members_only?: boolean;
+  /** RS-0095: date of a recurring series (public_event_series, attached by attachSeries) */
+  series_id?: string | null;
+  series?: EventSeriesInfo | null;
   /** sample events only: fictional drivers already signed up */
   sample_going?: string[];
 }
@@ -287,6 +290,18 @@ export function psnProfileUrl(name: string): string {
   return `https://profile.playstation.com/${encodeURIComponent(name)}`;
 }
 
+/** RS-0095 / DEC-0203: recurring series rhythm. weekday ISO (1 = Mon) in the host's time zone. */
+export interface EventSeriesInfo { series_id?: string; freq: 'weekly' | 'biweekly' | 'monthly'; weekday: number; monthly_nth: number | null; }
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const NTH: Record<string, string> = { '1': '1st', '2': '2nd', '3': '3rd', '4': '4th', '-1': 'last' };
+// COPY STATUS: Claude placeholders, Codex review pending.
+export function seriesLabel(s: EventSeriesInfo): string {
+  const wd = WEEKDAYS[(s.weekday - 1) % 7] ?? '';
+  if (s.freq === 'weekly') return `Weekly · ${wd}`;
+  if (s.freq === 'biweekly') return `Every 2 weeks · ${wd}`;
+  return `Monthly · ${NTH[String(s.monthly_nth)] ?? ''} ${wd}`;
+}
+
 export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boolean; full?: boolean; side?: string } = {}): string {
   // opts.side (DEC-0195): own content for the right-hand slot instead of the sign-up button
   // (My Account > Events, host rows: status, "x going", Edit) -- same row, only the buttons differ.
@@ -355,7 +370,7 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
     ${opts.side ?? (opts.rsvp ? `<div class="ev-rsvp" data-rsvp="${esc(e.event_id)}"></div>` : '')}
   </div>
   <div class="ev-foot">
-    <p class="ev-chips"><span class="ev-type">${esc(eventTypeLabels[e.event_type] ?? e.event_type)}</span>${plats ? `<span class="ev-type">${esc(plats)}</span>` : ''}${opts.sample ? '<span class="ev-flag" title="Example event — it will not take place">Sample</span>' : ''}</p>
+    <p class="ev-chips"><span class="ev-type">${esc(eventTypeLabels[e.event_type] ?? e.event_type)}</span>${plats ? `<span class="ev-type">${esc(plats)}</span>` : ''}${e.series ? `<span class="ev-type ev-series" title="Part of a series">${esc(seriesLabel(e.series))}</span>` : ''}${opts.sample ? '<span class="ev-flag" title="Example event — it will not take place">Sample</span>' : ''}</p>
     <div class="ev-tools">${share}${report}</div>
   </div>
 </article>`;

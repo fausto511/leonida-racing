@@ -16,6 +16,7 @@ import '../styles/hub.css';
   </div>
   <p class="er-msg" id="er-msg" aria-live="polite"></p>
   <div id="er-pending"></div>
+  <div id="er-series"></div>
   <div id="er-changes"></div>
   <div id="er-waiting"></div>
   <details class="er-hosts" id="er-hosts-box">
@@ -63,7 +64,7 @@ import '../styles/hub.css';
 
 <script>
   import { backendConfigured, getSupabase } from '../scripts/supabase-client';
-  import { esc, eventRowHtml, localizeTimes } from '../data/hub';
+  import { esc, eventRowHtml, localizeTimes, seriesLabel } from '../data/hub';
 
   const $ = (id: string) => document.getElementById(id) as HTMLElement;
   const root = $('er-root');
@@ -97,7 +98,7 @@ import '../styles/hub.css';
     const reviews = new Map(((rvRes.data ?? []) as any[]).map((r) => [r.event_id, r]));
     const changeIds = [...reviews.values()].filter((r) => r.pending).map((r) => r.event_id);
     const [inRev, changed] = await Promise.all([
-      sb.from('hub_events').select(COLS).in('review_status', ['pending', 'needs_changes']).order('starts_at'),
+      sb.from('hub_events').select(COLS).in('review_status', ['pending', 'needs_changes']).is('series_id', null).order('starts_at'),
       changeIds.length ? sb.from('hub_events').select(COLS).in('event_id', changeIds).eq('review_status', 'approved').order('starts_at') : Promise.resolve({ data: [], error: null }),
     ]);
     if (rvRes.error || hostRes.error || inRev.error || changed.error) { say(`Could not load: ${(rvRes.error || hostRes.error || inRev.error || changed.error)!.message}`, true); return; }
@@ -109,6 +110,7 @@ import '../styles/hub.css';
       const { data } = await sb.from('drivers').select('driver_id,display_name').in('driver_id', ids);
       names = new Map(((data ?? []) as any[]).map((d) => [d.driver_id, d.display_name]));
     }
+    await loadSeries();
     const pending = evs.filter((e) => e.review_status === 'pending');
     const waiting = evs.filter((e) => e.review_status === 'needs_changes');
     const card = (e: any, body: string) => `<div class="er-card">${hostLine(e, reviews.get(e.event_id))}${body}</div>`;
@@ -123,9 +125,57 @@ import '../styles/hub.css';
     $('er-waiting').innerHTML = waiting.length ? `<p class="er-group-t">Waiting for the host (${waiting.length})</p>`
       + waiting.map((e) => card(e, `<p class="er-note">Your note: ${esc(reviews.get(e.event_id)?.note ?? '—')}</p>` + row(e) + actions(e.event_id, 'event'))).join('') : '';
     localizeTimes(root);
-    const open = pending.length + chg.length;
+    const open = pending.length + chg.length + seriesOpen;
     $('er-count').textContent = open ? `(${open})` : '';
     renderHosts();
+  }
+
+  // ---- Series (RS-0095). COPY STATUS: Claude placeholders, Codex review pending. ----
+  let seriesOpen = 0;
+  const RULE = (s: any) => `${seriesLabel(s)} · ${String(s.local_time).slice(0, 5)} (${String(s.tz).replace(/_/g, ' ')})`;
+  async function loadSeries() {
+    const sb = getSupabase();
+    const { data, error } = await sb.from('hub_event_series').select('*').eq('status', 'active')
+      .or('review_status.in.(pending,needs_changes),pending.not.is.null,mod_alert_at.not.is.null').order('created_at');
+    if (error) { $('er-series').innerHTML = `<p class="er-note er-warn">Series could not be loaded: ${esc(error.message)}</p>`; seriesOpen = 0; return; }
+    const rows = (data ?? []) as any[];
+    const missing = rows.map((r) => r.created_by).filter((id) => id && !names.has(id));
+    if (missing.length) {
+      const d = await sb.from('drivers').select('driver_id,display_name').in('driver_id', missing);
+      ((d.data ?? []) as any[]).forEach((x) => names.set(x.driver_id, x.display_name));
+    }
+    const review = rows.filter((r) => r.review_status === 'pending');
+    const waiting = rows.filter((r) => r.review_status === 'needs_changes');
+    const chg = rows.filter((r) => r.review_status === 'approved' && r.pending);
+    const quiet = rows.filter((r) => r.review_status === 'approved' && r.mod_alert_at);
+    seriesOpen = review.length + chg.length + quiet.length;
+    const meta = (r: any) => {
+      const h = hosts.get(r.created_by);
+      return `<div class="er-meta"><span>Host <strong>${esc(names.get(r.created_by) ?? 'Unknown')}</strong>${h ? ` · stage ${h.level}${h.blocked ? ' · blocked' : ''}` : ''}</span>`
+        + `${r.submitted_at ? `<span>Submitted ${esc(when(r.submitted_at))}</span>` : ''}<span>Series · ${esc(RULE(r))}</span>`
+        + `${r.changes_requested ? '<span>Resubmitted after a change request</span>' : ''}</div>`;
+    };
+    const body = (r: any) => `<p class="er-note"><strong>${esc(r.title)}</strong> · ${esc(r.event_type ?? '')}${r.max_participants ? ` · max. ${r.max_participants}` : ''}</p>`
+      + (r.description ? `<p class="er-note">${esc(r.description)}</p>` : '')
+      + `<p class="er-note">${r.host_name ? `PSN ${esc(r.host_name)}` : ''}${r.host_name && r.discord_url ? ' · ' : ''}${r.discord_url ? `Discord ${esc(r.discord_url)}` : ''}</p>`;
+    const acts = (id: string, kind: 'review' | 'changes' | 'quiet') => `<div class="er-actions" data-series="${esc(id)}">`
+      + (kind === 'review'
+        ? `<button type="button" class="btn btn-p btn-sm" data-sact="approve">Approve series</button><textarea maxlength="300" placeholder="Reason for the host (required for Needs changes / Reject)"></textarea><button type="button" class="btn btn-s btn-sm" data-sact="needs_changes">Needs changes</button><button type="button" class="btn btn-danger btn-sm" data-sact="reject">Reject</button>`
+        : kind === 'changes'
+        ? `<button type="button" class="btn btn-p btn-sm" data-sact="approve_changes">Approve changes</button><textarea maxlength="300" placeholder="Reason for the host (required to reject)"></textarea><button type="button" class="btn btn-danger btn-sm" data-sact="reject_changes">Reject changes</button>`
+        : `<button type="button" class="btn btn-p btn-sm" data-sact="keep">Keep running</button><textarea maxlength="300" placeholder="Reason for the host (required to cancel)"></textarea><button type="button" class="btn btn-danger btn-sm" data-sact="cancel">Cancel series</button>`)
+      + '</div>';
+    const card = (r: any, inner: string) => `<div class="er-card">${meta(r)}${inner}</div>`;
+    let html = '';
+    if (review.length) html += `<p class="er-group-t">New series (${review.length})</p>` + review.map((r) => card(r, body(r) + '<p class="er-note">Approving publishes all upcoming dates of this series.</p>' + acts(r.series_id, 'review'))).join('');
+    if (chg.length) html += `<p class="er-group-t">Changes to live series (${chg.length})</p>` + chg.map((r) => {
+      const p = r.pending ?? {};
+      const diff = Object.keys(p).map((k) => `<tr><th>${esc(FIELD[k] ?? k)}</th><td>${esc(r[k] ?? '—')}</td><td class="is-new">${esc(p[k] ?? '— (removed)')}</td></tr>`).join('');
+      return card(r, `<p class="er-note"><strong>${esc(r.title)}</strong> · applies to all upcoming dates</p><table class="er-diff"><thead><tr><th>Field</th><th>Live now</th><th>New</th></tr></thead><tbody>${diff}</tbody></table>` + acts(r.series_id, 'changes'));
+    }).join('');
+    if (quiet.length) html += `<p class="er-group-t">Series without sign-ups (${quiet.length})</p>` + quiet.map((r) => card(r, body(r) + `<p class="er-note er-warn">No sign-ups for the last ${r.empty_count} dates. The host was asked whether it is still running.</p>` + acts(r.series_id, 'quiet'))).join('');
+    if (waiting.length) html += `<p class="er-group-t">Series waiting for the host (${waiting.length})</p>` + waiting.map((r) => card(r, `<p class="er-note">Your note: ${esc(r.note ?? '—')}</p>` + body(r) + acts(r.series_id, 'review'))).join('');
+    $('er-series').innerHTML = html;
   }
 
   function renderHosts() {
@@ -157,6 +207,20 @@ import '../styles/hub.css';
       box.querySelectorAll('button').forEach((b) => (b.disabled = true));
       const { error } = await getSupabase().rpc('moderate_event', { p_event: box.dataset.id, p_action: act, p_note: note || null });
       const done: Record<string, string> = { approve: 'Approved — the event is live.', needs_changes: 'Sent back to the host with your note.', reject: 'Rejected.', approve_changes: 'Changes approved — now live.', reject_changes: 'Changes rejected — the live version stays.' };
+      say(error ? errText(error.message) : done[act], Boolean(error));
+      await load();
+      document.dispatchEvent(new CustomEvent('er-changed'));
+      return;
+    }
+    const sbtn = t.closest<HTMLButtonElement>('[data-sact]');
+    if (sbtn) {
+      const box = sbtn.closest<HTMLElement>('.er-actions')!;
+      const note = (box.querySelector('textarea') as HTMLTextAreaElement).value.trim();
+      const act = sbtn.dataset.sact!;
+      if (['needs_changes', 'reject', 'reject_changes', 'cancel'].includes(act) && !note) { say('Add a reason for the host first.', true); box.querySelector('textarea')!.focus(); return; }
+      box.querySelectorAll('button').forEach((b) => (b.disabled = true));
+      const { error } = await getSupabase().rpc('moderate_series', { p_series: box.dataset.series, p_action: act, p_note: note || null });
+      const done: Record<string, string> = { approve: 'Series approved — upcoming dates are live.', needs_changes: 'Sent back to the host with your note.', reject: 'Series rejected.', approve_changes: 'Changes approved — all upcoming dates updated.', reject_changes: 'Changes rejected — the live version stays.', keep: 'Series keeps running.', cancel: 'Series cancelled.' };
       say(error ? errText(error.message) : done[act], Boolean(error));
       await load();
       document.dispatchEvent(new CustomEvent('er-changed'));

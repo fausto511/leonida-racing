@@ -150,6 +150,10 @@ const base = import.meta.env.BASE_URL;
               <label>Status<select name="status"><option value="scheduled">Scheduled</option><option value="cancelled">Cancelled</option></select></label>
               <label>Start * <small id="tz-hint">your local time</small><input type="datetime-local" name="starts_at" min="2026-11-19T00:00" required /></label>
               <label>End <small>optional</small><input type="datetime-local" name="ends_at" /></label>
+              <!-- RS-0095 / DEC-0203: recurring series (new events only). COPY STATUS: Claude placeholders. -->
+              <label data-series-new hidden>Repeat <small>a series always shows the next 4 dates</small><select name="repeat"><option value="">Does not repeat</option><option value="weekly">Every week</option><option value="biweekly">Every 2 weeks</option><option value="monthly">Every month</option></select></label>
+              <label data-series-monthly hidden>Every month on the <select name="monthly_nth"><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="-1">last</option></select> <small id="series-wd">weekday of the start date</small></label>
+              <p class="span2 lr-note" id="event-series-note" hidden></p>
               <fieldset class="span2 platforms-set"><legend>Platforms</legend>
                 {PLATFORMS.map((p) => p.active
                   ? <label class="check"><input type="checkbox" name="platforms" value={p.id} checked data-locked /> {p.label}</label>
@@ -493,6 +497,9 @@ const base = import.meta.env.BASE_URL;
     && (hostStatus.level === 3 ? hostStatus.created_24h < hostStatus.daily_limit : hostStatus.open < hostStatus.open_limit);
   const canCreateEvent = () => isMod || (MODE === 'events' && hostCanSubmit());
   const reviewed = () => !isMod && Boolean(hostStatus) && (hostStatus.level < 3 || hostStatus.blocked);
+  // RS-0095: dates of a series -- only time, sign-ups and cancelling are changed here (the rest in the series)
+  const isOccurrence = () => Boolean(selectedId && events.find((x) => x.event_id === selectedId)?.series_id) && !isMod;
+  const SERIES_LOCKED = ['title', 'description', 'discord_url', 'event_type', 'host_name', 'host_crew_id', 'members_only', 'location', 'max_participants', 'stream_url'];
   // RS-0045: creators see their own tracks; moderators all (drafts first).
   const visibleTracks = () => (isMod ? [...tracks].sort((a, b) => Number(a.is_published) - Number(b.is_published)) : tracks.filter((t) => t.created_by === ownDriverId));
   function applyRoleVisibility() {
@@ -527,6 +534,10 @@ const base = import.meta.env.BASE_URL;
     const m = e.message || '';
     if (e.code === '23505' || /duplicate key/.test(m)) return 'This URL slug is already used by another crew — change it.';
     if (/crews_tag_check/.test(m)) return 'Crew tag must be exactly 4 letters/digits.';
+    if (/series_limit/.test(m)) return 'You can run up to 3 series at a time. End one under Your series first.';
+    if (/edit_series/.test(m)) return 'This date is part of a series — change title, description and details in the series.';
+    if (/cancel_instead/.test(m)) return "Dates of a series can't be deleted. Cancel this date instead (Status: Cancelled).";
+    if (/invalid_tz/.test(m)) return "Your browser's time zone isn't supported. Please contact a moderator.";
     if (/host_blocked/.test(m)) return "You can't submit events right now. If you think this is a mistake, contact a moderator on our Discord.";
     if (/open_limit/.test(m)) return `You already have the maximum number of events in review${hostStatus?.open_limit ? ` (${hostStatus.open_limit})` : ''}. Wait for a moderator to review them, or delete one.`;
     if (/daily_limit/.test(m)) return `You can create ${hostStatus?.daily_limit ?? 'only a few'} events per 24 hours. Try again later.`;
@@ -922,6 +933,37 @@ const base = import.meta.env.BASE_URL;
     return '';
   }
 
+  // RS-0095: repeat options for new events; dates of a series are partly read-only.
+  const WD_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const isoWeekday = (d: Date) => ((d.getDay() + 6) % 7) + 1;
+  function syncSeriesFields(row: any | null) {
+    const isNew = !row && MODE === 'events';
+    eventForm.querySelectorAll<HTMLElement>('[data-series-new]').forEach((el) => (el.hidden = !isNew));
+    if (!isNew) ef.repeat.value = '';
+    syncRepeat();
+    const occ = Boolean(row?.series_id) && !isMod;
+    for (const n of SERIES_LOCKED) {
+      const el = ef[n] as HTMLInputElement | undefined;
+      if (!el) continue;
+      if (el.tagName === 'SELECT' || el.type === 'checkbox') el.disabled = occ || (n === 'members_only' && !ef.host_crew_id.value);
+      else el.readOnly = occ;
+    }
+    const note = $('event-series-note');
+    note.hidden = !occ;
+    note.textContent = occ ? 'This date is part of a series. Title, description and the other details are changed in the series (Your series, below) and apply to all upcoming dates. Here you can move this date, close its sign-ups or cancel it.' : '';
+  }
+  function syncRepeat() {
+    const rep = ef.repeat.value;
+    eventForm.querySelectorAll<HTMLElement>('[data-series-monthly]').forEach((el) => (el.hidden = rep !== 'monthly'));
+    const st = ef.starts_at.value ? new Date(ef.starts_at.value) : null;
+    if (st) {
+      $('series-wd').textContent = WD_LONG[isoWeekday(st) - 1];
+      if (!ef.monthly_nth.dataset.touched) { const n = Math.ceil(st.getDate() / 7); ef.monthly_nth.value = n > 4 ? '-1' : String(n); }
+    }
+    const sl = ef.stream_url.closest('label') as HTMLElement | null;
+    if (sl) sl.hidden = Boolean(rep);
+  }
+
   // Review state of an event (DEC-0209). Hosts: pending edits are loaded into the form,
   // so saving again keeps them. COPY STATUS: Claude placeholders, Codex review pending.
   const FIELD_LABEL: Record<string, string> = { title: 'title', description: 'description', discord_url: 'Discord invite' };
@@ -1059,6 +1101,9 @@ const base = import.meta.env.BASE_URL;
 
   // ------------------------------------------------------------ event form
   const ef = eventForm.elements as any;
+  ef.repeat.addEventListener('change', syncRepeat);
+  ef.starts_at.addEventListener('change', syncRepeat);
+  ef.monthly_nth.addEventListener('change', () => { ef.monthly_nth.dataset.touched = '1'; });
   $('tz-hint').textContent = `your local time (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
 
   function eventFromForm() {
@@ -1121,7 +1166,7 @@ const base = import.meta.env.BASE_URL;
     if (su && !streamPlatform(su)) bad.push('stream_url');
     // DEC-0101: an event created with closed sign-ups must be watchable. Switching a
     // running event to closed later stays allowed (existing sign-ups remain valid).
-    else if (!su && !selectedId && e.registration === 'closed') bad.push('closed_needs_stream');
+    else if (!su && !selectedId && e.registration === 'closed' && !ef.repeat.value) bad.push('closed_needs_stream');
     return bad;
   }
   const inviteCode = (u?: string | null) => (u ?? '').match(/^https:\/\/(?:discord\.gg|discord\.com\/invite)\/([A-Za-z0-9-]+)/)?.[1].toLowerCase() ?? null;
@@ -1164,9 +1209,10 @@ const base = import.meta.env.BASE_URL;
     ef.moderation_note.value = r.moderation_note ?? '';
     showModNote('event-mod-note', r, isMod, true);
     showReviewNote(row);
+    syncSeriesFields(row);
     ef.stream_url.value = [...(r.streams ?? [])].sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))[0]?.url ?? '';
     eventForm.querySelectorAll<HTMLInputElement>('input[name="platforms"]').forEach((i) => (i.checked = (r.platforms ?? []).includes(i.value) || (ACTIVE_PLATFORMS.length === 1 && i.hasAttribute('data-locked'))));
-    resetDelete(eventForm, Boolean(row));
+    resetDelete(eventForm, Boolean(row) && (isMod || !row.series_id));
     markInvalid(eventForm, []);
     msg(eventForm, '');
     showForm('events');
@@ -1238,6 +1284,52 @@ const base = import.meta.env.BASE_URL;
 
   eventForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
+    const sb0 = getSupabase();
+    // RS-0095: a date of a series -- only time, sign-ups, status
+    if (isOccurrence()) {
+      const full = eventFromForm();
+      const bad0: string[] = [];
+      if (!full.starts_at) bad0.push('starts_at');
+      if (full.ends_at && full.starts_at && new Date(full.ends_at) <= new Date(full.starts_at)) bad0.push('ends_at');
+      markInvalid(eventForm, bad0);
+      if (bad0.length) { msg(eventForm, `Please fix: ${bad0.map((b) => eventFieldHelp[b] ?? b).join('; ')}.`, true); return; }
+      const id = selectedId!;
+      const { error } = await sb0.from('hub_events').update({ starts_at: full.starts_at, ends_at: full.ends_at, status: full.status, registration: full.registration }).eq('event_id', id);
+      if (error) { msg(eventForm, dbError(error), true); return; }
+      await loadAll();
+      openEvent(events.find((x) => x.event_id === id) ?? null);
+      msg(eventForm, 'Saved — this date only.');
+      eventsChanged();
+      return;
+    }
+    // RS-0095: new recurring series
+    if (!selectedId && MODE === 'events' && ef.repeat.value) {
+      const e1 = eventFromForm();
+      const bad1 = validateEvent(e1);
+      markInvalid(eventForm, bad1);
+      if (bad1.length) { msg(eventForm, `Please fix: ${bad1.map((b) => eventFieldHelp[b] ?? b).join('; ')}.`, true); return; }
+      const [d, t] = String(ef.starts_at.value).split('T');
+      const dur = e1.ends_at ? Math.round((new Date(e1.ends_at).getTime() - new Date(e1.starts_at!).getTime()) / 60000) : null;
+      const payload = {
+        title: e1.title, description: e1.description, event_type: e1.event_type, platforms: e1.platforms, host_name: e1.host_name,
+        host_crew_id: e1.host_crew_id, location: e1.location, discord_url: e1.discord_url, max_participants: e1.max_participants,
+        registration: e1.registration, members_only: e1.members_only,
+        freq: ef.repeat.value, monthly_nth: ef.repeat.value === 'monthly' ? Number(ef.monthly_nth.value) : null,
+        weekday: isoWeekday(new Date(ef.starts_at.value)), anchor_date: d, local_time: t,
+        tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC', duration_min: dur && dur >= 15 && dur <= 1440 ? dur : null,
+      };
+      const { data, error } = await sb0.rpc('create_event_series', { p: payload });
+      if (error) { msg(eventForm, dbError(error), true); return; }
+      await loadAll();
+      eventsChanged();
+      const pending = (data as any)?.review_status !== 'approved';
+      selectedId = null;
+      showForm(null);
+      document.dispatchEvent(new CustomEvent('hc-series-changed', { detail: { message: pending
+        ? 'Series submitted — a moderator reviews it before the dates go live. The next 4 dates are in your list.'
+        : 'Series created — the next 4 dates are in the calendar.' } }));
+      return;
+    }
     const e = eventFromForm();
     const bad = validateEvent(e);
     markInvalid(eventForm, bad);

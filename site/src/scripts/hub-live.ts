@@ -3,7 +3,7 @@
 // network/RLS error, or simply zero published rows) -- callers then keep
 // showing the flagged sample data. Never throws.
 import { backendConfigured, getSupabase } from './supabase-client';
-import type { HubCrew, HubEvent } from '../data/hub';
+import type { HubCrew, HubEvent, EventSeriesInfo } from '../data/hub';
 import type { CommunityTrack } from '../data/tracks';
 
 export async function fetchLiveCrews(): Promise<HubCrew[] | null> {
@@ -47,6 +47,17 @@ export function pickFeaturedCrews(list: HubCrew[], n: number): HubCrew[] {
   return [...shuffle(list.filter((c) => c.is_featured)), ...shuffle(list.filter((c) => !c.is_featured))].slice(0, n);
 }
 
+/** RS-0095: badge info ("Weekly · Fri") for dates of a recurring series. */
+export async function attachSeries(rows: HubEvent[]): Promise<void> {
+  const ids = [...new Set(rows.map((r) => r.series_id).filter(Boolean) as string[])];
+  if (!ids.length || !backendConfigured) return;
+  try {
+    const { data } = await getSupabase().from('public_event_series').select('series_id,freq,weekday,monthly_nth').in('series_id', ids);
+    const byId = new Map(((data ?? []) as EventSeriesInfo[]).map((s) => [s.series_id!, s]));
+    rows.forEach((r) => { if (r.series_id) r.series = byId.get(r.series_id) ?? null; });
+  } catch { /* badge is optional */ }
+}
+
 export async function fetchLiveEvents(): Promise<HubEvent[] | null> {
   if (!backendConfigured) return null;
   try {
@@ -55,7 +66,7 @@ export async function fetchLiveEvents(): Promise<HubEvent[] | null> {
     const since = new Date(Date.now() - 6 * 3600 * 1000).toISOString();
     const { data, error } = await getSupabase()
       .from('hub_events')
-      .select('event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,members_only,created_by,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)')
+      .select('event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,members_only,created_by,series_id,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)')
       .eq('is_published', true)
       .gte('starts_at', since)
       .order('starts_at', { ascending: true })
@@ -70,6 +81,7 @@ export async function fetchLiveEvents(): Promise<HubEvent[] | null> {
       const byId = new Map(((names ?? []) as { driver_id: string; display_name: string | null }[]).map((n) => [n.driver_id, n.display_name]));
       rows.forEach((r) => { if (!r.host_name && r.created_by) r.host_account = byId.get(r.created_by) ?? null; });
     }
+    await attachSeries(rows);
     return rows;
   } catch {
     return null;
