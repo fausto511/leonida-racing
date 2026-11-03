@@ -201,7 +201,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <div class="vt" id="vt-lap">
             <span class="vt-l">Gellhorn <span class="vt-opt">best </span>lap</span>
             <b class:list={['vt-v tnum', { 'is-tba': myLap == null }]} data-v>{myLap != null ? lapTime(myLap) : 'No lap yet'}</b>
-            <a class="vt-s vt-link" href="#gellhorn" data-s>{lapRank != null ? `#${lapRank} of ${classCars.length} in ${cls} ↓` : 'Submit the first lap ↓'}</a>
+            <a class="vt-s vt-link" href="#gellhorn" data-s>{lapRank != null ? `#${lapRank} of ${classCars.length} in ${cls} ↓` : 'Submit the first lap\u00a0↓'}</a>
           </div>
           <div class="vt vr" id="vr">
             <span class="vt-l">Driver rating</span>
@@ -554,7 +554,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
     .vt { padding: 10px 12px; }
     .vt-v { font-size: 21px; }
     .vt-opt { display: none; }
-    .vt-s { font-size: 12px; }
+    .vt-s { font-size: 12px; white-space: normal; overflow: visible; } /* phones: wrap instead of cutting off */
     .vs-rows > div { font-size: 14px; }
     .vsec-head { flex-direction: column; align-items: flex-start; gap: 6px; }
     .vg-card { padding: 16px 14px; }

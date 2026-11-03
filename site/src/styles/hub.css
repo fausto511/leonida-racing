@@ -24,6 +24,7 @@
 .crew-head { display: flex; align-items: center; gap: 10px; min-width: 0; padding-right: 1.4rem; }
 .crew-head .crew-tag { flex: none; }
 .crew-name { margin: 0; min-width: 0; font-size: var(--lr-h3); font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 400px) { .crew-name { font-size: var(--lr-h3-xs); } } /* small phones: crew names up to 22 characters fit */
 .crew-badges { display: flex; gap: 6px; margin-top: 10px; height: 20px; }
 .crew-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 4px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; background: var(--lr-pink-fill-hover); color: var(--lr-pink); }
 .crew-badge.b-partner { background: var(--lr-orange-fill-hover); color: var(--lr-orange); }

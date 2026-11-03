@@ -270,7 +270,7 @@ a[target="_blank"]:not(.btn):not([class*="btn"]):not(.lr-noext):not([href^="http
 /* arrow text link (mockup .arrow): "Open the Guide →" */
 /* Arrow link "go further" (DEC-0170): section-head "more" links, card actions, end of link lists — 14px, 600, orange, hover pink, no underline.
    Exceptions by design: link inside an info line (grey, e.g. vehicle make line) and links on the Discord gradient band (white, underlined). */
-.arrow { font-size: 14px; font-weight: 600; color: var(--lr-orange); text-decoration: none; }
+.arrow { font-size: 14px; font-weight: 600; color: var(--lr-orange); text-decoration: none; white-space: nowrap; }
 .arrow:hover { color: var(--lr-pink); }
 
 /* ---- Cards (mockup .card) ---- */

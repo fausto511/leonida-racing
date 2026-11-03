@@ -9,7 +9,8 @@
 .garage-tile .mbar i { display: block; height: 100%; background: var(--lr-orange); border-radius: 999px; }
 @media (max-width: 760px) {
   .garage-tile { min-width: 0; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding: 10px 12px; }
-  .garage-tile .gt-top { order: 1; flex: 1; }
+  .garage-tile .gt-top { order: 1; flex: 1; gap: 10px; }
+  .garage-tile .gt-eb, .garage-tile .gt-cta { white-space: nowrap; } /* phones: one line each; the row wraps under the count instead */
   .garage-tile .gt-val { order: 0; font-size: 18px; }
   .garage-tile .gt-val small { font-size: 13px; }
   .garage-tile .mbar { order: 2; flex-basis: 100%; }

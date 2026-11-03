@@ -169,7 +169,7 @@ function init(root: HTMLElement) {
     else if (mine != null) act = `You rated it ${mine} ${STAR_SVG} · <button type="button" class="vr-act" data-rate-hint>change</button>`;
     else if (rateable && !me && backendConfigured) act = '<button type="button" class="vr-act" data-rate-hint>log in to rate</button>';
     else if (rateable) act = '<button type="button" class="vr-act" data-rate-hint>rate it</button>';
-    sub.innerHTML = mine != null && !saved ? act : act ? `${base1} · ${act}` : base1;
+    sub.innerHTML = mine != null && !saved ? act : act ? `${base1} · ${act}` : base1; // no break before the dot
   }
   async function rate(n: number, anchor: HTMLElement) {
     if (!rateable) { bubble(anchor, 'This car can be rated once it is officially released.'); return; }
@@ -245,7 +245,7 @@ function init(root: HTMLElement) {
       const rank = 1 + classRows.filter((r) => r.ms != null && r.ms < mineBest).length;
       v.textContent = lapTime(mineBest); v.classList.remove('is-tba');
       s.textContent = `#${rank} of ${classIds.length} in ${cls} ↓`;
-    } else { v.textContent = 'No lap yet'; v.classList.add('is-tba'); s.textContent = 'Submit the first lap ↓'; }
+    } else { v.textContent = 'No lap yet'; v.classList.add('is-tba'); s.textContent = 'Submit the first lap\u00a0↓'; }
     // rivals
     const rv = rivalsFromClass(classRows, id);
     if (rv) { $('vh2h-list') && ($('vh2h-list')!.innerHTML = rv.map((r) => rivalHtml(r.id, r.note, id)).join('')); $('vh2h-sub') && ($('vh2h-sub')!.textContent = 'Its closest rivals at Gellhorn'); }
