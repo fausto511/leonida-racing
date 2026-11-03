@@ -30,7 +30,7 @@ const base = import.meta.env.BASE_URL;
 
     <div id="rep-auth" class="rep-auth lr-empty-panel" hidden>
       <p>Log in with Discord to send a report. This keeps reports accountable and lets us tell you the outcome.</p>
-      <button type="button" id="rep-signin" class="btn btn-discord">Discord login</button>
+      <button type="button" id="rep-signin" class="btn btn-discord">Log in with Discord</button>
     </div>
 
     <div id="rep-body" hidden>
@@ -65,7 +65,7 @@ const base = import.meta.env.BASE_URL;
             <label><input type="radio" name="reason" value="illegal" /> Illegal content</label>
             <label><input type="radio" name="reason" value="hate_or_harassment" /> Hate or harassment</label>
             <label><input type="radio" name="reason" value="sexual_or_violent" /> Sexual or violent content</label>
-            <label><input type="radio" name="reason" value="spam_or_scam" /> Spam, scam or misleading</label>
+            <label><input type="radio" name="reason" value="spam_or_scam" /> Spam, scam or misleading content</label>
             <label><input type="radio" name="reason" value="impersonation" /> Impersonation</label>
             <label><input type="radio" name="reason" value="intellectual_property" /> Copyright or trademark</label>
             <label><input type="radio" name="reason" value="other" /> Breaks the Terms otherwise</label>
@@ -88,8 +88,8 @@ const base = import.meta.env.BASE_URL;
       <div class="rp-card">
         <h3>How reports work</h3>
         <ul>
-          <li>Only moderators see your report.</li>
-          <li>You see the outcome of your report on this page.</li>
+          <li>Only moderators see your report. We don’t tell anyone who sent it.</li>
+          <li>You can see the outcome of your report on this page.</li>
           <li>You can have up to 5 open reports at a time.</li>
           <li>No Discord account? Send your report to the e-mail address in the <a href={`${base}legal/`}>Legal notice</a>.</li>
         </ul>
