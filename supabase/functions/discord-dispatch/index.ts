@@ -115,7 +115,7 @@ async function discord(method: string, path: string, body?: unknown): Promise<DR
 }
 
 // ---------- data ----------
-const EVENT_COLS = "event_id,title,event_type,starts_at,ends_at,platforms,host_name,host_crew_id,created_by,status,is_published,is_test,members_only,max_participants,registration,discord_url,description,host:crews(name,tag,discord_url),creator:drivers!hub_events_created_by_fkey(display_name,deleted_at)";
+const EVENT_COLS = "event_id,series_id,title,event_type,starts_at,ends_at,platforms,host_name,host_crew_id,created_by,status,is_published,is_test,members_only,max_participants,registration,discord_url,description,host:crews(name,tag,discord_url),creator:drivers!hub_events_created_by_fkey(display_name,deleted_at)";
 async function loadEvent(id: string) {
   const { data } = await db.from("hub_events").select(EVENT_COLS).eq("event_id", id).maybeSingle();
   return data as any | null;
@@ -139,8 +139,24 @@ function feedMatches(f: any, e: any) {
   if (f.source === "host") return !!e.created_by && e.created_by === f.host_driver_id;
   return false;
 }
+// Event series (RS-0095, Fausto 03.11.2026): a feed shows only the next date of a series.
+// "Next" = earliest published, not cancelled date that has not ended yet (same rule as
+// series_housekeeping, which re-queues old + new date when it moves). A cancelled date
+// before that stays so its post can show the cancellation; later dates are not posted.
+async function seriesNext(seriesId: string): Promise<any | null> {
+  const { data } = await db.from("hub_events").select("event_id,starts_at,ends_at").eq("series_id", seriesId)
+    .eq("is_published", true).neq("status", "cancelled")
+    .gte("starts_at", new Date(Date.now() - 24 * 3600e3).toISOString()).order("starts_at").limit(5);
+  return (data ?? []).find((x: any) => new Date(x.ends_at ?? new Date(x.starts_at).getTime() + 2 * 3600e3).getTime() >= Date.now()) ?? null;
+}
+async function seriesWants(e: any) {
+  const nx = await seriesNext(e.series_id);
+  if (e.status === "cancelled") return !nx || e.starts_at < nx.starts_at;
+  return !!nx && nx.event_id === e.event_id;
+}
 async function wants(f: any, e: any | null) {
   if (!e || !e.is_published) return false;
+  if (e.series_id && !(await seriesWants(e))) return false;
   if (e.is_test && !(await testGuilds()).has(f.guild_id)) return false;
   // Crew-only events (DEC-0205) reach only the crew feeds of that crew.
   if (e.members_only && !(f.source === "crew" && f.crew_id === e.host_crew_id)) return false;
@@ -673,7 +689,7 @@ async function sync(f: any, eventId: string, e: any | null, going: number, depth
 }
 
 // ---------- outbox handlers ----------
-async function handleEvent(eventId: string) {
+async function handleEvent(eventId: string, series = false) {
   const e = await loadEvent(eventId);
   const going = e ? await goingCount(eventId) : 0;
   const feeds = new Map<string, any>();
@@ -691,6 +707,11 @@ async function handleEvent(eventId: string) {
     for (const f of data ?? []) feeds.set(f.feed_id, f);
   }
   for (const f of feeds.values()) await sync(f, eventId, e, going);
+  // A series date changed (cancelled, moved): make sure the series' current next date is posted.
+  if (e?.series_id && !series) {
+    const nx = await seriesNext(e.series_id);
+    if (nx && nx.event_id !== eventId) await handleEvent(nx.event_id, true);
+  }
 }
 
 async function handleBackfill(feedId: string) {
