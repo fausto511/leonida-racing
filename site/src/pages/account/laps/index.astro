@@ -206,6 +206,9 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
     :global(.acc-table :is(.c-vid, .c-wd):empty) { display: none; }
     :global(.acc-table .m) { display: inline; }
   }
+  /* DEC-0210 highlight opt-in in My submissions */
+  :global(.hl-tg) { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; font-size: 13px; color: var(--lr-muted); cursor: pointer; white-space: nowrap; }
+  :global(.hl-tg input) { accent-color: var(--lr-pink); margin: 0; }
 </style>
 
 <script>
@@ -482,7 +485,7 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
     // first -- this is the activity log, unlike My Records below.
     const { data: allRuns, error: allRunsErr } = await sb
       .from('runs')
-      .select('run_id, vehicle_id, track_id, lap_time_ms, review_status, publication_status, verification_tier, correction_note, submitted_at, created_at, vehicles(make, model), tracks(name)')
+      .select('run_id, vehicle_id, track_id, lap_time_ms, review_status, publication_status, verification_tier, correction_note, video_use_ok, submitted_at, created_at, vehicles(make, model), tracks(name)')
       .eq('driver_id', driverRow.driver_id)
       .order('created_at', { ascending: false });
     if (seq !== loadSeq) return;
@@ -507,7 +510,10 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
         const videoBtn = canAddVideo ? '<button type="button" class="btn btn-s btn-sm add-video-btn" data-run-id="' + run.run_id + '">+ Video</button>' : '';
         const withdrawBtn = canWithdraw ? '<button type="button" class="btn btn-danger btn-sm withdraw-btn" data-run-id="' + run.run_id + '">Withdraw</button>' : '';
         const date = formatDate(run.submitted_at ?? run.created_at);
-        tr.innerHTML = `<td class="c-car">${vehicleCell(run)}</td><td class="c-track">${trackCell(run)}</td><td class="c-time">${formatLapTime(run.lap_time_ms)}</td><td class="c-meta"><span class="lr-status ${info.cls}">${info.label}</span><span class="m">· ${date}</span></td><td class="c-date">${date}</td><td class="c-act c-vid">${videoBtn}</td><td class="c-act c-wd">${withdrawBtn}</td>`;
+        // DEC-0210: highlight opt-in, only for laps with a video. COPY: Claude placeholder, Codex review pending.
+        const hasVideo = run.verification_tier === 'video_submitted' || run.verification_tier === 'verified';
+        const hl = hasVideo ? `<label class="hl-tg" title="Feature this video in Leonida Racing highlight and analysis videos. Turning it off stops new use; videos already published stay online."><input type="checkbox" data-hl="${run.run_id}"${run.video_use_ok ? ' checked' : ''} /> Use in highlights</label>` : '';
+        tr.innerHTML = `<td class="c-car">${vehicleCell(run)}</td><td class="c-track">${trackCell(run)}</td><td class="c-time">${formatLapTime(run.lap_time_ms)}</td><td class="c-meta"><span class="lr-status ${info.cls}">${info.label}</span><span class="m">· ${date}</span>${hl}</td><td class="c-date">${date}</td><td class="c-act c-vid">${videoBtn}</td><td class="c-act c-wd">${withdrawBtn}</td>`;
         submissionsTbodyEl.appendChild(tr);
         // RS-0091: what the moderator wants corrected, right under the lap
         if (run.review_status === 'needs_correction') {
@@ -590,6 +596,22 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
       const fixBtn = ev.target.closest('[data-fix-open]');
       if (fixBtn) { openForm(fixBtn.dataset.fixOpen, 'fix'); return; }
       if (ev.target.closest('[data-sub-cancel]')) closeForms();
+    });
+    // DEC-0210: highlight opt-in switch
+    submissionsTbodyEl.addEventListener('change', async (ev) => {
+      const box = ev.target.closest('[data-hl]');
+      if (!box) return;
+      box.disabled = true;
+      const { error } = await getSupabase().rpc('set_video_use', { p_run_id: box.dataset.hl, p_ok: box.checked });
+      box.disabled = false;
+      if (error) {
+        console.error('set_video_use', error);
+        box.checked = !box.checked;
+        submissionsMsgEl.textContent = 'Could not save — please try again.';
+      } else {
+        const run = runsById.get(box.dataset.hl); if (run) run.video_use_ok = box.checked;
+        submissionsMsgEl.textContent = box.checked ? 'Your video can be featured in our highlights.' : 'We won’t use this video in new highlights.';
+      }
     });
     submissionsTbodyEl.addEventListener('submit', (ev) => {
       const form = ev.target.closest('.fix-form');

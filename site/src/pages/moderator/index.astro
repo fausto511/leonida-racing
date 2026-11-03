@@ -408,7 +408,7 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
       .select(
         `run_id, driver_id, vehicle_id, track_id, lap_time_ms, platform,
          vehicle_text_observed, vehicle_state, game_version, standard_version,
-         review_status, publication_status, verification_tier, display_name_consent,
+         review_status, publication_status, verification_tier, display_name_consent, video_use_ok,
          correction_note, corrected_at, correction_prev,
          submitted_at, driven_at, created_at,
          drivers(display_name),
@@ -572,7 +572,7 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
           }
           ${
             videoEvidence
-              ? `<div class="evidence-video-row"><span>Full lap video</span><a href="${videoEvidence.storage_reference}" target="_blank" rel="noopener">Open external link →</a></div>`
+              ? `<div class="evidence-video-row"><span>Full lap video${run.video_use_ok ? ' · <b>OK for highlights</b>' : ''}</span><a href="${videoEvidence.storage_reference}" target="_blank" rel="noopener">Open external link →</a></div>`
               : `<div class="evidence-video-row"><span>No video submitted</span><span>—</span></div>`
           }
         </div>

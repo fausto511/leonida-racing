@@ -101,6 +101,17 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
               </div>
             </div>
           </div>
+          <!-- DEC-0210: opt-in for highlight/analysis videos, only once a video link is in. COPY: Claude placeholder, Codex review pending. -->
+          <div class="sb-feat" id="sb-feat" hidden>
+            <label class="sb-feat-l"><input type="checkbox" id="video_feature" /><span>Feature my video in Leonida Racing highlight and analysis videos.</span></label>
+            <details class="sb-feat-d"><summary>Details</summary>
+              <ul>
+                <li>Credited with your name and linked to the original. Never with voice, face cam or other players’ names.</li>
+                <li>Used on our website and social media (YouTube, TikTok, Instagram, X, Twitch, Discord), including monetized channels.</li>
+                <li>Turn it off anytime in My laps. Videos already published stay online.</li>
+              </ul>
+            </details>
+          </div>
           <details class="sb-need" id="sb-need">
             <summary><span>What counts as proof?</span><i aria-hidden="true"></i></summary>
             <div class="sb-need-b">
@@ -266,6 +277,13 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   .sb-box.is-set .sb-ok { display: grid; }
   .sb-box.is-set .sb-vbox, .sb-box.is-set .dropzone { border-style: solid; border-color: var(--lr-lime-border); }
   .sb-need { margin-top: 18px; }
+  /* DEC-0210 highlight opt-in */
+  .sb-feat { margin-top: 14px; font-size: 14px; }
+  .sb-feat-l { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; color: var(--lr-text); }
+  .sb-feat-l input { margin-top: 3px; flex: none; accent-color: var(--lr-pink); }
+  .sb-feat-d { margin: 6px 0 0 26px; color: var(--lr-muted); font-size: 13px; }
+  .sb-feat-d summary { cursor: pointer; color: var(--lr-orange); font-weight: 600; width: max-content; }
+  .sb-feat-d ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
   .sb-need summary { display: inline-flex; align-items: center; gap: 8px; list-style: none; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--lr-soft); }
   .sb-need summary::-webkit-details-marker { display: none; }
   .sb-need summary:hover { color: var(--lr-text); }
@@ -551,6 +569,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   $('video_url').addEventListener('input', () => {
     videoId = ytId($('video_url').value);
     $('vid-ok').hidden = !videoId;
+    $('sb-feat').hidden = !videoId;
     refresh();
   });
 
@@ -792,9 +811,16 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
       if (res.status === 429) throw new Error('You sent a lot of laps in the last hour. Please try again later.');
       // Codex 21.10.: never show raw backend text or status codes to drivers.
       if (!res.ok) { console.error('submit-lap', res.status, body.error); throw new Error('Could not submit your lap. Please try again.'); }
+      // DEC-0210: highlight opt-in is saved right after the lap exists (the lap itself is already in)
+      let featNote = '';
+      if (videoUrl && $('video_feature').checked && body.run_id) {
+        const { error: featErr } = await sb.rpc('set_video_use', { p_run_id: body.run_id, p_ok: true });
+        if (featErr) { console.error('set_video_use', featErr); featNote = ' We could not save your highlights choice. You can turn it on in My laps.'; }
+      }
 
       const v = vById.get(vehicleId);
       $('success-text').textContent = `${fmtMs(lapTimeMs)} in the ${v ? `${v.make} ${v.model}` : 'car you picked'}. Your lap is awaiting moderator review and is not public yet.${videoUrl ? ' Video verified status requires a moderator to verify the full video.' : ''}`;
+      if (featNote) $('success-text').textContent += featNote;
       show('done');
       successEl.scrollIntoView({ block: 'start', behavior: 'smooth' });
       placement(lapTimeMs);
