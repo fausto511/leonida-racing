@@ -93,7 +93,7 @@ export interface HubEvent {
   /** Discord invite where the event takes place (RS-0034) */
   discord_url?: string | null;
   status: 'scheduled' | 'cancelled';
-  host?: { name: string; tag: string; color: string; discord_url?: string | null } | null;
+  host?: { crew_id?: string; name: string; tag: string; color: string; discord_url?: string | null } | null;
   max_participants?: number | null;
   /** 'open' = "I'm in" possible; 'closed' = listed, no sign-ups (RS-0058) */
   registration?: 'open' | 'closed';
@@ -208,6 +208,14 @@ export function eventStreamHtml(e: HubEvent, sample = false): string {
 }
 
 /** Social-Club-style crew tag: white plate, black tag, thin crew-colour bar at the bottom. */
+/** Host crew tag on an event row: links to that crew's card in the crew directory
+ *  (deep link /community/crews/#crew-<id>, already used by the home page). */
+function hostCrewTagHtml(h: NonNullable<HubEvent['host']>, sample: boolean): string {
+  const tag = crewTagHtml(h.tag, h.color, 'sm');
+  if (sample || !h.crew_id) return tag;
+  return `<a class="ev-crew-link" href="${esc(`${import.meta.env.BASE_URL}community/crews/#crew-${encodeURIComponent(h.crew_id)}`)}" title="${esc(h.name)} in the crew directory" aria-label="${esc(h.name)} in the crew directory">${tag}</a>`;
+}
+
 export function crewTagHtml(tag: string, color: string, size: 'sm' | 'md' = 'md'): string {
   return `<span class="crew-tag crew-tag-${size}" style="--crew-color:${safeColor(color)}" title="Crew tag ${esc(tag)}">${esc(tag)}</span>`;
 }
@@ -334,7 +342,7 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
     : e.host_account ? `<strong>${esc(e.host_account)}</strong>` : '';
   const whoIcon = who && e.host_icon && !opts.sample ? iconTagHtml(true) : '';
   const hostedBy = who || e.host
-    ? `<span class="ev-by"><span class="ev-by-l">Hosted by</span> ${who}${whoIcon}${e.host ? ` ${crewTagHtml(e.host.tag, e.host.color, 'sm')}` : ''}</span>`
+    ? `<span class="ev-by"><span class="ev-by-l">Hosted by</span> ${who}${whoIcon}${e.host ? ` ${hostCrewTagHtml(e.host, Boolean(opts.sample))}` : ''}</span>`
     : '';
   const plats = e.platforms.filter((p) => (ACTIVE_PLATFORMS as readonly string[]).includes(p)).map((p) => platformShort[p] ?? p).join(', ');
   const l2 = [

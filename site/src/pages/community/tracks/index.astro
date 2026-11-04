@@ -243,6 +243,10 @@ const steps = [
   [$('tr-fclose'), $('tr-apply'), bg].forEach((el) => el.addEventListener('click', () => openSheet(false)));
   $('tr-reset').addEventListener('click', () => { layoutSel.value = ''; classSel.value = ''; playersSel.value = ''; render(); });
 
+  // Deep link from a Garage class page: /community/tracks/?class=Super
+  const class0 = new URLSearchParams(location.search).get('class');
+  if (class0 && [...classSel.options].some((o) => o.value === class0)) classSel.value = class0;
+
   (async () => {
     saved = await loadSaved(false);
     ratings = await loadRatings(false, saved);

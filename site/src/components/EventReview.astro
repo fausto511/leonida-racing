@@ -68,7 +68,7 @@ import '../styles/hub.css';
 
   const $ = (id: string) => document.getElementById(id) as HTMLElement;
   const root = $('er-root');
-  const COLS = 'event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,members_only,created_by,is_published,review_status,created_at,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)';
+  const COLS = 'event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,members_only,created_by,is_published,review_status,created_at,host:crews(crew_id,name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)';
   const FIELD: Record<string, string> = { title: 'Title', description: 'Description', discord_url: 'Discord invite' };
   let names = new Map<string, string>();
   let hosts = new Map<string, any>();

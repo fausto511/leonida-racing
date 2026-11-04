@@ -12,6 +12,7 @@ import { classPages, manufacturerPages, classSlug, type TaxonomyPage } from '../
 import { lapTime } from '../data/leaderboard';
 import { speedHtml } from '../data/units';
 import { taxonomyCopy } from '../data/taxonomy-copy';
+import { trackVehicleClasses } from '../data/tracks';
 import { LAUNCH_DATE, LAUNCH_AT } from '../data/launch';
 import '../styles/garage-tile.css';
 
@@ -56,7 +57,9 @@ const N = list.length;
 const path = custom?.path ?? `cars/${isClass ? 'classes' : 'manufacturers'}/${page.slug}/`;
 const metaTitle = isClass ? `GTA VI ${label}` : `${label} in GTA VI`;
 const copy = taxonomyCopy[page.slug];
-const heading = copy?.h1 ?? label; // visible H1 without "GTA VI" (DEC-0130); GTA VI stays in title, eyebrow, meta
+const heading = copy?.h1 ?? label;
+// Class page -> Community tracks filtered by this class (Sackgassen-Check 04.11.2026)
+const trackClass = isClass ? trackVehicleClasses.find((c) => classSlug(c) === page.slug) ?? null : null; // visible H1 without "GTA VI" (DEC-0130); GTA VI stays in title, eyebrow, meta
 const seoName = isClass ? `GTA VI ${label}` : `${label} in GTA VI`;
 // before launch: "After launch"; after: field-specific empty state (Codex review 16.10.)
 const launched = Date.now() >= new Date(LAUNCH_AT ?? `${LAUNCH_DATE}T00:00:00Z`).getTime();
@@ -254,7 +257,7 @@ const more = custom
           {copy.about.map((p) => <p>{p}</p>)}
         </section>
       )}
-      <section class="wrap tlinks">
+      <section class:list={["wrap tlinks", { "has-race": Boolean(trackClass) }]}>
         {custom ? custom.links.map((l) => (
           <div>
             <p class="tsec-eb">{l.title}</p>
@@ -270,6 +273,12 @@ const more = custom
               <p class="tsec-eb">{heading} by manufacturer</p>
               <div class="tls">{makesHere.filter(([slug]) => manufacturerPages.some((m) => m.slug === slug)).map(([slug, name]) => <a href={`${base}cars/manufacturers/${slug}/`}>{name}<span>{makeHere(slug)}</span></a>)}<a class="arrow" href={`${base}cars/manufacturers/`}>All manufacturers →</a></div>
             </div>
+            {trackClass && (
+              <div>
+                <p class="tsec-eb">Race them</p>
+                <div class="tls"><a class="arrow" href={`${base}community/tracks/?class=${encodeURIComponent(trackClass)}`}>Community tracks for {heading} →</a></div>
+              </div>
+            )}
           </>
         ) : (
           <>
@@ -400,6 +409,7 @@ const more = custom
   .tabout-h { margin: 0 0 12px; }
   .tabout p { margin: 0 0 14px; font-size: 17px; line-height: 1.7; color: var(--lr-text); }
   .tabout p:last-child { margin-bottom: 0; }
+  .tlinks.has-race { grid-template-columns: 1fr 1.5fr 1fr; }
   .tlinks { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; margin-top: 32px; padding-top: 32px; padding-bottom: 32px; border-top: 1px solid var(--lr-line); }
   @media (max-width: 760px) { .tabout, .tlinks { margin-top: 24px; padding-top: 24px; } }
   .tls { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 15px; }
@@ -412,6 +422,7 @@ const more = custom
     .tb-inner { flex-direction: column; gap: 20px; }
     .glance { width: 100%; max-width: 560px; margin-top: 0; }
     .tmore-grid { grid-template-columns: 1fr; gap: 12px; }
+    .tlinks.has-race { grid-template-columns: 1fr 1.5fr; }
   }
   @media (max-width: 760px) {
     .tb-title { gap: 10px; }
@@ -421,6 +432,6 @@ const more = custom
     .tchip { height: 34px; font-size: 14px; }
     .tm { padding: 14px 16px; }
     .tm-s { display: none; }
-    .tlinks { grid-template-columns: 1fr; gap: 24px; }
+    .tlinks, .tlinks.has-race { grid-template-columns: 1fr; gap: 24px; }
   }
 </style>

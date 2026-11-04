@@ -71,6 +71,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
           <div class="chips">{a.channels.map((c) => <span class="chan">#{c}</span>)}</div>
           <h3 class="area-t">{a.title}</h3>
           <p class="area-p">{a.text}</p>
+          {a.link && <a class="lr-link area-l" href={`${import.meta.env.BASE_URL}${a.link.path}`}>{a.link.text} →</a>}
         </article>
       ))}
     </div>
@@ -219,6 +220,7 @@ const dash = '<span class="no" aria-label="No">–</span>';
   .dsec-p { margin: 0; font-size: 17px; line-height: 1.65; color: var(--lr-text); max-width: 640px; }
   .dsec-small { margin: 14px 0 0; font-size: 14px; line-height: 1.55; color: var(--lr-soft); max-width: 760px; }
 
+  .area-l { display: inline-block; margin-top: 10px; font-size: 14px; font-weight: 600; }
   .areas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
   .area { display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 20px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }

@@ -188,7 +188,7 @@ const base = import.meta.env.BASE_URL;
   let me: string | null = null;
   let isHost = false;
   let hostStatus: any = null;
-  const EVENT_COLS = 'event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,members_only,created_by,is_published,review_status,series_id,host:crews(name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)';
+  const EVENT_COLS = 'event_id,title,event_type,starts_at,ends_at,platforms,host_name,location,description,join_url,discord_url,status,max_participants,registration,members_only,created_by,is_published,review_status,series_id,host:crews(crew_id,name,tag,color,discord_url),streams:hub_event_streams(platform,url,channel_name,sort_order)';
   const slot = (label: string, attrs: string, tag = 'a', sub = '') => `<${tag} class="evs-slot" ${attrs}><span class="evs-slot-plus" aria-hidden="true">+</span><strong>${label}</strong>${sub ? `<small>${sub}</small>` : ''}</${tag}>`;
 
   document.addEventListener('hc-access', (e: any) => {

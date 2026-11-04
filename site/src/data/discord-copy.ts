@@ -19,12 +19,13 @@ export const discordGlance: { k: string; v: string }[] = [
   { k: "Events", v: "Sign up in Discord" },
 ];
 
-export const discordAreas: { title: string; text: string; channels: string[] }[] = [
-  { title: "Races, playlists and meets", channels: ["events", "playlists"], text: "Published events from the Leonida Racing calendar appear as cards in #events, with times shown in your time zone. Use I’m in to sign up through your linked account. Hosts share their announcements in #events and #playlists." },
+// link: site page behind the area (Sackgassen-Check 04.11.2026; link texts = Claude placeholders, Codex review pending)
+export const discordAreas: { title: string; text: string; channels: string[]; link?: { text: string; path: string } }[] = [
+  { title: "Races, playlists and meets", channels: ["events", "playlists"], text: "Published events from the Leonida Racing calendar appear as cards in #events, with times shown in your time zone. Use I’m in to sign up through your linked account. Hosts share their announcements in #events and #playlists.", link: { text: "See the event calendar", path: "community/events/" } },
   { title: "Players, right now", channels: ["lfg"], text: "Find a group for a race, cruise, car meet or photo session. Start a search in #lfg or join one that’s already running, with a temporary voice channel for the group." },
   { title: "Car talk", channels: ["chat", "car-talk"], text: "Builds, favorite shapes, the car you still regret selling. The car-talk forum keeps threads by topic, so a good argument about headlights is still there tomorrow." },
   { title: "Time Attack", channels: ["time-attack"], text: "Racing lines, braking points and the hunt for the last tenth. Talk Gellhorn Time Attack, compare approaches and get ready to put a lap on the board when GTA VI launches." },
-  { title: "Crews and racing styles", channels: ["crews", "racing-series", "racing-styles"], text: "Clean circuit racing, street-style sprints, slow cruises with the windows down. Find a crew or a series that drives the way you do." },
+  { title: "Crews and racing styles", channels: ["crews", "racing-series", "racing-styles"], text: "Clean circuit racing, street-style sprints, slow cruises with the windows down. Find a crew or a series that drives the way you do.", link: { text: "Browse the crews", path: "community/crews/" } },
   { title: "Creators and track builders", channels: ["snapmatics", "streams-videos", "job-creators"], text: "Share Snapmatics and videos, show the race jobs you’ve built and find other creators to swap feedback with." },
 ];
 

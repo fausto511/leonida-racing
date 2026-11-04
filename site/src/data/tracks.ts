@@ -38,6 +38,12 @@ export const raceTypeLabels: Record<RaceType, string> = {
   'special-vehicle': 'Special Vehicle',
   drift: 'Drift',
 };
+/** Track row: each class links to its Garage class page (all eight have one). Not in the editor preview. */
+const trackClassSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+function classLinkHtml(c: string, preview: boolean): string {
+  if (preview || !trackVehicleClasses.includes(c)) return esc(c);
+  return `<a class="tr-cl" href="${import.meta.env.BASE_URL}cars/classes/${trackClassSlug(c)}/" title="${esc(c)} in the Garage">${esc(c)}</a>`;
+}
 /** Same classes as the Garage (vehicles.ts); must match the DB check constraint. */
 export const trackVehicleClasses = ['Coupes', 'Muscle', 'Off-Road', 'SUVs', 'Sedans', 'Sports', 'Sports Classics', 'Super'];
 
@@ -91,7 +97,7 @@ export function trackRowHtml(t: CommunityTrack, opts: { sample?: boolean; previe
     <p class="tr-facts">
       <span>${iconRoute}${lengthHtml(t.length_km)}</span>
       <span>${iconUsers}${esc(players)} players</span>
-      <span class="tr-classes">${t.vehicle_classes.map(esc).join(' · ')}</span>
+      <span class="tr-classes">${t.vehicle_classes.map((c) => classLinkHtml(c, Boolean(opts.preview))).join(' · ')}</span>
     </p>
     ${opts.preview ? '' : trackRateHtml(t.track_id, opts.rating)}
   </div>

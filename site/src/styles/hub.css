@@ -290,6 +290,8 @@ a.crew-pill { text-decoration: none; }
 .tr-facts { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 10px 0 0; font-size: 14px; color: var(--lr-soft); }
 .tr-facts > span { display: inline-flex; align-items: center; gap: 6px; }
 .tr-classes { color: var(--lr-text); }
+.tr-cl { color: inherit; text-decoration: underline; text-decoration-color: var(--lr-line-strong); text-underline-offset: 3px; transition: color .15s, text-decoration-color .15s; }
+.tr-cl:hover { color: var(--lr-orange); text-decoration-color: var(--lr-orange); }
 .tr-dates { margin: 0; color: var(--lr-muted); font-size: 12px; }
 /* foot (DEC-0196, like the event row): chips left; added/updated + Report right */
 .tr-foot { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: -8px; } /* no line, like the event row foot */
@@ -359,3 +361,8 @@ a.ev-next-copy { text-decoration: none; }
 .crew-actions:has(.is-armed) > :not(.is-armed) { display: none; }
 .crew-actions .crew-pill { flex: none; }
 .jm-hint { display: block; margin-top: .35rem; color: var(--gh-yellow); font-size: .75rem; }
+
+/* Host crew tag on event rows links to the crew directory */
+.ev-crew-link { display: inline-flex; border-radius: 4px; transition: opacity .15s; }
+.ev-crew-link:hover { opacity: .8; }
+.ev-crew-link:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
