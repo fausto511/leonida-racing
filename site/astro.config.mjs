@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
-import { vehicleOptions } from './src/data/vehicles.ts';
+import { vehicleOptions, vehicleLastmod } from './src/data/vehicles.ts';
 import { dataNoindexPaths } from './src/data/rankings.ts';
 
 // noindex pages that must stay out of the sitemap (RS-0050): vehicles without
@@ -37,6 +37,13 @@ export default defineConfig({
       // /cars/compare/ carries noindex (any car combination is thin content), so it stays out too (04.11.2026).
       // Forwarding pages (/time-attack/, /tracks/…, the old /cars/vehicles/vapid-caracara/)
       // are not content either.
+      // lastmod only where a real change date exists (vehicle pages, 04.11.2026); other pages get none
+      // rather than a misleading build date.
+      serialize(item) {
+        const id = item.url.match(/\/cars\/vehicles\/([^/]+)\/$/)?.[1];
+        if (id && vehicleLastmod[id]) item.lastmod = new Date(vehicleLastmod[id]).toISOString();
+        return item;
+      },
       filter: (page) =>
         !page.includes('/account/') && !page.includes('/moderator/') && !page.includes('/community/tracks/') && !page.includes('/community/events/share/') &&
         !page.endsWith('/time-attack/') && !page.endsWith('/cars/rankings/') && !page.includes('/tracks/') && !page.includes('/report/') && !page.includes('/report-content/') && !page.endsWith('.txt') &&

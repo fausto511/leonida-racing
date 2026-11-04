@@ -54,6 +54,7 @@ interface GeneratedVehicle {
   first_seen_url?: string | null; first_seen_timestamp?: string | null;
   family?: string | null; previous_games?: string[] | null; sellable?: string | null;
   other_names?: string[] | null;
+  updated_at?: string | null;
 }
 // In-game stats (0-10) and ratings shown in the GTA VI vehicle menu (RS-0074, DEC-0132).
 // Prepared before launch; no values yet, so nothing displays them so far.
@@ -102,6 +103,19 @@ export const vehicleValuesTuned: Record<string, Partial<Record<VehicleValue['met
 for (const val of generated.values as VehicleValue[]) {
   const target = val.tuning === 'tuned' ? vehicleValuesTuned : vehicleValues;
   (target[val.vehicle_id] ??= {})[val.metric] = { ...val, value: Number(val.value) };
+}
+
+/** Sitemap lastmod per vehicle page (04.11.2026): latest of the vehicle row's
+ *  updated_at and the measured_at of its current values. Missing (e.g. an older
+ *  committed JSON without updated_at) = no lastmod for that page. */
+export const vehicleLastmod: Record<string, string> = {};
+for (const v of generated.vehicles as GeneratedVehicle[]) {
+  if (v.updated_at) vehicleLastmod[v.vehicle_id] = v.updated_at;
+}
+for (const val of generated.values as VehicleValue[]) {
+  if (!val.measured_at) continue;
+  const cur = vehicleLastmod[val.vehicle_id];
+  if (!cur || new Date(val.measured_at) > new Date(cur)) vehicleLastmod[val.vehicle_id] = val.measured_at;
 }
 
 // Fastest accepted Gellhorn lap per car (from public_leaderboard_ranks, fetched
