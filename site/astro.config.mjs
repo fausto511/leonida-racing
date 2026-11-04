@@ -34,12 +34,13 @@ export default defineConfig({
       // search -- excluded from the sitemap and separately set to
       // noindex on the page itself (see Base.astro).
       // /community/tracks/ stays out while it only shows sample data (noindex); overview, crews, events indexable since 2026-10-14 (Fausto).
+      // /cars/compare/ carries noindex (any car combination is thin content), so it stays out too (04.11.2026).
       // Forwarding pages (/time-attack/, /tracks/…, the old /cars/vehicles/vapid-caracara/)
       // are not content either.
       filter: (page) =>
         !page.includes('/account/') && !page.includes('/moderator/') && !page.includes('/community/tracks/') && !page.includes('/community/events/share/') &&
         !page.endsWith('/time-attack/') && !page.endsWith('/cars/rankings/') && !page.includes('/tracks/') && !page.includes('/report/') && !page.includes('/report-content/') && !page.endsWith('.txt') &&
-        !page.endsWith('/cars/vehicles/vapid-caracara/') && !page.endsWith('/cars/vehicles/enus-jubilee/') && !page.endsWith('/cars/vehicles/enus-windsor/') && !page.endsWith('/cars/vehicles/karin-contender/') && !page.endsWith('/time-attack/submit/') && !page.endsWith('/time-attack/rules/') &&
+        !page.endsWith('/cars/vehicles/vapid-caracara/') && !page.endsWith('/cars/vehicles/enus-jubilee/') && !page.endsWith('/cars/vehicles/enus-windsor/') && !page.endsWith('/cars/vehicles/karin-contender/') && !page.endsWith('/time-attack/submit/') && !page.endsWith('/time-attack/rules/') && !page.endsWith('/cars/compare/') &&
         !noindexVehiclePaths.some((p) => page.endsWith(p)) && !noindexDataPaths.some((p) => page.endsWith(p)),
     }),
   ],
