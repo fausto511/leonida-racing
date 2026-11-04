@@ -330,7 +330,7 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
       ? `<strong title="PSN name — add the host on PlayStation">${esc(e.host_name)}</strong><span class="ev-psn">PSN</span>`
       : `<a class="ev-psn-link" href="${esc(psnProfileUrl(e.host_name))}" target="_blank" rel="noopener nofollow" title="Open the host's PSN profile to send a friend request"><strong>${esc(e.host_name)}</strong><span class="ev-psn">PSN</span></a>`)
     : e.host_account ? `<strong>${esc(e.host_account)}</strong>` : '';
-  const whoIcon = who && e.host_icon && !opts.sample ? ` ${iconTagHtml(true)}` : '';
+  const whoIcon = who && e.host_icon && !opts.sample ? iconTagHtml(true) : '';
   const hostedBy = who || e.host
     ? `<span class="ev-by"><span class="ev-by-l">Hosted by</span> ${who}${whoIcon}${e.host ? ` ${crewTagHtml(e.host.tag, e.host.color, 'sm')}` : ''}</span>`
     : '';

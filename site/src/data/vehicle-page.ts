@@ -20,7 +20,7 @@ export interface ClassRow { id: string; ms: number | null }
 export function driverRowHtml(r: DriverRow): string {
   return `<div class="vg-row${r.me ? ' me' : ''}">
   <span class="vg-pos tnum${r.rank === 1 ? ' is-first' : ''}">${r.rank}</span>
-  <span class="vg-name">${esc(r.driver)}${r.icon ? ` ${iconTagHtml(true)}` : ''}${r.me ? ' <em class="vg-you">You</em>' : ''}</span>
+  <span class="vg-name">${esc(r.driver)}${iconTagHtml(r.icon)}${r.me ? ' <em class="vg-you">You</em>' : ''}</span>
   <span class="vg-time tnum">${lapTime(r.ms)}</span>
 </div>`;
 }

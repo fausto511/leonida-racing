@@ -5,7 +5,8 @@
 export const ICON_LABEL = 'ICON';
 export const ICON_TITLE = 'Known in the GTA racing scene';
 
-/** Small ICON badge next to a name; '' when the driver isn't an ICON. */
+/** Small ICON badge next to a name, with a leading space; '' when the driver isn't an ICON. */
 export function iconTagHtml(isIcon: boolean | undefined): string {
-  return isIcon ? `<span class="icon-tag" title="${ICON_TITLE}">${ICON_LABEL}</span>` : '';
+  // Symbol only (rosette with cut-out check, styles/tokens.css); the name stays in tooltip + screen reader label.
+  return isIcon ? ` <span class="icon-tag" role="img" aria-label="${ICON_LABEL}" title="${ICON_LABEL} — ${ICON_TITLE}"></span>` : '';
 }
