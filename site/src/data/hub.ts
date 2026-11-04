@@ -259,7 +259,7 @@ export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: bo
   const rest = focus.slice(shown.length);
   const chips = shown.map((f) => `<span class="crew-chip">${esc(f)}</span>`).concat(rest.length ? [`<span class="crew-chip" title="${esc(rest.join(', '))}">+${rest.length}</span>`] : []).join('');
   const badges = [
-    c.is_official ? '<span class="crew-badge b-official" title="Official crew of this site or of the original creators">Official</span>' : '',
+    c.is_official ? '<span class="crew-badge b-official" title="Leonida Racing crew">Official</span>' : '',
     // DEC-0201. COPY: Claude placeholder, Codex review pending.
     c.is_launch_crew ? '<span class="crew-badge b-launch" title="Listed by launch week of GTA VI">Launch Crew</span>' : '',
     c.is_featured ? '<span class="crew-badge b-featured">Featured</span>' : '',
