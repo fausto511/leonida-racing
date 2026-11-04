@@ -4,6 +4,7 @@
 // placeholders from the mockup -> Codex review (DEC-0088).
 import { esc, regionLabel, crewTagHtml, focusLabels, eventTypeLabels, type HubCrew, type HubEvent } from './hub';
 import { lapTime } from './leaderboard';
+import { iconTagHtml } from './icons';
 
 const base = import.meta.env.BASE_URL;
 
@@ -50,14 +51,14 @@ export function homeCrewRow(c: HubCrew, sample: boolean): string {
 </div>`;
 }
 
-export interface TRow { rank: number; driver: string; crew: { tag: string; color: string } | null; car: string; ms: number; me?: boolean; gapBefore?: boolean }
+export interface TRow { rank: number; driver: string; icon?: boolean; crew: { tag: string; color: string } | null; car: string; ms: number; me?: boolean; gapBefore?: boolean }
 
 /** Leaderboard row of the Time Attack band. */
 export function homeLbRow(r: TRow): string {
   const href = `${base}time-attack/gellhorn-international-raceway/`;
   return `<a class="trow${r.me ? ' me' : ''}${r.gapBefore ? ' gapb' : ''}" href="${href}">
   <span class="tpos tnum${r.rank === 1 ? ' is-first' : ''}">${r.rank}</span>
-  <span class="tdrv"><span class="tn">${esc(r.driver)}</span>${r.crew ? ` ${crewTagHtml(r.crew.tag, r.crew.color, 'sm')}` : ''}</span>
+  <span class="tdrv"><span class="tn">${esc(r.driver)}</span>${iconTagHtml(r.icon)}${r.crew ? ` ${crewTagHtml(r.crew.tag, r.crew.color, 'sm')}` : ''}</span>
   <span class="tcar">${esc(r.car)}</span>
   <span class="ttime tnum">${lapTime(r.ms)}</span>
 </a>`;

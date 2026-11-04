@@ -7,6 +7,7 @@ import { currentDriverId, fetchOwned, setOwned, fetchWishList, setWished } from 
 import { getSelected, toggleSelected, onCompareChange } from './compare';
 import { bubble, hideBubble } from './bubble';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
+import { loadIconIds } from './icons';
 import { lapTime } from '../data/leaderboard';
 import { STAR_SVG } from '../data/site';
 import { classRowsHtml, driverRowHtml, openRowHtml, startTileHtml, rivalsFromClass, rivalHtml, sortClass, GELLHORN_ROWS, type ClassRow } from '../data/vehicle-page';
@@ -263,8 +264,9 @@ function init(root: HTMLElement) {
     ($('vg-lb') as HTMLElement).hidden = !has;
     ($('vg-how') as HTMLElement).hidden = has;
     if (!has) { box.innerHTML = startTileHtml(model, `${base}time-attack/submit/`); return; }
-    let html = rows.map((r) => driverRowHtml({ rank: r.rank, driver: r.driver, ms: r.lap_time_ms, me: r.driver_id === me })).join('');
-    if (myRow && myRow.rank > GELLHORN_ROWS) html += driverRowHtml({ rank: myRow.rank, driver: myRow.driver, ms: myRow.lap_time_ms, me: true });
+    const icons = await loadIconIds([...rows.map((r) => r.driver_id), myRow?.driver_id]); // ICON badge (DEC-0215)
+    let html = rows.map((r) => driverRowHtml({ rank: r.rank, driver: r.driver, ms: r.lap_time_ms, me: r.driver_id === me, icon: icons.has(r.driver_id) })).join('');
+    if (myRow && myRow.rank > GELLHORN_ROWS) html += driverRowHtml({ rank: myRow.rank, driver: myRow.driver, ms: myRow.lap_time_ms, me: true, icon: icons.has(myRow.driver_id) });
     else if (!myRow) html += openRowHtml();
     box.innerHTML = html;
     $('vg-set')!.querySelector('[data-l]')!.textContent = myRow ? 'Beat your time' : 'Set a Gellhorn time';

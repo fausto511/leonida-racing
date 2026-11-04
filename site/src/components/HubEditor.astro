@@ -245,6 +245,7 @@ const base = import.meta.env.BASE_URL;
                 <label class="check"><input type="checkbox" name="role" value="crew_leader" /> Crew Leader — manages one crew (card, join requests, members)</label>
                 <label class="check"><input type="checkbox" name="role" value="event_host" /> Event Host — host stage 2: events are still reviewed (stage 3 under Event review)</label>
                 <label class="check"><input type="checkbox" name="role" value="creator" /> Creator — submits own race jobs to Tracks (a moderator publishes them)</label>
+                <label class="check"><input type="checkbox" name="role" value="notable" /> ICON — well-known in the GTA racing scene (creators, hosts, insiders); badge next to the name and Discord role “Icon” (DEC-0215)</label>
               </fieldset>
               <label class="span2" id="role-crew-wrap" hidden>Crew <small>crew not listed yet? Create it under Crews first, or let the driver apply with a new crew (approving the request creates it)</small><select id="role-crew"></select></label>
             </div>
@@ -1580,8 +1581,8 @@ const base = import.meta.env.BASE_URL;
   });
 
   // ------------------------------------------------------------ roles (moderators)
-  const roleLabel = (r: string) => (r === 'crew_leader' ? 'Crew Leader' : r === 'crew_commissioner' ? 'Commissioner' : r === 'creator' ? 'Creator' : 'Event Host');
-  const roleShort = (r: string) => (r === 'crew_leader' ? 'Leader' : r === 'crew_commissioner' ? 'Comm.' : r === 'creator' ? 'Creator' : 'Host');
+  const roleLabel = (r: string) => (r === 'crew_leader' ? 'Crew Leader' : r === 'crew_commissioner' ? 'Commissioner' : r === 'creator' ? 'Creator' : r === 'notable' ? 'ICON' : 'Event Host');
+  const roleShort = (r: string) => (r === 'crew_leader' ? 'Leader' : r === 'crew_commissioner' ? 'Comm.' : r === 'creator' ? 'Creator' : r === 'notable' ? 'ICON' : 'Host');
   let pickedDriver: { driver_id: string; display_name: string } | null = null;
 
   async function loadRoles() {

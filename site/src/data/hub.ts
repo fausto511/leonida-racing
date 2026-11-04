@@ -86,6 +86,8 @@ export interface HubEvent {
   join_url: string | null;
   /** fallback for "Hosted by" when no PSN name is given: creator's site display name */
   host_account?: string | null;
+  /** ICON role (DEC-0215) of the account that created the event; set by the live loader */
+  host_icon?: boolean;
   /** Discord invite where the event takes place (RS-0034) */
   discord_url?: string | null;
   status: 'scheduled' | 'cancelled';
@@ -104,6 +106,7 @@ export interface HubEvent {
   sample_going?: string[];
 }
 
+import { iconTagHtml } from './icons';
 import { languageLabel } from './languages';
 import { ACTIVE_PLATFORMS } from './platforms';
 export const platformLabels: Record<Platform, string> = { ps5: 'PS5', xbox: 'Xbox Series X|S' };
@@ -327,8 +330,9 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
       ? `<strong title="PSN name — add the host on PlayStation">${esc(e.host_name)}</strong><span class="ev-psn">PSN</span>`
       : `<a class="ev-psn-link" href="${esc(psnProfileUrl(e.host_name))}" target="_blank" rel="noopener nofollow" title="Open the host's PSN profile to send a friend request"><strong>${esc(e.host_name)}</strong><span class="ev-psn">PSN</span></a>`)
     : e.host_account ? `<strong>${esc(e.host_account)}</strong>` : '';
+  const whoIcon = who && e.host_icon && !opts.sample ? ` ${iconTagHtml(true)}` : '';
   const hostedBy = who || e.host
-    ? `<span class="ev-by"><span class="ev-by-l">Hosted by</span> ${who}${e.host ? ` ${crewTagHtml(e.host.tag, e.host.color, 'sm')}` : ''}</span>`
+    ? `<span class="ev-by"><span class="ev-by-l">Hosted by</span> ${who}${whoIcon}${e.host ? ` ${crewTagHtml(e.host.tag, e.host.color, 'sm')}` : ''}</span>`
     : '';
   const plats = e.platforms.filter((p) => (ACTIVE_PLATFORMS as readonly string[]).includes(p)).map((p) => platformShort[p] ?? p).join(', ');
   const l2 = [

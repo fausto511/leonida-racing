@@ -3,6 +3,7 @@
 // COPY STATUS: dashboard texts are Claude placeholders from the mockup -> Codex (DEC-0088).
 import { backendConfigured, getSupabase } from './supabase-client';
 import { fetchLiveCrews, fetchLiveEvents, pickFeaturedCrews } from './hub-live';
+import { loadIconIds } from './icons';
 import { createEventRsvp } from './event-rsvp';
 import { createCrewMembership } from './crew-membership';
 import { isSelected, toggleSelected } from './compare';
@@ -121,10 +122,11 @@ async function crewTags(ids: string[]) {
 const ranks = () => getSupabase().from('public_leaderboard_ranks').select(RANK_COLS).eq('track_id', TRACK).eq('platform', LEADERBOARD_PLATFORM);
 
 async function renderBand(rows: RankRow[], title: string, me: string | null) {
-  const tags = await crewTags([...new Set(rows.map((r) => r.driver_id))]);
+  const ids = [...new Set(rows.map((r) => r.driver_id))];
+  const [tags, icons] = await Promise.all([crewTags(ids), loadIconIds(ids)]);
   let prev = 0;
   const html = rows.map((r) => {
-    const row: TRow = { rank: r.rank, driver: r.driver, crew: tags.get(r.driver_id) ?? null, car: `${r.make} ${r.model}`, ms: r.lap_time_ms, me: r.driver_id === me, gapBefore: prev > 0 && r.rank > prev + 1 };
+    const row: TRow = { rank: r.rank, driver: r.driver, icon: icons.has(r.driver_id), crew: tags.get(r.driver_id) ?? null, car: `${r.make} ${r.model}`, ms: r.lap_time_ms, me: r.driver_id === me, gapBefore: prev > 0 && r.rank > prev + 1 };
     prev = r.rank;
     return homeLbRow(row);
   }).join('');

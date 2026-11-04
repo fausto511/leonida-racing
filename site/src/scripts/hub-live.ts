@@ -2,6 +2,7 @@
 // (no backend config, table missing because the migration hasn't run yet,
 // network/RLS error, or simply zero published rows) -- callers then keep
 // showing the flagged sample data. Never throws.
+import { loadIconIds } from './icons';
 import { backendConfigured, getSupabase } from './supabase-client';
 import type { HubCrew, HubEvent, EventSeriesInfo } from '../data/hub';
 import type { CommunityTrack } from '../data/tracks';
@@ -92,6 +93,9 @@ export async function fetchLiveEvents(): Promise<HubEvent[] | null> {
       const byId = new Map(((names ?? []) as { driver_id: string; display_name: string | null }[]).map((n) => [n.driver_id, n.display_name]));
       rows.forEach((r) => { if (!r.host_name && r.created_by) r.host_account = byId.get(r.created_by) ?? null; });
     }
+    // ICON badge next to "Hosted by" (DEC-0215): the account that created the event.
+    const icons = await loadIconIds(rows.map((r) => r.created_by));
+    rows.forEach((r) => { r.host_icon = Boolean(r.created_by && icons.has(r.created_by)); });
     await attachSeries(rows);
     return rows;
   } catch {

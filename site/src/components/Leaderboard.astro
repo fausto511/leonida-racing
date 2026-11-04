@@ -261,6 +261,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 <script>
   import { getSupabase, backendConfigured } from '../scripts/supabase-client';
   import { LEADERBOARD_PLATFORM } from '../data/platforms';
+  import { loadIconIds } from '../scripts/icons';
   import { sampleEntries, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, type LbEntry, type LbState, type LbMode } from '../data/leaderboard';
 
   const TRACK_ID = 'gellhorn-international-raceway';
@@ -437,8 +438,9 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
         if (!tags.has(r.driver_id) || r.is_primary) tags.set(r.driver_id, { tag: r.tag, color: r.color });
       }
     }
+    const icons = await loadIconIds(ids); // ICON badge (DEC-0215)
     const toEntry = (r: LiveRow): LbEntry => ({
-      driver: r.driver, driver_id: r.driver_id, crew: tags.get(r.driver_id) ?? null,
+      driver: r.driver, driver_id: r.driver_id, crew: tags.get(r.driver_id) ?? null, icon: icons.has(r.driver_id),
       vehicle_id: r.vehicle_id, make: r.make, model: r.model, logo: r.manufacturer_logo_slug,
       lap_time_ms: r.lap_time_ms, entries: Number(r.track_entries) || 0,
       verified: Boolean(r.video_verified), video_url: r.video_url,

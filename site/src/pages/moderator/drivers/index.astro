@@ -69,7 +69,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   import { esc } from '../../../data/hub';
 
   const PAGE = 25;
-  const ROLE: Record<string, string> = { crew_leader: 'Crew Leader', event_host: 'Event Host', creator: 'Creator' };
+  const ROLE: Record<string, string> = { crew_leader: 'Crew Leader', event_host: 'Event Host', creator: 'Creator', notable: 'ICON' };
   const $ = (id: string) => document.getElementById(id) as HTMLElement;
   let offset = 0;
   let total = 0;

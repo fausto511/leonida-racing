@@ -339,6 +339,15 @@ select optgroup option { background: var(--gh-surface); color: var(--gh-text); f
 .crew-tag-md { min-width: 4.4rem; padding: .38rem .7rem .58rem; font-size: .85rem; }
 .crew-tag-sm { min-width: 2.9rem; padding: .22rem .4rem .38rem; font-size: .66rem; box-shadow: inset 0 -3px 0 var(--crew-color, var(--gh-red)); }
 
+/* ICON badge (DEC-0215): outlined, so it never reads as a crew tag. Global like .crew-tag. */
+.icon-tag {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  padding: .16rem .36rem .18rem; border: 1px solid var(--lr-pink); border-radius: 2px;
+  color: var(--lr-pink); background: transparent;
+  font-family: var(--gh-font-body); font-weight: 900; font-size: .6rem; letter-spacing: .08em;
+  text-transform: uppercase; line-height: 1; white-space: nowrap; cursor: default;
+}
+
 
 /* Visually hidden, still read by screen readers and search engines (link text) */
 /* Skip link (keyboard users): hidden until focused. */

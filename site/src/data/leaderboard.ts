@@ -14,12 +14,15 @@ import { vehicleOptions, shortModelName } from './vehicles';
 import { makeHref, classHref, classSlug } from './garage-taxonomy';
 import { taxonomyCopy } from './taxonomy-copy';
 import { buildCrews, esc } from './hub';
+import { iconTagHtml } from './icons';
 
 export interface LbEntry {
   /** best run of one driver on one vehicle (= one row of public_leaderboard) */
   driver: string;
   driver_id: string;
   crew: { tag: string; color: string } | null;
+  /** ICON role (DEC-0215), set by the live loader */
+  icon?: boolean;
   vehicle_id: string;
   make: string;
   model: string;
@@ -268,7 +271,7 @@ export function render(all: LbEntry[], s: LbState, sample: boolean): Rendered {
       if (me) hasMe = true;
       const cls = ['tr', rank === 1 ? 'first' : '', me ? 'me' : '', rank === breakBefore ? 'brk' : ''].filter(Boolean).join(' ');
       const gp = e.lap_time_ms === best ? '' : `+${((e.lap_time_ms - best) / 1000).toFixed(3)}`;
-      return `<div class="${cls}" role="row"${me ? ' id="lb-me"' : ''}><span class="rk" role="cell">${rank}</span><span class="dr" role="cell"><span class="n">${esc(e.driver)}</span>${crewTag(e.crew)}${me ? '<span class="you">YOU</span>' : ''}</span>${carCol ? carCell(e, s.cls) : ''}<span class="mt"><span class="gp" role="cell">${gp}</span>${statusCell(e.verified)}${videoCell(e, sample)}</span><span class="tm" role="cell">${lapTime(e.lap_time_ms)}</span></div>`;
+      return `<div class="${cls}" role="row"${me ? ' id="lb-me"' : ''}><span class="rk" role="cell">${rank}</span><span class="dr" role="cell"><span class="n">${esc(e.driver)}</span>${iconTagHtml(e.icon)}${crewTag(e.crew)}${me ? '<span class="you">YOU</span>' : ''}</span>${carCol ? carCell(e, s.cls) : ''}<span class="mt"><span class="gp" role="cell">${gp}</span>${statusCell(e.verified)}${videoCell(e, sample)}</span><span class="tm" role="cell">${lapTime(e.lap_time_ms)}</span></div>`;
     }).join('')
     : empty(ranked.length ? 'No driver matches your search.' : s.vehicle || s.cls || s.make ? `No ${vf}times in this selection yet. <a href="${base}time-attack/submit/">Be the first — submit a lap</a>.` : `No ${vf}times yet.`);
   const shownCount = list.length;
@@ -330,5 +333,5 @@ export function trackStats(all: LbEntry[], verified: LbEntry[]) {
 }
 export function recordWhoHtml(rec: LbEntry | null): string {
   if (!rec) return '<span>No video-verified lap yet</span>';
-  return `<b>${esc(rec.driver)}</b>${crewTag(rec.crew)}<span>in ${esc(rec.make)} ${esc(rec.model)}</span>`;
+  return `<b>${esc(rec.driver)}</b>${iconTagHtml(rec.icon)}${crewTag(rec.crew)}<span>in ${esc(rec.make)} ${esc(rec.model)}</span>`;
 }
