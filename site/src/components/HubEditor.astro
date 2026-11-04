@@ -1586,8 +1586,8 @@ const base = import.meta.env.BASE_URL;
   });
 
   // ------------------------------------------------------------ roles (moderators)
-  const roleLabel = (r: string) => (r === 'crew_leader' ? 'Crew Leader' : r === 'crew_commissioner' ? 'Commissioner' : r === 'creator' ? 'Creator' : r === 'notable' ? 'ICON' : 'Event Host');
-  const roleShort = (r: string) => (r === 'crew_leader' ? 'Leader' : r === 'crew_commissioner' ? 'Comm.' : r === 'creator' ? 'Creator' : r === 'notable' ? 'ICON' : 'Host');
+  const roleLabel = (r: string) => (r === 'crew_leader' ? 'Crew Leader' : r === 'crew_commissioner' ? 'Commissioner' : r === 'creator' ? 'Creator' : r === 'notable' ? 'ICON' : r === 'crew_verified' ? 'Crew verification' : 'Event Host');
+  const roleShort = (r: string) => (r === 'crew_leader' ? 'Leader' : r === 'crew_commissioner' ? 'Comm.' : r === 'creator' ? 'Creator' : r === 'notable' ? 'ICON' : r === 'crew_verified' ? 'Verify' : 'Host');
   let pickedDriver: { driver_id: string; display_name: string } | null = null;
 
   async function loadRoles() {
@@ -1715,6 +1715,10 @@ const base = import.meta.env.BASE_URL;
     $('req-body').innerHTML = '<dl class="req-list">' + [
       row('Driver', r.driver?.display_name),
       row('Discord user ID', r.driver?.discord_user_id),
+      // DEC-0217: ICON / crew verification proof. Approve only after checking it.
+      r.role === 'crew_verified' && r.crew ? row('Crew to verify', `${crewTagHtml(r.crew.tag, r.crew.color, 'sm')} ${esc(r.crew.name)}`, true) : '',
+      r.proof_method === 'code' ? row('Proof', `Code <strong>${esc(r.proof_code ?? '')}</strong> should be visible at the link below (channel description, bio or crew description)`, true) : '',
+      r.proof_method === 'discord' ? row('Proof', `Via Discord — check the profile connections (YouTube/Twitch/X linked) or talk to them. <a href="https://discord.com/users/${esc(r.driver?.discord_user_id ?? '')}" target="_blank" rel="noopener">Open Discord profile</a>`, true) : '',
       r.role === 'crew_leader' && r.crew ? row('Existing crew', `${crewTagHtml(r.crew.tag, r.crew.color, 'sm')} ${esc(r.crew.name)}`, true) : '',
       r.role === 'crew_leader' && !r.crew ? row('New crew', `${crewTagHtml(r.new_crew_tag, r.new_crew_color, 'sm')} ${esc(r.new_crew_name)} <small>(goes live as soon as you approve)</small>`, true) : '',
       row('Crew Discord', link(r.new_crew_discord_url), true),
@@ -1765,7 +1769,7 @@ const base = import.meta.env.BASE_URL;
     if (error) { b.disabled = false; reqMsg(error.message, true); return; }
     await loadAll();
     openRequest(null);
-    placeholderEl.textContent = `Approved — ${r?.driver?.display_name ?? 'the driver'} is now ${roleLabel(r?.role ?? '')}${r?.role === 'crew_leader' && !r?.crew ? ' and the crew is live' : ''}.`;
+    placeholderEl.textContent = r?.role === 'crew_verified' ? `Approved — ${r?.crew?.name ?? 'the crew'} is now a verified crew.` : `Approved — ${r?.driver?.display_name ?? 'the driver'} is now ${roleLabel(r?.role ?? '')}${r?.role === 'crew_leader' && !r?.crew ? ' and the crew is live' : ''}.`;
   });
   $('req-reject').addEventListener('click', async () => {
     const b = $<HTMLButtonElement>('req-reject');

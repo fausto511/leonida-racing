@@ -1,0 +1,172 @@
+---
+// DEC-0217 (Fausto 04.11.2026): request the white seal yourself.
+// mode 'person' = ICON status (My Account > Settings), mode 'crew' = verified crew (My Account > Crew,
+// crew leaders only). Proof: personal code in the channel/bio/crew description + link, or via Discord
+// (moderators check the Discord profile connections or talk to the person). Moderators decide in Hub > Requests.
+// COPY STATUS: all texts are Claude placeholders, Codex review pending.
+interface Props { mode: 'person' | 'crew'; }
+const { mode } = Astro.props;
+const isPerson = mode === 'person';
+---
+<section class="vr" id="vr" data-mode={mode} hidden>
+  <h2 class="lr-h2 lr-h2-s vr-h">{isPerson ? 'ICON status' : 'Crew verification'}</h2>
+  <div class="vr-card">
+    <p class="vr-lede">
+      <span class="icon-tag" aria-hidden="true"></span>
+      {isPerson
+        ? 'For well-known creators, hosts and insiders of the GTA racing scene: a white seal next to your name shows that Leonida Racing has confirmed it is really you. It is not a reward for activity.'
+        : 'For crews that need to be recognisable as the original, e.g. the crew of a well-known creator: a white seal after the crew name, and no other crew can use the exact same name.'}
+    </p>
+
+    <div id="vr-status" class="vr-status" hidden></div>
+
+    <form id="vr-form" novalidate hidden>
+      {!isPerson && (
+        <label class="vr-field">Crew<select name="crew_id" id="vr-crew"></select></label>
+      )}
+      <fieldset class="vr-field">
+        <legend>How do you want to prove it?</legend>
+        <label class="vr-radio"><input type="radio" name="proof_method" value="code" checked />
+          <span><strong>With a code</strong> — put <code id="vr-code">…</code> into {isPerson ? 'your YouTube or Twitch channel description, your X bio or similar' : "your crew's Social Club description or a channel of your crew's Discord server"} (only until we have checked it), then add the link below.</span>
+        </label>
+        <label class="vr-radio"><input type="radio" name="proof_method" value="discord" />
+          <span><strong>Via Discord</strong> — faster if {isPerson ? 'your Discord profile shows your channel under connections' : "you're known on Discord"}. Send the request, then message a moderator on our Discord server.</span>
+        </label>
+      </fieldset>
+      <label class="vr-field" id="vr-link-wrap">Link to where the code is <small>required for the code option</small>
+        <input type="url" name="link_url" maxlength="200" placeholder="https://www.youtube.com/@yourchannel/about" />
+      </label>
+      <label class="vr-field">{isPerson ? 'Who are you in the scene?' : 'Who is behind the crew?'} <small>optional, max. 500 characters</small>
+        <textarea name="message" maxlength="500" rows="3"></textarea>
+      </label>
+      <div class="vr-acts"><button type="submit" class="btn btn-s" id="vr-send">Send request</button></div>
+      <p id="vr-msg" class="vr-msg" role="status"></p>
+    </form>
+  </div>
+</section>
+
+<style>
+  /* spacing between sections comes from the account page (flex gap) */
+  .vr-h { margin: 0 0 16px; }
+  .vr-card { display: flex; flex-direction: column; gap: 16px; padding: 20px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
+  .vr-lede { margin: 0; color: var(--lr-soft); line-height: 1.55; }
+  .vr-lede .icon-tag { width: 18px; height: 18px; margin-right: 6px; vertical-align: -3px; }
+  .vr-field { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; border: 0; font-weight: 600; font-size: 14px; color: var(--lr-text); }
+  .vr-field small { font-weight: 400; color: var(--lr-muted); }
+  .vr-field legend { padding: 0; margin-bottom: 8px; }
+  .vr-radio { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; font-weight: 400; color: var(--lr-soft); line-height: 1.5; }
+  .vr-radio input { margin-top: 4px; flex: none; }
+  .vr-radio strong { color: var(--lr-text); }
+  .vr-radio code { padding: 1px 6px; border-radius: 4px; background: var(--lr-raised); color: var(--lr-text); font-weight: 700; letter-spacing: .04em; }
+  #vr-form { display: flex; flex-direction: column; gap: 16px; }
+  #vr-form[hidden] { display: none; }
+  .vr-status { padding: 12px 14px; border-radius: 6px; background: var(--lr-raised); color: var(--lr-soft); line-height: 1.5; }
+  .vr-status strong { color: var(--lr-text); }
+  .vr-msg { margin: 0; min-height: 1.2em; font-size: 14px; }
+  .vr-msg.is-error { color: var(--lr-coral); } .vr-msg.is-ok { color: var(--lr-lime); }
+</style>
+
+<script>
+  import { getSupabase, backendConfigured } from '../scripts/supabase-client';
+  import { currentDriverId } from '../scripts/owned';
+
+  const root = document.getElementById('vr') as HTMLElement | null;
+  const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+  const ERR: [RegExp, string][] = [
+    [/verify_proof_link/, 'Add the link where we can see your code.'],
+    [/verify_already/, 'This is already confirmed.'],
+    [/verify_not_leader/, 'Only the crew leader can request verification.'],
+    [/verify_cooldown/, 'You can request again 30 days after a declined request.'],
+    [/one_open|duplicate key/, 'You already have an open request.'],
+    [/link_url_check/, 'The link has to start with https:// (max. 200 characters).'],
+  ];
+
+  async function init() {
+    if (!root || !backendConfigured) return;
+    const mode = root.dataset.mode === 'crew' ? 'crew' : 'person';
+    const role = mode === 'crew' ? 'crew_verified' : 'notable';
+    const sb = getSupabase();
+    const me = await currentDriverId();
+    if (!me) return;
+    const form = document.getElementById('vr-form') as HTMLFormElement;
+    const status = document.getElementById('vr-status')!;
+    const msg = document.getElementById('vr-msg')!;
+    const say = (t: string, err = false) => { msg.textContent = t; msg.className = `vr-msg ${t ? (err ? 'is-error' : 'is-ok') : ''}`; };
+
+    // crews this driver leads that are published and not verified yet
+    let crews: { crew_id: string; name: string; tag: string; is_verified: boolean }[] = [];
+    if (mode === 'crew') {
+      const { data: lead } = await sb.from('hub_roles').select('crew_id').eq('driver_id', me).eq('role', 'crew_leader');
+      const ids = (lead ?? []).map((r: { crew_id: string | null }) => r.crew_id).filter(Boolean) as string[];
+      if (!ids.length) return;
+      const { data: cs } = await sb.from('crews').select('crew_id,name,tag,is_verified,is_published').in('crew_id', ids);
+      crews = ((cs ?? []) as any[]).filter((c) => c.is_published);
+      if (!crews.length) return;
+    }
+
+    const [{ data: reqs }, { data: code }, roleRes] = await Promise.all([
+      sb.from('hub_role_requests').select('request_id,status,crew_id,decision_note,requested_at,decided_at').eq('driver_id', me).eq('role', role).order('requested_at', { ascending: false }).limit(10),
+      sb.rpc('my_verification_code'),
+      mode === 'person' ? sb.from('hub_roles').select('role_id').eq('driver_id', me).eq('role', 'notable').maybeSingle() : Promise.resolve({ data: null }),
+    ]);
+    const list = (reqs ?? []) as { request_id: string; status: string; crew_id: string | null; decision_note: string | null }[];
+    (document.getElementById('vr-code') as HTMLElement).textContent = String(code ?? '');
+    root.hidden = false;
+
+    const render = () => {
+      const crewSel = document.getElementById('vr-crew') as HTMLSelectElement | null;
+      if (mode === 'person') {
+        const has = Boolean((roleRes as { data: unknown }).data);
+        const open = list.find((r) => r.status === 'pending');
+        const last = list[0];
+        if (has) { status.innerHTML = '<strong>You have the ICON status.</strong> The white seal is shown next to your name.'; status.hidden = false; form.hidden = true; return; }
+        if (open) { status.innerHTML = '<strong>Request sent.</strong> A moderator will check it. If you chose Discord, message a moderator on our Discord server.'; status.hidden = false; form.hidden = true; return; }
+        status.hidden = !(last && last.status === 'rejected');
+        if (last && last.status === 'rejected') status.innerHTML = `<strong>Your last request was declined.</strong>${last.decision_note ? ` ${esc(last.decision_note)}` : ''}`;
+        form.hidden = false;
+        return;
+      }
+      // crew mode: one row of status per crew, the form offers crews without open request / verification
+      const lines: string[] = [];
+      const offer = crews.filter((c) => {
+        if (c.is_verified) { lines.push(`<strong>${esc(c.name)} [${esc(c.tag)}]</strong> is a verified crew.`); return false; }
+        const r = list.find((x) => x.crew_id === c.crew_id);
+        if (r?.status === 'pending') { lines.push(`<strong>${esc(c.name)} [${esc(c.tag)}]:</strong> request sent, a moderator will check it.`); return false; }
+        if (r?.status === 'rejected') lines.push(`<strong>${esc(c.name)} [${esc(c.tag)}]:</strong> last request declined.${r.decision_note ? ` ${esc(r.decision_note)}` : ''}`);
+        return true;
+      });
+      status.innerHTML = lines.join('<br>');
+      status.hidden = lines.length === 0;
+      if (crewSel) crewSel.innerHTML = offer.map((c) => `<option value="${esc(c.crew_id)}">${esc(c.name)} [${esc(c.tag)}]</option>`).join('');
+      form.hidden = offer.length === 0;
+    };
+    render();
+
+    const linkWrap = document.getElementById('vr-link-wrap')!;
+    const syncMethod = () => { const m = (form.elements.namedItem('proof_method') as RadioNodeList).value; linkWrap.querySelector('small')!.textContent = m === 'code' ? 'required for the code option' : 'optional'; };
+    form.querySelectorAll('input[name="proof_method"]').forEach((i) => i.addEventListener('change', syncMethod));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      say('');
+      const fd = new FormData(form);
+      const method = String(fd.get('proof_method') ?? 'code');
+      const link = String(fd.get('link_url') ?? '').trim();
+      const message = String(fd.get('message') ?? '').trim();
+      if (method === 'code' && !/^https:\/\//.test(link)) { say('Add the link (starting with https://) where we can see your code.', true); return; }
+      const crewId = mode === 'crew' ? String(fd.get('crew_id') ?? '') : null;
+      if (mode === 'crew' && !crewId) { say('Choose the crew.', true); return; }
+      const btn = document.getElementById('vr-send') as HTMLButtonElement; btn.disabled = true;
+      const { data, error } = await sb.from('hub_role_requests').insert({
+        driver_id: me, role, status: 'pending', crew_id: crewId, proof_method: method,
+        link_url: link || null, message: message || null,
+      }).select('request_id,status,crew_id,decision_note,requested_at,decided_at').single();
+      btn.disabled = false;
+      if (error) { const hit = ERR.find(([re]) => re.test(error.message)); say(hit ? hit[1] : error.message, true); return; }
+      list.unshift(data as any);
+      form.reset(); syncMethod();
+      render();
+    });
+  }
+  init();
+</script>

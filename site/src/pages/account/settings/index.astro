@@ -6,6 +6,7 @@
 import Base from '../../../layouts/Base.astro';
 import AccountHead from '../../../components/AccountHead.astro';
 import UnitsSwitch from '../../../components/UnitsSwitch.astro';
+import VerifyRequest from '../../../components/VerifyRequest.astro';
 ---
 <Base
   title="Settings — My Account"
@@ -42,6 +43,9 @@ import UnitsSwitch from '../../../components/UnitsSwitch.astro';
           <p id="settings-msg" class="lr-note set-msg" role="status" hidden></p>
         </div>
       </section>
+
+      <!-- DEC-0217: request the ICON status (white seal) -->
+      <VerifyRequest mode="person" />
 
       <!-- DEC-0197: units for the whole site; same switch as in the footer. Texts: Claude placeholders for Codex -->
       <section>

@@ -12,6 +12,7 @@ import AccountHead from '../../../components/AccountHead.astro';
 import HubEditor from '../../../components/HubEditor.astro';
 import DiscordFeedSteps from '../../../components/DiscordFeedSteps.astro';
 import RoleApply from '../../../components/RoleApply.astro';
+import VerifyRequest from '../../../components/VerifyRequest.astro';
 import '../../../styles/hub.css';
 const base = import.meta.env.BASE_URL;
 ---
@@ -60,6 +61,9 @@ const base = import.meta.env.BASE_URL;
         </div>
         <HubEditor mode="crew"><DiscordFeedSteps slot="discord" source="crew" open /></HubEditor>
       </section>
+
+      <!-- DEC-0217: crew leaders request the verified-crew seal -->
+      <VerifyRequest mode="crew" />
 
       <RoleApply focus="crew_leader" />
     </div>
