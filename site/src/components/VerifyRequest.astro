@@ -9,7 +9,7 @@ const { mode } = Astro.props;
 const isPerson = mode === 'person';
 ---
 <section class="vr" id="vr" data-mode={mode} hidden>
-  <h2 class="lr-h2 lr-h2-s vr-h">{isPerson ? 'ICON status' : 'Crew verification'}</h2>
+  <h2 class="lr-h2 lr-h2-s vr-h">{isPerson ? 'Verified user' : 'Verified crew'}</h2>
   <div class="vr-card">
     <p class="vr-lede">
       <span class="icon-tag" aria-hidden="true"></span>
@@ -74,7 +74,7 @@ const isPerson = mode === 'person';
   const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
   const ERR: [RegExp, string][] = [
     [/verify_proof_link/, 'Add the link where we can see your code.'],
-    [/verify_already/, 'This is already confirmed.'],
+    [/verify_already/, 'This is already verified.'],
     [/verify_not_leader/, 'Only the crew leader can request verification.'],
     [/verify_cooldown/, 'You can request again 30 days after a declined request.'],
     [/one_open|duplicate key/, 'You already have an open request.'],
@@ -119,7 +119,7 @@ const isPerson = mode === 'person';
         const has = Boolean((roleRes as { data: unknown }).data);
         const open = list.find((r) => r.status === 'pending');
         const last = list[0];
-        if (has) { status.innerHTML = '<strong>You have the ICON status.</strong> The white seal is shown next to your name.'; status.hidden = false; form.hidden = true; return; }
+        if (has) { status.innerHTML = '<strong>You are a verified user.</strong> The white seal is shown next to your name.'; status.hidden = false; form.hidden = true; return; }
         if (open) { status.innerHTML = '<strong>Request sent.</strong> A moderator will check it. If you chose Discord, message a moderator on our Discord server.'; status.hidden = false; form.hidden = true; return; }
         status.hidden = !(last && last.status === 'rejected');
         if (last && last.status === 'rejected') status.innerHTML = `<strong>Your last request was declined.</strong>${last.decision_note ? ` ${esc(last.decision_note)}` : ''}`;
