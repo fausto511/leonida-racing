@@ -117,6 +117,20 @@ const img = `${base}images/hub/hub-events`;
     <p class="dsec-small">Role menus and LFG searches are available on the official Leonida Racing server. There, Verified Event Hosts can use /ping for the permitted notification groups. <a class="arrow" href={`${base}discord/`}>What’s on the server →</a></p>
   </section>
 
+  <!-- RS-0110 (Fausto 04.11.2026): chat command for Twitch / YouTube streams. COPY: Claude placeholders, Codex review pending. -->
+  <section class="wrap dsec" id="stream-chat">
+    <p class="eyebrow dsec-eb">For streamers</p>
+    <h2 class="lr-h2 lr-h2-s dsec-h">!car in your stream chat</h2>
+    <p class="dsec-p">Viewers type <code>!car comet</code> and your chat bot answers with the car’s class, real-life inspiration and, once measured, price, top speed and Gellhorn lap time, plus a link. Add it once with the line for your bot:</p>
+    <div class="sc">
+      <p class="sc-l">Nightbot (type this in your chat)</p>
+      <pre class="sc-c"><code>{'!commands add !car $(urlfetch https://pprzkexqltudeuqjnsqa.supabase.co/functions/v1/chat-car?q=$(querystring))'}</code></pre>
+      <p class="sc-l">StreamElements (type this in your chat)</p>
+      <pre class="sc-c"><code>{'!command add !car ${customapi.https://pprzkexqltudeuqjnsqa.supabase.co/functions/v1/chat-car?q=${queryescape ${1:}}}'}</code></pre>
+    </div>
+    <p class="dsec-small">Example answer: <em>Pfister Comet S2 Cabrio (Sports) · based on Porsche 911 Turbo S Cabriolet (992) · leonidaracing.com/cars/vehicles/pfister-comet-s2-cabrio/ · Data by Leonida Racing</em></p>
+  </section>
+
   <section class="wrap dsec">
     <p class="eyebrow dsec-eb">Permissions</p>
     <h2 class="lr-h2 lr-h2-s dsec-h">What the bot needs, and why</h2>
@@ -210,6 +224,12 @@ const img = `${base}images/hub/hub-events`;
 
   .tiers-wrap { overflow-x: auto; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
   .cmds { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .dsec-p { margin: 0 0 16px; color: var(--lr-soft); line-height: 1.6; max-width: 70ch; }
+  .dsec-p code { font-size: 14px; padding: 2px 7px; border-radius: 4px; background: var(--lr-raised); color: var(--lr-text); }
+  .sc { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .sc-l { margin: 8px 0 0; font-size: 13px; font-weight: 600; color: var(--lr-text); }
+  .sc-c { margin: 0; padding: 12px 14px; border: 1px solid var(--lr-line); border-radius: 6px; background: var(--lr-card); overflow-x: auto; }
+  .sc-c code { font-size: 13px; color: var(--lr-text); white-space: pre; }
   .cmds th, .cmds td { padding: 12px 16px; border-top: 1px solid var(--lr-line); text-align: left; vertical-align: top; }
   .cmds thead th { border-top: 0; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-soft); }
   .cmds tbody th { white-space: nowrap; font-weight: 500; }
