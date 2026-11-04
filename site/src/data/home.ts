@@ -4,7 +4,7 @@
 // placeholders from the mockup -> Codex review (DEC-0088).
 import { esc, regionLabel, crewTagHtml, focusLabels, eventTypeLabels, type HubCrew, type HubEvent } from './hub';
 import { lapTime } from './leaderboard';
-import { iconTagHtml } from './icons';
+import { iconTagHtml, verifiedCrewHtml } from './icons';
 
 const base = import.meta.env.BASE_URL;
 
@@ -46,7 +46,7 @@ export function homeCrewRow(c: HubCrew, sample: boolean): string {
   return `<div class="crow crew-card" data-crew-id="${esc(joinId)}">
   <a class="clink" href="${href}" aria-label="${esc(c.name)} in the crew directory"></a>
   ${crewTagHtml(c.tag, c.color, 'sm')}
-  <span class="cmain"><b><span class="ctag-inline">${crewTagHtml(c.tag, c.color, 'sm')}</span>${esc(c.name)}</b><span>${sub}</span></span>
+  <span class="cmain"><b><span class="ctag-inline">${crewTagHtml(c.tag, c.color, 'sm')}</span>${esc(c.name)}${verifiedCrewHtml(c.is_verified)}</b><span>${sub}</span></span>
   <span class="cside crew-join-slot"></span>
 </div>`;
 }

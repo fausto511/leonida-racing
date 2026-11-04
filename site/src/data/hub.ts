@@ -37,6 +37,8 @@ export interface HubCrew {
   is_official?: boolean;
   /** DEC-0201: external crew listed by the end of GTA VI launch week; set on approval, kept for good */
   is_launch_crew?: boolean;
+  /** DEC-0216: verified crew = confirmed as the original by a moderator (white rosette after the name) */
+  is_verified?: boolean;
   /** DEC-0144: 'open' = join at once, 'request' = leader/commissioner approves (default) */
   join_mode?: 'open' | 'request';
 }
@@ -106,7 +108,7 @@ export interface HubEvent {
   sample_going?: string[];
 }
 
-import { iconTagHtml } from './icons';
+import { iconTagHtml, verifiedCrewHtml } from './icons';
 import { languageLabel } from './languages';
 import { ACTIVE_PLATFORMS } from './platforms';
 export const platformLabels: Record<Platform, string> = { ps5: 'PS5', xbox: 'Xbox Series X|S' };
@@ -271,7 +273,7 @@ export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: bo
   const actions = opts.actions ? `<div class="crew-actions">${opts.actions}</div>` : joinId ? '<span class="crew-join-slot"></span>' : '';
   return `<article class="crew-card"${c.crew_id && !opts.sample ? ` id="crew-${esc(c.crew_id)}"` : ''}${joinId ? ` data-crew-id="${esc(joinId)}"` : ''} data-platforms="${esc(c.platforms.join('|'))}" data-focus="${esc(c.focus.join('|'))}" data-featured="${c.is_featured ? '1' : '0'}" data-languages="${esc((c.languages ?? []).join('|'))}" data-search="${esc(`${c.name} ${c.tag}`.toLowerCase())}" style="--crew-color:${safeColor(c.color)}">
   ${report}
-  <div class="crew-head">${crewTagHtml(c.tag, c.color)}<h3 class="crew-name" title="${esc(c.name)}">${esc(c.name)}</h3></div>
+  <div class="crew-head">${crewTagHtml(c.tag, c.color)}<h3 class="crew-name" title="${esc(c.name)}">${esc(c.name)}</h3>${verifiedCrewHtml(c.is_verified)}</div>
   ${badges ? `<div class="crew-badges">${badges}</div>` : ''}
   <div class="crew-chips">${chips}</div>
   <p class="crew-desc">${c.description ? esc(c.description) : ''}</p>

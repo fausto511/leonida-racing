@@ -23,6 +23,7 @@
 .crew-card::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--crew-color); }
 .crew-head { display: flex; align-items: center; gap: 10px; min-width: 0; padding-right: 1.4rem; }
 .crew-head .crew-tag { flex: none; }
+.crew-head .icon-tag { width: 18px; height: 18px; margin-left: -4px; } /* verified crew seal right after the name (DEC-0216) */
 .crew-name { margin: 0; min-width: 0; font-size: var(--lr-h3); font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 400px) { .crew-name { font-size: var(--lr-h3-xs); } } /* small phones: crew names up to 22 characters fit */
 .crew-badges { display: flex; gap: 6px; margin-top: 10px; height: 20px; }
