@@ -746,7 +746,8 @@ async function handleBackfill(feedId: string) {
 // are never removed by the bot. Jobs: table discord_role_jobs (DB triggers + daily
 // discord_role_reconcile()). Server: secret DISCORD_GUILD_ID (same as join-discord-guild).
 const ROLE_GUILD = Deno.env.get("DISCORD_GUILD_ID") ?? "";
-const ROLE_NAMES: Record<string, string> = { member: "Registered Driver", crew_leader: "Verified Crew Leader", event_host: "Verified Event Host", creator: "Verified Creator" };
+// notable = ICON role (DEC-0215, 04.11.2026); the Discord role must be named "Icon" (looked up by name once, then by id).
+const ROLE_NAMES: Record<string, string> = { member: "Registered Driver", crew_leader: "Verified Crew Leader", event_host: "Verified Event Host", creator: "Verified Creator", notable: "Icon" };
 const UNKNOWN_MEMBER = 10007;
 let roleIdsCache: Record<string, string> | null = null;
 async function roleStatus(msg: string | null) {
