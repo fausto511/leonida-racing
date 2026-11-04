@@ -315,7 +315,9 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
   const mon = start.toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' });
   const wd = start.toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'UTC' });
   const time = start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
-  const endTime = end ? end.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) : '';
+  // Event over midnight (e.g. launch event 00:01 → 00:00 next day): the end also shows its date,
+  // otherwise the row reads like "23:01–23:00". The browser re-checks this in local time (localizeTimes).
+  const endTime = end ? endLabel(start, end, 'UTC') : '';
   const join = safeUrl(e.join_url);
   const cancelled = e.status === 'cancelled';
   // PSN name (marked "PSN" so players know whom to add on PlayStation), else the
@@ -343,7 +345,7 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
     <span class="ev-day" data-fmt="dnum">${esc(day)}</span>
     <span class="ev-mon" data-fmt="mon">${esc(mon)}</span>
   </div>`;
-  const timeHtml = `<b class="ev-time"><span data-ts="${esc(e.starts_at)}" data-fmt="time">${esc(time)}</span>${end ? `–<span data-ts="${esc(e.ends_at)}" data-fmt="time">${esc(endTime)}</span>` : ''}</b>`;
+  const timeHtml = `<b class="ev-time"><span data-ts="${esc(e.starts_at)}" data-fmt="time">${esc(time)}</span>${end ? `–<span data-ts="${esc(e.ends_at)}" data-start="${esc(e.starts_at)}" data-fmt="endtime">${esc(endTime)}</span>` : ''}</b>`;
   if (opts.full) {
     // Event row everywhere except the home teaser (DEC-0195, Fausto 30.10.): title · Hosted by ·
     // time + place · links · description; right: sign-up slot; foot: type/platform chips left,
@@ -384,7 +386,7 @@ export function eventRowHtml(e: HubEvent, opts: { rsvp?: boolean; sample?: boole
   </div>
   <div class="ev-main">
     <h3 class="ev-title">${esc(e.title)}</h3>
-    <p class="ev-l1"><span class="ev-type">${esc(eventTypeLabels[e.event_type] ?? e.event_type)}</span>${cancelled ? '<span class="ev-flag ev-cancel">Cancelled</span>' : ''}${opts.sample ? '<span class="ev-flag" title="Example event — it will not take place">Sample</span>' : ''}<b class="ev-time"><span data-ts="${esc(e.starts_at)}" data-fmt="time">${esc(time)}</span>${end ? `–<span data-ts="${esc(e.ends_at)}" data-fmt="time">${esc(endTime)}</span>` : ''}</b>${e.location ? `<span class="dot" aria-hidden="true">·</span><span class="ev-loc">${iconPin}${esc(e.location)}</span>` : ''}</p>
+    <p class="ev-l1"><span class="ev-type">${esc(eventTypeLabels[e.event_type] ?? e.event_type)}</span>${cancelled ? '<span class="ev-flag ev-cancel">Cancelled</span>' : ''}${opts.sample ? '<span class="ev-flag" title="Example event — it will not take place">Sample</span>' : ''}<b class="ev-time"><span data-ts="${esc(e.starts_at)}" data-fmt="time">${esc(time)}</span>${end ? `–<span data-ts="${esc(e.ends_at)}" data-start="${esc(e.starts_at)}" data-fmt="endtime">${esc(endTime)}</span>` : ''}</b>${e.location ? `<span class="dot" aria-hidden="true">·</span><span class="ev-loc">${iconPin}${esc(e.location)}</span>` : ''}</p>
     ${l2 ? `<p class="ev-l2">${l2}</p>` : ''}
     ${e.description ? `<p class="ev-desc">${esc(e.description)}</p>` : ''}
   </div>
@@ -399,6 +401,16 @@ export function eventOpenSpotHtml(): string {
   return `<div class="ev-open"><span class="ev-open-plus" aria-hidden="true">+</span><span class="ev-open-t"><b>Open spot</b><span>Host a race, a meet, or a hotlap session.</span></span><a class="btn btn-s ev-open-btn" href="${import.meta.env.BASE_URL}account/events/">Become a host</a></div>`;
 }
 
+/** End of an event: only the time if it ends on the start day, otherwise "20 Nov 00:00".
+ *  timeZone 'UTC' for the build-time render, undefined = visitor's local time. */
+function endLabel(start: Date, end: Date, timeZone?: string): string {
+  const tz = timeZone ? { timeZone } : {};
+  const t = end.toLocaleTimeString(timeZone ? 'en-GB' : undefined, { hour: '2-digit', minute: '2-digit', ...tz });
+  const dayKey = (d: Date) => d.toLocaleDateString('en-CA', tz);
+  if (dayKey(start) === dayKey(end)) return t;
+  return `${end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', ...tz })} ${t}`;
+}
+
 /** Re-formats all [data-ts] nodes inside `root` into the visitor's local time. */
 export function localizeTimes(root: ParentNode): void {
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -407,6 +419,11 @@ export function localizeTimes(root: ParentNode): void {
     if (Number.isNaN(d.getTime())) return;
     const fmt = el.dataset.fmt;
     if (fmt === 'time') { el.textContent = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); return; }
+    if (fmt === 'endtime') {
+      const st = new Date(el.dataset.start ?? '');
+      el.textContent = Number.isNaN(st.getTime()) ? d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : endLabel(st, d);
+      return;
+    }
     el.querySelectorAll<HTMLElement>('[data-fmt]').forEach((part) => {
       if (part.dataset.fmt === 'wd') part.textContent = d.toLocaleDateString('en-GB', { weekday: 'short' });
       if (part.dataset.fmt === 'day') part.textContent = d.toLocaleDateString('en-GB', { day: '2-digit' });
