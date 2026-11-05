@@ -59,7 +59,7 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     <div class="vc-brand"><img src={`${base}images/logos/${v.logoSlug}-gta-6-logo.svg`} alt="" width="20" height="20" loading="lazy" />{v.make}</div>
     <a href={href} class="vc-name">{v.model}</a>
     <div class="vc-stats">
-      <span class:list={[{ 'vc-tba': !price }]}>{price ? fmtPrice(price) : 'Price TBA'}</span>{' · '}<span class:list={[{ 'vc-tba': !speed }]}>{speed ? <Fragment set:html={speedHtml(speed)} /> : 'Top speed TBA'}</span>
+      <span class:list={[{ 'vc-tba': !price }]}>{price ? fmtPrice(price) : 'Price TBA'}</span><span class="vc-sep">{' · '}</span><span class:list={[{ 'vc-tba': !speed }]}>{speed ? <Fragment set:html={speedHtml(speed)} /> : 'Top speed TBA'}</span>
     </div>
     {cars && acq && <div class="vc-edition">{acq}</div>}
     <div class="vc-based">{v.realLifeInspiration ? `Based on ${v.realLifeInspiration}` : ' '}</div>
@@ -156,10 +156,13 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     .vc-list .vc-based { display: none; }
     .vc-list .vc-foot { margin-top: 4px; padding-top: 0; border-top: 0; font-size: 13px; }
     .vc-list .vc-cmp { top: 10px; right: 8px; width: 40px; height: 40px; }
-    .vc-list .vc-acts { position: absolute; right: 8px; bottom: 10px; }
+    /* compare, heart, garage stacked on the right with 10px between them (Fausto 05.11.) */
+    .vc-list { min-height: 160px; }
+    .vc-list .vc-acts { position: absolute; right: 8px; bottom: 10px; flex-direction: column; gap: 10px; }
     .vc-list .vc-garage, .vc-list .vc-wish { width: 40px; height: 40px; }
-    .vc-list .vc-foot { padding-right: 46px; }
-    .vc-list .vc-nolap-l { display: none; } /* phone list: short label, the heart needs the room */
-    .vc-list .vc-nolap-s { display: inline; } /* room for the heart left of the garage */
+    /* price and top speed on two lines: the taller row has the room */
+    .vc-list .vc-stats { display: flex; flex-direction: column; white-space: normal; }
+    .vc-list .vc-stats > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .vc-list .vc-sep { display: none; }
   }
 </style>
