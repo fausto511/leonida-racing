@@ -4,7 +4,7 @@
 // server-rendered; this only shows/hides/reorders them.
 // COPY STATUS: messages are Claude placeholders -> Codex review (DEC-0088).
 import { getSelected, toggleSelected, onCompareChange } from './compare';
-import { currentDriverId, fetchOwned, setOwned } from './owned';
+import { currentDriverId, fetchOwned, setOwned, fetchWishList, setWished } from './owned';
 import { backendConfigured, getSupabase } from './supabase-client';
 import { CLOSE_SVG } from '../data/site';
 import { releaseById } from '../data/releases';
@@ -32,6 +32,7 @@ const emptyRanges = (): Record<RangeKey, Range> => ({ price: [null, null], speed
 const state: State = { q: '', own: '', sort: DEFAULT_SORT, sets: emptySets(), ranges: emptyRanges() };
 let showAll = false;
 let owned = new Set<string>();
+let wished = new Set<string>(); // wishlist (DEC-0189); heart on every card next to the garage (Fausto 05.11.)
 let driverId: string | null = null;
 
 // ---- data available? (C4: fields without data stay greyed out until it exists) ----
@@ -374,6 +375,7 @@ function renderOwned() {
     b.setAttribute('aria-pressed', String(on));
     b.title = on ? 'In My Garage · click to remove' : 'Mark as owned · Adds the car to My Garage';
   });
+  paintWish();
   paintOwnCounts();
   if (driverId) {
     // count only the cars on this page (class / manufacturer pages show "3 / 29")
@@ -384,6 +386,17 @@ function renderOwned() {
     if (tile.dataset.glance != null) { $('gt-cta').textContent = `${here} / ${N}`; $('gt-cta').classList.add('is-count'); }
     else $('gt-cta').textContent = 'Open →';
   }
+}
+// Heart: pink = on the wishlist; dimmed while you own the car (owning takes it off the wishlist)
+function paintWish() {
+  document.querySelectorAll<HTMLButtonElement>('[data-wish]').forEach((b) => {
+    const id = b.dataset.wish!;
+    const own = owned.has(id), on = !own && wished.has(id);
+    b.setAttribute('aria-pressed', String(on));
+    b.classList.toggle('is-owned', own);
+    b.setAttribute('aria-disabled', String(own));
+    b.title = own ? 'Already in your garage' : on ? 'On your wishlist · click to remove' : 'Add to wishlist';
+  });
 }
 // G2: Owned / Not owned count within the current search + filters (not the whole list)
 function paintOwnCounts() {
@@ -399,7 +412,7 @@ function paintOwnCounts() {
 async function loadOwned() {
   driverId = await currentDriverId();
   if (!driverId) return;
-  owned = await fetchOwned();
+  [owned, wished] = await Promise.all([fetchOwned(), fetchWishList().then((l) => new Set(l))]);
   $('own-seg').hidden = false;
   renderOwned();
   if (state.own) render();
@@ -413,7 +426,7 @@ async function loadOwned() {
 // ---- events -----------------------------------------------------------------
 document.addEventListener('click', async (e) => {
   const t = e.target as HTMLElement;
-  if (!t.closest('#toast') && !t.closest('[data-garage]') && !t.closest('[data-compare]') && !t.closest('#cmp-btn')) hideBubble();
+  if (!t.closest('#toast') && !t.closest('[data-garage]') && !t.closest('[data-wish]') && !t.closest('[data-compare]') && !t.closest('#cmp-btn')) hideBubble();
   const cmp = t.closest<HTMLElement>('[data-compare]');
   if (cmp) {
     e.preventDefault();
@@ -436,6 +449,7 @@ document.addEventListener('click', async (e) => {
     try {
       await setOwned(driverId, id, next);
       next ? owned.add(id) : owned.delete(id);
+      if (next) wished.delete(id); // the database took it off the wishlist
       renderOwned();
       if (next) {
         let seen = false;
@@ -446,6 +460,26 @@ document.addEventListener('click', async (e) => {
     } catch {
       bubble(gar, 'Could not save that. Please try again.');
     } finally { gar.disabled = false; }
+    return;
+  }
+  const wb = t.closest<HTMLButtonElement>('[data-wish]');
+  if (wb) {
+    e.preventDefault();
+    const id = wb.dataset.wish!;
+    if (!driverId) {
+      bubble(wb, backendConfigured ? 'Log in to keep a wishlist.<button type="button" class="btn btn-discord btn-sm" data-login>Log in with Discord</button>' : 'Log in to keep a wishlist.', 6000);
+      return;
+    }
+    if (owned.has(id)) { bubble(wb, 'Already in your garage.'); return; }
+    const next = !wished.has(id);
+    wb.disabled = true;
+    try {
+      await setWished(driverId, id, next);
+      next ? wished.add(id) : wished.delete(id);
+      paintWish();
+    } catch {
+      bubble(wb, 'Could not save that. Please try again.');
+    } finally { wb.disabled = false; }
     return;
   }
   if (t.closest('[data-login]')) { login(); return; }

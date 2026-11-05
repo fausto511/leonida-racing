@@ -66,13 +66,18 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     <div class="vc-foot">
       <span class="vc-rank" title={cars && lap ? `Gellhorn rank in ${cls}` : 'Gellhorn International Raceway'}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>
-        {lap ? (cars ? <>Gellhorn #{lap.rank}{'\u2002·\u2002'}<span class="tnum">{lapTime(lap.ms)}</span></> : <>#{lap.rank} in {cls}{'\u2002·\u2002'}<span class="tnum">{lapTime(lap.ms)}</span></>) : 'No Gellhorn lap yet'}
+        {lap ? (cars ? <>#{lap.rank}{'\u2002·\u2002'}<span class="tnum">{lapTime(lap.ms)}</span></> : <>#{lap.rank} in {cls}{'\u2002·\u2002'}<span class="tnum">{lapTime(lap.ms)}</span></>) : <><span class="vc-nolap-l">No Gellhorn lap yet</span><span class="vc-nolap-s">No lap yet</span></>}
       </span>
       {cars ? (
-        <button type="button" class="vc-garage" data-garage={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to My Garage`} title="Mark as owned · Adds the car to My Garage">
-          <svg class="vc-g-house" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12M7 21v-7h10v7"/></svg>
-          <svg class="vc-g-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/></svg>
-        </button>
+        <span class="vc-acts">
+          <button type="button" class="vc-wish" data-wish={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to your wishlist`} title="Add to wishlist">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+          </button>
+          <button type="button" class="vc-garage" data-garage={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to My Garage`} title="Mark as owned · Adds the car to My Garage">
+            <svg class="vc-g-house" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12M7 21v-7h10v7"/></svg>
+            <svg class="vc-g-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/></svg>
+          </button>
+        </span>
       ) : <span class="vc-arrow" aria-hidden="true">→</span>}
     </div>
   </div>
@@ -96,6 +101,17 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   .vc-garage:hover { border-color: var(--lr-text); }
   .vc-garage:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
   .vc-garage svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  /* Wishlist heart next to the garage (Fausto 05.11.): always shown, so every card looks the same;
+     dimmed when you own the car (owning takes it off the wishlist) */
+  .vc-nolap-s { display: none; }
+  .vc-acts { display: flex; gap: 6px; flex: none; }
+  .vc-wish { position: relative; z-index: 2; flex: none; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); cursor: pointer; }
+  .vc-wish:hover:not(:disabled) { border-color: var(--lr-pink); color: var(--lr-pink); }
+  .vc-wish:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+  .vc-wish svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .vc-wish[aria-pressed="true"] { background: var(--lr-pink-fill); border-color: var(--lr-pink-border); color: var(--lr-pink); }
+  .vc-wish[aria-pressed="true"] svg { fill: currentColor; }
+  .vc-wish.is-owned { opacity: .35; cursor: default; }
   .vc-g-check { display: none; }
   .vc-garage[aria-pressed="true"] { background: var(--lr-lime-fill); border-color: var(--lr-lime-border); color: var(--lr-lime); }
   .vc-garage[aria-pressed="true"] .vc-g-house { display: none; }
@@ -140,6 +156,10 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     .vc-list .vc-based { display: none; }
     .vc-list .vc-foot { margin-top: 4px; padding-top: 0; border-top: 0; font-size: 13px; }
     .vc-list .vc-cmp { top: 10px; right: 8px; width: 40px; height: 40px; }
-    .vc-list .vc-garage { position: absolute; right: 8px; bottom: 10px; width: 40px; height: 40px; }
+    .vc-list .vc-acts { position: absolute; right: 8px; bottom: 10px; }
+    .vc-list .vc-garage, .vc-list .vc-wish { width: 40px; height: 40px; }
+    .vc-list .vc-foot { padding-right: 46px; }
+    .vc-list .vc-nolap-l { display: none; } /* phone list: short label, the heart needs the room */
+    .vc-list .vc-nolap-s { display: inline; } /* room for the heart left of the garage */
   }
 </style>

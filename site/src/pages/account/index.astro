@@ -212,6 +212,7 @@ const vehicleIndex = [...vehicleOptions]
     if (!src) return null;
     const el = src.cloneNode(true) as HTMLElement;
     el.querySelector('.vc-cmp')?.remove();
+    el.querySelector('.vc-wish')?.remove(); // the account lists set their own buttons (heart only on the wishlist)
     if (x.id === fresh) el.classList.add('is-new');
     const gar = el.querySelector<HTMLButtonElement>('.vc-garage')!;
     const label = `${x.make} ${x.model}`;

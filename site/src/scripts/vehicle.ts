@@ -123,6 +123,23 @@ function init(root: HTMLElement) {
     const label = on ? 'On your wishlist · click to remove' : 'Add to wishlist';
     wishBtn.title = label;
     wishBtn.setAttribute('aria-label', label);
+    // hearts on the "similar cars" cards (same rule as the Cars page)
+    document.querySelectorAll<HTMLButtonElement>('[data-wish]').forEach((b) => {
+      const cid = b.dataset.wish!, own = owned.has(cid), w = !own && wished.has(cid);
+      b.setAttribute('aria-pressed', String(w));
+      b.classList.toggle('is-owned', own);
+      b.setAttribute('aria-disabled', String(own));
+      b.title = own ? 'Already in your garage' : w ? 'On your wishlist · click to remove' : 'Add to wishlist';
+    });
+  }
+  async function toggleWishCard(carId: string, b: HTMLButtonElement) {
+    if (!me) { bubble(b, `Log in to keep a wishlist.${loginBtn('login')}`, 6000); return; }
+    if (owned.has(carId)) { bubble(b, 'Already in your garage.'); return; }
+    const next = !wished.has(carId);
+    b.disabled = true;
+    try { await setWished(me, carId, next); next ? wished.add(carId) : wished.delete(carId); paintWish(); }
+    catch { bubble(b, 'Could not save. Please try again.'); }
+    b.disabled = false;
   }
   wishBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -197,6 +214,8 @@ function init(root: HTMLElement) {
     if (lb) { login(lb.dataset.login === 'own' || lb.dataset.login === 'wish' ? lb.dataset.login : ''); return; }
     const cmp = t.closest<HTMLElement>('[data-compare]');
     if (cmp) { e.preventDefault(); e.stopPropagation(); toggleCompare(cmp.dataset.compare!, cmp); return; }
+    const wc = t.closest<HTMLButtonElement>('[data-wish]');
+    if (wc) { e.preventDefault(); e.stopPropagation(); toggleWishCard(wc.dataset.wish!, wc); return; }
     const gar = t.closest<HTMLElement>('[data-garage]');
     if (gar) { e.preventDefault(); e.stopPropagation(); toggleGarage(gar.dataset.garage!, gar); return; }
     const add = t.closest<HTMLElement>('[data-add-garage]');
