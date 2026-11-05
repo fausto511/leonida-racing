@@ -316,7 +316,9 @@ const vehicleIndex = [...vehicleOptions]
   const slot = (list: View, title: string, sub: string) => `<button type="button" class="mg-slot" data-add="${list}" aria-haspopup="dialog">
       <span class="mg-slot-plus" aria-hidden="true">+</span><span class="mg-slot-t"><strong>${title}</strong><span>${sub}</span></span></button>`;
 
-  /** progress per group, closest to complete first; finished groups after the open ones */
+  /** Order (Fausto 05.11.): complete groups first (the reward stays visible), then groups you own
+   *  something of, by fewest cars missing, then groups you own nothing of, also by fewest missing.
+   *  Every group with a car of yours is always shown; "Show all" only adds the untouched ones. */
   function collStats(list: Group[]) {
     const have = new Set(owned);
     return list.map((g) => {
@@ -325,12 +327,14 @@ const vehicleIndex = [...vehicleOptions]
     });
   }
   function renderColl() {
-    const rows = collStats(groups[groupBy]).sort((a, b) => {
-      const da = a.missing.length === 0, db = b.missing.length === 0;
-      if (da !== db) return da ? 1 : -1;
-      return (b.n / b.t) - (a.n / a.t) || a.missing.length - b.missing.length || a.name.localeCompare(b.name);
-    });
-    const list = showAll ? rows : rows.slice(0, COLL_TOP);
+    const tier = (g: { n: number; missing: string[] }) => (g.missing.length === 0 && g.n > 0 ? 0 : g.n > 0 ? 1 : 2);
+    const rows = collStats(groups[groupBy]).sort((a, b) =>
+      tier(a) - tier(b)
+      || (tier(a) === 0 ? b.t - a.t : a.missing.length - b.missing.length)
+      || (b.n / b.t) - (a.n / a.t)
+      || a.name.localeCompare(b.name));
+    const mine = rows.filter((g) => g.n > 0).length;
+    const list = showAll ? rows : rows.slice(0, Math.max(mine, COLL_TOP));
     $('cx-rows').innerHTML = list.map((g) => {
       const pct = g.t ? Math.round((g.n / g.t) * 100) : 0;
       const done = g.missing.length === 0;
@@ -341,7 +345,7 @@ const vehicleIndex = [...vehicleOptions]
       return `<div class="cx-row${done ? ' is-done' : ''}"><a class="cx-n" href="${esc(base + g.href)}">${esc(g.name)}</a><span class="cx-c">${g.n} / ${g.t}</span><span class="cx-bar" role="img" aria-label="${pct} %"><i style="width:${pct}%"></i></span>${right}</div>`;
     }).join('');
     const more = $<HTMLButtonElement>('cx-more');
-    more.hidden = rows.length <= COLL_TOP;
+    more.hidden = rows.length <= Math.max(mine, COLL_TOP);
     more.textContent = showAll ? 'Show fewer' : `Show all ${rows.length}`;
     // hint in My cars: groups with exactly one car missing (only once you own something)
     const almost = [...collStats(groups.classes), ...collStats(groups.makes)].filter((g) => g.n > 0 && g.missing.length === 1).length;
