@@ -10,6 +10,7 @@ import AccountHead from '../../components/AccountHead.astro';
 import CarCard from '../../components/CarCard.astro';
 import { vehicleOptions, fastestGellhornLapMs } from '../../data/vehicles';
 import { isNewInGame } from '../../data/releases';
+import { classPages, manufacturerPages, vehiclesInClass } from '../../data/garage-taxonomy';
 const base = import.meta.env.BASE_URL;
 // Gellhorn rank per class, same as on the Cars page (CarsBrowser)
 const rankInClass = new Map<string, number>();
@@ -18,6 +19,16 @@ for (const cls of new Set(vehicleOptions.flatMap((v) => v.classes))) {
     .sort((a, b) => fastestGellhornLapMs(a.id)! - fastestGellhornLapMs(b.id)!)
     .forEach((v, i) => rankInClass.set(v.id, i + 1));
 }
+// Collection tab (Fausto 05.11.): progress per class and per manufacturer, only groups that already
+// exist on the site (no hand-made sets). href = the group's page; a "missing" link adds ?own=not.
+const makeSlugs = new Set(manufacturerPages.map((m) => m.slug));
+const collGroups = {
+  classes: classPages.map((c) => ({ name: c.name, href: `cars/classes/${c.slug}/`, ids: vehiclesInClass(c.slug).map((v) => v.id) })),
+  makes: [...new Set(vehicleOptions.map((v) => v.logoSlug))].map((slug) => {
+    const vs = vehicleOptions.filter((v) => v.logoSlug === slug);
+    return { name: vs[0].make, href: makeSlugs.has(slug) ? `cars/manufacturers/${slug}/` : `cars/?make=${encodeURIComponent(slug)}`, ids: vs.map((v) => v.id) };
+  }),
+};
 const vehicleIndex = [...vehicleOptions]
   .sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`))
   .map((v) => ({ id: v.id, make: v.make, model: v.model, cls: v.classes[0] ?? 'Other', classes: v.classes.join(' / '), logo: v.logoSlug, photo: Boolean(v.photo) }));
@@ -40,6 +51,7 @@ const vehicleIndex = [...vehicleOptions]
       <div class="mg-seg" role="tablist" aria-label="Garage">
         <button type="button" role="tab" id="mg-tab-cars" aria-controls="mg-v-cars" aria-selected="true" data-view="cars">My cars <span class="mg-n" id="mg-n-cars"></span></button>
         <button type="button" role="tab" id="mg-tab-wish" aria-controls="mg-v-wish" aria-selected="false" data-view="wishlist">Wishlist <span class="mg-n" id="mg-n-wish"></span></button>
+        <button type="button" role="tab" id="mg-tab-coll" aria-controls="mg-v-coll" aria-selected="false" data-view="collection">Collection</button>
       </div>
 
       <section id="mg-v-cars" role="tabpanel" aria-labelledby="mg-tab-cars">
@@ -50,6 +62,7 @@ const vehicleIndex = [...vehicleOptions]
           </div>
           <div class="mg-meter"><b id="mg-own-n">0</b> of {vehicleIndex.length} cars<span class="mg-bar"><i id="mg-own-bar"></i></span></div>
         </div>
+        <p class="mg-almost" id="mg-almost" hidden><a href="#collection" id="mg-almost-a"></a></p>
         <p class="mg-msg lr-note" id="mg-msg-cars" role="status" hidden></p>
         <div class="mg-grid" id="mg-grid-cars"></div>
       </section>
@@ -63,6 +76,23 @@ const vehicleIndex = [...vehicleOptions]
         </div>
         <p class="mg-msg lr-note" id="mg-msg-wish" role="status" hidden></p>
         <div class="mg-grid" id="mg-grid-wish"></div>
+      </section>
+
+      <section id="mg-v-coll" role="tabpanel" aria-labelledby="mg-tab-coll" hidden>
+        <div class="mg-head">
+          <div>
+            <h2 class="lr-h2 lr-h2-s">Collection</h2>
+            <p class="mg-lede">How much of each class and manufacturer is in your garage. Only you can see this.</p>
+          </div>
+        </div>
+        <div class="cx-panel">
+          <div class="cx-seg" role="tablist" aria-label="Group by">
+            <button type="button" role="tab" data-group="classes" aria-selected="true">Classes</button>
+            <button type="button" role="tab" data-group="makes" aria-selected="false">Manufacturers</button>
+          </div>
+          <div id="cx-rows"></div>
+          <button type="button" class="cx-more" id="cx-more" hidden></button>
+        </div>
       </section>
     </div>
   </section>
@@ -92,6 +122,39 @@ const vehicleIndex = [...vehicleOptions]
 <style>
   [hidden] { display: none !important; }
   .account-wrap { padding-top: var(--lr-gap-head); } /* DEC-0188; the footer brings the 64px gap below */
+  /* Collection tab (Fausto 05.11.) */
+  .cx-panel { border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); padding: 6px 20px 12px; }
+  .cx-seg { display: flex; gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--lr-line-soft); }
+  .cx-seg button { height: 32px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: var(--lr-muted); font: 600 14px var(--gh-font-body); cursor: pointer; }
+  .cx-seg button:hover { color: var(--lr-text); }
+  .cx-seg button[aria-selected="true"] { background: var(--lr-raised); color: var(--lr-text); }
+  :global(.cx-row) { display: grid; grid-template-columns: minmax(120px, 220px) 64px minmax(0, 1fr) 150px; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--lr-line-soft); font-size: 15px; }
+  :global(.cx-row:last-child) { border-bottom: 0; }
+  :global(.cx-n) { color: var(--lr-text); font-weight: 600; text-decoration: none; }
+  :global(a.cx-n:hover) { color: var(--lr-orange); }
+  :global(.cx-c) { color: var(--lr-soft); font-variant-numeric: tabular-nums; }
+  :global(.cx-bar) { height: 4px; border-radius: 2px; background: var(--lr-raised); overflow: hidden; }
+  :global(.cx-bar i) { display: block; height: 100%; border-radius: 2px; background: var(--lr-orange); }
+  :global(.cx-row.is-done .cx-bar i) { background: var(--lr-lime); }
+  :global(.cx-r) { justify-self: end; color: var(--lr-orange); font-weight: 600; text-decoration: none; white-space: nowrap; }
+  :global(a.cx-r:hover) { color: var(--lr-orange-hover); }
+  :global(.cx-s) { display: none; }
+  :global(.cx-done) { justify-self: end; color: var(--lr-lime); font-weight: 600; white-space: nowrap; }
+  .cx-more { margin: 12px 0 4px; padding: 0; border: 0; background: none; color: var(--lr-orange); font: 600 14px var(--gh-font-body); cursor: pointer; }
+  .cx-more:hover { color: var(--lr-orange-hover); }
+  .mg-almost { margin: -8px 0 20px; font-size: 14px; }
+  .mg-almost a { color: var(--lr-orange); font-weight: 600; text-decoration: none; }
+  .mg-almost a:hover { color: var(--lr-orange-hover); }
+  @media (max-width: 760px) {
+    .cx-panel { padding: 4px 14px 10px; }
+    /* phone: name + count, then the bar with the link at its end */
+    :global(.cx-row) { grid-template-columns: minmax(0, 1fr) 112px; gap: 8px 14px; padding: 12px 0; }
+    :global(.cx-l) { display: none; }
+    :global(.cx-s) { display: inline; }
+    :global(.cx-c) { grid-column: 2; grid-row: 1; justify-self: end; }
+    :global(.cx-bar) { grid-column: 1; grid-row: 2; }
+    :global(.cx-r), :global(.cx-done) { grid-column: 2; grid-row: 2; justify-self: end; font-size: 14px; }
+  }
   .acc-auth { margin-bottom: 1.5rem; } /* box: .lr-empty-panel (DEC-0182) */
   /* switch My cars / Wishlist (DEC-0189) */
   .mg-seg { display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 32px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
@@ -160,8 +223,9 @@ const vehicleIndex = [...vehicleOptions]
   }
 </style>
 
-<script define:vars={{ vehicleIndex }}>
+<script define:vars={{ vehicleIndex, collGroups }}>
   window.__mgVehicles = vehicleIndex;
+  window.__mgGroups = collGroups;
 </script>
 
 <script>
@@ -170,9 +234,14 @@ const vehicleIndex = [...vehicleOptions]
   import { esc } from '../../data/hub';
 
   type V = { id: string; make: string; model: string; cls: string; classes: string; logo: string; photo: boolean };
-  type View = 'cars' | 'wishlist';
+  type View = 'cars' | 'wishlist' | 'collection';
+  type Group = { name: string; href: string; ids: string[] };
   const all = (window as any).__mgVehicles as V[];
   const byId = new Map(all.map((v) => [v.id, v]));
+  const groups = (window as any).__mgGroups as { classes: Group[]; makes: Group[] };
+  let groupBy: 'classes' | 'makes' = 'classes';
+  let showAll = false;
+  const COLL_TOP = 8;
   const base = import.meta.env.BASE_URL;
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const picker = $<HTMLDialogElement>('mg-picker');
@@ -247,6 +316,39 @@ const vehicleIndex = [...vehicleOptions]
   const slot = (list: View, title: string, sub: string) => `<button type="button" class="mg-slot" data-add="${list}" aria-haspopup="dialog">
       <span class="mg-slot-plus" aria-hidden="true">+</span><span class="mg-slot-t"><strong>${title}</strong><span>${sub}</span></span></button>`;
 
+  /** progress per group, closest to complete first; finished groups after the open ones */
+  function collStats(list: Group[]) {
+    const have = new Set(owned);
+    return list.map((g) => {
+      const n = g.ids.filter((id) => have.has(id)).length;
+      return { ...g, n, t: g.ids.length, missing: g.ids.filter((id) => !have.has(id)) };
+    });
+  }
+  function renderColl() {
+    const rows = collStats(groups[groupBy]).sort((a, b) => {
+      const da = a.missing.length === 0, db = b.missing.length === 0;
+      if (da !== db) return da ? 1 : -1;
+      return (b.n / b.t) - (a.n / a.t) || a.missing.length - b.missing.length || a.name.localeCompare(b.name);
+    });
+    const list = showAll ? rows : rows.slice(0, COLL_TOP);
+    $('cx-rows').innerHTML = list.map((g) => {
+      const pct = g.t ? Math.round((g.n / g.t) * 100) : 0;
+      const done = g.missing.length === 0;
+      const link = g.missing.length === 1 ? `${base}cars/vehicles/${encodeURIComponent(g.missing[0])}/`
+        : `${base}${g.href}${g.href.includes('?') ? '&' : '?'}own=not`;
+      const right = done ? '<span class="cx-done">✓ Complete</span>'
+        : `<a class="cx-r" href="${esc(link)}">${g.missing.length === 1 ? `<span class="cx-l">${esc(name(g.missing[0]).replace(/^\S+\s/, ''))} is missing</span><span class="cx-s">1 missing</span>` : `${g.missing.length} missing`} →</a>`;
+      return `<div class="cx-row${done ? ' is-done' : ''}"><a class="cx-n" href="${esc(base + g.href)}">${esc(g.name)}</a><span class="cx-c">${g.n} / ${g.t}</span><span class="cx-bar" role="img" aria-label="${pct} %"><i style="width:${pct}%"></i></span>${right}</div>`;
+    }).join('');
+    const more = $<HTMLButtonElement>('cx-more');
+    more.hidden = rows.length <= COLL_TOP;
+    more.textContent = showAll ? 'Show fewer' : `Show all ${rows.length}`;
+    // hint in My cars: groups with exactly one car missing (only once you own something)
+    const almost = [...collStats(groups.classes), ...collStats(groups.makes)].filter((g) => g.n > 0 && g.missing.length === 1).length;
+    $('mg-almost').hidden = almost === 0;
+    $('mg-almost-a').textContent = `${almost} ${almost === 1 ? 'collection is' : 'collections are'} one car away from complete →`;
+  }
+
   function render() {
     const cars = owned.map((id) => byId.get(id)).filter(Boolean) as V[];
     const wl = wish.map((id) => byId.get(id)).filter(Boolean) as V[];
@@ -261,6 +363,7 @@ const vehicleIndex = [...vehicleOptions]
     $('mg-n-wish').textContent = String(wl.length);
     $('mg-own-n').textContent = String(cars.length);
     $('mg-own-bar').style.width = `${Math.min(100, (cars.length / all.length) * 100)}%`;
+    renderColl();
     fresh = null;
   }
 
@@ -268,12 +371,14 @@ const vehicleIndex = [...vehicleOptions]
     view = v;
     $('mg-v-cars').hidden = v !== 'cars';
     $('mg-v-wish').hidden = v !== 'wishlist';
+    $('mg-v-coll').hidden = v !== 'collection';
+    $('mg-tab-coll').setAttribute('aria-selected', String(v === 'collection'));
     $('mg-tab-cars').setAttribute('aria-selected', String(v === 'cars'));
     $('mg-tab-wish').setAttribute('aria-selected', String(v === 'wishlist'));
-    if (cta) cta.textContent = v === 'cars' ? 'Add a car you own' : 'Add to wishlist';
-    if (updateHash) history.replaceState(null, '', v === 'wishlist' ? '#wishlist' : location.pathname + location.search);
+    if (cta) cta.textContent = v === 'wishlist' ? 'Add to wishlist' : 'Add a car you own';
+    if (updateHash) history.replaceState(null, '', v === 'cars' ? location.pathname + location.search : `#${v}`);
   }
-  const viewFromHash = (): View => (location.hash === '#wishlist' ? 'wishlist' : 'cars');
+  const viewFromHash = (): View => (location.hash === '#wishlist' ? 'wishlist' : location.hash === '#collection' ? 'collection' : 'cars');
 
   function renderPicker() {
     const q = pq.value.trim().toLowerCase();
@@ -312,6 +417,15 @@ const vehicleIndex = [...vehicleOptions]
     const b = (e.target as HTMLElement).closest<HTMLElement>('[data-view]');
     if (b) show(b.dataset.view as View);
   });
+  document.querySelector('.cx-seg')!.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('[data-group]');
+    if (!b) return;
+    groupBy = b.dataset.group as typeof groupBy; showAll = false;
+    document.querySelectorAll('.cx-seg [data-group]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    renderColl();
+  });
+  $('cx-more').addEventListener('click', () => { showAll = !showAll; renderColl(); });
+  $('mg-almost-a').addEventListener('click', (e) => { e.preventDefault(); show('collection'); window.scrollTo({ top: 0 }); });
   window.addEventListener('hashchange', () => show(viewFromHash(), false));
 
   $('acc-body').addEventListener('click', async (e) => {
@@ -383,7 +497,7 @@ const vehicleIndex = [...vehicleOptions]
   $('mg-picker-close').addEventListener('click', () => picker.close());
   picker.addEventListener('click', (e) => { if (e.target === picker) picker.close(); }); // click on backdrop
   // band action (DEC-0188/0189): picker for the list on screen; signed out it starts the Discord sign-in
-  cta?.addEventListener('click', () => { if (me) openPicker(view); else if (backendConfigured) $('acc-signin').click(); });
+  cta?.addEventListener('click', () => { if (me) openPicker(view === 'wishlist' ? 'wishlist' : 'cars'); else if (backendConfigured) $('acc-signin').click(); });
 
   async function init(session: any) {
     $('acc-auth').hidden = Boolean(session);

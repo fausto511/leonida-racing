@@ -316,12 +316,14 @@ function syncUrl() {
   if (rangeActive(state.ranges.speed)) p.set('speed', rangeParam(state.ranges.speed));
   if (rangeActive(state.ranges.lap)) p.set('lap', rangeParam(state.ranges.lap));
   if (state.sort !== DEFAULT_SORT) p.set('sort', state.sort);
+  if (state.own) p.set('own', state.own);
   const qs = p.toString();
   history.replaceState(null, '', location.pathname + (qs ? `?${qs}` : '') + location.hash);
 }
 function readUrl() {
   const p = new URLSearchParams(location.search);
   state.q = p.get('q') ?? '';
+  const ow = p.get('own'); if (ow === 'owned' || ow === 'not') state.own = ow; // e.g. from Collection: "3 missing →"
   p.get('class')?.split(',').filter(Boolean).forEach((c) => state.sets.class.add(c));
   p.get('make')?.split(',').filter(Boolean).forEach((m) => state.sets.make.add(m));
   const parseR = (v: string | null): Range => { if (!v) return [null, null]; const [a, b] = v.split('~'); return [a ? Number(a) : null, b ? Number(b) : null]; };
