@@ -10,7 +10,7 @@
 import { vehicleOptions } from './vehicles';
 
 /** Kill switch: false hides every badge (one-line change + push). */
-export const BADGE_ENABLED = true;
+export const BADGE_ENABLED = false; // hidden until Fausto switches it on (06.11.)
 /** A class counts once this many drivers have a time in it. */
 export const BADGE_MIN_FIELD = 4;
 
