@@ -12,6 +12,7 @@ const first = render([], initialState, false);
 const noLap = noLapCars([]);
 const base = import.meta.env.BASE_URL;
 const search = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+const people = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
 const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>';
 ---
 <section id="leaderboard" class="wrap lb">
@@ -32,9 +33,19 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     </div>
     <label class="ctl lb-q">
       <Fragment set:html={search} />
-      <span class="sr-only">Search driver or crew</span>
-      <input type="search" id="lb-q-driver" placeholder="Search driver or crew" autocomplete="off" />
+      <span class="sr-only">Search driver</span>
+      <input type="search" id="lb-q-driver" placeholder="Search driver" autocomplete="off" />
     </label>
+    <div class="lb-crew" id="lb-crew">
+      <button type="button" class="ctl lb-crew-btn" id="lb-crew-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="lb-crew-pop"><Fragment set:html={people} /><span class="lb-crew-l">Crew</span></button>
+      <button type="button" class="lb-crew-x" id="lb-crew-x" aria-label="Show all crews" hidden>×</button>
+      <div class="lb-crew-pop" id="lb-crew-pop" role="dialog" aria-label="Filter by crew" hidden>
+        <div id="lb-crew-mine"></div>
+        <p class="lb-crew-h">Find a crew</p>
+        <input type="search" id="lb-crew-q" placeholder="Crew name or tag" autocomplete="off" aria-label="Crew name or tag" />
+        <div id="lb-crew-list"></div>
+      </div>
+    </div>
     <button type="button" class="mypos" id="lb-mypos" hidden><span class="lg-l">Your position</span><span class="sm-l">Me</span> ↓</button>
     <span class="lbl">Show</span>
     <div class="vseg sm lb-toggle" role="group" aria-label="Times shown">
@@ -107,6 +118,30 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .lb-q input { flex: 1; min-width: 0; height: 100%; background: transparent; border: 0; outline: 0; color: var(--lr-text); font: inherit; font-size: 14px; }
   .lb-q input::placeholder { color: var(--lr-muted); }
   .lb-q:focus-within { border-color: var(--lr-field-focus); }
+  /* Crew filter (Fausto 06.11.): own button next to the search, works with every segment */
+  .lb-crew { position: relative; display: inline-flex; flex: none; }
+  .lb-crew-btn { background: transparent; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; max-width: 280px; }
+  .lb-crew-btn:hover { color: var(--lr-text); border-color: var(--lr-line-hover); }
+  .lb-crew-btn:focus-visible, .lb-crew-x:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: -2px; }
+  .lb-crew-l { display: inline-flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .lb-crew.on .lb-crew-btn { color: var(--lr-text); border-color: var(--lr-text); padding-right: 40px; }
+  .lb-crew.on .lb-crew-btn :global(svg) { display: none; }
+  /* selected: tag only (name stands in the header above the table), so the bar stays on one line */
+  .lb-crew.on :global(.lb-crew-n) { display: none; }
+  .lb-crew-x { position: absolute; right: 4px; top: 6px; width: 32px; height: 32px; border: 0; border-radius: 4px; background: transparent; color: var(--lr-muted); font-size: 20px; line-height: 1; cursor: pointer; }
+  .lb-crew-x:hover { color: var(--lr-text); background: var(--lr-white-hover); }
+  .lb-crew-x[hidden] { display: none; }
+  .lb-crew-pop { position: absolute; top: 50px; left: 0; z-index: 20; width: 320px; max-width: calc(100vw - 32px); padding: 10px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-raised); box-shadow: 0 12px 32px rgba(0,0,0,.5); }
+  .lb-crew-pop[hidden] { display: none; }
+  .lb-crew-h { margin: 6px 6px 6px; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); }
+  #lb-crew-q { width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-card); color: var(--lr-text); font: inherit; font-size: 14px; outline: 0; }
+  #lb-crew-q:focus { border-color: var(--lr-field-focus); }
+  .lb-crew-pop :global(.lb-crew-opt) { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px; border: 0; border-radius: 6px; background: transparent; color: var(--lr-text); font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
+  .lb-crew-pop :global(.lb-crew-opt:hover), .lb-crew-pop :global(.lb-crew-opt.on) { background: var(--lr-white-hover); }
+  .lb-crew-pop :global(.lb-crew-opt b) { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lb-crew-pop :global(.lb-crew-opt small) { margin-left: auto; flex: none; color: var(--lr-muted); font-size: 12px; }
+  .lb-crew-pop :global(.lb-crew-none) { margin: 8px 6px 4px; font-size: 13px; color: var(--lr-muted); }
+  #lb-crew-list { margin-top: 6px; }
   .mypos { height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-orange-border); background: transparent; color: var(--lr-orange); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
   .mypos[hidden] { display: none; }
   .lbl { font-size: 13px; color: var(--lr-muted); margin-left: auto; }
@@ -125,6 +160,10 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   #lb-context :global(.lb-context-title) { display: flex; align-items: center; gap: 12px; }
   #lb-context :global(.lb-context-title h3) { margin: 2px 0 0; font-size: var(--lr-h3); font-weight: 700; }
   #lb-context :global(.lb-context-kicker) { margin: 0; color: var(--lr-muted); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+  #lb-context :global(.lb-context-links) { display: inline-flex; align-items: center; gap: 16px; }
+  #lb-context :global(.lb-context-x) { width: 32px; height: 32px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; color: var(--lr-muted); font-size: 18px; line-height: 1; cursor: pointer; }
+  #lb-context :global(.lb-context-x:hover) { color: var(--lr-text); border-color: var(--lr-line-hover); }
+  .tbl :global(.rk small) { display: block; margin-top: 1px; font-size: 11px; font-weight: 500; color: var(--lr-muted); }
   #lb-context :global(.lb-context-link) { color: var(--lr-orange); font-size: 14px; font-weight: 600; text-decoration: none; }
 
   /* ---- table (div grid, rows inserted at runtime -> :global) ---- */
@@ -216,12 +255,16 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     .lb-head { flex-direction: column; align-items: flex-start; gap: 6px; }
     .lg-l { display: none; }
     .sm-l { display: inline; }
-    .lb-ctl { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
+    .lb-ctl { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 10px; }
     .seg4 { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); }
     .seg4 button { justify-content: center; padding: 0 6px; }
     .lb-q { max-width: none; grid-column: 1; }
-    .mypos { grid-column: 2; }
-    .lb-q:has(+ .mypos[hidden]) { grid-column: 1 / -1; }
+    .lb-crew { grid-column: 2; }
+    .mypos { grid-column: 3; }
+    .lb-ctl:has(.mypos[hidden]) .lb-q { grid-column: 1 / 3; }
+    .lb-ctl:has(.mypos[hidden]) .lb-crew { grid-column: 3; }
+    .lb-crew-btn { max-width: 150px; }
+    .lb-crew-pop { left: auto; right: 0; }
     .lbl { display: none; }
     .lb-toggle { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
     .lb-toggle button { justify-content: center; }
@@ -262,7 +305,8 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   import { getSupabase, backendConfigured } from '../scripts/supabase-client';
   import { LEADERBOARD_PLATFORM } from '../data/platforms';
   import { loadIconIds } from '../scripts/icons';
-  import { sampleEntries, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, type LbEntry, type LbState, type LbMode } from '../data/leaderboard';
+  import { sampleEntries, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, crewsWithLaps, crewInfo, crewTagHtml, type LbEntry, type LbState, type LbMode, type LbCrew } from '../data/leaderboard';
+  import { buildCrews } from '../data/hub';
 
   const TRACK_ID = 'gellhorn-international-raceway';
   const $ = (id: string) => document.getElementById(id)!;
@@ -281,11 +325,13 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   const pm = params.get('make'); if (pm && lbMakes.some(([k]) => k === pm)) state.make = pm;
   if (params.get('vehicle')) { state.vehicle = params.get('vehicle'); state.cls = null; state.make = null; }
   if (params.get('verified') === '1') state.verifiedOnly = true;
+  const pcr = params.get('crew'); if (pcr && /^[a-z0-9-]{1,80}$/.test(pcr)) state.crew = pcr;
   state.mode = state.vehicle ? 'car' : state.make ? 'make' : state.cls ? 'class' : 'overall';
 
   function syncUrl() {
     const u = new URL(location.href);
-    ['vehicle', 'class', 'make', 'verified', 'lb'].forEach((k) => u.searchParams.delete(k));
+    ['vehicle', 'class', 'make', 'verified', 'crew', 'lb'].forEach((k) => u.searchParams.delete(k));
+    if (state.crew) u.searchParams.set('crew', state.crew);
     if (state.cls) u.searchParams.set('class', state.cls);
     if (state.make) u.searchParams.set('make', state.make);
     if (state.vehicle) u.searchParams.set('vehicle', state.vehicle);
@@ -319,8 +365,51 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
       const on = (b.dataset.verified === '1') === state.verifiedOnly;
       b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
     });
+    drawCrewBtn();
     syncUrl();
   }
+
+  // ---- crew filter (Fausto 06.11.): button + popover with own crews and a search over crews with laps ----
+  let myCrews: LbCrew[] = [];
+  const crewWrap = $('lb-crew'), crewBtn = $('lb-crew-btn') as HTMLButtonElement, crewX = $('lb-crew-x') as HTMLButtonElement;
+  const crewPop = $('lb-crew-pop'), crewQ = $('lb-crew-q') as HTMLInputElement;
+  const crewOf = (slug: string): LbCrew | null => data.find((e) => e.crew?.slug === slug)?.crew ?? myCrews.find((c) => c.slug === slug) ?? crewInfo(slug);
+  function drawCrewBtn() {
+    const c = state.crew ? crewOf(state.crew) : null;
+    crewWrap.classList.toggle('on', Boolean(state.crew));
+    crewX.hidden = !state.crew;
+    const label = crewBtn.querySelector('.lb-crew-l')!;
+    label.innerHTML = state.crew ? (c ? `${crewTagHtml(c)}<span class="lb-crew-n">${esc(c.name ?? c.tag)}</span>` : esc(state.crew)) : 'Crew';
+    crewBtn.setAttribute('aria-label', state.crew ? `Crew filter: ${c?.name ?? state.crew}. Change crew` : 'Filter by crew');
+  }
+  function drawCrewPop() {
+    const counts = new Map(crewsWithLaps(current()).map((x) => [x.crew.slug!, x.drivers]));
+    const opt = (c: LbCrew) => {
+      const n = counts.get(c.slug!) ?? 0;
+      return `<button type="button" class="lb-crew-opt${state.crew === c.slug ? ' on' : ''}" data-crew="${esc(c.slug!)}">${crewTagHtml(c)}<b>${esc(c.name ?? c.tag)}</b><small>${n ? `${n} driver${n === 1 ? '' : 's'}` : 'no laps yet'}</small></button>`;
+    };
+    const mine = myCrews.filter((c) => c.slug);
+    $('lb-crew-mine').innerHTML = mine.length ? `<p class="lb-crew-h">Your crews</p>${mine.map(opt).join('')}` : '';
+    const q = crewQ.value.normalize('NFKD').toLowerCase().trim();
+    const all = crewsWithLaps(current()).map((x) => x.crew).filter((c) => !mine.some((m) => m.slug === c.slug));
+    const hits = q ? all.filter((c) => (c.name ?? '').toLowerCase().includes(q) || c.tag.toLowerCase().includes(q)) : all;
+    $('lb-crew-list').innerHTML = hits.length ? hits.slice(0, 8).map(opt).join('') + (hits.length > 8 ? `<p class="lb-crew-none">${hits.length - 8} more – type to narrow down</p>` : '')
+      : `<p class="lb-crew-none">${q ? 'No crew with laps matches.' : 'No crew has laps yet.'}</p>`;
+  }
+  function openCrewPop(open: boolean) {
+    crewPop.hidden = !open; crewBtn.setAttribute('aria-expanded', String(open));
+    if (open) { crewQ.value = ''; drawCrewPop(); crewQ.focus(); }
+  }
+  function setCrew(slug: string | null) { state.crew = slug; state.showAll = false; openCrewPop(false); draw(); }
+  crewBtn.addEventListener('click', () => openCrewPop(crewPop.hidden));
+  crewX.addEventListener('click', () => setCrew(null));
+  crewQ.addEventListener('input', drawCrewPop);
+  crewPop.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-crew]');
+    if (b) setCrew(b.dataset.crew!);
+  });
+  document.addEventListener('click', (e) => { if (!crewPop.hidden && !crewWrap.contains(e.target as Node)) openCrewPop(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !crewPop.hidden) { openCrewPop(false); crewBtn.focus(); } });
 
   const qDriver = $('lb-q-driver') as HTMLInputElement;
   qDriver.addEventListener('input', () => { state.qDriver = qDriver.value; draw(); });
@@ -349,6 +438,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   }));
   $('leaderboard').addEventListener('click', (e) => {
     if ((e.target as HTMLElement).closest('[data-lb-more]')) { state.showAll = true; draw(); }
+    if ((e.target as HTMLElement).closest('[data-crew-clear]')) setCrew(null);
   });
   $('lb-mypos').addEventListener('click', () => {
     const row = document.getElementById('lb-me');
@@ -417,6 +507,19 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     manufacturer_logo_slug: string | null; lap_time_ms: number; track_entries: number;
     video_verified: boolean; video_url: string | null;
   }
+  /** slug + name for crews (crew filter): build data first, the rest live from published crews. */
+  async function addCrewNames(list: LbCrew[]) {
+    const missing = new Set<string>();
+    for (const c of list) {
+      const b = c.id ? buildCrews.find((x) => x.crew_id === c.id) : null;
+      if (b) { c.slug = b.slug; c.name = b.name; } else if (c.id) missing.add(c.id);
+    }
+    if (!missing.size) return;
+    const { data: rows } = await getSupabase().from('crews').select('crew_id,slug,name').eq('is_published', true).in('crew_id', [...missing]);
+    const byId = new Map(((rows ?? []) as { crew_id: string; slug: string; name: string }[]).map((r) => [r.crew_id, r]));
+    for (const c of list) { const r = c.id ? byId.get(c.id) : null; if (r) { c.slug = r.slug; c.name = r.name; } }
+  }
+
   async function loadLive() {
     const sb = getSupabase();
     const cols = 'driver, driver_id, vehicle_id, make, model, manufacturer_logo_slug, lap_time_ms, track_entries, video_verified, video_url';
@@ -430,13 +533,14 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     const live = rows as LiveRow[];
     const liveVerified = (verRes.error ? [] : (verRes.data ?? [])) as LiveRow[];
     // Crew tag (RS-0024): main crew (is_primary) of active members of published crews.
-    const tags = new Map<string, { tag: string; color: string }>();
+    const tags = new Map<string, LbCrew>();
     const ids = [...new Set([...live, ...liveVerified].map((r) => r.driver_id).filter(Boolean))];
     if (ids.length) {
       const roster = await sb.from('public_crew_roster').select('*').in('driver_id', ids.slice(0, 300));
-      for (const r of (roster.data ?? []) as { driver_id: string; tag: string; color: string; is_primary?: boolean }[]) {
-        if (!tags.has(r.driver_id) || r.is_primary) tags.set(r.driver_id, { tag: r.tag, color: r.color });
+      for (const r of (roster.data ?? []) as { driver_id: string; crew_id?: string; tag: string; color: string; is_primary?: boolean }[]) {
+        if (!tags.has(r.driver_id) || r.is_primary) tags.set(r.driver_id, { tag: r.tag, color: r.color, id: r.crew_id });
       }
+      await addCrewNames([...tags.values()]);
     }
     const icons = await loadIconIds(ids); // ICON badge (DEC-0215)
     const toEntry = (r: LiveRow): LbEntry => ({
@@ -469,6 +573,12 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
       const me = own.data?.driver_id ?? null;
       if (!me) return;
       state.me = me;
+      // Own active crews for the crew picker
+      const mc = await sb.from('crew_membership_overview').select('crew_id, crew_name, tag, color, status, is_primary').eq('driver_id', me).eq('status', 'active');
+      myCrews = ((mc.data ?? []) as { crew_id: string; crew_name: string; tag: string; color: string; is_primary?: boolean }[])
+        .sort((a, b) => Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary)))
+        .map((r) => ({ tag: r.tag, color: r.color, id: r.crew_id, name: r.crew_name }));
+      await addCrewNames(myCrews).catch(() => {});
       draw();
       if (hasLive) await meTile(me).catch(() => {});
     })();

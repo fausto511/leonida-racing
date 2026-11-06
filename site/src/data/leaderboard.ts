@@ -20,7 +20,8 @@ export interface LbEntry {
   /** best run of one driver on one vehicle (= one row of public_leaderboard) */
   driver: string;
   driver_id: string;
-  crew: { tag: string; color: string } | null;
+  /** active (primary) crew; slug/name/id for the crew filter (?crew=<slug>, Fausto 06.11.) */
+  crew: LbCrew | null;
   /** ICON role (DEC-0215), set by the live loader */
   icon?: boolean;
   vehicle_id: string;
@@ -32,6 +33,8 @@ export interface LbEntry {
   verified: boolean;
   video_url: string | null;
 }
+
+export interface LbCrew { tag: string; color: string; slug?: string; name?: string; id?: string }
 
 export type LbMode = 'overall' | 'class' | 'make' | 'car';
 export interface LbState {
@@ -45,10 +48,12 @@ export interface LbState {
   /** Manufacturer filter (logo slug, e.g. "grotti"); null = all manufacturers */
   make: string | null;
   qDriver: string;
+  /** Crew filter (crew slug), independent of the segment: only members whose active crew it is (Fausto 06.11.) */
+  crew: string | null;
   verifiedOnly: boolean;
   showAll: boolean;
 }
-export const initialState: LbState = { mode: 'overall', me: null, vehicle: null, cls: null, make: null, qDriver: '', verifiedOnly: false, showAll: false };
+export const initialState: LbState = { mode: 'overall', me: null, vehicle: null, cls: null, make: null, qDriver: '', crew: null, verifiedOnly: false, showAll: false };
 export const PAGE = 12;
 
 // ---------------------------------------------------------------------------
@@ -77,9 +82,14 @@ const SAMPLE_CREW_TAG: Record<string, string> = {
   'sample-nordring-crew': 'BCRW', 'sample-gulf-coast-racing': 'BCRW',
   'sample-midnight-meet': 'LOWN', 'sample-vice-drift-union': 'LOWN',
 };
+/** Crew name/tag for a crew slug from the build data (URL ?crew= before live data is loaded). */
+export function crewInfo(slug: string): LbCrew | null {
+  const c = buildCrews.find((x) => x.slug === slug);
+  return c ? { tag: c.tag, color: c.color, slug: c.slug, name: c.name, id: c.crew_id } : null;
+}
 const crewBySlug = (slug: string) => {
   const c = buildCrews.find((x) => x.tag === SAMPLE_CREW_TAG[slug]);
-  return c ? { tag: c.tag, color: c.color } : null;
+  return c ? { tag: c.tag, color: c.color, slug: c.slug, name: c.name, id: c.crew_id } : null;
 };
 // name, crew slug (or null), skill offset ms
 const SAMPLE_DRIVERS: [string, string | null, number][] = [
@@ -135,7 +145,7 @@ const vehName = (e: { make: string; model: string }) => `${e.make} ${e.model}`;
 const byTime = (a: LbEntry, b: LbEntry) => a.lap_time_ms - b.lap_time_ms || a.driver.localeCompare(b.driver);
 
 function matchDriver(e: LbEntry, q: string) {
-  return !q || norm(e.driver).includes(q) || (e.crew ? norm(e.crew.tag).includes(q) : false);
+  return !q || norm(e.driver).includes(q);
 }
 
 /** Overall: every driver once, with his fastest vehicle. */
@@ -196,6 +206,21 @@ function videoCell(e: LbEntry, sample: boolean) {
 }
 const empty = (text: string) => `<div class="tr lb-empty" role="row"><span role="cell">${text}</span></div>`;
 
+/** Crews with at least one lap in the data (crew picker): crew + number of drivers, most drivers first. */
+export function crewsWithLaps(all: LbEntry[]): { crew: LbCrew; drivers: number }[] {
+  const m = new Map<string, { crew: LbCrew; ids: Set<string> }>();
+  for (const e of all) {
+    if (!e.crew?.slug) continue;
+    const cur = m.get(e.crew.slug) ?? { crew: e.crew, ids: new Set<string>() };
+    cur.ids.add(e.driver_id); m.set(e.crew.slug, cur);
+  }
+  return [...m.values()].map((x) => ({ crew: x.crew, drivers: x.ids.size }))
+    .sort((a, b) => b.drivers - a.drivers || (a.crew.name ?? a.crew.tag).localeCompare(b.crew.name ?? b.crew.tag));
+}
+export function crewTagHtml(c: LbCrew) {
+  return /^#[0-9a-fA-F]{6}$/.test(c.color) ? `<span class="crew-tag crew-tag-sm" style="--crew-color:${c.color}">${esc(c.tag)}</span>` : `<span class="crew-tag crew-tag-sm">${esc(c.tag)}</span>`;
+}
+
 /** Does a vehicle id pass the class / manufacturer filters? */
 export function inFilter(id: string, logo: string | null, s: Pick<LbState, 'cls' | 'make'>): boolean {
   const v = vById.get(id);
@@ -222,7 +247,7 @@ export function makeSelectHtml(s: LbState): string {
 
 export interface Rendered { body: string; context: string; more: string; meta: string; hasMe: boolean }
 
-type Ranked = { e: LbEntry; rank: number }[];
+type Ranked = { e: LbEntry; rank: number; ov?: number }[];
 /** Rows to show: Top 12; logged in and further down -> the driver ahead, own row, the driver behind
  *  (break only when they don't follow on from the Top 12, DEC-0119). */
 function pick(rows: Ranked, s: LbState, searching: boolean): { list: Ranked; breakBefore: number | null } {
@@ -244,13 +269,16 @@ export function render(all: LbEntry[], s: LbState, sample: boolean): Rendered {
 
   let ranked: Ranked;
   let context = '';
+  // context pieces (so the crew filter can join any view)
+  let cxLogo = '', cxKicker = '', cxTitle = '', cxLink = '';
   const carCol = !s.vehicle;
   if (s.vehicle) {
     const g = vById.get(s.vehicle);
     const v = all.find((e) => e.vehicle_id === s.vehicle) ?? (g ? ({ make: g.make, model: g.model, logo: g.logoSlug, vehicle_id: g.id } as LbEntry) : null);
     ranked = vehicleRows(all, s.vehicle, s.verifiedOnly);
     const name = v ? `${esc(v.make)} ${esc(v.model)}` : 'Unknown car';
-    context = `<div class="lb-context"><div class="lb-context-title">${v ? logoChip(v, true) : ''}<div><p class="lb-context-kicker">Car leaderboard · ${ranked.length} driver${ranked.length === 1 ? '' : 's'}</p><h3>${name}</h3></div></div>${v && inGarage(v.vehicle_id) ? `<a class="lb-context-link" href="${garageUrl(v.vehicle_id)}">Open the car page →</a>` : ''}</div>`;
+    cxLogo = v ? logoChip(v, true) : ''; cxKicker = 'Car leaderboard'; cxTitle = name;
+    cxLink = v && inGarage(v.vehicle_id) ? `<a class="lb-context-link" href="${garageUrl(v.vehicle_id)}">Open the car page →</a>` : '';
   } else {
     const filtered = s.cls || s.make;
     ranked = overallRows(filtered ? all.filter((e) => inFilter(e.vehicle_id, e.logo, s)) : all, s.verifiedOnly);
@@ -258,22 +286,37 @@ export function render(all: LbEntry[], s: LbState, sample: boolean): Rendered {
       const title = s.make && s.cls ? `${esc(makeName(s.make))} · ${esc(classLabel(s.cls))}` : s.make ? `${esc(makeName(s.make))} Cars` : esc(classLabel(s.cls!));
       const kicker = s.make && s.cls ? 'Manufacturer + class leaderboard' : s.make ? 'Manufacturer leaderboard' : 'Class leaderboard';
       const page = s.make && !s.cls ? makeHref({ logoSlug: s.make }) : s.cls && !s.make ? classHref(s.cls) : null;
-      context = `<div class="lb-context"><div class="lb-context-title">${s.make ? logoChip({ logo: s.make }, true) : ''}<div><p class="lb-context-kicker">${kicker} · ${ranked.length} driver${ranked.length === 1 ? '' : 's'}</p><h3>${title}</h3></div></div>${page ? `<a class="lb-context-link" href="${base}${page}">Open in Cars →</a>` : ''}</div>`;
+      cxLogo = s.make ? logoChip({ logo: s.make }, true) : ''; cxKicker = kicker; cxTitle = title;
+      cxLink = page ? `<a class="lb-context-link" href="${base}${page}">Open in Cars →</a>` : '';
     }
+  }
+  if (s.crew) {
+    // Crew filter: same board, only members of this crew; crew rank first, overall rank small (ov)
+    ranked = ranked.filter(({ e }) => e.crew?.slug === s.crew).map(({ e, rank }, i) => ({ e, rank: i + 1, ov: rank }));
+    const c = all.find((e) => e.crew?.slug === s.crew)?.crew ?? crewInfo(s.crew);
+    const cname = c ? `${esc(c.name ?? c.tag)} ${crewTagHtml(c)}` : esc(s.crew);
+    cxKicker = cxKicker ? `${cxKicker} · Crew` : 'Crew leaderboard';
+    cxTitle = cxTitle ? `${cxTitle} · ${cname}` : cname;
+    cxLink = `<span class="lb-context-links">${cxLink}<a class="lb-context-link" href="${base}community/crews/${c?.id ? `#crew-${esc(c.id)}` : ''}">Crew →</a><button type="button" class="lb-context-x" data-crew-clear aria-label="Show all crews">×</button></span>`;
+  }
+  if (cxKicker) {
+    const n = `${ranked.length} driver${ranked.length === 1 ? '' : 's'}`;
+    const hint = s.crew ? ' · small number = overall' : '';
+    context = `<div class="lb-context"><div class="lb-context-title">${cxLogo}<div><p class="lb-context-kicker">${cxKicker} · ${n}${hint}</p><h3>${cxTitle}</h3></div></div>${cxLink}</div>`;
   }
   const rows = ranked.filter(({ e }) => matchDriver(e, qd));
   const { list, breakBefore } = pick(rows, s, Boolean(qd));
   const best = ranked[0]?.e.lap_time_ms ?? 0;
   let hasMe = false;
   const body = list.length
-    ? list.map(({ e, rank }) => {
+    ? list.map(({ e, rank, ov }) => {
       const me = Boolean(s.me && e.driver_id === s.me);
       if (me) hasMe = true;
       const cls = ['tr', rank === 1 ? 'first' : '', me ? 'me' : '', rank === breakBefore ? 'brk' : ''].filter(Boolean).join(' ');
       const gp = e.lap_time_ms === best ? '' : `+${((e.lap_time_ms - best) / 1000).toFixed(3)}`;
-      return `<div class="${cls}" role="row"${me ? ' id="lb-me"' : ''}><span class="rk" role="cell">${rank}</span><span class="dr" role="cell"><span class="n">${esc(e.driver)}</span>${iconTagHtml(e.icon)}${crewTag(e.crew)}${me ? '<span class="you">YOU</span>' : ''}</span>${carCol ? carCell(e, s.cls) : ''}<span class="mt"><span class="gp" role="cell">${gp}</span>${statusCell(e.verified)}${videoCell(e, sample)}</span><span class="tm" role="cell">${lapTime(e.lap_time_ms)}</span></div>`;
+      return `<div class="${cls}" role="row"${me ? ' id="lb-me"' : ''}><span class="rk" role="cell">${rank}${ov ? `<small title="#${ov} overall">#${ov}</small>` : ''}</span><span class="dr" role="cell"><span class="n">${esc(e.driver)}</span>${iconTagHtml(e.icon)}${crewTag(e.crew)}${me ? '<span class="you">YOU</span>' : ''}</span>${carCol ? carCell(e, s.cls) : ''}<span class="mt"><span class="gp" role="cell">${gp}</span>${statusCell(e.verified)}${videoCell(e, sample)}</span><span class="tm" role="cell">${lapTime(e.lap_time_ms)}</span></div>`;
     }).join('')
-    : empty(ranked.length ? 'No driver matches your search.' : s.vehicle || s.cls || s.make ? `No ${vf}times in this selection yet. <a href="${base}time-attack/submit/">Be the first — submit a lap</a>.` : `No ${vf}times yet.`);
+    : empty(ranked.length ? 'No driver matches your search.' : s.crew ? `No ${vf}times from this crew in this selection yet.` : s.vehicle || s.cls || s.make ? `No ${vf}times in this selection yet. <a href="${base}time-attack/submit/">Be the first — submit a lap</a>.` : `No ${vf}times yet.`);
   const shownCount = list.length;
   const more = !qd && !s.showAll && shownCount < rows.length ? `<button type="button" class="btn btn-s lb-more-btn" data-lb-more>Show all ${rows.length} ${vf}drivers</button>` : '';
   return { body, context, more, meta, hasMe };
