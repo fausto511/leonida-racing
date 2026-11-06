@@ -66,7 +66,8 @@ export const discordRules = ["Respect the people behind the wheel. No harassment
 export const discordBotTeaser = {
   eyebrow: "For crews and server owners",
   title: "Bring the bot to your own server",
-  text: "Keep your crew’s events close to the conversation. Set up a feed for matching events from your crew, a host or the public calendar, or follow new vehicle posts. Event cards include sign-up buttons and follow updates made on the website.",
+  // Claude placeholder 06.11. (feeds for videos + Gellhorn records added), Codex review pending
+  text: "Keep your crew’s events close to the conversation. Set up a feed for matching events from your crew, a host or the public calendar, or for new cars, videos and Gellhorn lap records. Event cards include sign-up buttons and follow updates made on the website.",
   link: "How the bot works",
 };
 
@@ -79,7 +80,7 @@ export const discordFaq: { q: string; a: string }[] = [
   { q: "Is it only for racing?", a: "Racing is the core, but car meets, cruises, photo sessions, builds and crews all have their own place." },
   { q: "Which languages can I use?", a: "The general channels are English. Deutsch, Español, Français, Italiano and Português each have their own text and voice channel; pick the language role in #roles to see them." },
   { q: "How do my crew’s events get onto the server?", a: "Publish an event on Leonida Racing through the website’s Event Host process. Matching published events are shared through the calendar feed as Discord cards with sign-up buttons. Event details are managed on the website." },
-  { q: "Can I add the bot to my own server?", a: "Yes. Server administrators can add the bot and set up event or vehicle feeds. The bot guide explains the permissions, setup and available commands." },
+  { q: "Can I add the bot to my own server?", a: "Yes. Server administrators can add the bot and set up feeds for events, new cars, videos and Gellhorn lap records. The bot guide explains the permissions, setup and available commands." }, // Claude placeholder 06.11.
 ];
 
 // ---------------------------------------------------------------------------
@@ -108,6 +109,10 @@ export const botFeatures: { title: string; text: string }[] = [
   { title: "Reminders before the start", text: "Choose reminders 24 hours before the start, one hour before, or both. The bot replies to the event card. Optional mentions notify signed-up drivers who are members of that server." },
   { title: "New additions to Cars", text: "A vehicle feed shares new additions to Cars that are documented in official GTA VI material. Cards show the available vehicle details and a photo when one is included." },
   { title: "Lookups for everyone", text: "/car, /compare and /crew pull cards straight from Leonida Racing, so the next argument about which car to bring has something to point at." },
+  // Claude placeholders 06.11. (features built 01.–04.11.), Codex review pending
+  { title: "Gellhorn leaderboard and records", text: "/leaderboard shows the Gellhorn top 10, by class, car or maker, with your own place. A record feed posts new lap records with a checked video, for everyone or only your crew." },
+  { title: "Rate cars", text: "Rate this car under a car card gives a car 1–5 stars. It counts the same as a rating on the website." },
+  { title: "Videos from GTA and car channels", text: "A video feed posts new videos from GTA and car channels we picked." },
 ];
 
 export const botSetup: { title: string; text: string }[] = [
@@ -122,11 +127,14 @@ export const botCommands: { cmd: string; text: string; who: string }[] = [
   { cmd: "/car", text: "Look up a make or model for its vehicle card.", who: "Everyone" },
   { cmd: "/compare", text: "Put two to four cars side by side, with a link to the full comparison.", who: "Everyone" },
   { cmd: "/crew", text: "Show a crew card: platforms, focus, region, language and next event.", who: "Everyone" },
+  { cmd: "/leaderboard", text: "Gellhorn top 10, by class, car or maker.", who: "Everyone" }, // Claude placeholder 06.11.
   { cmd: "/create-event", text: "Open the event form on Leonida Racing. Event publication follows the website’s host and review requirements.", who: "Everyone" },
+  { cmd: "/edit-event", text: "Change one of your events: details, sign-ups open or closed, or cancel it.", who: "Event host" }, // Claude placeholder 06.11.
   { cmd: "/help", text: "See what the bot can do. Server admins also get the feed setup commands.", who: "Everyone" },
   { cmd: "/leonida feed events", text: "Post events from your crew, your host profile or the public calendar into a channel.", who: "Manage Server" },
   { cmd: "/leonida feed vehicles", text: "Post new additions to Cars documented in official GTA VI material.", who: "Manage Server" },
-  { cmd: "/leonida feed videos", text: "Post new GTA videos and live streams from the creators Leonida Racing follows.", who: "Manage Server" },
+  { cmd: "/leonida feed videos", text: "Post new videos from GTA and car channels we picked.", who: "Manage Server" },
+  { cmd: "/leonida feed gellhorn", text: "Post new Gellhorn lap records with a checked video. All records or only your crew's.", who: "Manage Server" }, // Claude placeholder 06.11.
   { cmd: "/leonida feed list", text: "See your feeds and any reported problems.", who: "Manage Server" },
   { cmd: "/leonida feed edit", text: "Change an event feed’s options: server events, reminders, mentions.", who: "Manage Server" },
   { cmd: "/leonida feed remove", text: "Stop a feed. Existing channel posts stay.", who: "Manage Server" },
@@ -143,7 +151,9 @@ export const botFaq: { q: string; a: string }[] = [
   { q: "The bot shows as offline. Is it broken?", a: "Not necessarily. This bot handles commands through HTTP rather than keeping a permanent Discord connection, so it may appear offline. Try a command; if it fails, check the bot’s channel permissions and any feed errors." },
   { q: "I can’t see the /leonida commands.", a: "Feed setup requires Manage Server or Administrator. Check your server permissions and that the bot was added to the server with commands enabled. Refresh Discord if the command list has not updated." },
   { q: "Do I need a Leonida Racing account?", a: "You do not need a website account to set up a public-calendar or vehicle feed, but you do need Manage Server in Discord. A crew or host feed also requires a linked website account with the matching confirmed role. Event sign-ups require a free linked account." },
-  { q: "Can I edit an event in Discord?", a: "Title, time and description always come from the website, so change them there. In your server’s Events list you can swap the cover image or move the event to a voice channel; the bot keeps those changes. Changes in Discord never reach the website." },
+  // Claude placeholder 06.11. (/edit-event exists since 02.11., DEC-0100), Codex review pending
+  { q: "Can I edit an event in Discord?", a: "Yes, with /edit-event: change the title, start, end, description or driver limit, close or reopen sign-ups, or cancel the event. Everything else you change on the website. In your server’s Events list you can still swap the cover image or move the event to a voice channel." },
+  { q: "Why didn't a video appear?", a: "The bot checks for new videos about every 10 minutes. It only posts new videos about GTA, cars or racing; older videos are skipped." }, // final text 03.11. (DEC-0212)
   { q: "What happens when an event is cancelled?", a: "Once processed, the card is marked Cancelled and its sign-up buttons are removed. If server events are enabled, the bot also removes the linked server event. Missing permissions or API errors can delay updates." },
   { q: "The cards have no images.", a: "Check that the bot has Embed Links in the channel and that your Discord display settings allow link previews. Some vehicle cards have no photo because none is available in Cars." },
   { q: "What happens if I remove a feed?", a: "Removing a feed stops its updates and removes its settings. Existing channel cards stay. The bot also attempts to remove the server events linked to that feed; check permissions if any remain." },
