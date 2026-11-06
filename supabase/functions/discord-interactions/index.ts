@@ -120,7 +120,7 @@ const COMMANDS = [
     options: [
       { type: 3, name: "class", description: "Only this class", required: false, choices: LB_CLASSES.map((c) => ({ name: c, value: c })) },
       { type: 3, name: "car", description: "Only this car (start typing a make or model)", required: false, autocomplete: true },
-      { type: 3, name: "manufacturer", description: "Only cars from this manufacturer", required: false, autocomplete: true },
+      { type: 3, name: "manufacturer", description: "Only cars from this maker", required: false, autocomplete: true },
       { type: 5, name: "verified", description: "Only laps with a checked video", required: false },
     ] },
   // Setup command: always "Manage Server" only (also checked at runtime).
@@ -146,7 +146,7 @@ const COMMANDS = [
       ] },
       { type: 1, name: "gellhorn", description: "Post new lap records from Gellhorn International Raceway", options: [
         { type: 7, name: "channel", description: "Channel for the record posts", required: true, channel_types: [0, 5] },
-        { type: 3, name: "records", description: "Which records (default: all)", required: false, choices: [
+        { type: 3, name: "records", description: "All records or only your crew's", required: false, choices: [
           { name: "All records", value: "all" }, { name: "Only my crew's drivers", value: "crew" }] },
         { type: 3, name: "crew", description: "Your crew (only needed if you lead or co-run more than one)", required: false, autocomplete: true },
       ] },
@@ -163,7 +163,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-11-03.1"; // /leaderboard manufacturer filter
+const COMMANDS_VERSION = "2026-11-06.1"; // simpler option texts (DEC-0211)
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
@@ -354,15 +354,15 @@ async function rateSelect(i: any) {
   if (error) throw error;
   const r = data as any;
   switch (r.status) {
-    case "no_profile": return ephemeral("Rate cars with a free Leonida Racing account. It uses this Discord login, so it takes one click.", [profileButton]);
-    case "not_open": return ephemeral("Car ratings open when GTA VI is out: <t:1794996000:F>. Your vote counts from then on.");
+    case "no_profile": return ephemeral("Log in on Leonida Racing to rate cars.", [row(linkButton("Log in", `${SITE}/account/`))]);
+    case "not_open": return ephemeral("Ratings are closed right now. Nothing was saved.");
     case "not_found": return ephemeral("This car can't be rated.");
     case "saved": break;
     default: return ephemeral("Something went wrong on our side. Please try again in a moment.");
   }
   const { data: v } = await db.from("vehicles").select(CAR_COLS).eq("vehicle_id", vehicleId).maybeSingle();
   const name = v ? `${v.make} ${v.model}` : "this car";
-  const text = r.prev && r.prev !== r.stars ? `Changed from ${stars(r.prev)} to ${stars(r.stars)} for **${name}**.` : `Saved: ${stars(r.stars)} (${r.stars}/5) for **${name}**. You can change it any time, here or on the car page.`;
+  const text = r.prev && r.prev !== r.stars ? `Changed: ${stars(r.prev)} \u2192 ${stars(r.stars)} for **${name}**` : `Saved: ${stars(r.stars)} for **${name}**. Pick again to change it.`;
   // Private confirmation as a follow-up; the card itself is updated in place (type 7).
   // A follow-up only works once Discord has the type 7 answer -> short wait, one retry.
   bg((async () => {
@@ -419,8 +419,9 @@ async function cmdLeaderboard(i: any) {
   const mk = (opt(i, "manufacturer") as string | undefined) || null;
   let car: any = null;
   if (carId) {
-    const { data } = await db.from("vehicles").select("vehicle_id,make,model").eq("vehicle_id", carId).not("release_id", "is", null).maybeSingle();
-    if (!data) return { content: "I couldn't find that car. Pick one from the suggestions while typing." };
+    const { data } = await db.from("vehicles").select("vehicle_id,make,model,classes").eq("vehicle_id", carId).not("release_id", "is", null).maybeSingle();
+    if (!data) return { content: "Car not found. Pick one from the list." };
+    if (cls && !(data.classes ?? []).includes(cls)) return { content: "That car isn't in this class." };
     car = data;
   }
   let allowed: Set<string> | null = null;
@@ -465,7 +466,7 @@ async function cmdLeaderboard(i: any) {
   if (myRank >= LB_TOP) lines.push("…", lbLine(ranked[myRank], myRank + 1, leader, !car, tags.get(ranked[myRank].driver_id), true));
   const anyVerified = shown.some((r) => r.video_verified) || (myRank >= LB_TOP && ranked[myRank].video_verified);
   return { embeds: [{ author: { name: "Gellhorn International Raceway · PS5" }, title, url, color: ORANGE, description: clip(lines.join("\n"), 4000),
-    footer: { text: `${ranked.length} driver${ranked.length === 1 ? "" : "s"}${anyVerified ? " · ✅ video verified" : ""} · Leonida Racing` } }], components: [buttons] };
+    footer: { text: `${ranked.length} driver${ranked.length === 1 ? "" : "s"}${anyVerified ? " · ✅ = video checked" : ""} · ${PLATFORMS[LB_PLATFORM] ?? LB_PLATFORM}` } }], components: [buttons] };
 }
 // Public deferred reply (the leaderboard needs a few queries): answer within 3 s, fill in afterwards.
 function deferPublic(i: any, work: () => Promise<Record<string, unknown>>) {
@@ -575,13 +576,14 @@ function cmdHelp(i: any) {
     "\u2022 **/event** \u2014 one event with start time, host and sign-ups",
     "\u2022 **/car** \u2014 a car's card \u00b7 **/compare** \u2014 2 to 4 cars side by side",
     "\u2022 **/crew** \u2014 a crew's card with its next event",
-    "\u2022 **/leaderboard** \u2014 Gellhorn top 10, overall, by class, manufacturer or car, with your own place",
-    "\u2022 **/create-event** \u2014 host your own event on the website \u00b7 **/edit-event** \u2014 change one of your events",
+    "\u2022 **/leaderboard** \u2014 Gellhorn top 10, by class, car or maker",
+    "\u2022 **/create-event** \u2014 create an event on the website \u00b7 **/edit-event** \u2014 change one of your events",
     "",
     "**Buttons**",
-    "\u2022 **I'm in / Withdraw** on event cards \u2014 sign up right from Discord (free Leonida Racing account)",
+    "\u2022 **I'm in / Withdraw** \u2014 sign up for an event or drop out",
+    "\u2022 **Rate this car** \u2014 give a car 1\u20135 stars",
   ];
-  if (OFFICIAL_GUILD && i.guild_id === OFFICIAL_GUILD) lines.push("\u2022 **Find Players** in #lfg \u2014 start a search with its own voice channel", "\u2022 Role menus in #roles \u2014 pick region, platform, language and pings", "\u2022 **/ping** \u2014 Verified Event Hosts ping the right crowd in #events or #playlists");
+  if (OFFICIAL_GUILD && i.guild_id === OFFICIAL_GUILD) lines.push("\u2022 **Find Players** in #lfg \u2014 find people to race with", "\u2022 Role menus in #roles \u2014 pick region, platform, language and pings", "\u2022 **/ping** \u2014 event hosts can ping members about their event");
   if (canManage(i)) lines.push("", "**Server setup** (you have Manage Server)",
     "\u2022 **/leonida feed events** \u2014 post events from the public calendar, your crew or your host profile",
     "\u2022 **/leonida feed vehicles** \u2014 new cars", "\u2022 **/leonida feed videos** \u2014 new GTA videos and live streams from creators we follow",
@@ -823,8 +825,8 @@ async function feedsWithNames(guildId: string) {
   if (hostIds.length) for (const d of (await db.from("drivers").select("driver_id,display_name").in("driver_id", hostIds)).data ?? []) hosts[d.driver_id] = d.display_name;
   return { feeds, names: { crews, hosts } };
 }
-const optionsLine = (f: any) => f.source === "gellhorn" ? `New track, class and vehicle records with a checked video${f.crew_id ? ", set by this crew's members" : ""}; a summary when several arrive at once`
-  : f.source === "videos" ? "New videos and live streams from the creators Leonida Racing follows" : f.source === "vehicles" ? "One post per new vehicle, a summary when several arrive at once" : [
+const optionsLine = (f: any) => f.source === "gellhorn" ? `Track, class and car records with a checked video${f.crew_id ? ", set by this crew's members" : ""}.`
+  : f.source === "videos" ? "New videos from GTA and car channels we picked." : f.source === "vehicles" ? "One post per new vehicle, a summary when several arrive at once" : [
   `Server events: ${f.native_events ? "on" : "off"}`,
   `Reminders: ${REMINDERS[f.reminders] ?? f.reminders}`,
   ...(f.reminders !== "off" ? [`Mentions: ${f.mention_attendees ? "on" : "off"}`] : []),
@@ -908,7 +910,7 @@ async function feedAdd(i: any, forceSource?: string) {
   const filters = [platform && PLATFORMS[platform], eventType && EVENT_TYPES[eventType]].filter(Boolean).join(" · ");
   const post = await api(`/channels/${channelId}/messages`, { method: "POST", body: JSON.stringify({
     allowed_mentions: { parse: [] },
-    embeds: [{ color: ORANGE, description: NO_EVENT_OPTIONS.has(source) ? `This channel now receives **${srcText}** via Leonida Racing.` : `This channel now receives events from **${srcText}**${filters ? ` (${filters})` : ""} via Leonida Racing.`, footer: { text: "Leonida Racing · leonidaracing.com" } }],
+    embeds: [{ color: ORANGE, description: source === "videos" ? "This channel now gets new videos picked by Leonida Racing." : NO_EVENT_OPTIONS.has(source) ? `This channel now receives **${srcText}** via Leonida Racing.` : `This channel now receives events from **${srcText}**${filters ? ` (${filters})` : ""} via Leonida Racing.`, footer: { text: "Leonida Racing · leonidaracing.com" } }],
   }) });
   if (!post.ok) {
     console.log("feed add test post", post.status, await post.text());
@@ -916,6 +918,8 @@ async function feedAdd(i: any, forceSource?: string) {
   }
   const { error } = await db.from("discord_feeds").insert(row_);
   if (error) {
+    // Not saved -> take the confirmation post back, so the channel doesn't announce a feed that doesn't exist (Codex 02.11.)
+    try { const m = await post.clone().json(); if (m?.id) await api(`/channels/${channelId}/messages/${m.id}`, { method: "DELETE" }); } catch { /* best effort */ }
     if (error.code === "23505") return { content: `<#${channelId}> already has this feed.` };
     throw error;
   }
@@ -926,7 +930,7 @@ async function feedAdd(i: any, forceSource?: string) {
 
 async function feedList(i: any) {
   const { feeds, names } = await feedsWithNames(i.guild_id);
-  if (!feeds.length) return { content: "This server has no Leonida Racing feeds yet. Add one with /leonida feed events." };
+  if (!feeds.length) return { content: "No feeds on this server yet. Start with /leonida feed." };
   const lines = feeds.map((f, n) => `**${n + 1}.** <#${f.channel_id}> · ${feedLabel(f, names)}\n${optionsLine(f)}${f.last_error ? `\n⚠️ Last problem: ${clip(f.last_error, 150)}` : ""}`);
   return { content: clip(lines.join("\n\n"), 1900) };
 }

@@ -373,7 +373,7 @@ function recordCard(x: RecItem) {
   const [top, ...more] = info.records as any[];
   const lines = [
     `**${esc(x.driver)}** · ${esc(carName(info))} · ${RUN_PLATFORMS[info.platform] ?? info.platform}`,
-    `**${lapTime(info.lap_time_ms)}** · ${((top.prev_ms - info.lap_time_ms) / 1000).toFixed(3)} s faster than the previous record (${lapTime(top.prev_ms)})`,
+    `**${lapTime(info.lap_time_ms)}** · ${((top.prev_ms - info.lap_time_ms) / 1000).toFixed(3)} s faster than the old record (${lapTime(top.prev_ms)})`,
   ];
   if (more.length) lines.push(`Also: ${more.map((r) => recordName(r, info)).join(" · ")}`);
   const video = safeUrl(info.video_url);
