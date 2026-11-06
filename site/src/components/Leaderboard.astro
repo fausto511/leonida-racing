@@ -186,6 +186,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .tbl :global(.tr.h) { min-height: 40px; border-top: 0; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); }
   .tbl :global(.rk) { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--lr-muted); }
   .tbl :global(.dr) { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--lr-text); font-weight: 600; }
+  .lb :global(.drv-badge), :global(.ta-tile .drv-badge) { flex: none; display: inline-flex; line-height: 0; }
   .tbl :global(.dr .n) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tbl :global(.lb-crew-tag) { flex: none; text-decoration: none; color: var(--lr-bg); }
   .tbl :global(.car) { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -307,6 +308,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   import { loadIconIds } from '../scripts/icons';
   import { sampleEntries, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, crewsWithLaps, crewInfo, crewTagHtml, type LbEntry, type LbState, type LbMode, type LbCrew } from '../data/leaderboard';
   import { buildCrews } from '../data/hub';
+  import { computeBadges } from '../data/badge';
 
   const TRACK_ID = 'gellhorn-international-raceway';
   const $ = (id: string) => document.getElementById(id)!;
@@ -316,6 +318,8 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   // Best VERIFIED run per driver + car (RS-0040); "Video verified only" uses its own view.
   let verifiedData: LbEntry[] = sampleEntries;
   let sample = true;
+  // Driver Badge (DEC-0230): from all accepted best laps, the same in every view (not from the verified-only list)
+  let badges = computeBadges(data);
   const current = () => (state.verifiedOnly ? verifiedData : data);
   const state: LbState = { ...initialState };
 
@@ -343,7 +347,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   const makeSel = $('lb-make') as HTMLSelectElement;
   const tbl = $('lb-tbl');
   function draw() {
-    const r = render(current(), state, sample);
+    const r = render(current(), state, sample, badges);
     tbl.classList.toggle('nocar', Boolean(state.vehicle));
     $('lb-thead').innerHTML = headHtml(!state.vehicle);
     $('lb-tbody').innerHTML = r.body;
@@ -467,7 +471,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     const t = document.getElementById('ta-tile');
     if (!t) return;
     t.querySelector('[data-rec]')!.textContent = s.rec ? lapTime(s.rec.lap_time_ms) : '—';
-    t.querySelector('[data-who]')!.innerHTML = recordWhoHtml(s.rec);
+    t.querySelector('[data-who]')!.innerHTML = recordWhoHtml(s.rec, badges);
     t.querySelector('[data-drivers]')!.textContent = s.drivers.toLocaleString('en-US');
     t.querySelector('[data-laps]')!.textContent = s.laps.toLocaleString('en-US');
     t.querySelector('[data-cars]')!.textContent = s.cars.toLocaleString('en-US');
@@ -551,6 +555,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     });
     data = live.map(toEntry);
     verifiedData = liveVerified.map(toEntry);
+    badges = computeBadges(data);
     sample = false;
     $('lb-flag').hidden = true;
     const nl = noLapCars([...data, ...verifiedData]);

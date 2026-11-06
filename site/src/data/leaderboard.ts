@@ -15,6 +15,7 @@ import { makeHref, classHref, classSlug } from './garage-taxonomy';
 import { taxonomyCopy } from './taxonomy-copy';
 import { buildCrews, esc } from './hub';
 import { iconTagHtml } from './icons';
+import { badgeHtml, type Badge } from './badge';
 
 export interface LbEntry {
   /** best run of one driver on one vehicle (= one row of public_leaderboard) */
@@ -260,7 +261,7 @@ function pick(rows: Ranked, s: LbState, searching: boolean): { list: Ranked; bre
   return { list: [...top, ...rows.slice(from, to)], breakBefore: rows[from].rank };
 }
 
-export function render(all: LbEntry[], s: LbState, sample: boolean): Rendered {
+export function render(all: LbEntry[], s: LbState, sample: boolean, badges?: Map<string, Badge>): Rendered {
   const qd = norm(s.qDriver);
   const vf = s.verifiedOnly ? 'verified ' : '';
   const driverCount = new Set(all.map((e) => e.driver_id)).size;
@@ -314,7 +315,7 @@ export function render(all: LbEntry[], s: LbState, sample: boolean): Rendered {
       if (me) hasMe = true;
       const cls = ['tr', rank === 1 ? 'first' : '', me ? 'me' : '', rank === breakBefore ? 'brk' : ''].filter(Boolean).join(' ');
       const gp = e.lap_time_ms === best ? '' : `+${((e.lap_time_ms - best) / 1000).toFixed(3)}`;
-      return `<div class="${cls}" role="row"${me ? ' id="lb-me"' : ''}><span class="rk" role="cell">${rank}${ov ? `<small title="#${ov} overall">#${ov}</small>` : ''}</span><span class="dr" role="cell"><span class="n">${esc(e.driver)}</span>${iconTagHtml(e.icon)}${crewTag(e.crew)}${me ? '<span class="you">YOU</span>' : ''}</span>${carCol ? carCell(e, s.cls) : ''}<span class="mt"><span class="gp" role="cell">${gp}</span>${statusCell(e.verified)}${videoCell(e, sample)}</span><span class="tm" role="cell">${lapTime(e.lap_time_ms)}</span></div>`;
+      return `<div class="${cls}" role="row"${me ? ' id="lb-me"' : ''}><span class="rk" role="cell">${rank}${ov ? `<small title="#${ov} overall">#${ov}</small>` : ''}</span><span class="dr" role="cell">${badgeHtml(badges?.get(e.driver_id))}<span class="n">${esc(e.driver)}</span>${iconTagHtml(e.icon)}${crewTag(e.crew)}${me ? '<span class="you">YOU</span>' : ''}</span>${carCol ? carCell(e, s.cls) : ''}<span class="mt"><span class="gp" role="cell">${gp}</span>${statusCell(e.verified)}${videoCell(e, sample)}</span><span class="tm" role="cell">${lapTime(e.lap_time_ms)}</span></div>`;
     }).join('')
     : empty(ranked.length ? 'No driver matches your search.' : s.crew ? `No ${vf}times from this crew in this selection yet.` : s.vehicle || s.cls || s.make ? `No ${vf}times in this selection yet. <a href="${base}time-attack/submit/">Be the first — submit a lap</a>.` : `No ${vf}times yet.`);
   const shownCount = list.length;
@@ -374,7 +375,7 @@ export function trackStats(all: LbEntry[], verified: LbEntry[]) {
   const cars = new Set(all.map((e) => e.vehicle_id)).size;
   return { rec, drivers, laps, cars };
 }
-export function recordWhoHtml(rec: LbEntry | null): string {
+export function recordWhoHtml(rec: LbEntry | null, badges?: Map<string, Badge>): string {
   if (!rec) return '<span>No video-verified lap yet</span>';
-  return `<b>${esc(rec.driver)}</b>${iconTagHtml(rec.icon)}${crewTag(rec.crew)}<span>in ${esc(rec.make)} ${esc(rec.model)}</span>`;
+  return `${badgeHtml(badges?.get(rec.driver_id), 24)}<b>${esc(rec.driver)}</b>${iconTagHtml(rec.icon)}${crewTag(rec.crew)}<span>in ${esc(rec.make)} ${esc(rec.model)}</span>`;
 }
