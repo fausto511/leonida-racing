@@ -15,6 +15,7 @@ import { vehicleSeeAlso } from '../../../../data/vehicle-see-also';
 import { releaseById, formatReleaseDate } from '../../../../data/releases';
 import { classHref, makeHref, classSlug, vehiclesByMake } from '../../../../data/garage-taxonomy';
 import { vehiclePhotoAlt } from '../../../../data/vehicle-photo-alt';
+import { vehicleTitle, vehicleDescription } from '../../../../data/seo-meta';
 import { sampleEntries, vehicleRows, lapTime } from '../../../../data/leaderboard';
 import { driverRowHtml, openRowHtml, startTileHtml, classRowsHtml, sampleClassRows, rivalsFromClass, rivalHtml, GELLHORN_ROWS, type ClassRow } from '../../../../data/vehicle-page';
 
@@ -32,8 +33,9 @@ const fullName = `${vehicle.make} ${vehicle.model}`;
 const photoAlt = vehiclePhotoAlt[vehicle.id] ?? `${fullName} in GTA VI`;
 
 // SEO metadata: approved Codex copy (2026-10-01), unchanged by the redesign.
-const metaTitle = `${fullName} — GTA VI Car Specs & Performance`;
-const metaDescription = `Explore the ${fullName} in GTA 6, including key vehicle details, release information, real-life inspiration, and available performance data.`;
+// Search title + description from the database (Fausto 07.11.2026, data/seo-meta.ts)
+const metaTitle = vehicleTitle(vehicle);
+const metaDescription = vehicleDescription(vehicle);
 // WebPage + main photo for Google (thumbnail in search results prefers the marked primary image), 25.10.
 const pageUrlAbs = new URL(`${import.meta.env.BASE_URL}cars/vehicles/${vehicle.id}/`, Astro.site).href;
 const vehicleJsonLd = [{

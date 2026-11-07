@@ -14,6 +14,7 @@ import { speedHtml } from '../data/units';
 import { taxonomyCopy } from '../data/taxonomy-copy';
 import { trackVehicleClasses } from '../data/tracks';
 import { LAUNCH_DATE, LAUNCH_AT } from '../data/launch';
+import { collectionTitle, collectionDescription } from '../data/seo-meta';
 import '../styles/garage-tile.css';
 
 /** New cars + model family pages use the same layout (DEC-0147, Fausto 20.10.2026). */
@@ -55,7 +56,8 @@ const isClass = kind === 'class';
 const list = [...vehicles].sort(compareGarageOrder);
 const N = list.length;
 const path = custom?.path ?? `cars/${isClass ? 'classes' : 'manufacturers'}/${page.slug}/`;
-const metaTitle = isClass ? `GTA VI ${label}` : `${label} in GTA VI`;
+// Search title + description from the database (Fausto 07.11.2026, data/seo-meta.ts); brand shown by Google separately
+const metaTitle = collectionTitle(isClass, label);
 const copy = taxonomyCopy[page.slug];
 const heading = copy?.h1 ?? label;
 // Class page -> Community tracks filtered by this class (Sackgassen-Check 04.11.2026)
@@ -68,12 +70,7 @@ const noSpeed = launched ? 'No speed recorded yet' : 'After launch';
 // Manufacturer with exactly one real-world counterpart: name it in the meta description (snippet only, not on the page; Fausto 27.10.2026).
 const soleInspiration = !isClass && Array.isArray((page as { inspiration?: string[] }).inspiration) && (page as { inspiration?: string[] }).inspiration!.length === 1
   ? (page as { inspiration?: string[] }).inspiration![0] : null;
-const makeDesc = (avail: boolean) => `Explore ${page.name} vehicles in GTA 6, the brand behind the game's ${soleInspiration}-inspired cars. Compare real-life inspirations, specs and ${avail ? 'available ' : ''}performance data.`;
-const metaDescription = isClass
-  ? `Browse GTA 6 ${page.name} vehicles. Compare models, key vehicle characteristics, real-life inspirations, release details, and available performance data.`
-  : soleInspiration
-    ? (makeDesc(true).length <= 160 ? makeDesc(true) : makeDesc(false))
-    : `Explore ${page.name} vehicles in GTA 6. See the real-world inspiration behind each model and compare key characteristics and available performance data.`;
+const metaDescription = collectionDescription(isClass, page.name, label, list, soleInspiration);
 const pageUrl = new URL(`${base}${path}`, Astro.site).href;
 const jsonLd = [{
   '@context': 'https://schema.org',
@@ -140,6 +137,7 @@ const more = custom
 <Base
   title={custom?.metaTitle ?? metaTitle}
   description={custom?.metaDescription ?? metaDescription}
+  brandSuffix={Boolean(custom)}
   section="garage"
   jsonLd={custom ? undefined : jsonLd}
   noindex={custom?.noindex}
