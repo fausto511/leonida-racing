@@ -44,6 +44,7 @@ Vor Beginn der Historie (Einrichtung September 2026):
 - 20261008160000_vehicle_values_sell_price_tuning_index.sql (am 17.10. aus der SQL-Editor-Datei nachgetragen; Zeitstempel nur zur Einordnung nach 20261008152155)
 - 20261014120000_redesign_phase0.sql
 - 20261014170000_crew_sort_order_default.sql
+- 20261019150500_crew_kick_ban_events_REST.sql (DEC-0144 Teil 2, im SQL-Editor eingespielt; 16 Funktionen und Tabellen `hub_event_kicks`/`hub_event_bans` am 07.11. live geprüft)
 - 20261019220000_cleanup_cron_log_weekly.sql (Fausto 19.10. im SQL-Editor; Cron-Job `cleanup-cron-log-weekly` am 07.11. live geprüft)
 - 20261021090000_account_delete_restrictions_kick_cleanup.sql (Fausto 21.10. im SQL-Editor; Cron-Job `cleanup-event-kicks-daily` und neue Zeilen in `anonymize_driver_account` am 07.11. live geprüft)
 
@@ -82,11 +83,11 @@ Zeitstempeln). Abgleich gegen `supabase_migrations.schema_migrations`:
   umbenannt, enthält aber nur eine Beschreibung als Kommentar, nicht das
   angewendete SQL. Objekt live geprüft (`crew_memberships_limit` enthält
   `driver_invite_limit`). Volltext steht in der Live-Historie.
-- **Noch zusammengefasst (offen):** `20261019150000_crew_join_mode_commissioner_kick_ban.sql`
-  und `20261019150500_crew_kick_ban_events_REST.sql` entsprechen live den fünf
-  Einträgen 20261019144843 crew_join_mode_commissioner_part1,
-  20261019145529 crew_commissioner_guard, 20261019145536
-  crew_leader_cleanup_commissioner, 20261019145556 crew_bans_join_rules_policies,
-  20261019145949 crew_assert_can_remove. Aufteilen wie am 17.10. (exakter
-  Live-Inhalt je Eintrag) steht aus; bis dahin meldet der Abgleich diese fünf.
+- Zusammengefasste Datei `20261019150000_crew_join_mode_commissioner_kick_ban.sql`
+  ersetzt durch die fünf Live-Einträge vom 19.10. (20261019144843 crew_join_mode_commissioner_part1,
+  20261019145529 crew_commissioner_guard, 20261019145536 crew_leader_cleanup_commissioner,
+  20261019145556 crew_bans_join_rules_policies, 20261019145949 crew_assert_can_remove), je Datei
+  exakt das gespeicherte Live-SQL (MD5 byte-genau geprüft). Die alte Datei enthielt zusätzlich
+  Teil 2 (Kick/Ban-Funktionen, Event-Kicks/-Bans); der steht weiter in
+  `20261019150500_crew_kick_ban_events_REST.sql` (Sonderfall, s. oben).
 - Zwei SQL-Editor-Änderungen als Sonderfall nachgetragen (s. oben).
