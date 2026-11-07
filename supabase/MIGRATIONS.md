@@ -1,6 +1,6 @@
 # Datenbank-Migrationen — Regeln und Sonderfälle
 
-Stand: 2026-10-17 (RS-0075, DEC-0133). Live-Projekt: `leonida-racing` (Supabase).
+Stand: 2026-11-07 (Abgleich Claude), vorher 2026-10-17 (RS-0075, DEC-0133). Live-Projekt: `leonida-racing` (Supabase).
 
 ## Regel (gilt für Claude, Codex und jede Änderung)
 
@@ -44,6 +44,8 @@ Vor Beginn der Historie (Einrichtung September 2026):
 - 20261008160000_vehicle_values_sell_price_tuning_index.sql (am 17.10. aus der SQL-Editor-Datei nachgetragen; Zeitstempel nur zur Einordnung nach 20261008152155)
 - 20261014120000_redesign_phase0.sql
 - 20261014170000_crew_sort_order_default.sql
+- 20261019220000_cleanup_cron_log_weekly.sql (Fausto 19.10. im SQL-Editor; Cron-Job `cleanup-cron-log-weekly` am 07.11. live geprüft)
+- 20261021090000_account_delete_restrictions_kick_cleanup.sql (Fausto 21.10. im SQL-Editor; Cron-Job `cleanup-event-kicks-daily` und neue Zeilen in `anonymize_driver_account` am 07.11. live geprüft)
 
 Achtung: `supabase db push` mit der Supabase-CLI würde diese Dateien für
 „ausstehend“ halten und erneut ausführen wollen. Die CLI wird für dieses
@@ -61,3 +63,30 @@ Projekt nicht zum Einspielen benutzt. Falls doch einmal nötig: vorher
 - 3 Änderungen, die nur als Kopie in `Claude outputs/` lagen, aber live angewendet
   sind, als Dateien ergänzt (siehe Sonderfälle).
 - Alte SQL-Kopien aus `Claude outputs/` liegen in `Claude outputs/_archiv-sql/` (nur `main`).
+
+## Abgleich 07.11.2026 (Claude, unbeaufsichtigte Aufräum-Sitzung)
+
+Seit dem 17.10. war wieder Drift entstanden (Dateien mit selbst gewählten
+Zeitstempeln). Abgleich gegen `supabase_migrations.schema_migrations`:
+
+- 7 Dateien auf die Live-Version umbenannt. Inhalt ohne Kommentare/Leerraum per
+  MD5 gegen das gespeicherte Live-SQL geprüft und gleich:
+  buckingham_rebrand (20261019100000 → 20261019101848),
+  invite_search_contains (20261021100000 → 20261020225606),
+  crew_consent_identity_lock_evidence_mime (20261030180000 → 20261030174459),
+  discord_mod_alert_duplicate_crew_name (20261030190000 → 20261030191526),
+  crews_launch_crew_badge (20261031120000 → 20261031021326),
+  reject_emoji_user_text (20261031140000 → 20261031034654),
+  runs_video_use_consent (20261103180000 → 20261103164447).
+- `20261020230424_driver_open_invite_limit.sql` (vorher 20261021110000):
+  umbenannt, enthält aber nur eine Beschreibung als Kommentar, nicht das
+  angewendete SQL. Objekt live geprüft (`crew_memberships_limit` enthält
+  `driver_invite_limit`). Volltext steht in der Live-Historie.
+- **Noch zusammengefasst (offen):** `20261019150000_crew_join_mode_commissioner_kick_ban.sql`
+  und `20261019150500_crew_kick_ban_events_REST.sql` entsprechen live den fünf
+  Einträgen 20261019144843 crew_join_mode_commissioner_part1,
+  20261019145529 crew_commissioner_guard, 20261019145536
+  crew_leader_cleanup_commissioner, 20261019145556 crew_bans_join_rules_policies,
+  20261019145949 crew_assert_can_remove. Aufteilen wie am 17.10. (exakter
+  Live-Inhalt je Eintrag) steht aus; bis dahin meldet der Abgleich diese fünf.
+- Zwei SQL-Editor-Änderungen als Sonderfall nachgetragen (s. oben).
