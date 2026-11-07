@@ -105,5 +105,5 @@ jobs:
           fi
           for f in ${{ steps.pick.outputs.list }}; do
             echo "Deploying $f"
-            supabase functions deploy "$f" --project-ref "$PROJECT_REF" --no-verify-jwt
+            supabase functions deploy "$f" --remote="$PROJECT_REF" --no-verify-jwt --yes
           done
