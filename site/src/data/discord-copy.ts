@@ -66,8 +66,8 @@ export const discordRules = ["Respect the people behind the wheel. No harassment
 export const discordBotTeaser = {
   eyebrow: "For crews and server owners",
   title: "Bring the bot to your own server",
-  // Claude placeholder 06.11. (feeds for videos + Gellhorn records added), Codex review pending
-  text: "Keep your crew’s events close to the conversation. Set up a feed for matching events from your crew, a host or the public calendar, or for new cars, videos and Gellhorn lap records. Event cards include sign-up buttons and follow updates made on the website.",
+  // final text 07.11. (Fausto, DEC-0212)
+  text: "Bring your crew’s events, new cars, lap records and videos into your own server. Event cards come with sign-up buttons.",
   link: "How the bot works",
 };
 
@@ -80,7 +80,7 @@ export const discordFaq: { q: string; a: string }[] = [
   { q: "Is it only for racing?", a: "Racing is the core, but car meets, cruises, photo sessions, builds and crews all have their own place." },
   { q: "Which languages can I use?", a: "The general channels are English. Deutsch, Español, Français, Italiano and Português each have their own text and voice channel; pick the language role in #roles to see them." },
   { q: "How do my crew’s events get onto the server?", a: "Publish an event on Leonida Racing through the website’s Event Host process. Matching published events are shared through the calendar feed as Discord cards with sign-up buttons. Event details are managed on the website." },
-  { q: "Can I add the bot to my own server?", a: "Yes. Server administrators can add the bot and set up feeds for events, new cars, videos and Gellhorn lap records. The bot guide explains the permissions, setup and available commands." }, // Claude placeholder 06.11.
+  { q: "Can I add the bot to my own server?", a: "Yes. Anyone with Manage Server can add it and set up feeds. The bot guide shows how." }, // final text 07.11. (Fausto, DEC-0212)
 ];
 
 // ---------------------------------------------------------------------------
@@ -88,10 +88,10 @@ export const discordFaq: { q: string; a: string }[] = [
 // (Codex Zuarbeit/Discord-Bot-Seite-Texte-2026-10-18.json), DEC-0088. Command names are API identifiers.
 export const botPage = {
   title: "GTA 6 Discord Bot for Events, Crews & Car Meets",
-  description: "Add the free Leonida Racing GTA 6 Discord bot. Share event cards and sign-ups, set reminders, look up cars and compare them with your crew.",
+  description: "Add the free Leonida Racing GTA 6 Discord bot: event cards with sign-ups and reminders, car lookups, leaderboards and video feeds.", // final text 07.11. (Fausto, DEC-0212)
   eyebrow: "GTA VI Discord Bot",
   h1: "The Leonida Racing bot",
-  intro: "Keep your crew’s events where the conversation happens. The Leonida Racing bot posts event cards with sign-up buttons, follows changes made on the website and brings car and crew lookups into your Discord.",
+  intro: "Keep your crew’s events where the conversation happens. The bot posts event cards with sign-up buttons, looks up cars, crews and lap times, and shares new records and videos.", // final text 07.11. (Fausto, DEC-0212)
   addNote: "Free. Setup needs the Manage Server permission.",
 };
 
@@ -99,6 +99,7 @@ export const botGlance: { k: string; v: string }[] = [
   { k: "Price", v: "Free" },
   { k: "Works on", v: "Your Discord server" },
   { k: "Event sources", v: "Crew · Host · Public calendar" },
+  { k: "Feeds", v: "Events · Cars · Records · Videos" }, // final text 07.11. (Fausto, DEC-0212)
   { k: "Setup", v: "Invite + feed command" },
 ];
 
@@ -110,24 +111,24 @@ export const botFeatures: { title: string; text: string }[] = [
   { title: "New additions to Cars", text: "A vehicle feed shares new additions to Cars that are documented in official GTA VI material. Cards show the available vehicle details and a photo when one is included." },
   { title: "Lookups for everyone", text: "/car, /compare and /crew pull cards straight from Leonida Racing, so the next argument about which car to bring has something to point at." },
   // Claude placeholders 06.11. (features built 01.–04.11.), Codex review pending
-  { title: "Gellhorn leaderboard and records", text: "/leaderboard shows the Gellhorn top 10, by class, car or maker, with your own place. A record feed posts new lap records with a checked video, for everyone or only your crew." },
-  { title: "Rate cars", text: "Rate this car under a car card gives a car 1–5 stars. It counts the same as a rating on the website." },
+  { title: "Gellhorn leaderboard and records", text: "/leaderboard shows the Gellhorn top 10 by class, car or manufacturer, plus your own place. The record feed posts new lap records, for all drivers or just your crew." }, // final text 07.11. (Fausto, DEC-0212)
+  { title: "Rate cars", text: "Give a car 1–5 stars right on its card. Change your rating anytime." }, // final text 07.11. (Fausto, DEC-0212)
   { title: "Videos from GTA and car channels", text: "A video feed posts new videos from GTA and car channels we picked." },
 ];
 
 export const botSetup: { title: string; text: string }[] = [
   { title: "Add the bot", text: "Open the bot invite, choose Add to server and select your server. You need Manage Server or Administrator there. Check that the bot can access the channel you want to use." },
-  { title: "Run /leonida feed events", text: "Choose a channel and event source with /leonida feed events. Public-calendar feeds require a platform filter. Crew and host feeds require the matching website role. Add server events and reminders if you want them." },
-  { title: "Check your feed", text: "The bot posts a setup confirmation in the chosen channel. Matching upcoming events are queued for delivery. Use /leonida feed list to check the feed and any reported problems." },
+  { title: "Choose a feed", text: "Run /leonida feed and pick what to post: events, new cars, records or videos. Then choose the channel." }, // final text 07.11. (Fausto, DEC-0212)
+  { title: "Check your feed", text: "The bot posts a confirmation in that channel. Use /leonida feed list to see all your feeds." }, // final text 07.11. (Fausto, DEC-0212)
 ];
 
 export const botCommands: { cmd: string; text: string; who: string }[] = [
   { cmd: "/events", text: "See upcoming events. Filter by event type or platform.", who: "Everyone" },
   { cmd: "/event", text: "Find one event by name.", who: "Everyone" },
-  { cmd: "/car", text: "Look up a make or model for its vehicle card.", who: "Everyone" },
+  { cmd: "/car", text: "Look up a car and rate it.", who: "Everyone" }, // final text 07.11. (Fausto, DEC-0212)
   { cmd: "/compare", text: "Put two to four cars side by side, with a link to the full comparison.", who: "Everyone" },
   { cmd: "/crew", text: "Show a crew card: platforms, focus, region, language and next event.", who: "Everyone" },
-  { cmd: "/leaderboard", text: "Gellhorn top 10, by class, car or maker.", who: "Everyone" }, // Claude placeholder 06.11.
+  { cmd: "/leaderboard", text: "Gellhorn top 10 by class, car or manufacturer. Shows your own place too.", who: "Everyone" }, // final text 07.11. (Fausto, DEC-0212)
   { cmd: "/create-event", text: "Open the event form on Leonida Racing. Event publication follows the website’s host and review requirements.", who: "Everyone" },
   { cmd: "/edit-event", text: "Change one of your events: details, sign-ups open or closed, or cancel it.", who: "Event host" }, // Claude placeholder 06.11.
   { cmd: "/help", text: "See what the bot can do. Server admins also get the feed setup commands.", who: "Everyone" },
@@ -149,11 +150,13 @@ export const botPerms: { p: string; why: string }[] = [
 export const botFaq: { q: string; a: string }[] = [
   { q: "Is the bot free?", a: "Yes. Adding it, feeds and every command are free." },
   { q: "The bot shows as offline. Is it broken?", a: "Not necessarily. This bot handles commands through HTTP rather than keeping a permanent Discord connection, so it may appear offline. Try a command; if it fails, check the bot’s channel permissions and any feed errors." },
-  { q: "I can’t see the /leonida commands.", a: "Feed setup requires Manage Server or Administrator. Check your server permissions and that the bot was added to the server with commands enabled. Refresh Discord if the command list has not updated." },
-  { q: "Do I need a Leonida Racing account?", a: "You do not need a website account to set up a public-calendar or vehicle feed, but you do need Manage Server in Discord. A crew or host feed also requires a linked website account with the matching confirmed role. Event sign-ups require a free linked account." },
+  { q: "I can’t see the /leonida commands.", a: "You need Manage Server. If you have it, refresh Discord." }, // final text 07.11. (Fausto, DEC-0212)
+  { q: "Do I need a Leonida Racing account?", a: "Not to look things up or set up most feeds. Crew feeds, event sign-ups and ratings need a free account." }, // final text 07.11. (Fausto, DEC-0212)
   // Claude placeholder 06.11. (/edit-event exists since 02.11., DEC-0100), Codex review pending
   { q: "Can I edit an event in Discord?", a: "Yes, with /edit-event: change the title, start, end, description or driver limit, close or reopen sign-ups, or cancel the event. Everything else you change on the website. In your server’s Events list you can still swap the cover image or move the event to a voice channel." },
   { q: "Why didn't a video appear?", a: "The bot checks for new videos about every 10 minutes. It only posts new videos about GTA, cars or racing; older videos are skipped." }, // final text 03.11. (DEC-0212)
+  { q: "Which channels does the video feed follow?", a: "Channels picked by Leonida Racing, the same for every server. Want to suggest one? Tell us on our Discord." }, // final text 07.11. (Fausto, DEC-0212)
+  { q: "What counts as a Gellhorn record?", a: "A lap that beats the best time on the track, in a class or in a car, with a video checked by a moderator." }, // final text 07.11. (Fausto, DEC-0212)
   { q: "What happens when an event is cancelled?", a: "Once processed, the card is marked Cancelled and its sign-up buttons are removed. If server events are enabled, the bot also removes the linked server event. Missing permissions or API errors can delay updates." },
   { q: "The cards have no images.", a: "Check that the bot has Embed Links in the channel and that your Discord display settings allow link previews. Some vehicle cards have no photo because none is available in Cars." },
   { q: "What happens if I remove a feed?", a: "Removing a feed stops its updates and removes its settings. Existing channel cards stay. The bot also attempts to remove the server events linked to that feed; check permissions if any remain." },

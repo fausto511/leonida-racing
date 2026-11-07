@@ -120,7 +120,7 @@ const COMMANDS = [
     options: [
       { type: 3, name: "class", description: "Only this class", required: false, choices: LB_CLASSES.map((c) => ({ name: c, value: c })) },
       { type: 3, name: "car", description: "Only this car (start typing a make or model)", required: false, autocomplete: true },
-      { type: 3, name: "manufacturer", description: "Only cars from this maker", required: false, autocomplete: true },
+      { type: 3, name: "manufacturer", description: "Only cars from this manufacturer", required: false, autocomplete: true },
       { type: 5, name: "verified", description: "Only laps with a checked video", required: false },
     ] },
   // Setup command: always "Manage Server" only (also checked at runtime).
@@ -163,7 +163,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-11-06.1"; // simpler option texts (DEC-0211)
+const COMMANDS_VERSION = "2026-11-07.1"; // manufacturer option text (final texts 07.11.)
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
@@ -576,7 +576,7 @@ function cmdHelp(i: any) {
     "\u2022 **/event** \u2014 one event with start time, host and sign-ups",
     "\u2022 **/car** \u2014 a car's card \u00b7 **/compare** \u2014 2 to 4 cars side by side",
     "\u2022 **/crew** \u2014 a crew's card with its next event",
-    "\u2022 **/leaderboard** \u2014 Gellhorn top 10, by class, car or maker",
+    "\u2022 **/leaderboard** \u2014 Gellhorn top 10, by class, car or manufacturer",
     "\u2022 **/create-event** \u2014 create an event on the website \u00b7 **/edit-event** \u2014 change one of your events",
     "",
     "**Buttons**",
