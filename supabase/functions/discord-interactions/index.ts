@@ -532,7 +532,7 @@ async function cmdCompare(i: any) {
 }
 
 // ---------- /crew ----------
-const FOCUS: Record<string, string> = { racing: "Racing", "time-attack": "Time Attack", league: "League", drift: "Drift", "car-meet": "Car Meets", cruise: "Cruises" };
+const FOCUS: Record<string, string> = { racing: "Racing", "time-attack": "Time Attack", league: "League", drift: "Drift", "car-meet": "Car Meets", cruise: "Cruises", "job-creation": "Job Creation" };
 const REGIONS: Record<string, string> = { international: "International", "north-america": "North America", "south-america": "South America", europe: "Europe", "middle-east": "Middle East", africa: "Africa", asia: "Asia", oceania: "Oceania" };
 const langName = (() => { let d: Intl.DisplayNames | null = null; try { d = new Intl.DisplayNames(["en"], { type: "language" }); } catch { /* fallback: code */ } return (c: string) => { try { return d?.of(c) ?? c; } catch { return c; } }; })();
 const safeHttps = (u: string | null) => { try { const x = new URL(String(u ?? "")); return x.protocol === "https:" ? x.toString() : null; } catch { return null; } };

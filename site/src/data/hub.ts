@@ -13,7 +13,7 @@
 // rows in the `crews` / `hub_events` tables -- not by editing this file.
 
 export type Platform = 'ps5' | 'xbox';
-export type CrewFocus = 'racing' | 'time-attack' | 'league' | 'drift' | 'car-meet' | 'cruise';
+export type CrewFocus = 'racing' | 'time-attack' | 'league' | 'drift' | 'car-meet' | 'cruise' | 'job-creation';
 export type EventType = 'race' | 'time-attack' | 'league' | 'car-meet' | 'cruise' | 'other';
 
 export interface HubCrew {
@@ -136,6 +136,7 @@ export const focusLabels: Record<CrewFocus, string> = {
   drift: 'Drift',
   'car-meet': 'Car Meets',
   cruise: 'Cruises',
+  'job-creation': 'Job Creation', // DEC-0234 (working title)
 };
 export const eventTypeLabels: Record<EventType, string> = {
   race: 'Race',

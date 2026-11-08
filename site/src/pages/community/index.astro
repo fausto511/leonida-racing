@@ -19,7 +19,7 @@ const nextEventsHtml = (upcoming.length ? upcoming.map((e) => eventRowHtml(e, { 
 const featured = [...buildCrews.filter((c) => c.is_featured), ...buildCrews.filter((c) => !c.is_featured)].slice(0, CREW_N);
 const crewsHtml = featured.map((c) => crewCardHtml(c)).join('');
 const evChips: [string, string][] = [['', 'All events'], ['race', 'Races'], ['time-attack', 'Time Attack'], ['league', 'Leagues'], ['car-meet', 'Car meets'], ['cruise', 'Cruises'], ['other', 'Other']];
-const crewChips: [string, string][] = [['', 'Featured'], ['racing', 'Racing'], ['time-attack', 'Time Attack'], ['league', 'League'], ['drift', 'Drift'], ['car-meet', 'Car meet'], ['cruise', 'Cruise']];
+const crewChips: [string, string][] = [['', 'Featured'], ['racing', 'Racing'], ['time-attack', 'Time Attack'], ['league', 'League'], ['drift', 'Drift'], ['car-meet', 'Car meet'], ['cruise', 'Cruise'], ['job-creation', 'Job creation']];
 const entries = [
   { href: `${base}community/events/`, img: 'events', eb: 'Calendar', title: 'Events', text: 'Races, leagues, car meets and cruises, all in your local time.', short: 'Races, leagues, meets and cruises', cta: 'Open calendar' },
   { href: `${base}community/crews/`, img: 'crews', eb: 'Directory', title: 'Crews', text: 'Racing crews and car meet communities that fit the way you play.', short: 'Crews that fit the way you play', cta: 'Browse crews', pos: '75% 30%' },
