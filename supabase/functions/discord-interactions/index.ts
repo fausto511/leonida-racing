@@ -1106,7 +1106,7 @@ async function lfgComponent(i: any) {
   const [, action, arg] = String(i.data?.custom_id ?? "").split(":");
   const uid = discordId(i);
   if (action === "new") {
-    if (!(await driverByDiscord(uid))) return ephemeral("Starting a search needs a Leonida Racing account (it's one click with Discord). Joining others works without.", [profileButton]);
+    if (!(await driverByDiscord(uid))) return ephemeral("Starting a search needs a Leonida Racing account (log in with Discord, it only takes seconds). Joining others works without.", [profileButton]);
     const { data: own } = await db.from("discord_lfg").select("lfg_id").eq("host_discord_id", uid).maybeSingle();
     if (own) return ephemeral("You already have a search running. Close it first, then start a new one.");
     const { count } = await db.from("discord_lfg").select("lfg_id", { count: "exact", head: true }).eq("guild_id", i.guild_id);
