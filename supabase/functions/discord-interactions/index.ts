@@ -1008,7 +1008,7 @@ async function rsvpButton(i: any) {
   if (r.season) {
     const t = String(r.title ?? "").replace(/ \(whole season\)$/, "");
     switch (r.status) {
-      case "no_profile": return ephemeral("To join, create your Leonida Racing driver profile first. It uses this Discord account, so it takes one click. Then press \u201cJoin season\u201d again.", [profileButton]);
+      case "no_profile": return ephemeral("To join, create your Leonida Racing driver profile first. It uses this Discord account, so it only takes seconds. Then press \u201cJoin championship\u201d again.", [profileButton]);
       case "in": return ephemeral(`You're in for the whole championship of **${t}** \u2014 every round, ${count} drivers.${psn}${r.discord_url ? " Join the host's Discord for the lobby invites." : ""}`, hostRow);
       case "already": return ephemeral(`You're already in for the championship of **${t}** (${count} drivers).${psn}`, hostRow);
       case "out": return ephemeral(`You left the championship of **${t}**. You're no longer signed up for its rounds.`);
@@ -1023,7 +1023,7 @@ async function rsvpButton(i: any) {
     }
   }
   switch (r.status) {
-    case "no_profile": return ephemeral("To sign up, create your Leonida Racing driver profile first. It uses this Discord account, so it takes one click. Then press \u201cI'm in\u201d again.", [profileButton]);
+    case "no_profile": return ephemeral("To sign up, create your Leonida Racing driver profile first. It uses this Discord account, so it only takes seconds. Then press \u201cI'm in\u201d again.", [profileButton]);
     case "not_found": return ephemeral("This event isn't available anymore.");
     case "in": return ephemeral(`You're in for **${r.title}** \u2014 ${count} going.${psn}${r.discord_url ? " Join the host's Discord for the lobby invite." : ""}`, hostRow);
     case "already": return ephemeral(`You're already in for **${r.title}** (${count} going).${psn}`, hostRow);
