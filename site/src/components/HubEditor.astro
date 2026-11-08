@@ -108,6 +108,7 @@ const base = import.meta.env.BASE_URL;
               <label class="check" data-mod-only><input type="checkbox" name="is_official" /> Official crew <small>Leonida Racing’s own crews</small></label>
               <label class="check" data-mod-only><input type="checkbox" name="is_verified" /> Verified crew <small>DEC-0216: confirmed as the original (e.g. a well-known creator's real crew); white seal after the name, other crews can't use the exact name</small></label>
               <label class="check" data-mod-only><input type="checkbox" name="is_launch_crew" /> Launch Crew <small>DEC-0201: set automatically on approval; tick only to correct</small></label>
+              <label data-mod-only>Social Club members <small>DEC-0235: shown on the card as e.g. “500+ SC members”; check the crew's Social Club page</small><select name="sc_member_range"><option value="">— not shown —</option><option value="50">50+</option><option value="100">100+</option><option value="250">250+</option><option value="500">500+</option><option value="750">750+</option></select></label>
               <label class="check" data-mod-only><input type="checkbox" name="is_partner" /> Partner crew</label>
               <label class="check" data-mod-only><input type="checkbox" name="is_featured" /> Featured crew <small>shown first on the home page, Hub overview and crew list</small></label>
               <label data-mod-only>Sort order <small>lower = earlier · 100 = no fixed spot</small><input type="number" name="sort_order" step="1" value="100" /></label>
@@ -905,6 +906,7 @@ const base = import.meta.env.BASE_URL;
       is_official: fd.get('is_official') === 'on',
       is_verified: fd.get('is_verified') === 'on',
       is_launch_crew: fd.get('is_launch_crew') === 'on',
+      sc_member_range: fd.get('sc_member_range') ? Number(fd.get('sc_member_range')) : null,
       sort_order: Math.round(Number(String(fd.get('sort_order') ?? '').trim() || 100)),  // empty = 100 = no fixed spot
       is_published: fd.get('is_published') === 'on',
       join_mode: (fd.get('join_mode') === 'open' ? 'open' : 'request') as 'open' | 'request',
@@ -1054,6 +1056,7 @@ const base = import.meta.env.BASE_URL;
     cf.is_official.checked = Boolean(r.is_official);
     cf.is_verified.checked = Boolean(r.is_verified);
     cf.is_launch_crew.checked = Boolean(r.is_launch_crew);
+    cf.sc_member_range.value = r.sc_member_range != null ? String(r.sc_member_range) : '';
     cf.is_published.checked = Boolean(r.is_published);
     cf.moderation_note.value = r.moderation_note ?? '';
     cf.join_mode.value = r.join_mode === 'open' ? 'open' : 'request';
@@ -1118,7 +1121,7 @@ const base = import.meta.env.BASE_URL;
       return;
     }
     const c: any = crewFromForm();
-    if (!isMod) { delete c.slug; delete c.is_partner; delete c.is_featured; delete c.is_official; delete c.is_verified; delete c.is_launch_crew; delete c.sort_order; delete c.is_published; }
+    if (!isMod) { delete c.slug; delete c.is_partner; delete c.is_featured; delete c.is_official; delete c.is_verified; delete c.is_launch_crew; delete c.sc_member_range; delete c.sort_order; delete c.is_published; }
     const bad = validateCrew({ ...crewFromForm(), ...(isMod ? {} : { slug: crews.find((x) => x.crew_id === selectedId)?.slug ?? 'x' }) });
     markInvalid(crewForm, bad);
     if (bad.length) { msg(crewForm, `Please fix: ${bad.map((b) => crewFieldHelp[b] ?? b).join('; ')}.`, true); return; }

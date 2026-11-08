@@ -539,7 +539,7 @@ const safeHttps = (u: string | null) => { try { const x = new URL(String(u ?? ""
 async function cmdCrew(i: any) {
   const id = String(opt(i, "crew") ?? "");
   if (!/^[0-9a-f-]{36}$/i.test(id)) return ephemeral("I couldn't find that crew. Pick one from the suggestions while typing.");
-  const { data: c } = await db.from("crews").select("crew_id,name,tag,color,platforms,focus,region,languages,description,member_count,discord_url,social_club_url,is_official,is_partner")
+  const { data: c } = await db.from("crews").select("crew_id,name,tag,color,platforms,focus,region,languages,description,member_count,sc_member_range,discord_url,social_club_url,is_official,is_partner")
     .eq("crew_id", id).eq("is_published", true).maybeSingle();
   if (!c) return ephemeral("I couldn't find that crew. Pick one from the suggestions while typing.");
   const { data: next } = await db.from("hub_events").select("event_id,title,starts_at").eq("host_crew_id", c.crew_id).eq("is_published", true).eq("is_test", false).eq("members_only", false)
@@ -551,7 +551,8 @@ async function cmdCrew(i: any) {
     { name: "Region", value: REGIONS[c.region] ?? c.region ?? "\u2014", inline: true },
     { name: "Language", value: (c.languages ?? []).map(langName).join(", ") || "\u2014", inline: true },
   ];
-  if (c.member_count != null) fields.push({ name: "Members", value: String(c.member_count), inline: true });
+  // DEC-0235: Social Club range instead of the Leonida member count (hidden for now)
+  if (c.sc_member_range) fields.push({ name: "Social Club", value: `${c.sc_member_range}+ members`, inline: true });
   if (next) fields.push({ name: "Next event", value: `[${clip(next.title, 80)}](${SITE}/community/events/#event-${next.event_id})\n<t:${unix(next.starts_at)}:f> \u00b7 <t:${unix(next.starts_at)}:R>`, inline: false });
   const color = /^#[0-9a-f]{6}$/i.test(c.color ?? "") ? parseInt(c.color.slice(1), 16) : ORANGE;
   const dc = safeHttps(c.discord_url), sc = safeHttps(c.social_club_url);

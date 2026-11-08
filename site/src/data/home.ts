@@ -2,7 +2,7 @@
 // (sample/fallback rows) and in the browser (live rows), so both look identical.
 // COPY STATUS: row labels ("Open spot", "by", "sample until launch") are Claude
 // placeholders from the mockup -> Codex review (DEC-0088).
-import { esc, regionLabel, crewTagHtml, focusLabels, eventTypeLabels, type HubCrew, type HubEvent } from './hub';
+import { esc, regionLabel, crewTagHtml, focusLabels, eventTypeLabels, scMembersLabel, type HubCrew, type HubEvent } from './hub';
 import { lapTime } from './leaderboard';
 import { iconTagHtml, verifiedCrewHtml } from './icons';
 import { badgeHtml, type Badge } from './badge';
@@ -42,7 +42,7 @@ export function homeOpenSpotRow(): string {
 export function homeCrewRow(c: HubCrew, sample: boolean): string {
   const joinId = sample ? c.slug : c.crew_id ?? '';
   const focus = c.focus.slice(0, 2).map((f) => focusLabels[f] ?? f).join(', ');
-  const sub = [focus || null, regionLabel(c.region) || null, c.member_count != null ? `${c.member_count} ${c.member_count === 1 ? 'member' : 'members'}` : null].filter(Boolean).map((x) => esc(x)).join(' · ');
+  const sub = [focus || null, regionLabel(c.region) || null, scMembersLabel(c.sc_member_range) || null].filter(Boolean).map((x) => esc(x)).join(' · ');
   const href = sample ? `${base}community/crews/` : `${base}community/crews/#crew-${encodeURIComponent(c.crew_id ?? '')}`;
   return `<div class="crow crew-card" data-crew-id="${esc(joinId)}">
   <a class="clink" href="${href}" aria-label="${esc(c.name)} in the crew directory"></a>

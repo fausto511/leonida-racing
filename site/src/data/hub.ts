@@ -28,6 +28,8 @@ export interface HubCrew {
   languages: string[]; // ISO 639-1 codes, see data/languages.ts
   description: string | null;
   member_count: number | null;
+  /** DEC-0235: lower bound of the Social Club member range (50/100/250/500/750), set by moderators */
+  sc_member_range?: number | null;
   discord_url: string | null;
   social_club_url: string | null;
   is_partner: boolean;
@@ -252,6 +254,9 @@ const iconPin = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" str
 /** opts.actions: HTML for the action area at the bottom of the card (My Account:
  *  status + Set as Active Crew / Leave Crew). Without it, cards that can be joined
  *  get an empty .crew-join-slot there, filled by scripts/crew-membership.ts (2026-10-07). */
+/** DEC-0235: "500+ SC members", or '' when no range is set. */
+export const scMembersLabel = (n?: number | null): string => (n ? `${n}+ SC members` : '');
+
 export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: boolean; actions?: string; badges?: string } = {}): string {
   // Redesign (boards Community / Crews): crew-colour bar on top, tag + name, badges, focus chips,
   // two-line description, "region · languages · members", foot with Discord/SC + Request Invite.
@@ -261,7 +266,9 @@ export function crewCardHtml(c: HubCrew, _roster?: string[], opts: { sample?: bo
   const joinId = c.crew_id ?? (opts.sample ? c.slug : null);
   const sc = safeUrl(c.social_club_url);
   const langs = (c.languages ?? []).slice(0, 2);
-  const members = c.member_count != null ? `${c.member_count} ${c.member_count === 1 ? 'member' : 'members'}` : '';
+  // DEC-0235 (Fausto 08.11.): Leonida member count hidden for now (looks tiny next to real crew sizes);
+  // show the Social Club range instead. COPY: Claude placeholder, Codex review pending.
+  const members = scMembersLabel(c.sc_member_range);
   const meta = [regionLabel(c.region), langs.map(languageLabel).join(', '), members].filter(Boolean).map(esc).join('<span class="dot">·</span>');
   const focus = c.focus.map((f) => focusLabels[f] ?? f);
   const shown = focus.length > 3 ? focus.slice(0, 2) : focus;
