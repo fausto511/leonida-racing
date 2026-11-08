@@ -218,7 +218,32 @@ async function housekeeping() {
     }
   }
   const removalsRetried = await retryRemovals();
-  return { guilds: byGuild.size, guildsRemoved, feedsRemoved, removalsRetried, ...(await retention()) };
+  const roleCatchUps = await roleCatchUp();
+  return { guilds: byGuild.size, guildsRemoved, feedsRemoved, removalsRetried, roleCatchUps, ...(await retention()) };
+}
+// Role catch-up (08.11.2026): a role job gives up after ~1 h if the person isn't on the server
+// yet. Anyone who joins later would never get their roles, so once a day queue a sync for every
+// active account without "Registered Driver" state and without a pending job. Someone who never
+// joins costs one short lookup per day.
+async function roleCatchUp(): Promise<number> {
+  if (!ROLE_GUILD) return 0;
+  const { data: drv } = await db.from("drivers").select("discord_user_id").not("discord_user_id", "is", null).is("deleted_at", null).limit(5000);
+  const all: string[] = [...new Set<string>((drv ?? []).map((r: any) => String(r.discord_user_id)))];
+  const missing: string[] = [];
+  for (let i = 0; i < all.length; i += 100) {
+    const chunk = all.slice(i, i + 100);
+    const [{ data: st }, { data: pend }] = await Promise.all([
+      db.from("discord_role_state").select("discord_user_id").in("discord_user_id", chunk).eq("role_key", "member"),
+      db.from("discord_role_jobs").select("discord_user_id").in("discord_user_id", chunk).is("processed_at", null),
+    ]);
+    const skip = new Set([...(st ?? []), ...(pend ?? [])].map((r: any) => String(r.discord_user_id)));
+    for (const id of chunk) if (!skip.has(id)) missing.push(id);
+  }
+  const batch = missing.slice(0, 200);
+  if (!batch.length) return 0;
+  const { error } = await db.from("discord_role_jobs").insert(batch.map((id) => ({ discord_user_id: id })));
+  if (error) { console.error("role catch-up", error.message); return 0; }
+  return batch.length;
 }
 // Cards/server events whose event is no longer published (or deleted) but whose delete
 // failed earlier: run sync() again, which deletes and only then forgets the reference.
