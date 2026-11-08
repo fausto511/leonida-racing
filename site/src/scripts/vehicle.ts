@@ -16,7 +16,7 @@ const base = import.meta.env.BASE_URL;
 const TRACK = 'gellhorn-international-raceway';
 const MAX_COMPARE = 4;
 // mirrors public.ratings_open() (DB decides; this only picks the hint)
-const RATINGS_OPEN_AT = Date.parse('2026-11-18T10:00:00Z');
+const RATINGS_OPEN_AT = Date.parse('2026-11-08T12:00:00Z') /* opened early, Fausto 08.11. */;
 
 const root = document.getElementById('vp');
 if (root) init(root);

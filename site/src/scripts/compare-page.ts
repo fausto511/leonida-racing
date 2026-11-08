@@ -16,7 +16,7 @@ import { COMPARE_MAX, verdict, alternatives, limited, limitedNote, money, moneyS
 
 const base = import.meta.env.BASE_URL;
 const TRACK = 'gellhorn-international-raceway';
-const RATINGS_OPEN_AT = Date.parse('2026-11-18T10:00:00Z'); // mirrors public.ratings_open()
+const RATINGS_OPEN_AT = Date.parse('2026-11-08T12:00:00Z') /* opened early, Fausto 08.11. */; // mirrors public.ratings_open()
 const root = document.getElementById('cp');
 const dataEl = document.getElementById('cp-data');
 if (root && dataEl) init(root, JSON.parse(dataEl.textContent || '[]') as CmpCar[]);
