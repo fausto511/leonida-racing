@@ -447,3 +447,7 @@ html[data-units="metric"] .u-imp, html:not([data-units="metric"]) .u-met { displ
 /* no-emoji note under a text field (scripts/no-emoji.ts, Fausto 31.10.2026) */
 .lr-noemoji { position: absolute; z-index: 1000; padding: 6px 10px; border-radius: 6px; background: var(--lr-card); border: 1px solid var(--lr-orange-border); color: var(--lr-orange); font-size: 12px; font-weight: 600; pointer-events: none; }
 .lr-noemoji[hidden] { display: none; }
+
+/* Driver Badge (DEC-0230): same look wherever badgeHtml() is used (stage 2, 08.11.2026) */
+.drv-badge { display: inline-flex; line-height: 0; flex: none; vertical-align: middle; }
+.vg-name .drv-badge { margin-right: 6px; }

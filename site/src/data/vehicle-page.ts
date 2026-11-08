@@ -4,6 +4,7 @@
 // are Claude placeholders from the mockup -> Codex review (DEC-0088).
 import { esc } from './hub';
 import { iconTagHtml } from './icons';
+import { badgeHtml, type Badge } from './badge';
 import { lapTime, type LbEntry } from './leaderboard';
 import { vehicleOptions, type VehicleOption } from './vehicles';
 
@@ -13,14 +14,14 @@ const base = import.meta.env.BASE_URL;
 export const GELLHORN_ROWS = 10;
 const byId = new Map(vehicleOptions.map((v) => [v.id, v]));
 
-export interface DriverRow { rank: number; driver: string; ms: number; me?: boolean; icon?: boolean }
+export interface DriverRow { rank: number; driver: string; ms: number; me?: boolean; icon?: boolean; badge?: Badge }
 export interface ClassRow { id: string; ms: number | null }
 
 /** "Fastest drivers in this car": rank · driver · lap */
 export function driverRowHtml(r: DriverRow): string {
   return `<div class="vg-row${r.me ? ' me' : ''}">
   <span class="vg-pos tnum${r.rank === 1 ? ' is-first' : ''}">${r.rank}</span>
-  <span class="vg-name">${esc(r.driver)}${iconTagHtml(r.icon)}${r.me ? ' <em class="vg-you">You</em>' : ''}</span>
+  <span class="vg-name">${badgeHtml(r.badge, 22)}${esc(r.driver)}${iconTagHtml(r.icon)}${r.me ? ' <em class="vg-you">You</em>' : ''}</span>
   <span class="vg-time tnum">${lapTime(r.ms)}</span>
 </div>`;
 }

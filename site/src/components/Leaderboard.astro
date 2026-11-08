@@ -308,7 +308,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   import { loadIconIds } from '../scripts/icons';
   import { sampleEntries, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, crewsWithLaps, crewInfo, crewTagHtml, type LbEntry, type LbState, type LbMode, type LbCrew } from '../data/leaderboard';
   import { buildCrews } from '../data/hub';
-  import { computeBadges } from '../data/badge';
+  import { computeBadges, loadBadges, badgesOn, type Badge } from '../data/badge';
 
   const TRACK_ID = 'gellhorn-international-raceway';
   const $ = (id: string) => document.getElementById(id)!;
@@ -320,6 +320,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   let sample = true;
   // Driver Badge (DEC-0230): from all accepted best laps, the same in every view (not from the verified-only list)
   let badges = computeBadges(data);
+  let liveBadges: Map<string, Badge> | null = null; // from public_driver_badges (stage 2)
   const current = () => (state.verifiedOnly ? verifiedData : data);
   const state: LbState = { ...initialState };
 
@@ -555,7 +556,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     });
     data = live.map(toEntry);
     verifiedData = liveVerified.map(toEntry);
-    badges = computeBadges(data);
+    badges = liveBadges ?? computeBadges(data);
     sample = false;
     $('lb-flag').hidden = true;
     const nl = noLapCars([...data, ...verifiedData]);
@@ -569,8 +570,9 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   guestTile();
   if (backendConfigured) {
     (async () => {
+      liveBadges = await loadBadges(getSupabase()).catch(() => null);
       const hasLive = await loadLive().catch(() => false);
-      if (hasLive) { guestTile(); draw(); }
+      if (hasLive || badgesOn()) { guestTile(); draw(); }
       const sb = getSupabase();
       const { data: s } = await sb.auth.getSession();
       if (!s?.session) return;

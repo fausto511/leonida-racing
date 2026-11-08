@@ -4,13 +4,41 @@
 //   colour = strength: per class with >= 4 drivers, the driver's position in the class board
 //            (0 = first, 1 = last), averaged over those classes; then among all ranked drivers:
 //            ahead of >= 90 % Pink · >= 65 % Gold · >= 30 % Silver · else Bronze (= 10/25/35/30 %) · Grey = no class with 4 drivers yet.
-// Stage 1 is computed in the browser from the leaderboard rows (best accepted lap per driver + car);
-// with more tracks this moves into the database.
+// Stage 2 (08.11.2026): live values come from the database view public_driver_badges (same rules),
+// shown only while site_flags 'driver_badge' is on (switch by SQL, no push). computeBadges stays for sample data.
 // COPY STATUS: tooltip texts are placeholders until the Codex review (DEC-0088).
 import { vehicleOptions } from './vehicles';
 
-/** Kill switch: false hides every badge (one-line change + push). */
-export const BADGE_ENABLED = false; // hidden until Fausto switches it on (06.11.)
+/** Emergency off in the code (one-line change + push). The normal switch is the database flag below. */
+export const BADGE_ENABLED = true;
+
+// Database switch: public.site_flags key 'driver_badge' (stage 2, 08.11.2026).
+//   on:  update public.site_flags set enabled = true  where key = 'driver_badge';
+//   off: update public.site_flags set enabled = false where key = 'driver_badge';
+let runtimeOn = false;
+/** True once the database flag has been read and is on. */
+export const badgesOn = () => BADGE_ENABLED && runtimeOn;
+
+type Sb = { from: (t: string) => any };
+let flagP: Promise<boolean> | null = null;
+/** Reads the database flag once per page. */
+export function loadBadgeFlag(sb: Sb): Promise<boolean> {
+  if (!flagP) flagP = Promise.resolve(sb.from('site_flags').select('enabled').eq('key', 'driver_badge').maybeSingle())
+    .then((r: any) => { runtimeOn = Boolean(r?.data?.enabled); return badgesOn(); })
+    .catch(() => { runtimeOn = false; return false; });
+  return flagP;
+}
+/** Live badges from the database (null while the flag is off). ids = only these drivers; empty = all. */
+export async function loadBadges(sb: Sb, ids: (string | null | undefined)[] = []): Promise<Map<string, Badge> | null> {
+  if (!(await loadBadgeFlag(sb))) return null;
+  const want = [...new Set(ids.filter(Boolean) as string[])];
+  let q = sb.from('public_driver_badges').select('driver_id,n,tier,ahead_pct');
+  if (want.length) q = q.in('driver_id', want.slice(0, 300));
+  const { data, error } = await q;
+  if (error) return null;
+  return new Map(((data ?? []) as { driver_id: string; n: number; tier: BadgeTier; ahead_pct: number | null }[])
+    .map((r) => [r.driver_id, { n: r.n, tier: r.tier, top: r.ahead_pct ?? undefined }]));
+}
 /** A class counts once this many drivers have a time in it. */
 export const BADGE_MIN_FIELD = 4;
 
@@ -101,7 +129,7 @@ export function badgeTitle(b: Badge): string {
 
 /** Badge markup (px = rendered size). Empty when the switch is off or there is no badge. */
 export function badgeHtml(b: Badge | undefined, px = 28): string {
-  if (!BADGE_ENABLED || !b) return '';
+  if (!badgesOn() || !b) return '';
   const num = badgeNumber(b.n);
   const fs = num.length >= 3 ? 30 : num.length === 2 ? 36 : 42;
   const title = badgeTitle(b);

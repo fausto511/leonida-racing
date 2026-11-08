@@ -96,6 +96,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         <span class="account-dot" id="account-dot" hidden></span>
       </button>
       <div id="account-menu-dropdown" class="account-dropdown" hidden role="menu">
+        <div id="account-menu-badge" class="account-badge" hidden></div>
         <a href={`${base}account/`} role="menuitem">My garage</a>
         <a href={`${base}account/laps/`} role="menuitem" id="account-menu-laps">My laps</a>
         <a href={`${base}account/crew/`} role="menuitem" id="account-menu-crew">My crews</a>
@@ -186,6 +187,9 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .account-avatar-fallback:empty::before { content: ''; }
   .account-dropdown { position: absolute; top: calc(100% + 10px); right: 0; min-width: 13rem; padding: 6px; display: flex; flex-direction: column; background: linear-gradient(180deg, rgba(251, 247, 234, .045), rgba(251, 247, 234, 0) 60px), var(--lr-raised); border: 1px solid var(--lr-line-strong); border-radius: 10px; box-shadow: 0 20px 48px rgba(0, 0, 0, .55), 0 2px 8px rgba(0, 0, 0, .35); } /* same list look as the site dropdown (DEC-0202) */
   .account-dropdown[hidden] { display: none; }
+  .account-badge { display: flex; align-items: center; gap: 10px; padding: 8px 10px 10px; margin-bottom: 4px; border-bottom: 1px solid var(--lr-line); font-size: 12px; color: var(--lr-muted); line-height: 1.35; }
+  .account-badge[hidden] { display: none; }
+  .account-badge :global(.drv-badge) { flex: none; display: inline-flex; line-height: 0; }
   .account-dropdown a, .account-dropdown button { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 6px; background: none; color: var(--lr-soft); font: inherit; font-size: 14px; font-weight: 500; text-align: left; text-decoration: none; cursor: pointer; }
   .account-dropdown a:hover, .account-dropdown button:hover, .account-dropdown a:focus-visible, .account-dropdown button:focus-visible { background: var(--lr-white-hover); color: var(--lr-text); outline: none; }
   .account-logout { margin-top: 4px; border-top: 1px solid var(--lr-line) !important; border-radius: 0 0 var(--gh-radius) var(--gh-radius) !important; color: var(--lr-muted) !important; }
@@ -240,6 +244,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
 
 <script>
   import { getSupabase, backendConfigured, SUPABASE_URL, SUPABASE_ANON_KEY } from '../scripts/supabase-client';
+  import { loadBadges, badgeHtml, badgeTitle } from '../data/badge';
 
   const root = document.documentElement;
 
@@ -357,6 +362,12 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       const own = await supabase.from('drivers').select('driver_id').eq('auth_user_id', session.user.id).maybeSingle();
       const me = own.data?.driver_id;
       if (!me) return;
+      // Own Driver Badge at the top of the menu (DEC-0230 stage 2); hidden while the database flag is off
+      loadBadges(supabase, [me]).then((bm) => {
+        const b = bm?.get(me); const el = document.getElementById('account-menu-badge');
+        if (!el || !b) return;
+        el.innerHTML = `${badgeHtml(b, 40)}<span>${badgeTitle(b)}</span>`; el.hidden = false;
+      }).catch(() => {});
       // Crew invites for me (RS-0063) + join requests for crews I lead.
       const inv = await supabase.from('crew_memberships').select('membership_id', { count: 'exact', head: true }).eq('driver_id', me).eq('status', 'invited');
       let pending = 0;
