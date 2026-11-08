@@ -109,7 +109,7 @@ const lapFor = (id: string) => { const t = realBest(id); return t == null ? null
 const rivalsLap = rivalsFromClass(classRows, vehicle.id);
 const rivalsSimilar = (similarAll.length > 3 ? similarAll.slice(3, 5) : similarAll.slice(0, 2)).map((v) => ({ id: v.id, note: `${v.classes[0]} · ${v.drive}` }));
 const rivals = rivalsLap ?? rivalsSimilar;
-const rivalsSub = rivalsLap ? 'Its closest rivals at Gellhorn' : 'Most similar cars until it has a lap';
+const rivalsSub = rivalsLap ? 'Closest matches at Gellhorn' : 'Most similar cars until it has a lap';
 const rivalsHtml = rivals.map((r) => rivalHtml(r.id, r.note, vehicle.id)).join('');
 const sampleRivals = sample ? rivalsFromClass(sampleClass, vehicle.id) : null;
 const sampleRivalsHtml = sampleRivals ? sampleRivals.map((r) => rivalHtml(r.id, r.note, vehicle.id)).join('') : '';

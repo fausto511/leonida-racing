@@ -10,7 +10,7 @@ const base = import.meta.env.BASE_URL;
   title="Terms of Use"
   description="The rules for using Leonida Racing: accounts, your content, what's not allowed, how moderation works, and how to report content."
   heading="Terms of Use"
-  kicker="Legal" updated="Last updated: 17 October 2026"
+  kicker="Legal" updated="Last updated: 8 November 2026"
   current="terms"
 >
     <h2>1. Who we are</h2>
@@ -24,6 +24,10 @@ const base = import.meta.env.BASE_URL;
     <p>You can add content to the site: lap times with screenshots and video links, your display name, crews, events, descriptions and links, and reports. Only add content you have the right to share.</p>
     <!-- Codex review 16.10.2026 (Leonida-Terms-Legal-Review): Discord distribution covered, no absolute anonymity claim. -->
     <p>By submitting content, you give us a non-exclusive, free-of-charge permission to store, check, format, display and moderate it for the relevant community feature. Published event details may also be distributed by our Discord bot to servers following the public calendar, your crew or your host profile, as described in the <a href={`${base}privacy/#discord`}>Privacy Policy</a>. You keep your rights to your content. Private screenshots submitted as lap-time proof are not included in this public distribution.</p>
+    <!-- DEC-0210, final 08.11.2026 (Codex review + Fausto, DEC-0212) -->
+    <h3>Highlight and analysis videos</h3>
+    <p>If you turn on video use, you give Leonida Racing a non-exclusive, royalty-free, worldwide licence to copy, shorten, edit and comment on clips from your recording for our highlight and analysis videos. We may publish these on our website and <a href={`${base}privacy/`}>our own social media channels</a>, including monetized videos, crediting your name and linking to the original. We exclude voices, face cams, music, radio and other players’ names. We do not license your recording to other creators.</p>
+    <p>The licence covers rights you control in the recording, not rights owned by Rockstar Games or other people. You confirm that you can grant those rights. You can turn permission off in My laps; it also ends when the lap or your account is deleted. This stops use in new publications. For videos published while permission was active, the licence has no fixed end date, subject to your statutory rights, including data protection rights.</p>
     <p>The <a href={`${base}privacy/`}>Privacy Policy</a> explains deletion and retention. Reviewed lap times remain as "Deleted driver", without your display name, Discord ID or sign-in link in the retained driver record. Separate handling of Discord posts and operational records is explained there.</p>
 
     <h2>4. What's not allowed</h2>
@@ -65,9 +69,21 @@ const base = import.meta.env.BASE_URL;
     <h2>10. Ending your use</h2>
     <p>You can stop using the site and delete your account at any time under My Account › Settings. We can end your use for serious or repeated violations of these terms (see section 5).</p>
 
-    <h2>11. Changes to these terms</h2>
+    <!-- DEC-0214 / RS-0106, final 08.11.2026 (Codex review + Fausto, DEC-0212) -->
+    <h2 id="using-our-data">11. Using our data</h2>
+    <p>We license our rights in the vehicle data, lap times and statistics on Leonida Racing under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>. You may share and adapt this material, including for commercial videos, articles and tools.</p>
+    <p>Credit is required for material used under this licence: show “Data by Leonida Racing” with a link to the source page and CC BY 4.0, in a place suited to the format — below a table, in a video or its description, or in a bot’s reply. Say if you changed the data. Values can change with game updates, so please include the date you checked them.</p>
+    <p>Not covered by this licence:</p>
+    <ul>
+      <li>personal data such as driver names, profiles and crew member lists. Don’t copy driver or crew lists;</li>
+      <li>images and game material, including screenshots, vehicle photos and manufacturer logos — these belong to Rockstar Games or their creators;</li>
+      <li>our name and logo, except to credit us. Please don’t suggest that we endorse or partner with you.</li>
+    </ul>
+    <p>The data is provided as is, without warranty to the extent permitted by law. Our liability terms still apply. Please don’t load the site or its data automatically in a way that slows it down; if you need a lot of data, contact us.</p>
+
+    <h2>12. Changes to these terms</h2>
     <p>If we change these terms in a way that matters to you, we'll announce it on the site before the change takes effect. If you don't agree, you can delete your account. Where a change requires your agreement under applicable law, we will obtain it. Continued use or failure to delete an account does not replace that agreement.</p>
 
-    <h2>12. Applicable law</h2>
+    <h2>13. Applicable law</h2>
     <p>German law applies. If you are a consumer living in another country, the mandatory consumer protection rules of that country still apply to you.</p>
 </LegalLayout>

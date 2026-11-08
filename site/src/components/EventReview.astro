@@ -134,7 +134,7 @@ import '../styles/hub.css';
   let seriesOpen = 0;
   let leagueRounds = new Map<string, any[]>();
   const RULE = (s: any) => s.kind === 'league'
-    ? `Season · ${(leagueRounds.get(s.series_id) ?? []).length} rounds: ${(leagueRounds.get(s.series_id) ?? []).map((x) => when(x.starts_at)).join(', ')}`
+    ? `Championship · ${(leagueRounds.get(s.series_id) ?? []).length} rounds: ${(leagueRounds.get(s.series_id) ?? []).map((x) => when(x.starts_at)).join(', ')}`
     : `${seriesLabel(s)} · ${String(s.local_time).slice(0, 5)} (${String(s.tz).replace(/_/g, ' ')})`;
   async function loadSeries() {
     const sb = getSupabase();
@@ -176,7 +176,7 @@ import '../styles/hub.css';
       + '</div>';
     const card = (r: any, inner: string) => `<div class="er-card">${meta(r)}${inner}</div>`;
     let html = '';
-    if (review.length) html += `<p class="er-group-t">New series &amp; seasons (${review.length})</p>` + review.map((r) => card(r, body(r) + `<p class="er-note">Approving publishes all upcoming ${r.kind === 'league' ? 'rounds of this season' : 'dates of this series'}.</p>` + acts(r.series_id, 'review'))).join('');
+    if (review.length) html += `<p class="er-group-t">New series &amp; championships (${review.length})</p>` + review.map((r) => card(r, body(r) + `<p class="er-note">Approving publishes all upcoming ${r.kind === 'league' ? 'rounds of this championship' : 'dates of this series'}.</p>` + acts(r.series_id, 'review'))).join('');
     if (chg.length) html += `<p class="er-group-t">Changes to live series (${chg.length})</p>` + chg.map((r) => {
       const p = r.pending ?? {};
       const diff = Object.keys(p).map((k) => `<tr><th>${esc(FIELD[k] ?? k)}</th><td>${esc(r[k] ?? '—')}</td><td class="is-new">${esc(p[k] ?? '— (removed)')}</td></tr>`).join('');

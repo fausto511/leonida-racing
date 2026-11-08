@@ -390,7 +390,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     const counts = new Map(crewsWithLaps(current()).map((x) => [x.crew.slug!, x.drivers]));
     const opt = (c: LbCrew) => {
       const n = counts.get(c.slug!) ?? 0;
-      return `<button type="button" class="lb-crew-opt${state.crew === c.slug ? ' on' : ''}" data-crew="${esc(c.slug!)}">${crewTagHtml(c)}<b>${esc(c.name ?? c.tag)}</b><small>${n ? `${n} driver${n === 1 ? '' : 's'}` : 'no laps yet'}</small></button>`;
+      return `<button type="button" class="lb-crew-opt${state.crew === c.slug ? ' on' : ''}" data-crew="${esc(c.slug!)}">${crewTagHtml(c)}<b>${esc(c.name ?? c.tag)}</b><small>${n ? `${n} driver${n === 1 ? '' : 's'}` : 'no laps in this selection'}</small></button>`;
     };
     const mine = myCrews.filter((c) => c.slug);
     $('lb-crew-mine').innerHTML = mine.length ? `<p class="lb-crew-h">Your crews</p>${mine.map(opt).join('')}` : '';
@@ -398,7 +398,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     const all = crewsWithLaps(current()).map((x) => x.crew).filter((c) => !mine.some((m) => m.slug === c.slug));
     const hits = q ? all.filter((c) => (c.name ?? '').toLowerCase().includes(q) || c.tag.toLowerCase().includes(q)) : all;
     $('lb-crew-list').innerHTML = hits.length ? hits.slice(0, 8).map(opt).join('') + (hits.length > 8 ? `<p class="lb-crew-none">${hits.length - 8} more – type to narrow down</p>` : '')
-      : `<p class="lb-crew-none">${q ? 'No crew with laps matches.' : 'No crew has laps yet.'}</p>`;
+      : `<p class="lb-crew-none">${q ? 'No matching crews in this selection.' : 'No other crews with laps in this selection.'}</p>`;
   }
   function openCrewPop(open: boolean) {
     crewPop.hidden = !open; crewBtn.setAttribute('aria-expanded', String(open));

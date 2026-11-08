@@ -302,7 +302,7 @@ export function render(all: LbEntry[], s: LbState, sample: boolean, badges?: Map
   }
   if (cxKicker) {
     const n = `${ranked.length} driver${ranked.length === 1 ? '' : 's'}`;
-    const hint = s.crew ? ' · small number = overall' : '';
+    const hint = s.crew ? ' · small number = rank among all drivers' : '';
     context = `<div class="lb-context"><div class="lb-context-title">${cxLogo}<div><p class="lb-context-kicker">${cxKicker} · ${n}${hint}</p><h3>${cxTitle}</h3></div></div>${cxLink}</div>`;
   }
   const rows = ranked.filter(({ e }) => matchDriver(e, qd));

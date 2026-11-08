@@ -152,10 +152,10 @@ const base = import.meta.env.BASE_URL;
               <label>Start * <small id="tz-hint">your local time</small><input type="datetime-local" name="starts_at" min="2026-11-19T00:00" required /></label>
               <label>End <small>optional</small><input type="datetime-local" name="ends_at" /></label>
               <!-- RS-0095 / DEC-0203: recurring series (new events only). COPY STATUS: Claude placeholders. -->
-              <label data-series-new hidden>Repeat <small>a series always shows the next 4 dates</small><select name="repeat"><option value="">Does not repeat</option><option value="weekly">Every week</option><option value="biweekly">Every 2 weeks</option><option value="monthly">Every month</option><option value="league">Championship / league season (fixed rounds)</option></select></label>
+              <label data-series-new hidden>Repeat <small>a series always shows the next 4 dates</small><select name="repeat"><option value="">Does not repeat</option><option value="weekly">Every week</option><option value="biweekly">Every 2 weeks</option><option value="monthly">Every month</option><option value="league">Championship (fixed rounds)</option></select></label>
               <label data-series-monthly hidden>Every month on the <select name="monthly_nth"><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="-1">last</option></select> <small id="series-wd">weekday of the start date</small></label>
               <div class="span2 season-box" data-season hidden>
-                <p class="lr-note">Round 1 is the start above. Add the other rounds (2 to 15 in total). Drivers sign up once for the whole season; Max. participants counts for the season.</p>
+                <p class="lr-note">Round 1 is the start above. Add the other rounds (2 to 15 in total). Drivers sign up once for the whole championship.</p>
                 <ol class="season-rounds" id="season-rounds" start="2"></ol>
                 <button type="button" class="btn btn-s btn-sm" id="season-add">+ Add round</button>
               </div>
@@ -547,8 +547,8 @@ const base = import.meta.env.BASE_URL;
     if (/verified crew already uses this name/i.test(m)) return 'A verified crew already uses this name. Choose a different crew name.';
     if (e.code === '23505' || /duplicate key/.test(m)) return 'This URL slug is already used by another crew — change it.';
     if (/crews_tag_check/.test(m)) return 'Crew tag must be exactly 4 letters/digits.';
-    if (/season_limit/.test(m)) return 'You can run up to 3 seasons at a time. End one under Your series first.';
-    if (/rounds_count/.test(m)) return 'A season has 2 to 15 rounds.';
+    if (/season_limit/.test(m)) return 'You can have up to 3 active championships. End one under Your series first.';
+    if (/rounds_count/.test(m)) return 'A championship has 2 to 15 rounds.';
     if (/starts_before_launch|not_before_launch/.test(m)) return 'Rounds can start on Nov 19, 2026 (GTA VI launch day) at the earliest.';
     if (/round_past/.test(m)) return 'All rounds have to be in the future.';
     if (/series_limit/.test(m)) return 'You can run up to 3 series at a time. End one under Your series first.';
@@ -1349,7 +1349,7 @@ const base = import.meta.env.BASE_URL;
       const rounds = [ef.starts_at.value, ...extra].filter(Boolean).map((v) => new Date(v).toISOString());
       markInvalid(eventForm, bad1);
       if (bad1.length) { msg(eventForm, `Please fix: ${bad1.map((b) => eventFieldHelp[b] ?? b).join('; ')}.`, true); return; }
-      if (new Set(rounds).size < 2 || rounds.length > 15) { msg(eventForm, 'A season has 2 to 15 rounds — add at least one more round date.', true); return; }
+      if (new Set(rounds).size < 2 || rounds.length > 15) { msg(eventForm, 'A championship has 2 to 15 rounds — add at least one more round date.', true); return; }
       const dur = e1.ends_at ? Math.round((new Date(e1.ends_at).getTime() - new Date(e1.starts_at!).getTime()) / 60000) : null;
       const payload = {
         title: e1.title, description: e1.description, event_type: e1.event_type, platforms: e1.platforms, host_name: e1.host_name,
@@ -1365,8 +1365,8 @@ const base = import.meta.env.BASE_URL;
       selectedId = null;
       showForm(null);
       document.dispatchEvent(new CustomEvent('hc-series-changed', { detail: { message: pending
-        ? 'Season submitted — a moderator reviews it before the rounds go live. All rounds are in your list.'
-        : 'Season created — all rounds are in the calendar.' } }));
+        ? 'Championship submitted — a moderator reviews it before the rounds go live. All rounds are in your list.'
+        : 'Championship created — all rounds are in the calendar.' } }));
       return;
     }
     // RS-0095: new recurring series

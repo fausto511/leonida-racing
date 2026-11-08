@@ -94,7 +94,7 @@ const base = import.meta.env.BASE_URL;
             <div class="evs-sactions"><button type="submit" class="btn btn-p">Save series</button><p class="evs-msg" id="series-form-msg" aria-live="polite"></p></div>
           </form>
           <div class="evs-sform" id="season-entries" hidden>
-            <div class="evs-editor-top"><h3 class="evs-editor-t" id="season-entries-t">Drivers in this season</h3><button type="button" class="btn btn-s btn-sm" id="season-entries-close">Close</button></div>
+            <div class="evs-editor-top"><h3 class="evs-editor-t" id="season-entries-t">Drivers in this championship</h3><button type="button" class="btn btn-s btn-sm" id="season-entries-close">Close</button></div>
             <p class="lr-note">Removing a driver frees the spot right away. It doesn't block them: they can sign up again while there's room. To keep someone out, kick or ban them from a round (Edit on the round).</p>
             <div id="season-entries-list"></div>
           </div>
@@ -216,13 +216,13 @@ const base = import.meta.env.BASE_URL;
     const { data } = await getSupabase().rpc('my_seasons');
     const rows = (data ?? []) as any[];
     $('my-seasons').innerHTML = rows.map((r) => r.entry_status === 'removed'
-      ? `<div class="evs-srow"><div><h4>${esc(r.title)}</h4><p class="evs-warn">The host removed you from this season, so you're no longer signed up for its rounds. You can sign up again while there's room.</p></div></div>`
-      : `<div class="evs-srow"><div><h4>${esc(r.title)}</h4><p>Season · ${r.rounds_done} of ${r.rounds_total} rounds done${r.next_starts_at ? ` · next round ${esc(new Date(r.next_starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }))}` : ''}</p></div>${r.series_status === 'active' ? `<div class="evs-sbtns"><button type="button" class="btn btn-s btn-sm" data-sleave="${esc(r.series_id)}">Leave season</button></div>` : ''}</div>`).join('');
+      ? `<div class="evs-srow"><div><h4>${esc(r.title)}</h4><p class="evs-warn">The host removed you from this championship, so you're no longer signed up for its rounds. You can sign up again while there's room.</p></div></div>`
+      : `<div class="evs-srow"><div><h4>${esc(r.title)}</h4><p>Championship · ${r.rounds_done} of ${r.rounds_total} rounds done${r.next_starts_at ? ` · next round ${esc(new Date(r.next_starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }))}` : ''}</p></div>${r.series_status === 'active' ? `<div class="evs-sbtns"><button type="button" class="btn btn-s btn-sm" data-sleave="${esc(r.series_id)}">Leave championship</button></div>` : ''}</div>`).join('');
   }
   $('my-seasons').addEventListener('click', async (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-sleave]');
     if (!b) return;
-    if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Click again to leave'; setTimeout(() => { if (b.isConnected) { b.dataset.armed = ''; b.textContent = 'Leave season'; } }, 4000); return; }
+    if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Click again to leave'; setTimeout(() => { if (b.isConnected) { b.dataset.armed = ''; b.textContent = 'Leave championship'; } }, 4000); return; }
     b.disabled = true;
     await getSupabase().rpc('leave_season', { p_series: b.dataset.sleave });
     await loadMine();
@@ -302,7 +302,7 @@ const base = import.meta.env.BASE_URL;
   const sMsg = (t: string, err = false) => { const m = $('series-msg'); m.textContent = t; m.className = `evs-msg${err ? ' is-error' : ''}`; };
   const fmtTime = (t: string) => String(t ?? '').slice(0, 5);
   const seriesErr = (m: string) => /series_limit/.test(m) ? 'You can run up to 3 series at a time.'
-    : /rounds_count/.test(m) ? 'A season has 2 to 15 rounds (past rounds included).'
+    : /rounds_count/.test(m) ? 'A championship has 2 to 15 rounds (past rounds included).'
     : /round_past/.test(m) ? 'All rounds have to be in the future.'
     : /starts_before_launch|not_before_launch/.test(m) ? 'Rounds can start on Nov 19, 2026 (GTA VI launch day) at the earliest.'
     : /time_locked/.test(m) ? "Rounds less than 24 hours away can't be moved or removed."
@@ -331,7 +331,7 @@ const base = import.meta.env.BASE_URL;
       const nxt = rounds.find((x) => new Date(x.starts_at).getTime() > Date.now());
       const nIn = entriesIn.get(r.series_id) ?? 0;
       const label = lg
-        ? `Season · ${rounds.length} rounds${nxt ? ` · next: ${new Date(nxt.starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}` : ''} · ${nIn}${r.max_participants ? ` / ${r.max_participants}` : ''} drivers in`
+        ? `Championship · ${rounds.length} rounds${nxt ? ` · next: ${new Date(nxt.starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}` : ''} · ${nIn}${r.max_participants ? ` / ${r.max_participants}` : ''} drivers in`
         : `${seriesLabel(r)} · ${fmtTime(r.local_time)} (${r.tz.replace(/_/g, ' ')})`;
       const pill = r.status === 'cancelled' ? '<span class="lr-status is-no">Cancelled by a moderator</span>'
         : r.status === 'ended' ? (r.review_status === 'rejected' ? '<span class="lr-status is-no">Not approved</span>' : '<span class="lr-status">Ended</span>')
@@ -347,9 +347,9 @@ const base = import.meta.env.BASE_URL;
       ].join('');
       const btns = r.status !== 'active' ? '' : [
         r.empty_count >= 2 ? `<button type="button" class="btn btn-p btn-sm" data-skeep="${esc(r.series_id)}">Keep it running</button>` : '',
-        r.review_status === 'rejected' ? '' : `<button type="button" class="btn btn-s btn-sm" data-sedit="${esc(r.series_id)}">${lg ? 'Edit season' : 'Edit series'}</button>`,
+        r.review_status === 'rejected' ? '' : `<button type="button" class="btn btn-s btn-sm" data-sedit="${esc(r.series_id)}">${lg ? 'Edit championship' : 'Edit series'}</button>`,
         lg && r.review_status === 'approved' ? `<button type="button" class="btn btn-s btn-sm" data-sentries="${esc(r.series_id)}">Drivers (${nIn})</button>` : '',
-        `<button type="button" class="btn btn-danger btn-sm" data-send="${esc(r.series_id)}">${lg ? 'End season' : 'End series'}</button>`,
+        `<button type="button" class="btn btn-danger btn-sm" data-send="${esc(r.series_id)}">${lg ? 'End championship' : 'End series'}</button>`,
       ].join('');
       return `<div class="evs-srow"><div><h4>${esc(r.title)}</h4><p>${esc(label)}</p>${notes}</div><div class="evs-sbtns">${pill}${btns}</div></div>`;
     }).join('');
@@ -375,7 +375,7 @@ const base = import.meta.env.BASE_URL;
     f.local_time.value = fmtTime(r.local_time); f.duration_min.value = r.duration_min ?? ''; f.max_participants.value = r.max_participants ?? '';
     f.registration.value = r.registration; f.host_name.value = r.host_name ?? '';
     $('sf-tz').textContent = `time zone ${r.tz.replace(/_/g, ' ')}`;
-    $('series-form-t').textContent = `${lg ? 'Edit season' : 'Edit series'}: ${r.title}`;
+    $('series-form-t').textContent = `${lg ? 'Edit championship' : 'Edit series'}: ${r.title}`;
     $('series-form-note').textContent = lg
       ? ((hostStatus?.level ?? 1) < 3 && r.review_status === 'approved' ? 'Changes to the title, description and Discord invite are checked by a moderator first. Rounds, limit and sign-ups change right away. Rounds less than 24 hours away stay as they are.' : 'Changes apply to all upcoming rounds.')
       : (hostStatus?.level ?? 1) < 3 && r.review_status === 'approved'
@@ -413,7 +413,7 @@ const base = import.meta.env.BASE_URL;
       const r2 = await sb.rpc('set_season_rounds', { p_series: editSeries.series_id, p_rounds: rounds.map((x) => ({ event_id: x.event_id, starts_at: new Date(x.v).toISOString() })) });
       if (r2.error) { m.textContent = `Details saved, but the rounds were not: ${seriesErr(r2.error.message)}`; m.className = 'evs-msg is-error'; await loadHosted(); return; }
       $('series-form').hidden = true; editSeries = null;
-      sMsg((data as any)?.pending ? 'Saved. The new title, description or Discord invite go live once a moderator approves them; rounds and everything else apply now.' : 'Season saved.');
+      sMsg((data as any)?.pending ? 'Saved. The new title, description or Discord invite go live once a moderator approves them; rounds and everything else apply now.' : 'Championship saved.');
       await loadHosted();
       return;
     }
@@ -446,7 +446,7 @@ const base = import.meta.env.BASE_URL;
   async function openEntries(id: string) {
     entriesSeries = id;
     const r = seriesRows.find((x) => x.series_id === id);
-    $('season-entries-t').textContent = `Drivers in ${r?.title ?? 'this season'}`;
+    $('season-entries-t').textContent = `Drivers in ${r?.title ?? 'this championship'}`;
     $('season-entries').hidden = false;
     const { data, error } = await getSupabase().rpc('season_entries', { p_series: id });
     const rows = (data ?? []) as any[];

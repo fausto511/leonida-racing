@@ -309,7 +309,7 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const NTH: Record<string, string> = { '1': '1st', '2': '2nd', '3': '3rd', '4': '4th', '-1': 'last' };
 // COPY STATUS: Claude placeholders, Codex review pending.
 export function seriesLabel(s: EventSeriesInfo): string {
-  if (s.kind === 'league') return s.round_no ? `Round ${s.round_no} of ${s.round_total}` : 'Season';
+  if (s.kind === 'league') return s.round_no ? `Round ${s.round_no} of ${s.round_total}` : 'Championship';
   const wd = WEEKDAYS[((s.weekday ?? 1) - 1) % 7] ?? '';
   if (s.freq === 'weekly') return `Weekly · ${wd}`;
   if (s.freq === 'biweekly') return `Every 2 weeks · ${wd}`;

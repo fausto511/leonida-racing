@@ -268,7 +268,7 @@ function init(root: HTMLElement) {
     } else { v.textContent = 'No lap yet'; v.classList.add('is-tba'); s.textContent = 'Submit the first lap\u00a0↓'; }
     // rivals
     const rv = rivalsFromClass(classRows, id);
-    if (rv) { $('vh2h-list') && ($('vh2h-list')!.innerHTML = rv.map((r) => rivalHtml(r.id, r.note, id)).join('')); $('vh2h-sub') && ($('vh2h-sub')!.textContent = 'Its closest rivals at Gellhorn'); }
+    if (rv) { $('vh2h-list') && ($('vh2h-list')!.innerHTML = rv.map((r) => rivalHtml(r.id, r.note, id)).join('')); $('vh2h-sub') && ($('vh2h-sub')!.textContent = 'Closest matches at Gellhorn'); }
     // drivers in this car
     const [{ data: top }, own] = await Promise.all([
       ranks().eq('scope_key', id).lte('rank', GELLHORN_ROWS).order('rank'),
@@ -302,7 +302,7 @@ function init(root: HTMLElement) {
     ($('vg-how') as HTMLElement).hidden = true;
     if (cl?.dataset.sample) cl.innerHTML = cl.dataset.sample;
     if (cs?.dataset.sample) cs.textContent = cs.dataset.sample;
-    if (rl?.dataset.sample) { rl.innerHTML = rl.dataset.sample; const sub = $('vh2h-sub'); if (sub) sub.textContent = 'Its closest rivals at Gellhorn'; }
+    if (rl?.dataset.sample) { rl.innerHTML = rl.dataset.sample; const sub = $('vh2h-sub'); if (sub) sub.textContent = 'Closest matches at Gellhorn'; }
     $('vg-flag')!.hidden = false;
   }
 

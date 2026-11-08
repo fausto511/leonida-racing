@@ -63,7 +63,7 @@ export function collectionTitle(isClass: boolean, label: string): string {
 export function collectionDescription(isClass: boolean, name: string, label: string, list: VehicleOption[], soleInspiration: string | null): string {
   const n = list.length;
   const what = isClass ? label : `${name} car${n === 1 ? '' : 's'}`;
-  const count = n === 1 ? `1 ${isClass ? label.replace(/s$/, '') : what}` : `All ${n} ${what}`;
+  const count = n === 1 ? `1 ${isClass ? label.replace(/s$/, '') : what}` : `Browse ${n} ${what}`;
   const brand = !isClass && soleInspiration ? `, the brand behind the game's ${soleInspiration}-inspired cars,` : '';
   const top = list
     .map((v) => ({ v, mph: mphOf(v.id) }))

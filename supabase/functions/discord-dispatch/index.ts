@@ -534,8 +534,8 @@ function card(e: any, going: number) {
   const buttons: Record<string, unknown>[] = [];
   if (!cancelled) {
     const season = e.series?.kind === "league";
-    buttons.push({ type: 2, style: 3, label: full ? "Full" : e.registration === "closed" ? "Sign-ups closed" : season ? "Join season" : "I'm in", custom_id: `rsvp:in:${e.event_id}`, disabled: full || e.registration === "closed" });
-    buttons.push({ type: 2, style: 2, label: season ? "Leave season" : "Withdraw", custom_id: `rsvp:out:${e.event_id}` });
+    buttons.push({ type: 2, style: 3, label: full ? "Full" : e.registration === "closed" ? "Sign-ups closed" : season ? "Join championship" : "I'm in", custom_id: `rsvp:in:${e.event_id}`, disabled: full || e.registration === "closed" });
+    buttons.push({ type: 2, style: 2, label: season ? "Leave championship" : "Withdraw", custom_id: `rsvp:out:${e.event_id}` });
   }
   buttons.push(linkButton("Details", eventUrl(e)));
   if (!cancelled && hostDiscord) buttons.push(linkButton("Host Discord", hostDiscord));

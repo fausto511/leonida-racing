@@ -512,7 +512,7 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
         const date = formatDate(run.submitted_at ?? run.created_at);
         // DEC-0210: highlight opt-in, only for laps with a video. COPY: Claude placeholder, Codex review pending.
         const hasVideo = run.verification_tier === 'video_submitted' || run.verification_tier === 'verified';
-        const hl = hasVideo ? `<label class="hl-tg" title="Feature this video in Leonida Racing highlight and analysis videos. Turning it off stops new use; videos already published stay online."><input type="checkbox" data-hl="${run.run_id}"${run.video_use_ok ? ' checked' : ''} /> Use in highlights</label>` : '';
+        const hl = hasVideo ? `<label class="hl-tg" title="Feature this video in Leonida Racing highlight and analysis videos. Turning it off stops new use; published videos stay up unless you ask us to remove them."><input type="checkbox" data-hl="${run.run_id}"${run.video_use_ok ? ' checked' : ''} /> Use in highlights</label>` : '';
         tr.innerHTML = `<td class="c-car">${vehicleCell(run)}</td><td class="c-track">${trackCell(run)}</td><td class="c-time">${formatLapTime(run.lap_time_ms)}</td><td class="c-meta"><span class="lr-status ${info.cls}">${info.label}</span><span class="m">· ${date}</span>${hl}</td><td class="c-date">${date}</td><td class="c-act c-vid">${videoBtn}</td><td class="c-act c-wd">${withdrawBtn}</td>`;
         submissionsTbodyEl.appendChild(tr);
         // RS-0091: what the moderator wants corrected, right under the lap

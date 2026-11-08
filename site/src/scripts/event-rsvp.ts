@@ -19,8 +19,8 @@ export function createEventRsvp(root: HTMLElement) {
   // RS-0095 part 2: rounds of a season -- sign-up is for the whole season (COPY: Claude placeholders)
   const isSeason = (e?: HubEvent) => e?.series?.kind === 'league';
   const SEASON_MSG: Record<string, string> = {
-    full: 'The season is full.', closed: 'Sign-ups for this season are closed.', past: 'This season is already over.',
-    members_only: 'This season is for crew members only.', blocked: 'The host removed you from this season.', not_found: 'This season is not open for sign-ups.',
+    full: 'The championship is full.', closed: 'Sign-ups for this championship are closed.', past: 'This championship is already over.',
+    members_only: 'This championship is for crew members only.', blocked: 'The host removed you from this championship.', not_found: 'This championship is not open for sign-ups.',
   };
   const isOver = (e: HubEvent) => new Date(e.ends_at ?? new Date(new Date(e.starts_at).getTime() + 3 * 3600e3).toISOString()) < new Date();
 
@@ -67,7 +67,7 @@ export function createEventRsvp(root: HTMLElement) {
       else if (closed) action = '';
       else if (e.registration === 'closed') action = '<span class="ev-full">Sign-ups Closed</span>';
       else if (full) action = '<span class="ev-full">Full</span>';
-      else action = `<button type="button" class="btn btn-md ev-rsvp-btn" data-join="${esc(id)}">${isSeason(e) ? 'Join season' : "I'm in"}</button>`;
+      else action = `<button type="button" class="btn btn-md ev-rsvp-btn" data-join="${esc(id)}">${isSeason(e) ? 'Join championship' : "I'm in"}</button>`;
       const msg = note && note.id === id ? `<span class="ev-rsvp-msg${note.err ? ' is-error' : ''}">${esc(note.text)}</span>` : '';
       slot.innerHTML = `${list}${action}${msg}`;
       // Next step after "I'm in" (Fausto, 2026-10-01): signing up alone is
@@ -115,7 +115,7 @@ export function createEventRsvp(root: HTMLElement) {
       const st = (data as any)?.status;
       note = err || !['in', 'already'].includes(st)
         ? { id, text: SEASON_MSG[st] ?? 'Could not sign up — please try again.', err: true }
-        : { id, text: 'You’re in for the whole season — every round is in My Account > Events.', discord: eventDiscord(ev!) };
+        : { id, text: 'You’re in for the whole championship — every round is in My Account > Events.', discord: eventDiscord(ev!) };
       await loadRsvps();
       return;
     }
@@ -130,10 +130,10 @@ export function createEventRsvp(root: HTMLElement) {
     if (!me) return;
     const sev = events.find((x) => x.event_id === id);
     if (isSeason(sev)) {
-      if (!confirmLeave.has(id)) { confirmLeave.add(id); note = { id, text: 'This takes you out of the whole season. Click Going again to confirm.' }; renderRsvps(); return; }
+      if (!confirmLeave.has(id)) { confirmLeave.add(id); note = { id, text: 'This takes you out of the whole championship. Click Going again to confirm.' }; renderRsvps(); return; }
       confirmLeave.delete(id);
       const { error: err } = await getSupabase().rpc('leave_season', { p_series: sev!.series_id });
-      note = err ? { id, text: 'That did not work — please try again.', err: true } : { id, text: 'You left the season.' };
+      note = err ? { id, text: 'That did not work — please try again.', err: true } : { id, text: 'You left the championship.' };
       await loadRsvps();
       return;
     }

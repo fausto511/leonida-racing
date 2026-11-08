@@ -253,7 +253,7 @@ async function seriesTag(e: any): Promise<string> {
     const { data } = await db.from("hub_events").select("event_id").eq("series_id", e.series_id).neq("status", "cancelled").order("starts_at").order("event_id");
     const list = (data ?? []) as any[];
     const n = list.findIndex((x) => x.event_id === e.event_id);
-    return n >= 0 ? `Round ${n + 1} of ${list.length}` : "Season";
+    return n >= 0 ? `Round ${n + 1} of ${list.length}` : "Championship";
   }
   const wd = WD[((s.weekday ?? 1) - 1) % 7];
   return s.freq === "weekly" ? `Weekly \u00b7 ${wd}` : s.freq === "biweekly" ? `Every 2 weeks \u00b7 ${wd}` : `Monthly \u00b7 ${NTH[String(s.monthly_nth)] ?? ""} ${wd}`;
@@ -634,7 +634,7 @@ function editPanel(e: any, pending: Record<string, unknown> | null, note = "") {
     `${state} \u00b7 Sign-ups ${e.registration === "closed" ? "closed" : "open"}${e.max_participants ? ` \u00b7 max. ${e.max_participants}` : ""}`,
     ...(pending ? ["Changes to the title or description are waiting for a moderator."] : []),
     // RS-0095. COPY STATUS: Claude placeholder.
-    ...(e.series_id ? [`This is one ${e.series?.kind === "league" ? "round of a season" : "date of a series"}. Here you can move it, close its sign-ups or cancel it. Title, description and limit are changed for all ${e.series?.kind === "league" ? "rounds" : "dates"} under Your series on the website.`] : []),
+    ...(e.series_id ? [`This is one ${e.series?.kind === "league" ? "round of a championship" : "date of a series"}. Here you can move it, close its sign-ups or cancel it. Title, description and limit are changed for all ${e.series?.kind === "league" ? "rounds" : "dates"} under Your series on the website.`] : []),
   ];
   const buttons: unknown[] = [evBtn(e.series_id ? "Change time" : "Edit details", 1, "edit", e.event_id)];
   if (e.status !== "cancelled") buttons.push(
@@ -666,7 +666,7 @@ const EDIT_ERRORS: [RegExp, string][] = [
   [/lead_time/, "The event has to start at least 24 hours from now, so a moderator has time to review it."],
   [/time_locked/, "The start time can only change while the event is at least 24 hours away."],
   [/not_editable/, "This event can't be changed any more."],
-  [/edit_series/, "This is part of a series or season: change title, description and limit under Your series on the website."],
+  [/edit_series/, "This is part of a series or championship: change title, description and limit under Your series on the website."],
   [/not_before_launch/, "Events can start on Nov 19, 2026 (GTA VI launch day) at the earliest."],
   [/hub_events_check/, "The end has to be after the start."],
   [/emoji/i, "Please remove emoji from the title and description."],
@@ -1009,17 +1009,17 @@ async function rsvpButton(i: any) {
     const t = String(r.title ?? "").replace(/ \(whole season\)$/, "");
     switch (r.status) {
       case "no_profile": return ephemeral("To join, create your Leonida Racing driver profile first. It uses this Discord account, so it takes one click. Then press \u201cJoin season\u201d again.", [profileButton]);
-      case "in": return ephemeral(`You're in for the whole season of **${t}** \u2014 every round, ${count} drivers.${psn}${r.discord_url ? " Join the host's Discord for the lobby invites." : ""}`, hostRow);
-      case "already": return ephemeral(`You're already in for the season of **${t}** (${count} drivers).${psn}`, hostRow);
-      case "out": return ephemeral(`You left the season of **${t}**. You're no longer signed up for its rounds.`);
-      case "not_in": return ephemeral(`You weren't signed up for the season of **${t}**.`);
-      case "full": return ephemeral(`Sorry, the season of **${t}** is full (${count}).`);
-      case "closed": return ephemeral(`Sign-ups for the season of **${t}** are closed.`);
-      case "cancelled": return ephemeral(`This round of **${t}** has been cancelled. You can still join the season on the next round's card.`);
-      case "past": return ephemeral(`The season of **${t}** is already over.`);
-      case "members_only": return ephemeral(`The season of **${t}** is for crew members only. Join the crew on Leonida Racing to sign up.`, hostRow);
-      case "blocked": return ephemeral(`You can't join the season of **${t}**.`);
-      case "not_found": return ephemeral("This season isn't open for sign-ups.");
+      case "in": return ephemeral(`You're in for the whole championship of **${t}** \u2014 every round, ${count} drivers.${psn}${r.discord_url ? " Join the host's Discord for the lobby invites." : ""}`, hostRow);
+      case "already": return ephemeral(`You're already in for the championship of **${t}** (${count} drivers).${psn}`, hostRow);
+      case "out": return ephemeral(`You left the championship of **${t}**. You're no longer signed up for its rounds.`);
+      case "not_in": return ephemeral(`You weren't signed up for the championship of **${t}**.`);
+      case "full": return ephemeral(`Sorry, the championship of **${t}** is full (${count}).`);
+      case "closed": return ephemeral(`Sign-ups for the championship of **${t}** are closed.`);
+      case "cancelled": return ephemeral(`This round of **${t}** has been cancelled. You can still join the championship on the next round's card.`);
+      case "past": return ephemeral(`The championship of **${t}** is already over.`);
+      case "members_only": return ephemeral(`The championship of **${t}** is for crew members only. Join the crew on Leonida Racing to sign up.`, hostRow);
+      case "blocked": return ephemeral(`You can't join the championship of **${t}**.`);
+      case "not_found": return ephemeral("This championship isn't open for sign-ups.");
     }
   }
   switch (r.status) {
