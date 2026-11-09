@@ -93,6 +93,8 @@ const bandSrc = custom?.band?.src ? `${base}${custom.band.src}` : bandCar ? `${b
 if (!custom?.band?.src && bandCar?.photo) (jsonLd[0] as Record<string, unknown>).primaryImageOfPage = { '@type': 'ImageObject', url: new URL(`${base}images/vehicles/${bandCar.id}-1920.webp`, Astro.site).href, width: 1920, height: 1080 };
 const bandPos = custom?.band && (custom.band.src || bandCar?.id === custom.band.id) ? custom.band.pos : undefined;
 const bandStyle = [bandPos ? `object-position:${bandPos}` : '', custom?.band?.style ?? ''].filter(Boolean).join(';') || undefined;
+// Share image (Fausto 09.11.2026): the band car's photo instead of the generic garage picture, same format as vehicle pages.
+const ogCar = !custom?.band?.src && bandCar?.photo ? bandCar : null;
 
 // ---- at a glance ----
 const lapOf = (v: VehicleOption) => fastestGellhornLapMs(v.id);
@@ -139,6 +141,10 @@ const more = custom
   description={custom?.metaDescription ?? metaDescription}
   brandSuffix={Boolean(custom)}
   section="garage"
+  ogImage={ogCar ? `images/vehicles/${ogCar.id}-1280.webp` : undefined}
+  ogImageAlt={ogCar ? `${ogCar.make} ${ogCar.model} in GTA 6` : undefined}
+  ogImageWidth={ogCar ? 1280 : undefined}
+  ogImageHeight={ogCar ? 720 : undefined}
   jsonLd={custom ? undefined : jsonLd}
   noindex={custom?.noindex}
   breadcrumbs={custom?.breadcrumbs ?? [{ name: 'Cars', path: 'cars/' }, { name: isClass ? 'Classes' : 'Manufacturers', path: `cars/${isClass ? 'classes' : 'manufacturers'}/` }, { name: page.name, path }]}
