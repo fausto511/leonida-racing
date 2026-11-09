@@ -245,6 +245,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
 <script>
   import { getSupabase, backendConfigured, SUPABASE_URL, SUPABASE_ANON_KEY } from '../scripts/supabase-client';
   import { loadBadges, badgeHtml, badgeTitle } from '../data/badge';
+  import { loadModOverview, todoTotal } from '../scripts/mod-overview';
 
   const root = document.documentElement;
 
@@ -346,18 +347,10 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       const isMod = !error && Array.isArray(data) && data.length > 0;
       moderatorLinkEl.hidden = !isMod;
       if (isMod) {
-        const [rq, rp, cr, tr] = await Promise.all([
-          supabase.from('hub_role_requests').select('request_id', { count: 'exact', head: true }).eq('status', 'pending'),
-          supabase.from('run_reports').select('report_id', { count: 'exact', head: true }).eq('status', 'open'),
-          supabase.from('content_reports').select('report_id', { count: 'exact', head: true }).eq('status', 'open'),
-          supabase.from('community_tracks').select('track_id', { count: 'exact', head: true }).eq('is_published', false),
-        ]);
-        const count = (rq.count ?? 0) + (rp.count ?? 0) + (cr.count ?? 0) + (tr.count ?? 0);
-        if (count) moderatorLinkEl.textContent = `Moderator (${count} new)`;
-        // Content reports first (possibly illegal content), then time reports.
-        if (!rq.count && cr.count) moderatorLinkEl.setAttribute('href', `${base}moderator/content/`);
-        else if (!rq.count && rp.count) moderatorLinkEl.setAttribute('href', `${base}moderator/reports/`);
-        else if (rq.count || tr.count) moderatorLinkEl.setAttribute('href', `${base}moderator/hub/`);
+        // All open reviews incl. laps, from mod_overview() (RS-0102); the link goes to the moderator overview
+        const ov = await loadModOverview();
+        const count = ov ? todoTotal(ov.todo) : 0;
+        if (count) moderatorLinkEl.textContent = `Moderator (${count} to do)`;
       }
       const own = await supabase.from('drivers').select('driver_id').eq('auth_user_id', session.user.id).maybeSingle();
       const me = own.data?.driver_id;

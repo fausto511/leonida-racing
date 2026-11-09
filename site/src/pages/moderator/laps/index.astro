@@ -1,0 +1,959 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ModeratorNav from '../../../components/ModeratorNav.astro';
+---
+<Base
+  title="Moderator"
+  description="Internal lap review: verify or reject submitted times."
+  section="moderator"
+  noindex
+>
+  <section class="wrap mod-wrap">
+    <ModeratorNav active="laps" />
+    <p class="eyebrow">Time Attack Operations</p>
+    <h1 class="display mod-title">Lap Review</h1>
+    <p class="mod-lede">Private evidence and moderation actions. No bulk approval for record-capable runs. Every action is logged.</p>
+
+    <div id="backend-notice" class="notice" hidden>
+      <strong>Backend not connected yet.</strong>
+      <span>This page reads and writes the real <code>runs</code>/<code>evidence</code> tables via Supabase and calls the <code>moderate-submission</code> function, but no Supabase project is configured for this build (see <code>SETUP-BACKEND.md</code>). Sign-in and data are disabled until <code>PUBLIC_SUPABASE_URL</code>, <code>PUBLIC_SUPABASE_ANON_KEY</code> and <code>PUBLIC_MODERATE_SUBMISSION_URL</code> are set.</span>
+    </div>
+
+    <div id="auth-box" class="panel auth-box" hidden>
+      <p>Log in with Discord to access the moderator area.</p>
+      <button type="button" id="discord-signin-btn" class="btn btn-discord">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.92 3.58 14.74 3.99C12.9 3.71 11.07 3.71 9.26 3.99C9.09 3.58 8.83 3.06 8.62 2.67C6.88 2.97 5.21 3.5 3.66 4.23C0.53 8.97 -0.32 13.58 0.1 18.14C2.18 19.69 4.19 20.63 6.17 21.25C6.66 20.58 7.1 19.86 7.48 19.11C6.76 18.83 6.07 18.5 5.43 18.11C5.6 17.98 5.77 17.85 5.93 17.71C9.88 19.56 14.17 19.56 18.07 17.71C18.23 17.85 18.4 17.98 18.57 18.11C17.92 18.5 17.24 18.84 16.52 19.11C16.9 19.86 17.33 20.58 17.82 21.25C19.8 20.63 21.82 19.69 23.9 18.14C24.4 12.86 23.05 8.28 20.33 4.23ZM8.01 15.34C6.83 15.34 5.86 14.23 5.86 12.88C5.86 11.53 6.81 10.43 8.01 10.43C9.22 10.43 10.19 11.53 10.17 12.88C10.17 14.23 9.22 15.34 8.01 15.34ZM15.99 15.34C14.8 15.34 13.83 14.23 13.83 12.88C13.83 11.53 14.78 10.43 15.99 10.43C17.19 10.43 18.17 11.53 18.14 12.88C18.14 14.23 17.19 15.34 15.99 15.34Z"></path></svg>
+        Log in with Discord
+      </button>
+    </div>
+
+    <div id="not-mod-notice" class="notice" hidden>
+      <strong>Not a moderator.</strong>
+      <span>Your account is signed in, but does not have moderator access. If you believe this is wrong, ask an existing moderator to grant it.</span>
+    </div>
+
+    <div id="mod-content" hidden>
+      <div class="mod-layout">
+        <div class="panel queue-panel">
+          <div class="queue-head">
+            <h2 class="queue-title">Review Queue</h2>
+            <span class="queue-count" id="queue-count">0 open</span>
+          </div>
+          <div class="queue-tabs" role="tablist">
+            <button type="button" class="queue-tab is-active" data-filter="pending" role="tab" aria-selected="true">Needs Decision</button>
+            <button type="button" class="queue-tab" data-filter="accepted" role="tab" aria-selected="false">Accepted</button>
+          </div>
+          <div class="queue-list" id="queue-list"></div>
+          <p class="queue-empty" id="queue-empty" hidden>Nothing here right now.</p>
+          <p class="queue-error" id="queue-error" hidden></p>
+        </div>
+
+        <div class="panel review-panel" id="review-panel">
+          <p class="review-placeholder" id="review-placeholder">Select a submission from the queue to review it.</p>
+          <div id="review-body" hidden></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  [hidden] { display: none !important; }
+
+  .mod-wrap { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+  .mod-title { margin: .4rem 0 .6rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .mod-lede { margin: 0 0 1.75rem; color: var(--gh-muted); font-size: .92rem; max-width: 46rem; }
+
+  .notice { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1.5rem; padding: 1rem 1.2rem; border: 1px solid var(--gh-yellow); background: var(--lr-orange-tint); border-radius: var(--gh-radius); font-size: .85rem; }
+  .notice strong { color: var(--gh-yellow); }
+  .notice code { color: var(--gh-text); }
+
+  .auth-box { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .auth-box p { margin: 0; font-size: .88rem; }
+
+  .mod-layout { display: grid; grid-template-columns: 21rem 1fr; gap: 1.5rem; align-items: start; }
+  @media (max-width: 900px) { .mod-layout { grid-template-columns: 1fr; } }
+
+  .queue-panel { padding: var(--gh-pad-card); position: sticky; top: 1.5rem; }
+  @media (max-width: 900px) { .queue-panel { position: static; } }
+  .queue-head { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; margin-bottom: 1rem; }
+  .queue-title { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.15rem; }
+  .queue-count { color: var(--gh-muted); font-size: .78rem; font-weight: 700; }
+  .queue-tabs { display: flex; gap: .4rem; margin-bottom: 1rem; }
+  .queue-tab { flex: 1; padding: .5rem .6rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: transparent; color: var(--gh-muted); font-weight: 700; font-size: .74rem; letter-spacing: .02em; cursor: pointer; font-family: var(--gh-font-body); }
+  .queue-tab.is-active { background: var(--gh-surface-soft); color: var(--gh-text); border-color: var(--gh-muted); }
+  .queue-list { display: flex; flex-direction: column; gap: .5rem; max-height: 32rem; overflow-y: auto; }
+  /* .queue-item and its children are built via queueListEl.innerHTML at runtime
+     (see renderQueue() in the script below), so Astro never attaches its
+     scoping attribute to them — these selectors must be :global() or the
+     rules silently never apply (same class of bug fixed twice on the
+     Account page: the browser's UA-stylesheet defaults win instead). */
+  :global(.queue-item) { display: block; width: 100%; text-align: left; padding: .7rem .8rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); border-left: 3px solid transparent; background: var(--gh-surface-soft); color: var(--gh-text); cursor: pointer; font-family: var(--gh-font-body); }
+  :global(.queue-item:hover) { border-color: var(--gh-muted); }
+  :global(.queue-item.is-active) { border-left-color: var(--gh-yellow); background: var(--lr-orange-tint); }
+  :global(.queue-item-title) { font-weight: 700; font-size: .88rem; margin-bottom: .2rem; }
+  :global(.queue-item-sub) { color: var(--gh-muted); font-size: .76rem; display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+  :global(.queue-tag) { display: inline-block; padding: .1rem .45rem; border-radius: 999px; font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+  :global(.queue-tag.tag-video) { background: var(--lr-lime-fill); color: #D9F58E; }
+  :global(.queue-tag.tag-record) { background: var(--lr-orange-fill); color: var(--gh-yellow); }
+  :global(.queue-tag.tag-correction) { background: var(--lr-pink-fill); color: var(--gh-red); }
+  .queue-empty, .queue-error { color: var(--gh-muted); font-size: .85rem; margin: 0; }
+  .queue-error { color: var(--lr-coral); }
+
+  .review-panel { padding: var(--gh-pad-card); min-height: 20rem; }
+  .review-placeholder { color: var(--gh-muted); font-size: .9rem; margin: 0; }
+
+  /* Everything below down to .decision-hint is built via reviewBodyEl.innerHTML
+     at runtime (see renderReviewPanel()/loadAutomatedChecks() in the script),
+     so — same reason as .queue-item above — these selectors must be
+     :global() or they silently never apply. */
+  :global(.review-head) { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1.2rem; border-bottom: 1px solid var(--gh-line); }
+  :global(.review-head h2) { margin: 0 0 .2rem; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.4rem; }
+  :global(.review-head-sub) { margin: 0; color: var(--gh-muted); font-size: .85rem; }
+  :global(.review-pills) { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
+  :global(.pill) { display: inline-block; padding: .2rem .55rem; border-radius: 999px; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+  :global(.pill-live) { background: var(--lr-lime-fill); color: #D9F58E; }
+  :global(.pill-pending) { background: var(--lr-orange-fill); color: var(--gh-yellow); }
+  :global(.pill-rejected) { background: var(--lr-pink-fill); color: var(--gh-red); }
+  :global(.pill-muted) { background: var(--gh-surface-soft); color: var(--gh-muted); }
+
+  :global(.review-grid) { display: grid; grid-template-columns: 1.1fr .9fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+  @media (max-width: 720px) { :global(.review-grid) { grid-template-columns: 1fr; } }
+
+  :global(.review-box) { padding: 1.1rem 1.2rem; border-radius: var(--gh-radius); background: var(--gh-surface-soft); border: 1px solid var(--gh-line); }
+  :global(.review-box-head) { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; margin-bottom: .9rem; }
+  :global(.review-box-head h3) { margin: 0; font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  :global(.review-box-head span) { color: var(--gh-muted); font-size: .72rem; }
+
+  :global(.fact-row) { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-block: .4rem; border-bottom: 1px solid var(--gh-line); font-size: .85rem; }
+  :global(.fact-row:last-child) { border-bottom: none; }
+  :global(.fact-row span) { color: var(--gh-muted); }
+  :global(.fact-row strong) { text-align: right; }
+
+  :global(.evidence-shot-wrap) { margin-bottom: .9rem; }
+  :global(.evidence-shot) { max-width: 100%; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); display: block; }
+  :global(.evidence-video-row) { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding-top: .8rem; border-top: 1px solid var(--gh-line); font-size: .85rem; }
+  :global(.evidence-video-row a) { color: var(--gh-text); }
+  :global(.evidence-none) { color: var(--gh-muted); font-size: .82rem; margin: 0; }
+
+  :global(.checks-grid) { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .8rem; }
+  :global(.check-tile) { padding: .7rem .8rem; border-radius: var(--gh-radius); background: var(--gh-bg); border: 1px solid var(--gh-line); }
+  :global(.check-tile span) { display: block; color: var(--gh-muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem; }
+  :global(.check-tile strong) { font-size: .95rem; }
+  :global(.check-tile.is-warning strong) { color: var(--gh-yellow); }
+  :global(.check-tile.is-bad strong) { color: var(--gh-red); }
+
+  :global(.decision-box textarea) { width: 100%; min-height: 4.5rem; margin-top: .8rem; padding: .7rem .9rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text); font-size: .88rem; font-family: var(--gh-font-body); resize: vertical; }
+  :global(.decision-box textarea:focus) { outline: 2px solid var(--gh-yellow); outline-offset: 1px; }
+  :global(.decision-actions) { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+  :global(.decision-msg) { margin: .8rem 0 0; font-size: .82rem; }
+  :global(.decision-msg.is-error) { color: var(--lr-coral); }
+  :global(.decision-msg.is-ok) { color: #D9F58E; }
+  :global(.decision-hint) { margin: .4rem 0 0; color: var(--gh-muted); font-size: .76rem; }
+  :global(.corr-note) { margin: 0 0 16px; } /* RS-0091: correction asked / done */
+
+  :global(.override-box) { border-color: var(--gh-yellow); }
+  :global(.override-grid) { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .9rem; margin-bottom: .3rem; }
+  :global(.override-grid label) { display: flex; flex-direction: column; gap: .35rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+  :global(.override-grid select), :global(.override-grid input[type="text"]) { padding: .5rem .6rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text); font-size: .85rem; font-family: var(--gh-font-body); text-transform: none; letter-spacing: normal; font-weight: 400; }
+  :global(.override-grid select:focus), :global(.override-grid input:focus) { outline: 2px solid var(--gh-yellow); outline-offset: 1px; }
+  :global(.override-checkbox) { flex-direction: row !important; align-items: center; gap: .5rem !important; }
+  :global(.override-checkbox input) { width: 1rem; height: 1rem; }
+</style>
+
+<script>
+  import { getSupabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '../../../scripts/supabase-client';
+
+  // Derived from the project URL like every other function URL on the site. The old
+  // separate build secret PUBLIC_MODERATE_SUBMISSION_URL still held the setup
+  // placeholder in production (2026-10-04) and broke Reveal / Approve.
+  const MODERATE_SUBMISSION_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/moderate-submission` : '';
+  const backendConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+
+  const noticeEl = document.getElementById('backend-notice');
+  const authBoxEl = document.getElementById('auth-box');
+  const notModNoticeEl = document.getElementById('not-mod-notice');
+  const modContentEl = document.getElementById('mod-content');
+
+  const queueListEl = document.getElementById('queue-list');
+  const queueCountEl = document.getElementById('queue-count');
+  const queueEmptyEl = document.getElementById('queue-empty');
+  const queueErrorEl = document.getElementById('queue-error');
+  const queueTabEls = [...document.querySelectorAll('.queue-tab')];
+
+  const reviewPlaceholderEl = document.getElementById('review-placeholder');
+  const reviewBodyEl = document.getElementById('review-body');
+
+  if (!backendConfigured) {
+    noticeEl.hidden = false;
+  } else {
+    authBoxEl.hidden = false;
+  }
+
+  let currentSession = null;
+  let queueRuns = [];
+  let selectedRunId = null;
+  let deepLinkRunId = new URLSearchParams(window.location.search).get('run');
+  let currentFilter = 'pending';
+  let currentModeratorDriverId = null;
+  let allVehicles = [];
+  let allReleases = []; // game_releases (RS-0048): game version per run
+
+  const REVIEW_STATUS_OPTIONS = [
+    ['draft', 'Draft'],
+    ['submitted', 'Submitted'],
+    ['needs_correction', 'Needs Correction'],
+    ['under_review', 'Under Review'],
+    ['accepted', 'Accepted'],
+    ['rejected', 'Rejected'],
+    ['invalidated', 'Invalidated'],
+  ];
+  const PUBLICATION_STATUS_OPTIONS = [
+    ['hidden', 'Hidden'],
+    ['provisional', 'Provisional'],
+    ['official', 'Official'],
+    ['archived', 'Archived'],
+  ];
+  const VERIFICATION_TIER_OPTIONS = [
+    ['self_reported', 'Self-Reported'],
+    ['unverified', 'Unverified'],
+    ['video_submitted', 'Video Submitted'],
+    ['verified', 'Verified'],
+    ['trusted_test', 'Trusted Test'],
+  ];
+
+  function formatLapTime(ms) {
+    if (ms == null) return '—';
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    const millis = ms % 1000;
+    return `${minutes}:${String(seconds).padStart(2, '0')}.${String(millis).padStart(3, '0')}`;
+  }
+
+  function formatDelta(ms) {
+    if (ms == null) return '—';
+    const sign = ms < 0 ? '−' : '+';
+    return `${sign}${(Math.abs(ms) / 1000).toFixed(3)} s`;
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function vehicleLabel(v) {
+    if (!v) return 'Unknown vehicle';
+    return `${v.make} ${v.model}`;
+  }
+
+  function platformLabel(p) {
+    if (p === 'ps5') return 'PS5';
+    if (p === 'xbox_series') return 'Xbox Series X|S';
+    return p ?? '—';
+  }
+
+  function reviewStatusPill(status) {
+    const map = {
+      submitted: ['Submitted', 'pill-pending'],
+      under_review: ['Under Review', 'pill-pending'],
+      needs_correction: ['Needs Correction', 'pill-pending'],
+      accepted: ['Accepted', 'pill-live'],
+      rejected: ['Rejected', 'pill-rejected'],
+      invalidated: ['Invalidated', 'pill-rejected'],
+      draft: ['Draft', 'pill-muted'],
+    };
+    const [label, cls] = map[status] ?? [status, 'pill-muted'];
+    return `<span class="pill ${cls}">${label}</span>`;
+  }
+
+  function publicationPill(status) {
+    const map = {
+      hidden: ['Hidden', 'pill-muted'],
+      provisional: ['Provisional', 'pill-live'],
+      official: ['Official', 'pill-live'],
+      archived: ['Archived', 'pill-muted'],
+    };
+    const [label, cls] = map[status] ?? [status, 'pill-muted'];
+    return `<span class="pill ${cls}">${label}</span>`;
+  }
+
+  function verificationPill(tier) {
+    const map = {
+      self_reported: ['Self-Reported', 'pill-muted'],
+      unverified: ['Unverified', 'pill-muted'],
+      video_submitted: ['Video Submitted', 'pill-pending'],
+      verified: ['Verified', 'pill-live'],
+      trusted_test: ['Trusted Test', 'pill-live'],
+    };
+    const [label, cls] = map[tier] ?? [tier, 'pill-muted'];
+    return `<span class="pill ${cls}">${label}</span>`;
+  }
+
+  function hasPublicVideo(run) {
+    return (run.evidence ?? []).some(
+      (e) => e.type === 'video_link' && e.visibility === 'public' && e.retention_state === 'active'
+    );
+  }
+
+  // Parses a "1:42.318"-style lap time back into milliseconds for the
+  // Moderator Override form. Returns null on anything that doesn't match.
+  function parseLapTime(str) {
+    const m = /^(\d+):([0-5]\d)\.(\d{1,3})$/.exec((str ?? '').trim());
+    if (!m) return null;
+    const minutes = parseInt(m[1], 10);
+    const seconds = parseInt(m[2], 10);
+    const millis = parseInt(m[3].padEnd(3, '0'), 10);
+    return minutes * 60000 + seconds * 1000 + millis;
+  }
+
+  function optionsHtml(pairs, selected) {
+    return pairs
+      .map(([val, label]) => `<option value="${val}" ${val === selected ? 'selected' : ''}>${label}</option>`)
+      .join('');
+  }
+
+  function vehicleOptionsHtml(selectedId) {
+    return allVehicles
+      .map((v) => `<option value="${v.vehicle_id}" ${v.vehicle_id === selectedId ? 'selected' : ''}>${v.make} ${v.model}</option>`)
+      .join('');
+  }
+
+  function releaseLabel(id) {
+    if (!id) return '—';
+    const r = allReleases.find((x) => x.release_id === id);
+    return r ? r.name : id;
+  }
+
+  // Game version is set automatically from the lap date (DB trigger, RS-0048);
+  // this dropdown only exists to correct edge cases, e.g. laps on update day.
+  function releaseOptionsHtml(selectedId) {
+    const opts = allReleases
+      .map((r) => `<option value="${r.release_id}" ${r.release_id === selectedId ? 'selected' : ''}>${r.name}${r.release_date ? ` (from ${r.release_date})` : ''}</option>`)
+      .join('');
+    return `<option value="" ${selectedId ? '' : 'selected'}>—</option>${opts}`;
+  }
+
+  async function loadReleases() {
+    if (allReleases.length) return;
+    const { data, error } = await getSupabase()
+      .from('game_releases')
+      .select('release_id, name, release_date')
+      .order('release_date', { ascending: true, nullsFirst: false })
+      .order('sort_order', { ascending: true });
+    if (!error && data) allReleases = data;
+  }
+
+  // Fetched once per session and cached — the vehicle list barely changes
+  // and every review panel render needs it for the override dropdown.
+  async function loadVehicles() {
+    if (allVehicles.length) return;
+    const sb = getSupabase();
+    const { data, error } = await sb
+      .from('vehicles')
+      .select('vehicle_id, make, model')
+      .order('make', { ascending: true })
+      .order('model', { ascending: true });
+    if (!error && data) allVehicles = data;
+  }
+
+  // The moderation_log insert below is only accepted (by RLS) when
+  // moderator_driver_id matches the caller's own drivers row — never
+  // some other moderator's, even though `moderators` itself is readable
+  // by any moderator. So we resolve our own driver_id once, from our own
+  // session, rather than trusting the first row a `moderators` select
+  // happens to return.
+  async function loadOwnDriverId() {
+    if (currentModeratorDriverId || !currentSession?.user?.id) return;
+    const sb = getSupabase();
+    const { data, error } = await sb
+      .from('drivers')
+      .select('driver_id')
+      .eq('auth_user_id', currentSession.user.id)
+      .maybeSingle();
+    if (!error && data) currentModeratorDriverId = data.driver_id;
+  }
+
+  function renderAuthState() {
+    if (!backendConfigured) return;
+    if (currentSession) {
+      authBoxEl.hidden = true;
+      checkModeratorStatus();
+    } else {
+      authBoxEl.hidden = false;
+      notModNoticeEl.hidden = true;
+      modContentEl.hidden = true;
+    }
+  }
+
+  async function checkModeratorStatus() {
+    const sb = getSupabase();
+    const { data, error } = await sb.from('moderators').select('driver_id').limit(1);
+    const isModerator = !error && Array.isArray(data) && data.length > 0;
+    if (isModerator) {
+      notModNoticeEl.hidden = true;
+      modContentEl.hidden = false;
+      await Promise.all([loadOwnDriverId(), loadVehicles(), loadReleases()]);
+      await loadQueue();
+    } else {
+      notModNoticeEl.hidden = false;
+      modContentEl.hidden = true;
+    }
+  }
+
+  async function loadQueue() {
+    queueErrorEl.hidden = true;
+    const sb = getSupabase();
+    const { data, error } = await sb
+      .from('runs')
+      .select(
+        `run_id, driver_id, vehicle_id, track_id, lap_time_ms, platform,
+         vehicle_text_observed, vehicle_state, game_version, standard_version,
+         review_status, publication_status, verification_tier, display_name_consent, video_use_ok,
+         correction_note, corrected_at, correction_prev,
+         submitted_at, driven_at, created_at,
+         drivers(display_name),
+         vehicles(make, model),
+         tracks(name),
+         evidence(evidence_id, type, role, visibility, storage_reference, mime_type, submitted_at, retention_state)`
+      )
+      .in('review_status', ['submitted', 'under_review', 'needs_correction', 'accepted'])
+      .order('submitted_at', { ascending: true });
+
+    if (error) {
+      queueErrorEl.hidden = false;
+      queueErrorEl.textContent = `Could not load the queue: ${error.message}`;
+      queueRuns = [];
+    } else {
+      queueRuns = data ?? [];
+    }
+    renderQueue();
+    if (selectedRunId && !queueRuns.some((r) => r.run_id === selectedRunId)) {
+      selectedRunId = null;
+      reviewPlaceholderEl.hidden = false;
+      reviewBodyEl.hidden = true;
+    }
+    // Deep link from Moderator > Reports (RS-0029): ?run=<run_id>
+    const wanted = deepLinkRunId;
+    deepLinkRunId = null;
+    if (wanted) {
+      const target = queueRuns.find((r) => r.run_id === wanted);
+      if (target) {
+        const filter = target.review_status === 'accepted' ? 'accepted' : 'pending';
+        if (filter !== currentFilter) queueTabEls.find((t) => t.dataset.filter === filter)?.click();
+        selectRun(wanted);
+        return;
+      }
+      queueErrorEl.hidden = false;
+      queueErrorEl.textContent = 'The reported time is not in the review queue (it may have been rejected or invalidated already).';
+    }
+    if (!selectedRunId) {
+      const firstVisible = filteredQueue()[0];
+      if (firstVisible) selectRun(firstVisible.run_id);
+    }
+  }
+
+  function filteredQueue() {
+    if (currentFilter === 'accepted') {
+      return queueRuns.filter((r) => r.review_status === 'accepted');
+    }
+    return queueRuns.filter((r) => ['submitted', 'under_review', 'needs_correction'].includes(r.review_status));
+  }
+
+  function renderQueue() {
+    const visible = filteredQueue();
+    queueCountEl.textContent = `${visible.length} ${visible.length === 1 ? 'item' : 'items'}`;
+    queueEmptyEl.hidden = visible.length > 0;
+    queueListEl.innerHTML = visible
+      .map((run) => {
+        const tags = [];
+        if (run.review_status === 'needs_correction') tags.push('<span class="queue-tag tag-correction">Needs Correction</span>');
+        // RS-0091: the driver sent a correction -> check again
+        else if (run.corrected_at && ['submitted', 'under_review'].includes(run.review_status)) tags.push('<span class="queue-tag tag-correction">Corrected</span>');
+        if (hasPublicVideo(run)) tags.push('<span class="queue-tag tag-video">Video</span>');
+        const isActive = run.run_id === selectedRunId;
+        return `
+          <button type="button" class="queue-item${isActive ? ' is-active' : ''}" data-run-id="${run.run_id}">
+            <div class="queue-item-title">${vehicleLabel(run.vehicles)} — ${run.drivers?.display_name ?? 'Unknown driver'}</div>
+            <div class="queue-item-sub">
+              <span>${formatLapTime(run.lap_time_ms)}</span>
+              <span>${run.tracks?.name ?? '—'}</span>
+              ${tags.join('')}
+            </div>
+          </button>
+        `;
+      })
+      .join('');
+  }
+
+  queueListEl.addEventListener('click', (event) => {
+    const btn = event.target.closest('[data-run-id]');
+    if (!btn) return;
+    selectRun(btn.dataset.runId);
+  });
+
+  queueTabEls.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      currentFilter = tab.dataset.filter;
+      queueTabEls.forEach((t) => {
+        t.classList.toggle('is-active', t === tab);
+        t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+      });
+      renderQueue();
+      const visible = filteredQueue();
+      if (!visible.some((r) => r.run_id === selectedRunId)) {
+        if (visible[0]) selectRun(visible[0].run_id);
+        else {
+          selectedRunId = null;
+          reviewPlaceholderEl.hidden = false;
+          reviewBodyEl.hidden = true;
+        }
+      }
+    });
+  });
+
+  async function selectRun(runId) {
+    selectedRunId = runId;
+    renderQueue();
+    const run = queueRuns.find((r) => r.run_id === runId);
+    if (!run) return;
+    reviewPlaceholderEl.hidden = true;
+    reviewBodyEl.hidden = false;
+    renderReviewPanel(run);
+    await loadAutomatedChecks(run);
+  }
+
+  // RS-0091: what was asked and what the driver changed
+  function correctionHtml(run) {
+    const e = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    if (run.review_status === 'needs_correction') {
+      return `<p class="lr-note lr-note-warn corr-note"><b>Waiting for the driver.</b> Asked: “${e(run.correction_note ?? '—')}”</p>`;
+    }
+    if (!run.corrected_at) return '';
+    const p = run.correction_prev ?? {};
+    const changes = [];
+    if (p.vehicle_id && p.vehicle_id !== run.vehicle_id) changes.push(`car was ${e(p.vehicle_label ?? p.vehicle_id)}`);
+    if (p.lap_time_ms && p.lap_time_ms !== run.lap_time_ms) changes.push(`time was ${formatLapTime(p.lap_time_ms)}`);
+    if (p.new_screenshot) changes.push('new screenshot (shown below; the old one stays on file)');
+    return `<p class="lr-note corr-note"><b>Corrected by the driver</b> on ${new Date(run.corrected_at).toLocaleString()}. You asked: “${e(run.correction_note ?? '—')}” ${changes.length ? `Changes: ${changes.join(', ')}.` : 'No field changed.'}</p>`;
+  }
+
+  function renderReviewPanel(run) {
+    // newest screenshot first: a correction (RS-0091) can add a second one
+    const shots = (run.evidence ?? []).filter((e) => e.type === 'screenshot').sort((a, b) => String(b.submitted_at).localeCompare(String(a.submitted_at)));
+    const screenshotEvidence = shots[0];
+    const videoEvidence = (run.evidence ?? []).find((e) => e.type === 'video_link');
+    const canVerify = hasPublicVideo(run);
+    const isAccepted = run.review_status === 'accepted';
+
+    reviewBodyEl.innerHTML = `
+      <div class="review-head">
+        <div>
+          <h2>${vehicleLabel(run.vehicles)}</h2>
+          <p class="review-head-sub">${run.drivers?.display_name ?? 'Unknown driver'} · ${run.tracks?.name ?? '—'} · ${formatLapTime(run.lap_time_ms)}</p>
+        </div>
+        <div class="review-pills">
+          ${reviewStatusPill(run.review_status)}
+          ${publicationPill(run.publication_status)}
+          ${verificationPill(run.verification_tier)}
+        </div>
+      </div>
+
+      ${correctionHtml(run)}
+      <div class="review-grid">
+        <div class="review-box">
+          <div class="review-box-head"><h3>Evidence</h3><span>Moderator only</span></div>
+          ${
+            screenshotEvidence
+              ? `<div class="evidence-shot-wrap">
+                   <img class="evidence-shot" id="evidence-shot-img" hidden alt="Submitted results screenshot for review" />
+                   <button type="button" class="btn btn-s" data-action="reveal-screenshot" data-evidence-id="${screenshotEvidence.evidence_id}">Reveal screenshot (10 min link)</button>
+                 </div>`
+              : `<p class="evidence-none">No screenshot on file.</p>`
+          }
+          ${
+            videoEvidence
+              ? `<div class="evidence-video-row"><span>Full lap video${run.video_use_ok ? ' · <b>OK for highlights</b>' : ''}</span><a href="${videoEvidence.storage_reference}" target="_blank" rel="noopener">Open external link →</a></div>`
+              : `<div class="evidence-video-row"><span>No video submitted</span><span>—</span></div>`
+          }
+        </div>
+
+        <div class="review-box">
+          <div class="review-box-head"><h3>Submitted Run</h3><span>Canonical data</span></div>
+          <div class="fact-row"><span>Vehicle</span><strong>${vehicleLabel(run.vehicles)}</strong></div>
+          <div class="fact-row"><span>As typed at submission</span><strong>${run.vehicle_text_observed || '—'}</strong></div>
+          <div class="fact-row"><span>Lap time</span><strong>${formatLapTime(run.lap_time_ms)}</strong></div>
+          <div class="fact-row"><span>Track</span><strong>${run.tracks?.name ?? '—'}</strong></div>
+          <div class="fact-row"><span>Platform</span><strong>${platformLabel(run.platform)}</strong></div>
+          <div class="fact-row"><span>Game version</span><strong>${releaseLabel(run.game_version)}</strong></div>
+          <div class="fact-row"><span>Standard</span><strong>${run.standard_version || '—'}</strong></div>
+          <div class="fact-row"><span>Display name consent</span><strong>${run.display_name_consent ? 'Yes' : 'No'}</strong></div>
+          <div class="fact-row"><span>Submitted</span><strong>${formatDate(run.submitted_at ?? run.created_at)}</strong></div>
+        </div>
+      </div>
+
+      <div class="review-box override-box" style="margin-bottom:1.25rem;">
+        <div class="review-box-head"><h3>Moderator Override</h3><span>Bypasses part of the audit trail — reason required</span></div>
+        <div class="override-grid">
+          <label>Vehicle
+            <select id="override-vehicle">${vehicleOptionsHtml(run.vehicle_id)}</select>
+          </label>
+          <label>Lap time
+            <input type="text" id="override-laptime" value="${formatLapTime(run.lap_time_ms)}" placeholder="1:42.318" />
+          </label>
+          <label>Platform
+            <select id="override-platform">
+              <option value="ps5" ${run.platform === 'ps5' ? 'selected' : ''}>PS5</option>
+              <option value="xbox_series" ${run.platform === 'xbox_series' ? 'selected' : 'disabled'}>Xbox Series X|S${run.platform === 'xbox_series' ? '' : ' — coming later'}</option>
+              <option value="pc" disabled>PC — coming later</option>
+            </select>
+          </label>
+          <label>Game version
+            <select id="override-gameversion">${releaseOptionsHtml(run.game_version)}</select>
+          </label>
+          <label>Standard
+            <input type="text" id="override-standard" value="${run.standard_version ?? ''}" />
+          </label>
+          <label class="override-checkbox">
+            <input type="checkbox" id="override-consent" ${run.display_name_consent ? 'checked' : ''} />
+            Display name consent
+          </label>
+          <label>Review status
+            <select id="override-review-status">${optionsHtml(REVIEW_STATUS_OPTIONS, run.review_status)}</select>
+          </label>
+          <label>Publication status
+            <select id="override-publication-status">${optionsHtml(PUBLICATION_STATUS_OPTIONS, run.publication_status)}</select>
+          </label>
+          <label>Verification tier
+            <select id="override-verification-tier">${optionsHtml(VERIFICATION_TIER_OPTIONS, run.verification_tier)}</select>
+          </label>
+        </div>
+        <textarea id="override-reason" placeholder="Reason for this manual change (required, logged to moderation_log)"></textarea>
+        <div class="decision-actions">
+          <button type="button" class="btn btn-p" data-action="save-override">Save Override</button>
+        </div>
+        <p class="decision-msg" id="override-msg" hidden></p>
+      </div>
+
+      <div class="review-box" style="margin-bottom:1.25rem;">
+        <div class="review-box-head"><h3>Automated Checks</h3><span>Decision support only</span></div>
+        <div class="checks-grid" id="checks-grid">
+          <div class="check-tile"><span>Duplicate</span><strong>Checking…</strong></div>
+          <div class="check-tile"><span>Driver PB (this vehicle/track)</span><strong>Checking…</strong></div>
+          <div class="check-tile"><span>Site record</span><strong>Checking…</strong></div>
+        </div>
+      </div>
+
+      <div class="review-box decision-box">
+        <div class="review-box-head"><h3>Decision</h3><span>Reason required for correction, reject or invalidate</span></div>
+        <textarea id="decision-reason" placeholder="Moderator reason / internal note"></textarea>
+        <p class="decision-hint">For “Request Correction” the driver sees this reason in My laps – write it to them, e.g. “The screenshot shows a Pfister Comet, please pick that car.”</p>
+        <div class="decision-actions">
+          ${!isAccepted ? `<button type="button" class="btn btn-s" data-action="request_correction">Request Correction</button>` : ''}
+          ${!isAccepted ? `<button type="button" class="btn btn-danger" data-action="reject">Reject</button>` : ''}
+          ${!isAccepted ? `<button type="button" class="btn btn-p" data-action="accept_provisional">Accept</button>` : ''}
+          <button type="button" class="btn btn-p" data-action="verify" ${canVerify ? '' : 'disabled'}>Verify (Official)</button>
+          ${isAccepted ? `<button type="button" class="btn btn-danger" data-action="invalidate">Invalidate</button>` : ''}
+        </div>
+        ${canVerify ? '' : '<p class="decision-hint">Verify is disabled: no public video link on this run yet.</p>'}
+        <p class="decision-msg" id="decision-msg" hidden></p>
+      </div>
+    `;
+  }
+
+  async function loadAutomatedChecks(run) {
+    const sb = getSupabase();
+    const grid = document.getElementById('checks-grid');
+    if (!grid) return;
+
+    const [dupRes, pbRes, recordRes] = await Promise.all([
+      sb
+        .from('runs')
+        .select('run_id, lap_time_ms')
+        .eq('driver_id', run.driver_id)
+        .eq('vehicle_id', run.vehicle_id)
+        .eq('track_id', run.track_id)
+        .neq('run_id', run.run_id),
+      sb
+        .from('runs')
+        .select('lap_time_ms')
+        .eq('driver_id', run.driver_id)
+        .eq('vehicle_id', run.vehicle_id)
+        .eq('track_id', run.track_id)
+        .eq('review_status', 'accepted')
+        .neq('run_id', run.run_id)
+        .order('lap_time_ms', { ascending: true })
+        .limit(1),
+      sb
+        .from('runs')
+        .select('lap_time_ms')
+        .eq('vehicle_id', run.vehicle_id)
+        .eq('track_id', run.track_id)
+        .in('publication_status', ['provisional', 'official'])
+        .neq('run_id', run.run_id)
+        .order('lap_time_ms', { ascending: true })
+        .limit(1),
+    ]);
+
+    const duplicate = (dupRes.data ?? []).find((r) => Math.abs(r.lap_time_ms - run.lap_time_ms) <= 30);
+    const pbRow = pbRes.data?.[0];
+    const recordRow = recordRes.data?.[0];
+
+    const duplicateTile = duplicate
+      ? `<div class="check-tile is-warning"><span>Duplicate</span><strong>Match within 30ms</strong></div>`
+      : `<div class="check-tile"><span>Duplicate</span><strong>None found</strong></div>`;
+
+    const pbTile = pbRow
+      ? `<div class="check-tile"><span>Driver PB (this vehicle/track)</span><strong>${formatDelta(run.lap_time_ms - pbRow.lap_time_ms)}</strong></div>`
+      : `<div class="check-tile"><span>Driver PB (this vehicle/track)</span><strong>No prior accepted run</strong></div>`;
+
+    let recordTile;
+    if (!recordRow) {
+      recordTile = `<div class="check-tile is-warning"><span>Site record</span><strong>Would be first published time</strong></div>`;
+    } else if (run.lap_time_ms < recordRow.lap_time_ms) {
+      recordTile = `<div class="check-tile is-warning"><span>Site record</span><strong>Would take the lead (${formatDelta(run.lap_time_ms - recordRow.lap_time_ms)})</strong></div>`;
+    } else {
+      recordTile = `<div class="check-tile"><span>Site record</span><strong>Outside (${formatDelta(run.lap_time_ms - recordRow.lap_time_ms)})</strong></div>`;
+    }
+
+    grid.innerHTML = `${duplicateTile}${pbTile}${recordTile}`;
+  }
+
+  function showDecisionMsg(text, isError) {
+    const el = document.getElementById('decision-msg');
+    if (!el) return;
+    el.hidden = false;
+    el.textContent = text;
+    el.className = `decision-msg ${isError ? 'is-error' : 'is-ok'}`;
+  }
+
+  function showOverrideMsg(text, isError) {
+    const el = document.getElementById('override-msg');
+    if (!el) return;
+    el.hidden = false;
+    el.textContent = text;
+    el.className = `decision-msg ${isError ? 'is-error' : 'is-ok'}`;
+  }
+
+  // Direct table update, bypassing the moderate-submission Edge Function.
+  // Moderators already have UPDATE on `runs` via the runs_update_moderator
+  // RLS policy (no with-check clause, so any column combination the DB's
+  // CHECK constraints allow goes through). Those constraints — official
+  // requires verified, verified requires accepted, provisional/official
+  // requires display_name_consent — still apply and are the real safety
+  // net here, so we mirror them client-side first only for a friendlier
+  // error message, not as the actual guard.
+  //
+  // Because this bypasses the Edge Function, it also bypasses that
+  // function's server-side moderation_log write (only the service role
+  // can insert there by default). We log it ourselves as a second,
+  // best-effort call under a migration-granted moderator INSERT policy —
+  // not atomic with the update, so in rare cases (e.g. a dropped
+  // connection between the two calls) the change could go through
+  // without a log entry. Good enough for a single-owner/small-team tool;
+  // revisit if this ever needs a hard guarantee.
+  async function saveOverride(run, triggerBtn) {
+    const reason = (document.getElementById('override-reason')?.value ?? '').trim();
+    if (!reason) {
+      showOverrideMsg('Reason is required.', true);
+      return;
+    }
+
+    const lapTimeStr = document.getElementById('override-laptime')?.value ?? '';
+    const lapTimeMs = parseLapTime(lapTimeStr);
+    if (lapTimeMs == null) {
+      showOverrideMsg('Lap time must look like 1:42.318.', true);
+      return;
+    }
+
+    const vehicleId = document.getElementById('override-vehicle')?.value;
+    const platform = document.getElementById('override-platform')?.value;
+    const gameVersion = document.getElementById('override-gameversion')?.value.trim() || null;
+    const standardVersion = document.getElementById('override-standard')?.value.trim() || null;
+    const consent = document.getElementById('override-consent')?.checked ?? false;
+    const reviewStatus = document.getElementById('override-review-status')?.value;
+    const publicationStatus = document.getElementById('override-publication-status')?.value;
+    const verificationTier = document.getElementById('override-verification-tier')?.value;
+
+    if (publicationStatus === 'official' && verificationTier !== 'verified') {
+      showOverrideMsg('Official requires Verified as the verification tier.', true);
+      return;
+    }
+    if (verificationTier === 'verified' && reviewStatus !== 'accepted') {
+      showOverrideMsg('Verified requires Accepted as the review status.', true);
+      return;
+    }
+    if (!['hidden', 'archived'].includes(publicationStatus) && !consent) {
+      showOverrideMsg('Provisional/Official requires display name consent.', true);
+      return;
+    }
+
+    const newValues = {
+      vehicle_id: vehicleId,
+      lap_time_ms: lapTimeMs,
+      platform,
+      game_version: gameVersion,
+      standard_version: standardVersion,
+      display_name_consent: consent,
+      review_status: reviewStatus,
+      publication_status: publicationStatus,
+      verification_tier: verificationTier,
+    };
+    const previousValues = {
+      vehicle_id: run.vehicle_id,
+      lap_time_ms: run.lap_time_ms,
+      platform: run.platform,
+      game_version: run.game_version,
+      standard_version: run.standard_version,
+      display_name_consent: run.display_name_consent,
+      review_status: run.review_status,
+      publication_status: run.publication_status,
+      verification_tier: run.verification_tier,
+    };
+
+    if (triggerBtn) triggerBtn.disabled = true;
+    const sb = getSupabase();
+    const { error: updateError } = await sb.from('runs').update(newValues).eq('run_id', run.run_id);
+    if (updateError) {
+      showOverrideMsg(updateError.message, true);
+      if (triggerBtn) triggerBtn.disabled = false;
+      return;
+    }
+
+    if (currentModeratorDriverId) {
+      const { error: logError } = await sb.from('moderation_log').insert({
+        run_id: run.run_id,
+        moderator_driver_id: currentModeratorDriverId,
+        action: 'manual_override',
+        previous_value: previousValues,
+        new_value: newValues,
+        reason,
+      });
+      if (logError) {
+        showOverrideMsg(`Saved, but the audit-log entry failed: ${logError.message}`, true);
+        await loadQueue();
+        return;
+      }
+    }
+
+    showOverrideMsg('Saved.');
+    await loadQueue();
+  }
+
+  async function callModerate(action, runId, reason, extra) {
+    const accessToken = currentSession?.access_token;
+    if (!accessToken) throw new Error('No active session.');
+    const res = await fetch(MODERATE_SUBMISSION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        apikey: SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ action, run_id: runId, reason: reason || undefined, ...extra }),
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error ?? `moderate-submission returned ${res.status}`);
+    return body;
+  }
+
+  reviewBodyEl.addEventListener('click', async (event) => {
+    const revealBtn = event.target.closest('[data-action="reveal-screenshot"]');
+    if (revealBtn) {
+      revealBtn.disabled = true;
+      const originalLabel = revealBtn.textContent;
+      revealBtn.textContent = 'Loading…';
+      try {
+        const body = await callModerate('issue_signed_url', null, null, { evidence_id: revealBtn.dataset.evidenceId });
+        const img = document.getElementById('evidence-shot-img');
+        if (img) {
+          img.src = body.signed_url;
+          img.hidden = false;
+        }
+        revealBtn.textContent = `Link expires in ${Math.round(body.expires_in_seconds / 60)} min`;
+      } catch (err) {
+        revealBtn.textContent = originalLabel;
+        revealBtn.disabled = false;
+        showDecisionMsg(err instanceof Error ? err.message : String(err), true);
+      }
+      return;
+    }
+
+    const actionBtn = event.target.closest('[data-action]');
+    if (!actionBtn || actionBtn.dataset.action === 'reveal-screenshot') return;
+    const action = actionBtn.dataset.action;
+    const run = queueRuns.find((r) => r.run_id === selectedRunId);
+    if (!run) return;
+
+    if (action === 'save-override') {
+      await saveOverride(run, actionBtn);
+      return;
+    }
+
+    const reasonInput = document.getElementById('decision-reason');
+    const reason = reasonInput ? reasonInput.value.trim() : '';
+
+    if (['reject', 'invalidate', 'request_correction'].includes(action) && !reason) {
+      showDecisionMsg('A reason is required for this action.', true);
+      return;
+    }
+
+    const buttons = reviewBodyEl.querySelectorAll('.decision-actions button');
+    buttons.forEach((b) => (b.disabled = true));
+
+    try {
+      await callModerate(action, run.run_id, reason || undefined);
+
+      if (action === 'accept_provisional') {
+        // Known gap in the deployed moderate-submission function: accept_provisional
+        // only sets review_status='accepted' and never touches publication_status,
+        // so an accepted run has no route to ever appear on the public leaderboard
+        // on its own. Moderators already have direct UPDATE grant on `runs` via the
+        // runs_update_moderator RLS policy, so we finish the promotion client-side
+        // here as a stopgap until the Edge Function itself is fixed to do this.
+        if (run.display_name_consent) {
+          const sb = getSupabase();
+          const { error } = await sb.from('runs').update({ publication_status: 'provisional' }).eq('run_id', run.run_id);
+          if (error) {
+            showDecisionMsg(`Accepted, but could not publish provisionally: ${error.message}`, true);
+          } else {
+            showDecisionMsg('Accepted and published provisionally.');
+          }
+        } else {
+          showDecisionMsg('Accepted, but this driver has not consented to display-name publication, so the run stays hidden from the public leaderboard.');
+        }
+      } else {
+        showDecisionMsg('Done.');
+      }
+
+      await loadQueue();
+    } catch (err) {
+      showDecisionMsg(err instanceof Error ? err.message : String(err), true);
+      buttons.forEach((b) => (b.disabled = false));
+    }
+  });
+
+  if (backendConfigured) {
+    const sbInit = getSupabase();
+    sbInit.auth.getSession().then(({ data }) => {
+      currentSession = data?.session ?? null;
+      renderAuthState();
+    });
+    sbInit.auth.onAuthStateChange((_event, session) => {
+      currentSession = session;
+      renderAuthState();
+    });
+
+    document.getElementById('discord-signin-btn').addEventListener('click', async () => {
+      const sb = getSupabase();
+      await sb.auth.signInWithOAuth({
+        provider: 'discord',
+        // guilds.join on top of identify+email -- Header.astro's
+        // onAuthStateChange listener (present on every page) picks up
+        // the resulting provider_token and auto-adds the driver to our
+        // Discord server. Scopes are replaced, not extended, by this
+        // option, hence listing identify+email explicitly too.
+        options: { redirectTo: window.location.origin + window.location.pathname + window.location.search, scopes: 'identify email guilds.join' },
+      });
+    });
+  }
+</script>

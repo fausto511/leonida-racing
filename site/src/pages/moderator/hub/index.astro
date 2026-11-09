@@ -2,11 +2,11 @@
 // Moderator: Hub-Inhalte (Crews, Events, Rollen, Rollen-Antraege).
 // Seit RS-0026 nur fuer Moderatoren; Crew Leader / Event Hosts pflegen ihre
 // Crew bzw. Events in My Account (gleiche Komponente, persoenlicher Modus).
-// RS-0097: Event review (Host-Stufen, DEC-0209) oben auf der Seite; Mod-Alerts verlinken hierher.
+// RS-0097: Event review lives on /moderator/event-review/ since 09.11.2026 (RS-0102); mod alerts still link here,
+// so a banner points there while events wait for review. Tabs open via ?tab=crews|events|tracks|roles|requests.
 import Base from '../../../layouts/Base.astro';
 import ModeratorNav from '../../../components/ModeratorNav.astro';
 import HubEditor from '../../../components/HubEditor.astro';
-import EventReview from '../../../components/EventReview.astro';
 ---
 <Base
   title="Hub Content — Moderator"
@@ -18,13 +18,26 @@ import EventReview from '../../../components/EventReview.astro';
     <ModeratorNav active="hub" />
     <p class="eyebrow">Community Operations</p>
     <h1 class="display mod-title">Hub Content</h1>
-    <p class="mod-lede">Create and edit the crews and events shown in Community, review events submitted by hosts, review Crew Leader / Creator requests and manage roles. Only entries marked <strong>Published</strong> are visible on the public site.</p>
-    <EventReview />
+    <p class="mod-lede">Create and edit the crews and events shown in Community, review Crew Leader / Creator requests and manage roles. Only entries marked <strong>Published</strong> are visible on the public site.</p>
+    <a class="hub-er-banner" id="hub-er-banner" href={`${import.meta.env.BASE_URL}moderator/event-review/`} hidden><b id="hub-er-n"></b> Events waiting for review — open Event review</a>
     <HubEditor mode="moderator" />
   </section>
 </Base>
+<script>
+  import { loadModOverview } from '../../../scripts/mod-overview';
+  loadModOverview().then((ov) => {
+    const n = ov ? ov.todo.events_review + ov.todo.event_changes : 0;
+    if (!n) return;
+    document.getElementById('hub-er-n')!.textContent = String(n);
+    document.getElementById('hub-er-banner')!.hidden = false;
+  });
+</script>
 
 <style>
+  .hub-er-banner { display: flex; align-items: center; gap: 10px; margin: 0 0 1.5rem; padding: 14px 18px; border: 1px solid var(--lr-orange-border); border-radius: 8px; background: var(--lr-orange-tint); color: var(--lr-text); font-weight: 600; text-decoration: none; }
+  .hub-er-banner[hidden] { display: none; }
+  .hub-er-banner:hover { border-color: var(--lr-orange); }
+  .hub-er-banner b { min-width: 24px; height: 24px; padding: 0 7px; box-sizing: border-box; border-radius: 999px; background: var(--lr-orange); color: var(--lr-on-orange); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; }
   .mod-wrap { padding-block: clamp(1.5rem, 4vw, 3rem) clamp(2.5rem, 6vw, 4.5rem); }
   .mod-title { margin: .4rem 0 .6rem; font-size: clamp(2rem, 4vw, 2.8rem); }
   .mod-lede { margin: 0 0 1.5rem; color: var(--gh-muted); font-size: .92rem; max-width: 46rem; }

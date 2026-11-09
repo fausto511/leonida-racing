@@ -1,6 +1,6 @@
 ---
 // The Hub editor (crews, events, roles, role requests), RS-0022/0023/0026.
-// mode="moderator": full admin view in /moderator/hub/.
+// mode="moderator": full admin view in /moderator/hub/ (tab via ?tab=, RS-0102).
 // mode="crew" / "events" / "tracks": personal view inside My Account -- only the
 // crews the driver leads / the events they run / the tracks they built (RS-0045).
 // RLS enforces the same rules.
@@ -1789,6 +1789,10 @@ const base = import.meta.env.BASE_URL;
   // ------------------------------------------------------------ wiring
   document.querySelectorAll<HTMLButtonElement>('.hc-tab').forEach((t) => t.addEventListener('click', () => {
     document.querySelectorAll('.hc-tab').forEach((x) => { x.classList.toggle('is-active', x === t); x.setAttribute('aria-selected', String(x === t)); });
+    if (MODE === 'moderator' && t.dataset.kind) { // keep ?tab= in sync with the moderator navigation (RS-0102)
+      const u = new URL(location.href); u.searchParams.set('tab', t.dataset.kind); history.replaceState(null, '', u);
+      document.querySelectorAll<HTMLElement>('.modnav-link[data-key^="hub:"]').forEach((a) => { const on = a.dataset.key === `hub:${t.dataset.kind}`; a.classList.toggle('is-active', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    }
     kind = t.dataset.kind as Kind;
     selectedId = null;
     if (kind === 'roles') { showForm('roles'); openRole(null); } else showForm(null);
@@ -1848,6 +1852,12 @@ const base = import.meta.env.BASE_URL;
       (document.querySelector('.hc-tabs') as HTMLElement).hidden = true;
       if (MODE === 'events') (document.querySelector('.hc-tab[data-kind="events"]') as HTMLElement).click();
       if (MODE === 'tracks') (document.querySelector('.hc-tab[data-kind="tracks"]') as HTMLElement).click();
+    }
+    // Moderator > Hub Content: open a tab from the navigation (?tab=crews|events|tracks|roles|requests, RS-0102)
+    if (MODE === 'moderator') {
+      const want = (new URLSearchParams(location.search).get('tab') ?? '').replace(/[^a-z]/g, '');
+      const tabEl = want ? document.querySelector<HTMLElement>(`.hc-tab[data-kind="${want}"]`) : null;
+      if (tabEl && !tabEl.hidden) tabEl.click();
     }
     syncRoleCrew();
     await loadAll();

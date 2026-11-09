@@ -1,0 +1,27 @@
+---
+// Moderator > Review > Events (RS-0102 stage 1, 09.11.2026): event review (host stages, DEC-0209)
+// on its own page instead of on top of Hub Content. The component checks moderator rights itself.
+import Base from '../../../layouts/Base.astro';
+import ModeratorNav from '../../../components/ModeratorNav.astro';
+import EventReview from '../../../components/EventReview.astro';
+---
+<Base title="Event review — Moderator" description="Internal: review events submitted by hosts." section="moderator" noindex>
+  <section class="wrap mod-wrap">
+    <ModeratorNav active="event-review" />
+    <p class="eyebrow">Review</p>
+    <h1 class="display mod-title">Event review</h1>
+    <p class="mod-lede">New events and series from stage 1 and 2 hosts, changes to live events, and the host stages.</p>
+    <EventReview />
+    <p class="er-empty-note" id="er-empty-note" hidden>Nothing to review right now, or you are not logged in as a moderator.</p>
+  </section>
+</Base>
+<script>
+  // EventReview stays hidden for non-moderators; show a short note so the page is never blank
+  setTimeout(() => { const r = document.getElementById('er-root'); if (r?.hidden) document.getElementById('er-empty-note')!.hidden = false; }, 2500);
+</script>
+<style>
+  .mod-wrap { padding-block: clamp(1.5rem, 4vw, 3rem) clamp(2.5rem, 6vw, 4.5rem); }
+  .mod-title { margin: .4rem 0 .6rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .mod-lede { margin: 0 0 1.5rem; color: var(--lr-soft); font-size: .92rem; max-width: 46rem; }
+  .er-empty-note { color: var(--lr-muted); font-size: 14px; }
+</style>

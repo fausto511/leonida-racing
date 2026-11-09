@@ -1,7 +1,7 @@
 ---
 // Moderator: reported lap times (RS-0029, DEC-0071). Reports come from the
 // footer page /report/. Open reports first; "Open in Lap Review" jumps to the
-// run (moderator/?run=<id>), where the actual decision is made. Here the
+// run (moderator/laps/?run=<id>), where the actual decision is made. Here the
 // report itself is closed: Resolved (something was wrong and has been acted
 // on) or Dismissed (time is fine), with an optional internal note.
 import Base from '../../../layouts/Base.astro';
@@ -94,12 +94,12 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
           const n = perRun.get(r.run_id) ?? 1;
           const actions = r.status === 'open'
             ? `<div class="rp-actions">
-                 <a class="btn btn-s" href="${base}moderator/?run=${esc(r.run_id)}">Open in Lap Review</a>
+                 <a class="btn btn-s" href="${base}moderator/laps/?run=${esc(r.run_id)}">Open in Lap Review</a>
                  <input type="text" maxlength="500" placeholder="Internal note (optional)" data-note="${esc(r.report_id)}" />
                  <button type="button" class="btn btn-p" data-act="resolved" data-id="${esc(r.report_id)}">Resolved</button>
                  <button type="button" class="btn btn-s" data-act="dismissed" data-id="${esc(r.report_id)}">Dismiss</button>
                </div>`
-            : `<div class="rp-actions"><a class="btn btn-s" href="${base}moderator/?run=${esc(r.run_id)}">Open in Lap Review</a><span class="rp-meta">${STATUS[r.status]} · ${r.handled_at ? esc(when(r.handled_at)) : ''}${r.handler?.display_name ? ` · by ${esc(r.handler.display_name)}` : ''}</span></div>
+            : `<div class="rp-actions"><a class="btn btn-s" href="${base}moderator/laps/?run=${esc(r.run_id)}">Open in Lap Review</a><span class="rp-meta">${STATUS[r.status]} · ${r.handled_at ? esc(when(r.handled_at)) : ''}${r.handler?.display_name ? ` · by ${esc(r.handler.display_name)}` : ''}</span></div>
                ${r.moderator_note ? `<p class="rp-note">Note: ${esc(r.moderator_note)}</p>` : ''}`;
           return `<article class="rp-card">
             <h3>${esc(veh)} — ${esc(run.driver?.display_name ?? 'Unknown driver')} · ${run.lap_time_ms ? lap(run.lap_time_ms) : '—'}</h3>
