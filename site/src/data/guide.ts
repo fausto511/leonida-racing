@@ -15,7 +15,7 @@ import { vehicleOptions } from './vehicles';
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
 // Bump on EVERY content change to the Guide (visible as "Last updated" + Article dateModified) — Fausto 27.10.2026.
-export const GUIDE_UPDATED = '2026-10-30';
+export const GUIDE_UPDATED = '2026-11-09';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -128,6 +128,7 @@ const EXT_LOOK = 'https://www.youtube.com/watch?v=tJbzMqJGH4k';
 const TSA = 'https://www.thesixthaxis.com/2026/06/24/gta-6-ultimate-edition-pre-order-bonus-and-vintage-vice-city-pack-revealed/';
 const FAMITSU = 'https://www.famitsu.com/article/202608/85753';
 const EDGE_GR = 'https://www.gamesradar.com/edge/gtavi-cover/';
+const HYPEBEAST_WCC = 'https://hypebeast.com/2026/11/grand-theft-auto-vi-gta6-real-in-game-cars';
 const GTAVICE_EDGE = 'https://www.gtavice.net/news/gta-vi-edge-preview-reveals-huge-new-details-on-gameplay-police-relationships-and-more';
 const VCH_EDGE = 'https://www.vicecityhustle.com/news/gta-6-edge-430-k9-units-cash-gated-story';
 const DAZED = 'https://www.dazeddigital.com/life-culture/article/70859/1/gta-6-grand-theft-auto-vi-rockstar-exclusive-deep-dive-game-unparalleled-world';
@@ -225,11 +226,13 @@ export const guideSections: GuideSection[] = [
       `The police response depends on what has been reported and what officers know. Nelson says a crime needs a witness or an alarm to reach the law. Police can know your appearance, your clothes, your vehicle, and that Jason and Lucia are traveling together. In the demonstration, switching to a car they do not recognize lowers their perception of you; splitting the pair up can help, too.`,
       `A baseball cap is not a complete escape plan. Nelson puts on glasses and a cap, then points out that the police still know his outfit. The same limitation applies to a haircut. A clothing store or a spare outfit from your personal vehicle gives you another option; in the shopping demonstration, he says buying and wearing a new outfit removes his current heat.`,
       `Sometimes the better exit is on foot. Nelson says a three-star pursuit in the city can be difficult to shake in a car unless it is very fast or you have a sports bike. His usual recommendation in that situation is to leave the streets and use the alleys. You can also wait for an area’s police search to die down instead of driving straight back into it.`,
-      `Edge’s pursuit adds spike strips laid across the road.`,
+      // Police Tempesta: final text Fausto 09.11.2026 (DEC-0212)
+      `Edge’s pursuit adds spike strips laid across the road, and Vice Beach Police has a supercar of its own: Rockstar’s November screenshots show the Pegassi Tempesta in VBPD colours.`,
     ],
     sources: [
       { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration: reporting, recognition, outfit changes, vehicle swaps, splitting up, and escape advice.' },
       { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: spike strips during a police pursuit. Checked October 30, 2026.' },
+      { label: 'Hypebeast / HYPEDRIVE — Grand Theft Auto VI real vs in-game cars', url: HYPEBEAST_WCC, note: 'November 2026: in-game screenshot of the Pegassi Tempesta in Vice Beach Police livery, supplied by Rockstar Games.' },
     ],
   },
   {
@@ -372,7 +375,7 @@ export const guideSections: GuideSection[] = [
     status: 'Not Confirmed',
     paragraphs: [
       `Several details players naturally want to know are still open. Rockstar has not published a complete vehicle list, dealership structure, later-game ownership limit, property-by-property garage capacities, tuning catalog, parts compatibility list, upgrade pricing, or final performance figures.`,
-      `The full damage model, insurance, recovery rules for owned vehicles, wheel support, manual shifting, race creation tools, and GTA VI online racing systems remain unresolved in the reviewed sources. Refueling, EV charging, and gas-station repairs have been reported from a Rockstar demo; their final rates, costs, settings, and application to racing are separate open questions.`,
+      `The full damage model, insurance, recovery rules for owned vehicles, wheel support, manual shifting, race creation tools, and GTA VI online racing systems remain unresolved in the reviewed sources, as does whether the police Tempesta takes part in pursuits. Refueling, EV charging, and gas-station repairs have been reported from a Rockstar demo; their final rates, costs, settings, and application to racing are separate open questions.`,
       `This section will shrink as Rockstar releases more information and the finished game provides testable answers. Until then, “not confirmed” means exactly that—not impossible, not secretly ruled out, just not ready to call a fact.`,
     ],
     sourcesHeading: 'Official material checked for this section',
@@ -382,6 +385,7 @@ export const guideSections: GuideSection[] = [
       { label: 'Rockstar Games — GTA VI Media', url: R_MEDIA, note: '' },
       { label: 'Rockstar Games — GTA VI Editions', url: R_EDITIONS, note: '' },
       { label: 'Rockstar Support — GTA VI Platforms, Editions, and Versions', url: R_SUPPORT, note: '' },
+      { label: 'Hypebeast / HYPEDRIVE — Grand Theft Auto VI real vs in-game cars', url: HYPEBEAST_WCC, note: 'November 2026: police Tempesta shown; no pursuit footage.' },
     ],
   },
 ];
