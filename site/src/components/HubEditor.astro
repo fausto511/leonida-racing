@@ -171,7 +171,7 @@ const base = import.meta.env.BASE_URL;
                   : <label class="check is-soon" title={comingLater(p)}><input type="checkbox" disabled /> {p.label} <span class="soon">Coming later</span></label>)}
               </fieldset>
               <label>Host PSN name <small>so players can add you on PlayStation</small><input type="text" name="host_name" maxlength="16" placeholder="e.g. Racer_01" autocomplete="off" /></label>
-              <label>Host crew <small>optional — only crews you lead or are a commissioner of; its tag is shown next to your name</small><select name="host_crew_id"><option value="">No host crew</option></select></label>
+              <label>Host crew <small id="ev-hostcrew-hint">optional — a crew you lead or co-run; its tag is shown next to your name</small><select name="host_crew_id"><option value="">No host crew</option></select></label>
               <label class="check span2" id="ev-members-wrap"><input type="checkbox" name="members_only" /> Crew members only <small>only active members of the host crew see this event and can sign up. Your crew's Discord feeds post it too.</small></label>
               <label>Location <small>optional — more places are added after release</small><select name="location"><option value="">— not specified —</option></select></label>
               <label class="span2">Discord invite <small>where participants meet you — a PSN name or a Discord (yours or your crew's) is required. Tip: create the invite in your rules or info channel, newcomers land right there.</small><input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
@@ -617,6 +617,13 @@ const base = import.meta.env.BASE_URL;
     names.map((n) => (n === 'starts_before_launch' || n === 'lead_time' ? 'starts_at' : n === 'closed_needs_stream' ? 'stream_url' : n)).forEach((n) => form.querySelector(`[name="${n}"]`)?.setAttribute('aria-invalid', 'true'));
   }
   // Friendlier wording for the database's own checks.
+  // Event saves (Fausto 10.11.): no raw database text; RLS means the host lost the right for this crew/event.
+  function eventError(e: { message: string; code?: string }) {
+    const m = e.message || '';
+    if (/row-level security/.test(m)) return "You're not allowed to save this event. Check that you still lead or co-run the host crew.";
+    const t = dbError(e);
+    return t === m ? 'Could not save the event. Please check the details and try again.' : t;
+  }
   function dbError(e: { message: string; code?: string }) {
     const m = e.message || '';
     // DEC-0216: name guard of verified crews (also 23505, so checked first). COPY: Claude placeholder, Codex review pending.
@@ -645,7 +652,7 @@ const base = import.meta.env.BASE_URL;
     if (/not_commissioner/.test(m)) return 'Make this member a commissioner first.';
     if (/not_member/.test(m)) return 'This driver is not an active member of the crew.';
     if (/crew_banned/.test(m)) return 'This driver is banned from your crew. Unban them first.';
-    if (/crew_invite_taken/.test(m)) return 'This Discord invite belongs to a crew on Leonida Racing. Use your own invite, or pick that crew as host crew (crew leaders and commissioners only).';
+    if (/crew_invite_taken/.test(m)) return 'This Discord invite belongs to a crew on Leonida Racing. Use a different invite, or pick that crew as host crew if you lead or co-run it.';
     if (/row-level security/.test(m)) return 'Not allowed — your account is not a moderator.';
     if (/check constraint/.test(m)) return `The database rejected a value (${m.match(/"([^"]+)"/)?.[1] ?? 'check'}). Please review the fields.`;
     return m;
@@ -733,6 +740,7 @@ const base = import.meta.env.BASE_URL;
     const current = sel.value;
     // Moderators: any crew. Hosts: no crew, or a crew they lead or are commissioner of (DEC-0204).
     const options = isMod ? crews : crews.filter((c) => isStaffOf(c.crew_id));
+    if (isMod) document.getElementById('ev-hostcrew-hint')!.textContent = "optional — its tag is shown next to the host's name";
     sel.innerHTML = '<option value="">No host crew</option>' + options.map((c) => `<option value="${esc(c.crew_id)}">${esc(c.tag)} · ${esc(c.name)}${c.is_published ? '' : ' (draft)'}</option>`).join('');
     sel.value = current;
   }
@@ -1024,11 +1032,11 @@ const base = import.meta.env.BASE_URL;
   // Moderator note shown to the crew leader / host (2026-10-02), like tracks.
   // unpublishedMeansHidden: events are published on creation, so unpublished
   // = hidden by a moderator; new crews start as drafts, so not for crews.
-  // DEC-0204. COPY STATUS: Claude placeholders, Codex review pending.
+  // DEC-0204. COPY final 10.11.2026 (Codex review + Fausto).
   function eventNoticeText(n: string | null | undefined) {
-    if (n === 'crew_removed') return "This event no longer runs under your crew, because its crew was removed or you're no longer its leader or commissioner. It stays live with your own contact details. Saving the event hides this note.";
+    if (n === 'crew_removed') return "This event lost its host crew (the crew was removed or you no longer lead or co-run it). It stays live with your own contact details. Saving the event hides this note.";
     if (n === 'crew_removed_private') return "This crew-only event lost its host crew (the crew was removed or you no longer lead or co-run it), so it's hidden. To keep it crew-only, pick a crew you lead and tick Crew members only. If you save without that, it becomes a public event.";
-    if (n === 'crew_removed_hidden') return "This event lost its crew, because the crew was removed or you're no longer its leader or commissioner, and it has no contact left, so it's hidden. Add your PSN name or a Discord invite and save to publish it again.";
+    if (n === 'crew_removed_hidden') return "This event lost its host crew (the crew was removed or you no longer lead or co-run it) and has no contact left, so it's hidden. Add your PSN name or a Discord invite and save to publish it again.";
     return '';
   }
 
@@ -1296,7 +1304,7 @@ const base = import.meta.env.BASE_URL;
     return bad;
   }
   const inviteCode = (u?: string | null) => (u ?? '').match(/^https:\/\/(?:discord\.gg|discord\.com\/invite)\/([A-Za-z0-9-]+)/)?.[1].toLowerCase() ?? null;
-  const eventFieldHelp: Record<string, string> = { lead_time: 'the event has to start at least 24 hours from now, so a moderator has time to review it', crew_invite_taken: "this Discord invite belongs to a crew on Leonida Racing. Use your own invite, or pick that crew as host crew (crew leaders and commissioners only)", title: 'title (3–80 characters)', starts_at: 'start date/time', starts_before_launch: 'events can start on Nov 19, 2026 (GTA VI launch day) at the earliest', ends_at: 'end must be after start', discord_url: 'Discord invite (https://discord.gg/… or https://discord.com/invite/…)', host_name: 'PSN name (3–16 characters, starts with a letter; letters, digits, - and _)', contact_required: 'add your PSN name or a Discord invite (or pick a host crew that has one), so players can reach you', max_participants: 'max. participants between 2 and 500', stream_url: 'a Twitch channel, YouTube video/live/channel, or Kick channel URL (https://…)', closed_needs_stream: 'an event with closed sign-ups needs a stream link (Twitch, YouTube, or Kick), so people can at least watch it' };
+  const eventFieldHelp: Record<string, string> = { lead_time: 'the event has to start at least 24 hours from now, so a moderator has time to review it', crew_invite_taken: "this Discord invite belongs to a crew on Leonida Racing. Use a different invite, or pick that crew as host crew if you lead or co-run it", title: 'title (3–80 characters)', starts_at: 'start date/time', starts_before_launch: 'events can start on Nov 19, 2026 (GTA VI launch day) at the earliest', ends_at: 'end must be after start', discord_url: 'Discord invite (https://discord.gg/… or https://discord.com/invite/…)', host_name: 'PSN name (3–16 characters, starts with a letter; letters, digits, - and _)', contact_required: 'add your PSN name or a Discord invite (or pick a host crew that has one), so players can reach you', max_participants: 'max. participants between 2 and 500', stream_url: 'a Twitch channel, YouTube video/live/channel, or Kick channel URL (https://…)', closed_needs_stream: 'an event with closed sign-ups needs a stream link (Twitch, YouTube, or Kick), so people can at least watch it' };
 
   function renderEventPreview() {
     const e = eventFromForm();
@@ -1424,7 +1432,7 @@ const base = import.meta.env.BASE_URL;
       if (bad0.length) { msg(eventForm, `Please fix: ${bad0.map((b) => eventFieldHelp[b] ?? b).join('; ')}.`, true); return; }
       const id = selectedId!;
       const { error } = await sb0.from('hub_events').update({ starts_at: full.starts_at, ends_at: full.ends_at, status: full.status, registration: full.registration }).eq('event_id', id);
-      if (error) { msg(eventForm, dbError(error), true); return; }
+      if (error) { msg(eventForm, eventError(error), true); return; }
       await loadAll();
       openEvent(events.find((x) => x.event_id === id) ?? null);
       msg(eventForm, isLeagueRound() ? 'Saved — this round only.' : 'Saved — this date only.');
@@ -1448,7 +1456,7 @@ const base = import.meta.env.BASE_URL;
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC', duration_min: dur && dur >= 15 && dur <= 1440 ? dur : null,
       };
       const { data, error } = await sb0.rpc('create_league_season', { p: payload });
-      if (error) { msg(eventForm, dbError(error), true); return; }
+      if (error) { msg(eventForm, eventError(error), true); return; }
       await loadAll();
       eventsChanged();
       const pending = (data as any)?.review_status !== 'approved';
@@ -1476,7 +1484,7 @@ const base = import.meta.env.BASE_URL;
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC', duration_min: dur && dur >= 15 && dur <= 1440 ? dur : null,
       };
       const { data, error } = await sb0.rpc('create_event_series', { p: payload });
-      if (error) { msg(eventForm, dbError(error), true); return; }
+      if (error) { msg(eventForm, eventError(error), true); return; }
       await loadAll();
       eventsChanged();
       const pending = (data as any)?.review_status !== 'approved';
@@ -1496,7 +1504,7 @@ const base = import.meta.env.BASE_URL;
       ? sb.from('hub_events').update(e).eq('event_id', selectedId).select().single()
       : sb.from('hub_events').insert({ ...e, created_by: ownDriverId }).select().single();
     const { data, error } = await q;
-    if (error) { msg(eventForm, dbError(error), true); return; }
+    if (error) { msg(eventForm, eventError(error), true); return; }
     // Sync the (for now single) stream link; the table allows several later.
     const su = streamUrlFromForm();
     const prev = events.find((x) => x.event_id === data.event_id)?.streams ?? [];
