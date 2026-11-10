@@ -23,12 +23,12 @@ const pick = source === 'crew' ? 'My crew' : 'My host profile';
       </li>
       <li>
         <strong>Choose an event feed</strong>
-        <span>Run <code>/leonida feed events</code> in your server. Choose the destination channel, then select <b>{pick}</b> as the source. You need the matching website role for that source.</span>
+        <span>Run <code>/leonida feed events</code> in your server. Choose the destination channel, then select <b>{pick}</b> as the source. {source === 'crew' ? 'You need to lead or co-run the crew on Leonida Racing.' : 'You need the Event Host role on Leonida Racing.'}</span>
         <button type="button" class="btn btn-s dfs-btn dfs-copy" data-copy="/leonida feed events">Copy command</button>
       </li>
       <li>
         <strong>Check the feed</strong>
-        <span>Matching published events appear in that channel with sign-up buttons. Edit event details on Leonida Racing. Use <code>/leonida feed edit</code> to change feed settings, or <code>/leonida feed remove</code> to stop the feed.</span>
+        <span>Matching published events appear in that channel with sign-up buttons.{source === 'crew' ? ' Crew-only events of your crew are posted there too.' : ''} Edit event details on Leonida Racing. Use <code>/leonida feed edit</code> to change feed settings, or <code>/leonida feed remove</code> to stop the feed.</span>
       </li>
     </ol>
     <a class="dfs-more" href={`${base}discord/bot/`}>Full setup guide →</a>

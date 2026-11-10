@@ -152,6 +152,7 @@ export const botFaq: { q: string; a: string }[] = [
   { q: "The bot shows as offline. Is it broken?", a: "Not necessarily. This bot handles commands through HTTP rather than keeping a permanent Discord connection, so it may appear offline. Try a command; if it fails, check the bot’s channel permissions and any feed errors." },
   { q: "I can’t see the /leonida commands.", a: "You need Manage Server. If you have it, refresh Discord." }, // final text 07.11. (Fausto, DEC-0212)
   { q: "Do I need a Leonida Racing account?", a: "Not to look things up or set up most feeds. Crew feeds, event sign-ups and ratings need a free account." }, // final text 07.11. (Fausto, DEC-0212)
+  { q: "Are crew-only events private in Discord?", a: "Only in your crew's own feeds. Everyone who can see that channel can read them, but only crew members can sign up." }, // final 10.11. (Codex review + Fausto)
   // Claude placeholder 06.11. (/edit-event exists since 02.11., DEC-0100), Codex review pending
   { q: "Can I edit an event in Discord?", a: "Yes, with /edit-event: change the title, start, end, description or driver limit, close or reopen sign-ups, or cancel the event. Everything else you change on the website. In your server’s Events list you can still swap the cover image or move the event to a voice channel." },
   { q: "Why didn't a video appear?", a: "The bot checks for new videos about every 10 minutes. It only posts new videos about GTA, cars or racing; older videos are skipped." }, // final text 03.11. (DEC-0212)

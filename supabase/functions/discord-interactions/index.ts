@@ -901,7 +901,8 @@ async function feedAdd(i: any, forceSource?: string) {
       const crew = picked ? crews.find((c) => c.crew_id === picked) : crews.length === 1 ? crews[0] : undefined;
       if (!crew) return { content: picked ? "You're not the leader or a commissioner of that crew on Leonida Racing." : "You lead or co-run more than one crew. Pick one with the crew option." };
       row_.crew_id = crew.crew_id; srcText = `${crew.name} [${crew.tag}]`;
-      notes.push("Crew-only events of this crew appear in this channel too."); // DEC-0205
+      notes.push("Crew-only events of this crew appear in this channel too. Everyone who can see this channel can read them."); // DEC-0205, text Fausto 10.11.
+      if (nativeEvents) notes.push("Server events can be seen by everyone on this server, including crew-only ones."); // external events, privacy_level 2 = whole server
     } else if (source === "host") {
       if (!(await rolesOf(driver.driver_id)).some((r) => r.role === "event_host")) return { content: "You need the Event Host role on Leonida Racing to add a host feed. You get it with your first approved event.", components: [row(linkButton("Create an event", `${SITE}/account/events/`))] };
       row_.host_driver_id = driver.driver_id; srcText = `events hosted by ${driver.display_name}`;
@@ -1019,7 +1020,7 @@ async function rsvpButton(i: any) {
       case "closed": return ephemeral(`Sign-ups for the championship of **${t}** are closed.`);
       case "cancelled": return ephemeral(`This round of **${t}** has been cancelled. You can still join the championship on the next round's card.`);
       case "past": return ephemeral(`The championship of **${t}** is already over.`);
-      case "members_only": return ephemeral(`The championship of **${t}** is for crew members only. Join the crew on Leonida Racing to sign up.`, hostRow);
+      case "members_only": return ephemeral(`The championship of **${t}** is for crew members only. Join the crew on Leonida Racing to sign up.`); // no host contacts for non-members (Fausto 10.11.)
       case "blocked": return ephemeral(`You can't join the championship of **${t}**.`);
       case "not_found": return ephemeral("This championship isn't open for sign-ups.");
     }
@@ -1035,8 +1036,8 @@ async function rsvpButton(i: any) {
     case "closed": return ephemeral(`Sign-ups for **${r.title}** are closed.`);
     case "cancelled": return ephemeral(`**${r.title}** has been cancelled.`);
     case "past": return ephemeral(`**${r.title}** is already over.`);
-    // DEC-0205 / RS-0098. COPY STATUS: Claude placeholders, Codex review pending.
-    case "members_only": return ephemeral(`**${r.title}** is for crew members only. Join the crew on Leonida Racing to sign up.`, hostRow);
+    // DEC-0205 / RS-0098. COPY final 10.11.2026 (Codex review + Fausto).
+    case "members_only": return ephemeral(`**${r.title}** is for crew members only. Join the crew on Leonida Racing to sign up.`); // no host contacts for non-members (Fausto 10.11.)
     case "blocked": return ephemeral(`You can't sign up for **${r.title}**.`);
   }
   return ephemeral("This action isn't available yet.");
