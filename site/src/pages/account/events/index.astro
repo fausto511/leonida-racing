@@ -80,8 +80,8 @@ const base = import.meta.env.BASE_URL;
               <label data-sf-rule>First date <small>sets the weekday</small><input type="date" name="anchor_date" required /></label>
               <label data-sf-rule>Start time <small id="sf-tz"></small><input type="time" name="local_time" required /></label>
               <label>Duration <small>minutes, optional</small><input type="number" name="duration_min" min="15" max="1440" step="5" /></label>
-              <label>Max. participants <small>optional</small><input type="number" name="max_participants" min="2" max="500" step="1" /></label>
-              <label>Sign-ups<select name="registration"><option value="open">Open</option><option value="closed">Closed — Listed, No Sign-ups</option></select></label>
+              <label>Max. participants <small id="sf-max-hint">optional</small><input type="number" name="max_participants" min="2" max="500" step="1" /></label>
+              <label>Sign-ups<select name="registration"><option value="open">Open</option><option value="closed">Closed — listed without sign-ups</option></select></label>
               <label>Host PSN name<input type="text" name="host_name" maxlength="16" autocomplete="off" /></label>
               <label class="span2">Discord invite<input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
               <label class="span2">Description <small>max. 600</small><textarea name="description" maxlength="600" rows="3"></textarea></label>
@@ -91,7 +91,7 @@ const base = import.meta.env.BASE_URL;
               <ol id="sf-rounds"></ol>
               <button type="button" class="btn btn-s btn-sm" id="sf-add">+ Add round</button>
             </div>
-            <div class="evs-sactions"><button type="submit" class="btn btn-p">Save series</button><p class="evs-msg" id="series-form-msg" aria-live="polite"></p></div>
+            <div class="evs-sactions"><button type="submit" class="btn btn-p" id="sf-save">Save series</button><p class="evs-msg" id="series-form-msg" aria-live="polite"></p></div>
           </form>
           <div class="evs-sform" id="season-entries" hidden>
             <div class="evs-editor-top"><h3 class="evs-editor-t" id="season-entries-t">Drivers in this championship</h3><button type="button" class="btn btn-s btn-sm" id="season-entries-close">Close</button></div>
@@ -295,8 +295,8 @@ const base = import.meta.env.BASE_URL;
   let seriesRows: any[] = [];
   let seasonRounds = new Map<string, any[]>();
   const toLocal = (iso: string) => { const d = new Date(iso); const z = (n: number) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`; };
-  function roundLi(eventId: string, value: string, locked: boolean) {
-    return `<li data-eid="${esc(eventId)}"><input type="datetime-local" value="${esc(value)}"${locked ? ' readonly title="Less than 24 hours away"' : ''} aria-label="Round start" />${locked ? '' : '<button type="button" class="btn btn-s btn-sm" data-rdel>Remove</button>'}</li>`;
+  function roundLi(eventId: string, value: string, locked: boolean, n: number | string = '') {
+    return `<li data-eid="${esc(eventId)}"><input type="datetime-local" value="${esc(value)}"${locked ? ' readonly title="Less than 24 hours away, can\'t be changed"' : ''} aria-label="Round ${n} start" />${locked ? '' : '<button type="button" class="btn btn-s btn-sm" data-rdel>Remove</button>'}</li>`;
   }
   let editSeries: any = null;
   const sMsg = (t: string, err = false) => { const m = $('series-msg'); m.textContent = t; m.className = `evs-msg${err ? ' is-error' : ''}`; };
@@ -308,7 +308,9 @@ const base = import.meta.env.BASE_URL;
     : /time_locked/.test(m) ? "Rounds less than 24 hours away can't be moved or removed."
     : /lead_time/.test(m) ? 'New rounds have to start at least 24 hours from now.'
     : /contact_required/.test(m) ? 'Add your PSN name or a Discord invite, so players can reach you.'
-    : /not_editable/.test(m) ? "This series can't be changed any more." : m;
+    : /not_editable/.test(m) ? (editSeries?.kind === 'league' ? "This championship can't be changed any more." : "This series can't be changed any more.")
+    : /round_unknown/.test(m) ? 'One of these rounds no longer exists. Reload the page and try again.'
+    : 'Something went wrong on our side. Reload the page before you try again.'; // texts decided by Fausto 10.11. (DEC-0212)
   async function loadSeries() {
     const { data } = await getSupabase().from('hub_event_series').select('*').eq('created_by', me!).order('created_at', { ascending: false });
     const cutoff = Date.now() - 30 * 864e5;
@@ -333,7 +335,8 @@ const base = import.meta.env.BASE_URL;
       const label = lg
         ? `Championship · ${rounds.length} rounds${nxt ? ` · next: ${new Date(nxt.starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}` : ''} · ${nIn}${r.max_participants ? ` / ${r.max_participants}` : ''} drivers in`
         : `${seriesLabel(r)} · ${fmtTime(r.local_time)} (${r.tz.replace(/_/g, ' ')})`;
-      const pill = r.status === 'cancelled' ? '<span class="lr-status is-no">Cancelled by a moderator</span>'
+      const pill = r.review_status === 'expired' ? '<span class="lr-status is-no">Expired</span>'
+        : r.status === 'cancelled' ? '<span class="lr-status is-no">Cancelled by a moderator</span>'
         : r.status === 'ended' ? (r.review_status === 'rejected' ? '<span class="lr-status is-no">Not approved</span>' : '<span class="lr-status">Ended</span>')
         : r.review_status === 'pending' ? '<span class="lr-status">In review</span>'
         : r.review_status === 'needs_changes' ? '<span class="lr-status is-fix">Needs changes</span>'
@@ -370,17 +373,20 @@ const base = import.meta.env.BASE_URL;
       $('sf-rounds').innerHTML = (seasonRounds.get(r.series_id) ?? [])
         .filter((x) => x.status !== 'cancelled' && new Date(x.starts_at).getTime() > Date.now())
         .map((x) => roundLi(x.event_id, toLocal(x.starts_at), new Date(x.starts_at).getTime() < Date.now() + lockMs)).join('');
+      renumberRounds();
     }
     f.freq.value = r.freq ?? 'weekly'; f.monthly_nth.value = String(r.monthly_nth ?? 1); f.anchor_date.value = r.anchor_date ?? '';
     f.local_time.value = fmtTime(r.local_time); f.duration_min.value = r.duration_min ?? ''; f.max_participants.value = r.max_participants ?? '';
     f.registration.value = r.registration; f.host_name.value = r.host_name ?? '';
     $('sf-tz').textContent = `time zone ${r.tz.replace(/_/g, ' ')}`;
     $('series-form-t').textContent = `${lg ? 'Edit championship' : 'Edit series'}: ${r.title}`;
+    $('sf-max-hint').textContent = lg ? 'optional, whole championship' : 'optional, per date';
+    $('sf-save').textContent = lg ? 'Save championship' : 'Save series';
     $('series-form-note').textContent = lg
-      ? ((hostStatus?.level ?? 1) < 3 && r.review_status === 'approved' ? 'Changes to the title, description and Discord invite are checked by a moderator first. Rounds, limit and sign-ups change right away. Rounds less than 24 hours away stay as they are.' : 'Changes apply to all upcoming rounds.')
+      ? ((hostStatus?.level ?? 1) < 3 && r.review_status === 'approved' ? 'Title, description and Discord invite changes need moderator approval. Rounds, limit and sign-ups change now. Rounds less than 24 hours away stay as they are.' : 'Changes apply to all upcoming rounds.')
       : (hostStatus?.level ?? 1) < 3 && r.review_status === 'approved'
-      ? 'Changes to the title, description and Discord invite are checked by a moderator first; everything else applies to all upcoming dates right away. Changing the rhythm or time moves upcoming dates without sign-ups; dates with sign-ups stay as they are (cancel them one by one if needed).'
-      : 'Changes apply to all upcoming dates. Changing the rhythm or time moves upcoming dates without sign-ups; dates with sign-ups stay as they are.';
+      ? 'Title, description and Discord invite changes need moderator approval. Everything else applies to upcoming dates now. A new rhythm or time only moves dates without sign-ups.'
+      : 'Changes apply to upcoming dates now. A new rhythm or time only moves dates without sign-ups.';
     if (!lg) syncSf();
     $('series-form-msg').textContent = '';
     $('series-form').hidden = false;
@@ -388,8 +394,13 @@ const base = import.meta.env.BASE_URL;
   }
   function syncSf() { if (editSeries?.kind === 'league') return; (document.querySelector('[data-sf-monthly]') as HTMLElement).hidden = sf().freq.value !== 'monthly'; }
   $('series-form').addEventListener('change', syncSf);
-  $('sf-add').addEventListener('click', () => { if ($('sf-rounds').children.length < 15) $('sf-rounds').insertAdjacentHTML('beforeend', roundLi('', '', false)); });
-  $('sf-rounds').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('[data-rdel]'); if (b) b.closest('li')?.remove(); });
+  // screen-reader number per round field ("Round 3 start"); past rounds are not listed, so count them in
+  function renumberRounds() {
+    const past = editSeries ? (seasonRounds.get(editSeries.series_id) ?? []).filter((x) => x.status !== 'cancelled' && new Date(x.starts_at).getTime() <= Date.now()).length : 0;
+    $('sf-rounds').querySelectorAll('input').forEach((el, i) => el.setAttribute('aria-label', `Round ${past + i + 1} start`));
+  }
+  $('sf-add').addEventListener('click', () => { if ($('sf-rounds').children.length < 15) { $('sf-rounds').insertAdjacentHTML('beforeend', roundLi('', '', false)); renumberRounds(); } });
+  $('sf-rounds').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('[data-rdel]'); if (b) { b.closest('li')?.remove(); renumberRounds(); } });
   $('series-close').addEventListener('click', () => { $('series-form').hidden = true; editSeries = null; });
   $('series-form').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -403,6 +414,12 @@ const base = import.meta.env.BASE_URL;
       duration_min: num(f.duration_min.value), max_participants: num(f.max_participants.value), registration: f.registration.value,
     };
     const m = $('series-form-msg');
+    const prevRs = editSeries.review_status;
+    const lgName = editSeries.kind === 'league' ? 'championship' : 'series';
+    // texts decided by Fausto 10.11. (DEC-0212)
+    const savedMsg = (d: any, ok: string) => prevRs === 'needs_changes' ? 'Updated and submitted for review.'
+      : prevRs === 'pending' ? `Saved. Your ${lgName} is still in review.`
+      : d?.pending ? 'Saved. Changes to the title, description or Discord invite need moderator approval. Your other changes apply now.' : ok;
     if (editSeries.kind === 'league') {
       for (const k of ['freq', 'monthly_nth', 'anchor_date', 'weekday', 'local_time']) delete payload[k];
       const rounds = [...$('sf-rounds').querySelectorAll<HTMLElement>('li')].map((li) => ({ event_id: li.dataset.eid || null, v: (li.querySelector('input') as HTMLInputElement).value }));
@@ -413,7 +430,7 @@ const base = import.meta.env.BASE_URL;
       const r2 = await sb.rpc('set_season_rounds', { p_series: editSeries.series_id, p_rounds: rounds.map((x) => ({ event_id: x.event_id, starts_at: new Date(x.v).toISOString() })) });
       if (r2.error) { m.textContent = `Details saved, but the rounds were not: ${seriesErr(r2.error.message)}`; m.className = 'evs-msg is-error'; await loadHosted(); return; }
       $('series-form').hidden = true; editSeries = null;
-      sMsg((data as any)?.pending ? 'Saved. The new title, description or Discord invite go live once a moderator approves them; rounds and everything else apply now.' : 'Championship saved.');
+      sMsg(savedMsg(data, 'Championship saved.'));
       await loadHosted();
       return;
     }
@@ -421,7 +438,7 @@ const base = import.meta.env.BASE_URL;
     const { data, error } = await getSupabase().rpc('update_event_series', { p_series: editSeries.series_id, p: payload });
     if (error) { m.textContent = seriesErr(error.message); m.className = 'evs-msg is-error'; return; }
     $('series-form').hidden = true; editSeries = null;
-    sMsg((data as any)?.pending ? 'Saved. The new title, description or Discord invite go live once a moderator approves them; everything else applies now.' : 'Series saved — upcoming dates are updated.');
+    sMsg(savedMsg(data, 'Series saved — upcoming dates are updated.'));
     await loadHosted();
   });
   $('series-list').addEventListener('click', async (e) => {
@@ -434,10 +451,11 @@ const base = import.meta.env.BASE_URL;
     if (kp) { kp.disabled = true; const { error } = await getSupabase().rpc('keep_event_series', { p_series: kp.dataset.skeep }); sMsg(error ? seriesErr(error.message) : 'Thanks — the series keeps running.', Boolean(error)); await loadSeries(); return; }
     const en = t.closest<HTMLButtonElement>('[data-send]');
     if (en) {
-      if (en.dataset.armed !== '1') { en.dataset.armed = '1'; en.textContent = 'Click again to end the series'; setTimeout(() => { if (en.isConnected) { en.dataset.armed = ''; en.textContent = 'End series'; } }, 4000); return; }
+      const enLg = seriesRows.find((x) => x.series_id === en.dataset.send)?.kind === 'league';
+      if (en.dataset.armed !== '1') { en.dataset.armed = '1'; en.textContent = enLg ? 'Click again to end. Rounds with sign-ups become cancelled.' : 'Click again to end. Dates with sign-ups become cancelled.'; setTimeout(() => { if (en.isConnected) { en.dataset.armed = ''; en.textContent = enLg ? 'End championship' : 'End series'; } }, 4000); return; }
       en.disabled = true;
       const { error } = await getSupabase().rpc('end_event_series', { p_series: en.dataset.send });
-      sMsg(error ? seriesErr(error.message) : 'Series ended. Upcoming dates without sign-ups were removed; dates with sign-ups are shown as cancelled.', Boolean(error));
+      sMsg(error ? seriesErr(error.message) : enLg ? 'Championship ended. Upcoming rounds without sign-ups were removed; rounds with sign-ups are shown as cancelled.' : 'Series ended. Upcoming dates without sign-ups were removed; dates with sign-ups are shown as cancelled.', Boolean(error));
       await loadHosted();
     }
   });

@@ -176,7 +176,7 @@ const base = import.meta.env.BASE_URL;
               <label>Location <small>optional — more places are added after release</small><select name="location"><option value="">— not specified —</option></select></label>
               <label class="span2">Discord invite <small>where participants meet you — a PSN name or a Discord (yours or your crew's) is required. Tip: create the invite in your rules or info channel, newcomers land right there.</small><input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
               <label>Max. participants <small>optional, e.g. lobby size</small><input type="number" name="max_participants" min="2" max="500" step="1" /></label>
-              <label>Sign-ups <small id="reg-hint">Controls the “I'm in” button on the calendar</small><select name="registration"><option value="open">Open</option><option value="closed">Closed — Listed, No Sign-ups</option></select></label>
+              <label>Sign-ups <small id="reg-hint">Controls the “I'm in” button on the calendar</small><select name="registration"><option value="open">Open</option><option value="closed">Closed — listed without sign-ups</option></select></label>
               <label class="span2">Stream link <small>Twitch, YouTube, or Kick. Required for events created with closed sign-ups. Shown even when sign-ups are full or closed.</small><input type="url" name="stream_url" placeholder="https://www.twitch.tv/…" /></label>
               <label class="span2">Description <small><span id="event-desc-count">0</span>/600</small><textarea name="description" maxlength="600" rows="3"></textarea></label>
               <!-- Privacy notice for hosts (Codex privacy review 16.10.2026, RS-0076): events are also distributed by the Discord bot -->
