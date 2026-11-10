@@ -42,7 +42,7 @@ const base = import.meta.env.BASE_URL;
       <section id="host-block" hidden>
         <div class="evs-head"><div>
           <h2 class="lr-h2 lr-h2-s">Events you host</h2>
-          <p class="evs-lede"><span id="host-lede-review">A moderator reviews each event before it goes live in the calendar.</span> Players who sign up will use your Discord invite or PlayStation name to reach you. Make sure each event has the right contact details. Edit an event to change it or to see who signed up.</p>
+          <p class="evs-lede"><span id="host-lede-review">A moderator reviews each event before it goes live in the calendar.</span> Players who sign up reach you through your Discord invite or PlayStation name, so keep them up to date. Open an event to edit it or see who signed up.</p>
         </div></div>
         <div class="evs-how" id="host-how">
           <p class="evs-how-t">How hosting works</p>
@@ -51,7 +51,7 @@ const base = import.meta.env.BASE_URL;
             <li data-step="2"><strong>Event Host</strong><span>After your first approved event you get the Event Host role and can have up to 3 events in review.</span></li>
             <li data-step="3"><strong>Trusted host</strong><span>Run good events and a moderator can unlock publishing without review.</span></li>
           </ol>
-          <p class="evs-how-note">Events need to start at least 24 hours after you submit them, so there's time to review. <span id="host-quota"></span></p>
+          <p class="evs-how-note">Submit events at least 24 hours before they start, so there's time to review them. <span id="host-quota"></span></p>
         </div>
         <div class="evs-blocked lr-note lr-note-warn" id="host-blocked" hidden>
           <span>You can't submit events right now. If you think this is a mistake, contact a moderator on our Discord.</span>
@@ -204,7 +204,7 @@ const base = import.meta.env.BASE_URL;
     document.querySelectorAll<HTMLElement>('#host-how [data-step]').forEach((li) => li.classList.toggle('is-current', Number(li.dataset.step) === st.level));
     $('host-lede-review').textContent = st.level === 3 && !st.blocked ? 'Your events go live in the calendar right away.' : 'A moderator reviews each event before it goes live in the calendar.';
     $('host-quota').textContent = st.level === 3 ? `Created in the last 24 hours: ${st.created_24h} of ${st.daily_limit}.` : `In review now: ${st.open} of ${st.open_limit}.`;
-    ($('host-quota').parentElement as HTMLElement).firstChild!.textContent = st.level === 3 ? '' : "Events need to start at least 24 hours after you submit them, so there's time to review. ";
+    ($('host-quota').parentElement as HTMLElement).firstChild!.textContent = st.level === 3 ? '' : "Submit events at least 24 hours before they start, so there's time to review them. ";
     $('host-blocked').hidden = !st.blocked;
   }
   const canSubmit = () => { const st = hostStatus; return Boolean(st) && !st.blocked && (st.level === 3 ? st.created_24h < st.daily_limit : st.open < st.open_limit); };
@@ -282,7 +282,7 @@ const base = import.meta.env.BASE_URL;
     const row = (e: any, wasPast = false) => eventRowHtml(e, { full: true, side: side(e, wasPast) });
     const st0 = hostStatus ?? { level: 1, blocked: false, open: 0, open_limit: 1 };
     const create = st0.blocked ? ''
-      : !canSubmit() ? slot('Create an event', 'type="button" disabled', 'button', st0.level === 3 ? `you've reached ${st0.daily_limit} new events in 24 hours` : `${st0.open} of ${st0.open_limit} events in review — wait for a moderator`)
+      : !canSubmit() ? slot('Create an event', 'type="button" disabled', 'button', st0.level === 3 ? `Limit of ${st0.daily_limit} new events in 24 hours reached. Try again later.` : `${st0.open} of ${st0.open_limit} events in review — wait for a moderator`)
       : st0.level === 1 && !all.length ? slot('Become an Event Host', 'type="button" data-new', 'button', 'create your first event')
       : slot('Create an event', 'type="button" data-new', 'button');
     hostEl.innerHTML = upcoming.map((e) => row(e)).join('')

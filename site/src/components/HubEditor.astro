@@ -630,10 +630,10 @@ const base = import.meta.env.BASE_URL;
     if (/cancel_instead/.test(m)) return "Dates of a series can't be deleted. Cancel this date instead (Status: Cancelled).";
     if (/invalid_tz/.test(m)) return "Your browser's time zone isn't supported. Please contact a moderator.";
     if (/host_blocked/.test(m)) return "You can't submit events right now. If you think this is a mistake, contact a moderator on our Discord.";
-    if (/open_limit/.test(m)) return `You already have the maximum number of events in review${hostStatus?.open_limit ? ` (${hostStatus.open_limit})` : ''}. Wait for a moderator to review them, or delete one.`;
+    if (/open_limit/.test(m)) return hostStatus?.open_limit ? `You've reached your limit of ${hostStatus.open_limit} events in review. Wait for a moderator, or delete one.` : "You've reached your limit of events in review. Wait for a moderator, or delete one.";
     if (/daily_limit/.test(m)) return `You can create ${hostStatus?.daily_limit ?? 'only a few'} events per 24 hours. Try again later.`;
     if (/lead_time/.test(m)) return 'The event has to start at least 24 hours from now, so a moderator has time to review it.';
-    if (/time_locked/.test(m)) return 'The start time can only change while the event is at least 24 hours away.';
+    if (/time_locked/.test(m)) return 'You can only move the start while both the old and the new time are at least 24 hours away.';
     if (/not_editable/.test(m)) return "This event can't be changed any more.";
     if (/hub_events_not_before_launch/.test(m)) return 'Events can start on Nov 19, 2026 (GTA VI launch day) at the earliest.';
     if (/crew_has_members/.test(m)) return 'Remove all other members first — then you can delete the crew.';
@@ -1081,13 +1081,13 @@ const base = import.meta.env.BASE_URL;
     const rv = row ? reviews.get(row.event_id) : null;
     const rs = row?.review_status ?? 'approved';
     let html = '';
-    if (row && rs === 'pending') html = isMod ? 'Waiting for review — approve or reject it under <strong>Event review</strong> above.' : '<strong>In review.</strong> A moderator checks this event before it goes live in the calendar. You can still edit it.';
+    if (row && rs === 'pending') html = isMod ? `Waiting for review. Approve or reject it under <a href="${import.meta.env.BASE_URL}moderator/event-review/">Review › Events</a>.` : '<strong>In review.</strong> A moderator checks this event before it goes live in the calendar. You can still edit it.';
     else if (row && rs === 'needs_changes') html = `<strong>Needs changes.</strong> ${rv?.note ? 'Moderator note: ' + esc(rv.note) + ' ' : ''}${isMod ? '' : 'Edit the event and save to send it again.'}`;
     else if (row && rs === 'rejected') html = `<strong>Not approved.</strong> ${rv?.note ? 'Moderator note: ' + esc(rv.note) + ' ' : ''}${isMod ? '' : "This event can't be changed any more. It's removed after 30 days."}`;
-    else if (row && rs === 'expired') html = `<strong>Expired.</strong> The start time passed before a moderator reviewed it.${isMod ? '' : " It's removed after 30 days."}`;
+    else if (row && rs === 'expired') html = `<strong>Expired.</strong> The start time passed before a moderator reviewed it.${isMod ? '' : " It's removed 30 days after the start time."}`;
     else if (rv?.pending) {
       const f = Object.keys(rv.pending).map((k) => FIELD_LABEL[k] ?? k).join(', ');
-      html = isMod ? `Changes to the ${esc(f)} wait for review under <strong>Event review</strong> above.`
+      html = isMod ? `Changes to ${esc(f)} wait for review under <a href="${import.meta.env.BASE_URL}moderator/event-review/?view=changes">Review › Events</a>.`
         : `<strong>Changes in review:</strong> ${esc(f)}. The calendar shows the previous version until a moderator approves them. <button type="button" class="btn btn-s btn-sm" id="ev-withdraw">Withdraw changes</button>`;
     } else if (rv?.edit_note && !isMod) html = `<strong>Your last changes were not approved.</strong> Moderator note: ${esc(rv.edit_note)}`;
     el.innerHTML = html;
@@ -1100,7 +1100,7 @@ const base = import.meta.env.BASE_URL;
     const { error } = await getSupabase().rpc('withdraw_event_changes', { p_event: id });
     await loadAll();
     openEvent(events.find((x) => x.event_id === id) ?? null);
-    msg(eventForm, error ? dbError(error) : 'Changes withdrawn — the live version stays.', Boolean(error));
+    msg(eventForm, error ? "Couldn't withdraw your changes. Try again." : 'Changes withdrawn — the live version stays.', Boolean(error));
     eventsChanged();
   });
 
@@ -1401,6 +1401,8 @@ const base = import.meta.env.BASE_URL;
   eventForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const sb0 = getSupabase();
+    // Fausto 10.11. (Codex text): own message when a "Needs changes" event is sent again
+    const prevRs = selectedId ? (events.find((x) => x.event_id === selectedId)?.review_status ?? null) : null;
     // RS-0095: a date of a series -- only time, sign-ups, status
     if (isOccurrence()) {
       const full = eventFromForm();
@@ -1496,9 +1498,9 @@ const base = import.meta.env.BASE_URL;
     await loadAll();
     openEvent(events.find((x) => x.event_id === data.event_id) ?? data);
     const saved = events.find((x) => x.event_id === data.event_id) ?? data;
-    msg(eventForm, saved.review_status === 'pending' ? 'Submitted — a moderator reviews it before it goes live in the calendar.'
-      : reviews.get(saved.event_id)?.pending ? 'Saved. Changes to the title, description or Discord invite go live once a moderator approves them; everything else is live now.'
-      : saved.is_published ? 'Saved — live in the calendar.' : 'Saved — hidden (moderator setting).');
+    msg(eventForm, saved.review_status === 'pending' ? (prevRs === 'needs_changes' ? 'Updated and submitted for review.' : 'Submitted — a moderator reviews it before it goes live in the calendar.')
+      : reviews.get(saved.event_id)?.pending ? 'Saved. Changes to the title, description or Discord invite need moderator approval. Your other changes apply now.'
+      : saved.is_published ? 'Saved — live in the calendar.' : 'Saved. Hidden from the calendar.');
     eventsChanged();
   });
 
