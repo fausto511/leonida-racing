@@ -109,7 +109,7 @@ const COMMANDS = [
   { name: "car", description: "Vehicle card from Leonida Racing", dm_permission: false,
     options: [{ type: 3, name: "vehicle", description: "Start typing a make or model", required: true, autocomplete: true }] },
   { name: "create-event", description: "Create an event on Leonida Racing", dm_permission: false },
-  { name: "edit-event", description: "Edit one of your events on Leonida Racing", dm_permission: false,
+  { name: "edit-event", description: "Edit one of your upcoming events on Leonida Racing", dm_permission: false,
     options: [{ type: 3, name: "event", description: "Start typing the name of your event", required: true, autocomplete: true }] },
   { name: "help", description: "What the Leonida Racing bot can do", dm_permission: false },
   { name: "compare", description: "Put 2 to 4 cars side by side", dm_permission: false,
@@ -163,7 +163,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-11-07.1"; // manufacturer option text (final texts 07.11.)
+const COMMANDS_VERSION = "2026-11-10.1"; // /edit-event description "upcoming" (Fausto 10.11.)
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
@@ -594,7 +594,7 @@ function cmdHelp(i: any) {
 }
 
 function cmdCreateEvent() {
-  return ephemeral("Create your event on Leonida Racing. A moderator reviews your first events before they go live; once it's published, servers that follow your crew or the public calendar get it automatically.",
+  return ephemeral("Create your event on Leonida Racing. A moderator reviews your first events before they go live. After that, servers that follow your crew or the calendar show it automatically.",
     [row(linkButton("Create Event", `${SITE}/account/events/`))]);
 }
 
@@ -617,7 +617,7 @@ const textInput = (id: string, label: string, style: 1 | 2, value: string, requi
 // Cancel event (asks first), Edit on website (everything else: type, platforms, location, crew, contact).
 async function ownEvent(i: any, id: string): Promise<{ e: any; pending: Record<string, string | null> | null } | string> {
   const d = await driverByDiscord(discordId(i));
-  if (!d) return "Sign in on Leonida Racing with this Discord account first, then you can edit your events here.";
+  if (!d) return "Log in on Leonida Racing with this Discord account first, then you can edit your events here.";
   const { data: e } = await db.from("hub_events").select("event_id,series_id,title,starts_at,ends_at,description,max_participants,registration,status,review_status,created_by,series:hub_event_series(kind)").eq("event_id", id).maybeSingle();
   if (!e || e.created_by !== d.driver_id) return "I couldn't find that event among yours. Pick one from the suggestions while typing.";
   if (e.review_status === "rejected" || e.review_status === "expired") return "This event can't be changed any more.";
@@ -665,7 +665,7 @@ function editModal(e: any, p: Record<string, string | null> | null) {
 }
 const EDIT_ERRORS: [RegExp, string][] = [
   [/lead_time/, "The event has to start at least 24 hours from now, so a moderator has time to review it."],
-  [/time_locked/, "The start time can only change while the event is at least 24 hours away."],
+  [/time_locked/, "You can only move the start while both the old and the new time are at least 24 hours away."],
   [/not_editable/, "This event can't be changed any more."],
   [/edit_series/, "This is part of a series or championship: change title, description and limit under Your series on the website."],
   [/not_before_launch/, "Events can start on Nov 19, 2026 (GTA VI launch day) at the earliest."],
@@ -686,7 +686,7 @@ async function editButton(i: any) {
   if (action === "back") return json({ type: 7, data: editPanel(r.e, r.pending) });
   if (!["close", "open", "cancelyes"].includes(action)) return json({ type: 7, data: editPanel(r.e, r.pending, "This button doesn't work anymore.") });
   const { data, error } = await db.rpc("discord_event_action", { p_discord_id: discordId(i), p_event: id, p_action: action === "cancelyes" ? "cancel" : action });
-  if (error) { console.error("discord_event_action", error); return json({ type: 7, data: editPanel(r.e, r.pending, "Something went wrong on our side. Nothing was changed.") }); }
+  if (error) { console.error("discord_event_action", error); return json({ type: 7, data: editPanel(r.e, r.pending, "Something went wrong on our side. Check My events on the website before you try again.") }); }
   const res = data as any;
   if (res.status !== "saved") return json({ type: 7, data: editPanel(r.e, r.pending, res.status === "error" ? editError(res.message) : "Nothing was changed.") });
   const note = action === "close" ? "Sign-ups closed. People who already signed up stay in." : action === "open" ? "Sign-ups open again." : "Event cancelled.";
@@ -712,14 +712,15 @@ async function submitEditEvent(i: any) {
   const max = maxRaw === "" ? null : Number(maxRaw);
   if (max !== null && (!Number.isInteger(max) || max < 2 || max > 500)) return await panel("Max. participants must be a whole number between 2 and 500, or empty. Nothing was changed.");
   const { data, error } = await db.rpc("discord_edit_event", { p_discord_id: discordId(i), p_event: id, p_title: isSeries ? cur.e.title : val("title"), p_starts_at: start, p_ends_at: end, p_description: isSeries ? (cur.e.description ?? "") : val("description"), p_max: max });
-  if (error) { console.error("discord_edit_event", error); return await panel("Something went wrong on our side. Nothing was changed. Please try again in a moment."); }
+  if (error) { console.error("discord_edit_event", error); return await panel("Something went wrong on our side. Check My events on the website before you try again."); }
   const r = data as any;
   if (r.status === "error") return await panel(editError(r.message));
   if (r.status !== "saved") return await panel(r.status === "started" ? "This event has already started. Nothing was changed." : "I couldn't find that event among yours. Nothing was changed.");
-  return await panel(r.review_status === "pending" ? "Saved. Your event is still in review; a moderator checks it before it goes live."
-    : r.review_status === "needs_changes" ? "Saved and sent to the moderators again."
-    : r.pending ? "Saved. Time, end and participant limit are live now; the new title or description goes live once a moderator approves it."
-    : "Saved \u2014 live on Leonida Racing and on every server that shows this event.");
+  // texts decided by Fausto 10.11. (DEC-0212)
+  return await panel(r.review_status === "pending" ? "Saved. Your event is still in review."
+    : r.review_status === "needs_changes" ? "Updated and submitted for review."
+    : r.pending ? "Saved. Changes to the title or description need moderator approval. Your other changes apply now."
+    : "Saved. Its Discord cards update shortly.");
 }
 
 // ---------- autocomplete ----------

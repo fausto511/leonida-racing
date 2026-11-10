@@ -970,7 +970,7 @@ async function handleModAlerts(): Promise<number> {
     allowed_mentions: { parse: [] },
     embeds: [{ color: ORANGE, title: rows.length === 1 ? "Waiting for review" : `${rows.length} things waiting for review`,
       description: clip(rows.map(line).join("\n"), 4000), footer: { text: "Leonida Racing \u00b7 mod alerts" }, timestamp: new Date().toISOString() }],
-    components: links.length <= 5 ? [row(...links.map((l) => linkButton(l === "moderator/" ? "Lap times" : l.includes("hub") ? "Hub & event review" : l.includes("reports") ? "Lap reports" : l.includes("content") ? "Content reports" : "Open", `${SITE}/${l}`)))] : [],
+    components: links.length <= 5 ? [row(...links.map((l) => linkButton(l === "moderator/" ? "Lap times" : l.includes("hub") ? "Moderator to-dos" : l.includes("reports") ? "Lap reports" : l.includes("content") ? "Content reports" : "Open", `${SITE}/${l}`)))] : [],
   });
   if (res.ok) { await db.from("discord_mod_alerts").update({ sent_at: new Date().toISOString() }).in("id", ids); return rows.length; }
   console.log("mod alert post failed", res.status, res.text.slice(0, 200));
