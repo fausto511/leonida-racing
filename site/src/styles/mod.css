@@ -8,13 +8,17 @@
 .modside { min-width: 0; } /* not sticky: a page wrapper clips overflow, so sticky would slide under the header */
 .modside-sum { display: none; }
 /* Phones: the menu starts folded by CSS (no script needed, so nothing jumps) */
-.modside-nav { display: flex; flex-direction: column; gap: 18px; }
+.modside-nav { display: flex; flex-direction: column; gap: 14px; }
 .modside-top { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; }
-.modside-kicker { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+.modside-kicker { font-family: var(--gh-font-display); font-size: 15px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--lr-text); }
 .modside-back { font-size: 13px; color: var(--lr-muted); text-decoration: none; }
 .modside-back:hover { color: var(--lr-text); }
 .modside-g { display: flex; flex-direction: column; gap: 2px; }
-.modside-gn { padding: 0 12px 4px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--lr-muted); }
+/* Fausto 10.11.: headings clearly different from entries: orange, small caps, line above; entries indented */
+.modside-g + .modside-g { padding-top: 14px; border-top: 1px solid var(--lr-line); }
+.modside-gn { padding: 0 12px 6px; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
+.modside-gn ~ .modside-a { padding-left: 22px; }
+.modside-gn ~ .modside-subs { margin-left: 22px; }
 .modside-a { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 36px; padding: 0 12px; border-radius: 6px; color: var(--lr-soft); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; }
 .modside-a:hover { background: var(--lr-raised); color: var(--lr-text); }
 .modside-a.is-active { background: rgba(251,247,234,.12); color: var(--lr-text); }

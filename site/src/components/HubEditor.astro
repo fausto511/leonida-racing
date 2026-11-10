@@ -45,6 +45,8 @@ const base = import.meta.env.BASE_URL;
             <h2 class="list-title" id="list-title">Crews</h2>
             <button type="button" class="btn btn-p btn-md" id="new-btn">+ New crew</button>
           </div>
+          <!-- moderator pages (RS-0102): find one entry among many; crews and tracks A–Z, events by date -->
+          <label class="list-q" id="list-q-wrap" hidden><span class="list-q-sr">Search this list</span><input type="search" id="list-q" placeholder="Search…" autocomplete="off" /></label>
           <div class="list" id="list"></div>
           <p class="list-empty" id="list-empty" hidden>Nothing here yet.</p>
           <p class="list-error" id="list-error" hidden></p>
@@ -278,6 +280,10 @@ const base = import.meta.env.BASE_URL;
   .list-panel { padding: 1.1rem; position: sticky; top: 5.5rem; }
   @media (max-width: 900px) { .list-panel { position: static; } }
   .list-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: 1rem; }
+  .list-q { display: block; margin: 0 0 .75rem; }
+  .list-q[hidden] { display: none; }
+  .list-q input { width: 100%; box-sizing: border-box; height: 40px; padding: 0 12px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-bg); color: var(--lr-text); font: inherit; font-size: 14px; }
+  .list-q-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .list-title { margin: 0; font-family: var(--gh-font-display); font-weight: 900; text-transform: uppercase; font-size: 1.15rem; }
   .list { display: flex; flex-direction: column; gap: .45rem; max-height: 34rem; overflow-y: auto; }
   .list-empty, .list-error { margin: 0; color: var(--lr-muted); font-size: 14px; }
@@ -485,10 +491,15 @@ const base = import.meta.env.BASE_URL;
   };
   if (FIXED_TAB && FILTERS[FIXED_TAB]) listFilter = FILTERS[FIXED_TAB][urlView] ? urlView : DEFAULT_VIEW[FIXED_TAB] ?? '';
   if (FIXED_TAB === 'requests' || FIXED_TAB === 'roles') fixedPick = urlView === 'roles' ? 'roles' : 'requests';
+  let listQ = '';
+  const qText = (k: string, r: any) => (k === 'crews' ? `${r.name} ${r.tag} ${r.slug ?? ''}` : k === 'events' ? `${r.title} ${r.host_name ?? ''} ${r.location ?? ''}` : `${r.title}`).toLowerCase();
   function applyFilter(k: string, rows: any[]): any[] {
     const f = FILTERS[k]?.[listFilter];
     if (!f) return rows;
     let out = rows.filter(f);
+    if (listQ) out = out.filter((r) => qText(k, r).includes(listQ));
+    if (k === 'crews') out = [...out].sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    if (k === 'tracks') out = [...out].sort((a, b) => String(a.title).localeCompare(String(b.title)));
     if (k === 'events') {
       const asc = listFilter === 'upcoming' || listFilter === 'series';
       out = [...out].sort((a, b) => (asc ? 1 : -1) * (new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()));
@@ -507,6 +518,12 @@ const base = import.meta.env.BASE_URL;
     }
     if (FIXED_TAB === 'requests' || FIXED_TAB === 'roles') { counts.requests = requests.length; counts.roles = roles.length; }
     rootEl.dispatchEvent(new CustomEvent('hc-counts', { bubbles: true, detail: counts }));
+  }
+  if (FIXED_TAB === 'crews' || FIXED_TAB === 'events' || FIXED_TAB === 'tracks') {
+    const qWrap = document.getElementById('list-q-wrap') as HTMLElement;
+    qWrap.hidden = false;
+    (qWrap.querySelector('input') as HTMLInputElement).placeholder = { crews: 'Search name or tag…', events: 'Search title, host or place…', tracks: 'Search track name…' }[FIXED_TAB]!;
+    qWrap.querySelector('input')!.addEventListener('input', (e) => { listQ = (e.target as HTMLInputElement).value.trim().toLowerCase(); renderList(); });
   }
   rootEl.addEventListener('hc-filter', (e) => {
     const key = String((e as CustomEvent).detail ?? '');
