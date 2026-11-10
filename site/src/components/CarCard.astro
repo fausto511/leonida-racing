@@ -43,7 +43,7 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
       <span class="vc-ph">
         <img class="vc-ph-bg lr-hzoom" src={`${base}images/garage/garage-hero-placeholder-640.webp`} alt="" width="640" height="360" loading="lazy" />
         <img class="vc-ph-logo" src={`${base}images/logos/${v.logoSlug}-gta-6-logo.svg`} alt="" width="92" height="92" loading="lazy" />
-        <span class="vc-ph-pill">Photo coming</span>
+        <span class="vc-ph-pill">No photo yet</span>
       </span>
     )}
     <span class="vc-pills">
@@ -73,7 +73,7 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
           <button type="button" class="vc-wish" data-wish={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to your wishlist`} title="Add to wishlist">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
           </button>
-          <button type="button" class="vc-garage" data-garage={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to My Garage`} title="Mark as owned · Adds the car to My Garage">
+          <button type="button" class="vc-garage" data-garage={v.id} aria-pressed="false" aria-label={`Add ${v.make} ${v.model} to My garage`} title="Mark as owned · adds it to My garage">
             <svg class="vc-g-house" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12M7 21v-7h10v7"/></svg>
             <svg class="vc-g-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/></svg>
           </button>

@@ -181,7 +181,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         </div>
         <div class="vh-actions">
           <button type="button" class="btn btn-s vh-cmp" id="vh-cmp" aria-pressed="false"><Fragment set:html={ico.plus} /><Fragment set:html={ico.check} /><span data-l>Compare</span></button>
-          <button type="button" class="btn btn-s vh-gar" id="vh-gar" aria-pressed="false"><Fragment set:html={ico.house} /><Fragment set:html={ico.houseCheck} /><span data-l>Add to My Garage</span></button>
+          <button type="button" class="btn btn-s vh-gar" id="vh-gar" aria-pressed="false"><Fragment set:html={ico.house} /><Fragment set:html={ico.houseCheck} /><span data-l>Add to My garage</span></button>
           <!-- Wishlist (RS-0087, DEC-0189): only while you don't own the car -->
           <button type="button" class="btn btn-s vh-wish" id="vh-wish" aria-pressed="false" aria-label="Add to wishlist" title="Add to wishlist"><Fragment set:html={ico.heart} /></button>
         </div>
@@ -197,7 +197,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <>
             <img class="vs-ph-bg" src={`${base}images/garage/garage-hero-placeholder.webp`} alt="" width="1672" height="941" />
             <img class="vs-ph-logo" src={logo} alt="" width="170" height="170" />
-            <span class="vs-ph-pill"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Photo coming</span>
+            <span class="vs-ph-pill"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>No photo yet</span>
           </>
         )}
       </div>

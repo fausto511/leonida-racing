@@ -79,11 +79,11 @@ function init(root: HTMLElement) {
   function paintGarage() {
     const on = owned.has(id);
     garBtn.setAttribute('aria-pressed', String(on));
-    garBtn.querySelector('[data-l]')!.textContent = on ? 'In My Garage' : 'Add to My Garage';
+    garBtn.querySelector('[data-l]')!.textContent = on ? 'In My garage' : 'Add to My garage';
     document.querySelectorAll<HTMLElement>('[data-garage]').forEach((b) => {
       const o = owned.has(b.dataset.garage!);
       b.setAttribute('aria-pressed', String(o));
-      b.title = o ? 'In My Garage · click to remove' : 'Mark as owned · Adds the car to My Garage';
+      b.title = o ? 'Remove from My garage' : 'Mark as owned · adds it to My garage';
     });
   }
   async function toggleGarage(carId: string, anchor: HTMLElement, pendingKey = '') {
@@ -104,7 +104,7 @@ function init(root: HTMLElement) {
       if (next) {
         let seen = false;
         try { seen = localStorage.getItem('lr-garage-hint') === '1'; localStorage.setItem('lr-garage-hint', '1'); } catch { /* ignore */ }
-        if (!seen) bubble(anchor, 'Added to My Garage. Your collection is under <b>My garage</b> in the account menu.', 6000);
+        if (!seen) bubble(anchor, 'Added to My garage. You’ll find it in the account menu.', 6000);
       }
     } catch {
       bubble(anchor, 'Could not save. Please try again.');

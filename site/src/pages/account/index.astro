@@ -288,7 +288,7 @@ const vehicleIndex = [...vehicleOptions]
     if (list === 'cars') {
       gar.setAttribute('aria-pressed', 'true');
       gar.dataset.remove = x.id; gar.dataset.list = 'cars';
-      gar.title = 'In My Garage · click to remove';
+      gar.title = 'Remove from My garage';
       gar.setAttribute('aria-label', `Remove ${label} from My cars`);
     } else {
       gar.dataset.own = x.id;

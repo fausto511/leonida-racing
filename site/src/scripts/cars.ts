@@ -375,7 +375,7 @@ function renderOwned() {
   document.querySelectorAll<HTMLElement>('[data-garage]').forEach((b) => {
     const on = owned.has(b.dataset.garage!);
     b.setAttribute('aria-pressed', String(on));
-    b.title = on ? 'In My Garage · click to remove' : 'Mark as owned · Adds the car to My Garage';
+    b.title = on ? 'Remove from My garage' : 'Mark as owned · adds it to My garage';
   });
   paintWish();
   paintOwnCounts();
@@ -456,7 +456,7 @@ document.addEventListener('click', async (e) => {
       if (next) {
         let seen = false;
         try { seen = localStorage.getItem('lr-garage-hint') === '1'; localStorage.setItem('lr-garage-hint', '1'); } catch { /* ignore */ }
-        if (!seen) bubble(gar, 'Added to My Garage. Your collection is under <b>My garage</b> in the account menu.', 6000);
+        if (!seen) bubble(gar, 'Added to My garage. You’ll find it in the account menu.', 6000);
       }
       if (state.own) render();
     } catch {

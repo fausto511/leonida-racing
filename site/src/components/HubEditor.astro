@@ -344,6 +344,9 @@ const base = import.meta.env.BASE_URL;
   .soon { padding: .1rem .45rem; border-radius: 999px; border: 1px solid var(--gh-line); font-size: .66rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--gh-muted); }
   .hc-form label.check { flex-direction: row; align-items: center; gap: .45rem; text-transform: none; letter-spacing: 0; font-size: .86rem; font-weight: 600; color: var(--gh-text); }
   .check input { width: 1rem; height: 1rem; accent-color: var(--lr-orange); }
+  /* the hint sits under the label (longer text since 10.11.; the label must not squeeze into three lines on phones) */
+  .hc-form label#ev-members-wrap { flex-wrap: wrap; row-gap: .15rem; }
+  #ev-members-wrap small { flex-basis: 100%; padding-left: 1.45rem; }
 
   .pub-state { padding: .35rem .75rem; border-radius: 999px; border: 1px solid var(--gh-line); font-size: .75rem; font-weight: 700; color: var(--gh-muted); }
   .role-selected { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: 1.4rem; padding: .9rem 1rem; border: 1px solid var(--lr-orange-border); border-radius: var(--gh-radius); background: var(--lr-orange-tint); }
