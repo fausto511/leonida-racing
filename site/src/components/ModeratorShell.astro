@@ -1,0 +1,84 @@
+---
+// Moderator area frame (RS-0102 stage 2, Fausto 10.11.2026): fixed left column with every
+// moderator page, grouped (Review / Reports / Community / Data), one line per entry, counters
+// right-aligned. A page can pass sub-filters (subs); they appear indented under its entry and are
+// driven by scripts/mod-shell.ts. Counters come from mod_overview(). Phones: the column folds
+// into a "Moderator menu" disclosure above the page.
+import '../styles/mod.css';
+export type ModKey = 'overview' | 'laps' | 'events' | 'tracks' | 'times' | 'content' | 'crews' | 'calendar' | 'track-list' | 'roles' | 'vehicles' | 'drivers' | 'channels';
+interface Props { active: ModKey; subs?: { key: string; label: string }[]; }
+const { active, subs = [] } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const m = `${base}moderator/`;
+const groups: { name: string; items: { key: ModKey; label: string; href: string; count?: string }[] }[] = [
+  { name: '', items: [{ key: 'overview', label: 'Overview', href: m }] },
+  { name: 'Review', items: [
+    { key: 'laps', label: 'Laps', href: `${m}laps/`, count: 'laps_review,videos_check' },
+    { key: 'events', label: 'Events', href: `${m}event-review/`, count: 'events_review,event_changes' },
+    { key: 'tracks', label: 'Tracks', href: `${m}tracks/`, count: 'tracks' },
+  ] },
+  { name: 'Reports', items: [
+    { key: 'times', label: 'Times', href: `${m}reports/`, count: 'time_reports' },
+    { key: 'content', label: 'Content', href: `${m}content/`, count: 'content_reports' },
+  ] },
+  { name: 'Community', items: [
+    { key: 'crews', label: 'Crews', href: `${m}crews/` },
+    { key: 'calendar', label: 'Event calendar', href: `${m}calendar/` },
+    { key: 'track-list', label: 'Track list', href: `${m}track-list/` },
+    { key: 'roles', label: 'Roles & requests', href: `${m}roles/`, count: 'requests' },
+  ] },
+  { name: 'Data', items: [
+    { key: 'vehicles', label: 'Vehicles', href: `${m}vehicles/` },
+    { key: 'drivers', label: 'Drivers', href: `${m}drivers/` },
+    { key: 'channels', label: 'Video channels', href: `${m}videos/` },
+  ] },
+];
+const activeLabel = groups.flatMap((g) => g.items).find((i) => i.key === active)?.label ?? 'Moderator';
+---
+<div class="modshell">
+  <details class="modside" open data-active={active}>
+    <summary class="modside-sum"><span>Moderator menu</span><b>{activeLabel}</b></summary>
+    <nav class="modside-nav" aria-label="Moderator tools">
+      <div class="modside-top">
+        <span class="modside-kicker">Moderator</span>
+        <a class="modside-back" href={base}>Back to the site</a>
+      </div>
+      {groups.map((g) => (
+        <div class="modside-g">
+          {g.name && <span class="modside-gn">{g.name}</span>}
+          {g.items.map((it) => (
+            <>
+              <a href={it.href} class:list={['modside-a', { 'is-active': it.key === active }]} data-count={it.count} aria-current={it.key === active ? 'page' : undefined}>
+                <span>{it.label}</span><span class="modside-n" hidden></span>
+              </a>
+              {it.key === active && subs.length > 0 && (
+                <div class="modside-subs" role="group" aria-label={`${it.label} filters`}>
+                  {subs.map((s) => (
+                    <button type="button" class="modside-sub" data-sub={s.key} aria-pressed="false"><span>{s.label}</span><span class="modside-sn" data-sub-n={s.key}></span></button>
+                  ))}
+                </div>
+              )}
+            </>
+          ))}
+        </div>
+      ))}
+    </nav>
+  </details>
+  <div class="modmain"><slot /></div>
+</div>
+<script>
+  import { loadModOverview } from '../scripts/mod-overview';
+  const side = document.querySelector<HTMLDetailsElement>('.modside')!;
+  // Phones: start folded so the page content comes first
+  if (window.matchMedia('(max-width: 899px)').matches) side.open = false;
+  loadModOverview().then((ov) => {
+    if (!ov) return;
+    side.querySelectorAll<HTMLElement>('[data-count]').forEach((a) => {
+      const n = (a.dataset.count ?? '').split(',').reduce((s, k) => s + (Number((ov.todo as any)[k]) || 0), 0);
+      const el = a.querySelector<HTMLElement>('.modside-n')!;
+      el.textContent = String(n);
+      el.hidden = n === 0;
+      if (n) a.setAttribute('aria-label', `${a.firstElementChild?.textContent ?? ''}, ${n} to do`);
+    });
+  });
+</script>

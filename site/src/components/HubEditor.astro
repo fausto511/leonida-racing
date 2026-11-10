@@ -10,11 +10,13 @@ import { PLATFORMS, comingLater } from '../data/platforms';
 import { crewLanguages, mainCrewLanguages } from '../data/languages';
 import { raceTypeLabels, layoutLabels, trackVehicleClasses } from '../data/tracks';
 const moreLanguages = Object.keys(crewLanguages).filter((k) => !mainCrewLanguages.includes(k)).sort((a, b) => crewLanguages[a].localeCompare(crewLanguages[b]));
-interface Props { mode: 'moderator' | 'crew' | 'events' | 'tracks'; }
-const { mode } = Astro.props;
+// tab (moderator only, RS-0102 stage 2): one fixed list per moderator page (Crews, Event calendar,
+// Track list, Roles & requests); the tab row is hidden and the left column's sub-filters drive the list.
+interface Props { mode: 'moderator' | 'crew' | 'events' | 'tracks'; tab?: 'crews' | 'events' | 'tracks' | 'roles' | 'requests'; }
+const { mode, tab } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
-<div id="hc-root" data-mode={mode}>
+<div id="hc-root" data-mode={mode} data-tab={tab}>
     <div id="backend-notice" class="notice lr-note lr-note-warn" hidden>
       <strong>Backend not connected.</strong>
       <span>No Supabase project is configured for this build, so nothing can be loaded or saved here.</span>
@@ -462,6 +464,60 @@ const base = import.meta.env.BASE_URL;
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
   const rootEl = $('hc-root');
+  const FIXED_TAB = rootEl.dataset.tab ?? '';
+  // Moderator pages (RS-0102 stage 2): list filters from the left column ('hc-filter'), counts back ('hc-counts')
+  // Start view from ?view= (the page's left column sets it); own read so script order doesn't matter
+  const urlView = new URLSearchParams(location.search).get('view') ?? '';
+  const DEFAULT_VIEW: Record<string, string> = { crews: 'live', events: 'upcoming', tracks: 'live' };
+  let listFilter = '';
+  let fixedPick = ''; // Roles & requests page: which of the two lists (set before access is known)
+  const isFuture = (e: any) => new Date(e.ends_at ?? e.starts_at).getTime() >= Date.now();
+  const isApproved = (e: any) => (e.review_status ?? 'approved') === 'approved';
+  const FILTERS: Record<string, Record<string, (r: any) => boolean>> = {
+    crews: { live: (c) => Boolean(c.is_published), hidden: (c) => !c.is_published },
+    events: {
+      upcoming: (e) => isApproved(e) && e.status !== 'cancelled' && !e.series_id && isFuture(e),
+      series: (e) => isApproved(e) && e.status !== 'cancelled' && Boolean(e.series_id) && isFuture(e),
+      past: (e) => isApproved(e) && e.status !== 'cancelled' && !isFuture(e),
+      cancelled: (e) => e.status === 'cancelled',
+    },
+    tracks: { live: (t) => Boolean(t.is_published), unpublished: (t) => !t.is_published },
+  };
+  if (FIXED_TAB && FILTERS[FIXED_TAB]) listFilter = FILTERS[FIXED_TAB][urlView] ? urlView : DEFAULT_VIEW[FIXED_TAB] ?? '';
+  if (FIXED_TAB === 'requests' || FIXED_TAB === 'roles') fixedPick = urlView === 'roles' ? 'roles' : 'requests';
+  function applyFilter(k: string, rows: any[]): any[] {
+    const f = FILTERS[k]?.[listFilter];
+    if (!f) return rows;
+    let out = rows.filter(f);
+    if (k === 'events') {
+      const asc = listFilter === 'upcoming' || listFilter === 'series';
+      out = [...out].sort((a, b) => (asc ? 1 : -1) * (new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()));
+      if (listFilter === 'series') { const seen = new Set(); out = out.filter((e) => (seen.has(e.series_id) ? false : (seen.add(e.series_id), true))); }
+    }
+    return out;
+  }
+  function emitCounts() {
+    if (!FIXED_TAB) return;
+    const counts: Record<string, number> = {};
+    const src: Record<string, () => any[]> = { crews: () => crews, events: () => events, tracks: () => tracks };
+    if (FILTERS[FIXED_TAB]) for (const [key, f] of Object.entries(FILTERS[FIXED_TAB])) {
+      let rows = src[FIXED_TAB]().filter(f);
+      if (FIXED_TAB === 'events' && key === 'series') rows = [...new Set(rows.map((e) => e.series_id))];
+      counts[key] = rows.length;
+    }
+    if (FIXED_TAB === 'requests' || FIXED_TAB === 'roles') { counts.requests = requests.length; counts.roles = roles.length; }
+    rootEl.dispatchEvent(new CustomEvent('hc-counts', { bubbles: true, detail: counts }));
+  }
+  rootEl.addEventListener('hc-filter', (e) => {
+    const key = String((e as CustomEvent).detail ?? '');
+    if (FIXED_TAB === 'roles' || FIXED_TAB === 'requests') {
+      fixedPick = key === 'roles' ? 'roles' : 'requests';
+      if (!contentEl.hidden) document.querySelector<HTMLElement>(`.hc-tab[data-kind="${fixedPick}"]`)?.click();
+      return;
+    }
+    listFilter = key;
+    renderList();
+  });
   const authBoxEl = document.getElementById('auth-box');
   const notModEl = document.getElementById('not-mod-notice');
   const contentEl = $('mod-content');
@@ -586,10 +642,11 @@ const base = import.meta.env.BASE_URL;
 
   // ------------------------------------------------------------ list
   function renderList() {
+    emitCounts();
     if (kind === 'roles') { renderRolesList(); return; }
     if (kind === 'requests') { renderRequestsList(); return; }
     if (kind === 'tracks') { renderTracksList(); return; }
-    const rows = kind === 'crews' ? visibleCrews() : visibleEvents();
+    const rows = applyFilter(kind, kind === 'crews' ? visibleCrews() : visibleEvents());
     listTitleEl.textContent = kind === 'crews' ? (isMod ? 'Crews' : 'My crews') : (isMod ? 'Events' : 'My events');
     newBtn.textContent = kind === 'crews' ? '+ New crew' : '+ New event';
     newBtn.hidden = kind === 'crews' ? !isMod : !canCreateEvent();
@@ -1434,7 +1491,7 @@ const base = import.meta.env.BASE_URL;
   const trackUrlOk = (u: string) => /^https:\/\/socialclub\.rockstargames\.com\//.test(u);
 
   function renderTracksList() {
-    const rows = visibleTracks();
+    const rows = applyFilter('tracks', visibleTracks());
     listTitleEl.textContent = isMod ? 'Tracks' : 'My tracks';
     newBtn.textContent = '+ New track';
     newBtn.hidden = !(isMod || isCreator);
@@ -1789,9 +1846,8 @@ const base = import.meta.env.BASE_URL;
   // ------------------------------------------------------------ wiring
   document.querySelectorAll<HTMLButtonElement>('.hc-tab').forEach((t) => t.addEventListener('click', () => {
     document.querySelectorAll('.hc-tab').forEach((x) => { x.classList.toggle('is-active', x === t); x.setAttribute('aria-selected', String(x === t)); });
-    if (MODE === 'moderator' && t.dataset.kind) { // keep ?tab= in sync with the moderator navigation (RS-0102)
+    if (MODE === 'moderator' && t.dataset.kind && !FIXED_TAB) { // keep ?tab= in sync with the moderator navigation (RS-0102)
       const u = new URL(location.href); u.searchParams.set('tab', t.dataset.kind); history.replaceState(null, '', u);
-      document.querySelectorAll<HTMLElement>('.modnav-link[data-key^="hub:"]').forEach((a) => { const on = a.dataset.key === `hub:${t.dataset.kind}`; a.classList.toggle('is-active', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     }
     kind = t.dataset.kind as Kind;
     selectedId = null;
@@ -1854,7 +1910,10 @@ const base = import.meta.env.BASE_URL;
       if (MODE === 'tracks') (document.querySelector('.hc-tab[data-kind="tracks"]') as HTMLElement).click();
     }
     // Moderator > Hub Content: open a tab from the navigation (?tab=crews|events|tracks|roles|requests, RS-0102)
-    if (MODE === 'moderator') {
+    if (MODE === 'moderator' && FIXED_TAB) {
+      (document.querySelector('.hc-tabs') as HTMLElement).hidden = true;
+      document.querySelector<HTMLElement>(`.hc-tab[data-kind="${fixedPick || FIXED_TAB}"]`)?.click();
+    } else if (MODE === 'moderator') {
       const want = (new URLSearchParams(location.search).get('tab') ?? '').replace(/[^a-z]/g, '');
       const tabEl = want ? document.querySelector<HTMLElement>(`.hc-tab[data-kind="${want}"]`) : null;
       if (tabEl && !tabEl.hidden) tabEl.click();

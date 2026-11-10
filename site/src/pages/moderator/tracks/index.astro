@@ -1,0 +1,132 @@
+---
+// Moderator > Review > Tracks (RS-0102 stage 2, Fausto 10.11.2026): community tracks that are not
+// published yet. Check the details against Social Club, then Publish or send a note to the creator.
+// Published tracks are edited under Community > Track list. RLS: moderators may update community_tracks.
+import Base from '../../../layouts/Base.astro';
+import ModeratorShell from '../../../components/ModeratorShell.astro';
+const subs = [
+  { key: 'review', label: 'To review' },
+  { key: 'noted', label: 'Note sent' },
+];
+---
+<Base title="Tracks — Moderator" description="Internal: review community tracks." section="moderator" noindex>
+  <section class="wrap mod-wrap">
+    <ModeratorShell active="tracks" subs={subs}>
+    <h1 class="display mod-title">Tracks</h1>
+    <p class="mod-lede" id="tr-sub">New submissions · oldest first. Published tracks are under Community › Track list.</p>
+    <p class="mq-msg" id="tr-gate" hidden></p>
+    <div class="mq" id="tr-body" hidden>
+      <div class="mq-list" id="tr-list"></div>
+      <section class="mq-detail" id="tr-detail" aria-live="polite"></section>
+    </div>
+    </ModeratorShell>
+  </section>
+</Base>
+<script>
+  import { backendConfigured, getSupabase } from '../../../scripts/supabase-client';
+  import { initModSubs } from '../../../scripts/mod-shell';
+  import { esc } from '../../../data/hub';
+  import { layoutLabels, raceTypeLabels } from '../../../data/tracks';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  let rows: any[] = [];
+  let names = new Map<string, string>();
+  let sel: string | null = null;
+  const FILTERS: Record<string, (t: any) => boolean> = { review: (t) => !t.review_note, noted: (t) => Boolean(t.review_note) };
+  const SUB: Record<string, string> = {
+    review: 'New submissions · oldest first. Published tracks are under Community › Track list.',
+    noted: 'You sent the creator a note · you can still publish.',
+  };
+  const subs = initModSubs('review', () => { sel = null; render(); });
+  const when = (iso: string) => new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' });
+  const km = (n: number) => `${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })} km`;
+
+  function render() {
+    $('tr-sub').textContent = SUB[subs.current];
+    Object.keys(FILTERS).forEach((k) => subs.count(k, rows.filter(FILTERS[k]).length));
+    const list = rows.filter(FILTERS[subs.current]);
+    if (!list.some((t) => t.track_id === sel)) sel = list[0]?.track_id ?? null;
+    $('tr-list').innerHTML = list.length ? list.map((t) => `<button type="button" class="mq-item${t.track_id === sel ? ' is-active' : ''}" data-id="${esc(t.track_id)}"><b>${esc(t.title)}</b><span class="mq-meta">${esc(names.get(t.created_by) ?? 'Unknown')} · ${esc(when(t.created_at))}</span></button>`).join('')
+      : `<p class="mq-empty">${subs.current === 'review' ? 'No tracks to review.' : 'No tracks with a note.'}</p>`;
+    const t = list.find((x) => x.track_id === sel);
+    if (!t) { $('tr-detail').innerHTML = ''; return; }
+    const facts: [string, string][] = [
+      ['Layout', (layoutLabels as any)[t.layout] ?? t.layout],
+      ['Length', km(t.length_km)],
+      ['Players', `${t.players_min}–${t.players_max}`],
+      ['Race type', (t.race_types ?? []).map((r: string) => (raceTypeLabels as any)[r] ?? r).join(', ') || '—'],
+      ['Vehicle classes', (t.vehicle_classes ?? []).join(', ') || '—'],
+      ['Updated', when(t.updated_at)],
+    ];
+    $('tr-detail').innerHTML = `
+      <div class="mq-head"><div><h2>${esc(t.title)}</h2><span class="mq-sub">By ${esc(names.get(t.created_by) ?? 'Unknown')} · submitted ${esc(when(t.created_at))}</span></div><span class="mq-chip">${subs.current === 'review' ? 'To review' : 'Note sent'}</span></div>
+      ${t.social_club_url ? `<a href="${esc(t.social_club_url)}" target="_blank" rel="noopener noreferrer" style="font-weight:600">Open on Social Club</a>` : '<p class="mq-msg is-error">No Social Club link.</p>'}
+      ${t.review_note ? `<p class="mq-quote">Your note: ${esc(t.review_note)}</p>` : ''}
+      <p class="mq-hint" style="margin:0">Compare these details with the Social Club page:</p>
+      <dl class="mq-facts">${facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+      <div class="mq-decide">
+        <label>Note to the creator (needed for “Send note”, max. 300 characters)<textarea id="tr-note" rows="2" maxlength="300">${esc(t.review_note ?? '')}</textarea></label>
+        <div class="mq-btns">
+          <button type="button" class="btn btn-p" data-act="publish">Publish</button>
+          <button type="button" class="btn btn-s" data-act="note">Send note</button>
+        </div>
+        <p class="mq-msg" id="tr-msg"></p>
+        <span class="mq-hint">Publish puts it on the Tracks page (then it is under Community › Track list). Details wrong? Edit them there after publishing, or tell the creator with a note.</span>
+      </div>`;
+  }
+
+  async function load() {
+    const sb = getSupabase();
+    const { data, error } = await sb.from('community_tracks').select('*').eq('is_published', false).order('created_at');
+    if (error) { $('tr-gate').hidden = false; $('tr-gate').textContent = `Could not load tracks: ${error.message}`; return; }
+    rows = data ?? [];
+    const ids = [...new Set(rows.map((t) => t.created_by).filter(Boolean))];
+    if (ids.length) {
+      const d = await sb.from('drivers').select('driver_id,display_name').in('driver_id', ids);
+      names = new Map(((d.data ?? []) as any[]).map((x) => [x.driver_id, x.display_name]));
+    }
+    render();
+  }
+
+  $('tr-list').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('[data-id]');
+    if (!b) return;
+    sel = b.dataset.id!;
+    render();
+  });
+  $('tr-detail').addEventListener('click', async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-act]');
+    if (!b || !sel) return;
+    const note = ($('tr-note') as HTMLTextAreaElement).value.trim();
+    const msg = $('tr-msg');
+    if (b.dataset.act === 'note' && !note) { msg.className = 'mq-msg is-error'; msg.textContent = 'Write the note first.'; return; }
+    b.disabled = true;
+    const patch = b.dataset.act === 'publish' ? { is_published: true, review_note: note || null } : { review_note: note };
+    const { error } = await getSupabase().from('community_tracks').update(patch).eq('track_id', sel);
+    if (error) { msg.className = 'mq-msg is-error'; msg.textContent = error.message; b.disabled = false; return; }
+    if (b.dataset.act === 'publish') rows = rows.filter((t) => t.track_id !== sel);
+    else rows = rows.map((t) => (t.track_id === sel ? { ...t, review_note: note } : t));
+    sel = null;
+    render();
+  });
+
+  async function init(session: any) {
+    $('tr-body').hidden = true;
+    if (!session) { $('tr-gate').hidden = false; $('tr-gate').textContent = 'Log in as a moderator to review tracks.'; return; }
+    const mod = await getSupabase().from('moderators').select('driver_id').limit(1);
+    if (mod.error || !mod.data?.length) { $('tr-gate').hidden = false; $('tr-gate').textContent = 'This page is for moderators only.'; return; }
+    $('tr-gate').hidden = true;
+    $('tr-body').hidden = false;
+    await load();
+  }
+  if (backendConfigured) {
+    const sb = getSupabase();
+    sb.auth.getSession().then(({ data }) => init(data?.session ?? null));
+  } else { $('tr-gate').hidden = false; $('tr-gate').textContent = 'Backend not connected.'; }
+</script>
+<style>
+  .mod-wrap { padding-block: clamp(1.5rem, 4vw, 3rem) clamp(2.5rem, 6vw, 4.5rem); }
+  .mod-title { margin: 0 0 .6rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .mod-lede { margin: 0 0 1.5rem; color: var(--lr-soft); font-size: .92rem; max-width: 46rem; }
+  [hidden] { display: none !important; }
+</style>

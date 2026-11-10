@@ -1,0 +1,31 @@
+---
+// Moderator > Community > Crews (RS-0102 stage 2, Fausto 10.11.2026). Crews list with Visible / Hidden.
+import Base from '../../../layouts/Base.astro';
+import ModeratorShell from '../../../components/ModeratorShell.astro';
+import HubEditor from '../../../components/HubEditor.astro';
+const subs = [{ key: 'live', label: 'Visible' }, { key: 'hidden', label: 'Hidden' }];
+---
+<Base title="Crews — Moderator" description="Internal: manage crews." section="moderator" noindex>
+  <section class="wrap mod-wrap">
+    <ModeratorShell active="crews" subs={subs}>
+    <h1 class="display mod-title">Crews</h1>
+    <p class="mq-intro">All crews. Hidden crews are not shown on the Crews page. Create a crew with “+ New crew”.</p>
+    <HubEditor mode="moderator" tab="crews" />
+    </ModeratorShell>
+  </section>
+</Base>
+<script>
+  import { initModSubs } from '../../../scripts/mod-shell';
+  const root = document.getElementById('hc-root')!;
+  const subs = initModSubs('live', (key) => root.dispatchEvent(new CustomEvent('hc-filter', { detail: key })));
+  root.addEventListener('hc-counts', (e) => {
+    const c = (e as CustomEvent).detail as Record<string, number>;
+    Object.entries(c).forEach(([k, n]) => subs.count(k, n));
+  });
+  root.dispatchEvent(new CustomEvent('hc-filter', { detail: subs.current }));
+</script>
+<style>
+  .mod-wrap { padding-block: clamp(1.5rem, 4vw, 3rem) clamp(2.5rem, 6vw, 4.5rem); }
+  .mod-title { margin: 0 0 .6rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .mq-intro { margin: 0 0 1.5rem; }
+</style>

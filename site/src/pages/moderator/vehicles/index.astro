@@ -6,7 +6,7 @@
 // measured values are never overwritten: a new value supersedes the old one
 // and keeps its source, game version and evidence.
 import Base from '../../../layouts/Base.astro';
-import ModeratorNav from '../../../components/ModeratorNav.astro';
+import ModeratorShell from '../../../components/ModeratorShell.astro';
 import { readdirSync } from 'node:fs';
 import { gtaTitles } from '../../../data/gta-titles';
 import path from 'node:path';
@@ -14,13 +14,14 @@ import path from 'node:path';
 // Manufacturer logos that exist in public/images/logos (<slug>-gta-6-logo.svg)
 const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
   .filter((f) => f.endsWith('-gta-6-logo.svg')).map((f) => f.replace('-gta-6-logo.svg', '')).sort();
+// RS-0102 stage 2 (10.11.2026): All / Missing data in the left column; one vehicle = three tabs.
+const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'Missing data' }];
 ---
 <Base title="Vehicles — Moderator" description="Internal: maintain vehicle data." section="moderator" noindex>
   <section class="wrap mod-wrap">
-    <ModeratorNav active="vehicles" />
-    <p class="eyebrow">Cars Operations</p>
+    <ModeratorShell active="vehicles" subs={subs}>
     <h1 class="display mod-title">Vehicles</h1>
-    <p class="mod-lede">The database is the only source of vehicle data. Changes appear on the site with the next build: automatically every 3 hours, or right away if you run <em>Deploy site to GitHub Pages</em> in GitHub → Actions. Measured values are never overwritten — a new value replaces the current one and the old one stays in the history.</p>
+    <p class="mod-lede">The database is the only source of vehicle data. Changes appear on the site with the next build (every 3 hours, or run <em>Deploy site to GitHub Pages</em> in GitHub → Actions).</p>
 
     <div id="vx-backend" class="notice" hidden><strong>Backend not connected.</strong><span>Vehicles cannot be loaded from this build.</span></div>
     <div id="vx-auth" class="panel vx-box" hidden><p>Log in as a moderator to edit vehicles.</p></div>
@@ -39,26 +40,38 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
       <div class="vx-main">
         <p id="vx-msg" class="vx-msg" hidden></p>
         <p id="vx-empty" class="vx-empty">Pick a vehicle on the left or create a new one.</p>
+        <div class="vx-head" id="vx-head" hidden>
+          <h2 class="vx-title" id="vx-title"></h2>
+          <div class="vx-tabs" role="tablist" aria-label="Vehicle data">
+            <button type="button" role="tab" data-vtab="base" aria-selected="true">Base data</button>
+            <button type="button" role="tab" data-vtab="values" aria-selected="false">Measured values</button>
+            <button type="button" role="tab" data-vtab="log" aria-selected="false">Change history</button>
+          </div>
+        </div>
 
         <form id="vx-form" class="panel vx-form" hidden>
-          <h2 class="vx-h2" id="vx-form-title">Vehicle</h2>
+          <h2 class="vx-h2" id="vx-form-title" hidden>Vehicle</h2>
           <div class="vx-fields">
+            <h3 class="vx-grp">Name</h3>
             <label>ID (URL slug) *<input name="vehicle_id" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="bravado-banshee" /><small>Cannot be changed later (links, runs and owned vehicles use it).</small></label>
             <label>Manufacturer *<input name="make" required maxlength="40" /></label>
             <label>Model *<input name="model" required maxlength="60" /></label>
             <label>Other names<input name="other_names" maxlength="400" placeholder="e.g. Cheetah Classic; '95 Cheetah" /><small>Separate with ; — earlier games, unconfirmed names, spellings. Used for search only; the official name stays in Model.</small></label>
             <label>Logo *<select name="manufacturer_logo_slug" required>{logoSlugs.map((s) => <option value={s}>{s}</option>)}</select></label>
+            <h3 class="vx-grp">Class</h3>
             <fieldset class="vx-classes"><legend>GTA class(es) *</legend><div id="vx-class-boxes"></div></fieldset>
             <label>Seats<input name="seats" type="number" min="1" max="16" step="1" /></label>
             <label>Drive<select name="drive"><option value="">Unknown (n/a)</option><option>RWD</option><option>FWD</option><option>AWD</option></select></label>
-            <label>Access requirement<select name="acquisition"><option value="">None</option><option value="pre-order">Pre-order bonus</option><option value="ultimate-edition">Ultimate Edition</option><option value="gta-plus">GTA+</option></select></label>
-            <label>Added with (release)<select name="release_id" id="vx-release"></select><small>Empty = not officially announced (page shows "TBA" and is not indexed).</small></label>
-            <label>First seen in<input name="first_seen_in" list="vx-firstseen" maxlength="60" /><datalist id="vx-firstseen"></datalist></label>
-            <label>Real-life inspiration<input name="real_life_inspiration" maxlength="80" /></label>
             <label>Model family<input name="family" list="vx-families" maxlength="40" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. dominator" /><datalist id="vx-families"></datalist><small>Same slug for all models of a family. From 5 models the family gets its own page.</small></label>
+            <h3 class="vx-grp">Availability</h3>
+            <label>Added with (release)<select name="release_id" id="vx-release"></select><small>Empty = not officially announced (page shows "TBA" and is not indexed).</small></label>
+            <label>Access requirement<select name="acquisition"><option value="">None</option><option value="pre-order">Pre-order bonus</option><option value="ultimate-edition">Ultimate Edition</option><option value="gta-plus">GTA+</option></select></label>
             <label>Can be sold<select name="sellable"><option value="">Unknown</option><option value="yes">Yes</option><option value="no">No (e.g. free bonus car)</option></select></label>
+            <label>First seen in<input name="first_seen_in" list="vx-firstseen" maxlength="60" /><datalist id="vx-firstseen"></datalist></label>
+            <h3 class="vx-grp">Background</h3>
             <label>GTA history<select name="history" id="vx-history"><option value="">Not checked yet</option><option value="new">New in GTA VI</option><option value="returning">Returning (pick titles)</option></select><small>Returning = same model name in an earlier title.</small></label>
             <fieldset class="vx-classes" id="vx-titles" hidden><legend>Earlier titles with this model name</legend><div class="vx-title-boxes">{gtaTitles.map((t) => <label><input type="checkbox" name="previous_games" value={t.slug} /> {t.short}</label>)}</div></fieldset>
+            <label>Real-life inspiration<input name="real_life_inspiration" maxlength="80" /></label>
             <label class="vx-check"><input type="checkbox" name="has_photo" /> Garage photo exists (<code>public/images/vehicles/&lt;id&gt;-640/1280/1920.webp</code>)</label>
           </div>
           <div class="vx-actions">
@@ -68,7 +81,6 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
         </form>
 
         <section id="vx-values" class="panel vx-form" hidden>
-          <h2 class="vx-h2">Measured values</h2>
           <p class="vx-hint">Price, sell value, top speed, the Gellhorn reference lap and the in-game stats (0–10) and ratings from the vehicle menu. Measure stock first; tuned (= fully tuned) values are kept separately. Each value keeps where it came from. Adding a new value makes the previous one (same value and tuning) "superseded".</p>
           <div id="vx-value-list"></div>
           <form id="vx-value-form" class="vx-fields vx-value-form">
@@ -87,11 +99,11 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
         </section>
 
         <section id="vx-log" class="panel vx-form" hidden>
-          <h2 class="vx-h2">Change history</h2>
           <div id="vx-log-list"></div>
         </section>
       </div>
     </div>
+  </ModeratorShell>
   </section>
 </Base>
 
@@ -118,6 +130,14 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
   .vx-fields small, .vx-hint { font-weight: 400; color: var(--gh-muted); font-size: .72rem; }
   .vx-hint { margin: 0 0 .8rem; font-size: .8rem; }
   .vx-wide { grid-column: 1 / -1; }
+  .vx-head { display: flex; flex-direction: column; gap: 12px; }
+  .vx-title { margin: 0; font-size: 26px; line-height: 1.2; font-weight: 700; }
+  .vx-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--lr-line); overflow-x: auto; }
+  .vx-tabs button { height: 40px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: transparent; color: var(--lr-soft); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .vx-tabs button[aria-selected="true"] { color: var(--lr-text); border-bottom-color: var(--lr-orange); }
+  :global(.vx-list small.vx-miss) { color: var(--lr-coral); display: block; }
+  .vx-grp { grid-column: 1 / -1; margin: .6rem 0 -.2rem; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--lr-orange); }
+  .vx-grp:first-child { margin-top: 0; }
   .vx-classes { grid-column: 1 / -1; border: 1px solid var(--gh-line); border-radius: var(--gh-radius); padding: .5rem .7rem; }
   :global(#vx-class-boxes) { display: flex; flex-wrap: wrap; gap: .3rem 1rem; }
   :global(#vx-class-boxes label) { flex-direction: row; align-items: center; gap: .35rem; font-weight: 600; color: var(--gh-text); }
@@ -144,6 +164,7 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
 <script>
   import { backendConfigured, getSupabase } from '../../../scripts/supabase-client';
   import { esc } from '../../../data/hub';
+  import { initModSubs } from '../../../scripts/mod-shell';
 
   const CLASSES = ['Super', 'Sports', 'Sports Classics', 'Muscle', 'Coupes', 'Sedans', 'Compacts', 'SUVs', 'Off-Road', 'Vans', 'Utility', 'Motorcycles', 'Cycles', 'Open Wheel', 'Industrial', 'Commercial', 'Service', 'Emergency', 'Military'];
   const METRIC: Record<string, string> = { price_gtad: 'Price', sell_price_gtad: 'Sell value', top_speed_mph: 'Top speed', gellhorn_reference_lap_ms: 'Gellhorn ref. lap',
@@ -156,6 +177,19 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
   let vehicles: any[] = [];
   let releases: any[] = [];
   let selected: any = null; // null + form visible = new vehicle
+  let vtab: 'base' | 'values' | 'log' = 'base';
+  // Missing data: what a complete vehicle page needs and is easy to forget
+  const missing = (v: any) => [!v.has_photo && 'no photo', v.previous_games == null && 'history not checked', !(v.classes ?? []).length && 'no class'].filter(Boolean) as string[];
+  const subs = initModSubs('all', () => renderList());
+  function showTab(t: typeof vtab) {
+    vtab = t;
+    document.querySelectorAll<HTMLButtonElement>('[data-vtab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.vtab === t)));
+    if (!selected) return;
+    form.hidden = t !== 'base';
+    $('vx-values').hidden = t !== 'values';
+    $('vx-log').hidden = t !== 'log';
+  }
+  document.querySelectorAll<HTMLButtonElement>('[data-vtab]').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.vtab as typeof vtab)));
 
   function msg(text: string, kind: 'ok' | 'error' = 'ok') {
     const m = $('vx-msg'); m.hidden = !text; m.textContent = text; m.className = `vx-msg is-${kind}`;
@@ -181,9 +215,12 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
 
   function renderList() {
     const q = $<HTMLInputElement>('vx-search').value.trim().toLowerCase();
-    const list = vehicles.filter((v) => `${v.make} ${v.model} ${v.vehicle_id} ${(v.other_names ?? []).join(' ')}`.toLowerCase().includes(q));
-    $('vx-count').textContent = `${list.length} of ${vehicles.length} vehicles`;
-    $('vx-list').innerHTML = list.map((v) => `<li><button type="button" data-id="${esc(v.vehicle_id)}" class="${selected?.vehicle_id === v.vehicle_id ? 'is-active' : ''}">${esc(v.make)} ${esc(v.model)}${v.release_id ? '' : ' <small>· not announced</small>'}</button></li>`).join('');
+    subs.count('all', vehicles.length);
+    subs.count('missing', vehicles.filter((v) => missing(v).length).length);
+    const base = subs.current === 'missing' ? vehicles.filter((v) => missing(v).length) : vehicles;
+    const list = base.filter((v) => `${v.make} ${v.model} ${v.vehicle_id} ${(v.other_names ?? []).join(' ')}`.toLowerCase().includes(q));
+    $('vx-count').textContent = `${list.length} of ${base.length} vehicles`;
+    $('vx-list').innerHTML = list.map((v) => { const miss = subs.current === 'missing' ? missing(v) : []; return `<li><button type="button" data-id="${esc(v.vehicle_id)}" class="${selected?.vehicle_id === v.vehicle_id ? 'is-active' : ''}">${esc(v.make)} ${esc(v.model)}${v.release_id ? '' : ' <small>· not announced</small>'}${miss.length ? `<small class="vx-miss">${esc(miss.join(' · '))}</small>` : ''}</button></li>`; }).join('');
   }
 
   function fillReleaseSelects() {
@@ -220,7 +257,10 @@ const logoSlugs = readdirSync(path.join(process.cwd(), 'public/images/logos'))
     const extra = [...cls].filter((c) => !CLASSES.includes(c));
     $('vx-class-boxes').innerHTML = [...CLASSES, ...extra].map((c) => `<label><input type="checkbox" name="classes" value="${esc(c)}" ${cls.has(c) ? 'checked' : ''} /> ${esc(c)}</label>`).join('');
     $('vx-updated').textContent = v?.updated_at ? `Last change ${new Date(v.updated_at).toLocaleString()}` : '';
-    $('vx-values').hidden = !v; $('vx-log').hidden = !v;
+    $('vx-head').hidden = false;
+    $('vx-title').textContent = v ? `${v.make} ${v.model}` : 'New vehicle';
+    (document.querySelector('.vx-tabs') as HTMLElement).hidden = !v;
+    if (v) showTab(vtab); else { $('vx-values').hidden = true; $('vx-log').hidden = true; }
     renderList();
     if (v) { loadValues(); loadLog(); }
   }

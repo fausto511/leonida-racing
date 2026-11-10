@@ -2,20 +2,44 @@
 // Moderator > Review > Events (RS-0102 stage 1, 09.11.2026): event review (host stages, DEC-0209)
 // on its own page instead of on top of Hub Content. The component checks moderator rights itself.
 import Base from '../../../layouts/Base.astro';
-import ModeratorNav from '../../../components/ModeratorNav.astro';
+import ModeratorShell from '../../../components/ModeratorShell.astro';
 import EventReview from '../../../components/EventReview.astro';
+// RS-0102 stage 2 (10.11.2026): views as sub-filters in the left column.
+const subs = [
+  { key: 'new', label: 'New' },
+  { key: 'changes', label: 'Changes to live' },
+  { key: 'waiting', label: 'Waiting for host' },
+  { key: 'quiet', label: 'No sign-ups' },
+  { key: 'hosts', label: 'Host levels' },
+];
 ---
 <Base title="Event review — Moderator" description="Internal: review events submitted by hosts." section="moderator" noindex>
   <section class="wrap mod-wrap">
-    <ModeratorNav active="event-review" />
-    <p class="eyebrow">Review</p>
-    <h1 class="display mod-title">Event review</h1>
-    <p class="mod-lede">New events and series from stage 1 and 2 hosts, changes to live events, and the host stages.</p>
+    <ModeratorShell active="events" subs={subs}>
+    <h1 class="display mod-title">Events</h1>
+    <p class="mod-lede" id="er-sub">New submissions from stage 1 and 2 hosts · soonest start first.</p>
     <EventReview />
     <p class="er-empty-note" id="er-empty-note" hidden>Nothing to review right now, or you are not logged in as a moderator.</p>
+  </ModeratorShell>
   </section>
 </Base>
 <script>
+  import { initModSubs } from '../../../scripts/mod-shell';
+  const SUB: Record<string, string> = {
+    new: 'New submissions from stage 1 and 2 hosts · soonest start first.',
+    changes: 'Changes to live events and series · the live version stays until you approve.',
+    waiting: 'Sent back to the host with your note · you can still decide.',
+    quiet: 'Series without sign-ups for several dates · the host was asked.',
+    hosts: 'Host levels · who may publish how much.',
+  };
+  const root = document.getElementById('er-root')!;
+  const subs = initModSubs('new', (key) => { document.getElementById('er-sub')!.textContent = SUB[key]; root.dispatchEvent(new CustomEvent('er-view', { detail: key })); });
+  document.getElementById('er-sub')!.textContent = SUB[subs.current];
+  root.dispatchEvent(new CustomEvent('er-view', { detail: subs.current }));
+  root.addEventListener('er-counts', (e) => {
+    const c = (e as CustomEvent).detail as Record<string, number>;
+    ['new', 'changes', 'waiting', 'quiet', 'hosts'].forEach((k) => subs.count(k, c[k] ?? 0));
+  });
   // EventReview stays hidden for non-moderators; show a short note so the page is never blank
   setTimeout(() => { const r = document.getElementById('er-root'); if (r?.hidden) document.getElementById('er-empty-note')!.hidden = false; }, 2500);
 </script>

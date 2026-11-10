@@ -5,34 +5,36 @@
 // 3. Waiting for the host (needs changes): reason shown, Approve / Reject still possible.
 // 4. Hosts: stage 1-3, daily limit (stage 3), blocked. Rows exist for everyone who submitted.
 // The database (moderate_event, set_event_host) checks moderator rights and the rules.
-// Mod alerts in #mod-alerts link to moderator/hub/, this section sits on top of that page.
+// Mod alerts in #mod-alerts link to moderator/hub/, which forwards to the moderator Overview.
 // COPY STATUS: Claude placeholders, internal page (moderators only).
 import '../styles/hub.css';
 ---
+<!-- RS-0102 stage 2 (10.11.2026): one view at a time, chosen in the moderator left column
+     (new · changes · waiting · quiet · hosts); the page dispatches 'er-view' and listens to 'er-counts'. -->
 <section class="er" id="er-root" hidden>
   <div class="er-head">
-    <h2 class="er-title">Event review <span class="er-count" id="er-count"></span></h2>
+    <span class="er-count" id="er-count"></span>
     <button type="button" class="btn btn-s btn-sm" id="er-reload">Reload</button>
   </div>
   <p class="er-msg" id="er-msg" aria-live="polite"></p>
-  <div id="er-pending"></div>
-  <div id="er-series"></div>
-  <div id="er-changes"></div>
-  <div id="er-waiting"></div>
-  <details class="er-hosts" id="er-hosts-box">
-    <summary>Hosts &amp; stages <span id="er-hosts-n"></span></summary>
+  <div data-er-view="new"><div id="er-pending"></div><div id="er-series-new"></div></div>
+  <div data-er-view="changes" hidden><div id="er-changes"></div><div id="er-series-chg"></div></div>
+  <div data-er-view="waiting" hidden><div id="er-waiting"></div><div id="er-series-wait"></div></div>
+  <div data-er-view="quiet" hidden><div id="er-series-quiet"></div></div>
+  <div class="er-hosts" id="er-hosts-box" data-er-view="hosts" hidden>
     <p class="er-hint">Stage 1: one event in review. Stage 2: up to 3 in review (gets the Event Host role). Stage 3: publishes without review, daily limit per 24 hours. Blocked: can't submit new events. Hosts appear here after their first submission.</p>
     <div class="er-table-wrap"><table class="er-table">
       <thead><tr><th>Host</th><th>Stage</th><th>Daily limit</th><th>Blocked</th><th>Approved without changes</th><th></th></tr></thead>
       <tbody id="er-hosts"></tbody>
     </table></div>
-  </details>
+  </div>
 </section>
 
 <style>
   .er[hidden], .er [hidden] { display: none !important; }
-  .er { margin-bottom: 2rem; padding: 1.1rem 1.2rem; border: 1px solid var(--lr-orange-border); border-radius: 8px; background: var(--lr-card); }
+  .er { margin-bottom: 2rem; }
   .er-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  :global(.er-empty) { padding: 20px; border: 1px dashed var(--lr-line-strong); border-radius: 8px; text-align: center; color: var(--lr-muted); font-size: 14px; }
   .er-title { margin: 0; font-size: 1.15rem; }
   .er-count { color: var(--gh-yellow); }
   .er-msg { margin: .5rem 0 0; font-size: .85rem; min-height: 1em; }
@@ -51,7 +53,6 @@ import '../styles/hub.css';
   :global(.er-actions) { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .7rem; }
   :global(.er-actions textarea) { flex: 1 1 18rem; min-height: 2.4rem; padding: .45rem .6rem; border: 1px solid var(--gh-line); border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: .85rem; }
   .er-hosts { margin-top: 1.2rem; }
-  .er-hosts > summary { cursor: pointer; font-weight: 700; font-size: .9rem; }
   .er-hint { font-size: .8rem; color: var(--gh-muted); max-width: 48rem; }
   .er-table-wrap { overflow-x: auto; }
   .er-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
@@ -115,23 +116,40 @@ import '../styles/hub.css';
     const waiting = evs.filter((e) => e.review_status === 'needs_changes');
     const card = (e: any, body: string) => `<div class="er-card">${hostLine(e, reviews.get(e.event_id))}${body}</div>`;
     const row = (e: any) => `<div class="ev-list">${eventRowHtml(e, { full: true, side: '' })}</div>`;
-    $('er-pending').innerHTML = `<p class="er-group-t">Waiting for review (${pending.length})</p>`
-      + (pending.length ? pending.map((e) => card(e, row(e) + actions(e.event_id, 'event'))).join('') : '<p class="er-note">Nothing to review.</p>');
-    $('er-changes').innerHTML = chg.length ? `<p class="er-group-t">Changes to live events (${chg.length})</p>` + chg.map((e) => {
+    $('er-pending').innerHTML = pending.length ? `<p class="er-group-t">Single events (${pending.length})</p>` + pending.map((e) => card(e, row(e) + actions(e.event_id, 'event'))).join('') : '';
+    $('er-changes').innerHTML = chg.length ? `<p class="er-group-t">Live events (${chg.length})</p>` + chg.map((e) => {
       const p = reviews.get(e.event_id).pending ?? {};
       const diff = Object.keys(p).map((k) => `<tr><th>${esc(FIELD[k] ?? k)}</th><td>${esc(e[k] ?? '—')}</td><td class="is-new">${esc(p[k] ?? '— (removed)')}</td></tr>`).join('');
       return card(e, `<p class="er-note"><strong>${esc(e.title)}</strong> · live since approval</p><table class="er-diff"><thead><tr><th>Field</th><th>Live now</th><th>New</th></tr></thead><tbody>${diff}</tbody></table>` + actions(e.event_id, 'changes'));
     }).join('') : '';
-    $('er-waiting').innerHTML = waiting.length ? `<p class="er-group-t">Waiting for the host (${waiting.length})</p>`
+    $('er-waiting').innerHTML = waiting.length ? `<p class="er-group-t">Single events (${waiting.length})</p>`
       + waiting.map((e) => card(e, `<p class="er-note">Your note: ${esc(reviews.get(e.event_id)?.note ?? '—')}</p>` + row(e) + actions(e.event_id, 'event'))).join('') : '';
     localizeTimes(root);
     const open = pending.length + chg.length + seriesOpen;
-    $('er-count').textContent = open ? `(${open})` : '';
+    $('er-count').textContent = '';
+    counts = { new: pending.length + sCounts.new, changes: chg.length + sCounts.changes, waiting: waiting.length + sCounts.waiting, quiet: sCounts.quiet, hosts: hosts.size };
+    root.dispatchEvent(new CustomEvent('er-counts', { bubbles: true, detail: { ...counts, open } }));
     renderHosts();
+    showView(view);
   }
 
   // ---- Series (RS-0095). COPY STATUS: Claude placeholders, Codex review pending. ----
   let seriesOpen = 0;
+  let sCounts = { new: 0, changes: 0, waiting: 0, quiet: 0 };
+  let counts: Record<string, number> = {};
+  let view = ((v) => (['new', 'changes', 'waiting', 'quiet', 'hosts'].includes(v) ? v : 'new'))(new URLSearchParams(location.search).get('view') ?? '');
+  const EMPTY: Record<string, string> = { new: 'No new events or series to review.', changes: 'No changes waiting.', waiting: 'Nothing is waiting for a host.', quiet: 'No series without sign-ups.' };
+  function showView(v: string) {
+    view = v;
+    root.querySelectorAll<HTMLElement>('[data-er-view]').forEach((el) => {
+      el.hidden = el.dataset.erView !== v;
+      if (el.dataset.erView !== 'hosts') {
+        el.querySelector('.er-empty')?.remove();
+        if (!el.hidden && !counts[v]) el.insertAdjacentHTML('beforeend', `<p class="er-empty">${EMPTY[v] ?? 'Nothing here.'}</p>`);
+      }
+    });
+  }
+  root.addEventListener('er-view', (e) => showView(String((e as CustomEvent).detail)));
   let leagueRounds = new Map<string, any[]>();
   const RULE = (s: any) => s.kind === 'league'
     ? `Championship · ${(leagueRounds.get(s.series_id) ?? []).length} rounds: ${(leagueRounds.get(s.series_id) ?? []).map((x) => when(x.starts_at)).join(', ')}`
@@ -140,7 +158,7 @@ import '../styles/hub.css';
     const sb = getSupabase();
     const { data, error } = await sb.from('hub_event_series').select('*').eq('status', 'active')
       .or('review_status.in.(pending,needs_changes),pending.not.is.null,mod_alert_at.not.is.null').order('created_at');
-    if (error) { $('er-series').innerHTML = `<p class="er-note er-warn">Series could not be loaded: ${esc(error.message)}</p>`; seriesOpen = 0; return; }
+    if (error) { $('er-series-new').innerHTML = `<p class="er-note er-warn">Series could not be loaded: ${esc(error.message)}</p>`; seriesOpen = 0; sCounts = { new: 0, changes: 0, waiting: 0, quiet: 0 }; return; }
     const rows = (data ?? []) as any[];
     const lg = rows.filter((r) => r.kind === 'league').map((r) => r.series_id);
     leagueRounds = new Map();
@@ -158,6 +176,7 @@ import '../styles/hub.css';
     const chg = rows.filter((r) => r.review_status === 'approved' && r.pending);
     const quiet = rows.filter((r) => r.review_status === 'approved' && r.mod_alert_at);
     seriesOpen = review.length + chg.length + quiet.length;
+    sCounts = { new: review.length, changes: chg.length, waiting: waiting.length, quiet: quiet.length };
     const meta = (r: any) => {
       const h = hosts.get(r.created_by);
       return `<div class="er-meta"><span>Host <strong>${esc(names.get(r.created_by) ?? 'Unknown')}</strong>${h ? ` · stage ${h.level}${h.blocked ? ' · blocked' : ''}` : ''}</span>`
@@ -175,21 +194,18 @@ import '../styles/hub.css';
         : `<button type="button" class="btn btn-p btn-sm" data-sact="keep">Keep running</button><textarea maxlength="300" placeholder="Reason for the host (required to cancel)"></textarea><button type="button" class="btn btn-danger btn-sm" data-sact="cancel">Cancel series</button>`)
       + '</div>';
     const card = (r: any, inner: string) => `<div class="er-card">${meta(r)}${inner}</div>`;
-    let html = '';
-    if (review.length) html += `<p class="er-group-t">New series &amp; championships (${review.length})</p>` + review.map((r) => card(r, body(r) + `<p class="er-note">Approving publishes all upcoming ${r.kind === 'league' ? 'rounds of this championship' : 'dates of this series'}.</p>` + acts(r.series_id, 'review'))).join('');
-    if (chg.length) html += `<p class="er-group-t">Changes to live series (${chg.length})</p>` + chg.map((r) => {
+    $('er-series-new').innerHTML = !review.length ? '' : `<p class="er-group-t">Series &amp; championships (${review.length})</p>` + review.map((r) => card(r, body(r) + `<p class="er-note">Approving publishes all upcoming ${r.kind === 'league' ? 'rounds of this championship' : 'dates of this series'}.</p>` + acts(r.series_id, 'review'))).join('');
+    $('er-series-chg').innerHTML = !chg.length ? '' : `<p class="er-group-t">Live series (${chg.length})</p>` + chg.map((r) => {
       const p = r.pending ?? {};
       const diff = Object.keys(p).map((k) => `<tr><th>${esc(FIELD[k] ?? k)}</th><td>${esc(r[k] ?? '—')}</td><td class="is-new">${esc(p[k] ?? '— (removed)')}</td></tr>`).join('');
       return card(r, `<p class="er-note"><strong>${esc(r.title)}</strong> · applies to all upcoming dates</p><table class="er-diff"><thead><tr><th>Field</th><th>Live now</th><th>New</th></tr></thead><tbody>${diff}</tbody></table>` + acts(r.series_id, 'changes'));
     }).join('');
-    if (quiet.length) html += `<p class="er-group-t">Series without sign-ups (${quiet.length})</p>` + quiet.map((r) => card(r, body(r) + `<p class="er-note er-warn">No sign-ups for the last ${r.empty_count} dates. The host was asked whether it is still running.</p>` + acts(r.series_id, 'quiet'))).join('');
-    if (waiting.length) html += `<p class="er-group-t">Series waiting for the host (${waiting.length})</p>` + waiting.map((r) => card(r, `<p class="er-note">Your note: ${esc(r.note ?? '—')}</p>` + body(r) + acts(r.series_id, 'review'))).join('');
-    $('er-series').innerHTML = html;
+    $('er-series-quiet').innerHTML = !quiet.length ? '' : `<p class="er-group-t">Series (${quiet.length})</p>` + quiet.map((r) => card(r, body(r) + `<p class="er-note er-warn">No sign-ups for the last ${r.empty_count} dates. The host was asked whether it is still running.</p>` + acts(r.series_id, 'quiet'))).join('');
+    $('er-series-wait').innerHTML = !waiting.length ? '' : `<p class="er-group-t">Series (${waiting.length})</p>` + waiting.map((r) => card(r, `<p class="er-note">Your note: ${esc(r.note ?? '—')}</p>` + body(r) + acts(r.series_id, 'review'))).join('');
   }
 
   function renderHosts() {
     const rows = [...hosts.values()];
-    $('er-hosts-n').textContent = `(${rows.length})`;
     $('er-hosts').innerHTML = rows.length ? rows.map((h) => `<tr data-driver="${esc(h.driver_id)}">
       <td>${esc(names.get(h.driver_id) ?? 'Unknown')}${h.stage3_suggested_at && h.level < 3 ? '<span class="er-sugg" title="5 events approved without changes">Stage 3 suggested</span>' : ''}</td>
       <td><select name="level">${[1, 2, 3].map((n) => `<option value="${n}"${n === h.level ? ' selected' : ''}>${n}</option>`).join('')}</select></td>

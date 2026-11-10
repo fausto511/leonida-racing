@@ -1,0 +1,31 @@
+---
+// Moderator > Community > Roles & requests (RS-0102 stage 2, Fausto 10.11.2026). Requests and granted roles.
+import Base from '../../../layouts/Base.astro';
+import ModeratorShell from '../../../components/ModeratorShell.astro';
+import HubEditor from '../../../components/HubEditor.astro';
+const subs = [{ key: 'requests', label: 'Requests' }, { key: 'roles', label: 'Role holders' }];
+---
+<Base title="Roles & requests — Moderator" description="Internal: roles and role requests." section="moderator" noindex>
+  <section class="wrap mod-wrap">
+    <ModeratorShell active="roles" subs={subs}>
+    <h1 class="display mod-title">Roles & requests</h1>
+    <p class="mq-intro">Requests: drivers asking for a role. Role holders: everyone with a role; grant a new one there or directly in Data › Drivers.</p>
+    <HubEditor mode="moderator" tab="requests" />
+    </ModeratorShell>
+  </section>
+</Base>
+<script>
+  import { initModSubs } from '../../../scripts/mod-shell';
+  const root = document.getElementById('hc-root')!;
+  const subs = initModSubs('requests', (key) => root.dispatchEvent(new CustomEvent('hc-filter', { detail: key })));
+  root.addEventListener('hc-counts', (e) => {
+    const c = (e as CustomEvent).detail as Record<string, number>;
+    Object.entries(c).forEach(([k, n]) => subs.count(k, n));
+  });
+  root.dispatchEvent(new CustomEvent('hc-filter', { detail: subs.current }));
+</script>
+<style>
+  .mod-wrap { padding-block: clamp(1.5rem, 4vw, 3rem) clamp(2.5rem, 6vw, 4.5rem); }
+  .mod-title { margin: 0 0 .6rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .mq-intro { margin: 0 0 1.5rem; }
+</style>

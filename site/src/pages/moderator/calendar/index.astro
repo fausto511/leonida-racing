@@ -1,0 +1,31 @@
+---
+// Moderator > Community > Event calendar (RS-0102 stage 2, Fausto 10.11.2026). Approved events only; submissions live in Review > Events.
+import Base from '../../../layouts/Base.astro';
+import ModeratorShell from '../../../components/ModeratorShell.astro';
+import HubEditor from '../../../components/HubEditor.astro';
+const subs = [{ key: 'upcoming', label: 'Upcoming' }, { key: 'series', label: 'Series' }, { key: 'past', label: 'Past' }, { key: 'cancelled', label: 'Cancelled' }];
+---
+<Base title="Event calendar — Moderator" description="Internal: edit approved events." section="moderator" noindex>
+  <section class="wrap mod-wrap">
+    <ModeratorShell active="calendar" subs={subs}>
+    <h1 class="display mod-title">Event calendar</h1>
+    <p class="mq-intro">All approved events on the calendar. Edit, hide or cancel them here, or add one with “+ New event”. New submissions are checked under Review › Events.</p>
+    <HubEditor mode="moderator" tab="events" />
+    </ModeratorShell>
+  </section>
+</Base>
+<script>
+  import { initModSubs } from '../../../scripts/mod-shell';
+  const root = document.getElementById('hc-root')!;
+  const subs = initModSubs('upcoming', (key) => root.dispatchEvent(new CustomEvent('hc-filter', { detail: key })));
+  root.addEventListener('hc-counts', (e) => {
+    const c = (e as CustomEvent).detail as Record<string, number>;
+    Object.entries(c).forEach(([k, n]) => subs.count(k, n));
+  });
+  root.dispatchEvent(new CustomEvent('hc-filter', { detail: subs.current }));
+</script>
+<style>
+  .mod-wrap { padding-block: clamp(1.5rem, 4vw, 3rem) clamp(2.5rem, 6vw, 4.5rem); }
+  .mod-title { margin: 0 0 .6rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .mq-intro { margin: 0 0 1.5rem; }
+</style>

@@ -4,11 +4,11 @@
 // Data: mod_overview() (refuses non-moderators). Lap Review moved to /moderator/laps/;
 // old links with ?run= are forwarded there. COPY: internal page, Claude (no Codex needed).
 import Base from '../../layouts/Base.astro';
-import ModeratorNav from '../../components/ModeratorNav.astro';
+import ModeratorShell from '../../components/ModeratorShell.astro';
 ---
 <Base title="Overview — Moderator" description="Internal: open reviews and site stats." section="moderator" noindex>
   <section class="wrap mod-wrap">
-    <ModeratorNav active="overview" />
+    <ModeratorShell active="overview">
     <h1 class="display mo-title">Overview</h1>
     <p class="mo-lede">Everything waiting for a moderator, and how the site is doing.</p>
 
@@ -58,6 +58,7 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
         </div>
       </section>
     </div>
+  </ModeratorShell>
   </section>
 </Base>
 
@@ -79,11 +80,11 @@ import ModeratorNav from '../../components/ModeratorNav.astro';
     const t = ov.todo;
     const rows = [
       { n: t.laps_review, title: 'Laps to review', text: 'New and corrected submissions waiting for a decision.', where: 'Review · Laps', href: `${m}laps/` },
-      { n: t.videos_check, title: 'Videos to check', text: 'Accepted laps with a video that is not verified yet.', where: 'Review · Laps', href: `${m}laps/` },
+      { n: t.videos_check, title: 'Videos to check', text: 'Accepted laps with a video that is not verified yet.', where: 'Review · Laps', href: `${m}laps/?view=videos` },
       { n: t.events_review, title: 'Events to review', text: 'New events and series from stage 1 and 2 hosts.', where: 'Review · Events', href: `${m}event-review/` },
-      { n: t.event_changes, title: 'Event changes', text: 'New title, description or Discord invite on a live event.', where: 'Review · Events', href: `${m}event-review/` },
-      { n: t.requests, title: 'Requests', text: 'Crew applications, ICON, verified crews and role requests.', where: 'Community · Roles & requests', href: `${m}hub/?tab=requests` },
-      { n: t.tracks, title: 'Tracks to review', text: 'Community tracks submitted for publishing.', where: 'Review · Tracks', href: `${m}hub/?tab=tracks` },
+      { n: t.event_changes, title: 'Event changes', text: 'New title, description or Discord invite on a live event.', where: 'Review · Events', href: `${m}event-review/?view=changes` },
+      { n: t.requests, title: 'Requests', text: 'Crew applications, ICON, verified crews and role requests.', where: 'Community · Roles & requests', href: `${m}roles/` },
+      { n: t.tracks, title: 'Tracks to review', text: 'Community tracks submitted for publishing.', where: 'Review · Tracks', href: `${m}tracks/` },
       { n: t.time_reports, title: 'Reported times', text: 'Lap times other drivers have reported.', where: 'Reports · Times', href: `${m}reports/` },
       { n: t.content_reports, title: 'Reported content', text: 'Crews, events or names reported as breaking the rules.', where: 'Reports · Content', href: `${m}content/` },
     ];

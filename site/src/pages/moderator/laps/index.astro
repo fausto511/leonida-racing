@@ -1,6 +1,13 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import ModeratorNav from '../../../components/ModeratorNav.astro';
+import ModeratorShell from '../../../components/ModeratorShell.astro';
+// RS-0102 stage 2 (10.11.2026): the four queues are sub-filters in the left column.
+const subs = [
+  { key: 'review', label: 'To review' },
+  { key: 'videos', label: 'Videos to check' },
+  { key: 'driver', label: 'Waiting for driver' },
+  { key: 'accepted', label: 'Accepted' },
+];
 ---
 <Base
   title="Moderator"
@@ -9,10 +16,9 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   noindex
 >
   <section class="wrap mod-wrap">
-    <ModeratorNav active="laps" />
-    <p class="eyebrow">Time Attack Operations</p>
-    <h1 class="display mod-title">Lap Review</h1>
-    <p class="mod-lede">Private evidence and moderation actions. No bulk approval for record-capable runs. Every action is logged.</p>
+    <ModeratorShell active="laps" subs={subs}>
+    <h1 class="display mod-title">Laps</h1>
+    <p class="mod-lede" id="laps-sub">To review · oldest first. Every action is logged.</p>
 
     <div id="backend-notice" class="notice" hidden>
       <strong>Backend not connected yet.</strong>
@@ -39,10 +45,6 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
             <h2 class="queue-title">Review Queue</h2>
             <span class="queue-count" id="queue-count">0 open</span>
           </div>
-          <div class="queue-tabs" role="tablist">
-            <button type="button" class="queue-tab is-active" data-filter="pending" role="tab" aria-selected="true">Needs Decision</button>
-            <button type="button" class="queue-tab" data-filter="accepted" role="tab" aria-selected="false">Accepted</button>
-          </div>
           <div class="queue-list" id="queue-list"></div>
           <p class="queue-empty" id="queue-empty" hidden>Nothing here right now.</p>
           <p class="queue-error" id="queue-error" hidden></p>
@@ -54,6 +56,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
         </div>
       </div>
     </div>
+  </ModeratorShell>
   </section>
 </Base>
 
@@ -71,7 +74,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   .auth-box { margin-bottom: 1.5rem; padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .auth-box p { margin: 0; font-size: .88rem; }
 
-  .mod-layout { display: grid; grid-template-columns: 21rem 1fr; gap: 1.5rem; align-items: start; }
+  .mod-layout { display: grid; grid-template-columns: minmax(240px, 280px) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
   @media (max-width: 900px) { .mod-layout { grid-template-columns: 1fr; } }
 
   .queue-panel { padding: var(--gh-pad-card); position: sticky; top: 1.5rem; }
@@ -91,7 +94,10 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   :global(.queue-item) { display: block; width: 100%; text-align: left; padding: .7rem .8rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); border-left: 3px solid transparent; background: var(--gh-surface-soft); color: var(--gh-text); cursor: pointer; font-family: var(--gh-font-body); }
   :global(.queue-item:hover) { border-color: var(--gh-muted); }
   :global(.queue-item.is-active) { border-left-color: var(--gh-yellow); background: var(--lr-orange-tint); }
-  :global(.queue-item-title) { font-weight: 700; font-size: .88rem; margin-bottom: .2rem; }
+  :global(.queue-item-title) { display: flex; justify-content: space-between; gap: .5rem; font-weight: 700; font-size: .9rem; margin-bottom: .2rem; }
+  :global(.queue-item-title > span:first-child) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  :global(.queue-item-time) { flex: none; font-variant-numeric: tabular-nums; }
+  :global(.evidence-shot[hidden]) { display: none !important; }
   :global(.queue-item-sub) { color: var(--gh-muted); font-size: .76rem; display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
   :global(.queue-tag) { display: inline-block; padding: .1rem .45rem; border-radius: 999px; font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
   :global(.queue-tag.tag-video) { background: var(--lr-lime-fill); color: #D9F58E; }
@@ -152,7 +158,12 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   :global(.decision-hint) { margin: .4rem 0 0; color: var(--gh-muted); font-size: .76rem; }
   :global(.corr-note) { margin: 0 0 16px; } /* RS-0091: correction asked / done */
 
-  :global(.override-box) { border-color: var(--gh-yellow); }
+  :global(.override-box) { border-color: var(--lr-line); margin-top: 1.25rem; }
+  :global(.override-sum) { cursor: pointer; list-style: none; margin-bottom: 0 !important; }
+  :global(.override-sum::-webkit-details-marker) { display: none; }
+  :global(.override-sum h3::before) { content: '▸ '; color: var(--lr-muted); }
+  :global(details[open] > .override-sum) { margin-bottom: 1rem !important; }
+  :global(details[open] > .override-sum h3::before) { content: '▾ '; }
   :global(.override-grid) { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .9rem; margin-bottom: .3rem; }
   :global(.override-grid label) { display: flex; flex-direction: column; gap: .35rem; font-size: .72rem; color: var(--gh-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
   :global(.override-grid select), :global(.override-grid input[type="text"]) { padding: .5rem .6rem; border-radius: var(--gh-radius); border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text); font-size: .85rem; font-family: var(--gh-font-body); text-transform: none; letter-spacing: normal; font-weight: 400; }
@@ -163,6 +174,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
 
 <script>
   import { getSupabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '../../../scripts/supabase-client';
+  import { initModSubs } from '../../../scripts/mod-shell';
 
   // Derived from the project URL like every other function URL on the site. The old
   // separate build secret PUBLIC_MODERATE_SUBMISSION_URL still held the setup
@@ -179,7 +191,13 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   const queueCountEl = document.getElementById('queue-count');
   const queueEmptyEl = document.getElementById('queue-empty');
   const queueErrorEl = document.getElementById('queue-error');
-  const queueTabEls = [...document.querySelectorAll('.queue-tab')];
+  const FILTER_LABEL = { review: 'To review', videos: 'Videos to check', driver: 'Waiting for driver', accepted: 'Accepted' };
+  const FILTERS = {
+    review: (r) => ['submitted', 'under_review'].includes(r.review_status),
+    videos: (r) => r.review_status === 'accepted' && r.verification_tier === 'video_submitted',
+    driver: (r) => r.review_status === 'needs_correction',
+    accepted: (r) => r.review_status === 'accepted',
+  };
 
   const reviewPlaceholderEl = document.getElementById('review-placeholder');
   const reviewBodyEl = document.getElementById('review-body');
@@ -194,7 +212,9 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   let queueRuns = [];
   let selectedRunId = null;
   let deepLinkRunId = new URLSearchParams(window.location.search).get('run');
-  let currentFilter = 'pending';
+  let currentFilter = 'review';
+  const subs = initModSubs('review', (key) => { currentFilter = key; onFilterChange(); });
+  currentFilter = subs.current;
   let currentModeratorDriverId = null;
   let allVehicles = [];
   let allReleases = []; // game_releases (RS-0048): game version per run
@@ -438,8 +458,8 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
     if (wanted) {
       const target = queueRuns.find((r) => r.run_id === wanted);
       if (target) {
-        const filter = target.review_status === 'accepted' ? 'accepted' : 'pending';
-        if (filter !== currentFilter) queueTabEls.find((t) => t.dataset.filter === filter)?.click();
+        const filter = Object.keys(FILTERS).find((k) => FILTERS[k](target)) ?? 'review';
+        if (filter !== currentFilter) subs.set(filter);
         selectRun(wanted);
         return;
       }
@@ -453,15 +473,15 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   }
 
   function filteredQueue() {
-    if (currentFilter === 'accepted') {
-      return queueRuns.filter((r) => r.review_status === 'accepted');
-    }
-    return queueRuns.filter((r) => ['submitted', 'under_review', 'needs_correction'].includes(r.review_status));
+    return queueRuns.filter(FILTERS[currentFilter] ?? FILTERS.review);
   }
 
   function renderQueue() {
     const visible = filteredQueue();
     queueCountEl.textContent = `${visible.length} ${visible.length === 1 ? 'item' : 'items'}`;
+    Object.keys(FILTERS).forEach((k) => subs.count(k, queueRuns.filter(FILTERS[k]).length));
+    document.getElementById('laps-sub').textContent = `${FILTER_LABEL[currentFilter]} · oldest first. Every action is logged.`;
+    document.querySelector('.queue-title').textContent = FILTER_LABEL[currentFilter];
     queueEmptyEl.hidden = visible.length > 0;
     queueListEl.innerHTML = visible
       .map((run) => {
@@ -473,10 +493,9 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
         const isActive = run.run_id === selectedRunId;
         return `
           <button type="button" class="queue-item${isActive ? ' is-active' : ''}" data-run-id="${run.run_id}">
-            <div class="queue-item-title">${vehicleLabel(run.vehicles)} — ${run.drivers?.display_name ?? 'Unknown driver'}</div>
+            <div class="queue-item-title"><span>${vehicleLabel(run.vehicles)}</span><span class="queue-item-time">${formatLapTime(run.lap_time_ms)}</span></div>
             <div class="queue-item-sub">
-              <span>${formatLapTime(run.lap_time_ms)}</span>
-              <span>${run.tracks?.name ?? '—'}</span>
+              <span>${run.drivers?.display_name ?? 'Unknown driver'} · ${run.tracks?.name ?? '—'}</span>
               ${tags.join('')}
             </div>
           </button>
@@ -491,13 +510,8 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
     selectRun(btn.dataset.runId);
   });
 
-  queueTabEls.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      currentFilter = tab.dataset.filter;
-      queueTabEls.forEach((t) => {
-        t.classList.toggle('is-active', t === tab);
-        t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
-      });
+  function onFilterChange() {
+    {
       renderQueue();
       const visible = filteredQueue();
       if (!visible.some((r) => r.run_id === selectedRunId)) {
@@ -508,8 +522,8 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
           reviewBodyEl.hidden = true;
         }
       }
-    });
-  });
+    }
+  }
 
   async function selectRun(runId) {
     selectedRunId = runId;
@@ -591,8 +605,32 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
         </div>
       </div>
 
-      <div class="review-box override-box" style="margin-bottom:1.25rem;">
-        <div class="review-box-head"><h3>Moderator Override</h3><span>Bypasses part of the audit trail — reason required</span></div>
+      <div class="review-box" style="margin-bottom:1.25rem;">
+        <div class="review-box-head"><h3>Automated Checks</h3><span>Decision support only</span></div>
+        <div class="checks-grid" id="checks-grid">
+          <div class="check-tile"><span>Duplicate</span><strong>Checking…</strong></div>
+          <div class="check-tile"><span>Driver PB (this vehicle/track)</span><strong>Checking…</strong></div>
+          <div class="check-tile"><span>Site record</span><strong>Checking…</strong></div>
+        </div>
+      </div>
+
+      <div class="review-box decision-box">
+        <div class="review-box-head"><h3>Decision</h3><span>Reason required for correction, reject or invalidate</span></div>
+        <textarea id="decision-reason" placeholder="Moderator reason / internal note"></textarea>
+        <p class="decision-hint">For “Request Correction” the driver sees this reason in My laps – write it to them, e.g. “The screenshot shows a Pfister Comet, please pick that car.”</p>
+        <div class="decision-actions">
+          ${!isAccepted ? `<button type="button" class="btn btn-s" data-action="request_correction">Request Correction</button>` : ''}
+          ${!isAccepted ? `<button type="button" class="btn btn-danger" data-action="reject">Reject</button>` : ''}
+          ${!isAccepted ? `<button type="button" class="btn btn-p" data-action="accept_provisional">Accept</button>` : ''}
+          <button type="button" class="btn btn-p" data-action="verify" ${canVerify ? '' : 'disabled'}>Verify (Official)</button>
+          ${isAccepted ? `<button type="button" class="btn btn-danger" data-action="invalidate">Invalidate</button>` : ''}
+        </div>
+        ${canVerify ? '' : '<p class="decision-hint">Verify is disabled: no public video link on this run yet.</p>'}
+        <p class="decision-msg" id="decision-msg" hidden></p>
+      </div>
+
+      <details class="review-box override-box">
+        <summary class="review-box-head override-sum"><h3>Edit lap data</h3><span>Rarely needed · bypasses part of the audit trail · reason required</span></summary>
         <div class="override-grid">
           <label>Vehicle
             <select id="override-vehicle">${vehicleOptionsHtml(run.vehicle_id)}</select>
@@ -632,31 +670,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
           <button type="button" class="btn btn-p" data-action="save-override">Save Override</button>
         </div>
         <p class="decision-msg" id="override-msg" hidden></p>
-      </div>
-
-      <div class="review-box" style="margin-bottom:1.25rem;">
-        <div class="review-box-head"><h3>Automated Checks</h3><span>Decision support only</span></div>
-        <div class="checks-grid" id="checks-grid">
-          <div class="check-tile"><span>Duplicate</span><strong>Checking…</strong></div>
-          <div class="check-tile"><span>Driver PB (this vehicle/track)</span><strong>Checking…</strong></div>
-          <div class="check-tile"><span>Site record</span><strong>Checking…</strong></div>
-        </div>
-      </div>
-
-      <div class="review-box decision-box">
-        <div class="review-box-head"><h3>Decision</h3><span>Reason required for correction, reject or invalidate</span></div>
-        <textarea id="decision-reason" placeholder="Moderator reason / internal note"></textarea>
-        <p class="decision-hint">For “Request Correction” the driver sees this reason in My laps – write it to them, e.g. “The screenshot shows a Pfister Comet, please pick that car.”</p>
-        <div class="decision-actions">
-          ${!isAccepted ? `<button type="button" class="btn btn-s" data-action="request_correction">Request Correction</button>` : ''}
-          ${!isAccepted ? `<button type="button" class="btn btn-danger" data-action="reject">Reject</button>` : ''}
-          ${!isAccepted ? `<button type="button" class="btn btn-p" data-action="accept_provisional">Accept</button>` : ''}
-          <button type="button" class="btn btn-p" data-action="verify" ${canVerify ? '' : 'disabled'}>Verify (Official)</button>
-          ${isAccepted ? `<button type="button" class="btn btn-danger" data-action="invalidate">Invalidate</button>` : ''}
-        </div>
-        ${canVerify ? '' : '<p class="decision-hint">Verify is disabled: no public video link on this run yet.</p>'}
-        <p class="decision-msg" id="decision-msg" hidden></p>
-      </div>
+      </details>
     `;
   }
 

@@ -5,7 +5,8 @@
 // "Action taken" or "No action". The decision note is SHOWN TO THE REPORTER
 // (Art. 16(5) DSA: inform the reporter of the decision).
 import Base from '../../../layouts/Base.astro';
-import ModeratorNav from '../../../components/ModeratorNav.astro';
+import ModeratorShell from '../../../components/ModeratorShell.astro';
+const subs = [{ key: 'open', label: 'Open' }, { key: 'closed', label: 'Closed' }];
 ---
 <Base
   title="Content Reports — Moderator"
@@ -14,23 +15,19 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   noindex
 >
   <section class="wrap mod-wrap">
-    <ModeratorNav active="content" />
-    <p class="eyebrow">Moderation</p>
-    <h1 class="display mod-title">Content Reports</h1>
-    <p class="mod-lede">Reports about crews, events, driver names or anything else. Check the content, remove or change it if needed (crews and events in Hub Content), then close the report. <strong>The reporter sees the status and your decision note.</strong> Handle reports about possibly illegal content first and without delay. If you remove someone's content, tell them why (Terms, section "Moderation").</p>
+    <ModeratorShell active="content" subs={subs}>
+    <h1 class="display mod-title">Reported content</h1>
+    <p class="mod-lede">Reports about crews, events, driver names or anything else. Change or hide the content on its own page (Crews, Event calendar), then close the report. <strong>The reporter sees the status and your decision note.</strong> Handle possibly illegal content first.</p>
 
     <div id="cr-backend" class="notice" hidden><strong>Backend not connected.</strong><span>Reports cannot be loaded from this build.</span></div>
     <div id="cr-auth" class="panel cr-box" hidden><p>Log in as a moderator to see reports.</p></div>
     <div id="cr-notmod" class="panel cr-box" hidden><p>This page is for moderators only.</p></div>
 
     <div id="cr-body" hidden>
-      <div class="cr-tabs" role="tablist">
-        <button type="button" class="cr-tab is-active" data-f="open" role="tab" aria-selected="true">Open</button>
-        <button type="button" class="cr-tab" data-f="closed" role="tab" aria-selected="false">Closed</button>
-      </div>
       <p id="cr-error" class="cr-error" hidden></p>
       <div id="cr-list"></div>
     </div>
+  </ModeratorShell>
   </section>
 </Base>
 
@@ -62,6 +59,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
 </style>
 
 <script>
+  import { initModSubs } from '../../../scripts/mod-shell';
   import { backendConfigured, getSupabase } from '../../../scripts/supabase-client';
   import { esc } from '../../../data/hub';
   import { contentReasonLabels, contentTypeLabels } from '../../../data/reports';
@@ -72,12 +70,14 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   const URGENT = new Set(['illegal', 'hate_or_harassment', 'sexual_or_violent']);
   let me: string | null = null;
   let filter: 'open' | 'closed' = 'open';
+  const subs = initModSubs('open', (k) => { filter = k as 'open' | 'closed'; render(); });
+  filter = subs.current as 'open' | 'closed';
   let rows: any[] = [];
   const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
   function targetLink(r: any): string {
-    if (r.target_type === 'crew') return r.target_crew_id ? `<a class="btn btn-s" href="${base}moderator/hub/">Open Hub Content</a>` : '<span class="cr-meta">Crew no longer exists</span>';
-    if (r.target_type === 'event') return r.target_event_id ? `<a class="btn btn-s" href="${base}moderator/hub/">Open Hub Content</a>` : '<span class="cr-meta">Event no longer exists</span>';
+    if (r.target_type === 'crew') return r.target_crew_id ? `<a class="btn btn-s" href="${base}moderator/crews/">Open Crews</a>` : '<span class="cr-meta">Crew no longer exists</span>';
+    if (r.target_type === 'event') return r.target_event_id ? `<a class="btn btn-s" href="${base}moderator/calendar/">Open Event calendar</a>` : '<span class="cr-meta">Event no longer exists</span>';
     const t = String(r.target_text ?? '');
     return /^https?:\/\//i.test(t) ? `<a class="btn btn-s" href="${esc(t)}" target="_blank" rel="noopener noreferrer">Open link ↗</a>` : '';
   }
@@ -85,7 +85,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   function render() {
     const list = rows.filter((r) => (filter === 'open' ? r.status === 'open' : r.status !== 'open'));
     const openCount = rows.filter((r) => r.status === 'open').length;
-    document.querySelector<HTMLElement>('.cr-tab[data-f="open"]')!.textContent = `Open (${openCount})`;
+    subs.count('open', openCount); subs.count('closed', rows.length - openCount);
     // urgent reasons first among open reports
     if (filter === 'open') list.sort((a, b) => Number(URGENT.has(b.reason)) - Number(URGENT.has(a.reason)));
     $('cr-list').innerHTML = list.length
@@ -125,11 +125,6 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
     render();
   }
 
-  document.querySelectorAll<HTMLButtonElement>('.cr-tab').forEach((t) => t.addEventListener('click', () => {
-    filter = t.dataset.f as any;
-    document.querySelectorAll('.cr-tab').forEach((x) => { x.classList.toggle('is-active', x === t); x.setAttribute('aria-selected', String(x === t)); });
-    render();
-  }));
 
   $('cr-list').addEventListener('click', async (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-act]');

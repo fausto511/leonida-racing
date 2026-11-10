@@ -4,7 +4,9 @@
 // notices to every Discord feed added with /leonida feed videos. A new channel's existing videos
 // are only recorded, never posted. Table video_channels (RLS: moderators only).
 import Base from '../../../layouts/Base.astro';
-import ModeratorNav from '../../../components/ModeratorNav.astro';
+import ModeratorShell from '../../../components/ModeratorShell.astro';
+// RS-0102 stage 2 (10.11.2026): Data > Video channels; Active / Paused / Add a channel in the left column.
+const subs = [{ key: 'active', label: 'Active' }, { key: 'paused', label: 'Paused' }, { key: 'add', label: 'Add a channel' }];
 ---
 <Base
   title="Videos & Streams — Moderator"
@@ -13,10 +15,9 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   noindex
 >
   <section class="wrap mod-wrap">
-    <ModeratorNav active="videos" />
-    <p class="eyebrow">Moderation</p>
-    <h1 class="display mod-title">Videos &amp; Streams</h1>
-    <p class="mod-lede">Channels the Discord bot follows. New videos (YouTube) and go-live notices (Twitch) are posted within about 10 minutes to every server that added <code>/leonida feed videos</code>. When you add a channel, its existing videos are skipped – only new ones get posted.</p>
+    <ModeratorShell active="channels" subs={subs}>
+    <h1 class="display mod-title">Video channels</h1>
+    <p class="mod-lede">Channels the Discord bot follows for the video &amp; stream feed. New videos (YouTube) and go-live notices (Twitch) are posted within about 10 minutes to every server that added <code>/leonida feed videos</code>. When you add a channel, its existing videos are skipped – only new ones get posted.</p>
 
     <div id="vc-backend" class="notice" hidden><strong>Backend not connected.</strong><span>Channels cannot be loaded from this build.</span></div>
     <div id="vc-auth" class="panel vc-box" hidden><p>Log in as a moderator to manage channels.</p></div>
@@ -46,6 +47,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
       <p id="vc-error" class="vc-error" hidden></p>
       <div id="vc-list"></div>
     </div>
+  </ModeratorShell>
   </section>
 </Base>
 
@@ -82,6 +84,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
 <script>
   import { backendConfigured, getSupabase } from '../../../scripts/supabase-client';
   import { esc } from '../../../data/hub';
+  import { initModSubs } from '../../../scripts/mod-shell';
 
   const $ = (id: string) => document.getElementById(id)!;
   let me: string | null = null;
@@ -99,8 +102,15 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   const filterLabel = (c: any) => FILTERS.find(([v]) => v === filterOf(c))![1];
   const filterCols = (v: string) => ({ gta_only: v !== 'all', cars_only: v === 'cars' });
 
+  const subs = initModSubs('active', () => render());
   function render() {
-    $('vc-list').innerHTML = rows.length ? rows.map((c) => {
+    subs.count('active', rows.filter((c) => c.is_active).length);
+    subs.count('paused', rows.filter((c) => !c.is_active).length);
+    const add = subs.current === 'add';
+    $('vc-form').hidden = !add;
+    $('vc-list').hidden = add;
+    const shown = rows.filter((c) => (subs.current === 'paused' ? !c.is_active : c.is_active));
+    $('vc-list').innerHTML = shown.length ? shown.map((c) => {
       const last = recent[c.channel_id];
       const status = !c.is_active ? 'Paused' : c.last_error ? '' : c.last_checked_at ? `Checked ${esc(when(c.last_checked_at))}` : 'Waiting for the first check (up to 10 min)';
       return `<article class="vc-card${c.is_active ? '' : ' is-off'}">
@@ -116,7 +126,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
           <button type="button" class="btn btn-s" data-act="delete" data-id="${esc(c.channel_id)}">Remove</button>
         </div>
       </article>`;
-    }).join('') : '<p class="vc-meta">No channels yet. Add the first one above.</p>';
+    }).join('') : `<p class="mq-empty">${subs.current === 'paused' ? 'No paused channels.' : 'No active channels yet. Add one under “Add a channel”.'}</p>`;
   }
 
   async function load() {
@@ -148,6 +158,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
     if (error) { showError(error.code === '23505' ? 'This channel is already on the list.' : `Couldn't add it: ${error.message}`); return; }
     (ev.target as HTMLFormElement).reset();
     await load();
+    subs.set('active');
   });
 
   $('vc-list').addEventListener('click', async (ev) => {

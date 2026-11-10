@@ -1,11 +1,12 @@
 ---
 // Moderator: reported lap times (RS-0029, DEC-0071). Reports come from the
-// footer page /report/. Open reports first; "Open in Lap Review" jumps to the
+// footer page /report/. Open reports first; "Open in Laps" jumps to the
 // run (moderator/laps/?run=<id>), where the actual decision is made. Here the
 // report itself is closed: Resolved (something was wrong and has been acted
 // on) or Dismissed (time is fine), with an optional internal note.
 import Base from '../../../layouts/Base.astro';
-import ModeratorNav from '../../../components/ModeratorNav.astro';
+import ModeratorShell from '../../../components/ModeratorShell.astro';
+const subs = [{ key: 'open', label: 'Open' }, { key: 'closed', label: 'Closed' }];
 ---
 <Base
   title="Reports — Moderator"
@@ -14,23 +15,19 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   noindex
 >
   <section class="wrap mod-wrap">
-    <ModeratorNav active="reports" />
-    <p class="eyebrow">Time Attack Operations</p>
-    <h1 class="display mod-title">Reported Times</h1>
-    <p class="mod-lede">Drivers can report a published time from the footer ("Report a time"). Check the run in Lap Review, change it there if needed, then close the report here. Reporters see only the status (In review / Handled / Closed), not your note.</p>
+    <ModeratorShell active="times" subs={subs}>
+    <h1 class="display mod-title">Reported times</h1>
+    <p class="mod-lede">Drivers report a published time from the footer. Check the lap in Laps, change it there if needed, then close the report here. Reporters only see the status, not your note.</p>
 
     <div id="rp-backend" class="notice" hidden><strong>Backend not connected.</strong><span>Reports cannot be loaded from this build.</span></div>
     <div id="rp-auth" class="panel rp-box" hidden><p>Log in as a moderator to see reports.</p></div>
     <div id="rp-notmod" class="panel rp-box" hidden><p>This page is for moderators only.</p></div>
 
     <div id="rp-body" hidden>
-      <div class="rp-tabs" role="tablist">
-        <button type="button" class="rp-tab is-active" data-f="open" role="tab" aria-selected="true">Open</button>
-        <button type="button" class="rp-tab" data-f="closed" role="tab" aria-selected="false">Closed</button>
-      </div>
       <p id="rp-error" class="rp-error" hidden></p>
       <div id="rp-list"></div>
     </div>
+  </ModeratorShell>
   </section>
 </Base>
 
@@ -58,6 +55,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
 </style>
 
 <script>
+  import { initModSubs } from '../../../scripts/mod-shell';
   import { backendConfigured, getSupabase } from '../../../scripts/supabase-client';
   import { esc } from '../../../data/hub';
 
@@ -72,6 +70,8 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   const STATUS: Record<string, string> = { open: 'Open', resolved: 'Resolved', dismissed: 'Dismissed' };
   let me: string | null = null;
   let filter: 'open' | 'closed' = 'open';
+  const subs = initModSubs('open', (k) => { filter = k as 'open' | 'closed'; render(); });
+  filter = subs.current as 'open' | 'closed';
   let rows: any[] = [];
 
   const lap = (ms: number) => {
@@ -83,7 +83,7 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
   function render() {
     const list = rows.filter((r) => (filter === 'open' ? r.status === 'open' : r.status !== 'open'));
     const openCount = rows.filter((r) => r.status === 'open').length;
-    document.querySelector<HTMLElement>('.rp-tab[data-f="open"]')!.textContent = `Open (${openCount})`;
+    subs.count('open', openCount); subs.count('closed', rows.length - openCount);
     // Several reports on the same run are a signal -> show the count.
     const perRun = new Map<string, number>();
     rows.forEach((r) => perRun.set(r.run_id, (perRun.get(r.run_id) ?? 0) + 1));
@@ -94,12 +94,12 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
           const n = perRun.get(r.run_id) ?? 1;
           const actions = r.status === 'open'
             ? `<div class="rp-actions">
-                 <a class="btn btn-s" href="${base}moderator/laps/?run=${esc(r.run_id)}">Open in Lap Review</a>
+                 <a class="btn btn-s" href="${base}moderator/laps/?run=${esc(r.run_id)}">Open in Laps</a>
                  <input type="text" maxlength="500" placeholder="Internal note (optional)" data-note="${esc(r.report_id)}" />
                  <button type="button" class="btn btn-p" data-act="resolved" data-id="${esc(r.report_id)}">Resolved</button>
                  <button type="button" class="btn btn-s" data-act="dismissed" data-id="${esc(r.report_id)}">Dismiss</button>
                </div>`
-            : `<div class="rp-actions"><a class="btn btn-s" href="${base}moderator/laps/?run=${esc(r.run_id)}">Open in Lap Review</a><span class="rp-meta">${STATUS[r.status]} · ${r.handled_at ? esc(when(r.handled_at)) : ''}${r.handler?.display_name ? ` · by ${esc(r.handler.display_name)}` : ''}</span></div>
+            : `<div class="rp-actions"><a class="btn btn-s" href="${base}moderator/laps/?run=${esc(r.run_id)}">Open in Laps</a><span class="rp-meta">${STATUS[r.status]} · ${r.handled_at ? esc(when(r.handled_at)) : ''}${r.handler?.display_name ? ` · by ${esc(r.handler.display_name)}` : ''}</span></div>
                ${r.moderator_note ? `<p class="rp-note">Note: ${esc(r.moderator_note)}</p>` : ''}`;
           return `<article class="rp-card">
             <h3>${esc(veh)} — ${esc(run.driver?.display_name ?? 'Unknown driver')} · ${run.lap_time_ms ? lap(run.lap_time_ms) : '—'}</h3>
@@ -127,11 +127,6 @@ import ModeratorNav from '../../../components/ModeratorNav.astro';
     render();
   }
 
-  document.querySelectorAll<HTMLButtonElement>('.rp-tab').forEach((t) => t.addEventListener('click', () => {
-    filter = t.dataset.f as any;
-    document.querySelectorAll('.rp-tab').forEach((x) => { x.classList.toggle('is-active', x === t); x.setAttribute('aria-selected', String(x === t)); });
-    render();
-  }));
 
   $('rp-list').addEventListener('click', async (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-act]');

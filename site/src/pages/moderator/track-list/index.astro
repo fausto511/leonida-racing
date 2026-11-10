@@ -1,0 +1,31 @@
+---
+// Moderator > Community > Track list (RS-0102 stage 2, Fausto 10.11.2026). Same data as Review > Tracks, as a full list.
+import Base from '../../../layouts/Base.astro';
+import ModeratorShell from '../../../components/ModeratorShell.astro';
+import HubEditor from '../../../components/HubEditor.astro';
+const subs = [{ key: 'live', label: 'Live' }, { key: 'unpublished', label: 'Not published' }];
+---
+<Base title="Track list — Moderator" description="Internal: edit community tracks." section="moderator" noindex>
+  <section class="wrap mod-wrap">
+    <ModeratorShell active="track-list" subs={subs}>
+    <h1 class="display mod-title">Track list</h1>
+    <p class="mq-intro">All community tracks. Edit or unpublish them here, or add one with “+ New track”. New submissions from creators are checked under Review › Tracks.</p>
+    <HubEditor mode="moderator" tab="tracks" />
+    </ModeratorShell>
+  </section>
+</Base>
+<script>
+  import { initModSubs } from '../../../scripts/mod-shell';
+  const root = document.getElementById('hc-root')!;
+  const subs = initModSubs('live', (key) => root.dispatchEvent(new CustomEvent('hc-filter', { detail: key })));
+  root.addEventListener('hc-counts', (e) => {
+    const c = (e as CustomEvent).detail as Record<string, number>;
+    Object.entries(c).forEach(([k, n]) => subs.count(k, n));
+  });
+  root.dispatchEvent(new CustomEvent('hc-filter', { detail: subs.current }));
+</script>
+<style>
+  .mod-wrap { padding-block: clamp(1.5rem, 4vw, 3rem) clamp(2.5rem, 6vw, 4.5rem); }
+  .mod-title { margin: 0 0 .6rem; font-size: clamp(2rem, 4vw, 2.8rem); }
+  .mq-intro { margin: 0 0 1.5rem; }
+</style>
