@@ -160,7 +160,7 @@ const base = import.meta.env.BASE_URL;
               <label data-series-new hidden>Repeat <small>a series always shows the next 4 dates</small><select name="repeat"><option value="">Does not repeat</option><option value="weekly">Every week</option><option value="biweekly">Every 2 weeks</option><option value="monthly">Every month</option><option value="league">Championship (fixed rounds)</option></select></label>
               <label data-series-monthly hidden>Every month on the <select name="monthly_nth"><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option><option value="-1">last</option></select> <small id="series-wd">weekday of the start date</small></label>
               <div class="span2 season-box" data-season hidden>
-                <p class="lr-note">Round 1 is the start above. Add the other rounds (2 to 15 in total). Drivers sign up once for the whole championship.</p>
+                <p class="lr-note">Round 1 is the start above. Add the other rounds (2 to 15 in total). Drivers sign up once for the whole championship, and the driver limit counts for the whole championship.</p>
                 <ol class="season-rounds" id="season-rounds" start="2"></ol>
                 <button type="button" class="btn btn-s btn-sm" id="season-add">+ Add round</button>
               </div>
@@ -176,7 +176,7 @@ const base = import.meta.env.BASE_URL;
               <label>Location <small>optional — more places are added after release</small><select name="location"><option value="">— not specified —</option></select></label>
               <label class="span2">Discord invite <small>where participants meet you — a PSN name or a Discord (yours or your crew's) is required. Tip: create the invite in your rules or info channel, newcomers land right there.</small><input type="url" name="discord_url" placeholder="https://discord.gg/…" /></label>
               <label>Max. participants <small>optional, e.g. lobby size</small><input type="number" name="max_participants" min="2" max="500" step="1" /></label>
-              <label>Sign-ups <small>Controls the “I'm in” button on the calendar</small><select name="registration"><option value="open">Open</option><option value="closed">Closed — Listed, No Sign-ups</option></select></label>
+              <label>Sign-ups <small id="reg-hint">Controls the “I'm in” button on the calendar</small><select name="registration"><option value="open">Open</option><option value="closed">Closed — Listed, No Sign-ups</option></select></label>
               <label class="span2">Stream link <small>Twitch, YouTube, or Kick. Required for events created with closed sign-ups. Shown even when sign-ups are full or closed.</small><input type="url" name="stream_url" placeholder="https://www.twitch.tv/…" /></label>
               <label class="span2">Description <small><span id="event-desc-count">0</span>/600</small><textarea name="description" maxlength="600" rows="3"></textarea></label>
               <!-- Privacy notice for hosts (Codex privacy review 16.10.2026, RS-0076): events are also distributed by the Discord bot -->
@@ -553,6 +553,8 @@ const base = import.meta.env.BASE_URL;
   let events: any[] = [];
   let tracks: any[] = [];
   let selectedId: string | null = null; // null + form visible = creating new
+  let leagueSeries = new Set<string>();
+  const isLeagueRound = () => { const sid = selectedId ? events.find((x) => x.event_id === selectedId)?.series_id : null; return Boolean(sid && leagueSeries.has(sid)); };
   let ownDriverId: string | null = null;
   let ownPsn: string | null = null; // optional profile PSN name (DEC-0112) -> pre-fills new events
   // Access model (RS-0023): moderators see/edit everything; crew leaders
@@ -626,7 +628,8 @@ const base = import.meta.env.BASE_URL;
     if (/starts_before_launch|not_before_launch/.test(m)) return 'Rounds can start on Nov 19, 2026 (GTA VI launch day) at the earliest.';
     if (/round_past/.test(m)) return 'All rounds have to be in the future.';
     if (/series_limit/.test(m)) return 'You can run up to 3 series at a time. End one under Your series first.';
-    if (/edit_series/.test(m)) return 'This date is part of a series — change title, description and details in the series.';
+    if (/edit_series/.test(m)) return 'This date is part of a series. Change title, description and details under Your series.';
+    if (/rounds_required/.test(m)) return 'Add a start date and time for each round.';
     if (/cancel_instead/.test(m)) return "Dates of a series can't be deleted. Cancel this date instead (Status: Cancelled).";
     if (/invalid_tz/.test(m)) return "Your browser's time zone isn't supported. Please contact a moderator.";
     if (/host_blocked/.test(m)) return "You can't submit events right now. If you think this is a mistake, contact a moderator on our Discord.";
@@ -718,6 +721,8 @@ const base = import.meta.env.BASE_URL;
     if (trTab) trTab.innerHTML = `Tracks${toReview ? `<span class="tab-count">${toReview}</span>` : ''}`;
     if (isMod) await Promise.all([loadRoles(), loadRequests()]);
     await loadMembers();
+    // which series are championships (league): own texts for their rounds; RLS shows own series (mods: all)
+    try { const ls = await sb.from('hub_event_series').select('series_id').eq('kind', 'league'); leagueSeries = new Set(((ls.data ?? []) as any[]).map((x) => x.series_id)); } catch { /* keep series texts */ }
     renderList();
     fillHostSelect();
     fillRoleCrewSelect();
@@ -1045,7 +1050,12 @@ const base = import.meta.env.BASE_URL;
     }
     const note = $('event-series-note');
     note.hidden = !occ;
-    note.textContent = occ ? 'This date is part of a series. Title, description and the other details are changed in the series (Your series, below) and apply to all upcoming dates. Here you can move this date, close its sign-ups or cancel it.' : '';
+    // texts decided by Fausto 10.11. (DEC-0212)
+    const round = occ && isLeagueRound();
+    note.textContent = !occ ? '' : round
+      ? 'This is one round of a championship. Here you can move it, close its sign-ups or cancel it. Title, description and the round schedule are changed under Your series.'
+      : 'This date is part of a series. Here you can move it, close its sign-ups or cancel it. Title, description and other details are changed under Your series and apply to all upcoming dates.';
+    $('reg-hint').textContent = round ? "Closing sign-ups here doesn't remove drivers already in the championship." : 'Controls the “I\'m in” button on the calendar';
   }
   function syncRepeat() {
     const rep = ef.repeat.value;
@@ -1066,7 +1076,7 @@ const base = import.meta.env.BASE_URL;
     const list = $('season-rounds');
     if (list.children.length >= 14) return;
     const li = document.createElement('li');
-    li.innerHTML = `<input type="datetime-local" data-round min="2026-11-19T00:00" aria-label="Round start" /><button type="button" class="btn btn-s btn-sm" data-round-del>Remove</button>`;
+    li.innerHTML = `<input type="datetime-local" data-round min="2026-11-19T00:00" aria-label="Round ${list.children.length + 2} start" /><button type="button" class="btn btn-s btn-sm" data-round-del>Remove</button>`;
     (li.querySelector('input') as HTMLInputElement).value = value;
     list.appendChild(li);
     ($('season-add') as HTMLButtonElement).disabled = list.children.length >= 14;
@@ -1416,7 +1426,7 @@ const base = import.meta.env.BASE_URL;
       if (error) { msg(eventForm, dbError(error), true); return; }
       await loadAll();
       openEvent(events.find((x) => x.event_id === id) ?? null);
-      msg(eventForm, 'Saved — this date only.');
+      msg(eventForm, isLeagueRound() ? 'Saved — this round only.' : 'Saved — this date only.');
       eventsChanged();
       return;
     }
