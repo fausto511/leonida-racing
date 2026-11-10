@@ -31,8 +31,11 @@ export function initModSubs(fallback: string, onChange: (key: string) => void): 
     b.addEventListener('click', () => {
       api.set(b.dataset.sub!);
       // Phones: fold the menu again so the list is visible
-      const d = b.closest('details');
-      if (d && window.matchMedia('(max-width: 899px)').matches) d.open = false;
+      const side = b.closest('.modside');
+      if (side?.classList.contains('is-open')) {
+        side.classList.remove('is-open');
+        side.querySelector('.modside-sum')?.setAttribute('aria-expanded', 'false');
+      }
     });
   });
   return api;

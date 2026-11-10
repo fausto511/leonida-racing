@@ -7,6 +7,7 @@
 
 .modside { min-width: 0; } /* not sticky: a page wrapper clips overflow, so sticky would slide under the header */
 .modside-sum { display: none; }
+/* Phones: the menu starts folded by CSS (no script needed, so nothing jumps) */
 .modside-nav { display: flex; flex-direction: column; gap: 18px; }
 .modside-top { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; }
 .modside-kicker { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-orange); }
@@ -29,11 +30,11 @@
 @media (max-width: 899px) {
   .modshell { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .modside { border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); padding: 4px; }
-  .modside-sum { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 12px; cursor: pointer; list-style: none; font-size: 14px; color: var(--lr-muted); }
-  .modside-sum::-webkit-details-marker { display: none; }
-  .modside-sum b { color: var(--lr-text); }
+  .modside-sum { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 12px; border: 0; background: transparent; cursor: pointer; font: inherit; font-size: 14px; color: var(--lr-muted); text-align: left; }
+  .modside-sum b { margin-left: auto; color: var(--lr-text); }
   .modside-sum::after { content: '▾'; color: var(--lr-muted); }
-  .modside[open] .modside-sum::after { content: '▴'; }
+  .modside.is-open .modside-sum::after { content: '▴'; }
+  .modside:not(.is-open) .modside-nav { display: none; }
   .modside-nav { padding: 8px 0 12px; }
   .modside-top { display: none; }
 }
@@ -90,7 +91,9 @@
 .mc-card .hit { fill: transparent; }
 .mc-card g:hover .bar { fill: var(--lr-orange-hover, #ffaa7a); }
 .mc-note { font-size: 13px; color: var(--lr-muted); margin: 0; }
-.mc-empty { min-height: 160px; border: 1px dashed var(--lr-line-strong); border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; text-align: center; font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
+.mc-card > div { aspect-ratio: 560 / 200; min-height: 150px; display: flex; flex-direction: column; } /* CLS: space reserved before data */
+.mc-card > div > svg { flex: 1; }
+.mc-empty { flex: 1; min-height: 0; border: 1px dashed var(--lr-line-strong); border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; text-align: center; font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
 .mc-range { display: flex; gap: 6px; }
 .mc-range button { height: 32px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-soft); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
 .mc-range button[aria-pressed="true"] { border-color: var(--lr-orange); background: var(--lr-orange-fill); color: var(--lr-text); }

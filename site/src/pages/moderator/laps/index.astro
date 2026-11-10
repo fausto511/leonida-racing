@@ -411,9 +411,9 @@ const subs = [
     const isModerator = !error && Array.isArray(data) && data.length > 0;
     if (isModerator) {
       notModNoticeEl.hidden = true;
-      modContentEl.hidden = false;
       await Promise.all([loadOwnDriverId(), loadVehicles(), loadReleases()]);
       await loadQueue();
+      modContentEl.hidden = false; // only once the queue is filled: no layout jump (CLS)
     } else {
       notModNoticeEl.hidden = false;
       modContentEl.hidden = true;

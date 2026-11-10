@@ -355,6 +355,9 @@ select optgroup option { background: var(--gh-surface); color: var(--gh-text); f
 .skip-link { position: absolute; left: .75rem; top: -4rem; z-index: 1000; padding: .6rem 1rem; background: var(--gh-surface); color: var(--gh-text); border: 1px solid var(--gh-line); border-radius: .4rem; text-decoration: none; }
 .skip-link:focus { top: .75rem; }
 main:focus { outline: none; }
+/* CLS 10.11.2026: main fills at least the screen, so content that loads after sign-in
+   (account, moderator, crew pages) never pushes a footer that is already visible. */
+#main { min-height: calc(100svh - var(--gh-header-h)); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 /* Speech bubble next to the clicked element (scripts/bubble.ts, DEC-0126 C1) */
