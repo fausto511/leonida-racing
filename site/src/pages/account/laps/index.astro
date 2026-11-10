@@ -99,7 +99,7 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
           </label>
           <label class="fix-field fix-wide"><span class="fix-label">New screenshot <span class="fix-opt">optional</span></span>
             <input name="shot" type="file" accept="image/*" />
-            <small class="fix-hint">Only needed if the moderator asked for a clearer screenshot. Otherwise your current one stays.</small>
+            <small class="fix-hint">Only needed if the moderator asked for a clearer screenshot.</small>
           </label>
         </div>
         <p class="lr-note is-error fix-msg" role="status" hidden></p>
@@ -199,7 +199,7 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
     :global(.acc-table .c-track), :global(.acc-table .c-date) { display: none; }
     :global(.acc-table .c-meta), :global(.acc-table .c-rank) { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--lr-muted); font-size: 13px; }
     /* actions get their own line on phones, so status and date never get squeezed */
-    /* phones: + Video always left, Withdraw always right, on one line */
+    /* phones: Add video always left, Withdraw always right, on one line */
     :global(.acc-table .c-act) { width: auto; }
     :global(.acc-table .c-vid) { grid-column: 1; justify-self: start; margin-top: 4px; }
     :global(.acc-table .c-wd) { grid-column: 2; justify-self: end; margin-top: 4px; }
@@ -342,7 +342,7 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
     }
   }
 
-  // ---- inline forms under a submission (RS-0091): "+ Video" and "Correct this lap" ----
+  // ---- inline forms under a submission (RS-0091): "Add video" and "Correct this lap" ----
   // One open form at a time; it sits in the row's second line (tr.sub-row).
   const runsById = new Map();
   const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -401,7 +401,7 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
       body: JSON.stringify(payload),
     });
     const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(body.detail ?? body.error ?? `Request failed (${res.status})`);
+    if (!res.ok) throw Object.assign(new Error(body.detail ?? body.error ?? `Request failed (${res.status})`), { status: res.status });
     return body;
   }
   async function submitVideo(form) {
@@ -435,14 +435,15 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
         const shot = await prepareImage(file);
         const path = `${currentSession.user.id}/${Date.now()}-${safeName(shot.name)}`;
         const { error: upErr } = await getSupabase().storage.from('lap-evidence').upload(path, shot.blob, { contentType: shot.type });
-        if (upErr) throw new Error('Screenshot upload failed. Check your connection and try again.');
+        if (upErr) throw Object.assign(new Error('Screenshot upload failed. Check your connection and try again.'), { status: 'upload' });
         screenshot = { storage_reference: path, mime_type: shot.type, byte_size: shot.size };
       }
       btn.textContent = 'Sending…';
       await callFn(CORRECT_RUN_URL, { run_id: run.run_id, vehicle_id: form.vehicle_id.value, lap_time_ms: ms, screenshot });
       await loadAccountData();
     } catch (err) {
-      formError(form, err instanceof Error ? err.message : 'Could not send the correction. Please try again.');
+      const st = (err as any)?.status;
+      formError(form, st === 409 ? 'This lap no longer needs a correction. Reload the page to see its status.' : st === 'upload' ? (err as Error).message : 'Could not send the correction. Please try again.');
       btn.disabled = false; btn.textContent = 'Send for review';
     }
   }
@@ -507,7 +508,7 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
         const canWithdraw = run.publication_status === 'hidden';
         const canAddVideo = run.review_status !== 'rejected' && run.review_status !== 'invalidated'
           && run.verification_tier !== 'verified';
-        const videoBtn = canAddVideo ? '<button type="button" class="btn btn-s btn-sm add-video-btn" data-run-id="' + run.run_id + '">+ Video</button>' : '';
+        const videoBtn = canAddVideo ? '<button type="button" class="btn btn-s btn-sm add-video-btn" data-run-id="' + run.run_id + '">Add video</button>' : '';
         const withdrawBtn = canWithdraw ? '<button type="button" class="btn btn-danger btn-sm withdraw-btn" data-run-id="' + run.run_id + '">Withdraw</button>' : '';
         const date = formatDate(run.submitted_at ?? run.created_at);
         // DEC-0210: highlight opt-in, only for laps with a video. COPY: Claude placeholder, Codex review pending.

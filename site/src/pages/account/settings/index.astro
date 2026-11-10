@@ -86,7 +86,7 @@ import VerifyRequest from '../../../components/VerifyRequest.astro';
     </div>
 
     <div class="panel deleted-box" id="deleted-box" hidden>
-      <p><strong>Your account has been deleted.</strong> Your personal data is gone; reviewed lap times stay on the leaderboard as “Deleted driver”.</p>
+      <p><strong>Your account has been deleted.</strong> Reviewed lap times stay on the leaderboard as “Deleted driver”.</p>
     </div>
   </section>
 </Base>
@@ -214,7 +214,7 @@ import VerifyRequest from '../../../components/VerifyRequest.astro';
       } catch (err) {
         delBtn.disabled = false;
         delBtn.textContent = 'Delete my account';
-        msg(delMsg, `Could not delete the account: ${(err as Error).message}`, false);
+        msg(delMsg, 'Could not delete your account. Please try again.', false);
       }
     });
   }

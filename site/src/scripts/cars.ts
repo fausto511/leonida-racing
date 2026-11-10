@@ -397,7 +397,7 @@ function paintWish() {
     b.setAttribute('aria-pressed', String(on));
     b.classList.toggle('is-owned', own);
     b.setAttribute('aria-disabled', String(own));
-    b.title = own ? 'Already in your garage' : on ? 'On your wishlist · click to remove' : 'Add to wishlist';
+    b.title = own ? 'Already in your garage' : on ? 'Remove from wishlist' : 'Add to wishlist';
   });
 }
 // G2: Owned / Not owned count within the current search + filters (not the whole list)

@@ -273,7 +273,7 @@ const base = import.meta.env.BASE_URL;
     if (ap) {
       ap.disabled = true;
       const { error } = await sb.from('crew_memberships').update({ status: 'active' }).eq('membership_id', ap.dataset.approve!);
-      await afterChange(error ? `Could not approve: ${error.message}` : `${ap.dataset.name} is now in ${ap.dataset.crew}.`, Boolean(error));
+      await afterChange(error ? (/crew_limit/.test(error.message) ? 'This driver is already in five crews.' : 'Could not approve this request. Please try again.') : `${ap.dataset.name} is now in ${ap.dataset.crew}.`, Boolean(error));
       return;
     }
     const rj = t.closest<HTMLButtonElement>('[data-reject]');

@@ -884,7 +884,7 @@ const base = import.meta.env.BASE_URL;
       approve.disabled = true;
       const { error } = await sb.from('crew_memberships').update({ status: 'active' }).eq('membership_id', approve.dataset.approve!);
       await loadMembers(); renderList();
-      renderMembers(error ? `Could not approve: ${error.message}` : 'Approved — the driver now shows up in your roster.', Boolean(error));
+      renderMembers(error ? (/crew_limit/.test(error.message) ? 'This driver is already in five crews.' : 'Could not approve this request. Please try again.') : 'Approved — the driver now shows up in your roster.', Boolean(error));
       return;
     }
     if (drop) {

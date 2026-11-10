@@ -299,7 +299,7 @@ const vehicleIndex = [...vehicleOptions]
       heart.className = `${gar.className} mg-heart`;
       heart.setAttribute('aria-pressed', 'true');
       heart.dataset.remove = x.id; heart.dataset.list = 'wishlist';
-      heart.title = 'On your wishlist · click to remove';
+      heart.title = 'Remove from wishlist';
       heart.setAttribute('aria-label', `Remove ${label} from your wishlist`);
       // keep the scoped style of the card's own icon: clone its <svg> and swap the drawing for a heart
       const svg = gar.querySelector('svg')!.cloneNode(false) as SVGElement;
@@ -456,7 +456,7 @@ const vehicleIndex = [...vehicleOptions]
         await setOwned(me, id, false);
         owned = owned.filter((x) => x !== id);
         render();
-        msg('cars', `${name(id)} removed.`, false, async () => { await setOwned(me!, id, true); owned.splice(i, 0, id); });
+        msg('cars', `${name(id)} removed from My cars.`, false, async () => { await setOwned(me!, id, true); owned.splice(i, 0, id); });
       } else {
         const i = wish.indexOf(id);
         await setWished(me, id, false);

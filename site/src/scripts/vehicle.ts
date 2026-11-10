@@ -121,7 +121,7 @@ function init(root: HTMLElement) {
     const on = wished.has(id);
     wishBtn.hidden = owned.has(id);
     wishBtn.setAttribute('aria-pressed', String(on));
-    const label = on ? 'On your wishlist · click to remove' : 'Add to wishlist';
+    const label = on ? 'Remove from wishlist' : 'Add to wishlist';
     wishBtn.title = label;
     wishBtn.setAttribute('aria-label', label);
     // hearts on the "similar cars" cards (same rule as the Cars page)
@@ -130,7 +130,7 @@ function init(root: HTMLElement) {
       b.setAttribute('aria-pressed', String(w));
       b.classList.toggle('is-owned', own);
       b.setAttribute('aria-disabled', String(own));
-      b.title = own ? 'Already in your garage' : w ? 'On your wishlist · click to remove' : 'Add to wishlist';
+      b.title = own ? 'Already in your garage' : w ? 'Remove from wishlist' : 'Add to wishlist';
     });
   }
   async function toggleWishCard(carId: string, b: HTMLButtonElement) {
