@@ -21,6 +21,7 @@ export function createEventRsvp(root: HTMLElement) {
   const SEASON_MSG: Record<string, string> = {
     full: 'The championship is full.', closed: 'Sign-ups for this championship are closed.', past: 'This championship is already over.',
     members_only: 'This championship is for crew members only.', blocked: 'The host removed you from this championship.', not_found: 'This championship is not open for sign-ups.',
+    no_profile: 'Log in with Discord first, then join the championship.', // Fausto 10.11. (DEC-0212)
   };
   const isOver = (e: HubEvent) => new Date(e.ends_at ?? new Date(new Date(e.starts_at).getTime() + 3 * 3600e3).toISOString()) < new Date();
 

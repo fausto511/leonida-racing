@@ -186,7 +186,7 @@ import '../styles/hub.css';
     const body = (r: any) => `<p class="er-note"><strong>${esc(r.title)}</strong> · ${esc(r.event_type ?? '')}${r.max_participants ? ` · max. ${r.max_participants}` : ''}</p>`
       + (r.description ? `<p class="er-note">${esc(r.description)}</p>` : '')
       + `<p class="er-note">${r.host_name ? `PSN ${esc(r.host_name)}` : ''}${r.host_name && r.discord_url ? ' · ' : ''}${r.discord_url ? `Discord ${esc(r.discord_url)}` : ''}</p>`;
-    const acts = (id: string, kind: 'review' | 'changes' | 'quiet') => `<div class="er-actions" data-series="${esc(id)}">`
+    const acts = (id: string, kind: 'review' | 'changes' | 'quiet') => `<div class="er-actions" data-series="${esc(id)}" data-league="${rows.find((x: any) => x.series_id === id)?.kind === 'league' ? '1' : ''}">`
       + (kind === 'review'
         ? `<button type="button" class="btn btn-p btn-sm" data-sact="approve">Approve</button><textarea maxlength="300" placeholder="Reason for the host (required for Needs changes / Reject)"></textarea><button type="button" class="btn btn-s btn-sm" data-sact="needs_changes">Needs changes</button><button type="button" class="btn btn-danger btn-sm" data-sact="reject">Reject</button>`
         : kind === 'changes'
@@ -245,7 +245,8 @@ import '../styles/hub.css';
       if (['needs_changes', 'reject', 'reject_changes', 'cancel'].includes(act) && !note) { say('Add a reason for the host first.', true); box.querySelector('textarea')!.focus(); return; }
       box.querySelectorAll('button').forEach((b) => (b.disabled = true));
       const { error } = await getSupabase().rpc('moderate_series', { p_series: box.dataset.series, p_action: act, p_note: note || null });
-      const done: Record<string, string> = { approve: 'Series approved — upcoming dates are live.', needs_changes: 'Sent back to the host with your note.', reject: 'Series rejected.', approve_changes: 'Changes approved — all upcoming dates updated.', reject_changes: 'Changes rejected — the live version stays.', keep: 'Series keeps running.', cancel: 'Series cancelled.' };
+      const lg = box.dataset.league === '1'; // texts decided by Fausto 10.11. (DEC-0212)
+      const done: Record<string, string> = { approve: lg ? 'Championship approved — upcoming rounds are live.' : 'Series approved — upcoming dates are live.', needs_changes: 'Sent back to the host with your note.', reject: lg ? 'Championship rejected.' : 'Series rejected.', approve_changes: 'Changes approved — all upcoming dates updated.', reject_changes: 'Changes rejected — the live version stays.', keep: 'Series keeps running.', cancel: 'Series cancelled.' };
       say(error ? errText(error.message) : done[act], Boolean(error));
       await load();
       document.dispatchEvent(new CustomEvent('er-changed'));
