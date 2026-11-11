@@ -24,7 +24,7 @@ import ModeratorShell from '../../../components/ModeratorShell.astro';
       <div class="mc-grid dx-charts">
         <figure class="mc-card"><figcaption><b>Accounts</b><span id="dx-acc-sub">Last 30 days</span></figcaption><div id="dx-acc"></div></figure>
         <figure class="mc-card"><figcaption><b>New accounts per day</b><span id="dx-new-sub">Last 30 days</span></figcaption><div id="dx-new"></div></figure>
-        <figure class="mc-card"><figcaption><b>Active drivers per day</b><span>Logged in and on the site</span></figcaption><div id="dx-act"></div></figure>
+        <figure class="mc-card"><figcaption><b>Active drivers per day</b><span id="dx-act-sub">Logged in and on the site</span></figcaption><div id="dx-act"></div></figure>
         <figure class="mc-card"><figcaption><b>Page views per day</b><span id="dx-vis-sub">Cloudflare Web Analytics · only visitors who allowed statistics</span></figcaption><div id="dx-vis"></div></figure>
       </div>
 
@@ -145,8 +145,11 @@ import ModeratorShell from '../../../components/ModeratorShell.astro';
       $('dx-new-sub').textContent = `Last 30 days · ${sum.toLocaleString('en-US')} new`;
       $('dx-new').innerHTML = barChart(u.new_per_day, `New accounts per day, last 30 days, ${sum} in total`);
       const act = u.active_per_day ?? [];
-      $('dx-act').innerHTML = act.length >= 7 ? barChart(act, 'Active drivers per day')
-        : `<div class="mc-empty">The site saves one total per day since 9 November, so the history is still short.${act.length ? ` So far: ${act.map((d) => `${dayLabel(d.day)}: ${d.n}`).join(' · ')}.` : ''}</div>`;
+      // Fausto 11.11.: bars from the first saved day on (the note-only box read as an empty tile).
+      $('dx-act').innerHTML = act.length
+        ? barChart(act, `Active drivers per day: ${act.map((d) => `${dayLabel(d.day)} ${d.n}`).join(', ')}`)
+        : `<div class="mc-empty">No day saved yet.</div>`;
+      if (act.length && act.length < 7) $('dx-act-sub').textContent = `Logged in and on the site · counted since ${dayLabel(act[0].day)}`;
     }
     const rows = ((vis.data ?? []) as any[]).map((r) => ({ day: r.day, n: Number(r.pageviews) || 0 }));
     if (vis.error || !rows.length) { $('dx-vis').innerHTML = `<div class="mc-empty">${vis.error ? 'Could not load page views.' : 'No page views yet.'}</div>`; return; }

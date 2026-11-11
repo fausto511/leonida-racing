@@ -149,9 +149,11 @@ import ModeratorShell from '../../components/ModeratorShell.astro';
     $('mo-new-sub').textContent = `Last 30 days · ${fmt(newSum)} new`;
     $('mo-new').innerHTML = barChart(u.new_per_day, `New accounts per day, last 30 days, ${newSum} in total`);
     const act = u.active_per_day ?? [];
-    $('mo-active').innerHTML = act.length >= 7
-      ? barChart(act, 'Active drivers per day')
-      : `<div class="mo-empty">The site saves one total per day since this page went live, so the history is still short.${act.length ? ` So far: ${act.map((d) => `${dayLabel(d.day)}: ${fmt(d.n)}`).join(' · ')}.` : ''}</div>`;
+    // Fausto 11.11.: bars from the first saved day on (the note-only box read as an empty tile).
+    $('mo-active').innerHTML = act.length
+      ? barChart(act, `Active drivers per day: ${act.map((d) => `${dayLabel(d.day)} ${fmt(d.n)}`).join(', ')}`)
+        + (act.length < 7 ? `<p class="mo-note">Counted since ${dayLabel(act[0].day)}: ${act.map((d) => `${dayLabel(d.day)} ${fmt(d.n)}`).join(' · ')}</p>` : '')
+      : `<div class="mo-empty">No day saved yet.</div>`;
     const c = ov.cars;
     $('mo-stars-sub').textContent = `${fmt(c.ratings)} ratings from ${fmt(c.rating_drivers)} driver${c.rating_drivers === 1 ? '' : 's'}`;
     $('mo-stars').innerHTML = hBars([5, 4, 3, 2, 1].map((s) => [`${s} star${s === 1 ? '' : 's'}`, Number(c.stars?.[s] ?? 0)]));
@@ -215,6 +217,7 @@ import ModeratorShell from '../../components/ModeratorShell.astro';
   .mo-card :global(.hit) { fill: transparent; }
   .mo-card :global(g:hover .bar) { fill: var(--lr-orange-hover); }
   .mo-card :global(.mo-empty) { min-height: 160px; border: 1px dashed var(--lr-line-strong); border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; text-align: center; font-size: 14px; line-height: 1.5; color: var(--lr-soft); }
+  .mo-card :global(.mo-note) { margin: 0; font-size: 13px; line-height: 1.5; color: var(--lr-muted); }
   .mo-card :global(.mo-hb) { display: flex; flex-direction: column; gap: 10px; }
   .mo-card :global(.mo-hbr) { display: grid; grid-template-columns: 120px minmax(0, 1fr) 44px; align-items: center; gap: 12px; font-size: 13px; }
   .mo-card :global(.mo-hbr span) { color: var(--lr-soft); }
