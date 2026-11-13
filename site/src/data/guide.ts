@@ -15,7 +15,7 @@ import { vehicleOptions } from './vehicles';
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
 // Bump on EVERY content change to the Guide (visible as "Last updated" + Article dateModified) — Fausto 27.10.2026.
-export const GUIDE_UPDATED = '2026-11-09';
+export const GUIDE_UPDATED = '2026-11-13';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -335,9 +335,10 @@ export const guideSections: GuideSection[] = [
     title: 'Gellhorn and the Circuit',
     status: 'Shown by Rockstar',
     paragraphs: [
-      `Rockstar has shown a dedicated paved race circuit in GTA VI, complete with a grid, curbing, timing, position, and lap information. Trailer 2 separately shows Lucia wearing clothing marked <strong>Gellhorn International</strong> with a race-car graphic.`,
+      `Rockstar has shown a dedicated paved race circuit in GTA VI, complete with a grid, curbing, timing, position, and lap information. Earlier GTA games had stadium events, small ovals, and improvised routes, but never a permanent road course built into the map. Trailer 2 separately shows Lucia wearing clothing marked <strong>Gellhorn International</strong> with a race-car graphic.`,
       `The venue is widely known as <strong>Gellhorn International Raceway</strong>, and Leonida Racing uses that established name for its <a href="{base}time-attack/gellhorn-international-raceway/">Time Attack competition</a>. The source record remains more precise: Rockstar’s public footage shows the circuit and the Gellhorn International branding, but does not display the full venue name alongside the race. The complete layout, location, classes, and event schedule remain unannounced.`,
       `Sebring International Raceway is a rumored inspiration, discussed in coverage by <strong>The Drive</strong> and <strong>Jalopnik</strong>. Parts of that comparison rely on leaked maps rather than official footage. It is a published theory about the inspiration, not a Rockstar-confirmed connection or proof that Gellhorn copies Sebring’s layout, length, or corners.`,
+      `Rockstar’s research for GTA VI also included a Florida racetrack. In a November 2026 interview with The Guardian, Rockstar North co-studio head Rob Nelson recalled visiting a racetrack a few hours after a night in a Miami club. The coverage does not name the track or say whether the visit was tied to Gellhorn.`,
     ],
     cta: { label: 'Visit Gellhorn Time Attack', href: 'time-attack/gellhorn-international-raceway/' },
     sources: [
@@ -345,6 +346,8 @@ export const guideSections: GuideSection[] = [
       { label: 'The Drive — Is Sebring Raceway Going To Be in GTA 6?', url: 'https://www.thedrive.com/news/theres-convincing-evidence-that-sebring-raceway-will-be-in-grand-theft-auto-6', note: 'April 3, 2026: documents the Sebring theory; map/leak-derived arguments are not treated as verified circuit facts.' },
       { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: EXT_LOOK, note: 'approximately 17:41–17:47: official circuit-racing footage.' },
       { label: 'Rockstar Games — GTA VI Trailer 2', url: 'https://www.youtube.com/watch?v=VQRLujxTm3c', note: 'approximately 1:57: “Gellhorn International” clothing and race-car graphic.' },
+      { label: 'Motor1 — GTA 6 Is Finally Getting Real Racing', url: 'https://www.motor1.com/news/806207/grand-theft-auto-6-race-track-leaked/', note: 'updated August 27, 2026: earlier GTA games had small ovals, dirt tracks, and improvised routes, but no dedicated asphalt road course.' },
+      { label: 'RockstarINTEL — New GTA VI Interview Reveals More Gameplay Features', url: 'https://rockstarintel.com/new-gta-vi-interview-reveals-more-gameplay-features/', note: 'November 2026: secondary coverage of The Guardian interview with Rob Nelson, including the racetrack visit during Florida research. Checked November 13, 2026.' },
     ],
   },
   {
