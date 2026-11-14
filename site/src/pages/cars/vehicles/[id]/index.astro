@@ -49,7 +49,7 @@ const vehicleJsonLd = [{
 }];
 
 const acqLabels: Record<string, string> = { 'pre-order': 'Pre-Order bonus', 'ultimate-edition': 'Ultimate Edition', 'gta-plus': 'GTA+' };
-const acqNotes: Record<string, string> = { 'pre-order': 'Pre-order bonus', 'ultimate-edition': 'Ultimate Edition exclusive', 'gta-plus': 'GTA+ members only' };
+const acqNotes: Record<string, string> = { 'pre-order': 'Pre-order bonus', 'ultimate-edition': 'Ultimate Edition exclusive', 'gta-plus': 'GTA+ only' };
 const acq = vehicle.acquisition ? acqLabels[vehicle.acquisition] : null;
 
 const release = vehicle.releaseId ? releaseById[vehicle.releaseId] : undefined;

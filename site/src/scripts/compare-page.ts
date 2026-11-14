@@ -57,6 +57,8 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
   const community = new Map<string, number>(); // best lap per car (any driver)
   const mine = new Map<string, { ms: number; rank: number }>();
   const owners = new Map<string, number>();
+  // false = not loaded (yet or failed): show a dash, not an invitation (Fausto 14.11.)
+  const ok = { best: false, own: false, cnt: false };
   const ratings = new Map<string, { avg: number; count: number }>();
 
   // ---- strip ----------------------------------------------------------------------
@@ -75,7 +77,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     <a class="ct-name" href="${vhref(c)}">${esc(c.model)}</a>
     <span class="ct-cls">${esc(c.cls)}</span>
     <div class="ct-foot"><a class="arrow ct-view" href="${vhref(c)}">View car →</a>
-      <button type="button" class="ct-gar" data-gar="${c.id}" aria-pressed="${o}" title="${o ? 'Remove from My garage' : 'Mark as owned · adds it to My garage'}" aria-label="My Garage">${houseIco}</button></div>
+      <button type="button" class="ct-gar" data-gar="${c.id}" aria-pressed="${o}" title="${o ? 'Remove from My garage' : 'Mark as owned · adds it to My garage'}" aria-label="My garage">${houseIco}</button></div>
   </div>
 </article>`;
   }
@@ -108,7 +110,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     const classes = new Set(list.map((c) => c.cls));
     $('cp-cls').innerHTML = list.length < 2 ? '' : classes.size === 1
       ? `<span class="cp-chip">${CHECK_SVG}All ${esc(list[0].cls)}</span>`
-      : '<span class="cp-diff">Different classes – they don\'t race each other on the leaderboard</span>';
+      : '<span class="cp-diff">Different classes – they only meet on the overall leaderboard</span>';
     root.style.setProperty('--n', String(Math.max(1, list.length)));
     ($('cp-add-m') as HTMLElement).hidden = list.length >= COMPARE_MAX;
     ($('cp-clear') as HTMLElement).hidden = !list.length;
@@ -158,7 +160,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
         const m = [c.price == null ? 'price' : '', c.ref == null ? 'reference lap' : ''].filter(Boolean);
         return `<span>${esc(c.model)}: ${m.length ? m.map((x) => `<em>${x}</em>`).join(' · ') : 'ready'}</span>`;
       }).join('');
-      box.innerHTML = `<p class="cp-eb">Our take</p><div class="lock"><div class="lock-m"><h3>Our verdict unlocks with prices and lap times</h3><p>We pick the best value, the fastest and the top-speed king as soon as the in-game price and our Gellhorn reference lap are known for at least two of these cars.</p><div class="lock-miss">${miss}</div></div><button type="button" class="btn btn-s" data-how>How we judge</button></div>${rules}`;
+      box.innerHTML = `<p class="cp-eb">Our take</p><div class="lock"><div class="lock-m"><h3>Our verdict unlocks with prices and lap times</h3><p>We pick the best value, the fastest and the top speed as soon as the in-game price and our Gellhorn reference lap are known for at least two of these cars.</p><div class="lock-miss">${miss}</div></div><button type="button" class="btn btn-s" data-how>How we judge</button></div>${rules}`;
       return;
     }
     const card = (eb: string, x: { car: CmpCar; text: string } | null, link: [string, string], best = false) => x
@@ -169,7 +171,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
 ${card('Best value', v.value, ['Cheapest cars ranking', `${base}cars/rankings/cheapest/`], Boolean(v.value))}
 ${card('Fastest at Gellhorn', v.fastest, ['Gellhorn leaderboard', `${base}time-attack/gellhorn-international-raceway/`])}
 ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars ranking', sp ? `${base}cars/rankings/fastest/${classSlug(sp.cls)}/` : `${base}cars/rankings/fastest/`])}
-</div><div class="tk-foot"><span>Based on our stock Gellhorn reference lap and the in-game price.${new Set(list.map((c) => c.cls)).size > 1 ? ' Different classes – they don\'t race each other on the leaderboard.' : ''}</span><button type="button" class="tk-how" data-how>How we judge →</button></div>${rules}`;
+</div><div class="tk-foot"><span>Based on our stock Gellhorn reference lap and the in-game price.${new Set(list.map((c) => c.cls)).size > 1 ? ' Different classes – they only meet on the overall leaderboard.' : ''}</span><button type="button" class="tk-how" data-how>How we judge →</button></div>${rules}`;
   }
 
   // ---- table ---------------------------------------------------------------------------
@@ -178,7 +180,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
   type Row = { label: string; sub?: string; dir?: 'min' | 'max'; cells: (c: CmpCar) => Cell };
   const star = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.3L14.38 9.62L22.08 9.62L15.85 14.15L18.23 21.48L12 16.95L5.77 21.48L8.15 14.15L1.92 9.62L9.62 9.62Z"/></svg>';
   const stars = (n: number) => `<span class="tv-stars">${[1, 2, 3, 4, 5].map((i) => star.replace('<svg', `<svg class="${i <= Math.round(n) ? 'on' : ''}"`)).join('')}</span>`;
-  const acqNote: Record<string, string> = { 'pre-order': 'Pre-order bonus', 'ultimate-edition': 'Ultimate Edition exclusive', 'gta-plus': 'GTA+ members only' };
+  const acqNote: Record<string, string> = { 'pre-order': 'Pre-order bonus', 'ultimate-edition': 'Ultimate Edition exclusive', 'gta-plus': 'GTA+ only' };
   const classRank = (c: CmpCar) => {
     const t = community.get(c.id); if (t == null) return null;
     return 1 + ALL.filter((o) => o.classes.includes(c.cls) && (community.get(o.id) ?? Infinity) < t).length;
@@ -197,12 +199,14 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
         : { m: tb('Coming soon', 'Soon'), raw: 'mal', tba: true } },
       { label: 'Best community lap', sub: 'Fastest driver in this car', dir: 'min', cells: (c) => {
         const t = community.get(c.id);
+        if (t == null && !ok.best) return { m: '—', raw: 'na' };
         if (t == null) return { m: `<a class="tv-link" href="${base}time-attack/submit/">${tb('Set the first time →', 'Set a time')}</a>`, raw: 'none' };
         const r = classRank(c);
         return { m: lapTime(t), s: r ? `#${r} in ${c.cls}` : '', v: t };
       } },
       ...(me ? [{ label: 'Your best lap', cells: (c: CmpCar): Cell => {
         const x = mine.get(c.id);
+        if (!x && !ok.own) return { m: '—', raw: 'na' };
         return x ? { m: lapTime(x.ms), s: `#${x.rank} in this car`, mine: true } : { m: `<a class="tv-link" href="${base}time-attack/submit/">Set a time →</a>`, raw: 'none' };
       } } as Row] : []),
       { label: 'Top speed', sub: 'Stock', dir: 'max', cells: (c) => c.speed != null ? { m: speedHtml(Math.round(c.speed)), raw: String(Math.round(c.speed)), v: c.speed } : { m: tb('Coming soon', 'Soon'), raw: 'mal', tba: true } },
@@ -228,6 +232,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
         return { m: open ? tb('Not enough ratings yet', 'Too few yet') : tb('Ratings open Nov 19', 'Opens Nov 19'), raw: 'r', tba: true };
       } },
       { label: 'In garages', cells: (c) => {
+        if (!ok.cnt) return { m: '—', raw: 'na' };
         const n = owners.get(c.id) ?? 0;
         return n ? { m: `${n} ${n === 1 ? 'driver' : 'drivers'}` } : { m: `<a class="tv-quiet" href="${vhref(c)}">${tb('Be the first →', 'Be the first')}</a>`, raw: 'none' };
       } },
@@ -258,7 +263,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
       if (g.h === 'The car' && hidden.length && hideSame) rows += `<div class="tr-hid">${hidden.length} identical ${hidden.length === 1 ? 'row' : 'rows'} hidden: ${esc(hidden.join(', '))} <button type="button" data-show-hidden>Show</button></div>`;
       if (rows) html += `<div class="tg"><p class="tg-h">${g.h}</p>${rows}</div>`;
     }
-    if (hideSame && hidden.length && !html.includes('tr-hid')) html += `<div class="tr-hid">${hidden.length} identical rows hidden: ${esc(hidden.join(', '))} <button type="button" data-show-hidden>Show</button></div>`;
+    if (hideSame && hidden.length && !html.includes('tr-hid')) html += `<div class="tr-hid">${hidden.length} identical ${hidden.length === 1 ? 'row' : 'rows'} hidden: ${esc(hidden.join(', '))} <button type="button" data-show-hidden>Show</button></div>`;
     box.innerHTML = html;
   }
 
@@ -297,7 +302,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     const f = list.filter((c) => c.ref != null && c.price != null).sort((a, b) => a.ref! - b.ref!)[0];
     const cls = f?.cls ?? list[0].cls;
     const left = alts.length
-      ? `<div class="al">${alts.map((a) => `<div class="al-r">${a.car.photo ? `<img class="al-img" src="${img(a.car)}" alt="" loading="lazy" />` : `<span class="al-img al-ph"><img src="${ph}" alt="" loading="lazy" /><img class="al-logo" src="${logo(a.car)}" alt="" loading="lazy" /></span>`}<div class="al-m"><b>${esc(a.car.make)} ${esc(a.car.model)}</b>${limited(a.car) ? `<small class="al-lim">${esc(limitedNote(a.car))}</small>` : ''}<span>${a.slower < 5 ? `As fast as the ${esc(f.model)}` : `${secs(a.slower)} slower than the ${esc(f.model)}`} · <em>${money(a.cheaper)} cheaper</em></span></div><button type="button" class="al-add" data-add="${a.car.id}">+ Compare</button></div>`).join('')}
+      ? `<div class="al">${alts.map((a) => `<div class="al-r">${a.car.photo ? `<img class="al-img" src="${img(a.car)}" alt="" loading="lazy" />` : `<span class="al-img al-ph"><img src="${ph}" alt="" loading="lazy" /><img class="al-logo" src="${logo(a.car)}" alt="" loading="lazy" /></span>`}<div class="al-m"><b>${esc(a.car.make)} ${esc(a.car.model)}</b>${limited(a.car) ? `<small class="al-lim">${esc(limitedNote(a.car))}</small>` : ''}<span>${Math.abs(a.slower) < 5 ? `As fast as the ${esc(f.model)}` : a.slower < 0 ? `${secs(-a.slower)} faster than the ${esc(f.model)}` : `${secs(a.slower)} slower than the ${esc(f.model)}`} · <em>${money(a.cheaper)} cheaper</em></span></div><button type="button" class="al-add" data-add="${a.car.id}">+ Compare</button></div>`).join('')}
 <p class="al-note">Same class, within ${(ALT_MAX_SLOWER_MS / 1000).toFixed(1)} s of your fastest pick and at least ${Math.round(ALT_MIN_CHEAPER * 100)} % cheaper.</p></div>`
       : f
         ? `<div class="lock"><div class="lock-m"><h3>No cheaper alternative</h3><p>No ${esc(cls)} car is close enough at Gellhorn and clearly cheaper.</p></div></div>`
@@ -321,7 +326,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
   $('cp-add-m').addEventListener('click', () => { slotOpen = !slotOpen; renderStrip(); (document.getElementById('ct-q') as HTMLInputElement | null)?.focus(); });
   $('cp-share').addEventListener('click', async () => {
     const btn = $('cp-share');
-    try { await navigator.clipboard.writeText(location.href); bubble(btn, 'Link copied. Anyone with it sees this comparison.'); }
+    try { await navigator.clipboard.writeText(location.href); bubble(btn, 'Link copied. It shows these cars, not your garage or laps.'); }
     catch { bubble(btn, `Copy this link:<br><b>${esc(location.href)}</b>`, 8000); }
   });
   document.addEventListener('click', async (e) => {
@@ -370,6 +375,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
       sb.from('public_vehicle_ratings').select('vehicle_id, rating_avg, rating_count'),
       me ? fetchOwned() : Promise.resolve(new Set<string>()),
     ]);
+    ok.best = !(best as any).error; ok.own = !(own as any).error; ok.cnt = !(cnt as any).error;
     for (const r of ((best as { data: { scope_key: string; lap_time_ms: number }[] | null }).data ?? [])) community.set(r.scope_key, r.lap_time_ms);
     for (const r of ((own as { data: { scope_key: string; lap_time_ms: number; rank: number }[] | null }).data ?? [])) mine.set(r.scope_key, { ms: r.lap_time_ms, rank: r.rank });
     for (const r of ((cnt as { data: { vehicle_id: string; owner_count: number }[] | null }).data ?? [])) owners.set(r.vehicle_id, Number(r.owner_count));

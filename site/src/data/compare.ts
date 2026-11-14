@@ -23,7 +23,7 @@ export interface CmpCar {
 /** Edition / bonus / GTA+ cars: judged like every other car (Fausto 15.10.), only marked
  *  with how you get them. Not "can't be bought later": nobody knows that (Fausto 03.11.). */
 export const limited = (c: CmpCar) => Boolean(c.acq);
-const LIMITED_NOTE: Record<string, string> = { 'ultimate-edition': 'Ultimate Edition only', 'pre-order': 'Pre-order bonus only', 'gta-plus': 'GTA+ only' };
+const LIMITED_NOTE: Record<string, string> = { 'ultimate-edition': 'Ultimate Edition exclusive', 'pre-order': 'Pre-order bonus', 'gta-plus': 'GTA+ only' };
 export const limitedNote = (c: CmpCar) => (c.acq ? `${LIMITED_NOTE[c.acq] ?? 'Limited'}.` : '');
 
 export const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
@@ -46,7 +46,8 @@ export function verdict(cars: CmpCar[], fmtSpeed: (mph: number) => string = (mph
   const fastest = withRef[0];
   // "of the four" only when every car has a reference lap; otherwise "here" (Codex 02.11.)
   const n = withRef.length < cars.length ? '' : cars.length === 2 ? 'two' : cars.length === 3 ? 'three' : 'four';
-  const fastestOut = { car: fastest, text: `Quickest reference lap ${n ? `of the ${n}` : 'here'}. Worth it if you chase every tenth.` };
+  const tieRef = withRef.length > 1 && withRef[1].ref === fastest.ref; // tie: no single winner (Fausto 14.11.)
+  const fastestOut = { car: fastest, text: `${tieRef ? 'Joint-quickest' : 'Quickest'} reference lap ${n ? `of the ${n}` : 'here'}. Worth it if you chase every tenth.` };
 
   // value: only cars you can buy
   const buyable = [...priced].sort((a, b) => a.ref! - b.ref!);
@@ -56,12 +57,12 @@ export function verdict(cars: CmpCar[], fmtSpeed: (mph: number) => string = (mph
     const f = buyable[0];
     const cheapest = [...buyable].sort((a, b) => a.price! - b.price!)[0];
     if (cheapest.id === f.id) {
-      value = { car: f, text: `Faster and cheaper than the rest. A clear pick.` };
+      value = { car: f, text: `Faster and cheaper than the other priced cars. A clear pick.` };
     } else {
       const cands = buyable.filter((c) => c.id !== f.id && c.ref! - f.ref! <= VALUE_MAX_SLOWER_MS && c.price! <= f.price! * (1 - VALUE_MIN_CHEAPER))
         .sort((a, b) => a.price! - b.price!);
       const pick = cands[0];
-      if (pick) value = { car: pick, text: `Only ${secs(pick.ref! - f.ref!)} slower than the ${f.model} at Gellhorn, but ${money(f.price! - pick.price!)} cheaper. Our pick for most drivers.` };
+      if (pick) value = { car: pick, text: `Only ${secs(pick.ref! - f.ref!)} slower than the ${f.model} at Gellhorn, but ${money(f.price! - pick.price!)} cheaper. Our value pick.` };
       else value = { car: f, text: `None of the cheaper cars stays close enough at Gellhorn. The ${f.model} is worth its price.` };
     }
   }
@@ -71,8 +72,9 @@ export function verdict(cars: CmpCar[], fmtSpeed: (mph: number) => string = (mph
   let speed: Verdict['speed'] = null;
   if (withSpeed.length >= 2) {
     const s = withSpeed[0];
-    const gap = s.ref != null && fastest.ref != null && s.id !== fastest.id ? ` but ${secs(s.ref - fastest.ref!)} slower around Gellhorn` : '';
-    speed = { car: s, text: `${fmtSpeed(s.speed!)}, the highest here${gap}.` };
+    const gap = s.ref != null && fastest.ref != null && s.id !== fastest.id ? `, but ${secs(s.ref - fastest.ref!)} slower around Gellhorn` : '';
+    const tieSpeed = withSpeed[1].speed === s.speed;
+    speed = { car: s, text: `${fmtSpeed(s.speed!)}, the ${tieSpeed ? 'joint-highest' : 'highest'} here${gap}.` };
   }
   return { value, valueNote, fastest: fastestOut, speed };
 }
@@ -85,7 +87,7 @@ export function alternatives(cars: CmpCar[], all: CmpCar[]): { car: CmpCar; slow
   return all
     .filter((c) => !chosen.has(c.id) && c.release && c.classes.includes(f.cls) && c.ref != null && c.price != null)
     .filter((c) => c.ref! - f.ref! <= ALT_MAX_SLOWER_MS && c.price! <= f.price! * (1 - ALT_MIN_CHEAPER))
-    .map((c) => ({ car: c, slower: Math.max(0, c.ref! - f.ref!), cheaper: f.price! - c.price! }))
+    .map((c) => ({ car: c, slower: c.ref! - f.ref!, cheaper: f.price! - c.price! })) // negative = faster (Codex 02.11.)
     .sort((a, b) => a.slower - b.slower || b.cheaper - a.cheaper)
     .slice(0, ALT_MAX);
 }
