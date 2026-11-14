@@ -129,7 +129,7 @@ export const eventTypeImages: Record<EventType, string> = {
   cruise: 'images/hub/event-cruise',
   other: 'images/hub/event-other',
 };
-export const eventTypeOgImage = (t: EventType) => `images/og/og-event-${t}.jpg`;
+export const eventTypeOgImage = (t: EventType) => `og/site/event-${t}.jpg`; // with the brand mark (data/og-site.ts)
 
 export const focusLabels: Record<CrewFocus, string> = {
   racing: 'Racing',

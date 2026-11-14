@@ -3,9 +3,9 @@
 //   v-<id>    vehicle: its photo, else a card with logo + name
 //   m-<slug>  manufacturer without a photo car: logo card
 //   c-<slug>  class without a photo car: name card
-//   r-<slug>  ranking without a photo car: title card
-//   p-cars    a car photo with "GTA 6 Cars": Cars, Compare and every other Cars page without its own
-import { vehicleOptions, MAKES_WITHOUT_LOGO, bandVehicle } from './vehicles';
+//   r-<slug>  ranking: title card, fixed (Fausto 14.11.; the Gellhorn ranking uses og/site/gellhorn.jpg)
+//   p-cars    the Cars band photo with "GTA 6 Cars": Cars, Compare and every other Cars page without its own
+import { vehicleOptions, MAKES_WITHOUT_LOGO } from './vehicles';
 import { classPages, manufacturerPages, vehiclesInClass, vehiclesByMake } from './garage-taxonomy';
 import { rankings } from './rankings';
 
@@ -16,7 +16,7 @@ export const rankingKey = (slug: string) => `r-${slug.replace(/\//g, '-')}`;
 export type OgCard =
   | { key: string; kind: 'photo'; vehicleId: string }
   | { key: string; kind: 'text'; title: string; kicker: string; sub?: string; logoSlug?: string }
-  | { key: string; kind: 'hero'; title: string; kicker: string; vehicleId: string };
+  | { key: string; kind: 'hero'; title: string; kicker: string; vehicleId?: string; src?: string };
 
 const cars = (n: number) => (n ? `${n} ${n === 1 ? 'car' : 'cars'} in GTA 6` : undefined); // no "0 cars" before a reveal
 
@@ -28,8 +28,7 @@ export function allOgCards(): OgCard[] {
   for (const m of manufacturerPages) out.push({ key: `m-${m.slug}`, kind: 'text', kicker: 'Manufacturer', title: m.name, sub: cars(vehiclesByMake(m.slug).filter((v) => v.releaseId).length), logoSlug: MAKES_WITHOUT_LOGO.has(m.slug) ? undefined : m.slug });
   for (const c of classPages) out.push({ key: `c-${c.slug}`, kind: 'text', kicker: 'Class', title: c.name, sub: cars(vehiclesInClass(c.slug).filter((v) => v.releaseId).length) });
   for (const r of rankings) out.push({ key: rankingKey(r.slug), kind: 'text', kicker: 'Ranking', title: r.title });
-  const hero = bandVehicle(vehicleOptions.filter((v) => v.releaseId));
-  if (hero?.photo) out.push({ key: 'p-cars', kind: 'hero', kicker: 'Leonida Racing', title: 'GTA 6 Cars', vehicleId: hero.id });
-  else out.push({ key: 'p-cars', kind: 'text', kicker: 'Leonida Racing', title: 'GTA 6 Cars', sub: 'Specs, real-life inspirations and lap times' });
+  // the Cars page band (car meet at night, DEC-0117), fixed (Fausto 14.11.)
+  out.push({ key: 'p-cars', kind: 'hero', kicker: 'Leonida Racing', title: 'GTA 6 Cars', src: 'images/garage/cars-band-1920.webp' });
   return out;
 }

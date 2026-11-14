@@ -102,7 +102,7 @@ const IMG = {
   carMeet: img('car-meet', [640, 1280, 1919], 1919, 1079, 'People gather beside customized cars at an outdoor parking-lot meet in GTA VI.', 'A car meet in GTA VI — Rockstar Games.'),
   takeover: img('street-takeover', [640, 1280, 1672], 1672, 941, 'A crowd surrounds cars and tire smoke at a nighttime street takeover in GTA VI, viewed from above.', 'A street takeover in GTA VI — Rockstar Games.'),
 };
-// Share image (og-guide.jpg) = circuit race crop (Fausto 27.10.2026); the band is the Launch Trailer night race (1:03).
+// Share image = og/site/guide.jpg, Ultimate Edition Grotti Cheetah cockpit (Fausto 14.11.2026, data/og-site.ts); the band is the Launch Trailer night race (1:03).
 export const guideHeroImage = IMG.circuitRace;
 
 export interface GuideSection {

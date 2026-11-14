@@ -8,7 +8,7 @@
 import Base from '../../layouts/Base.astro';
 import DiscordBand from '../../components/DiscordBand.astro';
 import { SITE_NAME } from '../../data/site';
-import { GUIDE_PUBLISHED, GUIDE_UPDATED, GUIDE_VEHICLES, guideHeroImage, type GuideImage, guideCoverage, guideFaq, guideMethodology, guideSections, sourceParts, statusTone } from '../../data/guide';
+import { GUIDE_PUBLISHED, GUIDE_UPDATED, GUIDE_VEHICLES, type GuideImage, guideCoverage, guideFaq, guideMethodology, guideSections, sourceParts, statusTone } from '../../data/guide';
 
 const base = import.meta.env.BASE_URL;
 const title = 'The Guide — GTA 6 Cars, Tuning & Racing';
@@ -34,7 +34,7 @@ const jsonLd = [
     dateModified: `${GUIDE_UPDATED}T12:00:00Z`,
     author: org,
     publisher: org,
-    image: new URL(`${base}images/guide/og-guide.jpg`, Astro.site).href,
+    image: new URL(`${base}og/site/guide.jpg`, Astro.site).href,
     about: { '@type': 'VideoGame', name: 'Grand Theft Auto VI', alternateName: ['GTA VI', 'GTA 6'] },
   },
   {
@@ -70,7 +70,7 @@ const entryMeta: Record<string, { href: string; img: string; srcset: string; cta
 const entries = guideCoverage.filter((c) => entryMeta[c.name]);
 const kindLabel = { official: 'Official', press: 'Press', community: 'Community' } as const;
 ---
-<Base title={title} description={description} section="guide" jsonLd={jsonLd} breadcrumbs={[{ name: 'The Guide', path: 'guide/' }]} ogImage="images/guide/og-guide.jpg" ogImageAlt={guideHeroImage.alt} ogImageWidth={1200} ogImageHeight={630}>
+<Base title={title} description={description} section="guide" jsonLd={jsonLd} breadcrumbs={[{ name: 'The Guide', path: 'guide/' }]} ogImage="og/site/guide.jpg" ogImageAlt="Grotti Cheetah with the door open and a red interior in GTA VI" ogImageWidth={1200} ogImageHeight={630}>
   <section class="gd-band">
     <img class="gd-bg" src={`${base}images/guide/guide-band-1080.webp`} srcset={`${base}images/guide/guide-band-640.webp 640w, ${base}images/guide/guide-band-1080.webp 1080w, ${base}images/guide/guide-band-1672.webp 1672w`} sizes="100vw" alt="" width="1672" height="837" fetchpriority="high" />
     <span class="lr-shade" aria-hidden="true"></span>

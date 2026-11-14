@@ -56,8 +56,13 @@ const fade = (from = 0.15) => Buffer.from(`<svg xmlns="http://www.w3.org/2000/sv
 const jpeg = (img: sharp.Sharp) => img.jpeg({ quality: 82, mozjpeg: true }).toBuffer();
 
 /** Car photo, cropped to 1200x630, small brand mark bottom left. */
-export async function photoCard(vehicleId: string) {
-  const photo = await sharp(join(PUB, 'images/vehicles', `${vehicleId}-1920.webp`)).resize(W, H, { fit: 'cover', position: 'centre' }).toBuffer();
+export const photoCard = (vehicleId: string) => brandedPhoto(join(PUB, 'images/vehicles', `${vehicleId}-1920.webp`));
+
+/** Any photo (path relative to site/), cropped to 1200x630, with the brand mark bottom left. */
+export const sitePhotoCard = (rel: string) => brandedPhoto(join(process.cwd(), rel));
+
+async function brandedPhoto(file: string) {
+  const photo = await sharp(file).resize(W, H, { fit: 'cover', position: 'centre' }).toBuffer();
   const mark = await brandMark(40);
   const low = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><defs><linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset=".72" stop-color="${BG}" stop-opacity="0"/><stop offset="1" stop-color="${BG}" stop-opacity=".75"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#f)"/></svg>`);
   return jpeg(sharp(photo).composite([{ input: low }, { input: mark.input, left: 40, top: H - mark.h - 30 }]));
@@ -101,8 +106,8 @@ export async function textCard(o: { title: string; kicker: string; sub?: string;
 }
 
 /** One car photo as background, darkened towards the bottom, kicker + title over it. */
-export async function heroCard(o: { title: string; kicker: string; vehicleId: string }) {
-  const photo = await sharp(join(PUB, 'images/vehicles', `${o.vehicleId}-1920.webp`)).resize(W, H, { fit: 'cover', position: 'centre' }).toBuffer();
+export async function heroCard(o: { title: string; kicker: string; vehicleId?: string; src?: string }) {
+  const photo = await sharp(join(PUB, o.src ?? `images/vehicles/${o.vehicleId}-1920.webp`)).resize(W, H, { fit: 'cover', position: 'centre' }).toBuffer();
   const x = 80;
   const t = await text(`<span foreground="${TEXT}" font_weight="800">${esc(o.title.replace(/GTA 6/g, 'GTA 6'))}</span>`, { font: 'Archivo 104', file: FONT_DISPLAY, width: W - 2 * x, spacing: -6 });
   const k = await text(`<span foreground="${ORANGE}" font_weight="700" letter_spacing="4000">${esc(o.kicker.toUpperCase())}</span>`, { font: 'Instrument Sans 28', file: FONT_BODY, width: W - 2 * x });
