@@ -101,7 +101,10 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         <a href={`${base}account/laps/`} role="menuitem" id="account-menu-laps">My laps</a>
         <a href={`${base}account/crew/`} role="menuitem" id="account-menu-crew">My crews</a>
         <a href={DISCORD_INVITE_URL} role="menuitem" target="_blank" rel="noopener">Open Discord server</a>
-        <a href={`${base}account/settings/`} role="menuitem">Settings</a>
+        <!-- only shown while something waits there (notification dot, Fausto 14.11.) -->
+        <a href={`${base}account/events/`} role="menuitem" id="account-menu-events" hidden>My events</a>
+        <a href={`${base}account/tracks/`} role="menuitem" id="account-menu-tracks" hidden>My tracks</a>
+        <a href={`${base}account/settings/`} role="menuitem" id="account-menu-settings">Settings</a>
         <!-- Only shown to moderators. Cosmetic: moderator pages and RLS check access themselves. -->
         <a href={`${base}moderator/`} role="menuitem" id="account-menu-moderator" hidden>Moderator</a>
         <button type="button" id="account-menu-logout" role="menuitem" class="account-logout">Log out</button>
@@ -245,6 +248,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
 <script>
   import { getSupabase, backendConfigured, SUPABASE_URL, SUPABASE_ANON_KEY } from '../scripts/supabase-client';
   import { loadBadges, badgeHtml, badgeTitle } from '../data/badge';
+  import { loadNotices, areaCount, totalCount } from '../scripts/notices';
   import { loadModOverview, todoTotal } from '../scripts/mod-overview';
 
   const root = document.documentElement;
@@ -361,24 +365,23 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         if (!el || !b) return;
         el.innerHTML = `${badgeHtml(b, 40)}<span>${badgeTitle(b)}</span>`; el.hidden = false;
       }).catch(() => {});
-      // Crew invites for me (RS-0063) + join requests for crews I lead.
-      const inv = await supabase.from('crew_memberships').select('membership_id', { count: 'exact', head: true }).eq('driver_id', me).eq('status', 'invited');
-      let pending = 0;
-      const roles = await supabase.from('hub_roles').select('crew_id').eq('driver_id', me).eq('role', 'crew_leader');
-      const crewIds = (roles.data ?? []).map((r: any) => r.crew_id).filter(Boolean);
-      if (crewIds.length) {
-        const { count } = await supabase.from('crew_membership_overview').select('membership_id', { count: 'exact', head: true }).eq('status', 'pending').in('crew_id', crewIds);
-        pending = count ?? 0;
+      // Notification dot (Fausto 14.11., replaces Discord DMs): to fix + new since last visit, all account areas
+      const n = await loadNotices();
+      if (n) {
+        if (n.laps.fix) lapsLinkEl.textContent = `My laps (${n.laps.fix} to fix)`;
+        else if (n.laps.new) lapsLinkEl.textContent = `My laps (${n.laps.new} new)`;
+        const crews = areaCount(n, 'crews');
+        if (crews) crewLinkEl.textContent = `My crews (${crews} new)`;
+        const extra: [string, number, string][] = [['account-menu-events', areaCount(n, 'events'), 'My events'], ['account-menu-tracks', areaCount(n, 'tracks'), 'My tracks'], ['account-menu-settings', areaCount(n, 'settings'), 'Settings']];
+        for (const [id, c, label] of extra) {
+          const el = document.getElementById(id) as HTMLAnchorElement | null;
+          if (!el) continue;
+          if (c) { el.textContent = `${label} (${c} new)`; el.hidden = false; } else if (id !== 'account-menu-settings') el.hidden = true;
+        }
+        const mine = totalCount(n);
+        dotEl.hidden = !mine;
+        menuCount = mine;
       }
-      const total = (inv.count ?? 0) + pending;
-      if (total) crewLinkEl.textContent = `My crews (${total} new)`;
-      // Laps a moderator sent back for correction (RS-0091)
-      const fix = await supabase.from('runs').select('run_id', { count: 'exact', head: true }).eq('driver_id', me).eq('review_status', 'needs_correction');
-      const toFix = fix.count ?? 0;
-      if (toFix) lapsLinkEl.textContent = `My laps (${toFix} to fix)`;
-      const mine = total + toFix;
-      dotEl.hidden = !mine;
-      menuCount = mine;
       setMenuLabel();
     }
 

@@ -63,34 +63,28 @@ const links = [
 </style>
 
 <script>
-  // Badges: Crews tab = open join requests for crews I lead + invites for me; My laps = laps to fix.
+  // Tab counts (Fausto 14.11.): per area what needs action + what is new since the last visit
+  // (scripts/notices.ts). Opening a tab marks its "new" items as seen.
   import { backendConfigured, getSupabase } from '../scripts/supabase-client';
+  import { loadNotices, markSeen, currentArea, areaCount, type NoticeArea } from '../scripts/notices';
   // keep the active tab in view on phones (the row scrolls sideways)
   document.querySelector('.acc-tab.is-active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  const TAB_AREA: Record<string, NoticeArea> = { laps: 'laps', crew: 'crews', events: 'events', tracks: 'tracks', settings: 'settings' };
   async function badge() {
     if (!backendConfigured) return;
-    const sb = getSupabase();
-    const { data: s } = await sb.auth.getSession();
-    const session = s?.session;
-    if (!session) return;
-    const own = await sb.from('drivers').select('driver_id').eq('auth_user_id', session.user.id).maybeSingle();
-    const me = own.data?.driver_id;
-    if (!me) return;
-    const roles = await sb.from('hub_roles').select('crew_id').eq('driver_id', me).eq('role', 'crew_leader');
-    const ids = (roles.data ?? []).map((r: any) => r.crew_id).filter(Boolean);
-    // + crew invites waiting for me (RS-0063)
-    const inv = await sb.from('crew_memberships').select('membership_id', { count: 'exact', head: true }).eq('driver_id', me).eq('status', 'invited');
-    let count = inv.count ?? 0;
-    if (ids.length) {
-      const req = await sb.from('crew_membership_overview').select('membership_id', { count: 'exact', head: true }).eq('status', 'pending').in('crew_id', ids);
-      count += req.count ?? 0;
+    const { data: s } = await getSupabase().auth.getSession();
+    if (!s?.session) return;
+    const n = await loadNotices();
+    if (!n) return;
+    for (const [tab, area] of Object.entries(TAB_AREA)) {
+      const c = areaCount(n, area);
+      const el = document.querySelector<HTMLElement>(`[data-acc-tab="${tab}"] .acc-tab-count`);
+      if (!el || !c) continue;
+      el.textContent = String(c); el.hidden = false;
+      el.setAttribute('aria-label', n[area].fix ? `${c} need your attention` : `${c} new`);
     }
-    const el = document.querySelector<HTMLElement>('[data-acc-tab="crew"] .acc-tab-count');
-    if (el && count) { el.textContent = String(count); el.hidden = false; el.setAttribute('aria-label', `${count} open`); }
-    // Badge on My laps: laps a moderator sent back for correction (RS-0091)
-    const fix = await sb.from('runs').select('run_id', { count: 'exact', head: true }).eq('driver_id', me).eq('review_status', 'needs_correction');
-    const lapsEl = document.querySelector<HTMLElement>('[data-acc-tab="laps"] .acc-tab-count');
-    if (lapsEl && fix.count) { lapsEl.textContent = String(fix.count); lapsEl.hidden = false; lapsEl.setAttribute('aria-label', `${fix.count} to fix`); }
+    const here = currentArea();
+    if (here) markSeen(here);
   }
   badge();
 </script>
