@@ -66,6 +66,20 @@ jobs:
           PUBLIC_MODERATE_SUBMISSION_URL: ${{ secrets.PUBLIC_MODERATE_SUBMISSION_URL }}
         run: npx astro build
 
+      # IndexNow (Fausto 14.11.): list the pages whose content changed since the live version
+      # (site/scripts/indexnow.mjs); sent to Bing & co. after the deploy, see job "indexnow".
+      - name: IndexNow - find changed pages
+        working-directory: site
+        continue-on-error: true
+        run: node scripts/indexnow.mjs prepare
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: indexnow
+          path: site/indexnow-changed.txt
+          if-no-files-found: ignore
+          retention-days: 1
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
@@ -81,3 +95,22 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  indexnow:
+    needs: deploy
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: site/scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: indexnow
+          path: site
+      - name: IndexNow - submit changed pages
+        working-directory: site
+        run: node scripts/indexnow.mjs submit
