@@ -5,6 +5,8 @@ import { vehicleOptions } from '../../../data/vehicles';
 const base = import.meta.env.BASE_URL;
 // "Correct this lap" (RS-0091): every car, grouped by make, for the car field
 const makes = [...new Set(vehicleOptions.map((v) => v.make))].sort((a, b) => a.localeCompare(b));
+// RS-0116 time hints: first class per car, for "faster cars in your class"
+const carClass = Object.fromEntries(vehicleOptions.map((v) => [v.id, v.classes[0] ?? '']));
 const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) => v.make === m).sort((a, b) => a.model.localeCompare(b.model)) }));
 ---
 <Base
@@ -49,6 +51,7 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
               </tr>
             </thead>
             <tbody id="records-tbody"></tbody>
+            <script type="application/json" id="car-class" set:html={JSON.stringify(carClass)} />
           </table>
           <p id="records-empty" class="empty-note" hidden>
             No vehicle records yet. <a href={`${base}time-attack/submit/`}>Submit your first lap</a>.
@@ -156,6 +159,14 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
   :global(.acc-table .c-act) { width: 1%; }
   :global(.acc-table .c-act + .c-act) { padding-left: 0; } /* Video and Withdraw each in their own column (Fausto 30.10.) */
   :global(.acc-table .m) { display: none; }
+  /* RS-0116 time hints under a record */
+  :global(.acc-table tr.has-sub > td) { border-bottom: 0; }
+  :global(.acc-table tr.rec-hints-row:hover) { background: none; }
+  :global(.acc-table tr.rec-hints-row > td) { padding-top: 0; white-space: normal; }
+  :global(.rec-hints) { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--lr-muted); }
+  :global(.rec-hints b) { color: var(--lr-text); font-weight: 600; }
+  :global(.rec-hints .h-up b) { color: var(--lr-lime); }
+  :global(.rec-hints .rec-link) { color: var(--lr-soft); }
   .empty-note { margin: 0; padding: 18px; color: var(--lr-muted); font-size: 14px; }
   .empty-note a { color: var(--lr-text); text-decoration: underline; }
   /* RS-0091: a second row under a submission for the correction request and the inline forms */
@@ -184,6 +195,8 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
   :global(.fix-acts) { display: flex; flex-wrap: wrap; gap: 10px; }
   @media (max-width: 760px) {
     :global(.acc-table tr.has-sub) { border-bottom: 0; }
+    :global(.acc-table tr.rec-hints-row) { display: block; padding-top: 0; }
+    :global(.acc-table tr.rec-hints-row > td) { display: block; }
     :global(.acc-table tr.sub-row) { padding-top: 0; }
     :global(.acc-table tr.sub-row > td) { grid-column: 1 / -1; padding: 0; }
     :global(.fix-fields) { grid-template-columns: 1fr; }
@@ -270,6 +283,32 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
   function vehicleCell(run) {
     const label = vehicleLabel(run.vehicles);
     return run.vehicle_id && run.vehicles ? `<a class="rec-link" href="${BASE}cars/vehicles/${linkAttr(run.vehicle_id)}/">${label}</a>` : label;
+  }
+  // RS-0116 / DEC-0224: time hints under each record, only from lap times (no technique tips).
+  // COPY: Claude placeholders 14.11., Codex review pending.
+  let CAR_CLASS = {};
+  try { CAR_CLASS = JSON.parse(document.getElementById('car-class')?.textContent || '{}'); } catch { /* no hints by class */ }
+  const gapS = (ms) => `${(ms / 1000).toFixed(3)} s`;
+  function timeHints(run, times, rank, carBest, validRuns) {
+    const out = [];
+    const me = run.lap_time_ms;
+    if (times && rank > 1) {
+      out.push(`<span class="h-gap"><b>${gapS(me - times[rank - 2])}</b> to #${rank - 1}</span>`);
+      if (rank > 11) out.push(`<span><b>${gapS(me - times[9])}</b> to the top 10</span>`);
+      if (rank > 2) out.push(`<span><b>${gapS(me - times[0])}</b> to the record</span>`);
+    } else if (times && rank === 1 && times.length > 1) {
+      out.push(`<span class="h-lead"><b>${gapS(times[1] - me)}</b> ahead of #2</span>`);
+    }
+    const cls = CAR_CLASS[run.vehicle_id];
+    if (times && cls) {
+      const n = [...carBest.entries()].filter(([id, ms]) => id !== run.vehicle_id && CAR_CLASS[id] === cls && ms < me).length;
+      const href = `${BASE}time-attack/gellhorn-international-raceway/?class=${encodeURIComponent(cls)}#leaderboard`;
+      if (n) out.push(`<a class="rec-link" href="${href}">${n} faster ${esc(cls)} ${n === 1 ? 'car' : 'cars'} →</a>`);
+    }
+    const mine = validRuns.filter((r) => r.vehicle_id === run.vehicle_id && r.track_id === run.track_id)
+      .sort((a, b) => new Date(a.submitted_at ?? a.created_at) - new Date(b.submitted_at ?? b.created_at));
+    if (mine.length > 1 && mine[0].lap_time_ms > me) out.push(`<span class="h-up"><b>−${gapS(mine[0].lap_time_ms - me)}</b> since your first lap</span>`);
+    return out.join('');
   }
   function leaderboardHref(run) {
     const page = TRACK_PAGES[run.track_id];
@@ -541,6 +580,14 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
     // read of run data (see the view's own comment in the schema) -- by
     // taking each OTHER driver's best time for that vehicle and counting how
     // many beat mine. Not deduped server-side, so done here client-side.
+    // RS-0116 / DEC-0224: best published lap per car (for "faster cars in your class"), once per load
+    let carBest = new Map();
+    if ([...bestByVehicle.values()].some((r) => r.publication_status === 'provisional' || r.publication_status === 'official')) {
+      const { data: tops } = await sb.from('public_leaderboard_ranks').select('scope_key, lap_time_ms')
+        .eq('track_id', 'gellhorn-international-raceway').eq('platform', 'ps5').eq('scope', 'vehicle').eq('rank', 1);
+      if (seq !== loadSeq) return;
+      carBest = new Map((tops ?? []).map((t) => [t.scope_key, t.lap_time_ms]));
+    }
     recordsTbodyEl.innerHTML = '';
     if (bestByVehicle.size === 0) {
       recordsEmptyEl.hidden = false;
@@ -550,6 +597,7 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
         const tr = document.createElement('tr');
         const isPublished = run.publication_status === 'provisional' || run.publication_status === 'official';
         let rankCell = '—';
+        let hints = '';
         if (isPublished) {
           // Group by driver_id, not the `driver` display label -- several
           // deleted accounts all show as "Deleted driver" (DEC-0079), and
@@ -567,10 +615,20 @@ const carsByMake = makes.map((m) => ({ make: m, cars: vehicleOptions.filter((v) 
           }
           const faster = [...bestPerDriver.values()].filter((ms) => ms < run.lap_time_ms).length;
           rankCell = `#${faster + 1}`;
+          hints = timeHints(run, [...bestPerDriver.values()].sort((a, b) => a - b), faster + 1, carBest, validRuns);
+        } else {
+          hints = timeHints(run, null, 0, carBest, validRuns);
         }
         const rankHtml = rankCell !== '—' && leaderboardHref(run) ? `<a class="rec-link" href="${leaderboardHref(run)}" title="Open this vehicle's leaderboard">${rankCell}</a>` : rankCell;
         tr.innerHTML = `<td class="c-car">${vehicleCell(run)}</td><td class="c-time">${formatLapTime(run.lap_time_ms)}</td><td class="c-track">${trackCell(run)}</td><td class="c-rank"><span class="m">Rank</span><span class="rank-cell">${rankHtml}</span></td>`;
         recordsTbodyEl.appendChild(tr);
+        if (hints) {
+          tr.classList.add('has-sub');
+          const sub = document.createElement('tr');
+          sub.className = 'rec-hints-row';
+          sub.innerHTML = `<td colspan="4"><span class="rec-hints">${hints}</span></td>`;
+          recordsTbodyEl.appendChild(sub);
+        }
       }
     }
   }
