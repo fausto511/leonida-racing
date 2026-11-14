@@ -3,11 +3,11 @@
 //   v-<id>    vehicle: its photo, else a card with logo + name
 //   m-<slug>  manufacturer without a photo car: logo card
 //   c-<slug>  class without a photo car: name card
-//   r-<slug>  ranking: title card, fixed (Fausto 14.11.; the Gellhorn ranking uses og/site/gellhorn.jpg)
+//   r-<slug>  ranking: title over the fastest car with a photo, else title card (Gellhorn ranking: og/site/gellhorn.jpg)
 //   p-cars    the Cars band photo with "GTA 6 Cars": Cars, Compare and every other Cars page without its own
-import { vehicleOptions, MAKES_WITHOUT_LOGO } from './vehicles';
+import { vehicleOptions, MAKES_WITHOUT_LOGO, bandVehicle } from './vehicles';
 import { classPages, manufacturerPages, vehiclesInClass, vehiclesByMake } from './garage-taxonomy';
-import { rankings } from './rankings';
+import { rankings, rankingEntries } from './rankings';
 
 export const OG_W = 1200, OG_H = 630;
 export const ogCarPath = (key: string) => `og/cars/${key}.jpg`;
@@ -27,7 +27,15 @@ export function allOgCards(): OgCard[] {
     : { key: `v-${v.id}`, kind: 'text' as const, kicker: v.make, title: v.model, sub: `${v.classes.join(' / ')} · GTA 6`, logoSlug: MAKES_WITHOUT_LOGO.has(v.logoSlug) ? undefined : v.logoSlug });
   for (const m of manufacturerPages) out.push({ key: `m-${m.slug}`, kind: 'text', kicker: 'Manufacturer', title: m.name, sub: cars(vehiclesByMake(m.slug).filter((v) => v.releaseId).length), logoSlug: MAKES_WITHOUT_LOGO.has(m.slug) ? undefined : m.slug });
   for (const c of classPages) out.push({ key: `c-${c.slug}`, kind: 'text', kicker: 'Class', title: c.name, sub: cars(vehiclesInClass(c.slug).filter((v) => v.releaseId).length) });
-  for (const r of rankings) out.push({ key: rankingKey(r.slug), kind: 'text', kicker: 'Ranking', title: r.title });
+  // Rankings: the title over the photo of the fastest car that has one, as on the page band (Fausto 14.11.);
+  // no photo car yet -> title card. The Gellhorn lap ranking uses og/site/gellhorn.jpg.
+  for (const r of rankings) {
+    if (r.metric === 'gellhorn_reference_lap_ms') continue;
+    const car = rankingEntries(r).find((e) => e.vehicle.photo)?.vehicle ?? bandVehicle(r.scope);
+    out.push(car?.photo
+      ? { key: rankingKey(r.slug), kind: 'hero', kicker: 'Ranking', title: r.title, vehicleId: car.id }
+      : { key: rankingKey(r.slug), kind: 'text', kicker: 'Ranking', title: r.title });
+  }
   // the Cars page band (car meet at night, DEC-0117), fixed (Fausto 14.11.)
   out.push({ key: 'p-cars', kind: 'hero', kicker: 'Leonida Racing', title: 'GTA 6 Cars', src: 'images/garage/cars-band-1920.webp' });
   return out;

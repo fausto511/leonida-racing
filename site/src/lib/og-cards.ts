@@ -109,7 +109,7 @@ export async function textCard(o: { title: string; kicker: string; sub?: string;
 export async function heroCard(o: { title: string; kicker: string; vehicleId?: string; src?: string }) {
   const photo = await sharp(join(PUB, o.src ?? `images/vehicles/${o.vehicleId}-1920.webp`)).resize(W, H, { fit: 'cover', position: 'centre' }).toBuffer();
   const x = 80;
-  const t = await text(`<span foreground="${TEXT}" font_weight="800">${esc(o.title.replace(/GTA 6/g, 'GTA 6'))}</span>`, { font: 'Archivo 104', file: FONT_DISPLAY, width: W - 2 * x, spacing: -6 });
+  const t = await text(`<span foreground="${TEXT}" font_weight="800">${esc(o.title.replace(/GTA 6/g, 'GTA 6'))}</span>`, { font: `Archivo ${o.title.length > 20 ? 72 : 104}`, file: FONT_DISPLAY, width: W - 2 * x, spacing: -6 });
   const k = await text(`<span foreground="${ORANGE}" font_weight="700" letter_spacing="4000">${esc(o.kicker.toUpperCase())}</span>`, { font: 'Instrument Sans 28', file: FONT_BODY, width: W - 2 * x });
   const mark = await brandMark(44);
   const tTop = H - 44 - mark.h - 34 - t.h;
