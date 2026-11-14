@@ -34,7 +34,8 @@ interface Props {
 }
 // Share images per section, 1200x630 (RS-0050). Vehicle pages with a photo pass their own.
 const sectionOg: Record<string, { path: string; alt: string }> = {
-  garage: { path: 'images/og/og-garage.jpg', alt: 'Two cars raised on lifts inside an auto repair garage' },
+  // Cars pages without their own image: a car photo titled "GTA 6 Cars" (og/cars/p-cars.jpg, Fausto 14.11.: not the empty garage)
+  garage: { path: 'og/cars/p-cars.jpg', alt: 'GTA 6 Cars at Leonida Racing' },
   'time-attack': { path: 'images/og/og-gellhorn.jpg', alt: 'Palm-lined Gellhorn International Raceway circuit in GTA VI' },
   hub: { path: 'images/og/og-hub.jpg', alt: 'GTA VI car meet with customized cars and drivers' },
   default: { path: 'images/og/og-home.jpg', alt: 'GTA VI race cars on Gellhorn International Raceway' },

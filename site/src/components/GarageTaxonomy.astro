@@ -16,6 +16,7 @@ import { trackVehicleClasses } from '../data/tracks';
 import { LAUNCH_DATE, LAUNCH_AT } from '../data/launch';
 import { collectionTitle, collectionDescription } from '../data/seo-meta';
 import '../styles/garage-tile.css';
+import { ogCarPath, OG_W, OG_H } from '../data/og-cars';
 
 /** New cars + model family pages use the same layout (DEC-0147, Fausto 20.10.2026). */
 export interface TaxonomyCustom {
@@ -141,10 +142,10 @@ const more = custom
   description={custom?.metaDescription ?? metaDescription}
   brandSuffix={Boolean(custom)}
   section="garage"
-  ogImage={ogCar ? `images/vehicles/${ogCar.id}-1280.webp` : undefined}
-  ogImageAlt={ogCar ? `${ogCar.make} ${ogCar.model} in GTA 6` : undefined}
-  ogImageWidth={ogCar ? 1280 : undefined}
-  ogImageHeight={ogCar ? 720 : undefined}
+  ogImage={ogCar ? ogCarPath(`v-${ogCar.id}`) : kind === 'class' ? ogCarPath(`c-${page.slug}`) : kind === 'manufacturer' ? ogCarPath(`m-${page.slug}`) : undefined}
+  ogImageAlt={ogCar ? `${ogCar.make} ${ogCar.model} in GTA 6` : kind === 'custom' ? undefined : `${label} in GTA 6`}
+  ogImageWidth={OG_W}
+  ogImageHeight={OG_H}
   jsonLd={custom ? undefined : jsonLd}
   noindex={custom?.noindex}
   breadcrumbs={custom?.breadcrumbs ?? [{ name: 'Cars', path: 'cars/' }, { name: isClass ? 'Classes' : 'Manufacturers', path: `cars/${isClass ? 'classes' : 'manufacturers'}/` }, { name: page.name, path }]}
