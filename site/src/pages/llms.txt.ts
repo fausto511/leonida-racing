@@ -4,7 +4,8 @@
 // intro, status and Garage/Calendar/Tracks lines = approved Codex copy (2026-10-01);
 // update it when sections change. URLs follow `site` + `base`.
 import type { APIRoute } from 'astro';
-import { SITE_NAME } from '../data/site';
+import { SITE_NAME, FREE_PROMISE } from '../data/site';
+// Free account section: Claude 15.11.2026 (RS-0127), Codex review pending.
 
 export const GET: APIRoute = ({ site }) => {
   const base = import.meta.env.BASE_URL;
@@ -30,6 +31,11 @@ Status: GTA VI is scheduled for release on November 19, 2026. Leonida Racing is 
 - [Event Calendar](${u('community/events/')}): GTA VI races, league rounds, community playlists, and car meets, with start times shown in each visitor’s local time zone
 - [Crews](${u('community/crews/')}): racing crews and car meet communities
 - [Tracks](${u('community/tracks/')}): planned directory for GTA VI community race jobs, with creator submissions, moderation, and filters once compatible creation tools are available
+
+## Free account
+
+- [Features](${u('features/')}): everything a free account does. ${FREE_PROMISE} Login with Discord (no new password; joins the Discord server). Private garage (cars you own, wishlist, collection by class and manufacturer), car ratings, Time Attack lap submissions (results screenshot or full lap video) with moderator review, personal records and submissions, up to five crews with an active crew tag, crew leader / event host / track creator applications, event sign-ups with local start times, hosted series and championships, saved tracks, display name and optional PSN name, km/h or mph, verified badges for people and crews, account deletion
+- [Discord bot](${u('discord/bot/')}): event cards with sign-up from Discord, Find Players (LFG) with temporary voice channels, /car and /compare commands, an event bot for other servers, and a !car command for stream chats (Nightbot, StreamElements)
 
 ## The Guide
 

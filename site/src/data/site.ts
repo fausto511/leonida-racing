@@ -4,6 +4,9 @@
 export const SITE_NAME = 'Leonida Racing';
 export const SITE_TAGLINE = 'GTA 6 racing database & community';
 export const SITE_DISCLAIMER = 'Independent GTA VI community project. Not affiliated with Rockstar Games or Take-Two Interactive.';
+// Free promise (Fausto 15.11.2026: true today, may change). Used on /features/ and in llms.txt --
+// if ads or paid features ever come, change it here and review those two places the same day.
+export const FREE_PROMISE = 'No ads, no paid features.';
 // Discord (RS-0076, 17.10.2026): community invite and bot install link in one place.
 // Header/Footer/home/404 still carry their own copy of the invite (same value).
 export const DISCORD_INVITE_URL = 'https://discord.gg/hPGuBwXRqT';
