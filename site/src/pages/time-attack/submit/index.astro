@@ -822,6 +822,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
       $('success-text').textContent = `${fmtMs(lapTimeMs)} in the ${v ? `${v.make} ${v.model}` : 'car you picked'}. Your lap is awaiting moderator review and is not public yet.${videoUrl ? ' Video verified status requires a moderator to verify the full video.' : ''}`;
       if (featNote) $('success-text').textContent += featNote;
       show('done');
+      try { localStorage.setItem('lr-engaged', '1'); } catch { /* strip save hint on the next visit (Fausto 15.11.) */ }
       successEl.scrollIntoView({ block: 'start', behavior: 'smooth' });
       placement(lapTimeMs);
     } catch (err) {

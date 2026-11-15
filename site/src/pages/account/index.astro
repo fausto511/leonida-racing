@@ -480,6 +480,7 @@ const vehicleIndex = [...vehicleOptions]
         const wasWished = wish.includes(id);
         await own(id);
         msg('cars', `${name(id)} added to My cars${wasWished ? ' and taken off your wishlist' : ''}.`);
+        try { localStorage.setItem('lr-engaged', '1'); } catch { /* strip save hint on the next visit (Fausto 15.11.) */ }
       } else {
         await setWished(me, id, true);
         wish = [...wish.filter((x) => x !== id), id];

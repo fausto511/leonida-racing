@@ -36,29 +36,53 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
 <script is:inline define:vars={{ stripKey, launchMs }}>
   (function () {
     var h = document.documentElement;
+    var ls = function (k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
     try {
-      if (localStorage.getItem(stripKey) === '1') h.classList.add('lr-strip-off');
       for (var i = 0; i < localStorage.length; i++) {
         var k = localStorage.key(i);
         if (k && /^sb-.*-auth-token$/.test(k)) { h.classList.add('lr-authed'); break; }
       }
     } catch (e) {}
-    if (launchMs - Date.now() <= 0) h.classList.add('lr-strip-off');
+    // Strip mode, decided before the first paint so nothing jumps (Fausto 15.11.):
+    //   before launch: countdown | after launch, 1st visit: "Create your driver profile" (guests only)
+    //   from the 2nd visit or after an action (garage, lap): save hint per device (bookmark / home screen)
+    var mode = 'off';
+    if (launchMs - Date.now() > 0) {
+      mode = ls(stripKey) === '1' ? 'off' : 'count';
+    } else {
+      var installed = (window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: minimal-ui)').matches)) || navigator.standalone;
+      var visits = Number(ls('lr-visits') || 0);
+      try { if (!sessionStorage.getItem('lr-vc')) { sessionStorage.setItem('lr-vc', '1'); visits += 1; ls('lr-visits', String(visits)); } } catch (e) {}
+      var ua = navigator.userAgent || '';
+      var ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      var android = /Android/i.test(ua);
+      if (installed) mode = 'off';
+      else if (visits >= 2 || ls('lr-engaged') === '1') mode = ls('lr-strip-save') === '1' ? 'off' : ios ? 'ios' : android ? 'android' : 'desk';
+      else mode = h.classList.contains('lr-authed') || ls('lr-strip-profile') === '1' ? 'off' : 'profile';
+      if (!ios && /Mac/.test((navigator.platform || '') + ' ' + ua)) h.classList.add('lr-mac');
+    }
+    h.setAttribute('data-strip', mode);
+    if (mode === 'off') h.classList.add('lr-strip-off');
   })();
 </script>
 
-{buildDays > 0 && (
-  <div class="lr-strip" id="lr-strip" data-launch-date={LAUNCH_DATE} data-launch-at={LAUNCH_AT ?? ''}>
-    <div class="wrap lr-strip-row">
-      <strong class="lr-strip-count"><span class="lr-strip-long">GTA VI launches</span><span class="lr-strip-short">GTA VI</span> <span data-strip-when>in {buildDays} days</span></strong>
+<!-- Strip: one message at a time, all with the same height (no layout shift). COPY: Claude placeholders 15.11., Codex review pending. -->
+<div class="lr-strip" id="lr-strip" data-launch-date={LAUNCH_DATE} data-launch-at={LAUNCH_AT ?? ''}>
+  <div class="wrap lr-strip-row">
+    <span class="st st-count">
+      <strong class="lr-strip-count"><span class="lr-strip-long">GTA VI launches</span><span class="lr-strip-short">GTA VI</span> <span data-strip-when>in {Math.max(1, buildDays)} days</span></strong>
       <span class="lr-strip-guest">
         <span class="lr-strip-sep" aria-hidden="true"></span>
         <a href={`${base}account/`} data-login-link>Create your driver profile<span class="lr-strip-long"> now</span> →</a>
       </span>
-      <button type="button" class="lr-strip-close" id="lr-strip-close" aria-label="Dismiss"><Fragment set:html={CLOSE_SVG} /></button>
-    </div>
+    </span>
+    <span class="st st-profile"><a href={`${base}account/`} data-login-link>Create your driver profile<span class="lr-strip-long">: your garage, your laps, your crew</span> →</a></span>
+    <span class="st st-desk"><strong>Bookmark Leonida Racing</strong><span class="lr-strip-sep" aria-hidden="true"></span><span>Press <kbd class="k-ctrl">Ctrl</kbd><kbd class="k-cmd">⌘</kbd> + <kbd>D</kbd> to save this site</span></span>
+    <span class="st st-android"><strong data-install-label>Get the Leonida app icon</strong><button type="button" class="st-add" id="st-add">Add</button></span>
+    <span class="st st-ios"><span>Tap <span class="st-share" aria-label="Share"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0-4 4m4-4 4 4M6 11H5v10h14V11h-1"/></svg></span> then <strong>Add to Home Screen</strong></span></span>
+    <button type="button" class="lr-strip-close" id="lr-strip-close" aria-label="Dismiss"><Fragment set:html={CLOSE_SVG} /></button>
   </div>
-)}
+</div>
 
 <header class="site-head" id="site-head">
   <div class="wrap head-row">
@@ -147,6 +171,17 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .lr-strip a:hover { text-decoration-thickness: 2px; }
   .lr-strip-close { position: absolute; right: clamp(.5rem, 3vw, 2.5rem); top: 50%; transform: translateY(-50%); background: none; border: 0; color: var(--lr-on-pink); cursor: pointer; font-size: 20px; line-height: 1; width: 32px; height: 32px; padding: 0; display: inline-grid; place-items: center; }
   .lr-strip-close:focus-visible { outline: 2px solid var(--lr-on-pink); outline-offset: 1px; border-radius: 4px; }
+  /* one message per mode (html[data-strip], set before the first paint) */
+  .st { display: none; align-items: center; gap: 12px; white-space: nowrap; }
+  :global(html[data-strip="count"]) .st-count, :global(html[data-strip="profile"]) .st-profile, :global(html[data-strip="desk"]) .st-desk,
+  :global(html[data-strip="android"]) .st-android, :global(html[data-strip="ios"]) .st-ios { display: inline-flex; }
+  .st kbd { display: inline-block; padding: 0 6px; border-radius: 4px; background: rgba(42,15,34,.16); font: inherit; font-weight: 700; line-height: 20px; }
+  .k-cmd { display: none !important; }
+  :global(html.lr-mac) .k-ctrl { display: none !important; }
+  :global(html.lr-mac) .k-cmd { display: inline-block !important; }
+  .st-add { height: 26px; padding: 0 14px; border: 0; border-radius: 6px; background: var(--lr-bg); color: var(--lr-text); font: inherit; font-weight: 700; cursor: pointer; }
+  .st-add:focus-visible { outline: 2px solid var(--lr-on-pink); outline-offset: 2px; }
+  .st-share { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 1.5px solid currentColor; border-radius: 4px; vertical-align: -3px; }
 
   /* ---- header bar ---- */
   .site-head { position: sticky; top: 0; z-index: 40; background: var(--lr-dark-92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--lr-line); }
@@ -264,17 +299,30 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       const when = strip.querySelector('[data-strip-when]');
       const update = () => {
         const ms = target - Date.now();
-        // After launch the strip goes away; its later content is not decided yet (DEC-0116).
         if (ms <= 0) { root.classList.add('lr-strip-off'); return; }
         const days = Math.ceil(ms / 86400000);
         if (when) when.textContent = days === 1 ? 'tomorrow' : `in ${days} days`;
       };
-      update();
-      setInterval(update, 60000);
+      const mode = root.getAttribute('data-strip');
+      if (mode === 'count') { update(); setInterval(update, 60000); }
+      // dismissing hides this message only; a later message (e.g. the save hint) can still appear
+      const dismissKey: Record<string, string> = { count: key, profile: 'lr-strip-profile', desk: 'lr-strip-save', android: 'lr-strip-save', ios: 'lr-strip-save' };
       document.getElementById('lr-strip-close')?.addEventListener('click', () => {
         root.classList.add('lr-strip-off');
-        try { localStorage.setItem(key, '1'); } catch { /* private mode: closes for this page only */ }
+        try { localStorage.setItem(dismissKey[root.getAttribute('data-strip') ?? 'count'] ?? key, '1'); } catch { /* private mode: closes for this page only */ }
       });
+      // Android: the browser's own install prompt; without it (e.g. Firefox) a short hint, same height
+      if (mode === 'android') {
+        let prompt: any = null;
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); prompt = e; });
+        window.addEventListener('appinstalled', () => { root.classList.add('lr-strip-off'); try { localStorage.setItem('lr-strip-save', '1'); } catch { /* ignore */ } });
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+        document.getElementById('st-add')?.addEventListener('click', async () => {
+          if (prompt) { prompt.prompt(); const r = await prompt.userChoice.catch(() => null); prompt = null; if (r?.outcome === 'accepted') root.classList.add('lr-strip-off'); return; }
+          const label = strip.querySelector('[data-install-label]');
+          if (label) label.textContent = 'Menu ⋮ › Add to Home screen';
+        });
+      }
     }
   }
 

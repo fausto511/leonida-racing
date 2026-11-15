@@ -2,7 +2,7 @@
   "name": "Leonida Racing",
   "short_name": "Leonida Racing",
   "start_url": "/",
-  "display": "browser",
+  "display": "minimal-ui",
   "background_color": "#0B0B14",
   "theme_color": "#0B0B14",
   "icons": [
@@ -16,5 +16,7 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "id": "/",
+  "scope": "/"
 }

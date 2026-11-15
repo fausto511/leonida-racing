@@ -104,6 +104,7 @@ function init(root: HTMLElement) {
       if (next) {
         let seen = false;
         try { seen = localStorage.getItem('lr-garage-hint') === '1'; localStorage.setItem('lr-garage-hint', '1'); } catch { /* ignore */ }
+        try { localStorage.setItem('lr-engaged', '1'); } catch { /* strip save hint on the next visit (Fausto 15.11.) */ }
         if (!seen) bubble(anchor, 'Added to My garage. You’ll find it in the account menu.', 6000);
       }
     } catch {
