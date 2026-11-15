@@ -1,0 +1,57 @@
+name: Database backup (daily, encrypted)
+
+# RS-0083 (Fausto 15.11.2026): the Supabase Free plan has no backups. Once a day this job dumps the
+# database (pg_dump 17, same major version as the server), encrypts it with a passphrase (AES-256,
+# gpg) and keeps it as a workflow artifact for 30 days. Encrypted because the repository is public
+# and the dump contains personal data (accounts, e-mail addresses from sign-in).
+#
+# Secrets (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_DB_URL     Supabase -> Connect -> "Session pooler" URI, with the database password filled in
+#   BACKUP_PASSPHRASE   any long passphrase; keep a copy outside GitHub - without it a backup cannot be opened
+# Restore: see supabase/BACKUP-RESTORE.md
+
+on:
+  schedule:
+    - cron: '23 3 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check secrets
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$DB_URL" ] || [ -z "$PASS" ]; then echo "::error::SUPABASE_DB_URL or BACKUP_PASSPHRASE missing"; exit 1; fi
+
+      - name: Dump database
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          mkdir -p out
+          # custom format (pg_restore can restore single tables); our schemas + sign-in accounts + storage metadata + migration history
+          docker run --rm -e DB_URL -v "$PWD/out:/out" postgres:17 \
+            sh -c 'pg_dump "$DB_URL" -Fc --no-owner --no-privileges -n public -n private -n auth -n storage -n supabase_migrations -f /out/db.dump'
+          ls -la out
+
+      - name: Encrypt
+        env:
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          name="leonida-db-$(date -u +%Y-%m-%d).dump.gpg"
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$PASS" --symmetric --cipher-algo AES256 -o "$name" out/db.dump
+          rm -f out/db.dump
+          echo "FILE=$name" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FILE }}
+          path: ${{ env.FILE }}
+          retention-days: 30
+          compression-level: 0
