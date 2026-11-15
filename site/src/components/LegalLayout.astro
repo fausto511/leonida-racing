@@ -5,8 +5,9 @@
 // unchanged and live in the pages. The TOC is built from the h2 headings in the browser; headings
 // keep existing ids (e.g. #contact, #analytics) and get one from their text otherwise.
 import Base from '../layouts/Base.astro';
-interface Props { title: string; description: string; heading: string; kicker: string; updated?: string; current: 'legal' | 'privacy' | 'terms' }
-const { title, description, heading, kicker, updated, current } = Astro.props;
+// noindex: Legal Notice and Privacy Policy contain the private postal address, keep them out of search results (Fausto 15.11.)
+interface Props { title: string; description: string; heading: string; kicker: string; updated?: string; current: 'legal' | 'privacy' | 'terms'; noindex?: boolean }
+const { title, description, heading, kicker, updated, current, noindex = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const docs = [
   { id: 'legal', name: 'Legal Notice', href: `${base}legal/` },
@@ -14,7 +15,7 @@ const docs = [
   { id: 'terms', name: 'Terms of Use', href: `${base}terms/` },
 ];
 ---
-<Base title={title} description={description}>
+<Base title={title} description={description} noindex={noindex}>
   <section class="lg-band lr-band-plain">
     <div class="wrap lr-band-in is-compact lg-band-in">
       <nav class="lr-crumb" aria-label="Breadcrumb"><a href={base}>Home</a><span aria-hidden="true">/</span><span aria-current="page">{heading}</span></nav>
