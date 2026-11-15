@@ -29,6 +29,16 @@ jobs:
           PASS: ${{ secrets.BACKUP_PASSPHRASE }}
         run: |
           if [ -z "$DB_URL" ] || [ -z "$PASS" ]; then echo "::error::SUPABASE_DB_URL or BACKUP_PASSPHRASE missing"; exit 1; fi
+          # shape check without revealing the password (user, host, port, password length, stray characters)
+          python3 - <<'PY'
+          import os, urllib.parse as u
+          raw = os.environ['DB_URL']
+          p = u.urlsplit(raw.strip())
+          pw = p.password or ''
+          print('scheme:', p.scheme, '| user:', p.username, '| host:', p.hostname, '| port:', p.port, '| db:', p.path)
+          print('password length:', len(pw), '| brackets:', '[' in pw or ']' in pw, '| spaces/newlines in secret:', raw != raw.strip() or ' ' in raw,
+                '| placeholder left:', 'YOUR-PASSWORD' in raw)
+          PY
 
       - name: Dump database
         env:
