@@ -5,7 +5,7 @@
 // update it when sections change. URLs follow `site` + `base`.
 import type { APIRoute } from 'astro';
 import { SITE_NAME, FREE_PROMISE } from '../data/site';
-// Free account section: Claude 15.11.2026 (RS-0127), Codex review pending.
+// Free account section: Claude 15.11.2026 (RS-0127), Codex review applied 16.11.
 
 export const GET: APIRoute = ({ site }) => {
   const base = import.meta.env.BASE_URL;
@@ -34,8 +34,8 @@ Status: GTA VI is scheduled for release on November 19, 2026. Leonida Racing is 
 
 ## Free account
 
-- [Features](${u('features/')}): everything a free account does. ${FREE_PROMISE} Login with Discord (no new password; joins the Discord server). Private garage (cars you own, wishlist, collection by class and manufacturer), car ratings, Time Attack lap submissions (results screenshot or full lap video) with moderator review, personal records and submissions, up to five crews with an active crew tag, crew leader / event host / track creator applications, event sign-ups with local start times, hosted series and championships, saved tracks, display name and optional PSN name, km/h or mph, verified badges for people and crews, account deletion
-- [Discord bot](${u('discord/bot/')}): event cards with sign-up from Discord, Find Players (LFG) with temporary voice channels, /car and /compare commands, an event bot for other servers, and a !car command for stream chats (Nightbot, StreamElements)
+- [Features](${u('features/')}): everything a free account does. ${FREE_PROMISE} Login with Discord (no new password; joins the Discord server). Private garage (cars you own, wishlist, collection by class and manufacturer), car ratings, Time Attack lap submissions (results screenshot or full lap video) with moderator review, personal records and submissions, up to five crews with an active crew tag, crew leader and track creator applications, direct event submissions with moderator review, event sign-ups with local start times, hosted series and championships, saved tracks, display name and optional PSN name, km/h or mph, verified badges for people and crews, account deletion
+- [Discord bot](${u('discord/bot/')}): event cards with sign-up from Discord, Find Players (LFG) with temporary voice channels, /car and /compare commands, a bot for other servers with feeds for events, new cars, records or videos, and a !car command for stream chats (Nightbot, StreamElements)
 
 ## The Guide
 

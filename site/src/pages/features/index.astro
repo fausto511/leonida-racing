@@ -2,8 +2,9 @@
 // Features page (RS-0127, Fausto 15.11.2026): everything a free account can do, so search engines and
 // AI assistants can see the full feature set. Linked from the footer (More) and the phone menu for guests.
 // Facts checked against the code on 15.11.2026 (account/*, community/*, discord/*, RoleApply, VerifyRequest).
-// COPY STATUS: Claude placeholders (mockup "Leonida Racing – Features-Seite", approved by Fausto for now),
-// Codex review pending (DEC-0088): Claude outputs/TEXT-Features-Seite-Entwurf-2026-11-15.md.
+// COPY STATUS: Codex review 15.11. (Codex Zuarbeit/Features-Seite-Review-2026-11-15.md) applied 16.11. with Claude's
+// counter-proposals, all approved by Fausto 16.11. (DEC-0088/0103).
+// Time Attack note: Fausto 16.11. -- submissions open on launch day; the date-based note stays.
 // Before launch the Time Attack lines say that submissions open on launch day (build-time check,
 // same rule as GarageTaxonomy); after the launch date the next build drops that note.
 import Base from '../../layouts/Base.astro';
@@ -48,26 +49,26 @@ const I = {
 const highlights: Card[] = [
   { t: 'Your private garage', c: 'Track the GTA VI cars you own, keep a wishlist and see your collection by class and manufacturer.', href: 'account/', go: 'Open your garage', i: I.garage },
   { t: 'Reviewed lap times', c: `Every Time Attack lap at Gellhorn International Raceway is checked by a moderator before it appears on the leaderboard. Laps with a full video can be marked Video verified.${taNote}`, href: 'time-attack/gellhorn-international-raceway/', go: 'See Time Attack', i: I.timer },
-  { t: 'Built into Discord', c: 'Sign up for events, find players and look up cars without leaving Discord. Hosts can add our event bot to their own server.', href: 'discord/', go: 'See the Discord server', i: I.check },
+  { t: 'Built into Discord', c: 'Sign up for events, find players and look up cars without leaving Discord. Server admins can add our bot to post events and more.', href: 'discord/', go: 'See the Discord server', i: I.check },
 ];
 
 const sections: Section[] = [
   { id: 'garage', h: 'Your garage', intro: 'Private to you.', tone: 'orange', cards: [
     { t: 'My cars', c: 'Mark the cars you own in GTA VI, on any car page or straight from your garage. Only you can see this list.', href: 'account/', go: 'Open My cars', i: I.garage },
-    { t: 'Wishlist', c: 'Save the cars you want next with the heart on any car page. When you buy one, it moves to My cars.', href: 'account/', go: 'Open Wishlist', i: I.heart },
+    { t: 'Wishlist', c: 'Save the cars you want next with the heart on any car page. When you buy one, mark it as owned and it moves to My cars.', href: 'account/', go: 'Open Wishlist', i: I.heart },
     { t: 'Collection', c: 'See how much of each class and manufacturer you own.', href: 'account/', go: 'Open Collection', i: I.pie },
-    { t: 'Car ratings', c: 'Rate the cars you drive. Each car shows the average rating once enough players have rated it.', href: 'cars/', go: 'Browse cars', i: I.star },
+    { t: 'Car ratings', c: 'Rate GTA VI cars. Each car shows the average rating once enough players have rated it.', href: 'cars/', go: 'Browse cars', i: I.star },
   ] },
   { id: 'laps', h: 'Lap times', tone: 'pink', cards: [
     { t: 'Time Attack', c: `Submit your lap at Gellhorn International Raceway with a results screenshot or a full lap video. A moderator checks it before it goes live on the leaderboard.${taNote}`, href: 'time-attack/submit/', go: 'Submit a lap', i: I.timer },
-    { t: 'My records', c: 'Your personal best for every car you’ve driven.', href: 'account/laps/', go: 'Open My records', i: I.trophy },
-    { t: 'My submissions', c: 'Every lap you’ve sent, including the ones still in review.', list: ['Correct a lap or withdraw it', 'Add a video later'], href: 'account/laps/', go: 'Open My submissions', i: I.list },
+    { t: 'My records', c: 'Your personal best for each car you’ve submitted a lap with.', href: 'account/laps/', go: 'Open My records', i: I.trophy },
+    { t: 'My submissions', c: 'Every lap you’ve sent, including the ones still in review.', list: ['Correct a lap when asked, or withdraw it before review', 'Add a video later'], href: 'account/laps/', go: 'Open My submissions', i: I.list },
   ] },
   { id: 'discord', h: 'Discord', intro: 'The site and our Discord server work together.', tone: 'discord', cards: [
     { t: 'Sign up from Discord', c: 'Published events appear as cards in #events. Hit I’m in to sign up through your linked account.', href: 'discord/', go: 'See the server', i: I.check },
     { t: 'Find Players', c: 'Start a search in #lfg for a race, cruise, car meet or photo session. The bot opens a temporary voice channel for your group.', href: 'discord/', go: 'See the server', i: I.search },
     { t: '/car and /compare', c: 'Look up car data and compare cars right in Discord.', href: 'discord/bot/', go: 'See the commands', i: I.term },
-    { t: 'Event bot for your server', c: 'Add the Leonida Racing bot to your own server. Your events get posted and kept up to date.', href: 'discord/bot/', go: 'Add the bot', i: I.bot },
+    { t: 'Event bot for your server', c: 'Add the Leonida Racing bot to your own server and pick a feed: events, new cars, records or videos.', href: 'discord/bot/', go: 'Add the bot', i: I.bot },
     { t: '!car in your stream chat', c: 'Streamers can add a !car command with Nightbot or StreamElements.', href: 'discord/bot/', go: 'Set it up', i: I.video },
   ] },
   { id: 'crews', h: 'Crews', tone: 'orange', cards: [
@@ -77,7 +78,7 @@ const sections: Section[] = [
   ] },
   { id: 'events', h: 'Events & tracks', tone: 'pink', cards: [
     { t: 'Sign up for events', c: 'Races, leagues, car meets and cruises. Start times show in your local time, and Events I’m going to keeps your sign-ups in one place.', href: 'community/events/', go: 'See the calendar', i: I.cal },
-    { t: 'Host events', c: 'List your own events after applying.', list: ['Single events, series and championships with rounds', 'Repeating dates and a participant limit', 'See who signed up', 'A moderator checks changes before they go live'], href: 'account/events/', go: 'Apply as event host', i: I.send },
+    { t: 'Host events', c: 'Submit your own events. A moderator reviews them before they go live until you’re a trusted host.', list: ['Single events, series and championships with rounds', 'Repeating dates and a participant limit', 'See who signed up', 'Some changes need moderator approval'], href: 'account/events/', go: 'Create an event', i: I.send },
     { t: 'Saved tracks', c: 'Save race jobs to your list and open them on Social Club.', href: 'community/tracks/', go: 'Browse tracks', i: I.bookmark },
     { t: 'Submit your tracks', c: 'Track creators can submit their own race jobs after applying. A moderator checks the details before publishing.', href: 'account/tracks/', go: 'Apply as creator', i: I.pen },
   ] },
@@ -85,8 +86,8 @@ const sections: Section[] = [
     { t: 'Discord login', c: 'No new password. You also join our Discord server automatically.', href: 'discord/', go: 'About the server', i: I.lock },
     { t: 'Display name', c: 'The name shown on leaderboards, crews and events. Add your PSN name if you like.', href: 'account/settings/', go: 'Open Settings', i: I.user },
     { t: 'km/h or mph', c: 'Pick the units you’re used to.', href: 'account/settings/', go: 'Open Settings', i: I.gauge },
-    { t: 'Verified badge', c: 'Known in the scene? Request a verified badge for yourself or for your crew.', href: 'account/settings/', go: 'Request it', i: I.shield },
-    { t: 'Delete your account', c: 'Removes all your personal data. Reviewed lap times stay on the leaderboard as Deleted driver.', href: 'account/settings/', go: 'Open Settings', i: I.trash },
+    { t: 'Verified badge', c: 'Known in the scene? Request a verified badge in Settings. Crew leaders can request one for their crew.', href: 'account/settings/', go: 'Request it', i: I.shield },
+    { t: 'Delete your account', c: 'Deletes your login, garage, crews and other personal data. Published lap times stay on the leaderboard as Deleted driver.', href: 'account/settings/', go: 'Open Settings', i: I.trash },
   ] },
 ];
 
@@ -94,7 +95,7 @@ const faq = [
   { q: 'Is Leonida Racing free?', a: 'Yes. Every feature is free. There are no ads and no paid features.' }, // keep in line with FREE_PROMISE (data/site.ts)
   { q: 'Where can I track the GTA 6 cars I own?', a: 'In My cars. Mark a car as owned on its car page or in your garage. Your wishlist works the same way.' },
   { q: 'Can other people see my garage?', a: 'No. My cars, Wishlist and Collection are private.' },
-  { q: 'Can I stay anonymous on the leaderboard?', a: 'Your display name is what others see. Pick any name you like and change it in Settings.' },
+  { q: 'Do I have to use my real name on the leaderboard?', a: 'Your display name is what others see. Pick any name you like and change it in Settings.' },
   { q: 'Is there a GTA 6 Discord bot?', a: 'Yes. Add it to your server to post your events, or try /car and /compare on our Discord first.' },
   { q: 'What do I need to sign up?', a: 'A Discord account. Click Log in with Discord at the top of any page.' },
 ];
