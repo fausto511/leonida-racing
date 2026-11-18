@@ -217,10 +217,10 @@ export const statsTotals = {
   lastAt: statsFeed[0]?.at ?? null,
 };
 
-/** short label of a metric for chips (placeholders, Codex review pending) */
+/** short label of a metric for chips (Codex review 18.11. decided by Fausto; same names in discord-dispatch METRIC_LABEL) */
 export const statLabels: Record<VehicleValue['metric'], string> = {
   price_gtad: 'Price', sell_price_gtad: 'Sell value', top_speed_mph: 'Top speed', gellhorn_reference_lap_ms: 'Gellhorn lap',
-  stat_speed: 'Speed', stat_acceleration: 'Acceleration', stat_handling_asphalt: 'Handling', stat_handling_offroad: 'Off-road handling',
+  stat_speed: 'Speed', stat_acceleration: 'Acceleration', stat_handling_asphalt: 'Asphalt handling', stat_handling_offroad: 'Off-road handling',
   stat_strength: 'Strength', rating_road: 'Road rating', rating_offroad: 'Off-road rating',
 };
 

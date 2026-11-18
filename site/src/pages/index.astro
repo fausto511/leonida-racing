@@ -22,6 +22,7 @@ const TA = `${base}time-attack/gellhorn-international-raceway/`;
 
 // ---- Fresh in the database (RS-0130, Fausto 16./18.11.2026): newest stats first. Hidden until the
 // first value is published, so nothing announces data that isn't there yet. Counters come from the data.
+// COPY STATUS: Codex review 18.11., decided by Fausto (RS-0130).
 const fresh = statsFeed.slice(0, 5);
 const FRESH_CHIPS = 3;
 const absDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
@@ -176,7 +177,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         <div class="hsec-titles">
           <p class="eyebrow">Live data</p>
           <h2 class="lr-h2 display hsec-title" id="fresh-title">Fresh in the database</h2>
-          <p class="hsec-sub">New prices, top speeds and lap times, as soon as they're published.</p>
+          <p class="hsec-sub">New prices, top speeds and lap times.</p>
         </div>
         <a href={`${base}cars/`} class="arrow">All cars →</a>
       </div>

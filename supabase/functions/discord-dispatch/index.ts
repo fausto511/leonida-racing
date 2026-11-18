@@ -381,10 +381,10 @@ async function handleVehicles(): Promise<number> {
 // count (price, top speed, lap, in-game stats), never text changes. Before posting, each car page
 // must show the new stats (data-stats-at on the page, written at build time, >= newest value).
 // Then ONE post per feed with source 'vehicles': a card for one car, a list for several.
-// COPY STATUS: Claude placeholders, Codex review pending.
+// COPY STATUS: Codex review 18.11., decided by Fausto (RS-0130).
 const METRIC_LABEL: Record<string, string> = {
   price_gtad: "Price", sell_price_gtad: "Sell value", top_speed_mph: "Top speed", gellhorn_reference_lap_ms: "Gellhorn lap",
-  stat_speed: "Speed", stat_acceleration: "Acceleration", stat_handling_asphalt: "Handling", stat_handling_offroad: "Off-road handling",
+  stat_speed: "Speed", stat_acceleration: "Acceleration", stat_handling_asphalt: "Asphalt handling", stat_handling_offroad: "Off-road handling",
   stat_strength: "Strength", rating_road: "Road rating", rating_offroad: "Off-road rating",
 };
 const METRIC_ORDER = Object.keys(METRIC_LABEL);
