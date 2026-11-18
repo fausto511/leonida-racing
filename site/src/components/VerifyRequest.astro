@@ -14,8 +14,8 @@ const isPerson = mode === 'person';
     <p class="vr-lede">
       <span class="icon-tag" aria-hidden="true"></span>
       {isPerson
-        ? 'For well-known creators, hosts and insiders of the GTA racing scene: a white seal next to your name shows that Leonida Racing has confirmed it is really you. It is not a reward for activity.'
-        : 'For crews that need to be recognisable as the original, e.g. the crew of a well-known creator: a white seal after the crew name, and no other crew can use the exact same name.'}
+        ? 'For well-known creators, hosts and insiders in GTA racing. A white badge next to your name shows we have confirmed it is really you. It is not a reward for activity.'
+        : 'A white badge next to the crew name shows we have confirmed it is the original crew. Other crews cannot use the same name.'}
     </p>
 
     <div id="vr-status" class="vr-status" hidden></div>
@@ -30,10 +30,10 @@ const isPerson = mode === 'person';
           <span><strong>With a code</strong> — put <code id="vr-code">…</code> into {isPerson ? 'your YouTube or Twitch channel description, your X bio or similar' : "your crew's Social Club description or a channel of your crew's Discord server"} (only until we have checked it), then add the link below.</span>
         </label>
         <label class="vr-radio"><input type="radio" name="proof_method" value="discord" />
-          <span><strong>Via Discord</strong> — faster if {isPerson ? 'your Discord profile shows your channel under connections' : "you're known on Discord"}. Send the request, then message a moderator on our Discord server.</span>
+          <span><strong>Via Discord</strong> — send the request, then message a moderator on our Discord server.</span>
         </label>
       </fieldset>
-      <label class="vr-field" id="vr-link-wrap">Link to where the code is <small>required for the code option</small>
+      <label class="vr-field" id="vr-link-wrap">Proof link <small>required for the code option</small>
         <input type="url" name="link_url" maxlength="200" placeholder="https://www.youtube.com/@yourchannel/about" />
       </label>
       <label class="vr-field">{isPerson ? 'Who are you in the scene?' : 'Who is behind the crew?'} <small>optional, max. 500 characters</small>
@@ -119,7 +119,7 @@ const isPerson = mode === 'person';
         const has = Boolean((roleRes as { data: unknown }).data);
         const open = list.find((r) => r.status === 'pending');
         const last = list[0];
-        if (has) { status.innerHTML = '<strong>You are a verified user.</strong> The white seal is shown next to your name.'; status.hidden = false; form.hidden = true; return; }
+        if (has) { status.innerHTML = '<strong>You are a verified user.</strong> The white badge is shown next to your name.'; status.hidden = false; form.hidden = true; return; }
         if (open) { status.innerHTML = '<strong>Request sent.</strong> A moderator will check it. If you chose Discord, message a moderator on our Discord server.'; status.hidden = false; form.hidden = true; return; }
         status.hidden = !(last && last.status === 'rejected');
         if (last && last.status === 'rejected') status.innerHTML = `<strong>Your last request was declined.</strong>${last.decision_note ? ` ${esc(last.decision_note)}` : ''}`;
@@ -162,7 +162,7 @@ const isPerson = mode === 'person';
         link_url: link || null, message: message || null,
       }).select('request_id,status,crew_id,decision_note,requested_at,decided_at').single();
       btn.disabled = false;
-      if (error) { const hit = ERR.find(([re]) => re.test(error.message)); say(hit ? hit[1] : error.message, true); return; }
+      if (error) { const hit = ERR.find(([re]) => re.test(error.message)); say(hit ? hit[1] : 'Could not send the request. Reload the page and try again.', true); return; }
       list.unshift(data as any);
       form.reset(); syncMethod();
       render();

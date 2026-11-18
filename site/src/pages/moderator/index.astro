@@ -153,7 +153,7 @@ import ModeratorShell from '../../components/ModeratorShell.astro';
     $('mo-active').innerHTML = act.length
       ? barChart(act, `Active drivers per day: ${act.map((d) => `${dayLabel(d.day)} ${fmt(d.n)}`).join(', ')}`)
         + (act.length < 7 ? `<p class="mo-note">Counted since ${dayLabel(act[0].day)}: ${act.map((d) => `${dayLabel(d.day)} ${fmt(d.n)}`).join(' · ')}</p>` : '')
-      : `<div class="mo-empty">No day saved yet.</div>`;
+      : `<div class="mo-empty">No data yet.</div>`;
     const c = ov.cars;
     $('mo-stars-sub').textContent = `${fmt(c.ratings)} ratings from ${fmt(c.rating_drivers)} driver${c.rating_drivers === 1 ? '' : 's'}`;
     $('mo-stars').innerHTML = hBars([5, 4, 3, 2, 1].map((s) => [`${s} star${s === 1 ? '' : 's'}`, Number(c.stars?.[s] ?? 0)]));

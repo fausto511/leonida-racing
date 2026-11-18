@@ -290,7 +290,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
         <td>${esc(r.measured_at ?? '—')}<br><small>by ${esc(r.creator?.display_name ?? '?')}</small></td>
         <td>${esc(r.status)}</td>
         <td>${r.status === 'current' ? `<button type="button" class="btn btn-s" data-reject="${esc(r.value_id)}">Reject</button>` : ''}</td>
-      </tr>`).join('')}</tbody></table>` : '<p class="vx-meta">No values yet — the site shows "Data pending".</p>';
+      </tr>`).join('')}</tbody></table>` : '<p class="vx-meta">No values yet.</p>';
   }
 
   async function loadLog() {
@@ -359,7 +359,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
   });
   $('vx-value-list').addEventListener('click', async (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-reject]'); if (!b) return;
-    if (!confirm('Reject this value? The site will show "Data pending" until a new value is added.')) return;
+    if (!confirm('Reject this value? It will no longer be used on the site after the next build.')) return;
     const { error } = await getSupabase().from('vehicle_values').update({ status: 'rejected' }).eq('value_id', b.dataset.reject!);
     if (error) { msg(`Could not reject: ${error.message}`, 'error'); return; }
     await loadValues();

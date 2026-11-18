@@ -148,7 +148,7 @@ import ModeratorShell from '../../../components/ModeratorShell.astro';
       // Fausto 11.11.: bars from the first saved day on (the note-only box read as an empty tile).
       $('dx-act').innerHTML = act.length
         ? barChart(act, `Active drivers per day: ${act.map((d) => `${dayLabel(d.day)} ${d.n}`).join(', ')}`)
-        : `<div class="mc-empty">No day saved yet.</div>`;
+        : `<div class="mc-empty">No data yet.</div>`;
       if (act.length && act.length < 7) $('dx-act-sub').textContent = `Logged in and on the site · counted since ${dayLabel(act[0].day)}`;
     }
     const rows = ((vis.data ?? []) as any[]).map((r) => ({ day: r.day, n: Number(r.pageviews) || 0 }));

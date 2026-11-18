@@ -18,7 +18,7 @@ const subs = [
   <section class="wrap mod-wrap">
     <ModeratorShell active="laps" subs={subs}>
     <h1 class="display mod-title">Laps</h1>
-    <p class="mod-lede" id="laps-sub">To review · oldest first. Every action is logged.</p>
+    <p class="mod-lede" id="laps-sub">To review · oldest first.</p>
 
     <div id="backend-notice" class="notice" hidden>
       <strong>Backend not connected yet.</strong>
@@ -480,7 +480,7 @@ const subs = [
     const visible = filteredQueue();
     queueCountEl.textContent = `${visible.length} ${visible.length === 1 ? 'item' : 'items'}`;
     Object.keys(FILTERS).forEach((k) => subs.count(k, queueRuns.filter(FILTERS[k]).length));
-    document.getElementById('laps-sub').textContent = `${FILTER_LABEL[currentFilter]} · oldest first. Every action is logged.`;
+    document.getElementById('laps-sub').textContent = `${FILTER_LABEL[currentFilter]} · oldest first.`;
     document.querySelector('.queue-title').textContent = FILTER_LABEL[currentFilter];
     queueEmptyEl.hidden = visible.length > 0;
     queueListEl.innerHTML = visible
@@ -592,7 +592,7 @@ const subs = [
         </div>
 
         <div class="review-box">
-          <div class="review-box-head"><h3>Submitted Run</h3><span>Canonical data</span></div>
+          <div class="review-box-head"><h3>Submitted lap</h3><span>Lap details</span></div>
           <div class="fact-row"><span>Vehicle</span><strong>${vehicleLabel(run.vehicles)}</strong></div>
           <div class="fact-row"><span>As typed at submission</span><strong>${run.vehicle_text_observed || '—'}</strong></div>
           <div class="fact-row"><span>Lap time</span><strong>${formatLapTime(run.lap_time_ms)}</strong></div>
@@ -622,10 +622,10 @@ const subs = [
           ${!isAccepted ? `<button type="button" class="btn btn-s" data-action="request_correction">Request Correction</button>` : ''}
           ${!isAccepted ? `<button type="button" class="btn btn-danger" data-action="reject">Reject</button>` : ''}
           ${!isAccepted ? `<button type="button" class="btn btn-p" data-action="accept_provisional">Accept</button>` : ''}
-          <button type="button" class="btn btn-p" data-action="verify" ${canVerify ? '' : 'disabled'}>Verify (Official)</button>
+          <button type="button" class="btn btn-p" data-action="verify" ${canVerify ? '' : 'disabled'}>Verify video</button>
           ${isAccepted ? `<button type="button" class="btn btn-danger" data-action="invalidate">Invalidate</button>` : ''}
         </div>
-        ${canVerify ? '' : '<p class="decision-hint">Verify is disabled: no public video link on this run yet.</p>'}
+        ${canVerify ? '' : '<p class="decision-hint">No public video link yet.</p>'}
         <p class="decision-msg" id="decision-msg" hidden></p>
       </div>
 
@@ -718,7 +718,7 @@ const subs = [
 
     const pbTile = pbRow
       ? `<div class="check-tile"><span>Driver PB (this vehicle/track)</span><strong>${formatDelta(run.lap_time_ms - pbRow.lap_time_ms)}</strong></div>`
-      : `<div class="check-tile"><span>Driver PB (this vehicle/track)</span><strong>No prior accepted run</strong></div>`;
+      : `<div class="check-tile"><span>Driver PB (this vehicle/track)</span><strong>No earlier accepted lap</strong></div>`;
 
     let recordTile;
     if (!recordRow) {

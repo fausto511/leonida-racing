@@ -35,7 +35,7 @@ const subs = [
   const FILTERS: Record<string, (t: any) => boolean> = { review: (t) => !t.review_note, noted: (t) => Boolean(t.review_note) };
   const SUB: Record<string, string> = {
     review: 'New submissions · oldest first. Published tracks are under Community › Track list.',
-    noted: 'You sent the creator a note · you can still publish.',
+    noted: 'A note was sent to the creator · you can still publish.',
   };
   const subs = initModSubs('review', () => { sel = null; render(); });
   const when = (iso: string) => new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' });
@@ -61,7 +61,7 @@ const subs = [
     $('tr-detail').innerHTML = `
       <div class="mq-head"><div><h2>${esc(t.title)}</h2><span class="mq-sub">By ${esc(names.get(t.created_by) ?? 'Unknown')} · submitted ${esc(when(t.created_at))}</span></div><span class="mq-chip">${subs.current === 'review' ? 'To review' : 'Note sent'}</span></div>
       ${t.social_club_url ? `<a href="${esc(t.social_club_url)}" target="_blank" rel="noopener noreferrer" style="font-weight:600">Open on Social Club</a>` : '<p class="mq-msg is-error">No Social Club link.</p>'}
-      ${t.review_note ? `<p class="mq-quote">Your note: ${esc(t.review_note)}</p>` : ''}
+      ${t.review_note ? `<p class="mq-quote">Note to the creator: ${esc(t.review_note)}</p>` : ''}
       <p class="mq-hint" style="margin:0">Compare these details with the Social Club page:</p>
       <dl class="mq-facts">${facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
       <div class="mq-decide">
