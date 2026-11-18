@@ -232,6 +232,7 @@ const vehicleIndex = [...vehicleOptions]
   import { backendConfigured, getSupabase } from '../../scripts/supabase-client';
   import { currentDriverId, fetchOwnedList, setOwned, fetchWishList, setWished } from '../../scripts/owned';
   import { esc } from '../../data/hub';
+  import { newStatsVehicles, markSeen } from '../../scripts/notices';
 
   type V = { id: string; make: string; model: string; cls: string; classes: string; logo: string; photo: boolean };
   type View = 'cars' | 'wishlist' | 'collection';
@@ -252,6 +253,7 @@ const vehicleIndex = [...vehicleOptions]
   let owned: string[] = []; // in the order they were added
   let wish: string[] = [];
   let fresh: string | null = null;
+  let newStats = new Set<string>(); // RS-0130: cars with new stats since the last visit
   let view: View = 'cars';
   let pickFor: View = 'cars';
 
@@ -283,6 +285,11 @@ const vehicleIndex = [...vehicleOptions]
     el.querySelector('.vc-cmp')?.remove();
     el.querySelector('.vc-wish')?.remove(); // the account lists set their own buttons (heart only on the wishlist)
     if (x.id === fresh) el.classList.add('is-new');
+    if (newStats.has(x.id)) {
+      // "New stats" pill: a clone of the class pill keeps the card's scoped style
+      const pill = el.querySelector<HTMLElement>('[data-cls-pill]');
+      if (pill) { const p = pill.cloneNode(false) as HTMLElement; p.removeAttribute('data-cls-pill'); p.classList.add('vc-new'); p.textContent = 'New stats'; pill.after(p); }
+    }
     const gar = el.querySelector<HTMLButtonElement>('.vc-garage')!;
     const label = `${x.make} ${x.model}`;
     if (list === 'cars') {
@@ -513,6 +520,10 @@ const vehicleIndex = [...vehicleOptions]
     if (!me) { msg('cars', 'Your driver profile is not ready yet — reload the page in a moment.', true); return; }
     [owned, wish] = await Promise.all([fetchOwnedList(), fetchWishList()]);
     render();
+    // RS-0130: tag the cars with new stats, then count them as seen (clears the avatar dot)
+    newStats = new Set(await newStatsVehicles());
+    if (newStats.size) render();
+    markSeen('garage');
   }
 
   if (backendConfigured) {

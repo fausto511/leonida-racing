@@ -33,6 +33,7 @@
 // when release_id gets set). Waits until the vehicle page is live on the website
 // (rebuild every 3 h), then posts to every feed with source 'vehicles': one card
 // per vehicle, or one summary when VEHICLE_DIGEST_FROM or more are ready at once.
+// New stats (RS-0130, 18.11.2026): outbox kind 'values', see "new stats" below.
 // Role sync (08.10.2026): see "Discord role sync" below.
 // Reminders (package 5, 15.10.2026): see "reminders" below.
 // LFG end (DEC-0111, 15.10.2026): see "LFG" below.
@@ -371,6 +372,99 @@ async function handleVehicles(): Promise<number> {
     if (ok) await feedError(f, null);
   }
   console.log("vehicles posted", ready.length, "to", (feeds ?? []).length, "feeds");
+  return ready.length;
+}
+
+// ---------- new stats (RS-0130, Fausto 18.11.2026) ----------
+// Outbox kind 'values' (DB trigger vehicle_values_discord): one row per car; the DB holds the batch
+// until 15 min after the last entry, so a burst of entries becomes one post. Only measured values
+// count (price, top speed, lap, in-game stats), never text changes. Before posting, each car page
+// must show the new stats (data-stats-at on the page, written at build time, >= newest value).
+// Then ONE post per feed with source 'vehicles': a card for one car, a list for several.
+// COPY STATUS: Claude placeholders, Codex review pending.
+const METRIC_LABEL: Record<string, string> = {
+  price_gtad: "Price", sell_price_gtad: "Sell value", top_speed_mph: "Top speed", gellhorn_reference_lap_ms: "Gellhorn lap",
+  stat_speed: "Speed", stat_acceleration: "Acceleration", stat_handling_asphalt: "Handling", stat_handling_offroad: "Off-road handling",
+  stat_strength: "Strength", rating_road: "Road rating", rating_offroad: "Off-road rating",
+};
+const METRIC_ORDER = Object.keys(METRIC_LABEL);
+const VALUES_WAIT_MAX_ATTEMPTS = 24;    // re-check every 30 min, give up after ~12 h
+function fmtStat(metric: string, value: number): string {
+  if (metric.startsWith("stat_")) return `${value.toFixed(1)} / 10`;
+  if (metric.startsWith("rating_")) return String(Math.round(value));
+  if (metric === "price_gtad" || metric === "sell_price_gtad") return `$${Math.round(value).toLocaleString("en-US")}`;
+  if (metric === "top_speed_mph") return `${value.toFixed(1)} mph (${(value * 1.609344).toFixed(1)} km/h)`;
+  const ms = Math.round(value), m = Math.floor(ms / 60000), s = (ms % 60000) / 1000;
+  return `${m}:${s.toFixed(3).padStart(6, "0")}`;
+}
+const statLabel = (x: any) => `${METRIC_LABEL[x.metric] ?? x.metric}${x.tuning === "tuned" ? " (tuned)" : ""}`;
+async function pageStatsAt(v: any): Promise<number> {
+  try {
+    const r = await fetch(vehicleUrl(v), { headers: { "cache-control": "no-cache" } });
+    if (!r.ok) return 0;
+    const m = (await r.text()).match(/data-stats-at="([^"]+)"/);
+    return m ? Date.parse(m[1]) || 0 : 0;
+  } catch { return 0; }
+}
+function statsCard(v: any, stats: any[]) {
+  const url = vehicleUrl(v);
+  return {
+    embeds: [{ author: { name: "New stats" }, title: `${v.make} ${v.model}`, url, color: ORANGE,
+      fields: stats.map((x) => ({ name: statLabel(x), value: fmtStat(x.metric, Number(x.value)), inline: true })),
+      ...(v._photo ? { image: { url: vehicleImg(v) } } : {}), footer: { text: "Leonida Racing · Cars" } }],
+    components: [row(linkButton("Open car page", url))],
+    allowed_mentions: { parse: [] },
+  };
+}
+function statsDigest(list: { v: any; stats: any[] }[]) {
+  const shown = list.slice(0, 15);
+  const lines = shown.map(({ v, stats }) => `• [${v.make} ${v.model}](${vehicleUrl(v)}) · ${stats.map((x) => `${statLabel(x)} ${fmtStat(x.metric, Number(x.value))}`).join(" · ")}`);
+  if (list.length > shown.length) lines.push(`…and ${list.length - shown.length} more`);
+  const pic = list.find((x) => x.v._photo)?.v;
+  return {
+    embeds: [{ author: { name: "New stats" }, title: `New stats for ${list.length} cars`, url: `${SITE}/`, color: ORANGE,
+      description: clip(lines.join("\n"), 4000), ...(pic ? { image: { url: vehicleImg(pic) } } : {}), footer: { text: "Leonida Racing · Cars" } }],
+    components: [row(linkButton("See what's new", `${SITE}/`))],
+    allowed_mentions: { parse: [] },
+  };
+}
+async function handleValues(): Promise<number> {
+  const { data: rows, error } = await db.rpc("discord_claim_values");
+  if (error) { console.error(error); return 0; }
+  if (!rows?.length) return 0;
+  const ids = [...new Set((rows as any[]).map((r) => r.vehicle_id))];
+  const [{ data: vs }, { data: vals }] = await Promise.all([
+    db.from("vehicles").select(VEHICLE_COLS).in("vehicle_id", ids).not("release_id", "is", null),
+    db.from("vehicle_values").select("vehicle_id,metric,tuning,value,created_at").in("vehicle_id", ids).eq("status", "current"),
+  ]);
+  const byId = new Map((vs ?? []).map((v: any) => [v.vehicle_id, v]));
+  const ready: { v: any; stats: any[] }[] = [];
+  for (const r of rows as any[]) {
+    const v = byId.get(r.vehicle_id);
+    if (!v) continue; // deleted or no longer officially shown -> not posted
+    const since = Date.parse(r.created_at) - 60e3;
+    const stats = (vals ?? []).filter((x: any) => x.vehicle_id === v.vehicle_id && Date.parse(x.created_at) >= since)
+      .sort((a: any, b: any) => METRIC_ORDER.indexOf(a.metric) - METRIC_ORDER.indexOf(b.metric) || String(a.tuning).localeCompare(String(b.tuning)));
+    if (!stats.length) continue; // the new value was withdrawn again
+    const newest = Math.max(...(vals ?? []).filter((x: any) => x.vehicle_id === v.vehicle_id).map((x: any) => Date.parse(x.created_at)));
+    if ((await pageStatsAt(v)) >= newest - 1000) { ready.push({ v, stats }); continue; }
+    if (r.attempts < VALUES_WAIT_MAX_ATTEMPTS) {
+      await db.from("discord_outbox").update({ processed_at: null, not_before: new Date(Date.now() + 30 * 60e3).toISOString(), last_error: "new stats not on the car page yet" }).eq("id", r.id);
+    } else {
+      await db.from("discord_outbox").update({ last_error: "new stats never showed on the car page, not posted" }).eq("id", r.id);
+    }
+  }
+  if (!ready.length) return 0;
+  ready.sort((a, b) => `${a.v.make} ${a.v.model}`.localeCompare(`${b.v.make} ${b.v.model}`));
+  for (const x of ready) x.v._photo = !!x.v.has_photo && await live(vehicleImg(x.v));
+  const msg = ready.length === 1 ? statsCard(ready[0].v, ready[0].stats) : statsDigest(ready);
+  const { data: feeds } = await db.from("discord_feeds").select("*").eq("source", "vehicles");
+  for (const f of feeds ?? []) {
+    const r = await discord("POST", `/channels/${f.channel_id}/messages`, msg);
+    if (r.ok) { await feedError(f, null); continue; }
+    if (!(await handleGone(f, r))) { await feedError(f, describeFail(r, "post in the channel")); console.log("stats post failed", f.feed_id, r.status, r.text.slice(0, 300)); }
+  }
+  console.log("stats posted", ready.length, "cars to", (feeds ?? []).length, "feeds");
   return ready.length;
 }
 
@@ -1146,6 +1240,7 @@ Deno.serve(async (req) => {
   const started = Date.now();
   let done = 0, failed = 0;
   try { done += await handleVehicles(); } catch (err) { failed++; console.error("vehicles", err); }
+  try { done += await handleValues(); } catch (err) { failed++; console.error("stats", err); }
   try { done += await handleRoleJobs(started); } catch (err) { failed++; console.error("roles", err); }
   try { done += await handleReminders(); } catch (err) { failed++; console.error("reminders", err); }
   try { done += await handleLfg(); } catch (err) { failed++; console.error("lfg", err); }

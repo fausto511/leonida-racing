@@ -69,7 +69,7 @@ const links = [
   import { loadNotices, markSeen, currentArea, areaCount, type NoticeArea } from '../scripts/notices';
   // keep the active tab in view on phones (the row scrolls sideways)
   document.querySelector('.acc-tab.is-active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-  const TAB_AREA: Record<string, NoticeArea> = { laps: 'laps', crew: 'crews', events: 'events', tracks: 'tracks', settings: 'settings' };
+  const TAB_AREA: Record<string, NoticeArea> = { garage: 'garage', laps: 'laps', crew: 'crews', events: 'events', tracks: 'tracks', settings: 'settings' };
   async function badge() {
     if (!backendConfigured) return;
     const { data: s } = await getSupabase().auth.getSession();
@@ -84,7 +84,7 @@ const links = [
       el.setAttribute('aria-label', n[area].fix ? `${c} need your attention` : `${c} new`);
     }
     const here = currentArea();
-    if (here) markSeen(here);
+    if (here && here !== 'garage') markSeen(here); // My garage marks itself seen after it tagged the cars (RS-0130)
   }
   badge();
 </script>

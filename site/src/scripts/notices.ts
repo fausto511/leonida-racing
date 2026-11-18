@@ -4,13 +4,15 @@
 // One request per page, shared by the header and the account tabs.
 import { backendConfigured, getSupabase } from './supabase-client';
 
-export type NoticeArea = 'laps' | 'crews' | 'events' | 'tracks' | 'settings';
+// 'garage' (RS-0130, Fausto 18.11.2026): cars in My garage or on the wishlist that got new stats.
+export type NoticeArea = 'laps' | 'crews' | 'events' | 'tracks' | 'settings' | 'garage';
 export type Notices = Record<NoticeArea, { fix: number; new: number }>;
-export const NOTICE_AREAS: NoticeArea[] = ['laps', 'crews', 'events', 'tracks', 'settings'];
+export const NOTICE_AREAS: NoticeArea[] = ['laps', 'crews', 'events', 'tracks', 'settings', 'garage'];
 
 /** The account area of the current page, if any (its "new" items count as seen). */
 export function currentArea(): NoticeArea | null {
   const p = location.pathname.replace(/\/+$/, '/');
+  if (/\/account\/$/.test(p)) return 'garage'; // My garage is the account start page
   const m = p.match(/\/account\/(laps|crew|events|tracks|settings)\/$/);
   if (!m) return null;
   return (m[1] === 'crew' ? 'crews' : m[1]) as NoticeArea;
@@ -32,6 +34,13 @@ export function loadNotices(force = false): Promise<Notices | null> {
 }
 
 export const areaCount = (n: Notices, a: NoticeArea) => (n[a]?.fix ?? 0) + (n[a]?.new ?? 0);
+
+/** cars in My garage / on the wishlist with new stats since the last visit (for the "New stats" pill) */
+export async function newStatsVehicles(): Promise<string[]> {
+  if (!backendConfigured) return [];
+  const { data, error } = await getSupabase().rpc('my_new_stats_vehicles');
+  return error || !Array.isArray(data) ? [] : (data as string[]);
+}
 export const totalCount = (n: Notices) => NOTICE_AREAS.reduce((s, a) => s + areaCount(n, a), 0);
 
 export async function markSeen(area: NoticeArea) {

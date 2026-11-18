@@ -167,6 +167,63 @@ export const garageOrderedVehicles: VehicleOption[] = [...vehicleOptions].sort(c
 // not in the database (class/seats/drive unknown, nothing to reference it).
 // Once Rockstar names it: add it to vehicleOptions with the real name, add
 // the DB row, and build the photo from the source file.
+// ---------------------------------------------------------------------------
+// New stats (RS-0130, Fausto 18.11.2026): home page "Fresh in the database",
+// "Stats updated" on the vehicle page, and data-stats-at for the Discord feed
+// (the dispatcher posts only once the car page carries the new stats).
+// ---------------------------------------------------------------------------
+type Stamped = VehicleValue & { created_at?: string | null };
+type Previous = { vehicle_id: string; metric: VehicleValue['metric']; tuning?: string | null; value: number; created_at: string };
+const stamped = (generated.values as Stamped[]).filter((v) => v.created_at);
+const previous = ((generated as { previous?: Previous[] }).previous ?? []);
+
+/** newest created_at of the current values per vehicle (ISO, as the database sent it) */
+export const vehicleStatsAt: Record<string, string> = {};
+for (const v of stamped) {
+  const cur = vehicleStatsAt[v.vehicle_id];
+  if (!cur || Date.parse(v.created_at!) > Date.parse(cur)) vehicleStatsAt[v.vehicle_id] = v.created_at!;
+}
+
+export interface StatChange { metric: VehicleValue['metric']; tuning: 'stock' | 'tuned'; value: VehicleValue; prev: VehicleValue | null }
+export interface StatsUpdate { vehicle: VehicleOption; at: string; changes: StatChange[]; isNew: boolean }
+const optById = new Map(vehicleOptions.map((v) => [v.id, v]));
+const METRIC_ORDER: VehicleValue['metric'][] = ['top_speed_mph', 'price_gtad', 'gellhorn_reference_lap_ms', 'sell_price_gtad',
+  'stat_speed', 'stat_acceleration', 'stat_handling_asphalt', 'stat_handling_offroad', 'stat_strength', 'rating_road', 'rating_offroad'];
+
+/** Latest updates, one entry per car (its values from the last 24 h before its newest value), newest first. */
+export const statsFeed: StatsUpdate[] = Object.entries(vehicleStatsAt)
+  .map(([id, at]) => {
+    const vehicle = optById.get(id);
+    if (!vehicle?.releaseId) return null; // only officially shown cars have a page worth pointing to
+    const from = Date.parse(at) - 24 * 3600e3;
+    const changes: StatChange[] = stamped
+      .filter((v) => v.vehicle_id === id && Date.parse(v.created_at!) >= from)
+      .map((v) => {
+        const tuning = v.tuning === 'tuned' ? 'tuned' : 'stock';
+        const p = previous.find((x) => x.vehicle_id === id && x.metric === v.metric && (x.tuning ?? 'stock') === tuning
+          && Date.parse(x.created_at) < Date.parse(v.created_at!));
+        return { metric: v.metric, tuning, value: { ...v, value: Number(v.value) }, prev: p ? { ...v, value: Number(p.value) } : null } as StatChange;
+      })
+      .sort((a, b) => METRIC_ORDER.indexOf(a.metric) - METRIC_ORDER.indexOf(b.metric) || a.tuning.localeCompare(b.tuning));
+    return { vehicle, at, changes, isNew: changes.every((c) => !c.prev) };
+  })
+  .filter((x): x is StatsUpdate => !!x && x.changes.length > 0)
+  .sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+
+/** automatic counters for the home page (never typed into a text, Fausto 16.11.) */
+export const statsTotals = {
+  cars: new Set(stamped.filter((v) => optById.get(v.vehicle_id)?.releaseId).map((v) => v.vehicle_id)).size,
+  values: stamped.filter((v) => optById.get(v.vehicle_id)?.releaseId).length,
+  lastAt: statsFeed[0]?.at ?? null,
+};
+
+/** short label of a metric for chips (placeholders, Codex review pending) */
+export const statLabels: Record<VehicleValue['metric'], string> = {
+  price_gtad: 'Price', sell_price_gtad: 'Sell value', top_speed_mph: 'Top speed', gellhorn_reference_lap_ms: 'Gellhorn lap',
+  stat_speed: 'Speed', stat_acceleration: 'Acceleration', stat_handling_asphalt: 'Handling', stat_handling_offroad: 'Off-road handling',
+  stat_strength: 'Strength', rating_road: 'Road rating', rating_offroad: 'Off-road rating',
+};
+
 export interface UnverifiedVehicle { workingId: string; basedOn: string; photoSource: string; note: string }
 export const unverifiedVehicles: UnverifiedVehicle[] = [
   { workingId: "unnamed-kellison-j4-inspired", basedOn: "Kellison J4 (1960s US kit sports car)", photoSource: "Visual/Cars/Kellison J4 Garage.jpg", note: "GTA Wiki lists it as a Kellison J4-inspired car without in-game name or manufacturer (checked 2026-09-30)." },

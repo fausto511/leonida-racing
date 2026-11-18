@@ -121,7 +121,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       </button>
       <div id="account-menu-dropdown" class="account-dropdown" hidden role="menu">
         <div id="account-menu-badge" class="account-badge" hidden></div>
-        <a href={`${base}account/`} role="menuitem">My garage</a>
+        <a href={`${base}account/`} role="menuitem" id="account-menu-garage">My garage</a>
         <a href={`${base}account/laps/`} role="menuitem" id="account-menu-laps">My laps</a>
         <a href={`${base}account/crew/`} role="menuitem" id="account-menu-crew">My crews</a>
         <a href={DISCORD_INVITE_URL} role="menuitem" target="_blank" rel="noopener">Open Discord server</a>
@@ -421,6 +421,9 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       if (n) {
         if (n.laps.fix) lapsLinkEl.textContent = `My laps (${n.laps.fix} to fix)`;
         else if (n.laps.new) lapsLinkEl.textContent = `My laps (${n.laps.new} new)`;
+        const garage = areaCount(n, 'garage'); // RS-0130: cars with new stats
+        const garageEl = document.getElementById('account-menu-garage');
+        if (garage && garageEl) garageEl.textContent = `My garage (${garage} new)`;
         const crews = areaCount(n, 'crews');
         if (crews) crewLinkEl.textContent = `My crews (${crews} new)`;
         const extra: [string, number, string][] = [['account-menu-events', areaCount(n, 'events'), 'My events'], ['account-menu-tracks', areaCount(n, 'tracks'), 'My tracks'], ['account-menu-settings', areaCount(n, 'settings'), 'Settings']];

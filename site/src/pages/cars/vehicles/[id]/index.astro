@@ -6,7 +6,7 @@
 // from the mockup -> Codex review (DEC-0088). About texts: data/vehicle-copy.ts (Codex).
 import Base from '../../../../layouts/Base.astro';
 import CarCard from '../../../../components/CarCard.astro';
-import { MAKES_WITHOUT_LOGO, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs } from '../../../../data/vehicles';
+import { MAKES_WITHOUT_LOGO, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs, vehicleStatsAt } from '../../../../data/vehicles';
 import { groupedTitles } from '../../../../data/gta-titles';
 import { speedHtml } from '../../../../data/units';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
@@ -28,6 +28,10 @@ const { vehicle } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const copy = vehicleCopy[vehicle.id];
 const sources = vehicleSources[vehicle.id] ?? [];
+// "Stats updated" (RS-0130, Fausto 16./18.11.2026): date of the newest published value. data-stats-at
+// carries the exact time for the Discord feed, which posts only once the page shows the new stats.
+const statsAt = vehicleStatsAt[vehicle.id] ?? null;
+const statsDate = statsAt ? new Date(statsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : null;
 const seeAlso = vehicleSeeAlso[vehicle.id];
 const cls = vehicle.classes[0];
 const fullName = `${vehicle.make} ${vehicle.model}`;
@@ -231,6 +235,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <div><dt>Drive{' · '}Seats</dt><dd>{vehicle.drive === 'n/a' && !vehicle.seats ? 'TBA' : <>{vehicle.drive}{' · '}{vehicle.seats} {vehicle.seats === 1 ? 'seat' : 'seats'}</>}</dd></div>
           <div><dt>Release</dt><dd class:list={{ 'is-tba': !release }}>{release?.date ? <>{release.name}{' · '}<time datetime={release.date}>{releaseDate}</time></> : releaseText}</dd></div>
         </dl>
+        {statsAt && <p class="vs-upd" data-stats-at={statsAt}><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Stats updated <time datetime={statsAt}>{statsDate}</time></p>}
         <p class="vs-own" id="vs-own"><Fragment set:html={ico.house} /><span id="vs-own-t">Be the first to add it to <button type="button" class="vs-own-btn" data-add-garage>your garage</button></span></p>
       </div>
     </section>
@@ -429,6 +434,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vs-rows > div { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; border-top: 1px solid var(--lr-line); font-size: 15px; }
   .vs-rows dt { color: var(--lr-soft); white-space: nowrap; }
   .vs-rows dd { margin: 0; font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .vs-upd { display: flex; align-items: center; gap: 8px; margin: 10px 0 12px; padding: 0 2px; font-size: 13px; color: var(--lr-muted); }
+  .vs-upd svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .vs-own { display: flex; align-items: center; gap: 10px; margin: auto 0 0; padding: 8px 2px 0; border-top: 1px solid var(--lr-line); font-size: 14px; color: var(--lr-soft); }
   .vs-own .ico { width: 16px; height: 16px; color: var(--lr-muted); }
   .vs-own :global(b) { color: var(--lr-text); }

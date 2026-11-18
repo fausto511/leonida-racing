@@ -353,3 +353,17 @@ if (!backendConfigured) {
   // logging out on this page -> back to the guest view
   sb.auth.onAuthStateChange((event) => { if (event === 'SIGNED_OUT') { clearDash(); window.location.reload(); } });
 }
+
+// ---- Fresh in the database (RS-0130): relative times ("12 min ago") in the visitor's clock ----
+function relTimes() {
+  document.querySelectorAll<HTMLTimeElement>('time[data-rel]').forEach((t) => {
+    const d = Date.parse(t.dateTime);
+    if (!d) return;
+    const min = Math.max(0, Math.round((Date.now() - d) / 60000));
+    t.textContent = min < 1 ? 'just now' : min < 60 ? `${min} min ago` : min < 48 * 60 ? `${Math.round(min / 60)} h ago`
+      : new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    t.title = new Date(d).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+  });
+}
+relTimes();
+setInterval(relTimes, 60000);
