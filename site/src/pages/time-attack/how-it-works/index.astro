@@ -5,6 +5,7 @@
 // hidden until a moderator accepts it (no automatic publishing).
 // Copy: Codex 21.10.2026 (Codex Zuarbeit/Texte-Submit-HowItWorks-Tracks-NewCars-2026-10-21.md), DEC-0088.
 import Base from '../../../layouts/Base.astro';
+import { isLaunched } from '../../../data/launch';
 const base = import.meta.env.BASE_URL;
 
 const steps = [
@@ -23,7 +24,7 @@ const faq = [
     q: 'What counts as a valid lap?', draft: true,
     a: [
       'A lap is expected to count when it’s a single clean run — no crashes, no exploited glitches, no editing or splicing — that matches the vehicle you submitted it under. Anything that looks inconsistent gets flagged for a manual look before it’s accepted.',
-      'We haven’t been able to test any of this against real Gellhorn gameplay yet, so the specifics stay in draft until after launch and hands-on testing.',
+      isLaunched() ? 'We’re testing these rules in the game now. Details may still change.' : 'We haven’t been able to test any of this against real Gellhorn gameplay yet, so the specifics stay in draft until after launch and hands-on testing.',
     ],
   },
   {

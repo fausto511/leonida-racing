@@ -7,6 +7,7 @@ import { currentDriverId, fetchOwned, setOwned } from './owned';
 import { getSelected, setSelectedList } from './compare';
 import { bubble, hideBubble } from './bubble';
 import { LEADERBOARD_PLATFORM } from '../data/platforms';
+import { isLaunched } from '../data/launch';
 import { lapTime } from '../data/leaderboard';
 import { speedHtml, speedText, currentUnits } from '../data/units';
 import { CLOSE_SVG, STAR_SVG } from '../data/site';
@@ -176,6 +177,9 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
 
   // ---- table ---------------------------------------------------------------------------
   const tb = (long: string, short: string) => `<span class="tl">${long}</span><span class="ts">${short}</span>`;
+  // missing values (Fausto 18.11.): "Coming soon" before launch, "Not recorded yet" after
+  const nrLong = isLaunched() ? 'Not recorded yet' : 'Coming soon';
+  const nrTb = () => isLaunched() ? tb('Not recorded yet', 'Not yet') : tb('Coming soon', 'Soon');
   type Cell = { m: string; s?: string; tba?: boolean; mine?: boolean; v?: number | null; raw?: string };
   type Row = { label: string; sub?: string; dir?: 'min' | 'max'; cells: (c: CmpCar) => Cell };
   const star = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.3L14.38 9.62L22.08 9.62L15.85 14.15L18.23 21.48L12 16.95L5.77 21.48L8.15 14.15L1.92 9.62L9.62 9.62Z"/></svg>';
@@ -196,7 +200,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     const perf: Row[] = [
       { label: 'Gellhorn reference lap', sub: 'Stock · our test driver', dir: 'min', cells: (c) => c.ref != null
         ? { m: lapTime(c.ref), s: c.ref === minRef ? (refs.length > 1 ? 'Fastest' : '') : `+${secs(c.ref - minRef!)}`, v: c.ref }
-        : { m: tb('Coming soon', 'Soon'), raw: 'mal', tba: true } },
+        : { m: nrTb(), raw: 'mal', tba: true } },
       { label: 'Best community lap', sub: 'Fastest driver in this car', dir: 'min', cells: (c) => {
         const t = community.get(c.id);
         if (t == null && !ok.best) return { m: '—', raw: 'na' };
@@ -209,20 +213,20 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
         if (!x && !ok.own) return { m: '—', raw: 'na' };
         return x ? { m: lapTime(x.ms), s: `#${x.rank} in this car`, mine: true } : { m: `<a class="tv-link" href="${base}time-attack/submit/">Set a time →</a>`, raw: 'none' };
       } } as Row] : []),
-      { label: 'Top speed', sub: 'Stock', dir: 'max', cells: (c) => c.speed != null ? { m: speedHtml(Math.round(c.speed)), raw: String(Math.round(c.speed)), v: c.speed } : { m: tb('Coming soon', 'Soon'), raw: 'mal', tba: true } },
+      { label: 'Top speed', sub: 'Stock', dir: 'max', cells: (c) => c.speed != null ? { m: speedHtml(Math.round(c.speed)), raw: String(Math.round(c.speed)), v: c.speed } : { m: nrTb(), raw: 'mal', tba: true } },
     ];
     const price: Row[] = [
       { label: 'Price', dir: 'min', cells: (c) => c.price != null
         ? { m: money(c.price), s: [c.price === minPrice ? (prices.length > 1 ? 'Cheapest' : '') : cheapest ? `+${moneyShort(c.price - minPrice!)} vs ${cheapest.model}` : '', limited(c) ? (acqNote[c.acq!] ?? '') : ''].filter(Boolean).join('\u2002·\u2002'), v: c.price }
-        : { m: tb('Coming soon', 'Soon'), raw: 'na', tba: true } },
+        : { m: nrTb(), raw: 'na', tba: true } },
       { label: 'Sell value', sub: 'Base price, no upgrades', dir: 'max', cells: (c) => c.sellable === 'no' ? { m: "Can't be sold" }
-        : c.sell != null ? { m: money(c.sell), v: c.sell } : { m: 'Coming soon', tba: true } },
+        : c.sell != null ? { m: money(c.sell), v: c.sell } : { m: nrLong, tba: true } },
     ];
     const car: Row[] = [
       { label: 'Class', cells: (c) => ({ m: esc(c.classes.join(' / ')) }) },
       { label: 'Drive', cells: (c) => ({ m: esc(c.drive) }) },
       { label: 'Seats', cells: (c) => ({ m: String(c.seats) }) },
-      { label: 'Where to get', cells: (c) => c.acq ? { m: acqNote[c.acq] ?? esc(c.acq) } : { m: 'Coming soon', tba: true } },
+      { label: 'Where to get', cells: (c) => c.acq ? { m: acqNote[c.acq] ?? esc(c.acq) } : { m: nrLong, tba: true } },
       { label: 'Based on', cells: (c) => c.based ? { m: esc(c.based) } : { m: 'Under review', tba: true } },
     ];
     const comm: Row[] = [

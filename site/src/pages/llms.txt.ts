@@ -5,7 +5,14 @@
 // update it when sections change. URLs follow `site` + `base`.
 import type { APIRoute } from 'astro';
 import { SITE_NAME, FREE_PROMISE } from '../data/site';
+import { isLaunched } from '../data/launch';
 // Free account section: Claude 15.11.2026 (RS-0127), Codex review applied 16.11.
+
+// Status paragraph switches with the first build after launch (Fausto 18.11.2026).
+const launched = isLaunched();
+const STATUS = launched
+  ? 'Status: GTA VI was released on November 19, 2026. Leonida Racing adds prices, top speeds and Gellhorn lap times as they are measured in the game, each with its source. Lap times are reviewed by moderators before they are published.'
+  : `Status: GTA VI is scheduled for release on November 19, 2026. Leonida Racing is live before the game: current leaderboard entries, lap data, crews, and events marked as samples are demonstration content. GTA VI Time Attack is planned to accept real submissions from launch day, and its rules will be tested against the released game. Vehicles known only from unofficial pre-release material are marked "Not officially revealed" and excluded from search indexing. Users can already create crews and schedule community events in the Community section.`;
 
 export const GET: APIRoute = ({ site }) => {
   const base = import.meta.env.BASE_URL;
@@ -14,11 +21,11 @@ export const GET: APIRoute = ({ site }) => {
 
 > Leonida Racing is an independent Grand Theft Auto VI (GTA 6) racing database and community. Cars covers GTA VI vehicles, classes, release information, first appearances, and real-life inspirations. Time Attack brings proof-based lap-time leaderboards to Gellhorn International Raceway. Community connects racers through crews and community events. Leonida Racing is not affiliated with Rockstar Games or Take-Two Interactive.
 
-Status: GTA VI is scheduled for release on November 19, 2026. Leonida Racing is live before the game: current leaderboard entries, lap data, crews, and events marked as samples are demonstration content. GTA VI Time Attack is planned to accept real submissions from launch day, and its rules will be tested against the released game. Vehicles known only from unofficial pre-release material are marked "Not officially revealed" and excluded from search indexing. Users can already create crews and schedule community events in the Community section.
+${STATUS}
 
 ## Cars
 
-- [Cars](${u('cars/')}): browse GTA VI vehicles by class and manufacturer, with seats, drivetrain, release details, first appearance, and primary real-life inspiration; prices, tested top speeds, and lap data follow after launch
+- [Cars](${u('cars/')}): browse GTA VI vehicles by class and manufacturer, with seats, drivetrain, release details, first appearance, and primary real-life inspiration; prices, tested top speeds, and lap data ${launched ? 'are added as they are measured' : 'follow after launch'}
 
 ## Time Attack
 

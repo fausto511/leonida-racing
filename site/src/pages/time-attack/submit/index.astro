@@ -5,6 +5,7 @@
 // Backend contract unchanged (submit-lap v7: >= 1 evidence item, vehicle_id + lap_time_ms required).
 // COPY: Codex 21.10.2026 (Codex Zuarbeit/Texte-Submit-HowItWorks-Tracks-NewCars-2026-10-21.md), DEC-0088.
 import Base from '../../../layouts/Base.astro';
+import { isLaunched } from '../../../data/launch';
 import { vehicleOptions } from '../../../data/vehicles';
 import { PLATFORMS } from '../../../data/platforms';
 import { CLOSE_SVG } from '../../../data/site';
@@ -20,7 +21,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   title="Submit a Lap — GTA 6 Time Attack"
   description="Submit your Gellhorn International Raceway lap time with a results screenshot or a full lap video."
   section="time-attack"
-  noindex={true /* until laps can be submitted on launch day (RS-0050) */}
+  noindex={!isLaunched() /* indexed from the first build after launch (RS-0050, Fausto 18.11.) */}
   breadcrumbs={[{ name: 'Time Attack', path: 'time-attack/gellhorn-international-raceway/' }, { name: 'Submit a Lap', path: 'time-attack/submit/' }]}
 >
   <section class="sb-band lr-band-plain">

@@ -5,3 +5,8 @@
 export const LAUNCH_DATE = '2026-11-19'; // local midnight of this day
 export const LAUNCH_AT: string | null = null; // fixed instant, if ever announced
 export const LAUNCH_LABEL = 'Nov 19, 2026';
+
+/** Launch switch (RS-0128, Fausto 18.11.2026): true from LAUNCH_AT, else from 00:00 UTC of LAUNCH_DATE.
+ *  At build time the scheduled build after midnight UTC flips static pages; in the browser it flips live. */
+export const LAUNCH_MS = new Date(LAUNCH_AT ?? `${LAUNCH_DATE}T00:00:00Z`).getTime();
+export const isLaunched = () => Date.now() >= LAUNCH_MS;

@@ -4,6 +4,8 @@
 // leaderboard, "No lap yet" + "Put a time on the board", About Gellhorn with facts, three cards.
 // COPY STATUS: placeholders from the mockup until the Codex review (DEC-0088).
 import Base from '../../../layouts/Base.astro';
+import { isLaunched } from '../../../data/launch';
+const launched = isLaunched(); // Track guide card (Fausto 18.11.)
 import Leaderboard from '../../../components/Leaderboard.astro';
 import { sampleEntries, trackStats, recordWhoHtml, lapTime } from '../../../data/leaderboard';
 const base = import.meta.env.BASE_URL;
@@ -91,10 +93,10 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
         <a href={`${base}time-attack/how-it-works/#rules`} class="arrow lk">Read the rules →</a>
       </div>
       <div class="card">
-        <span class="pill"><i></i>After launch</span>
+        <span class="pill"><i></i>{launched ? 'Coming soon' : 'After launch'}</span>
         <h3>Track guide</h3>
         <p>Braking points, racing lines and common mistakes, section by section. Goes up once we have driven Gellhorn ourselves.</p>
-        <span class="arrow lk off">Coming after launch</span>
+        {!launched && <span class="arrow lk off">Coming after launch</span>}
       </div>
       <div class="card">
         <span class="pill"><i class="pink"></i>Cars</span>

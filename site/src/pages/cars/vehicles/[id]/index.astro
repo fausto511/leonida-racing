@@ -11,6 +11,7 @@ import { groupedTitles } from '../../../../data/gta-titles';
 import { speedHtml } from '../../../../data/units';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
 import { vehicleSources } from '../../../../data/vehicle-sources';
+import { isLaunched } from '../../../../data/launch';
 import { vehicleSeeAlso } from '../../../../data/vehicle-see-also';
 import { releaseById, formatReleaseDate } from '../../../../data/releases';
 import { classHref, makeHref, classSlug, vehiclesByMake } from '../../../../data/garage-taxonomy';
@@ -31,6 +32,8 @@ const sources = vehicleSources[vehicle.id] ?? [];
 // "Stats updated" (RS-0130, Fausto 16./18.11.2026): date of the newest published value. data-stats-at
 // carries the exact time for the Discord feed, which posts only once the page shows the new stats.
 const statsAt = vehicleStatsAt[vehicle.id] ?? null;
+// missing values (Fausto 18.11.): "Coming soon" before launch, "Not recorded yet" after (next build)
+const notRecorded = isLaunched() ? 'Not recorded yet' : 'Coming soon';
 const statsDate = statsAt ? new Date(statsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : null;
 const seeAlso = vehicleSeeAlso[vehicle.id];
 const cls = vehicle.classes[0];
@@ -211,12 +214,12 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <div class="vt">
             <span class="vt-l">Price</span>
             <b class:list={['vt-v tnum', { 'is-tba': price == null }]}>{price != null ? money(price) : 'TBA'}</b>
-            <span class="vt-s">{price != null ? (acq ? `${acq} · store price` : 'Store price') : 'Coming soon'}</span>
+            <span class="vt-s">{price != null ? (acq ? `${acq} · store price` : 'Store price') : notRecorded}</span>
           </div>
           <div class="vt">
             <span class="vt-l">Top speed</span>
             <b class:list={['vt-v tnum', { 'is-tba': speed == null }]}>{speed != null ? <Fragment set:html={speedHtml(speed)} /> : 'TBA'}</b>
-            <span class="vt-s">{speedRank != null ? `#${speedRank} of ${classCars.length} in ${cls}` : 'Coming soon'}</span>
+            <span class="vt-s">{speedRank != null ? `#${speedRank} of ${classCars.length} in ${cls}` : notRecorded}</span>
           </div>
           <div class="vt" id="vt-lap">
             <span class="vt-l">Gellhorn <span class="vt-opt">best </span>lap</span>
@@ -230,8 +233,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           </div>
         </div>
         <dl class="vs-rows">
-          <div><dt>Where to get</dt><dd class:list={{ 'is-tba': !vehicle.acquisition }}>{vehicle.acquisition ? acqNotes[vehicle.acquisition] : 'Coming soon'}</dd></div>
-          <div><dt>Sell value</dt><dd class:list={{ 'is-tba': vehicle.sellable !== 'no' && sell == null }}>{vehicle.sellable === 'no' ? "Can't be sold" : sell != null ? money(sell) : 'Coming soon'}</dd></div>
+          <div><dt>Where to get</dt><dd class:list={{ 'is-tba': !vehicle.acquisition }}>{vehicle.acquisition ? acqNotes[vehicle.acquisition] : notRecorded}</dd></div>
+          <div><dt>Sell value</dt><dd class:list={{ 'is-tba': vehicle.sellable !== 'no' && sell == null }}>{vehicle.sellable === 'no' ? "Can't be sold" : sell != null ? money(sell) : notRecorded}</dd></div>
           <div><dt>Drive{' · '}Seats</dt><dd>{vehicle.drive === 'n/a' && !vehicle.seats ? 'TBA' : <>{vehicle.drive}{' · '}{vehicle.seats} {vehicle.seats === 1 ? 'seat' : 'seats'}</>}</dd></div>
           <div><dt>Release</dt><dd class:list={{ 'is-tba': !release }}>{release?.date ? <>{release.name}{' · '}<time datetime={release.date}>{releaseDate}</time></> : releaseText}</dd></div>
         </dl>
