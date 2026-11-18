@@ -77,8 +77,8 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       </span>
     </span>
     <span class="st st-profile"><a href={`${base}account/`} data-login-link>Create your driver profile<span class="lr-strip-long">: your garage, your laps, your crew</span> →</a></span>
-    <span class="st st-desk"><strong>Bookmark Leonida Racing</strong><span class="lr-strip-sep" aria-hidden="true"></span><span>Press <kbd class="k-ctrl">Ctrl</kbd><kbd class="k-cmd">⌘</kbd> + <kbd>D</kbd> to save this site</span></span>
-    <span class="st st-android"><strong data-install-label>Get the Leonida app icon</strong><button type="button" class="st-add" id="st-add">Add</button></span>
+    <span class="st st-desk"><span class="lr-strip-long"><strong>Bookmark Leonida Racing</strong></span><span class="lr-strip-sep lr-strip-long" aria-hidden="true"></span><span class="lr-strip-long">Press <kbd class="k-ctrl">Ctrl</kbd><kbd class="k-cmd">⌘</kbd> + <kbd>D</kbd> to save this site</span><span class="lr-strip-short"><strong>Bookmark this site:</strong> <kbd class="k-ctrl">Ctrl</kbd><kbd class="k-cmd">⌘</kbd> + <kbd>D</kbd></span></span>
+    <span class="st st-android"><strong data-install-label>Add Leonida to your Home screen</strong><button type="button" class="st-add" id="st-add">Add</button></span>
     <span class="st st-ios"><span>Tap <span class="st-share" aria-label="Share"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0-4 4m4-4 4 4M6 11H5v10h14V11h-1"/></svg></span> then <strong>Add to Home Screen</strong></span></span>
     <button type="button" class="lr-strip-close" id="lr-strip-close" aria-label="Dismiss"><Fragment set:html={CLOSE_SVG} /></button>
   </div>
@@ -323,7 +323,7 @@ const discordIcon = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         document.getElementById('st-add')?.addEventListener('click', async () => {
           if (prompt) { prompt.prompt(); const r = await prompt.userChoice.catch(() => null); prompt = null; if (r?.outcome === 'accepted') root.classList.add('lr-strip-off'); return; }
           const label = strip.querySelector('[data-install-label]');
-          if (label) label.textContent = 'Menu ⋮ › Add to Home screen';
+          if (label) label.textContent = 'Tap ⋮, then Add to Home screen';
         });
       }
     }
