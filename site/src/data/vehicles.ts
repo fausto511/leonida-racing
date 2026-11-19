@@ -33,6 +33,12 @@ export interface VehicleOption {
   // Other names (earlier games, unconfirmed names, spellings; RS-0074, DEC-0132).
   // Search only -- never shown as the official name, which is always `model`.
   otherNames?: string[];
+  // In-game info from the vehicle menu (Tuning garage, Fausto 19.11.2026). Unset = not recorded yet.
+  // gameType is internal for now (check against classes); era/storage/nitrous are meant for the car page.
+  gameType?: string;
+  era?: string;
+  storage?: number;
+  nitrous?: boolean;
 }
 
 // RULE (Fausto, 2026-09-30): vehicleOptions lists ONLY vehicles whose GTA VI
@@ -54,11 +60,14 @@ interface GeneratedVehicle {
   first_seen_url?: string | null; first_seen_timestamp?: string | null;
   family?: string | null; previous_games?: string[] | null; sellable?: string | null;
   other_names?: string[] | null;
+  game_type?: string | null; era?: string | null; storage?: number | null; nitrous_available?: boolean | null;
   updated_at?: string | null;
 }
 // In-game stats (0-10) and ratings shown in the GTA VI vehicle menu (RS-0074, DEC-0132).
 // Prepared before launch; no values yet, so nothing displays them so far.
-export type InGameMetric = 'stat_speed' | 'stat_acceleration' | 'stat_handling_asphalt' | 'stat_handling_offroad' | 'stat_strength' | 'rating_road' | 'rating_offroad';
+export type InGameMetric = 'stat_speed' | 'stat_acceleration' | 'stat_handling_asphalt' | 'stat_handling_offroad' | 'stat_strength' | 'rating_road' | 'rating_offroad'
+  // Nitrous boost per car: the blue plus in the tuning preview, not part of the ratings (19.11.2026).
+  | 'boost_speed' | 'boost_acceleration';
 export interface VehicleValue {
   vehicle_id: string; metric: 'price_gtad' | 'sell_price_gtad' | 'top_speed_mph' | 'gellhorn_reference_lap_ms' | InGameMetric; value: number;
   /** 'stock' (default) or 'tuned' (Fausto 2026-10-08: measure stock first, tuned later). */
@@ -86,6 +95,10 @@ export const vehicleOptions: VehicleOption[] = (generated.vehicles as GeneratedV
   ...(Array.isArray(v.previous_games) ? { previousGames: v.previous_games } : {}),
   ...(v.sellable === 'yes' || v.sellable === 'no' ? { sellable: v.sellable } : {}),
   ...(v.other_names?.length ? { otherNames: v.other_names } : {}),
+  ...(v.game_type ? { gameType: v.game_type } : {}),
+  ...(v.era ? { era: v.era } : {}),
+  ...(v.storage != null ? { storage: v.storage } : {}),
+  ...(v.nitrous_available != null ? { nitrous: v.nitrous_available } : {}),
 }));
 
 /** Model name for tight spots (tiles, chips): adds the make when another car shares the model name,

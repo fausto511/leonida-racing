@@ -62,6 +62,11 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
             <fieldset class="vx-classes"><legend>GTA class(es) *</legend><div id="vx-class-boxes"></div></fieldset>
             <label>Seats<input name="seats" type="number" min="1" max="16" step="1" /></label>
             <label>Drive<select name="drive"><option value="">Unknown (n/a)</option><option>RWD</option><option>FWD</option><option>AWD</option></select></label>
+            <h3 class="vx-grp">In-game info</h3>
+            <label>Type (in game)<input name="game_type" maxlength="40" placeholder="e.g. Muscle" /><small>Exactly as shown in the game. Internal for now: used to check our classes.</small></label>
+            <label>Era<input name="era" maxlength="40" placeholder="e.g. 1970s Antique" /><small>Exactly as shown in the game.</small></label>
+            <label>Storage<input name="storage" type="number" min="0" max="50" step="1" /><small>Storage slots shown in the game.</small></label>
+            <label>Nitrous available<select name="nitrous_available"><option value="">Unknown</option><option value="yes">Yes</option><option value="no">No</option></select><small>Nitrous Boost offered in the tuning garage.</small></label>
             <label>Model family<input name="family" list="vx-families" maxlength="40" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. dominator" /><datalist id="vx-families"></datalist><small>Same slug for all models of a family. From 5 models the family gets its own page.</small></label>
             <h3 class="vx-grp">Availability</h3>
             <label>Added with (release)<select name="release_id" id="vx-release"></select><small>Empty = not officially announced (page shows "TBA" and is not indexed).</small></label>
@@ -84,7 +89,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
           <p class="vx-hint">Price, sell value, top speed, the Gellhorn reference lap and the in-game stats (0–10) and ratings from the vehicle menu. Measure stock first; tuned (= fully tuned) values are kept separately. Each value keeps where it came from. Adding a new value makes the previous one (same value and tuning) "superseded".</p>
           <div id="vx-value-list"></div>
           <form id="vx-value-form" class="vx-fields vx-value-form">
-            <label>Value *<select name="metric" id="vx-metric"><option value="price_gtad">Price (GTA$)</option><option value="sell_price_gtad">Sell value (GTA$)</option><option value="top_speed_mph">Top speed (mph)</option><option value="gellhorn_reference_lap_ms">Gellhorn reference lap (m:ss.mmm)</option><optgroup label="In-game stats (0–10)"><option value="stat_speed">Speed</option><option value="stat_acceleration">Acceleration</option><option value="stat_handling_asphalt">Asphalt handling</option><option value="stat_handling_offroad">Off-road handling</option><option value="stat_strength">Strength</option></optgroup><optgroup label="In-game ratings"><option value="rating_road">Road rating</option><option value="rating_offroad">Off-road rating</option></optgroup></select></label>
+            <label>Value *<select name="metric" id="vx-metric"><option value="price_gtad">Price (GTA$)</option><option value="sell_price_gtad">Sell value (GTA$)</option><option value="top_speed_mph">Top speed (mph)</option><option value="gellhorn_reference_lap_ms">Gellhorn reference lap (m:ss.mmm)</option><optgroup label="In-game stats (0–10)"><option value="stat_speed">Speed</option><option value="stat_acceleration">Acceleration</option><option value="stat_handling_asphalt">Asphalt handling</option><option value="stat_handling_offroad">Off-road handling</option><option value="stat_strength">Strength</option></optgroup><optgroup label="In-game ratings"><option value="rating_road">Road rating</option><option value="rating_offroad">Off-road rating</option></optgroup><optgroup label="Nitrous boost (blue plus in the preview)"><option value="boost_speed">Boost: speed</option><option value="boost_acceleration">Boost: acceleration</option></optgroup></select></label>
             <label>Amount *<input name="value" id="vx-value" required placeholder="e.g. 1250000" /></label>
             <label>Tuning *<select name="tuning"><option value="stock">Stock (no upgrades)</option><option value="tuned">Fully tuned</option></select><small>Prices and sell values: always stock.</small></label>
             <label>Source *<select name="source_type"><option value="in_game">In-game (shown in the game)</option><option value="controlled_test">Measured (controlled test)</option><option value="rockstar">Rockstar (official)</option><option value="community">Community</option><option value="derived">Calculated</option></select></label>
@@ -169,7 +174,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
   const CLASSES = ['Super', 'Sports', 'Sports Classics', 'Muscle', 'Coupes', 'Sedans', 'Compacts', 'SUVs', 'Off-Road', 'Vans', 'Utility', 'Motorcycles', 'Cycles', 'Open Wheel', 'Industrial', 'Commercial', 'Service', 'Emergency', 'Military'];
   const METRIC: Record<string, string> = { price_gtad: 'Price', sell_price_gtad: 'Sell value', top_speed_mph: 'Top speed', gellhorn_reference_lap_ms: 'Gellhorn ref. lap',
     stat_speed: 'Speed (stat)', stat_acceleration: 'Acceleration (stat)', stat_handling_asphalt: 'Asphalt handling (stat)', stat_handling_offroad: 'Off-road handling (stat)', stat_strength: 'Strength (stat)',
-    rating_road: 'Road rating', rating_offroad: 'Off-road rating' };
+    rating_road: 'Road rating', rating_offroad: 'Off-road rating', boost_speed: 'Nitrous boost: speed', boost_acceleration: 'Nitrous boost: acceleration' };
   const SOURCE: Record<string, string> = { in_game: 'In-game', controlled_test: 'Measured', rockstar: 'Rockstar', community: 'Community', derived: 'Calculated' };
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const form = $<HTMLFormElement>('vx-form');
@@ -198,6 +203,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
     if (metric === 'price_gtad' || metric === 'sell_price_gtad') return `GTA$ ${Math.round(v).toLocaleString('en-US')}`;
     if (metric === 'top_speed_mph') return `${Number(v).toFixed(1)} mph`;
     if (metric.startsWith('stat_')) return Number(v).toFixed(1);
+    if (metric.startsWith('boost_')) return `+${Number(v).toFixed(1)}`;
     if (metric.startsWith('rating_')) return String(Math.round(Number(v)));
     const ms = Math.round(v); return `${Math.floor(ms / 60000)}:${((ms % 60000) / 1000).toFixed(3).padStart(6, '0')}`;
   };
@@ -208,7 +214,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
       return Number(m[1]) * 60000 + Number(m[2]) * 1000 + Number(m[3].padEnd(3, '0'));
     }
     const n = Number(raw); if (!Number.isFinite(n)) return null;
-    if (metric.startsWith('stat_')) return n >= 0 && n <= 10 ? n : null;
+    if (metric.startsWith('stat_') || metric.startsWith('boost_')) return n >= 0 && n <= 10 ? n : null;
     if (metric.startsWith('rating_')) return n >= 0 ? n : null;
     return n > 0 ? n : null;
   }
@@ -245,6 +251,8 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
     el.other_names.value = (v?.other_names ?? []).join('; ');
     el.manufacturer_logo_slug.value = v?.manufacturer_logo_slug ?? '';
     el.seats.value = v?.seats ?? ''; el.drive.value = v?.drive ?? '';
+    el.game_type.value = v?.game_type ?? ''; el.era.value = v?.era ?? ''; el.storage.value = v?.storage ?? '';
+    el.nitrous_available.value = v?.nitrous_available == null ? '' : v.nitrous_available ? 'yes' : 'no';
     el.acquisition.value = v?.acquisition ?? ''; el.release_id.value = v?.release_id ?? '';
     el.first_seen_in.value = v?.first_seen_in ?? ''; el.real_life_inspiration.value = v?.real_life_inspiration ?? '';
     el.has_photo.checked = Boolean(v?.has_photo);
@@ -268,7 +276,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
   async function loadVehicles() {
     const sb = getSupabase();
     const [vr, rr] = await Promise.all([
-      sb.from('vehicles').select('vehicle_id, make, model, manufacturer_logo_slug, classes, seats, drive, acquisition, has_photo, release_id, first_seen_in, real_life_inspiration, family, previous_games, sellable, other_names, updated_at').order('make').order('model'),
+      sb.from('vehicles').select('vehicle_id, make, model, manufacturer_logo_slug, classes, seats, drive, acquisition, has_photo, release_id, first_seen_in, real_life_inspiration, family, previous_games, sellable, other_names, game_type, era, storage, nitrous_available, updated_at').order('make').order('model'),
       sb.from('game_releases').select('release_id, name, release_date').order('sort_order'),
     ]);
     if (vr.error || rr.error) { msg(`Could not load: ${(vr.error ?? rr.error)!.message}`, 'error'); return; }
@@ -312,6 +320,9 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
     const row: any = {
       make: el.make.value.trim(), model: el.model.value.trim(), manufacturer_logo_slug: el.manufacturer_logo_slug.value,
       classes, seats: el.seats.value ? Number(el.seats.value) : null, drive: el.drive.value || null,
+      game_type: el.game_type.value.trim() || null, era: el.era.value.trim() || null,
+      storage: el.storage.value === '' ? null : Number(el.storage.value),
+      nitrous_available: el.nitrous_available.value === '' ? null : el.nitrous_available.value === 'yes',
       acquisition: el.acquisition.value || null, release_id: el.release_id.value || null,
       first_seen_in: el.first_seen_in.value.trim() || null, real_life_inspiration: el.real_life_inspiration.value.trim() || null,
       has_photo: el.has_photo.checked,
@@ -341,7 +352,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
     e.preventDefault();
     const el = valueForm.elements as any;
     const value = parseValue(el.metric.value, el.value.value);
-    if (value == null) { const mt = el.metric.value; msg(mt === 'gellhorn_reference_lap_ms' ? 'Lap time format: m:ss.mmm (e.g. 1:24.642).' : mt.startsWith('stat_') ? 'Stats: a number from 0 to 10 (e.g. 7.4).' : mt.startsWith('rating_') ? 'Ratings: a number from 0 (e.g. 784).' : 'Enter a positive number.', 'error'); return; }
+    if (value == null) { const mt = el.metric.value; msg(mt === 'gellhorn_reference_lap_ms' ? 'Lap time format: m:ss.mmm (e.g. 1:24.642).' : mt.startsWith('stat_') || mt.startsWith('boost_') ? 'Stats and boost: a number from 0 to 10 (e.g. 0.3).' : mt.startsWith('rating_') ? 'Ratings: a number from 0 (e.g. 784).' : 'Enter a positive number.', 'error'); return; }
     const { error } = await getSupabase().from('vehicle_values').insert({
       vehicle_id: selected.vehicle_id, metric: el.metric.value, tuning: el.metric.value.includes('price') ? 'stock' : el.tuning.value, value, source_type: el.source_type.value,
       method: el.method.value.trim() || null, game_release_id: el.game_release_id.value || null, platform: el.platform.value || null,
@@ -355,7 +366,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
 
   $('vx-metric').addEventListener('change', () => {
     const m = ($('vx-metric') as HTMLSelectElement).value;
-    ($('vx-value') as HTMLInputElement).placeholder = m.includes('price') ? 'e.g. 1250000' : m === 'top_speed_mph' ? 'e.g. 124.5' : m.startsWith('stat_') ? 'e.g. 7.4' : m.startsWith('rating_') ? 'e.g. 784' : 'e.g. 1:24.642';
+    ($('vx-value') as HTMLInputElement).placeholder = m.includes('price') ? 'e.g. 1250000' : m === 'top_speed_mph' ? 'e.g. 124.5' : m.startsWith('stat_') ? 'e.g. 7.4' : m.startsWith('boost_') ? 'e.g. 0.3' : m.startsWith('rating_') ? 'e.g. 784' : 'e.g. 1:24.642';
   });
   $('vx-value-list').addEventListener('click', async (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-reject]'); if (!b) return;

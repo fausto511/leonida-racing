@@ -48,6 +48,9 @@ Vor Beginn der Historie (Einrichtung September 2026):
 - 20261019220000_cleanup_cron_log_weekly.sql (Fausto 19.10. im SQL-Editor; Cron-Job `cleanup-cron-log-weekly` am 07.11. live geprüft)
 - 20261021090000_account_delete_restrictions_kick_cleanup.sql (Fausto 21.10. im SQL-Editor; Cron-Job `cleanup-event-kicks-daily` und neue Zeilen in `anonymize_driver_account` am 07.11. live geprüft)
 
+Über den SQL-Editor eingespielt (November 2026):
+- 20261119074700_vehicle_game_info_nitrous.sql (Fausto 19.11. ~07:47 UTC im SQL-Editor, weil die Supabase-Bestätigung bei ihm nicht erscheint; Spalten `vehicles.storage/era/game_type/nitrous_available` und Kennzahlen `boost_speed/boost_acceleration` am 19.11. live geprüft)
+
 Achtung: `supabase db push` mit der Supabase-CLI würde diese Dateien für
 „ausstehend“ halten und erneut ausführen wollen. Die CLI wird für dieses
 Projekt nicht zum Einspielen benutzt. Falls doch einmal nötig: vorher
