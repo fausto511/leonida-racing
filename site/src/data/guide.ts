@@ -11,24 +11,26 @@ import { vehicleOptions } from './vehicles';
 // Internal links FROM the Guide: Claude decides (Fausto, 2026-10-03, DEC-0095).
 // Links TO the Guide on other pages: Codex proposes, Fausto approves.
 // Redesign 18.10.2026: "The Garage" -> "Cars", "The Hub" -> "Community" in links/copy (Claude placeholders, Codex review, DEC-0088).
+// Launch update 20.11.2026: Codex copy (Codex Zuarbeit/Guide-Launch-Update-Nachbesserung-2026-11-19.md) with Fausto's choices;
+// GranForma/Emperor/Piccia sentences + FAQ = Claude placeholders (Codex review pending, DEC-0088).
 // Never add leak information here. Visible text: "GTA VI"; meta: "GTA 6".
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
 // Bump on EVERY content change to the Guide (visible as "Last updated" + Article dateModified) — Fausto 27.10.2026.
-export const GUIDE_UPDATED = '2026-11-13';
+export const GUIDE_UPDATED = '2026-11-20';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
 /** Source card parts: label = "Publisher — Title". Origin pill derived from the publisher (Claude, 18.10.2026, DEC-0140):
  *  Rockstar's own channels = official, fan sites/databases = community, everything else = press. */
-export type SourceKind = 'official' | 'press' | 'community';
+export type SourceKind = 'official' | 'press' | 'community' | 'tested';
 const OFFICIAL = ['Rockstar Games', 'Rockstar Newswire', 'Rockstar Support'];
-const COMMUNITY = ['GTABase', 'RockstarINTEL', 'TGG'];
+const COMMUNITY = ['GTABase', 'RockstarINTEL', 'TGG', 'PowerPyx'];
 export function sourceParts(src: GuideSource): { publisher: string; title: string; kind: SourceKind } {
   const i = src.label.indexOf(' — ');
   const publisher = i > 0 ? src.label.slice(0, i) : src.label;
   const title = i > 0 ? src.label.slice(i + 3) : src.label;
-  const kind: SourceKind = OFFICIAL.includes(publisher) ? 'official' : COMMUNITY.includes(publisher) ? 'community' : 'press';
+  const kind: SourceKind = publisher === 'Leonida Racing' ? 'tested' : OFFICIAL.includes(publisher) ? 'official' : COMMUNITY.includes(publisher) ? 'community' : 'press';
   return { publisher, title, kind };
 }
 /** Status pill colour per evidence level (DEC-0140): Rockstar-sourced = lime, identification/report = orange, open = grey. */
@@ -141,10 +143,9 @@ export const guideSections: GuideSection[] = [
     title: 'Vehicles in GTA VI',
     status: 'Shown by Rockstar',
     paragraphs: [
-      `GTA VI brings back familiar in-game manufacturers and models while adding vehicles created specifically for Leonida.${RETURNING_SENTENCE} Rockstar has named only part of the lineup, while many vehicles shown in official trailers and screenshots are identified by their design and badges. Those are community identifications, not Rockstar-confirmed names. Our <a href="{base}cars/">Cars section</a> focuses on racing-relevant cars and is not a complete list of every vehicle shown for GTA VI.`,
+      `GTA VI brings back familiar in-game manufacturers and models while adding vehicles created specifically for Leonida.${RETURNING_SENTENCE} In-game names replace earlier visual identifications once we have checked the car. Some familiar models return under new names: the car known as the Buffalo STX in GTA Online appears as the ’19 Buffalo in GTA VI. Our <a href="{base}cars/">Cars section</a> focuses on racing-relevant cars and is not a complete list of every vehicle shown for GTA VI.`,
       `Official footage also shows motorcycles, watercraft, and aircraft, but this guide focuses on cars and racing. A car appearing on screen does not by itself establish how it can be owned, stored, or customized.`,
       `Open Cars for individual models, <a href="{base}cars/classes/">GTA classes</a>, <a href="{base}cars/manufacturers/">manufacturers</a>, first appearances, release information, and real-life inspirations. Compare recorded prices and tested performance where results are available; individual car pages keep the source and tuning category beside the data.`,
-      `Rockstar released the Launch Trailer on October 15, 2026. It joins the official footage used to document vehicles, while model identifications remain separate from Rockstar-confirmed names.`,
     ],
     cta: { label: 'Explore Cars', href: 'cars/' },
     sources: [
@@ -153,7 +154,8 @@ export const guideSections: GuideSection[] = [
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: 'official screenshot titles, including named Ultimate Edition vehicles.' },
       { label: 'Rockstar Support — GTA VI Platforms, Editions, and Versions', url: R_SUPPORT, note: 'named edition vehicles and content.' },
       // Fausto 15.10.2026: source of the vehicle count on the home Guide card. Note: Codex 18.10. (Racing-Fahrzeug-News-2026-10-18.md), Fausto: show 311 with GTABase.
-      { label: 'GTABase — GTA 6 Cars & Vehicles List', url: 'https://www.gtabase.com/gta-6/vehicles/', note: 'Community database listing 311 entries across all vehicle types; entries do not all have the same evidence basis. Checked October 18, 2026.' },
+      { label: 'GTABase — GTA 6 Cars & Vehicles List', url: 'https://www.gtabase.com/gta-6/vehicles/', note: 'Community database listing 329 entries across all vehicle types; entries do not all have the same evidence basis. Checked November 19, 2026.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: the car previously known as the Buffalo STX appears as ’19 Buffalo in the game. Leonida Racing lists year-designated models with the year after the model name.' },
     ],
   },
   {
@@ -165,7 +167,8 @@ export const guideSections: GuideSection[] = [
       `A familiar shape does not always come with a familiar badge. GTA VI is changing the branding on some returning cars, so the manufacturer you remember from GTA Online may no longer be the one on the bodywork.`,
       `The <a href="{base}cars/vehicles/buckingham-jubilee/">Jubilee</a> is a clear example. Known as the Enus Jubilee in GTA Online, the Rolls-Royce Cullinan-inspired SUV now wears <a href="{base}cars/manufacturers/buckingham/">Buckingham</a> branding in GTA VI’s Extended Look: on the front fender at around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1186s" rel="noopener">19:46</a> and on the tailgate at around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1207s" rel="noopener">20:07</a>. That brings a familiar luxury SUV under a marque previously known for aircraft and the Tug boat. The car returns; its place in GTA’s fictional industry changes.`,
       `The Windsor family is likely to follow. At around <a href="https://www.youtube.com/watch?v=rz1B4B2yBZY&amp;t=48s" rel="noopener">0:48</a> in the Launch Trailer, the Rolls-Royce Dawn-inspired <a href="{base}cars/vehicles/buckingham-windsor-drop/">Windsor Drop</a> carries a tall, rectangular badge on the front fender. That shape points to Buckingham rather than the oval Enus badge, although the emblem itself cannot be read clearly.`,
-      `A familiar exotic with unfamiliar lettering tells another part of the story. The <a href="{base}cars/vehicles/granforma-zorrusso/">Zorrusso</a>-associated car in the Rockstar images published with Bloomberg’s October 14 feature carries <strong>GranForma</strong> lettering on the rear, replacing the familiar Pegassi branding. Its real-world inspiration is the Italdesign Zerouno. Whether GranForma denotes the manufacturer, a customizer or a particular version remains unresolved.`,
+      `A familiar exotic with unfamiliar lettering tells another part of the story. The <a href="{base}cars/vehicles/granforma-zorrusso/">Zorrusso</a>-associated car in the Rockstar images published with Bloomberg’s October 14 feature carries <strong>GranForma</strong> lettering on the rear, replacing the familiar Pegassi branding. Its real-world inspiration is the Italdesign Zerouno. In the game, the Zorrusso is now sold as a GranForma.`,
+      `It is not the only one. In GTA VI, the Sultan wears <a href="{base}cars/vehicles/emperor-sultan/">Emperor</a> badges and the Furia is a <a href="{base}cars/vehicles/piccia-furia/">Piccia</a>.`,
       `The pattern suggests that Rockstar may be bringing some fictional marques into closer alignment with their real-world inspirations. It is a change worth following if you know the older cars—or organize your garage by manufacturer. Rockstar has not announced a rule for the full lineup, and a changed badge on one car does not mean every model under its old marque is moving with it.`,
     ],
     sources: [
@@ -174,6 +177,7 @@ export const guideSections: GuideSection[] = [
       { label: 'Rockstar Games — GTA VI: An Extended Look', url: `${EXT_LOOK}&t=1186s`, note: 'August 27, 2026: Buckingham badge on the Jubilee’s front fender at approximately 19:46 and on the tailgate at approximately 20:07.' },
       { label: 'GTABase — Jubilee in GTA VI', url: 'https://www.gtabase.com/gta-6/vehicles/jubilee', note: 'Community identification of the Buckingham Jubilee.' },
       { label: 'GTABase — Jubilee in GTA Online', url: 'https://www.gtabase.com/grand-theft-auto-v/vehicles/enus-jubilee', note: 'The model’s earlier Enus identity.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: in-game names show the Zorrusso as a GranForma, the Sultan as an Emperor, and the Furia as a Piccia.' },
       { label: 'Rockstar Games — GTA VI Launch Trailer', url: `${LAUNCH}&t=48s`, note: 'October 15, 2026: Windsor Drop with a tall, rectangular fender badge at approximately 0:48.' },
     ],
   },
@@ -184,7 +188,7 @@ export const guideSections: GuideSection[] = [
     status: 'Rockstar Interview',
     paragraphs: [
       `GTA VI’s driving model was rebuilt for the current hardware. Rockstar North co-studio head Rob Nelson says drivetrain, tires, suspension, and steering all feed into the vehicle physics, with the team aiming to combine the weight and feel associated with GTA IV with the accessibility of GTA V.`,
-      `Rockstar has also assembled a vehicle-handling team that includes real race-car drivers. That signals serious attention to how vehicles behave, but it is not proof that GTA VI is a full driving simulation. Exact grip levels, drivetrain advantages, damage behavior, and the fastest cars still need to be tested in the released game.`,
+      `Rockstar has also assembled a vehicle-handling team that includes real race-car drivers. Our Gellhorn laps compare how cars perform around the circuit, including braking, cornering, and acceleration.`,
       `Narrower streets and dense traffic put more demands on your driving, according to Nelson. You can also switch between Jason and Lucia while the other character takes the wheel. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1120s" rel="noopener">18:40</a> in the Extended Look, the player switches from Jason at the wheel to Lucia, who shoots at the pursuing cars while Jason keeps driving. Nelson describes moments where taking out a pursuing car’s tires blocks the cars following it.`,
       `IGN’s demo also includes a ride with <strong>Ryde Me</strong>, the game’s ride-hailing service. Nelson describes it as a way to fast travel, with the option to ride along and chat.`,
       `Small details matter when you’re just out for a drive, too. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=506s" rel="noopener">8:26</a> in the Extended Look, the <a href="{base}cars/vehicles/ubermacht-sentinel-classic-cabrio/">Sentinel Classic Cabrio</a> drives with a working turn signal. The footage does not show whether you operate the indicators yourself or the game handles them.`,
@@ -197,6 +201,20 @@ export const guideSections: GuideSection[] = [
     ],
   },
   {
+    id: 'stats',
+    title: 'Vehicle Stats and Ratings',
+    status: 'Tested in the game',
+    paragraphs: [
+      `The vehicle stat panel shows five values on a 0–10 scale: <strong>Speed</strong>, <strong>Acceleration</strong>, <strong>Asphalt Handling</strong>, <strong>Off-Road Handling</strong>, and <strong>Strength</strong>. It also shows separate road and off-road ratings. Asphalt and off-road handling describe different strengths, so a lifted 4x4 and a lowered sports car can both look strong for different jobs.`,
+      `A small mark on each bar shows the car’s stock value, so you can see what upgrades have changed. You can also open the panel from the vehicle menu while driving. When you change parts, compare the road and off-road ratings directly.`,
+      `The <a href="{base}cars/vehicles/dinka-chavos-xs/">Dinka Chavos XS</a> shows how much a race build can change a car. Stock, it has 5.2 Speed, 5.7 Acceleration, 3.9 Asphalt Handling, and a road rating of 497. The race-prepared rental at Gellhorn has 7.7 Speed, 7.9 Acceleration, 6.7 Asphalt Handling, and a road rating of 743. Its Off-Road Handling drops from 4.2 to 1.6.`,
+      `At Gellhorn’s <strong>Keep It PG</strong> event, your car needs a road rating between 500 and 780. If yours falls outside that range, you can rent a race-prepared car at the track. Our <a href="{base}cars/">car pages</a> show the stats and ratings of the stock car as we read them in the game.`,
+    ],
+    sources: [
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: vehicle stat panels checked on Jason’s ’70 Ganado, the Cypher, the Buffalo ’19, and the Chavos XS. Stock-value marks confirmed on stock cars. Stock Chavos XS compared with the race-prepared Gellhorn rental; Keep It PG entry range checked in the event menu.' },
+    ],
+  },
+  {
     id: 'theft',
     images: [IMG.slimJim],
     title: 'Stealing, Scanning, Selling, and Registering Cars',
@@ -205,7 +223,7 @@ export const guideSections: GuideSection[] = [
       `Stealing a parked car in GTA VI is no longer described as the same one-button job for every vehicle. Nelson says some cars remain inaccessible early in the story until Jason or Lucia obtains the right tools. Drivers can still be carjacked, but unattended vehicles may demand a quieter or more technical approach.`,
       `Check the car before you commit. Nelson describes a <strong>phone scanner</strong> that shows whether a vehicle is locked, has an alarm, or carries a tracker. It also shows what the car is worth at a Pay ’n’ Spray or specialty car fence and how much it would cost to register it for yourself. A Slim Jim works for one car; another needs a key cloner.`,
       `Edge identifies <strong>WAINK</strong> as the app listing cars wanted by fences, including their security and tracking details. The fence usually has equipment to block a tracker’s signal at the drop-off.`,
-      `Stolen cars can be sold or registered as personal vehicles. Nelson told Famitsu that an unregistered stolen vehicle remains available for a while, appears with a gray radar icon, and disappears when the game is restarted. Registration makes the vehicle yours, while the complete list of eligible vehicles and the later-game ownership limit remain unannounced.`,
+      `Stolen cars can be sold or registered as personal vehicles. Scan a car before you take it: the scan shows whether it can be registered and what that costs. Nelson told Famitsu that unregistered stolen cars disappear when the game restarts.`,
       `An <strong>advanced tracker</strong> can turn a slow getaway into a police alert: Nelson says it pings your location when you drive too slowly. Condition matters at delivery, too. A car fence pays less for damage, and you can repair the car before selling it.`,
       `The driver can be a problem before you even reach the ignition. Edge describes motorists who flee and others who fight back with a weapon. An owner can also report a theft after you have driven away.`,
       `A car fence can also point you toward a specific job. In the demo, one has supplied a door code for a <strong>police impound lot</strong>, where Jason and Lucia can steal the requested car together or alone. This is a theft job, not an explanation of how to recover your own impounded vehicle. Nelson also says there are points in the story where earning money through activities such as stealing and selling cars is needed to advance the mission flow.`,
@@ -214,6 +232,7 @@ export const guideSections: GuideSection[] = [
       { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration.' },
       { label: 'Famitsu — Exclusive Interview with Rob Nelson', url: FAMITSU, note: 'August 28, 2026: vehicle registration, three initial storage spaces, purchasable garages, and the persistence rules for unregistered stolen vehicles.' },
       { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: WAINK, car security, trackers, and delivery condition. Checked October 30, 2026.' },
+      { label: 'PC Gamer — GTA 6: How stealing cars has changed', url: 'https://www.pcgamer.com/games/grand-theft-auto/gta-6-how-to-steal-cars/', note: 'November 18, 2026: vehicle scanning and registration in the released game. Checked November 19, 2026.' },
       { label: 'Vice City Hustle — GTA 6 Edge: K9 Units, Scooter Bros, Cash Gates', url: VCH_EDGE, note: 'October 29, 2026: secondary Edge coverage of WAINK, personal-vehicle delivery, and fuel. Not a separate demonstration. Checked October 30, 2026.' },
     ],
   },
@@ -241,7 +260,7 @@ export const guideSections: GuideSection[] = [
     title: 'Vehicle Ownership, Garages, and Safehouse Vehicles',
     status: 'Rockstar Interview',
     paragraphs: [
-      `GTA VI has personal vehicles and expandable garage storage. Nelson told Famitsu that players begin with room for three vehicles. If all three spaces are occupied, one vehicle must be sold before another can be registered as personal. Buying garages around the map expands that capacity. Rockstar has not announced the later-game ownership limit, whether individual properties have different capacities, or how freely vehicles can be moved between garages.`,
+      `GTA VI has personal vehicles and expandable garage storage. Nelson told Famitsu that players begin with room for three vehicles. If all three spaces are occupied, one vehicle must be sold before another can be registered as personal. Buying garages around the map expands that capacity. You buy garages through the <strong>Vice City Real Estate</strong> app on your phone.`,
       `Rockstar’s Ultimate Edition includes Jason’s Safehouse Vehicles and the Ganado Retro Build. It also includes the <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a> with a garage, while the Vintage Vice City Pack includes the <a href="{base}cars/vehicles/vapid-stanier-55/">’55 Vapid Stanier Sedan</a> with a garage.`,
       `The accompanying Rockstar press material identifies those locations as Paradise Garage in Watson Bay and Shore Court Garage near Ocean Beach. They are personal garages, not confirmed tuning shops.`,
       `Your personal vehicle also acts as a mobile stash for spare outfits and purchased weapons. Edge names the delivery service <strong>Scooter Bros</strong>: pay through the phone app, and a driver brings your car in seconds before leaving on a scooter. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1069s" rel="noopener">17:49</a> in the Extended Look, Lucia changes her outfit while sitting in the car with Jason.`,
@@ -249,6 +268,8 @@ export const guideSections: GuideSection[] = [
     sources: [
       { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration.' },
       { label: 'Famitsu — Exclusive Interview with Rob Nelson', url: FAMITSU, note: 'August 28, 2026: three initial vehicle spaces, the replacement rule when storage is full, and purchasable garages that expand ownership capacity.' },
+      { label: 'PowerPyx — GTA 6 All Garage Locations', url: 'https://www.powerpyx.com/gta-6-all-garage-locations/', note: 'November 18, 2026: garages bought through the Vice City Real Estate phone app. Checked November 19, 2026.' },
+      { label: 'GTABase — GTA 6 Properties & Garages', url: 'https://www.gtabase.com/gta-6/properties/', note: 'Garage purchases through Vice City Real Estate. Checked November 19, 2026.' },
       { label: 'Rockstar Games — GTA VI Editions', url: R_EDITIONS, note: 'Jason’s Safehouse Vehicles, Ganado Retro Build, and the named vehicle bonuses.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: '“Jason’s Safehouse Vehicles,” “Ganado Retro Build,” and “’67 Vapid Dominator Buggy.”' },
       { label: 'Rockstar Support — GTA VI Platforms, Editions, and Versions', url: R_SUPPORT, note: 'edition and pre-order package contents.' },
@@ -260,13 +281,15 @@ export const guideSections: GuideSection[] = [
   {
     id: 'fuel',
     title: 'Fuel, EV Charging, and Gas-Station Repairs',
-    status: 'Reported from a Rockstar Demo',
+    status: 'Tested in the game',
     paragraphs: [
       `Edge reports a fuel gauge and engine-health readout for every vehicle. Refueling is described as quick, with cars covering long distances between stops.`,
-      `<strong>GamesRadar</strong> reports TGG’s account of a Rockstar North preview: a gas-station interaction offered refueling or vehicle repair, with the fill-up estimated at around ten seconds. That timing is the previewer’s estimate, not a fixed specification for every car.`,
-      `<strong>PC Gamer</strong> also reports EV charging in the same preview account. Charging and gas-station repairs are reported demo features, not a published rulebook for fuel consumption, charging speed, prices, or race conditions. Whether the systems can be disabled or apply differently across missions and racing remains unresolved.`,
+      `Fuel is part of every drive: when the tank runs low, you refuel at a gas station. PC Gamer reports that electric vehicles use charging points instead and that fuel lasts long enough that stops are infrequent.`,
+      `In TGG’s Rockstar North preview, the gas-station menu also offered vehicle repair.`,
     ],
     sources: [
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: refueling at a gas station in story mode.' },
+      { label: 'PC Gamer — Refueling cars in GTA 6 is barely necessary', url: 'https://www.pcgamer.com/games/grand-theft-auto/gta-6-refuel-repair-cars/', note: 'November 19, 2026: gas-station refueling, EV charging, and how often you need to stop. Checked November 19, 2026.' },
       { label: 'TGG — GTA 6: Vehicles Work Differently Now', url: 'https://www.youtube.com/watch?v=5PEKC28azRU&t=558s', note: 'Original creator report; chapter “Fuel & EV Charging” starts at 9:18.' },
       { label: 'GamesRadar — Rockstar boss on GTA 6’s refueling system', url: 'https://www.gamesradar.com/games/grand-theft-auto/rockstar-boss-says-well-see-what-people-say-about-gta-6s-controversial-refueling-system-but-thinks-its-so-fast-that-you-cant-complain/', note: 'September 3, 2026: explicitly attributes the refuel/repair interaction and approximate timing to TGG’s preview account.' },
       { label: 'PC Gamer — GTA 6’s reported refuelling action', url: 'https://www.pcgamer.com/games/grand-theft-auto/grand-theft-auto-6s-controversial-refuelling-action-reportedly-takes-about-10-seconds-to-perform-which-rockstars-co-studio-head-says-is-pretty-fast-for-a-fill-up/', note: 'September 5, 2026: reports charging and refueling via TGG/GamesRadar; the same report chain, not another independent demo.' },
@@ -277,14 +300,17 @@ export const guideSections: GuideSection[] = [
   {
     id: 'customization',
     images: [IMG.rideout, IMG.willies],
-    title: 'Car Customization and Mod Shops',
-    status: 'Confirmed by Rockstar',
+    title: 'Car Customization, Tuning, and Mod Shops',
+    status: 'Tested in the game',
     paragraphs: [
-      `Vehicle customization is confirmed for GTA VI. Rockstar has named two specialist shops included with the Ultimate Edition: <strong>Rideout Customs Mod Shop</strong> in Vice City and <strong>One-Eyed Willie’s Mod Shop</strong> in Lake Leonida.`,
+      `Mod shops across Leonida have different specialties. <strong>Coastal Auto Care</strong>, for example, offers retro builds. <strong>Rideout Customs</strong> in Vice City and <strong>One-Eyed Willie’s</strong> in Lake Leonida are exclusive to the Ultimate Edition.`,
       `Rockstar’s accompanying descriptions give the shops different identities. Rideout Customs focuses on detailed interiors, wheels, and donk builds. One-Eyed Willie’s specializes in off-road modifications and hand-painted vehicle designs. The same material describes the wider selection as both artistic and performance-oriented.`,
-      `Official screenshots support those descriptions with custom upholstery, steering wheels, oversized street wheels, lifted off-road builds, protective hardware, and painted graphics. They show what finished vehicles can look like; they do not reveal a complete parts menu. Engine stages, transmissions, brakes, suspension options, compatibility, and prices remain unannounced.`,
+      `At <strong>Coastal Auto Care</strong>, the menu for <a href="{base}cars/vehicles/vapid-ganado-70/">Jason’s ’70 Ganado</a> has six tabs: <strong>Pro Builds</strong>, <strong>Cosmetics</strong>, <strong>Bodywork</strong>, <strong>Performance</strong>, <strong>Wheels</strong>, and <strong>Interior</strong>. Pro Builds offers complete build packages and wheel kits. On the Ganado, lowering the suspension improves asphalt handling at the expense of off-road handling; raising it does the reverse.`,
+      `Its Performance menu lists the <strong>engine</strong>, <strong>intakes</strong>, <strong>transmission</strong>, and <strong>boost</strong>, which is nitrous. Engine and transmission upgrades come in stages. We found no separate brake or turbo upgrade there. Some parts require a bank account before you can buy them; nitrous was listed at $5,000 for the Ganado.`,
+      `Don’t judge a part by its name. On the Ganado, most intakes and exhausts left the displayed stats unchanged, while a custom wing traded a little speed for asphalt handling. The preview highlights gains in green and losses in red before you buy.`,
     ],
     sources: [
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: Jason’s ’70 Ganado with the Retro Build – Ultimate Edition at Coastal Auto Care. Menu tabs, build and wheel kits, staged upgrades, nitrous, part previews, bank-account requirements, and the $5,000 nitrous listing checked on this car.' },
       { label: 'Rockstar Games — GTA VI Editions', url: R_EDITIONS, note: 'names and Ultimate Edition inclusion.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: '“Rideout Customs Mod Shop 01–03” and “One-Eyed Willie’s Mod Shop 01–03.”' },
       { label: 'TheSixthAxis — GTA VI Ultimate Edition details', url: TSA, note: 'Rockstar press descriptions of the shops and their specialties.' },
@@ -298,10 +324,11 @@ export const guideSections: GuideSection[] = [
     status: 'Confirmed by Rockstar',
     paragraphs: [
       `GTA VI treats some vehicles as projects rather than finished purchases. The Ultimate Edition includes the <strong>Classic Car Collection</strong>, an assignment connected to collector and fixer Wyman. Rockstar’s accompanying description says players will find abandoned classics and unfinished builds and restore them for his collection.`,
-      `The <strong>Ganado Retro Build</strong> is another confirmed example of a vehicle-specific conversion. Rockstar has shown and named the package for Jason’s Vapid Ganado. These examples prove that curated restorations and special builds exist, but they do not yet establish a universal restoration system for every car.`,
+      `The <strong>Ganado Retro Build</strong> is another vehicle-specific conversion. At Coastal Auto Care, the Ganado’s Pro Builds menu lists the Ultimate Edition package alongside Standard, Advanced, and Elite versions.`,
     ],
     sources: [
       { label: 'Rockstar Support — GTA VI Editions', url: R_SUPPORT, note: 'Classic Car Collection and Ganado Retro Build.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: the Ganado’s Pro Builds menu at Coastal Auto Care, with the Retro Build – Ultimate Edition and Standard, Advanced, and Elite versions.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: '“Classic Car Collection 01–06” and “Ganado Retro Build.”' },
       { label: 'TheSixthAxis — GTA VI Ultimate Edition details', url: TSA, note: 'documentation of Rockstar’s restoration description.' },
     ],
@@ -310,14 +337,15 @@ export const guideSections: GuideSection[] = [
     id: 'racing',
     images: [IMG.circuitRace, IMG.streetRace],
     title: 'Racing in GTA VI',
-    status: 'Shown by Rockstar',
+    status: 'Tested in the game',
     paragraphs: [
       `GTA VI includes structured circuit, off-road, and street racing. Rockstar’s Extended Look shows all three with an active race HUD rather than presenting them only as background scenes.`,
+      `Story-mode races take place at <strong>Gellhorn International Raceway</strong>, <strong>Boone Speedway</strong>, and the <strong>Thrillbilly Mud Club</strong>, among others.`,
       `At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1061s" rel="noopener">17:41</a>, 16 cars race two laps on a wet paved circuit, with position, lap, and timing information on screen. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1115s" rel="noopener">18:35</a>, a 12-entry field of quads, motorcycles, and off-road pickups runs two laps on a dirt course. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1221s" rel="noopener">20:21</a>, a six-car street race tracks progress as a percentage. These are the events shown, not a fixed rule for grid sizes or race distances.`,
       `Racing can interrupt a getaway, too. Edge describes a customized 4x4 with purple underglow challenging Nelson’s station wagon on the highway. Its occupants keep taunting him until he accepts, and a passenger hangs out of the window as they pull ahead.`,
-      `The footage shows organized racing, but the full event rules remain open: entry requirements, eligible classes, rewards, championships, and online support. A race shown in the story-game presentation does not establish a GTA VI Online racing mode.`,
-      `Nitrous returns in the street race shown in the Extended Look. Which cars can run it, how you get it, and whether every event allows it are separate questions the footage does not answer.`,
-      `For your own car comparisons, keep <strong>top speed</strong> separate from <strong>lap time</strong>. One measures speed; the other includes the corners, braking, and acceleration of a particular route. Our car rankings distinguish reference testing from driver leaderboard results. Compare the same tuning category and read the test conditions before treating two times as equivalent.`,
+      `At <strong>Keep It PG</strong>, the event menu lists the lap count, field size, maximum payout, and accepted car ratings. You can compare those details before choosing your car.`,
+      `Nitrous returns as an upgrade: on Jason’s ’70 Ganado, it sits under <strong>Boost</strong> in the Performance menu.`,
+      `For your own car comparisons, keep <strong>top speed</strong> separate from <strong>lap time</strong>. One measures speed; the other includes the corners, braking, and acceleration of a particular route. Our car rankings keep Gellhorn laps separate from driver leaderboard results. Compare the same tuning category and read the test conditions before treating two times as equivalent.`,
     ],
     cta: { label: 'Go to Time Attack', href: 'time-attack/gellhorn-international-raceway/' },
     sources: [
@@ -326,22 +354,25 @@ export const guideSections: GuideSection[] = [
       { label: 'Game Informer — GTA VI: Welcome to Leonida', url: 'https://gameinformer.com/feature/2026/09/29/grand-theft-auto-vi-welcome-to-leonida', note: 'September 29, 2026: Rockstar cover story additionally identifies street and off-road racing among the activities; full article access may require a subscription.' },
       { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: highway challenge involving a customized 4x4 with purple underglow. Checked October 30, 2026.' },
       { label: 'GTAVice — Edge preview and print-only Phil Hooker Q&A', url: GTAVICE_EDGE, note: 'October 29, 2026: secondary coverage, including attributed excerpts from the print-only Q&A and the reported 23-station total. Checked October 30, 2026.' },
-      { label: 'Rockstar Support — GTAV Title Update 1.47 Notes', url: 'https://support.rockstargames.com/articles/6clYU1N1kk9hiaBceBu81d/gtav-title-update-1-47-notes-ps4-xbox-one-pc', note: 'Rockstar refers to Nitro Boost on Arena contender vehicles in GTA Online. Historical context only; not evidence of GTA VI upgrade availability. Checked October 30, 2026.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: Keep It PG event menu at Gellhorn checked for laps, field size, maximum payout, and the accepted road-rating range. Nitrous checked in the Performance menu at Coastal Auto Care.' },
+      { label: 'PowerPyx — GTA 6 All Challenges Guide', url: 'https://www.powerpyx.com/gta-6-all-challenges-guide/', note: 'November 18, 2026: racing challenges name Gellhorn International Raceway, Boone Speedway, and Thrillbilly Mud Club. Checked November 19, 2026.' },
+      { label: 'GamesRadar — All GTA 6 cheats and how to unlock them', url: 'https://www.gamesradar.com/games/grand-theft-auto/gta-6-cheats/', note: 'Race-related unlock requirements name Gellhorn, Boone Speedway, and Thrillbilly Mud Club. Checked November 19, 2026.' },
     ],
   },
   {
     id: 'gellhorn',
     images: [IMG.circuitEmpty],
     title: 'Gellhorn and the Circuit',
-    status: 'Shown by Rockstar',
+    status: 'Tested in the game',
     paragraphs: [
-      `Rockstar has shown a dedicated paved race circuit in GTA VI, complete with a grid, curbing, timing, position, and lap information. Earlier GTA games had stadium events, small ovals, and improvised routes, but never a permanent road course built into the map. Trailer 2 separately shows Lucia wearing clothing marked <strong>Gellhorn International</strong> with a race-car graphic.`,
-      `The venue is widely known as <strong>Gellhorn International Raceway</strong>, and Leonida Racing uses that established name for its <a href="{base}time-attack/gellhorn-international-raceway/">Time Attack competition</a>. The source record remains more precise: Rockstar’s public footage shows the circuit and the Gellhorn International branding, but does not display the full venue name alongside the race. The complete layout, location, classes, and event schedule remain unannounced.`,
+      `Gellhorn International Raceway is a playable race venue south of Port Gellhorn. Earlier GTA games had stadium events, small ovals, and improvised routes, but never a permanent road course built into the map. Trailer 2 separately shows Lucia wearing clothing marked <strong>Gellhorn International</strong> with a race-car graphic.`,
+      `<strong>Keep It PG</strong> runs multi-lap races on several layouts of Gellhorn, including the <strong>Basic Loop</strong>, <strong>Short Loop</strong>, <strong>Intermediate Loop CCW</strong>, and <strong>Long Loop</strong>. In our races, the field had 16 cars; the Short Loop ran three laps and the Basic Loop five. You can enter your own car if its road rating fits, or rent a race-prepared Übermacht Cypher, Bravado Buffalo ’19, or Dinka Chavos XS at the track. Leonida Racing uses the circuit for its <a href="{base}time-attack/gellhorn-international-raceway/">Time Attack competition</a>.`,
       `Sebring International Raceway is a rumored inspiration, discussed in coverage by <strong>The Drive</strong> and <strong>Jalopnik</strong>. Parts of that comparison rely on leaked maps rather than official footage. It is a published theory about the inspiration, not a Rockstar-confirmed connection or proof that Gellhorn copies Sebring’s layout, length, or corners.`,
       `Rockstar’s research for GTA VI also included a Florida racetrack. In a November 2026 interview with The Guardian, Rockstar North co-studio head Rob Nelson recalled visiting a racetrack a few hours after a night in a Miami club. The coverage does not name the track or say whether the visit was tied to Gellhorn.`,
     ],
     cta: { label: 'Visit Gellhorn Time Attack', href: 'time-attack/gellhorn-international-raceway/' },
     sources: [
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: Gellhorn International Raceway in story mode, south of Port Gellhorn. Keep It PG checked with Basic Loop, Short Loop, Intermediate Loop CCW, and Long Loop; our races had 16 cars, with three laps on the Short Loop and five on the Basic Loop. Own-car entry and the Cypher, Buffalo ’19, and Chavos XS rentals checked.' },
       { label: 'Jalopnik — GTA VI Has A Race Track', url: 'https://www.jalopnik.com/2246099/gta-6-race-track-new-details/', note: 'August 27, 2026: discusses Sebring as an inspiration; not an independent Rockstar confirmation.' },
       { label: 'The Drive — Is Sebring Raceway Going To Be in GTA 6?', url: 'https://www.thedrive.com/news/theres-convincing-evidence-that-sebring-raceway-will-be-in-grand-theft-auto-6', note: 'April 3, 2026: documents the Sebring theory; map/leak-derived arguments are not treated as verified circuit facts.' },
       { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: EXT_LOOK, note: 'approximately 17:41–17:47: official circuit-racing footage.' },
@@ -377,8 +408,7 @@ export const guideSections: GuideSection[] = [
     title: 'What Rockstar Has Not Confirmed Yet',
     status: 'Not Confirmed',
     paragraphs: [
-      `Several details players naturally want to know are still open. Rockstar has not published a complete vehicle list, dealership structure, later-game ownership limit, property-by-property garage capacities, tuning catalog, parts compatibility list, upgrade pricing, or final performance figures.`,
-      `The full damage model, insurance, recovery rules for owned vehicles, wheel support, manual shifting, race creation tools, and GTA VI online racing systems remain unresolved in the reviewed sources, as does whether the police Tempesta takes part in pursuits. Refueling, EV charging, and gas-station repairs have been reported from a Rockstar demo; their final rates, costs, settings, and application to racing are separate open questions.`,
+      `Several details are still open. Wheel support, manual shifting, insurance, and the full damage model remain open in the sources we checked, as does whether the police Tempesta takes part in pursuits.`,
       `This section will shrink as Rockstar releases more information and the finished game provides testable answers. Until then, “not confirmed” means exactly that—not impossible, not secretly ruled out, just not ready to call a fact.`,
     ],
     sourcesHeading: 'Official material checked for this section',
@@ -404,23 +434,24 @@ export const guideCoverage: { name: string; text: string }[] = [
 /** FAQ: the same text is used for the visible answers and FAQPage JSON-LD. */
 export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'Is Gellhorn International Raceway based on Sebring?', a: 'Sebring is a rumored inspiration discussed by The Drive and Jalopnik. Parts of that comparison rely on leaked maps. The official material reviewed here does not confirm a Sebring connection or establish that Gellhorn copies its layout, length, or corners.' },
-  { q: 'Do cars need fuel or charging in GTA VI?', a: 'Edge reports vehicle fuel gauges and quick refueling. EV charging is separately reported from TGG’s Rockstar North preview. Consumption rates, charging times, settings, and race-specific rules remain unresolved.' },
+  { q: 'Do cars need fuel or charging in GTA VI?', a: 'Yes. Cars need fuel, and you refuel at gas stations. PC Gamer reports that electric vehicles charge at charging points and that fuel lasts long enough that stops are infrequent.' },
   { q: 'Can you repair cars at gas stations in GTA VI?', a: 'GamesRadar reports that TGG’s Rockstar preview included a gas-station choice between refueling and vehicle repair. That does not establish the services available at every station or their prices.' },
-  { q: 'Does GTA VI have nitrous?', a: 'Yes. Nitrous is used in the street race shown in Rockstar’s Extended Look. Which cars can run it, how you get it, and the rules for individual events are not shown.' },
-  { q: 'Are GTA VI Online races confirmed by the gameplay footage?', a: 'The circuit, off-road, and street races shown in the Extended Look do not establish an online racing mode. Online event formats, multiplayer grids, cross-play, and Race Creator support need their own confirmation.' },
-  { q: 'Is the fastest GTA VI car also the best for Gellhorn?', a: 'Top speed and lap time measure different things. Use Gellhorn reference laps to compare tested cars, and the driver leaderboard to compare submitted runs. Keep tuning categories and test conditions consistent.' },
+  { q: 'Does GTA VI have nitrous?', a: 'Yes. Nitrous is an upgrade at mod shops; on Jason’s ’70 Ganado, it’s the Boost option in the Performance menu.' },
+  { q: 'What do the car stats mean in GTA VI?', a: 'The panel shows Speed, Acceleration, Asphalt Handling, Off-Road Handling, and Strength on a 0–10 scale, plus road and off-road ratings. At Gellhorn’s Keep It PG event, the road rating decides whether your car is eligible.' },
+  { q: 'Are GTA VI Online races confirmed by the gameplay footage?', a: 'No. GTA VI launched as a single-player game, so its races are story-mode races. Online racing would need its own announcement.' },
+  { q: 'Is the fastest GTA VI car also the best for Gellhorn?', a: 'Top speed and lap time measure different things. Use Gellhorn laps to compare tested cars, and the driver leaderboard to compare submitted runs. Keep tuning categories and test conditions consistent.' },
   { q: 'How does the vehicle scanner work in GTA VI?', a: 'Rob Nelson describes a phone scanner that shows whether a car is locked, has an alarm or tracker, what it is worth at a Pay ’n’ Spray or specialty car fence, and what it costs to register for yourself. Different vehicles can require tools such as a Slim Jim or key cloner.' },
   { q: 'Can changing cars or clothes help you escape the police in GTA VI?', a: 'Yes. In Nelson’s demonstration, switching to a car the police do not recognize lowers their perception of you. He also says buying and wearing a new outfit removes his current heat. Glasses, a cap, or a haircut alone do not address clothing the police already recognize.' },
-  { q: 'Is GranForma replacing Pegassi for the Zorrusso in GTA VI?', a: 'The Zorrusso-associated car shown in Rockstar images published with Bloomberg’s October 14 feature carries GranForma lettering instead of the familiar Pegassi branding. Whether GranForma is the manufacturer, a customizer or a particular version remains unresolved. It does not establish a replacement for Pegassi across the lineup.', aHtml: 'The <a href="{base}cars/vehicles/granforma-zorrusso/">Zorrusso</a>-associated car shown in Rockstar images published with Bloomberg’s October 14 feature carries GranForma lettering instead of the familiar Pegassi branding. Whether GranForma is the manufacturer, a customizer or a particular version remains unresolved. It does not establish a replacement for Pegassi across the lineup.' },
+  { q: 'Is GranForma replacing Pegassi for the Zorrusso in GTA VI?', a: 'For the Zorrusso, yes. Rockstar images published with Bloomberg’s October 14 feature already showed GranForma lettering, and in the game the Zorrusso is sold as a GranForma. That does not mean every former Pegassi model has moved.', aHtml: 'For the <a href="{base}cars/vehicles/granforma-zorrusso/">Zorrusso</a>, yes. Rockstar images published with Bloomberg’s October 14 feature already showed GranForma lettering, and in the game the Zorrusso is sold as a GranForma. That does not mean every former Pegassi model has moved.' },
   { q: 'Can I call my personal vehicle in GTA VI?', a: 'Yes. Edge describes Scooter Bros, a paid phone-app service that delivers your personal car. Delivery fees and restrictions have not been fully detailed.' },
-  { q: 'Which cars has Rockstar confirmed for GTA VI?', a: 'Rockstar has named cars including the ’95 Grotti Cheetah and ’67 Vapid Dominator Buggy. More cars appear in official footage without being named; their model names are often community identifications. Rockstar has not published a complete official lineup. Our Cars section focuses on racing-relevant cars.', aHtml: 'Rockstar has named cars including the <a href="{base}cars/vehicles/grotti-cheetah-95/">’95 Grotti Cheetah</a> and <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a>. More cars appear in official footage without being named; their model names are often community identifications. Rockstar has not published a complete official lineup. Our <a href="{base}cars/">Cars section</a> focuses on racing-relevant cars.' },
+  { q: 'Which cars has Rockstar confirmed for GTA VI?', a: 'Rockstar has named cars including the ’95 Grotti Cheetah and ’67 Vapid Dominator Buggy. The game itself now shows each car’s name, and we use those names, such as the ’19 Buffalo for the car known as the Buffalo STX. Our Cars section focuses on racing-relevant cars.', aHtml: 'Rockstar has named cars including the <a href="{base}cars/vehicles/grotti-cheetah-95/">’95 Grotti Cheetah</a> and <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a>. The game itself now shows each car’s name, and we use those names, such as the ’19 Buffalo for the car known as the Buffalo STX. Our <a href="{base}cars/">Cars section</a> focuses on racing-relevant cars.' },
   { q: 'How does stealing cars work in GTA VI?', a: 'Rockstar North’s Rob Nelson described a tiered system. Some parked vehicles require tools such as a Slim Jim or key cloner, while occupied vehicles can still be carjacked. A phone scanner can provide information about a vehicle’s security, tracker, value, and registration cost.' },
-  { q: 'Can stolen cars become personal vehicles?', a: 'Yes. A stolen car can be registered as a personal vehicle. Unregistered stolen vehicles remain temporarily but disappear when the game is restarted. Players begin with storage for three vehicles and can buy garages to expand it; the complete list of eligible vehicles and the later-game ownership limit remain unannounced.' },
-  { q: 'Does GTA VI have car customization?', a: 'Yes. Rockstar has confirmed specialist mod shops and described cosmetic and performance-oriented modifications. The complete parts catalog and standard-edition workshop options remain unknown.' },
-  { q: 'What mod shops are confirmed for GTA VI?', a: 'Rideout Customs Mod Shop in Vice City and One-Eyed Willie’s Mod Shop in Lake Leonida are confirmed as Ultimate Edition content. Rideout Customs focuses on interiors, wheels, and donk builds; One-Eyed Willie’s specializes in off-road modifications and hand-painted designs.' },
-  { q: 'Does GTA VI have garages?', a: 'Yes. Players begin with storage for three vehicles, and garages purchased around the map expand that capacity. Rockstar has also revealed garage content tied to the ’67 Vapid Dominator Buggy and ’55 Vapid Stanier. The later-game ownership limit and the capacity of each garage remain unannounced.', aHtml: 'Yes. Players begin with storage for three vehicles, and garages purchased around the map expand that capacity. Rockstar has also revealed garage content tied to the <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a> and <a href="{base}cars/vehicles/vapid-stanier-55/">’55 Vapid Stanier</a>. The later-game ownership limit and the capacity of each garage remain unannounced.' },
+  { q: 'Can stolen cars become personal vehicles?', a: 'Yes. Registration lets you keep an eligible stolen car as a personal vehicle. Scan the car first to see whether it can be registered and what that costs.' },
+  { q: 'Does GTA VI have car customization?', a: 'Yes. The mod-shop menu for Jason’s ’70 Ganado includes engine, transmission, and nitrous upgrades, plus bodywork, wheels, paint, and interiors.' },
+  { q: 'What mod shops are confirmed for GTA VI?', a: 'Rideout Customs in Vice City and One-Eyed Willie’s in Lake Leonida are exclusive to the Ultimate Edition. Other mod shops have their own specialties; Coastal Auto Care, for example, offers retro builds, including the Ganado Retro Build.' },
+  { q: 'Does GTA VI have garages?', a: 'Yes. Players begin with storage for three vehicles, and buying garages expands that capacity. You buy garages through the Vice City Real Estate app on your phone. Rockstar has also revealed garage content tied to the ’67 Vapid Dominator Buggy and ’55 Vapid Stanier.', aHtml: 'Yes. Players begin with storage for three vehicles, and buying garages expands that capacity. You buy garages through the Vice City Real Estate app on your phone. Rockstar has also revealed garage content tied to the <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a> and <a href="{base}cars/vehicles/vapid-stanier-55/">’55 Vapid Stanier</a>.' },
   { q: 'What kinds of racing are shown in GTA VI?', a: 'Rockstar’s Extended Look shows circuit, off-road, and street racing with position and timing information on screen. Event access, rewards, classes, championships, and online support remain open.' },
-  { q: 'Is Gellhorn International Raceway confirmed?', aHtml: 'Rockstar has shown a dedicated paved circuit and separate Gellhorn International racing branding. Leonida Racing uses the established name <a href="{base}time-attack/gellhorn-international-raceway/">Gellhorn International Raceway</a>, while noting that Rockstar’s public footage has not yet displayed the complete venue name beside the circuit.', a: 'Rockstar has shown a dedicated paved circuit and separate Gellhorn International racing branding. Leonida Racing uses the established name Gellhorn International Raceway, while noting that Rockstar’s public footage has not yet displayed the complete venue name beside the circuit.' },
+  { q: 'Is Gellhorn International Raceway confirmed?', a: 'Yes. Gellhorn International Raceway is a playable race venue south of Port Gellhorn, with several layouts.', aHtml: 'Yes. <a href="{base}time-attack/gellhorn-international-raceway/">Gellhorn International Raceway</a> is a playable race venue south of Port Gellhorn, with several layouts.' },
   { q: 'Are car meets confirmed in GTA VI?', a: 'Rockstar has shown car-meet and street-takeover scenes. Those scenes confirm the culture and setting, but Rockstar has not yet announced a player-hosted car-meet system.' },
   { q: 'Will GTA VI have a Race Creator?', a: 'Rockstar has not confirmed a Race Creator or player-built race jobs for GTA VI.' },
   { q: 'Where can I compare GTA VI cars?', a: 'Cars lets you browse racing-relevant GTA VI cars by class and manufacturer and compare the details currently available. Compare recorded prices, tested top speeds, and performance data where available, with sources and tuning categories kept alongside the results.', aHtml: '<a href="{base}cars/">Cars</a> lets you browse racing-relevant GTA VI cars by <a href="{base}cars/classes/">class</a> and <a href="{base}cars/manufacturers/">manufacturer</a> and <a href="{base}cars/compare/">compare</a> the details currently available. Compare recorded prices, tested top speeds, and performance data where available, with sources and tuning categories kept alongside the results.' },
@@ -428,7 +459,8 @@ export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
 ];
 
 export const guideMethodology: string[] = [
-  `Leonida Racing separates information into six public evidence levels: <strong>Confirmed by Rockstar</strong>, <strong>Shown by Rockstar</strong>, <strong>Rockstar Interview</strong>, <strong>Reported from a Rockstar Demo</strong>, <strong>Community Identification</strong>, and <strong>Not Confirmed</strong>. Each section carries one label for the evidence behind its central claim. When an individual detail uses a different evidence level, the text and its sources say so directly.`,
+  `Leonida Racing separates information into seven public evidence levels: <strong>Confirmed by Rockstar</strong>, <strong>Shown by Rockstar</strong>, <strong>Rockstar Interview</strong>, <strong>Reported from a Rockstar Demo</strong>, <strong>Tested in the game</strong>, <strong>Community Identification</strong>, and <strong>Not Confirmed</strong>. Each section carries one label for the evidence behind its central claim. When an individual detail uses a different evidence level, the text and its sources say so directly.`,
+  `We check details in the game ourselves on PS5. These findings are labeled <strong>Tested in the game</strong>, with the car, shop, or event tested listed in the sources.`,
   `Official footage proves only what can be seen. A visible spoiler does not automatically prove a selectable spoiler upgrade, and a car at a meet does not automatically prove a player-hosted event system. Vehicle names and real-life inspirations identified by the community are labeled separately from Rockstar-confirmed names.`,
   `Sources are attached to the section they support, with timestamps for videos and official titles for screenshots. Reported theories may be included when they answer a useful question, with the publication and unconfirmed status made clear. Repetition across articles is not independent confirmation; an article’s use of leaked material is not presented as evidence from official footage. The page is updated when a source adds meaningful information or changes the evidence behind a claim.`,
 ];
@@ -437,9 +469,9 @@ export const guideMethodology: string[] = [
  *  Label from Codex; note adapted by Claude to name the source (Codex review pending).
  *  Update value + checked date together. */
 export const GUIDE_VEHICLES = {
-  value: '311',
+  value: '329',
   label: 'GTABase Entries',
   sourceLabel: 'GTABase',
   sourceUrl: 'https://www.gtabase.com/gta-6/vehicles/',
-  note: 'Total across all vehicle types in GTABase’s database. This is not an official Rockstar vehicle count or a count of vehicles independently verified here. Checked October 18, 2026.',
+  note: 'Total across all vehicle types in GTABase’s database. This is not an official Rockstar vehicle count or a count of vehicles independently verified here. Checked November 19, 2026.',
 };

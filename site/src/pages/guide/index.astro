@@ -12,7 +12,7 @@ import { GUIDE_PUBLISHED, GUIDE_UPDATED, GUIDE_VEHICLES, type GuideImage, guideC
 
 const base = import.meta.env.BASE_URL;
 const title = 'The Guide — GTA 6 Cars, Tuning & Racing';
-const description = 'Explore sourced information on GTA 6 cars, driving physics, car theft, customization, mod shops, garages, racing, car meets, and Gellhorn.';
+const description = 'Sourced and tested information on GTA 6 cars: vehicle stats, driving, car theft, tuning, mod shops, garages, racing, car meets, and Gellhorn.';
 const updatedLabel = new Date(`${GUIDE_UPDATED}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 const updatedShort = new Date(`${GUIDE_UPDATED}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 const pageUrl = new URL(`${base}guide/`, Astro.site).href;
@@ -47,7 +47,7 @@ const jsonLd = [
 // Short TOC labels (Claude placeholders).
 const tocLabel: Record<string, string> = {
   vehicles: 'Vehicles', granforma: 'Brands & rebadging', driving: 'Driving & physics', theft: 'Theft & registration', heat: 'Heat & police',
-  ownership: 'Ownership & garages', fuel: 'Fuel & repairs', customization: 'Customization', classics: 'Classic cars', racing: 'Racing', gellhorn: 'Gellhorn',
+  ownership: 'Ownership & garages', fuel: 'Fuel & repairs', stats: 'Stats & ratings', customization: 'Tuning & mod shops', classics: 'Classic cars', racing: 'Racing', gellhorn: 'Gellhorn',
   'car-culture': 'Car culture', 'not-confirmed': 'Open questions',
 };
 const toc: [string, string][] = [
@@ -57,8 +57,8 @@ const toc: [string, string][] = [
 
 const glance = [
   { v: GUIDE_VEHICLES.value, l: GUIDE_VEHICLES.label, href: '#vehicle-count' },
-  { v: '3', l: 'Racing formats shown', href: '#racing' },
-  { v: '2', l: 'Named mod shops', href: '#customization' },
+  { v: '5', l: 'In-game stats', href: '#stats' },
+  { v: '2', l: 'Ultimate Edition mod shops', href: '#customization' },
 ];
 
 const coverageNote = guideCoverage.find((c) => c.name === 'The Guide');
@@ -68,7 +68,7 @@ const entryMeta: Record<string, { href: string; img: string; srcset: string; cta
   'Community': { href: 'community/', img: 'images/hub/community-band-640.webp', srcset: `${base}images/hub/community-band-640.webp 640w, ${base}images/hub/community-band-1080.webp 1080w`, cta: 'Open Community' },
 };
 const entries = guideCoverage.filter((c) => entryMeta[c.name]);
-const kindLabel = { official: 'Official', press: 'Press', community: 'Community' } as const;
+const kindLabel = { official: 'Official', press: 'Press', community: 'Community', tested: 'Our test' } as const;
 ---
 <Base title={title} description={description} section="guide" jsonLd={jsonLd} breadcrumbs={[{ name: 'The Guide', path: 'guide/' }]} ogImage="og/site/guide.jpg" ogImageAlt="Grotti Cheetah with the door open and a red interior in GTA VI" ogImageWidth={1200} ogImageHeight={630}>
   <section class="gd-band">
@@ -135,11 +135,19 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
                 const sp = sourceParts(x);
                 return (
                   <li>
-                    <a class="lr-noext lr-hcard" href={x.url} target="_blank" rel="noopener">
-                      <span class="gd-src-top"><span class:list={['gd-kind', `is-${sp.kind}`]}>{kindLabel[sp.kind]}</span><span class="gd-src-pub">{sp.publisher}</span></span>
-                      <span class="gd-src-t lr-ext-after">{sp.title}</span>
-                      {x.note && <span class="gd-src-n">{x.note}</span>}
-                    </a>
+                    {x.url ? (
+                      <a class="lr-noext lr-hcard" href={x.url} target="_blank" rel="noopener">
+                        <span class="gd-src-top"><span class:list={['gd-kind', `is-${sp.kind}`]}>{kindLabel[sp.kind]}</span><span class="gd-src-pub">{sp.publisher}</span></span>
+                        <span class="gd-src-t lr-ext-after">{sp.title}</span>
+                        {x.note && <span class="gd-src-n">{x.note}</span>}
+                      </a>
+                    ) : (
+                      <div class="gd-src-card">
+                        <span class="gd-src-top"><span class:list={['gd-kind', `is-${sp.kind}`]}>{kindLabel[sp.kind]}</span><span class="gd-src-pub">{sp.publisher}</span></span>
+                        <span class="gd-src-t">{sp.title}</span>
+                        {x.note && <span class="gd-src-n">{x.note}</span>}
+                      </div>
+                    )}
                   </li>
                 );
               })}
@@ -255,11 +263,13 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-src li { display: flex; }
   .gd-src a { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); color: var(--lr-text); text-decoration: none; transition: border-color .15s; }
   .gd-src a:hover .gd-src-t { color: var(--lr-orange); }
+  .gd-src-card { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); color: var(--lr-text); }
   .gd-src-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .gd-kind { padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
   .gd-kind.is-official { color: var(--lr-lime); background: var(--lr-lime-fill); }
   .gd-kind.is-press { color: var(--lr-soft); background: var(--lr-line-soft); }
   .gd-kind.is-community { color: var(--lr-orange); background: var(--lr-orange-fill); }
+  .gd-kind.is-tested { color: var(--lr-lime); background: var(--lr-lime-fill); }
   .gd-src-pub { font-size: 12px; color: var(--lr-muted); }
   .gd-src-t { font-size: 14px; font-weight: 600; line-height: 1.35; }
   .gd-src-n { font-size: 13px; line-height: 1.45; color: var(--lr-muted); }
