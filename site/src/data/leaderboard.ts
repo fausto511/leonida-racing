@@ -70,7 +70,7 @@ function rng(seed: number) {
 }
 // Garage vehicle + fictional base pace on Gellhorn (ms)
 const SAMPLE_VEHICLES: [string, number][] = [
-  ['grotti-furia', 84200], ['pegassi-zorrusso', 84500], ['truffade-thrax', 84900], ['pegassi-tempesta', 85300],
+  ['piccia-furia', 84200], ['pegassi-zorrusso', 84500], ['truffade-thrax', 84900], ['pegassi-tempesta', 85300],
   ['grotti-itali-rsx', 85900], ['pfister-neon', 86500], ['bravado-banshee', 86800], ['invetero-coquette-d10', 87100],
   ['ubermacht-cypher', 87500], ['annis-elegy-retro-custom', 87900], ['obey-8f-drafter', 88200], ['emperor-sultan', 88900],
   ['ubermacht-sentinel-xs', 89300], ['grotti-cheetah-95', 89600], ['vapid-dominator-gtx', 90400], ['karin-futo', 91200],
