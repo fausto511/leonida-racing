@@ -5,7 +5,7 @@ const KEY = 'gellhorn-compare-selected';
 
 // Vehicle ids that were renamed; old ids stored in a visitor's browser are
 // mapped to the new one (2026-09-30: Caracara -> Caracara 4x4).
-const RENAMED: Record<string, string> = { 'vapid-caracara': 'vapid-caracara-4x4', 'vapid-contender': 'karin-contender', 'karin-sultan': 'emperor-sultan', 'grotti-furia': 'piccia-furia', 'ubermacht-zion-cabrio': 'ubermacht-zion' };
+const RENAMED: Record<string, string> = { 'vapid-caracara': 'vapid-caracara-4x4', 'vapid-contender': 'karin-contender', 'karin-sultan': 'emperor-sultan', 'grotti-furia': 'piccia-furia', 'pegassi-zorrusso': 'granforma-zorrusso', 'ubermacht-zion-cabrio': 'ubermacht-zion' };
 
 export function getSelected(): string[] {
   try {
