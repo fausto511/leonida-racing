@@ -112,9 +112,8 @@ const ratingTiles = [
 const hasStats = statRows.some((r) => r.value != null) || ratingTiles.some((r) => r.value != null);
 const showAvg = statRows.some((r) => r.avg != null);
 const statVals = [...STAT_ROWS.map((r) => r.key), 'rating_road', 'rating_offroad'].map((k) => (vals as any)[k]).filter(Boolean);
-const statsReadAt: string | null = statVals.map((v: any) => v.measured_at).filter(Boolean).sort().pop() ?? null;
 const statsPlatform: string | null = statVals.find((v: any) => v.platform)?.platform ?? null;
-const statsSource = `Read in game${statsPlatform ? ` on ${statsPlatform.toUpperCase()}` : ''}${statsReadAt ? ` · ${new Date(statsReadAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}` : ''}`;
+const statsSource = `Read in game${statsPlatform ? ` on ${statsPlatform.toUpperCase()}` : ''}`;
 
 // Real Gellhorn laps known at build time (empty before launch); the browser refreshes them.
 const realBest = (id: string) => fastestGellhornLapMs(id);
@@ -270,7 +269,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           <div><dt>Era</dt><dd class:list={{ 'is-tba': !vehicle.era }}>{vehicle.era ?? notRecorded}</dd></div>
           <div><dt>Release</dt><dd class:list={{ 'is-tba': !release }}>{release?.date ? <>{release.name}{' · '}<time datetime={release.date}>{releaseDate}</time></> : releaseText}</dd></div>
         </dl>
-        {statsAt && <p class="vs-upd" data-stats-at={statsAt}><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Stats updated <time datetime={statsAt}>{statsDate}</time></p>}
+        {/* "Stats updated" moved into the In-game stats block (Fausto 19.11.2026); the attribute stays here for the Discord feed. */}
+        {statsAt && <span hidden data-stats-at={statsAt}></span>}
         <p class="vs-own" id="vs-own"><Fragment set:html={ico.house} /><span id="vs-own-t">Be the first to add it to <button type="button" class="vs-own-btn" data-add-garage>your garage</button></span></p>
       </div>
     </section>
@@ -284,7 +284,10 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
             <h2 class="lr-h2 vsec-title display">{vehicle.model} by the numbers</h2>
             <p class="vsec-sub">Straight from the game's vehicle menu, for the stock car with no upgrades.</p>
           </div>
-          <span class="vst-tag">Stock</span>
+          <div class="vst-meta">
+            {statsAt && <span class="vst-upd"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Stats updated <time datetime={statsAt}>{statsDate}</time></span>}
+            <span class="vst-tag">Stock</span>
+          </div>
         </div>
         <div class="vst">
           <div class="vst-card">
@@ -323,7 +326,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
             </dl>
           </div>
         </div>
-        <p class="vst-src"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>{statsSource}. Fully tuned values follow later.</p>
+        <p class="vst-src">{statsSource}. Fully tuned values follow later.</p>
       </section>
     )}
 
@@ -521,8 +524,6 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vs-rows > div { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; border-top: 1px solid var(--lr-line); font-size: 15px; }
   .vs-rows dt { color: var(--lr-soft); white-space: nowrap; }
   .vs-rows dd { margin: 0; font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-  .vs-upd { display: flex; align-items: center; gap: 8px; margin: 10px 0 12px; padding: 0 2px; font-size: 13px; color: var(--lr-muted); }
-  .vs-upd svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .vs-own { display: flex; align-items: center; gap: 10px; margin: auto 0 0; padding: 8px 2px 0; border-top: 1px solid var(--lr-line); font-size: 14px; color: var(--lr-soft); }
   .vs-own .ico { width: 16px; height: 16px; color: var(--lr-muted); }
   .vs-own :global(b) { color: var(--lr-text); }
@@ -662,8 +663,10 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vst-facts > div + div { border-top: 1px solid var(--lr-line-soft); }
   .vst-facts dt { color: var(--lr-soft); white-space: nowrap; }
   .vst-facts dd { margin: 0; font-weight: 600; text-align: right; }
-  .vst-src { display: flex; align-items: center; gap: 8px; margin: 16px 0 0; font-size: 13px; color: var(--lr-muted); }
-  .vst-src .ico { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; }
+  .vst-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+  .vst-upd { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--lr-muted); white-space: nowrap; }
+  .vst-upd .ico { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; }
+  .vst-src { margin: 16px 0 0; font-size: 13px; color: var(--lr-muted); }
   @media (max-width: 900px) {
     .vst { grid-template-columns: minmax(0, 1fr); }
     .vst-row { grid-template-columns: minmax(0, 1fr) auto 44px; }
