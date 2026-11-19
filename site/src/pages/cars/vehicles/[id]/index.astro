@@ -84,6 +84,38 @@ const speed = vals.top_speed_mph?.value ?? null;
 const sell = vals.sell_price_gtad?.value ?? null;
 const speedRank = speed == null ? null : 1 + classCars.filter((v) => (vehicleValues[v.id]?.top_speed_mph?.value ?? -1) > speed).length;
 
+// ---- In-game stats (Fausto 19.11.2026, DEC-0241): stock values from the game's vehicle menu ----
+// Left: 5 bars (0-10) with the class average as a tick; right: both ratings, Drive, Seats, Storage.
+// Class average + rank only once enough cars of the class have the value (STATS_CLASS_MIN).
+// The whole block shows only when the car has at least one stat or rating.
+// COPY STATUS: section title, sub line, tag, legend, source line = Claude placeholders -> Codex (DEC-0088).
+const STATS_CLASS_MIN = 5;
+const STAT_ROWS = [
+  { key: 'stat_speed', label: 'Speed' },
+  { key: 'stat_acceleration', label: 'Acceleration' },
+  { key: 'stat_handling_asphalt', label: 'Asphalt handling' },
+  { key: 'stat_handling_offroad', label: 'Off-road handling' },
+  { key: 'stat_strength', label: 'Strength' },
+];
+const valOf = (id: string, key: string): number | null => (vehicleValues[id] as any)?.[key]?.value ?? null;
+function classInfo(key: string, value: number | null) {
+  const all = classCars.map((v) => valOf(v.id, key)).filter((x): x is number => x != null);
+  if (value == null || all.length < STATS_CLASS_MIN) return { avg: null as number | null, rank: null as number | null, n: all.length, top: false };
+  const rank = 1 + all.filter((x) => x > value).length;
+  return { avg: all.reduce((a, b) => a + b, 0) / all.length, rank, n: all.length, top: rank === 1 };
+}
+const statRows = STAT_ROWS.map((r) => { const value = valOf(vehicle.id, r.key); return { ...r, value, ...classInfo(r.key, value) }; });
+const ratingTiles = [
+  { key: 'rating_road', label: 'Road rating' },
+  { key: 'rating_offroad', label: 'Off-road rating' },
+].map((r) => { const value = valOf(vehicle.id, r.key); return { ...r, value, ...classInfo(r.key, value) }; });
+const hasStats = statRows.some((r) => r.value != null) || ratingTiles.some((r) => r.value != null);
+const showAvg = statRows.some((r) => r.avg != null);
+const statVals = [...STAT_ROWS.map((r) => r.key), 'rating_road', 'rating_offroad'].map((k) => (vals as any)[k]).filter(Boolean);
+const statsReadAt: string | null = statVals.map((v: any) => v.measured_at).filter(Boolean).sort().pop() ?? null;
+const statsPlatform: string | null = statVals.find((v: any) => v.platform)?.platform ?? null;
+const statsSource = `Read in game${statsPlatform ? ` on ${statsPlatform.toUpperCase()}` : ''}${statsReadAt ? ` · ${new Date(statsReadAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}` : ''}`;
+
 // Real Gellhorn laps known at build time (empty before launch); the browser refreshes them.
 const realBest = (id: string) => fastestGellhornLapMs(id);
 const myLap = realBest(vehicle.id);
@@ -235,13 +267,65 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         <dl class="vs-rows">
           <div><dt>Where to get</dt><dd class:list={{ 'is-tba': !vehicle.acquisition }}>{vehicle.acquisition ? acqNotes[vehicle.acquisition] : notRecorded}</dd></div>
           <div><dt>Sell value</dt><dd class:list={{ 'is-tba': vehicle.sellable !== 'no' && sell == null }}>{vehicle.sellable === 'no' ? "Can't be sold" : sell != null ? money(sell) : notRecorded}</dd></div>
-          <div><dt>Drive{' · '}Seats</dt><dd>{vehicle.drive === 'n/a' && !vehicle.seats ? 'TBA' : <>{vehicle.drive}{' · '}{vehicle.seats} {vehicle.seats === 1 ? 'seat' : 'seats'}</>}</dd></div>
+          <div><dt>Era</dt><dd class:list={{ 'is-tba': !vehicle.era }}>{vehicle.era ?? notRecorded}</dd></div>
           <div><dt>Release</dt><dd class:list={{ 'is-tba': !release }}>{release?.date ? <>{release.name}{' · '}<time datetime={release.date}>{releaseDate}</time></> : releaseText}</dd></div>
         </dl>
         {statsAt && <p class="vs-upd" data-stats-at={statsAt}><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Stats updated <time datetime={statsAt}>{statsDate}</time></p>}
         <p class="vs-own" id="vs-own"><Fragment set:html={ico.house} /><span id="vs-own-t">Be the first to add it to <button type="button" class="vs-own-btn" data-add-garage>your garage</button></span></p>
       </div>
     </section>
+
+    <!-- ---- In-game stats (DEC-0241) ---- -->
+    {hasStats && (
+      <section class="wrap vsec" id="stats">
+        <div class="vsec-head">
+          <div class="vsec-titles">
+            <p class="eyebrow">In-game stats</p>
+            <h2 class="lr-h2 vsec-title display">{vehicle.model} by the numbers</h2>
+            <p class="vsec-sub">Straight from the game's vehicle menu, for the stock car with no upgrades.</p>
+          </div>
+          <span class="vst-tag">Stock</span>
+        </div>
+        <div class="vst">
+          <div class="vst-card">
+            <div class="vst-h">
+              <h3>Stats</h3>
+              {showAvg && <span class="vst-legend"><i aria-hidden="true"></i>{cls} average</span>}
+            </div>
+            <dl class="vst-rows">
+              {statRows.map((r) => (
+                <div class="vst-row">
+                  <dt>{r.label}</dt>
+                  <dd class="vst-bar" aria-hidden="true">
+                    {r.value != null && <span class="vst-fill" style={`width:${r.value * 10}%`}></span>}
+                    {r.avg != null && <span class="vst-avg" style={`left:${(r.avg * 10).toFixed(1)}%`}></span>}
+                  </dd>
+                  <dd class:list={['vst-v tnum', { 'is-top': r.top, 'is-tba': r.value == null }]}>{r.value != null ? r.value.toFixed(1) : '–'}</dd>
+                  <dd class="vst-rk">{r.rank != null ? `#${r.rank} of ${r.n}` : ''}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <div class="vst-side">
+            <div class="vst-ratings">
+              {ratingTiles.map((r) => (
+                <div class="vt vst-rt">
+                  <span class="vt-l">{r.label}</span>
+                  <b class:list={['vt-v tnum', { 'is-top': r.top, 'is-tba': r.value == null }]}>{r.value != null ? Math.round(r.value) : 'TBA'}</b>
+                  <span class="vt-s">{r.rank != null ? `#${r.rank} of ${r.n} in ${cls}` : r.value == null ? notRecorded : ''}</span>
+                </div>
+              ))}
+            </div>
+            <dl class="vst-facts">
+              <div><dt>Drive</dt><dd class:list={{ 'is-tba': vehicle.drive === 'n/a' }}>{vehicle.drive === 'n/a' ? notRecorded : vehicle.drive}</dd></div>
+              <div><dt>Seats</dt><dd class:list={{ 'is-tba': !vehicle.seats }}>{vehicle.seats || notRecorded}</dd></div>
+              <div><dt>Storage</dt><dd class:list={{ 'is-tba': vehicle.storage == null }}>{vehicle.storage != null ? `${vehicle.storage} ${vehicle.storage === 1 ? 'slot' : 'slots'}` : notRecorded}</dd></div>
+            </dl>
+          </div>
+        </div>
+        <p class="vst-src"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>{statsSource}. Fully tuned values follow later.</p>
+      </section>
+    )}
 
     <!-- ---- Gellhorn ---- -->
     <section class="wrap vsec" id="gellhorn">
@@ -551,6 +635,43 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vmore-all { flex: none; }
 
   /* ---- tablet ---- */
+  /* In-game stats (DEC-0241) */
+  .vst-tag { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--lr-orange-fill); color: var(--lr-orange); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+  .vst { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 20px; }
+  .vst-card { display: flex; flex-direction: column; gap: 18px; min-width: 0; padding: 20px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
+  .vst-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .vst-h h3 { margin: 0; font-size: 20px; font-weight: 700; }
+  .vst-legend { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--lr-muted); white-space: nowrap; }
+  .vst-legend i { display: inline-block; width: 2px; height: 14px; border-radius: 1px; background: var(--lr-muted); }
+  .vst-rows { margin: 0; display: flex; flex-direction: column; gap: 18px; }
+  .vst-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 44px 84px; align-items: center; gap: 8px 16px; }
+  .vst-row dt { font-size: 15px; color: var(--lr-soft); }
+  .vst-row dd { margin: 0; }
+  .vst-bar { position: relative; height: 8px; border-radius: 999px; background: var(--lr-raised); }
+  .vst-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 999px; background: var(--lr-text); }
+  .vst-avg { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--lr-muted); }
+  .vst-v { font-size: 18px; font-weight: 700; text-align: right; }
+  .vst .is-top { color: var(--lr-pink); }
+  .vst-rk { font-size: 13px; color: var(--lr-muted); white-space: nowrap; }
+  .vst-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .vst-ratings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .vst-rt { padding: 16px 18px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
+  .vst-rt .vt-v { font-size: 32px; line-height: 1.2; }
+  .vst-facts { margin: 0; padding: 4px 18px; border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); }
+  .vst-facts > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; font-size: 15px; }
+  .vst-facts > div + div { border-top: 1px solid var(--lr-line-soft); }
+  .vst-facts dt { color: var(--lr-soft); white-space: nowrap; }
+  .vst-facts dd { margin: 0; font-weight: 600; text-align: right; }
+  .vst-src { display: flex; align-items: center; gap: 8px; margin: 16px 0 0; font-size: 13px; color: var(--lr-muted); }
+  .vst-src .ico { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; }
+  @media (max-width: 900px) {
+    .vst { grid-template-columns: minmax(0, 1fr); }
+    .vst-row { grid-template-columns: minmax(0, 1fr) auto 44px; }
+    .vst-row dt { grid-column: 1; grid-row: 1; }
+    .vst-rk { grid-column: 2; grid-row: 1; }
+    .vst-v { grid-column: 3; grid-row: 1; }
+    .vst-bar { grid-column: 1 / -1; grid-row: 2; }
+  }
   @media (max-width: 1100px) {
     .vm-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .vs { grid-template-columns: 1fr; }
