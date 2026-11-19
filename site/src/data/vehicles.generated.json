@@ -1737,25 +1737,6 @@
    "other_names": []
   },
   {
-   "vehicle_id": "ubermacht-zion-cabrio",
-   "make": "Übermacht",
-   "model": "Zion Cabrio",
-   "manufacturer_logo_slug": "ubermacht",
-   "classes": [
-    "Coupes"
-   ],
-   "seats": 2,
-   "drive": "RWD",
-   "acquisition": null,
-   "has_photo": false,
-   "release_id": "base-game",
-   "first_seen_in": "An Extended Look",
-   "first_seen_url": null,
-   "first_seen_timestamp": null,
-   "real_life_inspiration": "BMW M6 Convertible (E64)",
-   "other_names": []
-  },
-  {
    "vehicle_id": "vapid-aleutian",
    "make": "Vapid",
    "model": "Aleutian",
