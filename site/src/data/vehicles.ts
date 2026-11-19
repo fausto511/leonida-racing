@@ -261,6 +261,7 @@ export function formatVehicleValueHtml(v: VehicleValue): string {
 }
 
 // Makes without a usable logo yet (RS-0073: GranForma, only a small emblem in
-// the Bloomberg screenshot). Their logo file is a transparent placeholder so
+// the Bloomberg screenshot; Willard and BF are new in GTA VI, logo still to
+// cut, 19.11.2026). Their logo file is a transparent placeholder so
 // tiles never show a broken image; the vehicle page header hides it.
-export const MAKES_WITHOUT_LOGO = new Set(['granforma']);
+export const MAKES_WITHOUT_LOGO = new Set(['granforma', 'willard', 'bf']);
