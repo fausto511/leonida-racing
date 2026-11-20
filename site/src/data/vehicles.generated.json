@@ -40,25 +40,6 @@
    "other_names": []
   },
   {
-   "vehicle_id": "albany-buccaneer-custom",
-   "make": "Albany",
-   "model": "Buccaneer Custom",
-   "manufacturer_logo_slug": "albany",
-   "classes": [
-    "Muscle"
-   ],
-   "seats": 2,
-   "drive": "RWD",
-   "acquisition": null,
-   "has_photo": false,
-   "release_id": "base-game",
-   "first_seen_in": "Trailer 1",
-   "first_seen_url": "https://www.youtube.com/watch?v=QdBZY2fkU-0&t=28s",
-   "first_seen_timestamp": "0:28",
-   "real_life_inspiration": "Ford Fairlane",
-   "other_names": []
-  },
-  {
    "vehicle_id": "albany-cavalcade-xl",
    "make": "Albany",
    "model": "Cavalcade XL",

@@ -47,7 +47,7 @@ export default defineConfig({
       filter: (page) =>
         !page.includes('/account/') && !page.includes('/moderator/') && !page.includes('/community/tracks/') && !page.includes('/community/events/share/') &&
         !page.endsWith('/time-attack/') && !page.endsWith('/cars/rankings/') && !page.includes('/tracks/') && !page.includes('/report/') && !page.includes('/report-content/') && !page.endsWith('/legal/') && !page.endsWith('/privacy/') && !page.endsWith('.txt') &&
-        !page.endsWith('/cars/vehicles/vapid-caracara/') && !page.endsWith('/cars/vehicles/enus-jubilee/') && !page.endsWith('/cars/vehicles/enus-windsor/') && !page.endsWith('/cars/vehicles/vapid-contender/') && !page.endsWith('/cars/vehicles/ubermacht-zion-cabrio/') && !page.endsWith('/cars/vehicles/karin-sultan/') && !page.endsWith('/cars/vehicles/grotti-furia/') && !page.endsWith('/cars/vehicles/pegassi-zorrusso/') && !page.endsWith('/time-attack/submit/') && !page.endsWith('/time-attack/rules/') && !page.endsWith('/cars/compare/') &&
+        !page.endsWith('/cars/vehicles/vapid-caracara/') && !page.endsWith('/cars/vehicles/enus-jubilee/') && !page.endsWith('/cars/vehicles/enus-windsor/') && !page.endsWith('/cars/vehicles/vapid-contender/') && !page.endsWith('/cars/vehicles/ubermacht-zion-cabrio/') && !page.endsWith('/cars/vehicles/albany-buccaneer-custom/') && !page.endsWith('/cars/vehicles/karin-sultan/') && !page.endsWith('/cars/vehicles/grotti-furia/') && !page.endsWith('/cars/vehicles/pegassi-zorrusso/') && !page.endsWith('/time-attack/submit/') && !page.endsWith('/time-attack/rules/') && !page.endsWith('/cars/compare/') &&
         !noindexVehiclePaths.some((p) => page.endsWith(p)) && !noindexDataPaths.some((p) => page.endsWith(p)),
     }),
   ],
