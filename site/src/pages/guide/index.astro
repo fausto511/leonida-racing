@@ -193,7 +193,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
         {guideMethodology.map((p) => <p class="gd-p" set:html={p} />)}
         <div class="gd-count card" id="vehicle-count">
           <strong class="display">{GUIDE_VEHICLES.value}</strong>
-          <p><b>{GUIDE_VEHICLES.label}:</b> <a href={GUIDE_VEHICLES.sourceUrl} target="_blank" rel="noopener">{GUIDE_VEHICLES.sourceLabel}</a> {GUIDE_VEHICLES.note}</p>
+          <p><b>{GUIDE_VEHICLES.label}:</b> {GUIDE_VEHICLES.sourceUrl && <><a href={GUIDE_VEHICLES.sourceUrl} target="_blank" rel="noopener">{GUIDE_VEHICLES.sourceLabel}</a> </>}{GUIDE_VEHICLES.note}</p>
         </div>
         <p class="gd-updated">Last updated: <time datetime={GUIDE_UPDATED}>{updatedLabel}</time></p>
         <p class="gd-indep">Leonida Racing is an independent community project and is not affiliated with Rockstar Games or Take-Two Interactive.</p>

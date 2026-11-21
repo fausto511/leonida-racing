@@ -153,8 +153,7 @@ export const guideSections: GuideSection[] = [
       { label: 'Rockstar Games — GTA VI Media', url: R_MEDIA, note: 'official trailers and media library.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: 'official screenshot titles, including named Ultimate Edition vehicles.' },
       { label: 'Rockstar Support — GTA VI Platforms, Editions, and Versions', url: R_SUPPORT, note: 'named edition vehicles and content.' },
-      // Fausto 15.10.2026: source of the vehicle count on the home Guide card. Note: Codex 18.10. (Racing-Fahrzeug-News-2026-10-18.md), Fausto: show 311 with GTABase.
-      { label: 'GTABase — GTA 6 Cars & Vehicles List', url: 'https://www.gtabase.com/gta-6/vehicles/', note: 'Community database listing 329 entries across all vehicle types; entries do not all have the same evidence basis. Checked November 19, 2026.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 21, 2026: 157 cars across the nine car types Coupe, Muscle, Off-Road, Pickup, Sedan, Sport, Super, SUV, and Van in the vehicle progress menu.' },
       { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: the car previously known as the Buffalo STX appears as ’19 Buffalo in the game. Leonida Racing lists year-designated models with the year after the model name.' },
     ],
   },
@@ -483,13 +482,12 @@ export const guideMethodology: string[] = [
   `Sources are attached to the section they support, with timestamps for videos and official titles for screenshots. Reported theories may be included when they answer a useful question, with the publication and unconfirmed status made clear. Repetition across articles is not independent confirmation; an article’s use of leaked material is not presented as evidence from official footage. The page is updated when a source adds meaningful information or changes the evidence behind a claim.`,
 ];
 
-/** Vehicle-count card. Value = GTABase count (Fausto 2026-10-03: GTABase has very good sourcing).
- *  Label from Codex; note adapted by Claude to name the source (Codex review pending).
- *  Update value + checked date together. */
+/** Vehicle-count card (Fausto 2026-11-21): total of the nine in-game car types, no longer the GTABase count.
+ *  Text: Codex 21.11.2026 (Guide-Update-2, point 17). Update value + checked date together. */
 export const GUIDE_VEHICLES = {
-  value: '329',
-  label: 'GTABase Entries',
-  sourceLabel: 'GTABase',
-  sourceUrl: 'https://www.gtabase.com/gta-6/vehicles/',
-  note: 'Total across all vehicle types in GTABase’s database. This is not an official Rockstar vehicle count or a count of vehicles independently verified here. Checked November 19, 2026.',
+  value: '157',
+  label: 'Cars in the game',
+  sourceLabel: '',
+  sourceUrl: '',
+  note: 'Across the game’s nine car types, as listed in the in-game vehicle progress menu. Checked November 21, 2026.',
 };
