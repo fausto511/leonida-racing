@@ -10,7 +10,7 @@ export const vehiclePhotoAlt: Record<string, string> = {
   'annis-elegy-retro-custom': 'Annis Elegy Retro Custom with graphic livery and glowing taillights at night, rear view',
   'declasse-tulip': 'Red Declasse Tulip driving toward the camera on a sunny road',
   'ubermacht-cypher': 'White Übermacht Cypher race car with a rear wing on a wet track, rear view',
-  'ubermacht-sentinel-classic-cabrio': 'Red Übermacht Sentinel Classic Cabrio parked in front of a shop, front view',
+  'ubermacht-sentinel-classic': 'Red Übermacht Sentinel ’85 convertible parked in front of a shop, front view',
   'vapid-caracara-4x4': 'Silver Vapid Caracara 4x4 pickup with hood stripe on a gravel driveway',
   'canis-kamacho': 'Green Canis Kamacho off-road truck against a glowing green backdrop',
   'declasse-mamba-gt': 'Red Declasse Mamba GT race car with number 36 livery',

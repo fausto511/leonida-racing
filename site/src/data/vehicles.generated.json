@@ -1661,25 +1661,6 @@
    "other_names": []
   },
   {
-   "vehicle_id": "ubermacht-sentinel-classic-cabrio",
-   "make": "Übermacht",
-   "model": "Sentinel Classic Cabrio",
-   "manufacturer_logo_slug": "ubermacht",
-   "classes": [
-    "Sports Classics"
-   ],
-   "seats": 2,
-   "drive": "RWD",
-   "acquisition": null,
-   "has_photo": true,
-   "release_id": "base-game",
-   "first_seen_in": "GTA VI promotional website",
-   "first_seen_url": null,
-   "first_seen_timestamp": null,
-   "real_life_inspiration": "BMW 3 Series Cabriolet (E30)",
-   "other_names": []
-  },
-  {
    "vehicle_id": "ubermacht-sentinel-xs",
    "make": "Übermacht",
    "model": "Sentinel XS",
