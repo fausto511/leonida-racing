@@ -2,7 +2,7 @@
 // Time Attack / Gellhorn -- Redesign (DEC-0119, boards TimeAttack / TimeAttackActive / TimeAttackMobile):
 // image band with record tile (guest) / own best (logged in, set by Leaderboard.astro), no sub-nav,
 // leaderboard, "No lap yet" + "Put a time on the board", About Gellhorn with facts, three cards.
-// COPY STATUS: placeholders from the mockup until the Codex review (DEC-0088).
+// COPY STATUS: launch update 21.11.2026 approved by Fausto (Claude draft + Codex review).
 import Base from '../../../layouts/Base.astro';
 import { isLaunched } from '../../../data/launch';
 const launched = isLaunched(); // Track guide card (Fausto 18.11.)
@@ -17,12 +17,15 @@ const DRIVE = 'https://www.thedrive.com/news/theres-convincing-evidence-that-seb
 const JALOPNIK = 'https://www.jalopnik.com/2246099/gta-6-race-track-new-details/';
 // FAQ copy: Codex 25.10.2026 (Gellhorn-Seitentexte). "Where" and "How long" held back until measured (DEC-0181).
 const faq = [
-  { q: 'Is there a race track in GTA 6?', a: 'Yes. Rockstar’s Extended Look shows cars racing on a paved circuit, with lap information, a timer, and a position display.' },
-  { q: 'Is Gellhorn International Raceway the official name?', a: 'It is the established name we use for the circuit. Rockstar’s footage separately shows the race track and “Gellhorn International” racing branding, but does not display the complete venue name alongside the circuit.' },
+  { q: 'Is there a race track in GTA 6?', a: 'Yes. Gellhorn International Raceway, just south of Port Gellhorn, is a dedicated road course you can race in story mode. GTA VI also has other race venues, including Boone Speedway and Ambrosia Raceway.' },
+  { q: 'Is Gellhorn International Raceway the official name?', a: 'Yes. That’s the venue’s name in the game. Race menus shorten it to Gellhorn Raceway.' },
+  { q: 'How do you unlock races at Gellhorn?', a: 'Play the introduction event at the track. It unlocks the Keep It PG series, and placing in those races opens up more events.' },
+  { q: 'Can you race your own car at Gellhorn?', a: 'Yes, if its road rating fits the event. You can also rent one of the tuned race cars on offer.' },
+  { q: 'Do AI racers rubber-band at Gellhorn?', a: 'Yes, and it’s very noticeable. Rivals slow sharply when you fall behind and catch up quickly when you pull away.' },
   { q: 'Is Gellhorn International Raceway based on Sebring?', a: 'Sebring is a rumored inspiration. The Drive and Jalopnik have discussed the comparison, but it has not been confirmed by Rockstar in the official material reviewed for this guide. Parts of that discussion rely on leaked maps. That does not establish that Gellhorn copies Sebring’s layout, length, or corners.',
     aHtml: `Sebring is a rumored inspiration. <a href="${DRIVE}" rel="noopener">The Drive</a> and <a href="${JALOPNIK}" rel="noopener">Jalopnik</a> have discussed the comparison, but it has not been confirmed by Rockstar in the official material reviewed for this guide. Parts of that discussion rely on leaked maps. That does not establish that Gellhorn copies Sebring’s layout, length, or corners.` },
-  { q: 'What cars are best for Gellhorn?', a: 'Check the Gellhorn reference-lap rankings to compare cars, and the Time Attack leaderboard to see driver results. Compare the same tuning category and read the test notes before treating two times as equivalent. A reference lap is not a guarantee of your own result.',
-    aHtml: `Check the <a href="${base}cars/rankings/gellhorn-lap/">Gellhorn reference-lap rankings</a> to compare cars, and the <a href="#leaderboard">Time Attack leaderboard</a> to see driver results. Compare the same tuning category and read the test notes before treating two times as equivalent. A reference lap is not a guarantee of your own result.` },
+  { q: 'What cars are best for Gellhorn?', a: 'Check the Gellhorn lap rankings to compare cars, and the Time Attack leaderboard to see driver results. Compare the same tuning category and read the test notes before treating two times as equivalent. A Gellhorn lap is not a guarantee of your own result.',
+    aHtml: `Check the <a href="${base}cars/rankings/gellhorn-lap/">Gellhorn lap rankings</a> to compare cars, and the <a href="#leaderboard">Time Attack leaderboard</a> to see driver results. Compare the same tuning category and read the test notes before treating two times as equivalent. A Gellhorn lap is not a guarantee of your own result.` },
   { q: 'How do I submit a Gellhorn lap?', a: 'Use Submit a lap and follow the Time Attack rules for your entry and evidence. Video verification is shown separately from acceptance onto the leaderboard.',
     aHtml: `Use <a href="${base}time-attack/submit/">Submit a lap</a> and follow the <a href="${base}time-attack/how-it-works/#rules">Time Attack rules</a> for your entry and evidence. Video verification is shown separately from acceptance onto the leaderboard.` },
   { q: 'Is Leonida Racing’s leaderboard an official Rockstar ranking?', a: 'No. It is a community leaderboard run by Leonida Racing. Our submission rules and verification labels describe our own competition.' },
@@ -74,13 +77,13 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
       </div>
       <div class="card txt">
         <p>Gellhorn International Raceway is the circuit at the center of Leonida Racing’s GTA VI Time Attack. Bring your favorite car, put a clean lap together, and give the next driver something to chase. Accepted laps follow our submission rules, with video verification shown separately.</p>
-        <p>Rockstar’s Extended Look shows cars racing on a paved circuit with curbing and a racing HUD: lap information, a timer, and a position display. This is a dedicated motorsport circuit built by Rockstar, not a route laid out on public roads. There’s a grid to race against and a clock to watch. For anyone who enjoys chasing a personal best, that’s a good reason to pay attention.</p>
-        <p>The name needs one distinction. Trailer 2 shows Lucia wearing “Gellhorn International” racing branding. The circuit footage does not display the full venue name beside the track. We use the established name Gellhorn International Raceway, while keeping those two pieces of official footage separate in our source notes.</p>
+        <p>Gellhorn International Raceway is a dedicated road course just south of Port Gellhorn, and you can race it in story mode. Its layouts range from the Short Loop and Basic Loop to longer loops, with reverse layouts and a Rallycross Loop adding variety. The races we checked had 16-car grids.</p>
+        <p>At Keep It PG, you can enter your own car if its road rating fits, or rent a tuned Übermacht Cypher, Bravado Buffalo ’19, or Dinka Chavos XS. The introduction event unlocks Keep It PG, and placing in those races opens up more. Gellhorn races charge an entry fee, with a rental fee on top if you borrow a car. The AI uses heavy rubber-banding: rivals slow sharply when you fall behind and catch up quickly when you pull away.</p>
         <p>Sebring International Raceway comes up as a possible inspiration in coverage by <a href={DRIVE} rel="noopener">The Drive</a> and <a href={JALOPNIK} rel="noopener">Jalopnik</a>. That comparison remains unconfirmed, and parts of the discussion rely on leaked maps rather than official footage. It is a theory about the inspiration, not proof of a replica.</p>
-        <p>Use the leaderboard to compare driver laps, then check the <a href={`${base}cars/rankings/gellhorn-lap/`}>car rankings</a> for Gellhorn reference times. Your favorite build still has to earn its time on the board.</p>
+        <p>Use the leaderboard to compare driver laps, then check the <a href={`${base}cars/rankings/gellhorn-lap/`}>car rankings</a> for Gellhorn laps. Your favorite build still has to earn its time on the board.</p>
         <dl class="facts">
           <div><dt>Length</dt><dd class="p">Not measured</dd></div>
-          <div><dt>Corners</dt><dd class="p">Not measured</dd></div>
+          <div><dt>Grid</dt><dd>16 cars</dd></div>
           <div><dt>Track record</dt><dd id="ta-fact-rec">No record yet</dd></div>
         </dl>
       </div>
@@ -95,7 +98,7 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
       <div class="card">
         <span class="pill"><i></i>{launched ? 'Coming soon' : 'After launch'}</span>
         <h3>Track guide</h3>
-        <p>Braking points, racing lines and common mistakes, section by section. Goes up once we have driven Gellhorn ourselves.</p>
+        <p>Braking points, racing lines and common mistakes, section by section.</p>
         {!launched && <span class="arrow lk off">Coming after launch</span>}
       </div>
       <div class="card">
