@@ -17,7 +17,7 @@ import { vehicleOptions } from './vehicles';
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
 // Bump on EVERY content change to the Guide (visible as "Last updated" + Article dateModified) — Fausto 27.10.2026.
-export const GUIDE_UPDATED = '2026-11-21';
+export const GUIDE_UPDATED = '2026-11-22';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -115,6 +115,8 @@ export interface GuideSection {
   status?: string;
   paragraphs: string[]; // trusted HTML (<strong>, internal <a href="{base}…">)
   cta?: { label: string; href: string };
+  /** optional table after the paragraphs (cells: trusted HTML) */
+  table?: { caption: string; head: string[]; rows: string[][] };
   sourcesHeading?: string;
   sources: GuideSource[];
 }
@@ -289,6 +291,48 @@ export const guideSections: GuideSection[] = [
       { label: 'TheSixthAxis — GTA VI Ultimate Edition and Vintage Vice City Pack', url: TSA, note: 'June 24, 2026: documentation of Rockstar’s accompanying descriptions for Paradise Garage and Shore Court Garage.' },
       { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: vehicle storage and the personal vehicle as a stash. Checked October 30, 2026.' },
       { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 20, 2026: personal car wrecked, continued in another car, called Joey; the same personal car was delivered to the roadside seconds later. Cost not checked.' },
+    ],
+  },
+  {
+    // RS-0088 (Fausto 22.11.2026). COPY: Claude draft -> Codex review (DEC-0088).
+    id: 'garages',
+    title: 'All Garages in GTA VI: Locations, Spaces and How to Get Them',
+    status: 'Reported by Players',
+    paragraphs: [
+      `Garages are the only property you can buy in GTA VI’s Story Mode. Every space in a garage lets you register one more personal car. Twelve garages come with every copy of the game: eight you buy and four the story gives you. Three more are edition and GTA+ bonuses.`,
+      `The <strong>Vice City Real Estate</strong> app on your phone opens after the Chapter 2 mission “Daily Driver.” Each of the eight garages for sale has one space. Prices run from $5,000 to $50,000; BuckMe Gold members pay 20% less, which needs a $100,000 deposit in BuckMe Family Savings. Buy all eight and you unlock the Little Boxes trophy.`,
+      `The story garages are free and bigger. Port Gellhorn Station comes after “Daily Driver,” Thompson Court after “Company Cars” in Chapter 4, and NE 15th Street and Pegassi Residences after “Operation Savage Glory” in Chapter 5. With three spaces, Pegassi Residences is the largest garage in the game.`,
+      `Shore Court Garage in Ocean Beach comes with the pre-order bonus, Paradise Garage in Watson Bay with the Ultimate Edition, and GTA+ members get the Crosstown Garage from Chapter 3.`,
+      `Keep track of your own setup on Leonida Racing: add the garages you own, park your cars in them and see which spaces are still free.`,
+    ],
+    table: {
+      caption: 'GTA VI garages, spaces and how to get them',
+      head: ['Garage', 'Area', 'Spaces', 'How to get it'],
+      rows: [
+        ['Mitchel Auto Center', 'Kelly County', '1', '$5,000 ($4,000 with BuckMe Gold)'],
+        ['Persistence Road Garage', 'Belville', '1', '$9,500 ($7,600)'],
+        ['7th Avenue Garage', 'Salton, Vice City', '1', '$15,000 ($12,000)'],
+        ['Store n’ Bolt', 'Ambrosia', '1', '$21,000 ($16,800)'],
+        ['Wyatt Motors', 'Allied Crystal, Ambrosia', '1', '$27,000 ($21,600)'],
+        ['Vela Rota Drive Garage', 'Capri', '1', '$30,000 ($24,000)'],
+        ['Bonita Court Garage', 'Vice Beach', '1', '$42,500 ($34,000)'],
+        ['Atlantic Court Garage', 'Ocean Beach', '1', '$50,000 ($40,000)'],
+        ['Port Gellhorn Station Garage', 'Port Gellhorn', '1', 'Story: “Daily Driver” (Chapter 2)'],
+        ['Thompson Court Garage', 'Ocean Beach', '2', 'Story: “Company Cars” (Chapter 4)'],
+        ['NE 15th Street Garage', 'Stockyard, Vice City', '2', 'Story: “Operation Savage Glory” (Chapter 5)'],
+        ['Pegassi Residences Garage', 'Tequesta Retreat, Vice City', '3', 'Story: “Operation Savage Glory” (Chapter 5)'],
+        ['Shore Court Garage', 'Ocean Beach', '1', 'Pre-order bonus'],
+        ['Paradise Garage', 'Watson Bay', '1', 'Ultimate Edition'],
+        ['GTA+ Crosstown Garage', 'Crosstown, Vice City', '1', 'GTA+, from Chapter 3'],
+      ],
+    },
+    cta: { label: 'Sign in and manage your garages', href: 'account/#garages' },
+    sources: [
+      { label: 'PowerPyx — GTA 6 All Garage Locations', url: 'https://www.powerpyx.com/gta-6-all-garage-locations/', note: 'Eight garages for sale and four story garages with their spaces and unlock missions. Checked November 22, 2026.' },
+      { label: 'Power Up Gaming — GTA 6: How to Buy Garages and Store Your Cars', url: 'https://powerupgaming.co.uk/2026/11/21/gta-6-how-to-buy-garages-and-store-your-cars/', note: 'November 21, 2026: regular and BuckMe Gold prices, spaces, story and bonus garages. Checked November 22, 2026.' },
+      { label: 'gta6guide.fr — GTA 6 Properties: Houses, Garages, Prices & Locations', url: 'https://gta6guide.fr/en/gta-6/properties', note: 'All 15 garages with area and spaces. Checked November 22, 2026.' },
+      { label: 'GTABase — All GTA 6 Garage Locations', url: 'https://www.gtabase.com/gta-6/map/?feature=garages', note: 'Garage map, unlock after “Daily Driver.” Checked November 22, 2026.' },
+      { label: 'Game Checklists — GTA 6 Properties & Garages Checklist', url: 'https://game-checklists.com/gta6/properties-checklist/', note: 'Little Boxes trophy for buying all eight garages. Checked November 22, 2026.' },
     ],
   },
   {

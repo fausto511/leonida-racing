@@ -47,7 +47,7 @@ const jsonLd = [
 // Short TOC labels (Claude placeholders).
 const tocLabel: Record<string, string> = {
   vehicles: 'Vehicles', granforma: 'Brands & rebadging', driving: 'Driving & physics', theft: 'Theft & registration', heat: 'Heat & police',
-  ownership: 'Ownership & garages', fuel: 'Fuel & repairs', stats: 'Stats & ratings', customization: 'Tuning & mod shops', classics: 'Classic cars', racing: 'Racing', gellhorn: 'Gellhorn',
+  ownership: 'Ownership', garages: 'Garages', fuel: 'Fuel & repairs', stats: 'Stats & ratings', customization: 'Tuning & mod shops', classics: 'Classic cars', racing: 'Racing', gellhorn: 'Gellhorn',
   'car-culture': 'Car culture', 'not-confirmed': 'Open questions',
 };
 const toc: [string, string][] = [
@@ -127,7 +127,16 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
               )}
             </Fragment>
           ))}
-          {s.cta && <a class="btn btn-s gd-cta" href={`${base}${s.cta.href}`}>{s.cta.label}</a>}
+          {s.table && (
+            <div class="gd-tbl-wrap">
+              <table class="gd-tbl">
+                <caption class="sr-only">{s.table.caption}</caption>
+                <thead><tr>{s.table.head.map((h) => <th scope="col">{h}</th>)}</tr></thead>
+                <tbody>{s.table.rows.map((r) => <tr>{r.map((c, i) => i === 0 ? <th scope="row" set:html={c} /> : <td set:html={c} />)}</tr>)}</tbody>
+              </table>
+            </div>
+          )}
+          {s.cta && <a class={`btn ${s.id === 'garages' ? 'btn-p' : 'btn-s'} gd-cta`} href={`${base}${s.cta.href}`}>{s.cta.label}</a>}
           <div class="gd-src">
             <p class="gd-src-h">{s.sourcesHeading ?? 'Sources'} <span>· {s.sources.length}</span></p>
             <ul>
@@ -245,6 +254,14 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
   .gd-p :global(a) { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .15s; }
   .gd-p :global(a:hover) { color: var(--lr-orange); }
   .gd-cta { margin: 4px 0 0; }
+  .gd-tbl-wrap { margin: 4px 0 20px; overflow-x: auto; border: 1px solid var(--lr-line); border-radius: 8px; }
+  .gd-tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .gd-tbl th, .gd-tbl td { padding: 10px 14px; text-align: left; border-top: 1px solid var(--lr-line-soft); vertical-align: top; }
+  .gd-tbl thead th { border-top: 0; color: var(--lr-muted); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: var(--lr-card); }
+  .gd-tbl tbody th { font-weight: 600; color: var(--lr-text); white-space: nowrap; }
+  .gd-tbl td { color: var(--lr-soft); }
+  .gd-tbl td:nth-child(3) { text-align: center; font-variant-numeric: tabular-nums; color: var(--lr-text); }
+  @media (max-width: 760px) { .gd-tbl th, .gd-tbl td { padding: 9px 10px; } .gd-tbl tbody th { white-space: normal; } }
 
   /* figures in card style */
   .gd-figs { margin: 4px 0 20px; }

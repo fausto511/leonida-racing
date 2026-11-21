@@ -3,8 +3,9 @@
 // My Account. Switch between My cars (vehicles the driver owns) and Wishlist
 // (RS-0087, cars he wants next). Both lists are private. Each list ends in a
 // "+" slot that opens the vehicle picker; the band action opens it too.
-// Owning a car takes it off the wishlist (database trigger). Garages (RS-0088)
-// join the switch after launch. Copy marked as placeholder until Codex (DEC-0088).
+// Owning a car takes it off the wishlist (database trigger). Garages (RS-0088, Fausto 22.11.2026):
+// fourth tab; the driver ticks the garages he owns and sorts his cars into them (strict spaces).
+// Copy marked as placeholder until Codex (DEC-0088).
 import Base from '../../layouts/Base.astro';
 import AccountHead from '../../components/AccountHead.astro';
 import CarCard from '../../components/CarCard.astro';
@@ -52,6 +53,7 @@ const vehicleIndex = [...vehicleOptions]
         <button type="button" role="tab" id="mg-tab-cars" aria-controls="mg-v-cars" aria-selected="true" data-view="cars">My cars <span class="mg-n" id="mg-n-cars"></span></button>
         <button type="button" role="tab" id="mg-tab-wish" aria-controls="mg-v-wish" aria-selected="false" data-view="wishlist">Wishlist <span class="mg-n" id="mg-n-wish"></span></button>
         <button type="button" role="tab" id="mg-tab-coll" aria-controls="mg-v-coll" aria-selected="false" data-view="collection">Collection</button>
+        <button type="button" role="tab" id="mg-tab-gar" aria-controls="mg-v-gar" aria-selected="false" data-view="garages">Garages <span class="mg-n" id="mg-n-gar"></span></button>
       </div>
 
       <section id="mg-v-cars" role="tabpanel" aria-labelledby="mg-tab-cars">
@@ -94,8 +96,40 @@ const vehicleIndex = [...vehicleOptions]
           <button type="button" class="cx-more" id="cx-more" hidden></button>
         </div>
       </section>
+
+      <!-- Garages (RS-0088). COPY: Claude placeholder -> Codex (DEC-0088). -->
+      <section id="mg-v-gar" role="tabpanel" aria-labelledby="mg-tab-gar" hidden>
+        <div class="mg-head">
+          <div>
+            <h2 class="lr-h2 lr-h2-s">Garages</h2>
+            <p class="mg-lede">Add the garages you own in GTA VI and park your cars in them. Each garage holds as many cars as it has spaces in the game. Only you can see this.</p>
+          </div>
+          <div class="mg-meter"><b id="gr-used">0</b> of <span id="gr-cap">0</span> spaces used<span class="mg-bar"><i id="gr-bar"></i></span></div>
+        </div>
+        <p class="mg-msg lr-note" id="mg-msg-gar" role="status" hidden></p>
+        <div class="gr-empty lr-empty-panel" id="gr-empty" hidden>
+          <p>You have not added any garages yet. Pick the ones you own in the game, then park your cars in them.</p>
+          <button type="button" class="btn btn-p" data-gr-edit>Add garages</button>
+        </div>
+        <div class="gr-grid" id="gr-grid"></div>
+        <div class="gr-tools" id="gr-tools" hidden><button type="button" class="btn btn-s" data-gr-edit>Add or remove garages</button></div>
+        <div class="gr-free" id="gr-free" hidden>
+          <h3 class="gr-free-h">Not in a garage <span class="mg-n" id="gr-free-n"></span></h3>
+          <ul class="gr-rows" id="gr-free-list"></ul>
+        </div>
+      </section>
     </div>
   </section>
+
+  <dialog class="mg-picker gr-pick" id="gr-pick" aria-labelledby="gr-pick-title">
+    <div class="mg-picker-head">
+      <h2 id="gr-pick-title">Your garages</h2>
+      <button type="button" class="mg-picker-close" id="gr-pick-close" aria-label="Close">✕</button>
+    </div>
+    <p class="gr-pick-lede">Tick every garage you own in GTA VI.</p>
+    <div class="mg-picker-list" id="gr-pick-list"></div>
+    <div class="gr-pick-foot"><button type="button" class="btn btn-p" id="gr-pick-save">Save</button></div>
+  </dialog>
 
   <!-- The standard car card of the Cars page for every car (Fausto 27.10.: one card per object, only
        the buttons differ). The page clones the cards it needs into My cars / Wishlist. -->
@@ -177,7 +211,7 @@ const vehicleIndex = [...vehicleOptions]
   @media (max-width: 1100px) { .mg-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (max-width: 900px) { .mg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 760px) { .mg-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; } }
-  @media (max-width: 560px) { .mg-seg { display: flex; } .mg-seg button { flex: 1; justify-content: center; } }
+  @media (max-width: 560px) { .mg-seg { display: flex; max-width: 100%; overflow-x: auto; scrollbar-width: none; } .mg-seg button { flex: 1 0 auto; justify-content: center; padding: 0 10px; gap: 6px; } }
   :global(.mg-grid .vcard.is-new) { animation: mg-in .45s ease-out; border-color: var(--lr-orange); }
   @keyframes mg-in { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { :global(.mg-grid .vcard.is-new) { animation: none; } }
@@ -200,6 +234,42 @@ const vehicleIndex = [...vehicleOptions]
   :global(.mg-slot strong) { color: var(--lr-text); font-weight: 600; font-size: 15px; }
   :global(.mg-slot-t) { display: flex; flex-direction: column; gap: 4px; }
   @media (max-width: 760px) { :global(.mg-slot) { min-height: 118px; flex-direction: row; gap: 14px; } }
+
+  /* Garages (RS-0088) */
+  .gr-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  @media (max-width: 1100px) { .gr-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 760px) { .gr-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; } }
+  :global(.gr-card) { border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); padding: 16px 18px 10px; }
+  :global(.gr-card.is-full) { border-color: var(--lr-line-strong); }
+  :global(.gr-card-h) { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  :global(.gr-card h3) { margin: 0; font-size: 16px; font-weight: 700; color: var(--lr-text); }
+  :global(.gr-area) { display: block; margin-top: 2px; font-size: 13px; color: var(--lr-muted); }
+  :global(.gr-cap) { flex: none; font-variant-numeric: tabular-nums; font-size: 14px; font-weight: 600; color: var(--lr-soft); }
+  :global(.gr-card.is-full .gr-cap) { color: var(--lr-lime); }
+  :global(.gr-rows) { list-style: none; margin: 0; padding: 0; }
+  :global(.gr-row) { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 0; border-top: 1px solid var(--lr-line-soft); }
+  :global(.gr-row .mg-logo) { width: 26px; height: 26px; }
+  :global(.gr-car) { flex: 1; min-width: 0; color: var(--lr-text); font-size: 15px; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  :global(a.gr-car:hover) { color: var(--lr-orange); }
+  :global(.gr-car .mg-make) { color: var(--lr-muted); font-size: 13px; }
+  :global(.gr-row.is-empty .gr-car) { color: var(--lr-muted); font-style: italic; }
+  :global(.gr-sel) { flex: none; max-width: 46%; width: 118px; height: 36px; padding: 0 8px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: var(--lr-raised); color: var(--lr-text); font: 500 14px var(--gh-font-body); cursor: pointer; }
+  :global(.gr-sel:disabled) { opacity: .5; cursor: default; }
+  .gr-tools { margin: 20px 0 0; }
+  .gr-free { margin-top: 32px; }
+  .gr-free-h { margin: 0 0 4px; font-size: 16px; font-weight: 700; color: var(--lr-text); }
+  .gr-free .gr-rows { border: 1px solid var(--lr-line); border-radius: 8px; background: var(--lr-card); padding: 0 18px; }
+  .gr-free :global(.gr-row:first-child) { border-top: 0; }
+  .gr-empty { margin-bottom: 20px; }
+  .gr-pick-lede { margin: 0 1.1rem .6rem; color: var(--lr-soft); font-size: 14px; }
+  :global(.gr-opt) { display: flex; align-items: center; gap: .7rem; padding: .55rem .5rem; border-radius: var(--gh-radius); cursor: pointer; font-size: .92rem; }
+  :global(.gr-opt:hover) { background: var(--gh-surface-soft, var(--lr-white-hover)); }
+  :global(.gr-opt input) { width: 18px; height: 18px; accent-color: var(--lr-orange); flex: none; }
+  :global(.gr-opt-t) { display: flex; flex-direction: column; min-width: 0; }
+  :global(.gr-opt-sub) { color: var(--gh-muted); font-size: .78rem; }
+  :global(.gr-opt-cap) { margin-left: auto; flex: none; color: var(--lr-soft); font-size: .8rem; font-variant-numeric: tabular-nums; }
+  .gr-pick-foot { display: flex; justify-content: flex-end; padding: .7rem 1.1rem 1rem; border-top: 1px solid var(--gh-line); }
+  @media (max-width: 560px) { .gr-pick-foot .btn { width: 100%; } }
 
   /* picker */
   .mg-picker { width: min(34rem, calc(100vw - 2rem)); max-height: min(40rem, calc(100vh - 3rem)); padding: 0; border: 1px solid var(--gh-line); border-radius: var(--gh-radius-lg, 12px); background: var(--gh-surface); color: var(--gh-text); }
@@ -230,12 +300,12 @@ const vehicleIndex = [...vehicleOptions]
 
 <script>
   import { backendConfigured, getSupabase } from '../../scripts/supabase-client';
-  import { currentDriverId, fetchOwnedList, setOwned, fetchWishList, setWished } from '../../scripts/owned';
+  import { currentDriverId, fetchOwnedList, setOwned, fetchWishList, setWished, fetchGarageCatalog, fetchMyGarages, saveMyGarages, fetchCarGarages, setCarGarage, type Garage } from '../../scripts/owned';
   import { esc } from '../../data/hub';
   import { newStatsVehicles, markSeen } from '../../scripts/notices';
 
   type V = { id: string; make: string; model: string; cls: string; classes: string; logo: string; photo: boolean };
-  type View = 'cars' | 'wishlist' | 'collection';
+  type View = 'cars' | 'wishlist' | 'collection' | 'garages';
   type Group = { name: string; href: string; ids: string[] };
   const all = (window as any).__mgVehicles as V[];
   const byId = new Map(all.map((v) => [v.id, v]));
@@ -255,15 +325,20 @@ const vehicleIndex = [...vehicleOptions]
   let fresh: string | null = null;
   let newStats = new Set<string>(); // RS-0130: cars with new stats since the last visit
   let view: View = 'cars';
+  // Garages (RS-0088)
+  let catalog: Garage[] = [];
+  let myGarages: string[] = [];
+  let carGarage = new Map<string, string | null>();
   let pickFor: View = 'cars';
 
   const name = (id: string) => { const v = byId.get(id); return v ? `${v.make} ${v.model}` : 'The car'; };
   const logo = (v: V) => `<span class="mg-logo"><img src="${base}images/logos/${esc(v.logo)}-gta-6-logo.svg" alt="" width="22" height="22" loading="lazy" /></span>`;
 
   /** status line above a list; with undo it offers to take the last step back */
+  const msgId = (l: View) => (l === 'cars' ? 'mg-msg-cars' : l === 'garages' ? 'mg-msg-gar' : 'mg-msg-wish');
   function msg(list: View, text: string, error = false, undo?: () => Promise<void>) {
-    (['cars', 'wishlist'] as View[]).forEach((l) => { const o = $(l === 'cars' ? 'mg-msg-cars' : 'mg-msg-wish'); if (l !== list) o.hidden = true; });
-    const el = $(list === 'cars' ? 'mg-msg-cars' : 'mg-msg-wish');
+    (['cars', 'wishlist', 'garages'] as View[]).forEach((l) => { if (l !== list) $(msgId(l)).hidden = true; });
+    const el = $(msgId(list));
     el.className = `mg-msg lr-note${error ? ' is-error' : ''}`;
     el.innerHTML = `<span>${esc(text)}</span>${undo ? '<button type="button" class="mg-undo">Undo</button>' : ''}`;
     el.hidden = !text;
@@ -375,7 +450,111 @@ const vehicleIndex = [...vehicleOptions]
     $('mg-own-n').textContent = String(cars.length);
     $('mg-own-bar').style.width = `${Math.min(100, (cars.length / all.length) * 100)}%`;
     renderColl();
+    renderGarages();
     fresh = null;
+  }
+
+  // ---- Garages (RS-0088) ----
+  const gById = () => new Map(catalog.map((g) => [g.id, g]));
+  const kindLabel: Record<string, string> = { purchase: 'Bought', story: 'Story', bonus: 'Bonus' };
+  const spaces = (n: number) => `${n} ${n === 1 ? 'space' : 'spaces'}`;
+  /** cars per owned garage, in the order the driver added them */
+  function parked() {
+    const m = new Map<string, string[]>(myGarages.map((g) => [g, []]));
+    owned.forEach((id) => { const g = carGarage.get(id); if (g && m.has(g)) m.get(g)!.push(id); });
+    return m;
+  }
+  /** move menu for a car: Not in a garage + every owned garage (full ones disabled) */
+  function moveSelect(id: string, current: string | null, used: Map<string, string[]>) {
+    const gs = gById();
+    const head = `<option value="" selected disabled hidden>${current ? 'Move' : 'Park in'}</option>`;
+    const out = current ? `<option value="-">Not in a garage</option>` : '';
+    const opts = [head, out].concat(myGarages.filter((gid) => gid !== current).map((gid) => {
+      const g = gs.get(gid); if (!g) return '';
+      const n = used.get(gid)?.length ?? 0;
+      const full = n >= g.capacity && gid !== current;
+      return `<option value="${esc(gid)}"${full ? ' disabled' : ''}>${esc(g.name)} (${n}/${g.capacity}${full ? ', full' : ''})</option>`;
+    }));
+    return `<select class="gr-sel" data-move="${esc(id)}" aria-label="Move ${esc(name(id))}">${opts.join('')}</select>`;
+  }
+  const carLabel = (id: string) => { const v = byId.get(id); return v ? `${logo(v)}<a class="gr-car" href="${base}cars/vehicles/${encodeURIComponent(id)}/"><span class="mg-make">${esc(v.make)}</span> ${esc(v.model)}</a>` : ''; };
+  function renderGarages() {
+    const gs = gById();
+    const used = parked();
+    const mine = myGarages.map((g) => gs.get(g)).filter(Boolean) as Garage[];
+    const free = owned.filter((id) => { const g = carGarage.get(id); return !g || !used.has(g); });
+    const cap = mine.reduce((a, g) => a + g.capacity, 0);
+    const inUse = mine.reduce((a, g) => a + (used.get(g.id)?.length ?? 0), 0);
+    $('gr-used').textContent = String(inUse);
+    $('gr-cap').textContent = String(cap);
+    $('gr-bar').style.width = cap ? `${Math.min(100, (inUse / cap) * 100)}%` : '0';
+    $('mg-n-gar').textContent = mine.length ? String(mine.length) : '';
+    $('gr-empty').hidden = mine.length > 0;
+    $('gr-tools').hidden = mine.length === 0;
+    $('gr-grid').innerHTML = mine.map((g) => {
+      const cars = used.get(g.id) ?? [];
+      const emptyRows = Math.max(0, g.capacity - cars.length);
+      const parkable = free.length
+        ? `<select class="gr-sel" data-park="${esc(g.id)}" aria-label="Park a car in ${esc(g.name)}"><option value="" selected>Park a car</option>${free.map((id) => `<option value="${esc(id)}">${esc(name(id))}</option>`).join('')}</select>`
+        : '';
+      return `<article class="gr-card${cars.length >= g.capacity ? ' is-full' : ''}">
+        <div class="gr-card-h"><div><h3>${esc(g.name)}</h3><span class="gr-area">${esc([g.area, kindLabel[g.kind]].filter(Boolean).join(' · '))}</span></div><span class="gr-cap">${cars.length} / ${g.capacity}</span></div>
+        <ul class="gr-rows">${cars.map((id) => `<li class="gr-row">${carLabel(id)}${moveSelect(id, g.id, used)}</li>`).join('')}${Array.from({ length: emptyRows }, () => `<li class="gr-row is-empty"><span class="gr-car">Empty space</span>${parkable}</li>`).join('')}</ul>
+      </article>`;
+    }).join('');
+    $('gr-free').hidden = mine.length === 0 || free.length === 0;
+    $('gr-free-n').textContent = String(free.length);
+    $('gr-free-list').innerHTML = free.map((id) => `<li class="gr-row">${carLabel(id)}${moveSelect(id, null, used)}</li>`).join('');
+  }
+
+  async function moveCar(id: string, to: string | null) {
+    const from = carGarage.get(id) ?? null;
+    if (from === to) return;
+    try {
+      await setCarGarage(me!, id, to);
+      carGarage.set(id, to);
+      renderGarages();
+      const g = to ? gById().get(to) : null;
+      msg('garages', g ? `${name(id)} parked in ${g.name}.` : `${name(id)} taken out of its garage.`, false,
+        async () => { await setCarGarage(me!, id, from); carGarage.set(id, from); });
+    } catch (e: any) {
+      renderGarages();
+      msg('garages', String(e?.message ?? '').includes('garage_full') ? 'That garage is full. Move a car out first.' : 'Could not move the car — please try again.', true);
+    }
+  }
+
+  function renderGaragePicker() {
+    const have = new Set(myGarages);
+    const used = parked();
+    const groupsOf: [string, string][] = [['purchase', 'Bought in the Vice City Real Estate app'], ['story', 'From the story'], ['bonus', 'Edition and GTA+ bonus']];
+    $('gr-pick-list').innerHTML = groupsOf.map(([k, title]) => {
+      const gs = catalog.filter((g) => g.kind === k);
+      if (!gs.length) return '';
+      return `<p class="mg-group">${esc(title)}</p>` + gs.map((g) => {
+        const n = used.get(g.id)?.length ?? 0;
+        return `<label class="gr-opt"><input type="checkbox" value="${esc(g.id)}"${have.has(g.id) ? ' checked' : ''} /><span class="gr-opt-t"><span>${esc(g.name)}</span><span class="gr-opt-sub">${esc([g.area, n ? `${n} parked` : ''].filter(Boolean).join(' · '))}</span></span><span class="gr-opt-cap">${spaces(g.capacity)}</span></label>`;
+      }).join('');
+    }).join('');
+  }
+  async function saveGaragePicker() {
+    const btn = $<HTMLButtonElement>('gr-pick-save');
+    const ticked = [...document.querySelectorAll<HTMLInputElement>('#gr-pick-list input:checked')].map((i) => i.value);
+    const add = ticked.filter((g) => !myGarages.includes(g));
+    const remove = myGarages.filter((g) => !ticked.includes(g));
+    if (!add.length && !remove.length) { garPicker.close(); return; }
+    const used = parked();
+    const freed = remove.reduce((a, g) => a + (used.get(g)?.length ?? 0), 0);
+    btn.disabled = true;
+    try {
+      await saveMyGarages(me!, add, remove);
+      myGarages = [...myGarages.filter((g) => !remove.includes(g)), ...add];
+      owned.forEach((id) => { const g = carGarage.get(id); if (g && remove.includes(g)) carGarage.set(id, null); });
+      garPicker.close();
+      renderGarages();
+      msg('garages', freed ? `Garages saved. ${freed} ${freed === 1 ? 'car is' : 'cars are'} now not in a garage.` : 'Garages saved.');
+    } catch {
+      msg('garages', 'Could not save your garages — please try again.', true);
+    } finally { btn.disabled = false; }
   }
 
   function show(v: View, updateHash = true) {
@@ -383,13 +562,15 @@ const vehicleIndex = [...vehicleOptions]
     $('mg-v-cars').hidden = v !== 'cars';
     $('mg-v-wish').hidden = v !== 'wishlist';
     $('mg-v-coll').hidden = v !== 'collection';
+    $('mg-v-gar').hidden = v !== 'garages';
+    $('mg-tab-gar').setAttribute('aria-selected', String(v === 'garages'));
     $('mg-tab-coll').setAttribute('aria-selected', String(v === 'collection'));
     $('mg-tab-cars').setAttribute('aria-selected', String(v === 'cars'));
     $('mg-tab-wish').setAttribute('aria-selected', String(v === 'wishlist'));
-    if (cta) cta.textContent = v === 'wishlist' ? 'Add to wishlist' : 'Add a car you own';
+    if (cta) cta.textContent = v === 'wishlist' ? 'Add to wishlist' : v === 'garages' ? 'Add garages' : 'Add a car you own';
     if (updateHash) history.replaceState(null, '', v === 'cars' ? location.pathname + location.search : `#${v}`);
   }
-  const viewFromHash = (): View => (location.hash === '#wishlist' ? 'wishlist' : location.hash === '#collection' ? 'collection' : 'cars');
+  const viewFromHash = (): View => (location.hash === '#wishlist' ? 'wishlist' : location.hash === '#collection' ? 'collection' : location.hash === '#garages' ? 'garages' : 'cars');
 
   function renderPicker() {
     const q = pq.value.trim().toLowerCase();
@@ -439,8 +620,22 @@ const vehicleIndex = [...vehicleOptions]
   $('mg-almost-a').addEventListener('click', (e) => { e.preventDefault(); show('collection'); window.scrollTo({ top: 0 }); });
   window.addEventListener('hashchange', () => show(viewFromHash(), false));
 
+  // Garages (RS-0088): add/remove garages, park and move cars
+  const garPicker = $<HTMLDialogElement>('gr-pick');
+  const openGaragePicker = () => { renderGaragePicker(); garPicker.showModal(); $('gr-pick-list').scrollTop = 0; };
+  $('gr-pick-save').addEventListener('click', saveGaragePicker);
+  $('gr-pick-close').addEventListener('click', () => garPicker.close());
+  garPicker.addEventListener('click', (e) => { if (e.target === garPicker) garPicker.close(); });
+  $('mg-v-gar').addEventListener('change', (e) => {
+    const s = e.target as HTMLSelectElement;
+    if (!me || !s.matches('select')) return;
+    if (s.dataset.move && s.value) { s.disabled = true; moveCar(s.dataset.move, s.value === '-' ? null : s.value); }
+    else if (s.dataset.park && s.value) { s.disabled = true; moveCar(s.value, s.dataset.park); }
+  });
+
   $('acc-body').addEventListener('click', async (e) => {
     const t = e.target as HTMLElement;
+    if (t.closest('[data-gr-edit]')) { if (me) openGaragePicker(); return; }
     const add = t.closest<HTMLElement>('[data-add]');
     if (add) { openPicker(add.dataset.add as View); return; }
     if (!me) return;
@@ -462,8 +657,9 @@ const vehicleIndex = [...vehicleOptions]
         const i = owned.indexOf(id);
         await setOwned(me, id, false);
         owned = owned.filter((x) => x !== id);
+        carGarage.delete(id);
         render();
-        msg('cars', `${name(id)} removed from My cars.`, false, async () => { await setOwned(me!, id, true); owned.splice(i, 0, id); });
+        msg('cars', `${name(id)} removed from My cars.`, false, async () => { await setOwned(me!, id, true); owned.splice(i, 0, id); carGarage.set(id, null); });
       } else {
         const i = wish.indexOf(id);
         await setWished(me, id, false);
@@ -509,7 +705,7 @@ const vehicleIndex = [...vehicleOptions]
   $('mg-picker-close').addEventListener('click', () => picker.close());
   picker.addEventListener('click', (e) => { if (e.target === picker) picker.close(); }); // click on backdrop
   // band action (DEC-0188/0189): picker for the list on screen; signed out it starts the Discord sign-in
-  cta?.addEventListener('click', () => { if (me) openPicker(view === 'wishlist' ? 'wishlist' : 'cars'); else if (backendConfigured) $('acc-signin').click(); });
+  cta?.addEventListener('click', () => { if (me) { if (view === 'garages') openGaragePicker(); else openPicker(view === 'wishlist' ? 'wishlist' : 'cars'); } else if (backendConfigured) $('acc-signin').click(); });
 
   async function init(session: any) {
     $('acc-auth').hidden = Boolean(session);
@@ -518,7 +714,7 @@ const vehicleIndex = [...vehicleOptions]
     if (!session) return;
     me = await currentDriverId();
     if (!me) { msg('cars', 'Your driver profile is not ready yet — reload the page in a moment.', true); return; }
-    [owned, wish] = await Promise.all([fetchOwnedList(), fetchWishList()]);
+    [owned, wish, catalog, myGarages, carGarage] = await Promise.all([fetchOwnedList(), fetchWishList(), fetchGarageCatalog(), fetchMyGarages(), fetchCarGarages()]);
     render();
     // RS-0130: tag the cars with new stats, then count them as seen (clears the avatar dot)
     newStats = new Set(await newStatsVehicles());

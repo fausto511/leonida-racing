@@ -96,3 +96,4 @@ Zeitstempeln). Abgleich gegen `supabase_migrations.schema_migrations`:
 - Zwei SQL-Editor-Änderungen als Sonderfall nachgetragen (s. oben).
 
 - `20261121150000_vehicle_specialist_tracker_register_cost.sql`: per Supabase-MCP `apply_migration` am 21.11.2026 angewendet (Name `vehicle_specialist_tracker_register_cost`; Live-Version trägt den Zeitstempel der Anwendung).
+- `20261122010000_garages_planner.sql`: per Supabase-MCP `apply_migration` am 22.11.2026 angewendet (Name `garages_planner`). RS-0088 Garagen-Planer: Tabellen `garages` (15 Garagen, Stellplätze, Preise normal/BuckMe Gold) und `driver_garages`, Spalte `owned_vehicles.garage_id` (FK auf driver_garages, beim Entfernen der Garage auf NULL), Trigger `owned_vehicle_garage_capacity` (streng, Fehler `garage_full`), Update-Policy nur für `garage_id`.
