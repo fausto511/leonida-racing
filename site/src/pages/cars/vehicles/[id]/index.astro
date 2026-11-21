@@ -110,6 +110,8 @@ const ratingTiles = [
   { key: 'rating_offroad', label: 'Off-road rating' },
 ].map((r) => { const value = valOf(vehicle.id, r.key); return { ...r, value, ...classInfo(r.key, value) }; });
 const hasStats = statRows.some((r) => r.value != null) || ratingTiles.some((r) => r.value != null);
+// Drive / Seats / Storage come from the info page and show even before any stat is read (Fausto 21.11.2026).
+const hasFacts = vehicle.drive !== 'n/a' || !!vehicle.seats || vehicle.storage != null;
 const showAvg = statRows.some((r) => r.avg != null);
 const statVals = [...STAT_ROWS.map((r) => r.key), 'rating_road', 'rating_offroad'].map((k) => (vals as any)[k]).filter(Boolean);
 const statsPlatform: string | null = statVals.find((v: any) => v.platform)?.platform ?? null;
@@ -327,6 +329,21 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           </div>
         </div>
         <p class="vst-src">{statsSource}.</p>
+      </section>
+    )}
+    {!hasStats && hasFacts && (
+      <section class="wrap vsec" id="stats">
+        <div class="vsec-head">
+          <div class="vsec-titles">
+            <p class="eyebrow">In-game stats</p>
+            <h2 class="lr-h2 vsec-title display">{vehicle.model} by the numbers</h2>
+          </div>
+        </div>
+        <dl class="vst-facts is-solo">
+          <div><dt>Drive</dt><dd class:list={{ 'is-tba': vehicle.drive === 'n/a' }}>{vehicle.drive === 'n/a' ? notRecorded : vehicle.drive}</dd></div>
+          <div><dt>Seats</dt><dd class:list={{ 'is-tba': !vehicle.seats }}>{vehicle.seats || notRecorded}</dd></div>
+          <div><dt>Storage</dt><dd class:list={{ 'is-tba': vehicle.storage == null }}>{vehicle.storage != null ? `${vehicle.storage} ${vehicle.storage === 1 ? 'slot' : 'slots'}` : notRecorded}</dd></div>
+        </dl>
       </section>
     )}
 
@@ -663,6 +680,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vst-facts > div + div { border-top: 1px solid var(--lr-line-soft); }
   .vst-facts dt { color: var(--lr-soft); white-space: nowrap; }
   .vst-facts dd { margin: 0; font-weight: 600; text-align: right; }
+  .vst-facts.is-solo { max-width: 460px; }
   .vst-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
   .vst-upd { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--lr-muted); white-space: nowrap; }
   .vst-upd .ico { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; }
