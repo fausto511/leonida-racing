@@ -294,11 +294,14 @@ export const guideSections: GuideSection[] = [
     paragraphs: [
       `Edge reports a fuel gauge and engine-health readout for every vehicle. Refueling is described as quick, with cars covering long distances between stops.`,
       `Fuel is part of every drive: when the tank runs low, you refuel at a gas station. PC Gamer reports that electric vehicles use charging points instead and that fuel lasts long enough that stops are infrequent.`,
+      `In published tests, a full tank lasted roughly 18 to 30 minutes of driving, depending on the car. A stolen car may already be low on fuel, so check the gauge before a chase.`,
       `Gas stations can repair your car, too, not just fill the tank.`,
     ],
     sources: [
       { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: refueling at a gas station in story mode.' },
       { label: 'PC Gamer — Refueling cars in GTA 6 is barely necessary', url: 'https://www.pcgamer.com/games/grand-theft-auto/gta-6-refuel-repair-cars/', note: 'November 19, 2026: gas-station refueling, EV charging, how often you need to stop, and the Repair option in the gas-station Services menu. Checked November 21, 2026.' },
+      { label: 'Kotaku — We Tested How Long It Takes To Run Out Of Gas In GTA 6', url: 'https://kotaku.com/we-tested-how-long-it-takes-to-run-out-of-gas-in-gta-6-2000755601', note: 'Checked November 21, 2026: pickup 29:08; Banshee 18:31.' },
+      { label: 'MotiveGTA — How Long Does Fuel REALLY Last in GTA 6?', url: 'https://www.youtube.com/watch?v=jFHpHTjyQ8o&t=244s', note: 'November 2026: Willard Transient result at 4:04, Infernus ’96 at 6:01. Checked November 21, 2026.' },
       { label: 'Digital Car Addict — GTA VI vehicle overview', url: 'https://www.youtube.com/watch?v=ie4vtIle3lU&t=249s', note: 'November 2026: gas stations refuel and repair at 4:09. Checked November 20, 2026.' },
       { label: 'TGG — GTA 6: Vehicles Work Differently Now', url: 'https://www.youtube.com/watch?v=5PEKC28azRU&t=558s', note: 'Original creator report; chapter “Fuel & EV Charging” starts at 9:18.' },
       { label: 'GamesRadar — Rockstar boss on GTA 6’s refueling system', url: 'https://www.gamesradar.com/games/grand-theft-auto/rockstar-boss-says-well-see-what-people-say-about-gta-6s-controversial-refueling-system-but-thinks-its-so-fast-that-you-cant-complain/', note: 'September 3, 2026: explicitly attributes the refuel/repair interaction and approximate timing to TGG’s preview account.' },
@@ -449,6 +452,7 @@ export const guideCoverage: { name: string; text: string }[] = [
 export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'Is Gellhorn International Raceway based on Sebring?', a: 'Sebring is a rumored inspiration discussed by The Drive and Jalopnik. Parts of that comparison rely on leaked maps. The official material reviewed here does not confirm a Sebring connection or establish that Gellhorn copies its layout, length, or corners.' },
   { q: 'Do cars need fuel or charging in GTA VI?', a: 'Yes. Cars need fuel, and you refuel at gas stations. PC Gamer reports that electric vehicles charge at charging points and that fuel lasts long enough that stops are infrequent.' },
+  { q: 'How long does a tank of fuel last in GTA VI?', a: 'In published tests, a full tank lasted roughly 18 to 30 minutes of driving, depending on the car.' },
   { q: 'Can you repair cars at gas stations in GTA VI?', a: 'Yes. Gas stations offer repairs as well as fuel.' },
   { q: 'Does GTA VI have nitrous?', a: 'Yes. Nitrous is an upgrade at mod shops; on Jason’s ’70 Ganado, it’s the Boost option in the Performance menu.' },
   { q: 'What do the car stats mean in GTA VI?', a: 'The panel shows Speed, Acceleration, Asphalt Handling, Off-Road Handling, and Strength on a 0–10 scale, plus road and off-road ratings. At Gellhorn’s Keep It PG event, the road rating decides whether your car is eligible.' },
