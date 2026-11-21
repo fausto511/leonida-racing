@@ -94,3 +94,5 @@ Zeitstempeln). Abgleich gegen `supabase_migrations.schema_migrations`:
   Teil 2 (Kick/Ban-Funktionen, Event-Kicks/-Bans); der steht weiter in
   `20261019150500_crew_kick_ban_events_REST.sql` (Sonderfall, s. oben).
 - Zwei SQL-Editor-Änderungen als Sonderfall nachgetragen (s. oben).
+
+- `20261121150000_vehicle_specialist_tracker_register_cost.sql`: per Supabase-MCP `apply_migration` am 21.11.2026 angewendet (Name `vehicle_specialist_tracker_register_cost`; Live-Version trägt den Zeitstempel der Anwendung).
