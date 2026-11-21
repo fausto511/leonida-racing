@@ -727,10 +727,10 @@
    "other_names": []
   },
   {
-   "vehicle_id": "dundreary-sirius",
-   "make": "Dundreary",
-   "model": "Sirius",
-   "manufacturer_logo_slug": "dundreary",
+   "vehicle_id": "sirius-transgressor-67",
+   "make": "Sirius",
+   "model": "Transgressor '67",
+   "manufacturer_logo_slug": "sirius",
    "classes": [
     "Muscle"
    ],

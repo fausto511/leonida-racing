@@ -14,7 +14,7 @@ export const vehiclePhotoAlt: Record<string, string> = {
   'vapid-caracara-4x4': 'Silver Vapid Caracara 4x4 pickup with hood stripe on a gravel driveway',
   'canis-kamacho': 'Green Canis Kamacho off-road truck against a glowing green backdrop',
   'declasse-mamba-gt': 'Red Declasse Mamba GT race car with number 36 livery',
-  'dundreary-sirius': 'Turquoise Dundreary Sirius coupe viewed from the rear quarter',
+  'sirius-transgressor-67': 'Turquoise Sirius Transgressor ’67 coupe viewed from the rear quarter',
   'grotti-cheetah-95': "White Grotti Cheetah '95 on a palm-lined street at sunset",
   'schyster-deviant': 'Schyster Deviant with red, white, and blue star-spangled livery',
   'vapid-dominator-67-buggy': "Lifted Vapid Dominator '67 Buggy outside an auto shop",
