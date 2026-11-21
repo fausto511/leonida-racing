@@ -64,7 +64,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
             <label>Drive<select name="drive"><option value="">Unknown (n/a)</option><option>RWD</option><option>FWD</option><option>AWD</option></select></label>
             <h3 class="vx-grp">In-game info</h3>
             <label>Type (in game)<input name="game_type" maxlength="40" placeholder="e.g. Muscle" /><small>Exactly as shown in the game. Internal for now: used to check our classes.</small></label>
-            <label>Era<input name="era" maxlength="40" placeholder="e.g. 1970s Antique" /><small>Exactly as shown in the game.</small></label>
+            <label>Era<input name="era" maxlength="40" placeholder="e.g. 1970s" /><small>Decade only. The word after it in the game (Antique, Restored …) depends on the car’s condition.</small></label>
             <label>Storage<input name="storage" type="number" min="0" max="50" step="1" /><small>Storage slots shown in the game.</small></label>
             <label>Nitrous available<select name="nitrous_available"><option value="">Unknown</option><option value="yes">Yes</option><option value="no">No</option></select><small>Nitrous Boost offered in the tuning garage.</small></label>
             <label>Model family<input name="family" list="vx-families" maxlength="40" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. dominator" /><datalist id="vx-families"></datalist><small>Same slug for all models of a family. From 5 models the family gets its own page.</small></label>
