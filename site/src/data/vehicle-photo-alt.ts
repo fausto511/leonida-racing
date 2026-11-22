@@ -6,7 +6,7 @@
 export const vehiclePhotoAlt: Record<string, string> = {
   'granforma-zorrusso': 'Red GranForma Zorrusso parked at a curb, front three-quarter view',
   // Added 2026-10-06 (Claude, from the photos; Fausto allowed alt texts without Codex):
-  'albany-manana': 'Yellow Albany Manana on jack stands in a workshop, a mechanic underneath',
+  'albany-manana': 'Rust-red Albany Manana ’77 convertible with the top down, parked on a driveway, front three-quarter view',
   'annis-elegy-retro-custom': 'Annis Elegy Retro Custom with graphic livery and glowing taillights at night, rear view',
   'declasse-tulip': 'Red Declasse Tulip driving toward the camera on a sunny road',
   'ubermacht-cypher': 'White Übermacht Cypher race car with a rear wing on a wet track, rear view',
