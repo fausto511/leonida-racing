@@ -102,6 +102,11 @@ const IMG = {
   streetRace: img('street-race', [640, 1280], 1280, 720, 'Customized cars race along a street at sunset, with a blue exhaust flame behind the nearest car in GTA VI.', 'Street racing in GTA VI — Rockstar Games.'),
   // Visual/locations/Gellhorn International Raceway/gellhorn rent chavos xs.png, 3840x2160, Fausto 22.11.2026 (own PS5 screenshot).
   statsChavos: img('gellhorn-rental-chavos-xs', W3, 1920, 1080, 'A white, red, and blue race-prepared Dinka Chavos XS in the Gellhorn paddock, next to its stat panel with five stat bars and its road and off-road ratings, in GTA VI.', 'The race-prepared Chavos XS rental at Gellhorn and its stat panel. Leonida Racing in-game screenshot (PS5).'),
+  // Visual/locations/*, 3840x2160, Fausto 22.11.2026 (own PS5 screenshots).
+  gellhornFinish: img('gellhorn-finish-line', W3, 1920, 1080, 'The start-finish straight at Gellhorn International Raceway, with the track logo painted on the asphalt, pit garages on the left, and empty grandstands on the right, in GTA VI.', 'The start-finish straight at Gellhorn International Raceway. Leonida Racing in-game screenshot (PS5).'),
+  gellhornSign: img('gellhorn-entrance-sign', W3, 1920, 1080, 'The Gellhorn Motorsports Park entrance sign between two giant Patriot Beer cans, with palm trees and flower beds, in GTA VI.', 'The entrance sign reads Gellhorn Motorsports Park. Leonida Racing in-game screenshot (PS5).'),
+  leonidaAutoWorld: img('leonida-auto-world', W3, 1920, 1080, 'Sports cars in a dim workshop with blue and pink lighting, a car body raised on a lift, and a green supercar in the foreground, at Leonida Auto World in GTA VI.', 'Leonida Auto World, Randy’s business in Balsero. Leonida Racing in-game screenshot (PS5).'),
+  whisler: img('whisler-motorsport', W3, 1920, 1080, 'A mechanic stands in a bright workshop with red car lifts, tool chests, and a green sedan raised on a lift, below the Whisler Motorsport logo, in GTA VI.', 'Whisler Motorsport at Gellhorn International Raceway. Leonida Racing in-game screenshot (PS5).'),
   circuitEmpty: img('circuit-empty', [640, 1280, 1672], 1672, 941, 'An empty race circuit lined with palms, fencing, and blue and red painted trackside areas in GTA VI.', 'The circuit from official GTA VI footage, with the race cars digitally removed for a clearer view of the track.'),
   carMeet: img('car-meet', [640, 1280, 1919], 1919, 1079, 'People gather beside customized cars at an outdoor parking-lot meet in GTA VI.', 'A car meet in GTA VI — Rockstar Games.'),
   takeover: img('street-takeover', [640, 1280, 1672], 1672, 941, 'A crowd surrounds cars and tire smoke at a nighttime street takeover in GTA VI, viewed from above.', 'A street takeover in GTA VI — Rockstar Games.'),
@@ -226,7 +231,7 @@ export const guideSections: GuideSection[] = [
   },
   {
     id: 'theft',
-    images: [IMG.slimJim],
+    images: [IMG.slimJim, IMG.leonidaAutoWorld],
     title: 'Stealing, Scanning, Selling, and Registering Cars',
     status: 'Rockstar Interview',
     paragraphs: [
@@ -371,18 +376,18 @@ export const guideSections: GuideSection[] = [
   },
   {
     id: 'customization',
-    images: [IMG.rideout, IMG.willies],
+    images: [IMG.whisler, IMG.willies],
     title: 'Car Customization, Tuning, and Mod Shops',
     status: 'Tested in the game',
     paragraphs: [
-      `Mod shops across Leonida have different specialties. <strong>Coastal Auto Care</strong>, for example, offers retro builds. <strong>Rideout Customs</strong> in Vice City and <strong>One-Eyed Willie’s</strong> in Lake Leonida are exclusive to the Ultimate Edition.`,
+      `Mod shops across Leonida have different specialties. <strong>Coastal Auto Care</strong>, for example, offers retro builds. <strong>Whisler Motorsport</strong>, at Gellhorn International Raceway, specializes in racing, with custom parts and track-racing cosmetics. <strong>Rideout Customs</strong> in Vice City and <strong>One-Eyed Willie’s</strong> in Lake Leonida are exclusive to the Ultimate Edition.`,
       `Rockstar’s accompanying descriptions give the shops different identities. Rideout Customs focuses on detailed interiors, wheels, and donk builds. One-Eyed Willie’s specializes in off-road modifications and hand-painted vehicle designs. The same material describes the wider selection as both artistic and performance-oriented.`,
       `At <strong>Coastal Auto Care</strong>, the menu for <a href="{base}cars/vehicles/vapid-ganado-70/">Jason’s ’70 Ganado</a> has six tabs: <strong>Pro Builds</strong>, <strong>Cosmetics</strong>, <strong>Bodywork</strong>, <strong>Performance</strong>, <strong>Wheels</strong>, and <strong>Interior</strong>. Pro Builds offers complete build packages and wheel kits. On the Ganado, lowering the suspension improves asphalt handling at the expense of off-road handling; raising it does the reverse.`,
       `Its Performance menu lists the <strong>engine</strong>, <strong>intakes</strong>, <strong>transmission</strong>, and <strong>boost</strong>, which is nitrous. Engine and transmission upgrades come in stages. We found no separate brake or turbo upgrade there. Some parts require a bank account before you can buy them; nitrous was listed at $5,000 for the Ganado.`,
       `Don’t judge a part by its name. On the Ganado, most intakes and exhausts left the displayed stats unchanged, while a custom wing traded a little speed for asphalt handling. The preview highlights gains in green and losses in red before you buy.`,
     ],
     sources: [
-      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: Jason’s ’70 Ganado with the Retro Build – Ultimate Edition at Coastal Auto Care. Menu tabs, build and wheel kits, staged upgrades, nitrous, part previews, bank-account requirements, and the $5,000 nitrous listing checked on this car.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: Jason’s ’70 Ganado with the Retro Build – Ultimate Edition at Coastal Auto Care. Menu tabs, build and wheel kits, staged upgrades, nitrous, part previews, bank-account requirements, and the $5,000 nitrous listing checked on this car. November 22, 2026: Whisler Motorsport at Gellhorn, described in the game as a mod shop for custom parts and track-racing cosmetics, with a racing specialty.' },
       { label: 'Rockstar Games — GTA VI Editions', url: R_EDITIONS, note: 'names and Ultimate Edition inclusion.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: '“Rideout Customs Mod Shop 01–03” and “One-Eyed Willie’s Mod Shop 01–03.”' },
       { label: 'TheSixthAxis — GTA VI Ultimate Edition details', url: TSA, note: 'Rockstar press descriptions of the shops and their specialties.' },
@@ -412,7 +417,7 @@ export const guideSections: GuideSection[] = [
     status: 'Tested in the game',
     paragraphs: [
       `GTA VI includes structured circuit, off-road, and street racing. Rockstar’s Extended Look shows all three with an active race HUD rather than presenting them only as background scenes.`,
-      `Story-mode races take place at <strong>Gellhorn International Raceway</strong>, <strong>Boone Speedway</strong>, and the <strong>Thrillbilly Mud Club</strong>, among others.`,
+      `Story mode groups its races into series, including <strong>Hit and Run VC</strong>, <strong>Animal Crackers</strong>, and the events at <strong>Gellhorn International Raceway</strong>, <strong>Boone Speedway</strong>, and the <strong>Thrillbilly Mud Club</strong>.`,
       `Story mode has <strong>40 unique races</strong>. Win 20 different races for <strong>Earn Cash, Not Kudos</strong>, or 30 for the racing requirement toward 100% completion. Repeating the same race does not add another unique win.`,
       `The <strong>13 Race Challenges</strong> are a separate category, with time or score targets and bronze, silver, and gold medals. You need gold in 10 of them for 100% completion.`,
       `At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1061s" rel="noopener">17:41</a>, 16 cars race two laps on a wet paved circuit, with position, lap, and timing information on screen. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1115s" rel="noopener">18:35</a>, a 12-entry field of quads, motorcycles, and off-road pickups runs two laps on a dirt course. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1221s" rel="noopener">20:21</a>, a six-car street race tracks progress as a percentage. These are the events shown, not a fixed rule for grid sizes or race distances.`,
@@ -429,7 +434,7 @@ export const guideSections: GuideSection[] = [
       { label: 'Game Informer — GTA VI: Welcome to Leonida', url: 'https://gameinformer.com/feature/2026/09/29/grand-theft-auto-vi-welcome-to-leonida', note: 'September 29, 2026: Rockstar cover story additionally identifies street and off-road racing among the activities; full article access may require a subscription.' },
       { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: highway challenge involving a customized 4x4 with purple underglow. Checked October 30, 2026.' },
       { label: 'GTAVice — Edge preview and print-only Phil Hooker Q&A', url: GTAVICE_EDGE, note: 'October 29, 2026: secondary coverage, including attributed excerpts from the print-only Q&A and the reported 23-station total. Checked October 30, 2026.' },
-      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: Keep It PG event menu at Gellhorn checked for laps, field size, maximum payout, and the accepted road-rating range. Nitrous checked in the Performance menu at Coastal Auto Care. November 21, 2026: entry fees and heavy rubber-banding in our Gellhorn races.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: Keep It PG event menu at Gellhorn checked for laps, field size, maximum payout, and the accepted road-rating range. Nitrous checked in the Performance menu at Coastal Auto Care. November 21, 2026: entry fees and heavy rubber-banding in our Gellhorn races. November 22, 2026: race series and race counts checked in the Progress menu.' },
       { label: 'PowerPyx — GTA 6 All Unique Race Locations', url: 'https://www.powerpyx.com/gta-6-all-unique-race-locations-racing-activities/', note: 'November 18, 2026: 40 unique races, 20 different wins for Earn Cash, Not Kudos, 30 for 100% completion, entry and rental fees, and winning for a profit. Checked November 22, 2026.' },
       { label: 'PowerPyx — GTA 6 All Race Challenge Locations & Gold Medals', url: 'https://www.powerpyx.com/gta-6-all-race-challenge-locations-gold-medals/', note: 'November 18, 2026: 13 separate medal challenges, with 10 gold medals required for 100% completion. Checked November 22, 2026.' },
       { label: 'GAMES.GG — All Race Challenge Locations', url: 'https://games.gg/grand-theft-auto-vi/guides/all-race-challenge-locations-in-gta-6/', note: 'November 19, 2026: challenge list, medal targets, and 10 gold medals for 100% completion. Checked November 22, 2026.' },
@@ -440,7 +445,7 @@ export const guideSections: GuideSection[] = [
   },
   {
     id: 'gellhorn',
-    images: [IMG.circuitEmpty],
+    images: [IMG.gellhornFinish, IMG.gellhornSign],
     title: 'Gellhorn and the Circuit',
     status: 'Tested in the game',
     paragraphs: [
