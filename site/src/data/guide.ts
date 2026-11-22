@@ -100,6 +100,8 @@ const IMG = {
   classicCar: img('classic-collection-car', W3, 1920, 1080, 'A turquoise Sirius Transgressor ’67 coupe with black side stripes and a rear spoiler, viewed from behind in GTA VI.', `Sirius Transgressor ’67 from the Classic Car Collection, Ultimate Edition. ${RS}`),
   circuitRace: img('circuit-race', [640, 1280, 1672], 1672, 941, 'A pack of race cars on a wet, palm-lined circuit in GTA VI.', 'Circuit racing in GTA VI — Rockstar Games.'),
   streetRace: img('street-race', [640, 1280], 1280, 720, 'Customized cars race along a street at sunset, with a blue exhaust flame behind the nearest car in GTA VI.', 'Street racing in GTA VI — Rockstar Games.'),
+  // Visual/locations/Gellhorn International Raceway/gellhorn rent chavos xs.png, 3840x2160, Fausto 22.11.2026 (own PS5 screenshot).
+  statsChavos: img('gellhorn-rental-chavos-xs', W3, 1920, 1080, 'A white, red, and blue race-prepared Dinka Chavos XS in the Gellhorn paddock, next to its stat panel with five stat bars and its road and off-road ratings, in GTA VI.', 'The race-prepared Chavos XS rental at Gellhorn and its stat panel. Leonida Racing in-game screenshot (PS5).'),
   circuitEmpty: img('circuit-empty', [640, 1280, 1672], 1672, 941, 'An empty race circuit lined with palms, fencing, and blue and red painted trackside areas in GTA VI.', 'The circuit from official GTA VI footage, with the race cars digitally removed for a clearer view of the track.'),
   carMeet: img('car-meet', [640, 1280, 1919], 1919, 1079, 'People gather beside customized cars at an outdoor parking-lot meet in GTA VI.', 'A car meet in GTA VI — Rockstar Games.'),
   takeover: img('street-takeover', [640, 1280, 1672], 1672, 941, 'A crowd surrounds cars and tire smoke at a nighttime street takeover in GTA VI, viewed from above.', 'A street takeover in GTA VI — Rockstar Games.'),
@@ -207,6 +209,7 @@ export const guideSections: GuideSection[] = [
   },
   {
     id: 'stats',
+    images: [IMG.statsChavos],
     title: 'Vehicle Stats and Ratings',
     status: 'Tested in the game',
     paragraphs: [
