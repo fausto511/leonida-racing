@@ -321,30 +321,109 @@ const stars = (n: number) => "\u2B50".repeat(n);
 const rateRow = (vehicleId: string, variant: string) => ({ type: 1, components: [{ type: 3, custom_id: `rate:${variant}:${vehicleId}`, placeholder: "Rate this car",
   options: [5, 4, 3, 2, 1].map((n) => ({ label: stars(n), value: String(n), description: `${n} of 5 \u00b7 ${RATE_LABELS[n]}` })) }] });
 const ratingLine = (avg: number | null, count: number | null) => (avg != null && (count ?? 0) >= 3 ? `\u2B50 ${Number(avg).toFixed(1)} \u00b7 ${count} ratings` : undefined);
-const CAR_COLS = "vehicle_id,make,model,classes,drive,seats,real_life_inspiration,first_seen_in,has_photo";
+const CAR_COLS = "vehicle_id,make,model,classes,drive,seats,storage,specialist,tracker,key_cloner_required,real_life_inspiration,first_seen_in,has_photo";
+// ---- car values for /car and /compare (Fausto 23.11.2026: same order as the car page) ----
+// COPY STATUS: labels = Claude placeholders, Codex review pending (DEC-0088).
+const CONDITIONS = ["Top", "Good", "Average", "Poor", "Scrap"];
+const STAT_ROWS: [string, string][] = [["stat_speed", "Speed"], ["stat_acceleration", "Acceleration"], ["stat_handling_asphalt", "Asphalt handling"], ["stat_handling_offroad", "Off-road handling"], ["stat_strength", "Strength"]];
+const RANK_MIN = 5; // same as STATS_CLASS_MIN on the car page
+const usd = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
+const DASH = "\u2014";
+type SellVal = { value: number; condition: string };
+type CarVals = { vals: Record<string, number>; sell: SellVal[]; ranks: Record<string, { rank: number; n: number } | null>; cls: string | null };
+function splitValues(rows: any[]) {
+  const vals: Record<string, number> = {}; const sell: SellVal[] = [];
+  for (const r of rows) {
+    if (r.tuning === "tuned") continue; // stock values only, like the car page
+    if (r.metric === "sell_price_gtad") { if (r.condition) sell.push({ value: Number(r.value), condition: r.condition }); continue; }
+    vals[r.metric] = Number(r.value);
+  }
+  sell.sort((a, b) => CONDITIONS.indexOf(a.condition) - CONDITIONS.indexOf(b.condition));
+  return { vals, sell };
+}
+// "$1,000 · Poor condition" (one scan) or "$4,000–6,650 · Average to Top condition" (several), like the car page
+function sellText(sell: SellVal[]): string | null {
+  if (!sell.length) return null;
+  const vs = sell.map((x) => x.value), lo = Math.min(...vs), hi = Math.max(...vs);
+  if (sell.length === 1) return `${usd(hi)} \u00b7 ${sell[0].condition} condition`;
+  return `${lo === hi ? usd(hi) : `${usd(lo)}\u2013${usd(hi).slice(1)}`} \u00b7 ${sell[sell.length - 1].condition} to ${sell[0].condition} condition`;
+}
+async function carValues(v: any): Promise<CarVals> {
+  const { data } = await db.from("vehicle_values").select("metric,value,tuning,condition").eq("vehicle_id", v.vehicle_id).eq("status", "current");
+  const { vals, sell } = splitValues(data ?? []);
+  const cls: string | null = (v.classes ?? [])[0] ?? null;
+  const ranks: CarVals["ranks"] = { rating_road: null, rating_offroad: null };
+  if (cls && (vals.rating_road != null || vals.rating_offroad != null)) {
+    const { data: peers } = await db.from("vehicles").select("vehicle_id").contains("classes", [cls]);
+    const ids = (peers ?? []).map((x: any) => x.vehicle_id);
+    const { data: rv } = ids.length ? await db.from("vehicle_values").select("vehicle_id,metric,value,tuning").eq("status", "current").in("metric", ["rating_road", "rating_offroad"]).in("vehicle_id", ids) : { data: [] as any[] };
+    for (const m of ["rating_road", "rating_offroad"]) {
+      const own = vals[m];
+      const all = (rv ?? []).filter((r: any) => r.metric === m && r.tuning !== "tuned").map((r: any) => Number(r.value));
+      if (own != null && all.length >= RANK_MIN) ranks[m] = { rank: 1 + all.filter((x: number) => x > own).length, n: all.length };
+    }
+  }
+  return { vals, sell, ranks, cls };
+}
+const statBlock = (vals: Record<string, number>) => {
+  if (!STAT_ROWS.some(([k]) => vals[k] != null)) return DASH;
+  const rows = STAT_ROWS.map(([k, label]) => {
+    const x = vals[k];
+    if (x == null) return `${label.padEnd(17)}    ${DASH}`;
+    const n = Math.max(0, Math.min(10, Math.round(x)));
+    return `${label.padEnd(17)} ${x.toFixed(1).padStart(4)}  ${"\u2588".repeat(n)}${"\u2591".repeat(10 - n)}`;
+  });
+  return "```\n" + rows.join("\n") + "\n```";
+};
+const blank = { name: "\u200b", value: "\u200b", inline: true };
 async function carRating(id: string) {
   const { data } = await db.from("public_vehicle_ratings").select("rating_avg,rating_count").eq("vehicle_id", id).maybeSingle();
   return data as { rating_avg: number; rating_count: number } | null;
 }
-// variant "c" = /car answer, "n" = "New in Cars" post from discord-dispatch (same look as there)
-function carMessage(v: any, avg: number | null, count: number | null, variant: string) {
+// variant "c" = /car answer, "n" = "New in Cars" post from discord-dispatch (same look as there).
+// /car shows the values in the order of the car page (Fausto 23.11.2026); "New in Cars" keeps the short card
+// (a new car rarely has values yet).
+function carMessage(v: any, avg: number | null, count: number | null, variant: string, cv?: CarVals) {
   const url = `${SITE}/cars/vehicles/${v.vehicle_id}/`;
+  const photo = v.has_photo ? { image: { url: `${SITE}/images/vehicles/${v.vehicle_id}-1280.webp` } } : {};
+  const components = [row(linkButton("Open car page", url), addButton), rateRow(v.vehicle_id, variant)];
+  if (variant === "n" || !cv) {
+    const fields = [
+      { name: "Class", value: (v.classes ?? []).join(", ") || DASH, inline: true },
+      { name: "Drivetrain", value: v.drive || DASH, inline: true },
+      { name: "Seats", value: v.seats ? String(v.seats) : DASH, inline: true },
+    ];
+    if (v.real_life_inspiration) fields.push({ name: "Real-life inspiration", value: v.real_life_inspiration, inline: false });
+    if (v.first_seen_in) fields.push({ name: "First seen in", value: v.first_seen_in, inline: false });
+    return {
+      embeds: [{ ...(variant === "n" ? { author: { name: "New in Cars" } } : {}), title: `${v.make} ${v.model}`, url, color: ORANGE, description: ratingLine(avg, count), fields, ...photo, footer: { text: "Leonida Racing \u00b7 Cars" } }],
+      components, allowed_mentions: { parse: [] },
+    };
+  }
+  const { vals, sell, ranks, cls } = cv;
+  const rating = (m: string) => {
+    const x = vals[m]; if (x == null) return DASH;
+    const r = ranks[m]; return `${Math.round(x)}${r && cls ? ` \u00b7 #${r.rank} of ${r.n} ${cls}` : ""}`;
+  };
+  const mph = vals.top_speed_mph;
   const fields = [
-    { name: "Class", value: (v.classes ?? []).join(", ") || "\u2014", inline: true },
-    { name: "Drivetrain", value: v.drive || "\u2014", inline: true },
-    { name: "Seats", value: v.seats ? String(v.seats) : "\u2014", inline: true },
+    { name: "Cost to register", value: vals.register_cost_gtad != null ? usd(vals.register_cost_gtad) : DASH, inline: true },
+    { name: "Sell value", value: sellText(sell) ?? DASH, inline: true }, blank,
+    { name: "Road rating", value: rating("rating_road"), inline: true },
+    { name: "Off-road rating", value: rating("rating_offroad"), inline: true }, blank,
+    { name: "In-game stats (stock)", value: statBlock(vals), inline: false },
+    { name: "Top speed", value: mph != null ? `${mph.toFixed(1)} mph (${(mph * 1.609344).toFixed(1)} km/h)` : DASH, inline: true },
+    { name: "Drive", value: v.drive && v.drive !== "n/a" ? v.drive : DASH, inline: true },
+    { name: "Seats", value: v.seats ? String(v.seats) : DASH, inline: true },
+    { name: "Storage", value: v.storage != null ? `${v.storage} ${v.storage === 1 ? "slot" : "slots"}` : DASH, inline: true },
+    { name: "Specialist", value: v.specialist || DASH, inline: true },
+    { name: "Tracker", value: v.tracker ? `${v.tracker}${v.key_cloner_required ? " \u00b7 Key Cloner needed" : ""}` : DASH, inline: true },
+    { name: "Driver rating", value: ratingLine(avg, count) ?? "Not enough ratings yet", inline: false },
   ];
-  if (v.real_life_inspiration) fields.push({ name: "Real-life inspiration", value: v.real_life_inspiration, inline: false });
-  if (v.first_seen_in) fields.push({ name: "First seen in", value: v.first_seen_in, inline: false });
+  const head = [(v.classes ?? []).join(", "), v.real_life_inspiration ? `Based on ${v.real_life_inspiration}` : ""].filter(Boolean).join(" \u00b7 ");
   return {
-    embeds: [{
-      ...(variant === "n" ? { author: { name: "New in Cars" } } : {}),
-      title: `${v.make} ${v.model}`, url, color: ORANGE, description: ratingLine(avg, count), fields,
-      ...(v.has_photo ? { image: { url: `${SITE}/images/vehicles/${v.vehicle_id}-1280.webp` } } : {}),
-      footer: { text: "Leonida Racing \u00b7 Cars" },
-    }],
-    components: [row(linkButton("Open car page", url), addButton), rateRow(v.vehicle_id, variant)],
-    allowed_mentions: { parse: [] },
+    embeds: [{ title: `${v.make} ${v.model}`, url, color: ORANGE, description: head || undefined, fields, ...photo, footer: { text: "Leonida Racing \u00b7 Cars" } }],
+    components, allowed_mentions: { parse: [] },
   };
 }
 async function rateSelect(i: any) {
@@ -375,15 +454,16 @@ async function rateSelect(i: any) {
     }
   })());
   if (!v) return json({ type: 6 });
-  return json({ type: 7, data: carMessage(v, r.avg, r.count, variant === "n" ? "n" : "c") });
+  const kind = variant === "n" ? "n" : "c";
+  return json({ type: 7, data: carMessage(v, r.avg, r.count, kind, kind === "c" ? await carValues(v) : undefined) });
 }
 
 async function cmdCar(i: any) {
   const id = String(opt(i, "vehicle") ?? "");
   const { data: v } = await db.from("vehicles").select(CAR_COLS).eq("vehicle_id", id).not("release_id", "is", null).maybeSingle();
   if (!v) return ephemeral("I couldn't find that vehicle. Pick one from the suggestions while typing.");
-  const rt = await carRating(v.vehicle_id);
-  return reply(carMessage(v, rt?.rating_avg ?? null, rt?.rating_count ?? null, "c"));
+  const [rt, cv] = await Promise.all([carRating(v.vehicle_id), carValues(v)]);
+  return reply(carMessage(v, rt?.rating_avg ?? null, rt?.rating_count ?? null, "c", cv));
 }
 
 // ---------- /leaderboard (RS-0101) ----------
@@ -482,7 +562,6 @@ function deferPublic(i: any, work: () => Promise<Record<string, unknown>>) {
 
 // ---------- /compare ----------
 const COMPARE_TRACK = "gellhorn-international-raceway", COMPARE_PLATFORM = "ps5"; // same as the compare page
-const ACQ: Record<string, string> = { "pre-order": "Pre-order bonus", "ultimate-edition": "Ultimate Edition exclusive", "gta-plus": "GTA+ members only" };
 const lapTime = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, "0")}.${String(ms % 1000).padStart(3, "0")}`;
 async function cmdCompare(i: any) {
   const ids = [...new Set([1, 2, 3, 4].map((n) => String(opt(i, `car${n}`) ?? "").trim()).filter(Boolean))];
@@ -495,16 +574,26 @@ async function cmdCompare(i: any) {
     .eq("platform", COMPARE_PLATFORM).eq("scope", "vehicle").eq("rank", 1).in("scope_key", cars.map((c) => c.vehicle_id));
   const best = new Map((laps ?? []).map((l: any) => [l.scope_key, l]));
   const fastest = Math.min(...[...best.values()].map((l: any) => l.lap_time_ms));
+  // Values in the order of the car page (Fausto 23.11.2026); \u25B2 = best of these cars (higher is better).
+  const { data: valRows } = await db.from("vehicle_values").select("vehicle_id,metric,value,tuning,condition").eq("status", "current")
+    .in("metric", ["register_cost_gtad", "sell_price_gtad", "rating_road", "rating_offroad", "top_speed_mph"]).in("vehicle_id", cars.map((c) => c.vehicle_id));
+  const cv = new Map(cars.map((c) => [c.vehicle_id, splitValues((valRows ?? []).filter((r: any) => r.vehicle_id === c.vehicle_id))]));
+  const top = (m: string) => { const xs = cars.map((c) => cv.get(c.vehicle_id)!.vals[m]).filter((x): x is number => x != null); return xs.length > 1 ? Math.max(...xs) : null; };
+  const tops = { rating_road: top("rating_road"), rating_offroad: top("rating_offroad"), top_speed_mph: top("top_speed_mph") } as Record<string, number | null>;
+  const mark = (m: string, x: number) => (tops[m] != null && x === tops[m] ? " \u25B2" : "");
   const same = (f: (c: any) => string) => new Set(cars.map(f)).size === 1;
   const cls = (c: any) => (c.classes ?? []).join(" / ") || "\u2014";
   const lines = (c: any) => {
     const l: any = best.get(c.vehicle_id);
+    const { vals, sell } = cv.get(c.vehicle_id)!;
+    const num = (m: string, f: (x: number) => string) => (vals[m] != null ? `${f(vals[m])}${mark(m, vals[m])}` : DASH);
     return [
       `**Class** ${cls(c)}`,
-      `**Drive** ${c.drive || "\u2014"}`,
-      `**Seats** ${c.seats ?? "\u2014"}`,
-      ...(c.acquisition ? [`**Get it** ${ACQ[c.acquisition] ?? c.acquisition}`] : []),
-      ...(c.real_life_inspiration ? [`**Based on** ${clip(c.real_life_inspiration, 60)}`] : []),
+      `**Cost to register** ${vals.register_cost_gtad != null ? usd(vals.register_cost_gtad) : DASH}`,
+      `**Sell value** ${sellText(sell) ?? DASH}`,
+      `**Road rating** ${num("rating_road", (x) => String(Math.round(x)))}`,
+      `**Off-road rating** ${num("rating_offroad", (x) => String(Math.round(x)))}`,
+      `**Top speed** ${num("top_speed_mph", (x) => `${x.toFixed(1)} mph`)}`,
       ...(best.size ? [`**Best lap** ${l ? `${lapTime(l.lap_time_ms)}${l.lap_time_ms === fastest && best.size > 1 ? " \u{1F3C1}" : ""}` : "\u2014"}`] : []),
     ].join("\n");
   };
@@ -517,7 +606,8 @@ async function cmdCompare(i: any) {
   const notes = [
     best.size ? `Best lap = fastest community lap at Gellhorn (PS5) in that car.` : "",
     same(cls) ? "" : "Different classes: they don't race each other on the leaderboard.",
-    "Costs to register, reference laps and our verdict are on the full comparison.",
+    Object.values(tops).some((x) => x != null) ? "\u25B2 = best of these cars." : "",
+    "Our verdict and more details are on the full comparison.",
   ].filter(Boolean).join("\n");
   const url = `${SITE}/cars/compare/?cars=${cars.map((c) => c.vehicle_id).join(",")}`;
   const photos = cars.filter((c) => c.has_photo);
