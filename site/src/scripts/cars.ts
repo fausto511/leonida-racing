@@ -23,12 +23,14 @@ const DEFAULT_SORT = tools?.dataset.defaultSort ?? 'class';
 const NOUN = tools?.dataset.noun ?? 'cars';
 
 type Group = 'class' | 'make' | 'drive' | 'seats' | 'avail' | 'origin';
-type RangeKey = 'price' | 'speed' | 'lap';
+type RangeKey = 'price' | 'speed' | 'lap' | 'road' | 'off' | 'sspd' | 'sacc';
+// road/off = in-game ratings, sspd/sacc = in-game speed/acceleration stats 0-10 (Fausto 23.11.2026)
+const RANGES: RangeKey[] = ['price', 'speed', 'lap', 'road', 'off', 'sspd', 'sacc'];
 type FilterKey = Group | RangeKey | 'q' | 'own';
 type Range = [number | null, number | null];
 interface State { q: string; own: '' | 'owned' | 'not'; sort: string; sets: Record<Group, Set<string>>; ranges: Record<RangeKey, Range> }
 const emptySets = (): Record<Group, Set<string>> => ({ class: new Set(), make: new Set(), drive: new Set(), seats: new Set(), avail: new Set(), origin: new Set() });
-const emptyRanges = (): Record<RangeKey, Range> => ({ price: [null, null], speed: [null, null], lap: [null, null] });
+const emptyRanges = (): Record<RangeKey, Range> => Object.fromEntries(RANGES.map((k) => [k, [null, null]])) as Record<RangeKey, Range>;
 const state: State = { q: '', own: '', sort: DEFAULT_SORT, sets: emptySets(), ranges: emptyRanges() };
 let showAll = false;
 let owned = new Set<string>();
@@ -41,8 +43,13 @@ const DOMAIN: Record<RangeKey, { min: number; max: number; has: boolean; log: bo
   price: { ...minMax(values('price')), log: true },
   speed: { ...minMax(values('speed')), log: false },
   lap: { ...minMax(values('lap')), log: false },
+  road: { ...minMax(values('road')), log: false },
+  off: { ...minMax(values('off')), log: false },
+  sspd: { ...minMax(values('sspd')), log: false },
+  sacc: { ...minMax(values('sacc')), log: false },
 };
-function minMax(v: number[]) { return v.length ? { min: Math.min(...v), max: Math.max(...v), has: v.length >= 2 && Math.min(...v) < Math.max(...v) } : { min: 0, max: 0, has: false }; }
+// a slider / sort needs at least 5 cars with values, otherwise it stays greyed out ("coming soon")
+function minMax(v: number[]) { return v.length ? { min: Math.min(...v), max: Math.max(...v), has: v.length >= 5 && Math.min(...v) < Math.max(...v) } : { min: 0, max: 0, has: false }; }
 
 // ---- labels -----------------------------------------------------------------
 const makeName = new Map<string, string>();
@@ -51,8 +58,9 @@ const AVAIL: Record<string, string> = { base: 'Base game', 'pre-order': 'Pre-Ord
 const ORIGIN: Record<string, string> = { new: 'New in GTA VI', returning: 'Returning' };
 const SEP = ' · ';
 const fmtMoney = (n: number) => (n >= 1e6 ? `$${+(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `$${+(n / 1e3).toFixed(1)}k` : `$${Math.round(n)}`);
-const FMT: Record<RangeKey, (n: number) => string> = { price: fmtMoney, speed: (n) => speedText(n, currentUnits(), 0, 0), lap: (n) => lapTime(Math.round(n)) };
-const RANGE_NAME: Record<RangeKey, string> = { price: 'Cost to register', speed: 'Top speed', lap: 'Lap' };
+const stat = (n: number) => n.toFixed(1);
+const FMT: Record<RangeKey, (n: number) => string> = { price: fmtMoney, speed: (n) => speedText(n, currentUnits(), 0, 0), lap: (n) => lapTime(Math.round(n)), road: (n) => String(Math.round(n)), off: (n) => String(Math.round(n)), sspd: stat, sacc: stat };
+const RANGE_NAME: Record<RangeKey, string> = { price: 'Cost to register', speed: 'Top speed', lap: 'Lap', road: 'Road rating', off: 'Off-road rating', sspd: 'Speed', sacc: 'Acceleration' };
 function valueLabel(g: Group, v: string) {
   if (g === 'make') return makeName.get(v) ?? v;
   if (g === 'seats') return `${v} seats`;
@@ -67,7 +75,7 @@ function rangeLabel(k: RangeKey, r: Range): string {
   if (lo != null) return `${RANGE_NAME[k]} from ${FMT[k](lo)}`;
   return `${RANGE_NAME[k]} up to ${FMT[k](hi!)}`;
 }
-const isRange = (k: FilterKey): k is RangeKey => k === 'price' || k === 'speed' || k === 'lap';
+const isRange = (k: FilterKey | string): k is RangeKey => (RANGES as string[]).includes(k);
 function filterLabel(k: FilterKey, st: State = state): string {
   if (k === 'q') return `“${st.q}”`;
   if (k === 'own') return st.own === 'owned' ? 'Owned' : 'Not owned';
@@ -103,7 +111,7 @@ function fails(c: HTMLElement, st: State): FilterKey[] {
   if (s.avail.size && !s.avail.has(d.avail!)) out.push('avail');
   if (s.origin.size && !s.origin.has(d.origin!)) out.push('origin');
   // A range hides cars without that value (DEC-0117: Max $ hides cars without a price)
-  for (const k of ['price', 'speed', 'lap'] as RangeKey[]) {
+  for (const k of RANGES) {
     const [lo, hi] = st.ranges[k];
     if (lo == null && hi == null) continue;
     const v = Number(d[k]);
@@ -116,14 +124,14 @@ function fails(c: HTMLElement, st: State): FilterKey[] {
 const activeKeys = (st: State): FilterKey[] => [
   ...(st.q ? ['q' as const] : []),
   ...(Object.keys(st.sets) as Group[]).filter((g) => st.sets[g].size),
-  ...(['price', 'speed', 'lap'] as RangeKey[]).filter((k) => rangeActive(st.ranges[k])),
+  ...RANGES.filter((k) => rangeActive(st.ranges[k])),
   ...(st.own ? ['own' as const] : []),
 ];
 const countWith = (st: State) => cards.filter((c) => !fails(c, st).length).length;
 const cloneState = (st: State): State => ({
   ...st,
   sets: Object.fromEntries((Object.keys(st.sets) as Group[]).map((g) => [g, new Set(st.sets[g])])) as Record<Group, Set<string>>,
-  ranges: { price: [...st.ranges.price] as Range, speed: [...st.ranges.speed] as Range, lap: [...st.ranges.lap] as Range },
+  ranges: Object.fromEntries(RANGES.map((k) => [k, [...st.ranges[k]]])) as Record<RangeKey, Range>,
 });
 function without(st: State, k: FilterKey): State {
   const n = cloneState(st);
@@ -145,11 +153,12 @@ function sortKey(a: HTMLElement, b: HTMLElement): number {
     case 'price': return missingLast(num(a.dataset.price), num(b.dataset.price), 1);
     case 'speed': return missingLast(num(a.dataset.speed), num(b.dataset.speed), -1);
     case 'lap': return missingLast(num(a.dataset.lap), num(b.dataset.lap), 1);
+    case 'road': case 'off': case 'sspd': case 'sacc': return missingLast(num(a.dataset[state.sort]), num(b.dataset[state.sort]), -1);
     case 'recent': return missingLast(releaseTime(a.dataset.release), releaseTime(b.dataset.release), -1);
     default: return order;
   }
 }
-const SORT_LABEL: Record<string, string> = { class: 'Class', name: 'Name A–Z', price: 'Cost to register', speed: 'Top speed', lap: 'Gellhorn lap time', recent: 'Recently added' };
+const SORT_LABEL: Record<string, string> = { class: 'Class', name: 'Name A–Z', price: 'Cost to register', speed: 'Top speed', lap: 'Gellhorn lap time', recent: 'Recently added', road: 'Road rating', off: 'Off-road rating', sspd: 'Speed', sacc: 'Acceleration' };
 
 // ---- did you mean -------------------------------------------------------------
 function lev(a: string, b: string): number {
@@ -194,6 +203,7 @@ function toPos(k: RangeKey, v: number | null, end: 'lo' | 'hi'): number {
 function niceValue(k: RangeKey, v: number): number {
   if (k === 'price') { const p = Math.pow(10, Math.floor(Math.log10(v)) - 1); return Math.round(v / p) * p; }
   if (k === 'lap') return Math.round(v / 100) * 100;
+  if (k === 'sspd' || k === 'sacc') return Math.round(v * 10) / 10;
   // top speed snaps to whole km/h or whole mph, whichever the visitor reads (DEC-0197); stored in mph
   if (k === 'speed' && currentUnits() === 'metric') return Math.round(v * KMH_PER_MPH) / KMH_PER_MPH;
   return Math.round(v);
@@ -267,7 +277,7 @@ function render() {
   const qInput = $('f-q') as HTMLInputElement;
   if (document.activeElement !== qInput) qInput.value = state.q;
   const pro = (['drive', 'seats', 'avail', 'origin'] as Group[]).reduce((n, g) => n + state.sets[g].size, 0)
-    + (rangeActive(state.ranges.speed) ? 1 : 0) + (rangeActive(state.ranges.lap) ? 1 : 0) + (state.ranges.price[0] != null ? 1 : 0);
+    + RANGES.filter((k) => k !== 'price' && rangeActive(state.ranges[k])).length + (state.ranges.price[0] != null ? 1 : 0);
   $('detail-count').hidden = !pro; $('detail-count').textContent = String(pro);
   const allF = keys.filter((k) => k !== 'q' && k !== 'own').length;
   $('filter-count').hidden = !allF; $('filter-count').textContent = String(allF);
@@ -305,6 +315,7 @@ function render() {
 // ---- URL --------------------------------------------------------------------
 const r2 = (x: number | null) => (x == null ? '' : String(Math.round(x * 100) / 100)); // km/h steps are fractional mph
 const rangeParam = (r: Range) => `${r2(r[0])}~${r2(r[1])}`;
+const URL_KEY: Record<RangeKey, string> = { price: 'price', speed: 'speed', lap: 'lap', road: 'road', off: 'offroad', sspd: 'spd', sacc: 'acc' };
 function syncUrl() {
   const p = new URLSearchParams();
   if (state.q) p.set('q', state.q);
@@ -313,8 +324,7 @@ function syncUrl() {
   const pr = state.ranges.price;
   if (pr[0] == null && pr[1] != null) p.set('max', String(pr[1]));
   else if (rangeActive(pr)) p.set('price', rangeParam(pr));
-  if (rangeActive(state.ranges.speed)) p.set('speed', rangeParam(state.ranges.speed));
-  if (rangeActive(state.ranges.lap)) p.set('lap', rangeParam(state.ranges.lap));
+  for (const k of RANGES) if (k !== 'price' && rangeActive(state.ranges[k])) p.set(URL_KEY[k], rangeParam(state.ranges[k]));
   if (state.sort !== DEFAULT_SORT) p.set('sort', state.sort);
   if (state.own) p.set('own', state.own);
   const qs = p.toString();
@@ -331,10 +341,9 @@ function readUrl() {
     const m = p.get('max'); if (m) state.ranges.price = [null, parseMoney(m)];
     if (p.get('price')) state.ranges.price = parseR(p.get('price'));
   }
-  if (DOMAIN.speed.has) state.ranges.speed = parseR(p.get('speed'));
-  if (DOMAIN.lap.has) state.ranges.lap = parseR(p.get('lap'));
+  for (const k of RANGES) if (k !== 'price' && DOMAIN[k].has) state.ranges[k] = parseR(p.get(URL_KEY[k]));
   const s = p.get('sort');
-  if (s && SORT_LABEL[s] && !(['price', 'speed', 'lap'].includes(s) && !DOMAIN[s as RangeKey].has)) state.sort = s;
+  if (s && SORT_LABEL[s] && !(isRange(s) && !DOMAIN[s].has)) state.sort = s;
 }
 
 // ---- hint bubble at the clicked control (C1) -------------------------------------
@@ -552,7 +561,6 @@ if (!DOMAIN.price.has) {
 document.querySelectorAll<HTMLButtonElement>('[data-needs]').forEach((b) => {
   if (DOMAIN[b.dataset.needs as RangeKey].has) return;
   b.disabled = true;
-  b.title = 'Not enough data to sort';
   if (!b.querySelector('span')) b.insertAdjacentHTML('beforeend', '<span>coming soon</span>');
 });
 
@@ -570,7 +578,7 @@ function paintDraft(paintRanges = true) {
   });
   dsp.querySelectorAll<HTMLElement>('[data-sel]').forEach((em) => {
     const g = em.dataset.sel!;
-    if (g === 'price' || g === 'speed' || g === 'lap') { em.textContent = rangeActive(draft.ranges[g]) ? 'set' : ''; return; }
+    if (isRange(g)) { em.textContent = rangeActive(draft.ranges[g]) ? 'set' : ''; return; }
     const n = draft.sets[g as Group].size;
     em.textContent = n ? `${n} selected` : '';
   });

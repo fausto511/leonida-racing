@@ -45,6 +45,11 @@ const cardData = (v: VehicleOption, i: number) => ({
   price: vehicleValues[v.id]?.[COST_METRIC]?.value ?? '', // cost to register (DEC-0247); key stays 'price' for URLs
   speed: vehicleValues[v.id]?.top_speed_mph?.value ?? '',
   lap: fastestGellhornLapMs(v.id) ?? '',
+  // in-game ratings and stock stats (0-10), the values on the card (Fausto 23.11.2026)
+  road: vehicleValues[v.id]?.rating_road?.value ?? '',
+  off: vehicleValues[v.id]?.rating_offroad?.value ?? '',
+  sspd: vehicleValues[v.id]?.stat_speed?.value ?? '',
+  sacc: vehicleValues[v.id]?.stat_acceleration?.value ?? '',
   release: v.releaseId ?? '',
 });
 
@@ -62,6 +67,14 @@ const ORIGIN: [string, string][] = [['new', 'New in GTA VI'], ['returning', 'Ret
 // cost to register runs in the thousands, not millions like GTA V prices (DEC-0247)
 const PRICE_PRESETS = [['5k', 5000], ['10k', 10000], ['20k', 20000], ['30k', 30000], ['50k', 50000]] as const;
 
+// sort options that need values; without enough data they stay greyed out with "coming soon" (Fausto 23.11.2026)
+// COPY STATUS: labels draft-claude -> Codex review (DEC-0088)
+const SORT_DATA: [string, string][] = [['road', 'Road rating'], ['off', 'Off-road rating'], ['sspd', 'Speed'], ['sacc', 'Acceleration'], ['price', 'Cost to register'], ['speed', 'Top speed'], ['lap', 'Gellhorn lap time']];
+// detailed-search sliders [key, title]; the last two stay greyed out with "Coming soon" until there is data
+const RNG_MAIN: [string, string][] = [['road', 'Road rating'], ['off', 'Off-road rating'], ['sspd', 'Speed'], ['sacc', 'Acceleration'], ['price', 'Cost to register']];
+const RNG_SOON: [string, string][] = [['speed', 'Top speed'], ['lap', 'Gellhorn lap time']];
+const seatsSorted = [...seatCounts.entries()].sort((a, b) => a[0] - b[0]);
+const DRIVES = ['AWD', 'RWD', 'FWD'].filter((d) => driveCounts.get(d));
 const chev = '<svg class="ico ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
 const check = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
 function mc(group: string, value: string | number, label: string, n: number | undefined): string {
@@ -129,12 +142,9 @@ function mc(group: string, value: string | number, label: string, n: number | un
         <div class="menu" data-menu="sort" hidden>
           {scope !== 'class' && <button type="button" class:list={['menu-i', { on: defaultSort === 'class' }]} data-sort="class">Class</button>}
           <button type="button" class:list={['menu-i', { on: defaultSort === 'name' }]} data-sort="name">Name A–Z</button>
-          <button type="button" class="menu-i" data-sort="price" data-needs="price">Cost to register</button>
-          <button type="button" class="menu-i" data-sort="speed" data-needs="speed">Top speed</button>
-          <button type="button" class="menu-i" data-sort="lap" data-needs="lap">Gellhorn lap time</button>
-          <span class="menu-sep"></span>
-          <button type="button" class="menu-i" disabled title="Not enough data to sort">Most owned<span>coming soon</span></button>
+          {SORT_DATA.map(([k, l]) => <button type="button" class="menu-i" data-sort={k} data-needs={k}>{l}</button>)}
           <button type="button" class="menu-i" data-sort="recent">Recently added</button>
+          <button type="button" class="menu-i" disabled>Most owned<span>coming soon</span></button>
         </div>
       </div>
     </div>
@@ -171,31 +181,32 @@ function mc(group: string, value: string | number, label: string, n: number | un
   <div class="dsp-back" id="dsp-back" hidden></div>
   <div class="dsp" id="dsp" role="dialog" aria-modal="true" aria-labelledby="dsp-title" hidden>
     <div class="dsp-h">
-      <span class="dsp-ht"><b id="dsp-title">Detailed search</b><span class="muted">Combine as many filters as you like. Within a group any match counts.</span></span>
+      <span class="dsp-ht"><b id="dsp-title">Detailed search</b><span class="muted">Combine as many filters as you like. Within a group any match counts. A slider hides cars without that value.</span></span>
       <button type="button" class="dsp-x" id="dsp-close" aria-label="Close"><Fragment set:html={CLOSE_SVG} /></button>
     </div>
     <div class="dsp-q" id="dsp-q" hidden><span class="muted">Search</span><button type="button" class="dsp-qchip" id="dsp-qchip" aria-label="Remove search"><span id="dsp-qtext"></span><b aria-hidden="true"><Fragment set:html={CLOSE_SVG} /></b></button><span class="muted dsp-qhint">The search text counts together with these filters.</span></div>
     <div class="dsp-body">
       {scope !== 'class' && <div class="dsg"><h4>Class <em data-sel="class"></em></h4><div class="mchips" set:html={classesSorted.map(([c, n]) => mc('class', c, c, n)).join('')} /></div>}
-<div class="dsg rng" data-range="price"><h4>Cost to register <em data-sel="price"></em></h4>
-        <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum cost to register" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum cost to register" /></div>
-        <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
-        <p class="rng-off">Costs to register coming soon.</p>
-      </div>
-      <div class="dsg rng" data-range="speed"><h4>Top speed <em data-sel="speed"></em></h4>
-        <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum top speed" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum top speed" /></div>
-        <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
-        <p class="rng-off">Top-speed filtering needs more measured data.</p>
-      </div>
-      <div class="dsg rng" data-range="lap"><h4>Gellhorn lap time <em data-sel="lap"></em></h4>
-        <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum gellhorn lap time" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum gellhorn lap time" /></div>
-        <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
-        <p class="rng-off">Lap-time filtering needs more lap data.</p>
-      </div>
+{RNG_MAIN.map(([k, t]) => (
+        <div class="dsg rng" data-range={k}><h4>{t} <em data-sel={k}></em></h4>
+          <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label={`Minimum ${t.toLowerCase()}`} /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label={`Maximum ${t.toLowerCase()}`} /></div>
+          <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
+          <p class="rng-off">Coming soon</p>
+        </div>
+      ))}
+      <div class="dsg"><h4>Drive <em data-sel="drive"></em></h4><div class="mchips" set:html={DRIVES.map((d) => mc('drive', d, d, driveCounts.get(d))).join('')} /></div>
+      <div class="dsg"><h4>Seats <em data-sel="seats"></em></h4><div class="mchips" set:html={seatsSorted.map(([n, c]) => mc('seats', n, String(n), c)).join('')} /></div>
       {scope !== 'make' && <div class="dsg dsg-wide">
         <h4>Manufacturer <em data-sel="make"></em><input type="search" class="dsp-msearch" id="dsp-msearch" placeholder={`Search ${makes.length} brands`} aria-label="Search manufacturers" /></h4>
         <div class="mlist" set:html={makes.map(([slug, name]) => mc('make', slug, name, makeCounts.get(slug))).join('')} />
       </div>}
+      {RNG_SOON.map(([k, t]) => (
+        <div class="dsg rng" data-range={k}><h4>{t} <em data-sel={k}></em></h4>
+          <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label={`Minimum ${t.toLowerCase()}`} /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label={`Maximum ${t.toLowerCase()}`} /></div>
+          <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
+          <p class="rng-off">Coming soon</p>
+        </div>
+      ))}
     </div>
     <div class="dsp-f">
       <span class="muted dsp-sum" id="dsp-sum"></span>
@@ -210,10 +221,9 @@ function mc(group: string, value: string | number, label: string, n: number | un
     <div class="dsp-body sort-list">
       {scope !== 'class' && <button type="button" class:list={['menu-i', { on: defaultSort === 'class' }]} data-sort="class">Class</button>}
       <button type="button" class:list={['menu-i', { on: defaultSort === 'name' }]} data-sort="name">Name A–Z</button>
-      <button type="button" class="menu-i" data-sort="price" data-needs="price">Cost to register</button>
-      <button type="button" class="menu-i" data-sort="speed" data-needs="speed">Top speed</button>
-      <button type="button" class="menu-i" data-sort="lap" data-needs="lap">Gellhorn lap time</button>
+      {SORT_DATA.map(([k, l]) => <button type="button" class="menu-i" data-sort={k} data-needs={k}>{l}</button>)}
       <button type="button" class="menu-i" data-sort="recent">Recently added</button>
+      <button type="button" class="menu-i" disabled>Most owned<span>coming soon</span></button>
     </div>
   </div>
 
