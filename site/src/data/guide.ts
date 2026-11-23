@@ -17,7 +17,7 @@ import { vehicleOptions } from './vehicles';
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
 // Bump on EVERY content change to the Guide (visible as "Last updated" + Article dateModified) — Fausto 27.10.2026.
-export const GUIDE_UPDATED = '2026-11-22';
+export const GUIDE_UPDATED = '2026-11-23';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -268,6 +268,26 @@ export const guideSections: GuideSection[] = [
     ],
   },
   {
+    // Fausto 23.11.2026 (DEC-0247/0248). COPY: Claude draft -> Codex review (DEC-0088).
+    id: 'money',
+    title: 'Making Money with Stolen Cars',
+    status: 'Tested in the game',
+    paragraphs: [
+      `You can’t buy a car in GTA VI, but you can make money with one. Every scan in the <strong>WAiNK</strong> app shows two numbers that matter: <strong>Sell Value</strong>, what a buyer pays you for that car, and <strong>Cost to Register</strong>, what it costs to keep it.`,
+      `Registering is the expensive option. In our scans, keeping a car cost about three to four times what it would sell for: a Bravado Banshee sold for $6,650 but cost $24,500 to register. Sell the everyday cars and save the cash for the ones you really want to keep.`,
+      `The cost to register belongs to the model. Every time we scanned the same model, it showed the same cost to register. Each car page on Leonida Racing lists it.`,
+      `The sell value belongs to the car in front of you. The info page of the scan shows its <strong>Body Condition</strong>, from Top to Scrap, and worn cars appear to sell for less. We’re still testing how much condition changes the price, so our car pages always show the condition next to the sell value.`,
+      `GTA+ members earn 10% more when they sell a vehicle they own.`,
+      `Space is the real limit. You can own up to 18 cars in the standard game, so every car you register should earn its spot. Plan your garages on Leonida Racing and see which spaces are still free.`,
+    ],
+    cta: { label: 'Manage your garages', href: 'account/#garages' },
+    sources: [
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 21–23, 2026: WAiNK scans of 15 cars with sell value, cost to register and body condition; repeat scans of the Itali RSX and Granger 3600LX showed the same cost to register.' },
+      { label: 'Rockstar Games — GTA+', url: 'https://www.rockstargames.com/VI/gta-plus', note: 'Increased Sell Value: 10% more on owned vehicle sales. Checked November 23, 2026.' },
+      { label: 'GTABase — GTA 6 Cars & Vehicles Database', url: 'https://www.gtabase.com/gta-6/vehicles/', note: '16 garage spots plus two personal vehicles, 18 in total. Checked November 23, 2026.' },
+    ],
+  },
+  {
     id: 'heat',
     title: 'Heat, Police Recognition, and Getaways',
     status: 'Rockstar Interview',
@@ -316,6 +336,7 @@ export const guideSections: GuideSection[] = [
     status: 'Reported by Players',
     paragraphs: [
       `Garages are the only property you can buy in GTA VI’s Story Mode. Every space in a garage lets you register one more personal car. Twelve garages come with every copy of the game: eight you buy and four the story gives you. Three more are edition and GTA+ bonuses.`,
+      `That adds up to 16 garage spaces. Together with Jason’s and Lucia’s personal vehicles, you can own up to 18 cars in the standard game, or 21 with all three bonus garages. Motorcycles take a space too.`,
       `The <strong>Vice City Real Estate</strong> app on your phone opens after the Chapter 2 mission “Daily Driver.” Each of the eight garages for sale has one space. Prices run from $5,000 to $50,000; BuckMe Gold members pay 20% less, which needs a $100,000 deposit in BuckMe Family Savings. Buy all eight and you unlock the Little Boxes trophy.`,
       `The story garages are free and bigger. Port Gellhorn Station comes after “Daily Driver,” Thompson Court after “Company Cars” in Chapter 4, and NE 15th Street and Pegassi Residences after “Operation Savage Glory” in Chapter 5. With three spaces, Pegassi Residences is the largest garage in the game.`,
       `Shore Court Garage in Ocean Beach comes with the pre-order bonus, Paradise Garage in Watson Bay with the Ultimate Edition, and GTA+ members get the Crosstown Garage from Chapter 3.`,
@@ -349,6 +370,8 @@ export const guideSections: GuideSection[] = [
       { label: 'gta6guide.fr — GTA 6 Properties: Houses, Garages, Prices & Locations', url: 'https://gta6guide.fr/en/gta-6/properties', note: 'All 15 garages with area and spaces. Checked November 22, 2026.' },
       { label: 'GTABase — All GTA 6 Garage Locations', url: 'https://www.gtabase.com/gta-6/map/?feature=garages', note: 'Garage map, unlock after “Daily Driver.” Checked November 22, 2026.' },
       { label: 'Game Checklists — GTA 6 Properties & Garages Checklist', url: 'https://game-checklists.com/gta6/properties-checklist/', note: 'Little Boxes trophy for buying all eight garages. Checked November 22, 2026.' },
+      { label: 'Sportskeeda — How many cars can you own in GTA 6', url: 'https://www.sportskeeda.com/gta/how-many-cars-can-gta-6-will-stay-forever', note: '16 garage spaces across 12 garages, 18 cars in total; cars and motorcycles share the spaces. Checked November 23, 2026.' },
+      { label: 'GTABase — GTA 6 Cars & Vehicles Database', url: 'https://www.gtabase.com/gta-6/vehicles/', note: 'One personal vehicle each for Jason and Lucia, 18 vehicles in total with every base-game garage. Checked November 23, 2026.' },
     ],
   },
   {
@@ -544,6 +567,10 @@ export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'Does GTA VI have car customization?', a: 'Yes. The mod-shop menu for Jason’s ’70 Ganado includes engine, transmission, and nitrous upgrades, plus bodywork, wheels, paint, and interiors.' },
   { q: 'What mod shops are confirmed for GTA VI?', a: 'Rideout Customs in Vice City and One-Eyed Willie’s in Lake Leonida are exclusive to the Ultimate Edition. Other mod shops have their own specialties; Coastal Auto Care, for example, offers retro builds, including the Ganado Retro Build.' },
   { q: 'Does GTA VI have garages?', a: 'Yes. Players begin with storage for three vehicles, and buying garages expands that capacity. You buy garages through the Vice City Real Estate app on your phone. Rockstar has also revealed garage content tied to the ’67 Vapid Dominator Buggy and ’55 Vapid Stanier.', aHtml: 'Yes. Players begin with storage for three vehicles, and buying garages expands that capacity. You buy garages through the Vice City Real Estate app on your phone. Rockstar has also revealed garage content tied to the <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a> and <a href="{base}cars/vehicles/vapid-stanier-55/">’55 Vapid Stanier</a>.' },
+  // COPY: Claude draft 23.11.2026 -> Codex review
+  { q: 'How many cars can you own in GTA VI?', a: 'Up to 18 in the standard game: 16 garage spaces plus Jason’s and Lucia’s personal vehicles. The pre-order bonus, the Ultimate Edition and GTA+ each add one more space, for up to 21.' },
+  { q: 'Is it better to sell or register a stolen car in GTA VI?', a: 'Usually sell. In our scans, registering cost about three to four times the car’s sell value, so keep only the cars you really want.' },
+  { q: 'Does condition change a car’s sell value in GTA VI?', a: 'It appears to. The scan shows each car’s body condition, and worn cars sold for less in our tests. Damage also lowers what a fence pays.' },
   { q: 'What kinds of racing are in GTA VI?', a: 'Story mode includes circuit, street, off-road, elimination, and demolition races, plus separate Race Challenges with medal targets. Gellhorn events have car-rating requirements and offer rentals.' },
   { q: 'How many races are in GTA VI?', a: 'Story mode has 40 unique races and 13 separate Race Challenges. For 100% completion, win 30 different races and earn gold in 10 Race Challenges.' },
   { q: 'Is Gellhorn International Raceway confirmed?', a: 'Yes. Gellhorn International Raceway is a playable race venue south of Port Gellhorn, with several layouts.', aHtml: 'Yes. <a href="{base}time-attack/gellhorn-international-raceway/">Gellhorn International Raceway</a> is a playable race venue south of Port Gellhorn, with several layouts.' },
