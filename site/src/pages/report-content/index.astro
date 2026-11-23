@@ -20,7 +20,7 @@ const base = import.meta.env.BASE_URL;
       <nav class="lr-crumb" aria-label="Breadcrumb"><a href={base}>Home</a><span aria-hidden="true">/</span><span aria-current="page">Report content</span></nav>
       <p class="eyebrow">Moderation</p>
       <h1 class="display lr-t2">Report content</h1>
-      <p class="lr-lede">Found a crew, an event, a driver name or anything else on this site that is illegal or breaks our <a href={`${base}terms/`}>Terms</a>? Tell the moderators. Reports are private: only moderators see them. You'll see the outcome of your report on this page.</p>
+      <p class="lr-lede">Found a crew, event, driver name or other content that may be illegal or break our <a href={`${base}terms/`}>Terms</a>? Send a report to the moderators. We don’t tell the person or crew concerned who sent it. You can check the outcome here.</p>
     </div>
   </section>
 
@@ -68,7 +68,7 @@ const base = import.meta.env.BASE_URL;
             <label><input type="radio" name="reason" value="spam_or_scam" /> Spam, scam or misleading content</label>
             <label><input type="radio" name="reason" value="impersonation" /> Impersonation</label>
             <label><input type="radio" name="reason" value="intellectual_property" /> Copyright or trademark</label>
-            <label><input type="radio" name="reason" value="other" /> Breaks the Terms otherwise</label>
+            <label><input type="radio" name="reason" value="other" /> Another breach of the Terms</label>
           </div>
           <label class="rep-details">Explain why <small>at least 20 characters — what exactly is wrong, and where? If you think it's illegal, say why.</small>
             <textarea name="details" maxlength="2000" rows="5" placeholder="e.g. The crew description insults people for their religion."></textarea>
@@ -88,9 +88,9 @@ const base = import.meta.env.BASE_URL;
       <div class="rp-card">
         <h3>How reports work</h3>
         <ul>
-          <li>Only moderators see your report. We don’t tell anyone who sent it.</li>
+          <li>Moderators review your report. We don’t tell the person or crew concerned who sent it.</li>
           <li>You can see the outcome of your report on this page.</li>
-          <li>You can have up to 5 open reports at a time.</li>
+          <li>You can have up to 5 open content reports at a time.</li>
           <li>No Discord account? Send your report to the e-mail address in the <a href={`${base}legal/`}>Legal notice</a>.</li>
         </ul>
       </div>
@@ -150,12 +150,13 @@ const base = import.meta.env.BASE_URL;
       sb.from('crews').select('crew_id, name, tag').eq('is_published', true).order('name'),
       sb.from('hub_events').select('event_id, title, starts_at').eq('is_published', true).order('starts_at', { ascending: false }).limit(200),
     ]);
+    if (crews.error || events.error) msg('Could not load the available crews and events. Please try again.', true);
     const cl = (crews.data ?? []) as { crew_id: string; name: string; tag: string }[];
     const el = (events.data ?? []) as { event_id: string; title: string; starts_at: string }[];
     crewSel.innerHTML = '<option value="">Choose a crew</option>' + cl.map((c) => `<option value="${esc(c.crew_id)}">${esc(c.name)} [${esc(c.tag)}]</option>`).join('');
     eventSel.innerHTML = '<option value="">Choose an event</option>' + el.map((e) => `<option value="${esc(e.event_id)}">${esc(new Date(e.starts_at).toLocaleDateString(undefined, { dateStyle: 'medium' }))} · ${esc(e.title)}</option>`).join('');
-    $('rep-crew-none').hidden = cl.length > 0;
-    $('rep-event-none').hidden = el.length > 0;
+    $('rep-crew-none').hidden = cl.length > 0 || Boolean(crews.error);
+    $('rep-event-none').hidden = el.length > 0 || Boolean(events.error);
     const crew = params.get('crew');
     const event = params.get('event');
     if (crew && cl.some((c) => c.crew_id === crew)) { pickType('crew'); crewSel.value = crew; }
@@ -163,9 +164,10 @@ const base = import.meta.env.BASE_URL;
   }
 
   async function loadMine() {
-    const { data } = await getSupabase().from('content_reports')
+    const { data, error } = await getSupabase().from('content_reports')
       .select('report_id, target_type, target_snapshot, target_text, reason, status, created_at, decision_note')
       .eq('reporter_driver_id', me!).order('created_at', { ascending: false }).limit(10);
+    if (error) { mineEl.hidden = false; mineEl.innerHTML = '<p class="rep-none">Could not load your reports. Please try again.</p>'; return; }
     const rows = (data ?? []) as any[];
     mineEl.hidden = rows.length === 0;
     mineEl.innerHTML = rows.length ? '<p class="rep-mine-title">Your reports</p>' + rows.map((r) => {
@@ -173,6 +175,12 @@ const base = import.meta.env.BASE_URL;
       const status = r.status === 'open' ? 'In review' : r.status === 'resolved' ? 'Action taken' : 'No action';
       return `<div class="rep-mine-row"><div class="rm-main">${what}<small>${esc(contentReasonLabels[r.reason] ?? r.reason)} · ${esc(new Date(r.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' }))}</small>${r.decision_note ? `<small class="rm-decision">Moderators: ${esc(r.decision_note)}</small>` : ''}</div><span class="rep-status ${esc(r.status)}">${status}</span></div>`;
     }).join('') : '';
+  }
+
+  // The insert policy fails for several reasons: only name the limit when the own open count confirms it (Codex 02.11., Fausto 23.11.).
+  async function limitOrNeutral() {
+    const { count } = await getSupabase().from('content_reports').select('report_id', { count: 'exact', head: true }).eq('reporter_driver_id', me!).eq('status', 'open');
+    return (count ?? 0) >= 5 ? 'You have 5 open reports already — please wait until they are handled.' : 'Could not send the report. Check that you’re logged in and that the crew or event is still published, then try again.';
   }
 
   form.addEventListener('submit', async (ev) => {
@@ -197,8 +205,8 @@ const base = import.meta.env.BASE_URL;
     btn.disabled = false;
     if (error) {
       msg(/duplicate|unique/i.test(error.message) ? 'You already have an open report for this.'
-        : /target_not_found/i.test(error.message) ? 'This is no longer published — nothing to report.'
-        : /row-level/i.test(error.message) ? 'You have 5 open reports already — please wait until they are handled.'
+        : /target_not_found/i.test(error.message) ? 'This is no longer published. If you still want to report it, choose Something else and describe where you saw it.'
+        : /row-level/i.test(error.message) ? await limitOrNeutral()
         : 'Could not send the report. Please try again.', true);
       return;
     }

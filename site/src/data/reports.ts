@@ -13,5 +13,5 @@ export const contentReasonLabels: Record<string, string> = {
   spam_or_scam: 'Spam, scam or misleading',
   impersonation: 'Impersonation',
   intellectual_property: 'Copyright or trademark',
-  other: 'Breaks the Terms otherwise',
+  other: 'Another breach of the Terms',
 };

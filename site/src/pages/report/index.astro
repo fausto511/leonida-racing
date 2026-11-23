@@ -17,7 +17,7 @@ const base = import.meta.env.BASE_URL;
       <nav class="lr-crumb" aria-label="Breadcrumb"><a href={base}>Home</a><span aria-hidden="true">/</span><span aria-current="page">Report a time</span></nav>
       <p class="eyebrow">Time Attack</p>
       <h1 class="display lr-t2">Report a time</h1>
-      <p class="lr-lede">Think a published lap time is wrong — impossible, wrong car, wrong track or rules? Tell the moderators. Reports are private: only moderators see them, and the driver is not notified by us.</p>
+      <p class="lr-lede">Think a published lap uses the wrong car or track, breaks the rules or shows an implausible time? Send a report to the moderators. We don’t tell the driver who sent it. You can check your report’s status and outcome here.</p>
     </div>
   </section>
 
@@ -38,10 +38,11 @@ const base = import.meta.env.BASE_URL;
           <p class="rep-step-title"><span class="lr-step-n">1</span> Which time?</p>
           <label class="ui-search rep-search">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-            <input type="search" id="rep-q" placeholder="Search driver or vehicle" autocomplete="off" />
+            <input type="search" id="rep-q" placeholder="Search driver or vehicle" aria-label="Search published lap times" autocomplete="off" />
           </label>
           <div id="rep-results" class="rep-results" role="listbox" aria-label="Published times"></div>
           <p id="rep-picked" class="rep-picked" hidden></p>
+          <p class="rep-none">Can’t find the lap? Use <a href={`${base}report-content/`}>Report content</a> and include the page link and lap details.</p>
         </div>
 
         <div class="rep-step">
@@ -69,9 +70,9 @@ const base = import.meta.env.BASE_URL;
       <div class="rp-card">
         <h3>How reports work</h3>
         <ul>
-          <li>Only moderators see your report. We don’t tell the driver who sent it.</li>
+          <li>Moderators review your report. We don’t tell the driver who sent it.</li>
           <li>You can see the status and outcome of your reports on this page.</li>
-          <li>You can have up to 5 open reports at a time.</li>
+          <li>You can have up to 5 open time reports at a time.</li>
         </ul>
       </div>
       <div class="rp-card">
@@ -108,13 +109,14 @@ const base = import.meta.env.BASE_URL;
   let entries: Entry[] = [];
   let picked: Entry | null = null;
   let me: string | null = null;
+  let loadFailed = false;
 
   function renderResults() {
     const q = qEl.value.trim().toLowerCase();
     const list = entries.filter((e) => !q || `${e.driver} ${e.make} ${e.model}`.toLowerCase().includes(q)).slice(0, 40);
     resultsEl.innerHTML = list.length
       ? list.map((e) => `<button type="button" class="rep-item${picked?.run_id === e.run_id ? ' is-picked' : ''}" data-run="${esc(e.run_id)}"><span class="ri-driver">${esc(e.driver)}</span><span class="ri-car">${esc(e.make)} ${esc(e.model)}</span><span class="ri-time">${fmt(e.lap_time_ms)}</span></button>`).join('')
-      : `<p class="rep-none">${entries.length ? 'No published time matches your search.' : 'There are no published times yet.'}</p>`;
+      : `<p class="rep-none">${loadFailed ? 'Could not load published lap times. Please try again.' : entries.length ? 'No published time matches your search.' : 'There are no published times yet.'}</p>`;
   }
   qEl.addEventListener('input', renderResults);
   resultsEl.addEventListener('click', (ev) => {
@@ -129,13 +131,14 @@ const base = import.meta.env.BASE_URL;
   detailsEl.addEventListener('input', () => detailsEl.removeAttribute('aria-invalid'));
 
   async function loadMine() {
-    const { data } = await getSupabase().from('run_reports').select('report_id, run_id, reason, status, created_at, moderator_note').eq('reporter_driver_id', me!).order('created_at', { ascending: false }).limit(10);
+    const { data, error } = await getSupabase().from('run_reports').select('report_id, run_id, reason, status, created_at, moderator_note').eq('reporter_driver_id', me!).order('created_at', { ascending: false }).limit(10);
+    if (error) { mineEl.hidden = false; mineEl.innerHTML = '<p class="rep-none">Could not load your reports. Please try again.</p>'; return; }
     const rows = (data ?? []) as any[];
     mineEl.hidden = rows.length === 0;
     mineEl.innerHTML = rows.length ? '<p class="rep-mine-title">Your reports</p>' + rows.map((r) => {
       const e = entries.find((x) => x.run_id === r.run_id);
-      const what = e ? `${esc(e.driver)} · ${esc(e.make)} ${esc(e.model)} · ${fmt(e.lap_time_ms)}` : 'Time no longer listed';
-      const status = r.status === 'open' ? 'In review' : r.status === 'resolved' ? 'Handled' : 'Closed';
+      const what = e ? `${esc(e.driver)} · ${esc(e.make)} ${esc(e.model)} · ${fmt(e.lap_time_ms)}` : 'Lap details unavailable here';
+      const status = r.status === 'open' ? 'In review' : r.status === 'resolved' ? 'Action taken' : 'No action';
       return `<div class="rep-mine-row"><div class="rm-main">${what}<small>${esc(reasonLabel[r.reason] ?? r.reason)} · ${esc(new Date(r.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' }))}${r.moderator_note ? ' · Moderator: ' + esc(r.moderator_note) : ''}</small></div><span class="rep-status ${esc(r.status)}">${status}</span></div>`;
     }).join('') : '';
   }
@@ -151,11 +154,19 @@ const base = import.meta.env.BASE_URL;
     const { error } = await getSupabase().from('run_reports').insert({ run_id: picked.run_id, reporter_driver_id: me, reason, details });
     btn.disabled = false;
     if (error) {
-      msg(/duplicate|unique/i.test(error.message) ? 'You already reported this time.' : /row-level/i.test(error.message) ? 'You have 5 open reports already — please wait until they are handled.' : 'Could not send the report. Please try again.', true);
+      // The insert policy fails for several reasons (limit, time no longer published, not logged in):
+      // only name the limit when the own open count confirms it (Codex 02.11., Fausto 23.11.).
+      let text = 'Could not send the report. Please try again.';
+      if (/duplicate|unique/i.test(error.message)) text = 'You already reported this time.';
+      else if (/row-level/i.test(error.message)) {
+        const { count } = await getSupabase().from('run_reports').select('report_id', { count: 'exact', head: true }).eq('reporter_driver_id', me!).eq('status', 'open');
+        text = (count ?? 0) >= 5 ? 'You have 5 open reports already — please wait until they are handled.' : 'Could not send the report. Check that you’re logged in and that the time is still published, then try again.';
+      }
+      msg(text, true);
       return;
     }
     form.reset(); picked = null; pickedEl.hidden = true; qEl.value = ''; renderResults();
-    msg('Thanks — the moderators will take a look.');
+    msg('Report sent. You can check its status and outcome on this page.');
     await loadMine();
   });
 
@@ -166,7 +177,8 @@ const base = import.meta.env.BASE_URL;
     const sb = getSupabase();
     const own = await sb.from('drivers').select('driver_id').eq('auth_user_id', session.user.id).maybeSingle();
     me = own.data?.driver_id ?? null;
-    const { data } = await sb.from('public_leaderboard').select('run_id, driver, make, model, lap_time_ms').eq('platform', 'ps5').order('make').order('model').order('lap_time_ms');
+    const { data, error } = await sb.from('public_leaderboard').select('run_id, driver, make, model, lap_time_ms').eq('platform', 'ps5').order('make').order('model').order('lap_time_ms');
+    loadFailed = Boolean(error);
     entries = (data ?? []) as Entry[];
     renderResults();
     if (me) await loadMine();
