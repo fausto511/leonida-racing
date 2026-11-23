@@ -1,0 +1,96 @@
+---
+// How we measure — car data (Fausto 23.11.2026, DEC-0251). Only the vehicle data we read in the game;
+// Time Attack explains its laps on /time-attack/how-it-works/, Leonida Labs gets its own page later.
+// COPY STATUS: Claude placeholders 23.11.2026 -> Codex review (DEC-0088).
+import Base from '../../../layouts/Base.astro';
+const base = import.meta.env.BASE_URL;
+
+const scanner = [
+  { k: 'Cost to register', v: 'What it costs to keep the car. It belongs to the model: every scan of the same model has shown the same amount.' },
+  { k: 'Sell value', v: 'What a buyer pays for the car you scanned. It depends on that car, so we always list the body condition with it. GTA+ adds 10% when you sell a car you own; our values don’t include that bonus.' },
+  { k: 'Tracker and access', v: 'Whether the car has no tracker, a standard or an advanced one, and whether you need the Key Cloner.' },
+];
+const menu = [
+  { k: 'Stats', v: 'Speed, acceleration, asphalt handling, off-road handling and strength, each from 0 to 10.' },
+  { k: 'Road and off-road rating', v: 'The two numbers next to the road and terrain icons.' },
+  { k: 'Car details', v: 'Type, era, seats, storage and the mod shop specialist from the info page.' },
+];
+const rules = [
+  { t: 'Stock first', c: 'We record a car in stock form before anything else. In the vehicle menu, a stock car’s bars end exactly at the white marks. If they don’t, we don’t use the values. Fully tuned values come later and stay separate.' },
+  { t: 'Standouts on their own', c: 'One-off standout cars carry special parts. Their values never replace the regular model’s values; they get their own pages.' },
+  { t: 'Only what we can see', c: 'If a value isn’t clear on screen, we leave it out. A car without enough data stays unlisted until we have it.' },
+  { t: 'Updated, not overwritten', c: 'When the game changes a value, the new one replaces the old one on the site. We keep the history.' },
+];
+const jsonLd = [{
+  '@context': 'https://schema.org', '@type': 'WebPage', name: 'How we measure GTA 6 car data',
+  url: new URL(`${base}cars/how-we-measure/`, Astro.site).href,
+  about: { '@type': 'VideoGame', name: 'Grand Theft Auto VI', alternateName: ['GTA VI', 'GTA 6'] },
+}];
+---
+<Base
+  title="How We Measure GTA 6 Car Data"
+  description="Where our GTA 6 car data comes from: cost to register, sell value, stats and ratings, read in the game on a PS5 with the current game version."
+  section="cars"
+  breadcrumbs={[{ name: 'Cars', path: 'cars/' }, { name: 'How we measure', path: 'cars/how-we-measure/' }]}
+  jsonLd={jsonLd}
+>
+  <section class="hm-band lr-band-plain">
+    <div class="wrap lr-band-in hm-band-in">
+      <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><span aria-current="page">How we measure</span></nav>
+      <p class="eyebrow">Car data</p>
+      <h1 class="display lr-t2">How we measure</h1>
+      <p class="lr-lede">Every number on our car pages is read by us in the game, on a PS5 with the current game version. Each value keeps its source and date. If we can’t read it clearly, it doesn’t go on the site.</p>
+    </div>
+  </section>
+
+  <div class="wrap hm">
+    <section class="hm-sec" aria-labelledby="hm-scan-h">
+      <h2 class="lr-h2 lr-h2-s" id="hm-scan-h">From the WAiNK scan</h2>
+      <p class="hm-sub">Point your phone at a car and the WAiNK app shows what it’s worth and how well it’s protected.</p>
+      <dl class="hm-list card">{scanner.map((r) => <div><dt>{r.k}</dt><dd>{r.v}</dd></div>)}</dl>
+    </section>
+
+    <section class="hm-sec" aria-labelledby="hm-menu-h">
+      <h2 class="lr-h2 lr-h2-s" id="hm-menu-h">From the vehicle menu</h2>
+      <p class="hm-sub">The game’s own vehicle menu shows how a car drives and what it is.</p>
+      <dl class="hm-list card">{menu.map((r) => <div><dt>{r.k}</dt><dd>{r.v}</dd></div>)}</dl>
+    </section>
+
+    <section class="hm-sec" aria-labelledby="hm-rules-h">
+      <h2 class="lr-h2 lr-h2-s" id="hm-rules-h">Our rules</h2>
+      <ul class="hm-rules">{rules.map((r) => <li><strong>{r.t}</strong><span>{r.c}</span></li>)}</ul>
+    </section>
+
+    <section class="hm-sec" aria-labelledby="hm-other-h">
+      <h2 class="lr-h2 lr-h2-s" id="hm-other-h">Other data on Leonida Racing</h2>
+      <ul class="hm-rules">
+        <li><strong>Time Attack laps</strong><span>Drivers submit their Gellhorn laps and a moderator checks every one. <a href={`${base}time-attack/how-it-works/`}>How Time Attack works</a></span></li>
+        <li><strong>Top speeds and reference laps</strong><span>Measured in controlled tests by Leonida Labs. The method follows on its own page.</span></li>
+      </ul>
+      <p class="hm-sub">Spotted a wrong value? <a href={`${base}report-content/`}>Tell us</a>.</p>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .hm-band-in.lr-band-in { min-height: 0; padding-bottom: 32px; }
+  .hm > section { max-width: 880px; }
+  .hm-sec { padding-top: var(--lr-gap-sec); }
+  .hm > .hm-sec:first-child { padding-top: var(--lr-gap-head); }
+  .hm-sub { margin: 8px 0 0; font-size: 15px; color: var(--lr-soft); }
+  .hm-sub a, .hm-rules a { color: var(--lr-text); text-decoration: underline; text-decoration-color: var(--lr-orange); text-underline-offset: 3px; }
+  .hm-sub a:hover, .hm-rules a:hover { color: var(--lr-orange); }
+  .hm-list { margin: 18px 0 0; padding: 4px 20px; }
+  .hm-list > div { display: grid; grid-template-columns: 200px 1fr; gap: 16px; padding: 14px 0; }
+  .hm-list > div + div { border-top: 1px solid var(--lr-line); }
+  .hm-list dt { font-weight: 700; color: var(--lr-text); }
+  .hm-list dd { margin: 0; font-size: 15px; line-height: 1.55; color: var(--lr-soft); }
+  .hm-rules { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; }
+  .hm-rules li { display: flex; flex-direction: column; gap: 6px; }
+  .hm-rules strong { font-size: 16px; }
+  .hm-rules span { font-size: 15px; line-height: 1.55; color: var(--lr-soft); }
+  @media (max-width: 760px) {
+    .hm-list > div { grid-template-columns: 1fr; gap: 4px; }
+    .hm-rules { grid-template-columns: 1fr; }
+  }
+</style>

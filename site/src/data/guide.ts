@@ -279,6 +279,7 @@ export const guideSections: GuideSection[] = [
       `The sell value belongs to the car in front of you. The info page of the scan shows its <strong>Body Condition</strong>, from Top to Scrap, and worn cars appear to sell for less. We’re still testing how much condition changes the price, so our car pages always show the condition next to the sell value.`,
       `GTA+ members earn 10% more when they sell a vehicle they own.`,
       `Space is the real limit. You can own up to 18 cars in the standard game, so every car you register should earn its spot. Plan your garages on Leonida Racing and see which spaces are still free.`,
+      `How we read and record these values: <a href="{base}cars/how-we-measure/">How we measure</a>.`,
     ],
     cta: { label: 'Manage your garages', href: 'account/#garages' },
     sources: [

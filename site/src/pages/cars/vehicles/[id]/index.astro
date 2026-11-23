@@ -357,7 +357,7 @@ if (faqs.length) vehicleJsonLd.push({ '@context': 'https://schema.org', '@type':
             </dl>
           </div>
         </div>
-        <p class="vst-src">{statsSource}.</p>
+        <p class="vst-src">{statsSource}. <a href={`${base}cars/how-we-measure/`}>How we measure</a></p>
       </section>
     )}
     {!hasStats && hasFacts && (
@@ -754,6 +754,8 @@ if (faqs.length) vehicleJsonLd.push({ '@context': 'https://schema.org', '@type':
   .vst-upd { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--lr-muted); white-space: nowrap; }
   .vst-upd .ico { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; }
   .vst-src { margin: 16px 0 0; font-size: 13px; color: var(--lr-muted); }
+  .vst-src a { color: var(--lr-soft); text-decoration: underline; text-underline-offset: 3px; }
+  .vst-src a:hover { color: var(--lr-orange); }
   @media (max-width: 900px) {
     .vst { grid-template-columns: minmax(0, 1fr); }
     .vst-row { grid-template-columns: minmax(0, 1fr) auto 44px; }
