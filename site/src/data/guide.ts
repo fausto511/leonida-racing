@@ -17,7 +17,7 @@ import { vehicleOptions } from './vehicles';
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
 // Bump on EVERY content change to the Guide (visible as "Last updated" + Article dateModified) — Fausto 27.10.2026.
-export const GUIDE_UPDATED = '2026-11-23';
+export const GUIDE_UPDATED = '2026-11-24';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -190,6 +190,27 @@ export const guideSections: GuideSection[] = [
     ],
   },
   {
+    id: 'standouts',
+    title: 'Standout Vehicles and Special Finds',
+    status: 'Reported by Players',
+    paragraphs: [
+      `<strong>Standouts</strong> are special versions of regular vehicles, with distinctive paint, parts, or a custom build.`,
+      `Pause the game, open <strong>Progress → Vehicles</strong>, and select the <strong>Standout</strong> tab. The builds are grouped into themed sets, including Street Racer, Stock Car, and Demolition Derby.`,
+      `The <strong>Annis Drifter Elegy</strong> is a drift-built Elegy in a garage behind the drag strip at Gellhorn International Raceway.`,
+      `Another special find is the green <strong>Maibatsu Penumbra FF ’97</strong> in a house garage on Vespucci Island, a nod to Brian O’Conner’s car in <em>The Fast and the Furious</em>.`,
+      `Some Standout parts cannot be reapplied after you change them. Read the mod-shop warning before replacing them.`,
+    ],
+    sources: [
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 20, 2026: Annis Drifter Elegy found in the garage behind the drag strip at Gellhorn International Raceway.' },
+      { label: 'PowerPyx — GTA 6 Progress Database', url: 'https://www.powerpyx.com/gta-6-collectible-guide-progress-database/', note: 'November 18, 2026: separate Standout category and themed sets. Checked November 23, 2026.' },
+      { label: 'GTABase — GTA VI vehicles', url: 'https://www.gtabase.com/gta-6/vehicles/', note: 'Custom variants and the warning about losing unique Standout parts. Checked November 23, 2026.' },
+      { label: 'HowToVideoGame — GTA 6 Standout vehicles', url: 'https://howtovideogame.com/gta-6-standout-vehicles/', note: 'November 20, 2026: in-game warning that some unique parts cannot be reapplied after modification. Checked November 23, 2026.' },
+      { label: 'gameta — Drifter Elegy', url: 'https://gameta.gg/gta6/vehicles/drifter-elegy/', note: 'Drifter Elegy listed as a Street Racer build based on the Elegy ’90 at Gellhorn. Checked November 23, 2026.' },
+      { label: 'KeenGamer — GTA 6 Fast and Furious secret car location', url: 'https://www.keengamer.com/articles/guides/gta-6-fast-and-furious-secret-car-location/', note: 'November 20, 2026: green Penumbra FF on Vespucci Island and the film reference. Checked November 23, 2026.' },
+      { label: 'GAMES.GG — GTA 6 Paul Walker car location', url: 'https://games.gg/grand-theft-auto-vi/guides/grand-theft-auto-6-paul-walker-car-location-how-to-get/', note: 'November 19, 2026: Penumbra FF house garage on Vespucci Island. Checked November 23, 2026.' },
+    ],
+  },
+  {
     id: 'driving',
     images: [IMG.driving],
     title: 'Driving and Vehicle Physics',
@@ -199,13 +220,13 @@ export const guideSections: GuideSection[] = [
       `Rockstar has also assembled a vehicle-handling team that includes real race-car drivers. Our Gellhorn laps compare how cars perform around the circuit, including braking, cornering, and acceleration.`,
       `Narrower streets and dense traffic put more demands on your driving, according to Nelson. You can also switch between Jason and Lucia while the other character takes the wheel. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1120s" rel="noopener">18:40</a> in the Extended Look, the player switches from Jason at the wheel to Lucia, who shoots at the pursuing cars while Jason keeps driving. Nelson describes moments where taking out a pursuing car’s tires blocks the cars following it.`,
       `IGN’s demo also includes a ride with <strong>Ryde Me</strong>, the game’s ride-hailing service. Nelson describes it as a way to fast travel, with the option to ride along and chat.`,
-      `Small details matter when you’re just out for a drive, too. You work the turn signals yourself: on PS5, tap left or right on the D-pad while driving. The radio wheel also has a <strong>Vehicle</strong> tab with controls for the car itself, such as the lights and hazard lights.`,
+      `Small details matter when you’re just out for a drive, too. You work the turn signals yourself: on PS5, tap left or right on the D-pad while driving. Hold left on the D-pad to open the radio menu, then use the right stick to select <strong>Vehicle</strong>. This menu includes the lights, hazard lights, and the roof controls on a convertible.`,
       `In the cars we drove, older American muscle cars felt noticeably looser than older four-wheel-drive off-roaders. Age alone doesn’t tell you how planted a car will feel. Brake hard and the discs can glow.`,
       `There’s no first-person view in the camera settings. You drive in third person.`,
       `Damage follows the impact: side hits leave dents where they land, headlights can break individually, and mirrors can be knocked loose. On the older cars we checked, mirrors broke off; on newer ones, they hung by a cable. A bumper torn loose on one side can drag along the road. Engine damage has its own readout.`,
     ],
     sources: [
-      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 20, 2026: PS5 turn signals on the D-pad, the Vehicle tab in the radio wheel, the camera settings, handling impressions, and damage on the cars we drove. November 23, 2026: glowing brake discs under hard braking.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 20, 2026: PS5 turn signals on the D-pad, the Vehicle menu, the camera settings, handling impressions, and damage on the cars we drove. November 23, 2026: glowing brake discs under hard braking. November 23, 2026: Vehicle menu and convertible roof controls checked on PS5; hold left on the D-pad, select Vehicle with the right stick.' },
       { label: 'Hella Flush — GTA VI damage tests', url: 'https://www.youtube.com/watch?v=H_GhXwV384I&t=27s', note: 'November 2026: mirrors at 0:27, local dents at 1:00, engine damage at 1:23, and a dragging bumper at 4:31. Checked November 20, 2026.' },
       { label: 'IGN — GTA 6: The Big Interview', url: IGN_FULL, note: 'October 7, 2026; July demonstration.' },
       { label: 'GamesRadar — Rob Nelson on GTA VI driving physics', url: 'https://www.gamesradar.com/games/grand-theft-auto/gta-6-driving-is-the-best-parts-of-gta-4-but-with-the-accessibility-of-gta-5-says-rockstar-boss/', note: 'September 4, 2026: direct Nelson quotation covering drivetrain, tires, suspension, steering, and the rebuilt physics model.' },
@@ -555,12 +576,14 @@ export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'Do AI racers rubber-band in GTA VI?', a: 'Yes, and it’s very noticeable. In the races we played at Gellhorn, rivals slowed sharply when we fell behind and caught up quickly when we pulled away.' },
   { q: 'Is the fastest GTA VI car also the best for Gellhorn?', a: 'Top speed and lap time measure different things. Use Gellhorn laps to compare tested cars, and the driver leaderboard to compare submitted runs. Keep tuning categories and test conditions consistent.' },
   { q: 'How do you use turn signals in GTA VI?', a: 'On PS5, tap left or right on the D-pad while driving.' },
+  { q: 'How do you open or close a convertible roof in GTA VI?', a: 'Hold left on the D-pad to open the radio menu. Use the right stick to select Vehicle, then choose the roof control.' },
   { q: 'Does GTA VI have a first-person view?', a: 'No. There’s no first-person option in the camera settings, so you drive in third person.' },
   { q: 'How does the vehicle scanner work in GTA VI?', a: 'Rob Nelson describes a phone scanner that shows whether a car is locked, has an alarm or tracker, what it is worth at a Pay ’n’ Spray or specialty car fence, and what it costs to register for yourself. Different vehicles can require tools such as a Slim Jim or key cloner.' },
   { q: 'Can changing cars or clothes help you escape the police in GTA VI?', a: 'Yes. In Nelson’s demonstration, switching to a car the police do not recognize lowers their perception of you. He also says buying and wearing a new outfit removes his current heat. Glasses, a cap, or a haircut alone do not address clothing the police already recognize.' },
   { q: 'Is GranForma replacing Pegassi for the Zorrusso in GTA VI?', a: 'For the Zorrusso, yes. Rockstar images published with Bloomberg’s October 14 feature already showed GranForma lettering, and the in-game manufacturer is GranForma. That does not mean every former Pegassi model has moved.', aHtml: 'For the <a href="{base}cars/vehicles/granforma-zorrusso/">Zorrusso</a>, yes. Rockstar images published with Bloomberg’s October 14 feature already showed GranForma lettering, and the in-game manufacturer is GranForma. That does not mean every former Pegassi model has moved.' },
   { q: 'Can I call my personal vehicle in GTA VI?', a: 'Yes. Call Joey from your phone contacts. In our test, he delivered the same personal car nearby within seconds after we had wrecked it.' },
   { q: 'Which cars has Rockstar confirmed for GTA VI?', a: 'Rockstar has named cars including the ’95 Grotti Cheetah and ’67 Vapid Dominator Buggy. The game itself now shows each car’s name, and we use those names, such as the ’19 Buffalo for the car known as the Buffalo STX. Our Cars section focuses on racing-relevant cars.', aHtml: 'Rockstar has named cars including the <a href="{base}cars/vehicles/grotti-cheetah-95/">’95 Grotti Cheetah</a> and <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a>. The game itself now shows each car’s name, and we use those names, such as the ’19 Buffalo for the car known as the Buffalo STX. Our <a href="{base}cars/">Cars section</a> focuses on racing-relevant cars.' },
+  { q: 'What are Standout vehicles in GTA VI?', a: 'Special versions of regular vehicles with distinctive paint, parts, or custom builds. You can find their themed sets under Progress → Vehicles → Standout.' },
   { q: 'How does stealing cars work in GTA VI?', a: 'Rockstar North’s Rob Nelson described a tiered system. Some parked vehicles require tools such as a Slim Jim or key cloner, while occupied vehicles can still be carjacked. A phone scanner can provide information about a vehicle’s security, tracker, value, and registration cost.' },
   { q: 'How do you get the Slim Jim in GTA VI?', a: 'Moses gives you the Slim Jim during the Chapter 2 mission Moses. It opens locked cars quietly, but it does not start cars with keyless ignition.' },
   { q: 'How do you get the key cloner in GTA VI?', a: 'Through the story, during Randy’s job to steal a Zorrusso in Chapter 3. Follow the prompt to install it through your phone’s settings.' },
