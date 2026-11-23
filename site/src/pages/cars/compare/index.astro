@@ -5,7 +5,7 @@
 // noindex: any combination of cars would be thin content (handoff).
 // COPY STATUS: all texts are Claude placeholders from the mockup -> Codex (DEC-0088).
 import Base from '../../../layouts/Base.astro';
-import { vehicleOptions, vehicleValues, COST_METRIC } from '../../../data/vehicles';
+import { vehicleOptions, vehicleValues, COST_METRIC, sellValueText } from '../../../data/vehicles';
 import type { CmpCar } from '../../../data/compare';
 
 const base = import.meta.env.BASE_URL;
@@ -15,7 +15,7 @@ const cars: CmpCar[] = vehicleOptions.map((v) => {
     id: v.id, make: v.make, model: v.model, logo: v.logoSlug, cls: v.classes[0], classes: v.classes,
     drive: v.drive, seats: v.seats, acq: v.acquisition ?? null, photo: Boolean(v.photo), based: v.realLifeInspiration ?? null,
     release: Boolean(v.releaseId), sellable: v.sellable ?? null,
-    price: val[COST_METRIC]?.value ?? null, /* cost to register, DEC-0247 */ sell: val.sell_price_gtad?.value ?? null, speed: val.top_speed_mph?.value ?? null, ref: val.gellhorn_reference_lap_ms?.value ?? null,
+    price: val[COST_METRIC]?.value ?? null, /* cost to register, DEC-0247 */ sell: sellValueText(v.id)?.max ?? null, sellText: sellValueText(v.id) ?? null, speed: val.top_speed_mph?.value ?? null, ref: val.gellhorn_reference_lap_ms?.value ?? null,
   };
 });
 const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>';

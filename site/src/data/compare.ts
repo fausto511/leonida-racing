@@ -18,6 +18,8 @@ export interface CmpCar {
   id: string; make: string; model: string; logo: string; cls: string; classes: string[];
   drive: string; seats: number; acq: string | null; photo: boolean; based: string | null; release: boolean; sellable: string | null;
   price: number | null; sell: number | null; speed: number | null; ref: number | null;
+  /** sell value text per body condition (DEC-0248) */
+  sellText?: { main: string; sub: string; max: number } | null;
 }
 
 /** Edition / bonus / GTA+ cars: judged like every other car (Fausto 15.10.), only marked

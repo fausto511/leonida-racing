@@ -74,6 +74,8 @@ export interface VehicleValue {
   tuning?: 'stock' | 'tuned';
   source_type: 'in_game' | 'rockstar' | 'controlled_test' | 'community' | 'derived'; method: string | null;
   game_release_id: string | null; platform: string | null; measured_at: string | null; evidence_url: string | null;
+  /** body condition in the scanner when read (sell values, DEC-0248); null = not condition-dependent */
+  condition?: string | null;
 }
 
 export const vehicleOptions: VehicleOption[] = (generated.vehicles as GeneratedVehicle[]).map((v) => ({
@@ -116,6 +118,27 @@ export const vehicleValuesTuned: Record<string, Partial<Record<VehicleValue['met
 for (const val of generated.values as VehicleValue[]) {
   const target = val.tuning === 'tuned' ? vehicleValuesTuned : vehicleValues;
   (target[val.vehicle_id] ??= {})[val.metric] = { ...val, value: Number(val.value) };
+}
+
+/** Sell values depend on the car's body condition (Fausto 23.11.2026, DEC-0248): one stock value per
+ *  condition, best condition first. Only values with a recorded condition are shown. */
+export const CONDITIONS = ['Top', 'Good', 'Average', 'Poor', 'Scrap'] as const;
+export const vehicleSellValues: Record<string, VehicleValue[]> = {};
+for (const val of generated.values as VehicleValue[]) {
+  if (val.metric !== 'sell_price_gtad' || val.tuning === 'tuned' || !val.condition) continue;
+  (vehicleSellValues[val.vehicle_id] ??= []).push({ ...val, value: Number(val.value) });
+}
+for (const list of Object.values(vehicleSellValues)) list.sort((a, b) => CONDITIONS.indexOf(a.condition as any) - CONDITIONS.indexOf(b.condition as any));
+const usd0 = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
+/** "$1,000 · Poor condition" (one scan) or "$4,000–6,650" + "Average to Top" (several); null = none.
+ *  COPY: Claude placeholder 23.11.2026 (Codex review open). */
+export function sellValueText(id: string): { main: string; sub: string; max: number } | null {
+  const list = vehicleSellValues[id];
+  if (!list?.length) return null;
+  const vals = list.map((v) => v.value);
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  if (list.length === 1) return { main: usd0(hi), sub: `${list[0].condition} condition`, max: hi };
+  return { main: lo === hi ? usd0(hi) : `${usd0(lo)}–${usd0(hi).slice(1)}`, sub: `${list[list.length - 1].condition} to ${list[0].condition} condition`, max: hi };
 }
 
 /** Sitemap lastmod per vehicle page (04.11.2026): latest of the vehicle row's

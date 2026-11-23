@@ -91,6 +91,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
           <form id="vx-value-form" class="vx-fields vx-value-form">
             <label>Value *<select name="metric" id="vx-metric"><option value="register_cost_gtad">Cost to register (GTA$)</option><option value="sell_price_gtad">Sell value (GTA$)</option><option value="price_gtad">Purchase price (GTA$, only if the game sells the car)</option><option value="top_speed_mph">Top speed (mph)</option><option value="gellhorn_reference_lap_ms">Gellhorn reference lap (m:ss.mmm)</option><optgroup label="In-game stats (0–10)"><option value="stat_speed">Speed</option><option value="stat_acceleration">Acceleration</option><option value="stat_handling_asphalt">Asphalt handling</option><option value="stat_handling_offroad">Off-road handling</option><option value="stat_strength">Strength</option></optgroup><optgroup label="In-game ratings"><option value="rating_road">Road rating</option><option value="rating_offroad">Off-road rating</option></optgroup><optgroup label="Nitrous boost (blue plus in the preview)"><option value="boost_speed">Boost: speed</option><option value="boost_acceleration">Boost: acceleration</option></optgroup></select></label>
             <label>Amount *<input name="value" id="vx-value" required placeholder="e.g. 1250000" /></label>
+            <label id="vx-cond-l" hidden>Body condition *<select name="condition" id="vx-cond"><option value="">—</option><option>Top</option><option>Good</option><option>Average</option><option>Poor</option><option>Scrap</option></select><small>As shown in the scanner. Sell values depend on it (DEC-0248).</small></label>
             <label>Tuning *<select name="tuning"><option value="stock">Stock (no upgrades)</option><option value="tuned">Fully tuned</option></select><small>Money values (cost to register, sell value): always stock.</small></label>
             <label>Source *<select name="source_type"><option value="in_game">In-game (shown in the game)</option><option value="controlled_test">Measured (controlled test)</option><option value="rockstar">Rockstar (official)</option><option value="community">Community</option><option value="derived">Calculated</option></select></label>
             <label>Method<input name="method" maxlength="40" placeholder="e.g. LR-TS-1" /><small>Methodology version, once decided.</small></label>
@@ -286,12 +287,12 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
 
   async function loadValues() {
     const { data, error } = await getSupabase().from('vehicle_values')
-      .select('value_id, metric, tuning, value, source_type, method, game_release_id, platform, measured_at, evidence_url, note, status, created_at, creator:drivers!vehicle_values_created_by_fkey(display_name)')
+      .select('value_id, metric, tuning, condition, value, source_type, method, game_release_id, platform, measured_at, evidence_url, note, status, created_at, creator:drivers!vehicle_values_created_by_fkey(display_name)')
       .eq('vehicle_id', selected.vehicle_id).order('created_at', { ascending: false });
     if (error) { $('vx-value-list').innerHTML = `<p class="vx-meta">Could not load values: ${esc(error.message)}</p>`; return; }
     $('vx-value-list').innerHTML = data?.length ? `<table class="vx-table"><thead><tr><th>Value</th><th>Amount</th><th>Source</th><th>Version</th><th>Measured</th><th>Status</th><th></th></tr></thead><tbody>${data.map((r: any) => `
       <tr class="${r.status === 'current' ? '' : 'is-old'}">
-        <td>${esc(METRIC[r.metric] ?? r.metric)}${r.tuning === 'tuned' ? ' <small>(tuned)</small>' : ''}</td>
+        <td>${esc(METRIC[r.metric] ?? r.metric)}${r.tuning === 'tuned' ? ' <small>(tuned)</small>' : ''}${r.condition ? ` <small>(${esc(r.condition)})</small>` : ''}</td>
         <td>${esc(fmtValue(r.metric, Number(r.value)))}${r.evidence_url ? ` <a href="${esc(r.evidence_url)}" target="_blank" rel="noopener">evidence</a>` : ''}${r.note ? `<br><small>${esc(r.note)}</small>` : ''}</td>
         <td>${esc(SOURCE[r.source_type] ?? r.source_type)}${r.method ? ` · ${esc(r.method)}` : ''}${r.platform ? ` · ${esc(r.platform.toUpperCase())}` : ''}</td>
         <td>${esc(releases.find((x) => x.release_id === r.game_release_id)?.name ?? '—')}</td>
@@ -352,20 +353,23 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
     e.preventDefault();
     const el = valueForm.elements as any;
     const value = parseValue(el.metric.value, el.value.value);
+    if (el.metric.value === 'sell_price_gtad' && !el.condition.value) { msg('Sell value: choose the body condition shown in the scanner.', 'error'); return; }
     if (value == null) { const mt = el.metric.value; msg(mt === 'gellhorn_reference_lap_ms' ? 'Lap time format: m:ss.mmm (e.g. 1:24.642).' : mt.startsWith('stat_') || mt.startsWith('boost_') ? 'Stats and boost: a number from 0 to 10 (e.g. 0.3).' : mt.startsWith('rating_') ? 'Ratings: a number from 0 (e.g. 784).' : 'Enter a positive number.', 'error'); return; }
     const { error } = await getSupabase().from('vehicle_values').insert({
       vehicle_id: selected.vehicle_id, metric: el.metric.value, tuning: el.metric.value.endsWith('_gtad') ? 'stock' : el.tuning.value, value, source_type: el.source_type.value,
       method: el.method.value.trim() || null, game_release_id: el.game_release_id.value || null, platform: el.platform.value || null,
       measured_at: el.measured_at.value || null, evidence_url: el.evidence_url.value.trim() || null, note: el.note.value.trim() || null,
+      condition: el.metric.value === 'sell_price_gtad' ? el.condition.value : null,
     });
     if (error) { msg(`Could not add the value: ${error.message}`, 'error'); return; }
-    valueForm.reset(); fillReleaseSelects();
+    valueForm.reset(); fillReleaseSelects(); $('vx-cond-l').hidden = true;
     await loadValues();
     msg('Value added. The site shows it after the next build.', 'ok');
   });
 
   $('vx-metric').addEventListener('change', () => {
     const m = ($('vx-metric') as HTMLSelectElement).value;
+    $('vx-cond-l').hidden = m !== 'sell_price_gtad';
     ($('vx-value') as HTMLInputElement).placeholder = m.endsWith('_gtad') ? 'e.g. 24500' : m === 'top_speed_mph' ? 'e.g. 124.5' : m.startsWith('stat_') ? 'e.g. 7.4' : m.startsWith('boost_') ? 'e.g. 0.3' : m.startsWith('rating_') ? 'e.g. 784' : 'e.g. 1:24.642';
   });
   $('vx-value-list').addEventListener('click', async (e) => {

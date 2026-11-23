@@ -29,7 +29,7 @@ const absDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { mon
 // money values as on the vehicle page ($24,500); everything else as the rankings show it
 const chipValue = (v: (typeof fresh)[number]['changes'][number]['value']) => isMoneyMetric(v.metric)
   ? `$${Math.round(v.value).toLocaleString('en-US')}` : formatVehicleValueHtml(v);
-const statChip = (c: (typeof fresh)[number]['changes'][number]) => `${statLabels[c.metric]}${c.tuning === 'tuned' ? ' (tuned)' : ''}`;
+const statChip = (c: (typeof fresh)[number]['changes'][number]) => `${statLabels[c.metric]}${c.tuning === 'tuned' ? ' (tuned)' : ''}${c.value.condition ? ` (${c.value.condition})` : ''}`;
 
 // ---- Time Attack band: sample top 5 until real laps exist ----
 const sampleTop = overallRows(sampleEntries, false).slice(0, 5);

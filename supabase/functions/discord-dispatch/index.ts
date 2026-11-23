@@ -401,7 +401,7 @@ function fmtStat(metric: string, value: number): string {
   const ms = Math.round(value), m = Math.floor(ms / 60000), s = (ms % 60000) / 1000;
   return `${m}:${s.toFixed(3).padStart(6, "0")}`;
 }
-const statLabel = (x: any) => `${METRIC_LABEL[x.metric] ?? x.metric}${x.tuning === "tuned" ? " (tuned)" : ""}`;
+const statLabel = (x: any) => `${METRIC_LABEL[x.metric] ?? x.metric}${x.tuning === "tuned" ? " (tuned)" : ""}${x.condition ? ` (${x.condition})` : ""}`;
 async function pageStatsAt(v: any): Promise<number> {
   try {
     const r = await fetch(vehicleUrl(v), { headers: { "cache-control": "no-cache" } });
@@ -439,7 +439,7 @@ async function handleValues(): Promise<number> {
   const ids = [...new Set((rows as any[]).map((r) => r.vehicle_id))];
   const [{ data: vs }, { data: vals }] = await Promise.all([
     db.from("vehicles").select(VEHICLE_COLS).in("vehicle_id", ids).not("release_id", "is", null),
-    db.from("vehicle_values").select("vehicle_id,metric,tuning,value,created_at").in("vehicle_id", ids).eq("status", "current"),
+    db.from("vehicle_values").select("vehicle_id,metric,tuning,value,created_at,condition").in("vehicle_id", ids).eq("status", "current"),
   ]);
   const byId = new Map((vs ?? []).map((v: any) => [v.vehicle_id, v]));
   const ready: { v: any; stats: any[] }[] = [];

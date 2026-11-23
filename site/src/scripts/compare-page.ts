@@ -219,8 +219,8 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
       { label: 'Cost to register', dir: 'min', cells: (c) => c.price != null
         ? { m: money(c.price), s: [c.price === minPrice ? (prices.length > 1 ? 'Cheapest' : '') : cheapest ? `+${moneyShort(c.price - minPrice!)} vs ${cheapest.model}` : '', limited(c) ? (acqNote[c.acq!] ?? '') : ''].filter(Boolean).join('\u2002·\u2002'), v: c.price }
         : { m: nrTb(), raw: 'na', tba: true } },
-      { label: 'Sell value', sub: 'In-game scanner, no upgrades', dir: 'max', cells: (c) => c.sellable === 'no' ? { m: "Can't be sold" }
-        : c.sell != null ? { m: money(c.sell), v: c.sell } : { m: nrLong, tba: true } },
+      { label: 'Sell value', sub: 'Stolen, depends on condition', dir: 'max', cells: (c) => c.sellable === 'no' ? { m: "Can't be sold" }
+        : c.sellText ? { m: esc(c.sellText.main), s: esc(c.sellText.sub), v: c.sellText.max } : { m: nrLong, tba: true } },
     ];
     const car: Row[] = [
       { label: 'Class', cells: (c) => ({ m: esc(c.classes.join(' / ')) }) },

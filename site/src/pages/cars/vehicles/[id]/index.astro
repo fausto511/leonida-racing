@@ -6,7 +6,7 @@
 // from the mockup -> Codex review (DEC-0088). About texts: data/vehicle-copy.ts (Codex).
 import Base from '../../../../layouts/Base.astro';
 import CarCard from '../../../../components/CarCard.astro';
-import { MAKES_WITHOUT_LOGO, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs, vehicleStatsAt, COST_METRIC, COST_LABEL } from '../../../../data/vehicles';
+import { MAKES_WITHOUT_LOGO, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs, vehicleStatsAt, COST_METRIC, COST_LABEL, sellValueText } from '../../../../data/vehicles';
 import { groupedTitles } from '../../../../data/gta-titles';
 import { speedHtml } from '../../../../data/units';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
@@ -82,7 +82,9 @@ const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 // GTA VI has no car dealers: the money tile shows the in-game cost to register (DEC-0247).
 const price = vals[COST_METRIC]?.value ?? null;
 const speed = vals.top_speed_mph?.value ?? null;
-const sell = vals.sell_price_gtad?.value ?? null;
+// sell value per body condition (DEC-0248): "$1,000 · Poor condition"
+const sellInfo = sellValueText(vehicle.id);
+const sell = sellInfo?.max ?? null;
 const speedRank = speed == null ? null : 1 + classCars.filter((v) => (vehicleValues[v.id]?.top_speed_mph?.value ?? -1) > speed).length;
 
 // ---- In-game stats (Fausto 19.11.2026, DEC-0241): stock values from the game's vehicle menu ----
@@ -269,7 +271,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         </div>
         <dl class="vs-rows">
           <div><dt>Where to get</dt><dd class:list={{ 'is-tba': !vehicle.acquisition }}>{vehicle.acquisition ? acqNotes[vehicle.acquisition] : notRecorded}</dd></div>
-          <div><dt>Sell value</dt><dd class:list={{ 'is-tba': vehicle.sellable !== 'no' && sell == null }}>{vehicle.sellable === 'no' ? "Can't be sold" : sell != null ? money(sell) : notRecorded}</dd></div>
+          <div><dt>Sell value</dt><dd class:list={{ 'is-tba': vehicle.sellable !== 'no' && sell == null }}>{vehicle.sellable === 'no' ? "Can't be sold" : sellInfo ? <>{sellInfo.main}<span class="vs-cond"> · {sellInfo.sub}</span></> : notRecorded}</dd></div>
           <div><dt>Era</dt><dd class:list={{ 'is-tba': !vehicle.era }}>{vehicle.era ?? notRecorded}</dd></div>
           <div><dt>Release</dt><dd class:list={{ 'is-tba': !release }}>{release?.date ? <>{release.name}{' · '}<time datetime={release.date}>{releaseDate}</time></> : releaseText}</dd></div>
         </dl>
@@ -525,6 +527,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vt { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 10px 14px; border-radius: 6px; background: var(--lr-raised); }
   .vt-l { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-muted); }
   .vt-short { display: none; }
+  .vs-cond { color: var(--lr-muted); }
   .vt-v { font-size: 24px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .vt-s { font-size: 13px; color: var(--lr-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   a.vt-link { font-size: 14px; font-weight: 600; color: var(--lr-orange); text-decoration: none; } /* = .arrow (DEC-0170) */
