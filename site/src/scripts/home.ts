@@ -23,7 +23,7 @@ const shuffle = <T,>(a: T[]): T[] => { const b = [...a]; for (let i = b.length -
 
 // ---------------------------------------------------------------------------
 // Rotations: fixed cards stay, two picks from the pool, order mixed per load
-// (Fastest at Gellhorn: Super + Sports + 2 random classes; Guide: Racing first + 2).
+// (Fastest at Gellhorn: Super + Sports + 2 random classes; Guide: 3 random, no fixed card since 23.11.).
 // ---------------------------------------------------------------------------
 function rotate(gridId: string, total: number, shuffleAll: boolean) {
   const grid = $(gridId);

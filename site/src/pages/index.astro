@@ -60,7 +60,7 @@ const skel = (n: number, tag: boolean) => Array.from({ length: n }, () => `<div 
 const eventsHtml = skel(3, false);
 const crewsHtml = skel(4, true);
 
-// ---- Guide: "Racing in GTA VI" fixed, two rotating (never "not-confirmed") ----
+// ---- Guide: three random cards, no fixed card (Fausto 23.11.2026; never "not-confirmed") ----
 const GUIDE_CARD: Record<string, { img: string; line: string; title?: string }> = {
   // racing / vehicles / customization: image, title and sentence from the mockup (DEC-0116 board Home)
   racing: { img: 'guide/street-race', title: 'Racing in GTA VI', line: 'Circuit, off-road, and street racing, each shown with a live race HUD.' },
@@ -74,9 +74,9 @@ const GUIDE_CARD: Record<string, { img: string; line: string; title?: string }> 
   'car-culture': { img: 'guide/car-meet', line: 'Car meets, takeovers and the details that give Leonida’s car scene its character.' },
 };
 const guideCards = guideSections.filter((s) => s.id !== 'not-confirmed' && GUIDE_CARD[s.id]);
-const guideFixed = guideCards.find((s) => s.id === 'racing')!;
-const MOCKUP_DEFAULT = ['vehicles', 'customization'];
-const guideRest = [...guideCards.filter((s) => MOCKUP_DEFAULT.includes(s.id)), ...guideCards.filter((s) => s.id !== 'racing' && !MOCKUP_DEFAULT.includes(s.id))];
+// Without JavaScript the first three are shown; the script picks three at random.
+const GUIDE_DEFAULT = ['racing', 'vehicles', 'customization'];
+const guideOrdered = [...guideCards.filter((s) => GUIDE_DEFAULT.includes(s.id)), ...guideCards.filter((s) => !GUIDE_DEFAULT.includes(s.id))];
 const guideUpdated = new Date(`${GUIDE_UPDATED}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
 const home = new URL(base, Astro.site).href;
@@ -315,8 +315,8 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
       <div class="hsec-aside"><span class="muted">Updated {guideUpdated}</span><a href={`${base}guide/`} class="arrow">Open the Guide →</a></div>
     </div>
     <div class="cgrid cgrid-3" id="guide-cards">
-      {[guideFixed, ...guideRest].map((s, i) => (
-        <article class="card gcard lr-hcard" data-rotate={i === 0 ? 'fixed' : i <= 2 ? 'pool-default' : 'pool'}>
+      {guideOrdered.map((s, i) => (
+        <article class="card gcard lr-hcard" data-rotate={i <= 2 ? 'pool-default' : 'pool'}>
           <div class="g-img">
             <img class="lr-hzoom" src={`${base}images/${GUIDE_CARD[s.id].img}-640.webp`} srcset={`${base}images/${GUIDE_CARD[s.id].img}-640.webp 640w, ${base}images/${GUIDE_CARD[s.id].img}-1280.webp 1280w`} sizes="(max-width: 760px) 272px, 420px" alt="" width="640" height="360" loading="lazy" />
             {s.status && <span class="g-status"><i aria-hidden="true"></i>{s.status}</span>}
