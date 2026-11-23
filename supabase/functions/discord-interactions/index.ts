@@ -342,7 +342,7 @@ function splitValues(rows: any[]) {
   return { vals, sell };
 }
 // Value + condition like the car page tile: "$1,000" / "Poor condition" or "$4,000–6,650" / "Average to Top condition".
-// /car puts the condition on its own line (no ugly wrap in the narrow field, Fausto 23.11.); /compare keeps it short on one line.
+// /car and /compare both use the short form "$6,650 (Average)" (Fausto 23.11.); "card" = two lines, currently unused.
 function sellText(sell: SellVal[], mode: "card" | "short" = "card"): string | null {
   if (!sell.length) return null;
   const vs = sell.map((x) => x.value), lo = Math.min(...vs), hi = Math.max(...vs);
@@ -410,7 +410,7 @@ function carMessage(v: any, avg: number | null, count: number | null, variant: s
   const mph = vals.top_speed_mph;
   const fields = [
     { name: "Cost to register", value: vals.register_cost_gtad != null ? usd(vals.register_cost_gtad) : DASH, inline: true },
-    { name: "Sell value", value: sellText(sell) ?? DASH, inline: true }, blank,
+    { name: "Sell value", value: sellText(sell, "short") ?? DASH, inline: true }, blank,
     { name: "Road rating", value: rating("rating_road"), inline: true },
     { name: "Off-road rating", value: rating("rating_offroad"), inline: true }, blank,
     { name: "In-game stats (stock)", value: statBlock(vals), inline: false },
