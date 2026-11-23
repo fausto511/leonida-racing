@@ -19,6 +19,6 @@ export const vehiclePhotoAlt: Record<string, string> = {
   'schyster-deviant': 'Schyster Deviant with red, white, and blue star-spangled livery',
   'vapid-dominator-67-buggy': "Lifted Vapid Dominator '67 Buggy outside an auto shop",
   'vapid-ganado-70': "Yellow Vapid Ganado '70 driving along a coastal road",
-  'vapid-riata-classic': 'Dirt-covered white Vapid Riata Classic with retro side stripes, close-up',
+  'vapid-riata-classic': 'Dirt-covered white Vapid Riata ’70 with retro side stripes, close-up',
   'vapid-stanier-55': "Yellow and white Vapid Stanier '55 on a neon-lit street",
 };
