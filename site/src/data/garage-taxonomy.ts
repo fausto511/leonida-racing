@@ -85,11 +85,12 @@ export const classesAbout = {
     'Our car database focuses on racing-relevant cars, rather than every vehicle in GTA VI. Rockstar has named some models directly; others are community identifications from official footage and screenshots. A model name used here should not be read as official confirmation unless Rockstar has provided it.',
   ],
 };
+// manufacturersAbout: Codex Herstelleruebersicht 23.11.2026 (para 3 first sentence Claude), approved by Fausto 23.11.2026
 export const manufacturersAbout = {
   heading: 'Explore GTA VI Car Manufacturers',
   paragraphs: [
-    'A manufacturer badge is another way into our car database. Follow a favorite marque across different body styles, or start with a shape you recognize and see what else wears the same name. A brand’s page brings its listed cars together so you can move from the broad family resemblance to the details of each model.',
+    'A manufacturer badge is another way to explore GTA VI’s cars. Follow a favorite marque across different body styles, or start with a shape you recognize and see what else wears the same name. A brand’s page brings its listed cars together so you can move from the broad family resemblance to the details of each model.',
     'GTA VI uses fictional manufacturers. The real-life inspirations shown here describe recognizable design influences, not licensed partnerships or exact equivalents. Individual cars can combine features from several sources, so a badge’s main inspiration does not explain every vehicle beneath it.',
-    'Rockstar names some manufacturers and models in official material; other identifications come from the community’s reading of visible designs and badges. We keep that distinction separate from the real-world comparisons. Our database concentrates on racing-relevant cars and does not attempt to catalogue every vehicle in GTA VI. Open a manufacturer to explore the selection, then use the individual vehicle pages for model-specific details.',
+    'For cars already in the game, manufacturer and model names follow what the game shows. Some familiar cars wear different badges in GTA VI: the Paragon is an Ascot, while the Chino is a Dundreary. Open a manufacturer to explore its cars, then use the individual vehicle pages for model-specific details.',
   ],
 };
