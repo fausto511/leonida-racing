@@ -4,9 +4,9 @@
 // "Price · Top speed", "Based on …", foot with the Gellhorn rank. The whole
 // card links to the vehicle page; the compare button sits above that link.
 // COPY STATUS: "TBA" / "No Gellhorn lap yet" are Claude placeholders -> Codex (DEC-0088).
-import { vehicleValues, COST_METRIC, type VehicleOption } from '../data/vehicles';
+import { vehicleValues, COST_METRIC, sellValueText, type VehicleOption } from '../data/vehicles';
 import { lapTime } from '../data/leaderboard';
-import { speedHtml } from '../data/units';
+import RatingIcon from './RatingIcon.astro';
 
 interface Props {
   vehicle: VehicleOption;
@@ -26,14 +26,23 @@ interface Props {
 }
 const { vehicle: v, cls = v.classes[0], lap = null, rotate, variant = 'home', data = {}, isNew = false, list = true } = Astro.props;
 const cars = variant === 'cars';
-const acqLabels: Record<string, string> = { 'pre-order': 'Pre-Order bonus', 'ultimate-edition': 'Ultimate Edition', 'gta-plus': 'GTA+' };
-const acq = v.acquisition ? acqLabels[v.acquisition] : null;
 const dataAttrs = Object.fromEntries(Object.entries(data).map(([k, val]) => [`data-${k}`, String(val)]));
 const base = import.meta.env.BASE_URL;
 const href = `${base}cars/vehicles/${v.id}/`;
 const price = vehicleValues[v.id]?.[COST_METRIC]?.value; // cost to register (DEC-0247)
-const speed = vehicleValues[v.id]?.top_speed_mph?.value;
+const sell = sellValueText(v.id);
+const road = vehicleValues[v.id]?.rating_road?.value;
+const off = vehicleValues[v.id]?.rating_offroad?.value;
+const spd = vehicleValues[v.id]?.stat_speed?.value; // in-game stats 0-10
+const acc = vehicleValues[v.id]?.stat_acceleration?.value;
+const hasRatings = road != null || off != null;
+const hasBars = spd != null || acc != null;
+const dash = '\u2014';
+const pct = (x?: number) => `${Math.max(0, Math.min(10, x ?? 0)) * 10}%`;
 const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
+// Card values (Fausto 23.11.2026, variant C): road + off-road rating as chips with the game's icons (icon left of the
+// number), Speed + Acceleration bars, then Cost to register + Sell value. Home cards: only the rating chips. Edition label removed
+// from the card (which Ultimate Edition cars are really exclusive is still open). Top speed returns once measured.
 ---
 <article class:list={['card vcard lr-hcard', { 'vc-cars': cars, 'vc-list': cars && list }]} data-id={v.id} data-rotate={rotate} {...dataAttrs}>
   <a href={href} class="vc-img" tabindex="-1" aria-hidden="true">
@@ -58,10 +67,24 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   <div class="vc-body">
     <div class="vc-brand"><img src={`${base}images/logos/${v.logoSlug}-gta-6-logo.svg`} alt="" width="20" height="20" loading="lazy" />{v.make}</div>
     <a href={href} class="vc-name">{v.model}</a>
-    <div class="vc-stats">
-      <span class:list={[{ 'vc-tba': !price }]}>{price ? <>{fmtPrice(price)}<span class="vc-unit"> to register</span></> : 'Cost TBA'}</span><span class="vc-sep">{' · '}</span><span class:list={[{ 'vc-tba': !speed }]}>{speed ? <Fragment set:html={speedHtml(speed)} /> : 'Top speed TBA'}</span>
-    </div>
-    {cars && acq && <div class="vc-edition">{acq}</div>}
+    {hasRatings ? (
+      <div class="vc-chips">
+        {road != null && <span class="vc-chip" title="Road rating"><RatingIcon kind="road" />{Math.round(road)}</span>}
+        {off != null && <span class="vc-chip" title="Off-road rating"><RatingIcon kind="offroad" />{Math.round(off)}</span>}
+      </div>
+    ) : (!cars || !hasBars) && <div class="vc-stats vc-tba">No stats yet</div>}
+    {cars && hasBars && (
+      <div class="vc-bars">
+        <div class="vc-bar"><span class="vc-bl">Speed</span><span class="vc-bv"><span class="vc-bt"><i style={`width:${pct(spd)}`}></i></span><b>{spd != null ? spd.toFixed(1) : dash}</b></span></div>
+        <div class="vc-bar"><span class="vc-bl">Acceleration</span><span class="vc-bv"><span class="vc-bt"><i style={`width:${pct(acc)}`}></i></span><b>{acc != null ? acc.toFixed(1) : dash}</b></span></div>
+      </div>
+    )}
+    {cars && (
+      <div class="vc-money">
+        <div><small><span class="vc-long">Cost to register</span><span class="vc-short">Register</span></small><b class:list={[{ 'vc-na': !price }]}>{price ? fmtPrice(price) : dash}</b></div>
+        <div><small><span class="vc-long">Sell value</span><span class="vc-short">Sell</span></small><b class:list={[{ 'vc-na': !sell }]}>{sell ? sell.main : dash}</b></div>
+      </div>
+    )}
     <div class="vc-based">{v.realLifeInspiration ? `Based on ${v.realLifeInspiration}` : ' '}</div>
     <div class="vc-foot">
       <span class="vc-rank" title={cars && lap ? `Gellhorn rank in ${cls}` : 'Gellhorn International Raceway'}>
@@ -94,9 +117,6 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   .vc-pills { position: absolute; left: 12px; top: 12px; right: 56px; display: flex; flex-wrap: wrap; gap: 6px; }
   .vc-cls { height: 26px; padding: 0 10px; border-radius: 999px; background: var(--lr-dark-80); backdrop-filter: blur(4px); font-size: 12px; font-weight: 600; color: var(--lr-text); display: inline-flex; align-items: center; }
   .vc-new { background: var(--lr-lime); color: var(--lr-on-lime); font-weight: 700; }
-  .vc-acq { color: var(--lr-orange); }
-  /* C2 (Fausto 15.10.): edition as an orange text line, not a second pill in the image */
-  .vc-edition { font-size: 13px; font-weight: 600; color: var(--lr-orange); }
   .vc-garage { position: relative; z-index: 2; flex: none; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); cursor: pointer; }
   .vc-garage:hover { border-color: var(--lr-text); }
   .vc-garage:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
@@ -131,6 +151,19 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
   .vc-name::after { content: ''; position: absolute; inset: 0; z-index: 1; }
   .vc-name:focus-visible { outline: none; }
   .vcard:has(.vc-name:focus-visible) { outline: 2px solid var(--lr-orange); outline-offset: 2px; }
+  /* variant C (Fausto 23.11.2026) */
+  .vc-chips { display: flex; gap: 6px; margin: 4px 0 2px; }
+  .vc-chip { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 9px 0 6px; border: 1px solid var(--lr-line-strong, rgba(255,255,255,.16)); border-radius: 8px; font-size: 14px; font-weight: 700; color: var(--lr-text); font-variant-numeric: tabular-nums; }
+  .vc-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 4px 0 2px; }
+  .vc-bl, .vc-money small { display: block; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--lr-muted); }
+  .vc-bv { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .vc-bt { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .vc-bt i { display: block; height: 100%; background: var(--lr-orange); border-radius: 2px; }
+  .vc-bv b { min-width: 24px; text-align: right; font-size: 13px; color: var(--lr-text); font-variant-numeric: tabular-nums; }
+  .vc-money { display: flex; gap: 18px; margin: 2px 0; }
+  .vc-money b { font-size: 15px; color: var(--lr-text); font-variant-numeric: tabular-nums; }
+  .vc-money b.vc-na { color: var(--lr-muted); font-weight: 500; }
+  .vc-short { display: none; }
   .vc-stats { margin-top: 2px; font-size: 14px; color: var(--lr-soft); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .vc-tba { color: var(--lr-muted); }
   .vc-based { font-size: 14px; color: var(--lr-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; }
@@ -153,6 +186,13 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     .vc-list .vc-brand img { width: 16px; height: 16px; }
     .vc-list .vc-name { font-size: 16px; }
     .vc-list .vc-stats { font-size: 13px; }
+    /* phone list: no bars, short money labels, so the row keeps the height of its three buttons */
+    .vc-list .vc-bars { display: none; }
+    .vc-list .vc-chips { margin: 2px 0 0; }
+    .vc-list .vc-chip { height: 26px; font-size: 13px; padding: 0 8px 0 5px; }
+    .vc-list .vc-money { gap: 14px; margin: 0; }
+    .vc-list .vc-long { display: none; }
+    .vc-list .vc-short { display: inline; }
     .vc-list .vc-based { display: none; }
     .vc-list .vc-foot { margin-top: 4px; padding-top: 0; border-top: 0; font-size: 13px; }
     .vc-list .vc-cmp { top: 10px; right: 8px; width: 40px; height: 40px; }
@@ -160,9 +200,5 @@ const fmtPrice = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
     .vc-list { min-height: 160px; }
     .vc-list .vc-acts { position: absolute; right: 8px; bottom: 10px; flex-direction: column; gap: 10px; }
     .vc-list .vc-garage, .vc-list .vc-wish { width: 40px; height: 40px; }
-    /* price and top speed on two lines: the taller row has the room */
-    .vc-list .vc-stats { display: flex; flex-direction: column; white-space: normal; }
-    .vc-list .vc-stats > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .vc-list .vc-sep { display: none; }
   }
 </style>
