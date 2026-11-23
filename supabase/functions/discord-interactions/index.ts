@@ -517,7 +517,7 @@ async function cmdCompare(i: any) {
   const notes = [
     best.size ? `Best lap = fastest community lap at Gellhorn (PS5) in that car.` : "",
     same(cls) ? "" : "Different classes: they don't race each other on the leaderboard.",
-    "Prices, reference laps and our verdict are on the full comparison.",
+    "Costs to register, reference laps and our verdict are on the full comparison.",
   ].filter(Boolean).join("\n");
   const url = `${SITE}/cars/compare/?cars=${cars.map((c) => c.vehicle_id).join(",")}`;
   const photos = cars.filter((c) => c.has_photo);
