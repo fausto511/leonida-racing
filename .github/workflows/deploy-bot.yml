@@ -9,9 +9,10 @@ name: Deploy Discord bot to Supabase
 #   › Secret SUPABASE_ACCESS_TOKEN (Supabase › Account › Access Tokens).
 # Der Schlüssel steht nie in einer Datei; GitHub blendet ihn in Logs aus.
 #
-# Nur diese zwei Funktionen. Alle anderen werden weiter einzeln deployt.
-# Beide laufen mit verify_jwt = false (Discord signiert selbst; Cron ruft
-# discord-dispatch ohne Login auf) – wie live seit Oktober 2026.
+# Nur diese drei Funktionen. Alle anderen werden weiter einzeln deployt.
+# Alle laufen mit verify_jwt = false (Discord signiert selbst; Cron ruft
+# discord-dispatch ohne Login auf; chat-car ist öffentlich für Chat-Bots) – wie live.
+# chat-car seit 23.11.2026 dabei (Fausto, DEC-0247).
 #
 # Ablauf: geänderte Funktion ermitteln → Syntax prüfen (esbuild, nur Parsen)
 # → hochladen. Schlägt die Prüfung fehl, wird nichts hochgeladen.
@@ -23,12 +24,13 @@ on:
     paths:
       - 'supabase/functions/discord-interactions/**'
       - 'supabase/functions/discord-dispatch/**'
+      - 'supabase/functions/chat-car/**'
   workflow_dispatch:
     inputs:
       function:
         description: 'Which function to deploy'
         type: choice
-        options: [both, discord-interactions, discord-dispatch]
+        options: [both, discord-interactions, discord-dispatch, chat-car]
         default: both
 
 permissions:
@@ -54,7 +56,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ALL="discord-interactions discord-dispatch"
+          ALL="discord-interactions discord-dispatch chat-car"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             choice="${{ github.event.inputs.function }}"
             if [ "$choice" = "both" ]; then list="$ALL"; else list="$choice"; fi
