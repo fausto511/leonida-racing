@@ -12,7 +12,7 @@
 import Base from '../../../layouts/Base.astro';
 import DiscordBand from '../../../components/DiscordBand.astro';
 import { rankings, rankingEntries, rankingIndexable, RANKING_MIN_ENTRIES } from '../../../data/rankings';
-import { formatVehicleValueHtml, valueSourceLabels, bandVehicle, type VehicleOption } from '../../../data/vehicles';
+import { formatVehicleValueHtml, valueSourceLabels, bandVehicle, COST_METRIC, type VehicleOption } from '../../../data/vehicles';
 import { classPages } from '../../../data/garage-taxonomy';
 import { releaseById } from '../../../data/releases';
 import { ogCarPath, rankingKey, OG_W, OG_H } from '../../../data/og-cars';
@@ -25,7 +25,7 @@ const base = import.meta.env.BASE_URL;
 const entries = rankingEntries(r);
 const indexable = rankingIndexable(r);
 const complete = entries.length === r.scope.length;
-const isPrice = r.metric === 'price_gtad';
+const isPrice = r.metric === COST_METRIC; // cost to register (DEC-0247)
 const isLap = r.metric === 'gellhorn_reference_lap_ms';
 const isSpeed = r.metric === 'top_speed_mph';
 const cls = r.classSlug ? classPages.find((c) => c.slug === r.classSlug) : undefined;
@@ -65,8 +65,8 @@ const bandCar: VehicleOption | null = isLap ? null : topWithPhoto ?? bandVehicle
 // ---- at a glance ----
 const pct = r.scope.length ? Math.round((entries.length / r.scope.length) * 100) : 0;
 const top = entries[0] ?? null;
-const topLabel = isPrice ? (r.slug === 'cheapest' ? 'Lowest price' : 'Highest price') : isLap ? 'Quickest reference lap' : 'Highest top speed';
-const measuredAs = isPrice ? 'Purchase price' : isLap ? 'Stock, reference lap' : 'Stock, no upgrades';
+const topLabel = isPrice ? (r.slug === 'cheapest' ? 'Lowest cost to register' : 'Highest cost to register') : isLap ? 'Quickest reference lap' : 'Highest top speed';
+const measuredAs = isPrice ? 'Cost to register, in-game scanner' : isLap ? 'Stock, reference lap' : 'Stock, no upgrades';
 
 // ---- loops ----
 const compareIds = entries.slice(0, 4).map((e) => e.vehicle.id);
@@ -111,7 +111,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
           <span class="mbar" aria-hidden="true"><i style={`width:${pct}%`}></i></span></div>
         <div class="gl-row"><span>{topLabel}</span>{top
           ? <b><a href={`${base}cars/vehicles/${top.vehicle.id}/`}>{top.vehicle.model}</a>{' · '}<span class="tnum" set:html={formatVehicleValueHtml(top.value)} /></b>
-          : <b class="is-tba">{isPrice ? 'No price yet' : 'No result yet'}</b>}</div>
+          : <b class="is-tba">{isPrice ? 'No cost yet' : 'No result yet'}</b>}</div>
         <div class="gl-row"><span>Values</span><b>{measuredAs}</b></div>
         <p class="gl-note">Coverage is based on revealed cars listed in our database for this ranking.</p>
       </div>
@@ -134,7 +134,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
           <h2 class="lr-h2 rk-h2" id="rk-list-h">Ranked by {r.valueLabel.toLowerCase()}</h2>
           {compareIds.length >= 2 && <a class="arrow rk-cmp" href={`${base}cars/compare/?cars=${compareIds.join(',')}`}>Compare top {compareIds.length} →</a>}
         </div>
-        {!complete && <p class="rk-note">{isPrice ? 'Prices' : 'Results'} available for {entries.length} of {r.scope.length} revealed cars listed in this ranking. Positions may change as more {isPrice ? 'prices' : 'results'} are added.</p>}
+        {!complete && <p class="rk-note">{isPrice ? 'Costs to register' : 'Results'} available for {entries.length} of {r.scope.length} revealed cars listed in this ranking. Positions may change as more {isPrice ? 'costs' : 'results'} are added.</p>}
         <div class="card rk-wrap">
           <table class="rk-table">
             <thead><tr><th scope="col" class="c-pos">#</th><th scope="col">Car</th><th scope="col" class="c-cls">Class</th><th scope="col" class="c-val">{r.valueLabel}</th><th scope="col" class="c-src">Source</th></tr></thead>
@@ -151,7 +151,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
             </tbody>
           </table>
         </div>
-        {!indexable && entries.length < RANKING_MIN_ENTRIES && <p class="rk-note">This ranking currently contains {entries.length} {entries.length === 1 ? 'car' : 'cars'} with a recorded {isPrice ? 'price' : 'result'}.</p>}
+        {!indexable && entries.length < RANKING_MIN_ENTRIES && <p class="rk-note">This ranking currently contains {entries.length} {entries.length === 1 ? 'car' : 'cars'} with a recorded {isPrice ? 'cost to register' : 'result'}.</p>}
       </section>
     )}
 
@@ -159,11 +159,11 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
     {waiting.length > 0 && (
       <section class="rk-sec" aria-labelledby="rk-wait-h">
         <div class="rk-sec-head">
-          <h2 class="lr-h2 rk-h2" id="rk-wait-h">{entries.length ? (isPrice ? 'No price recorded yet' : 'Not ranked yet') : (isPrice ? 'Waiting for prices' : 'Waiting for results')}<span class="rk-count tnum">{waiting.length}</span></h2>
+          <h2 class="lr-h2 rk-h2" id="rk-wait-h">{entries.length ? (isPrice ? 'No cost recorded yet' : 'Not ranked yet') : (isPrice ? 'Waiting for costs' : 'Waiting for results')}<span class="rk-count tnum">{waiting.length}</span></h2>
         </div>
         {entries.length === 0 && (
           <p class="rk-lead">{isPrice
-            ? 'No purchase prices are available yet. Cars will appear here as their prices are recorded in GTA VI.'
+            ? 'No costs to register are available yet. Cars will appear here as their costs are recorded in GTA VI.'
             : isLap
               ? 'No reference lap times are available yet. Cars will appear here as their stock results are recorded at Gellhorn International Raceway.'
               : 'No top-speed results are available yet. Cars will appear here as their stock results are recorded.'}</p>

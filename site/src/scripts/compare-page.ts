@@ -152,16 +152,16 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
     if (list.length < 2) { box.innerHTML = ''; return; }
     const v = verdict(list, (mph) => speedText(Math.round(mph), currentUnits()));
     const rules = `<div class="tk-rules" id="tk-rules" hidden><b>How we judge</b><ul>
-<li>Only our stock Gellhorn reference lap and the in-game price count. Community laps depend on the driver, so they never decide.</li>
+<li>Only our stock Gellhorn reference lap and the in-game cost to register count. Community laps depend on the driver, so they never decide.</li>
 <li>Best value: a car that is at most ${(VALUE_MAX_SLOWER_MS / 1000).toFixed(1)} s slower than the fastest pick and at least ${Math.round(VALUE_MIN_CHEAPER * 100)} % cheaper. Faster and cheaper at once is a clear pick.</li>
 <li>Edition, bonus and GTA+ cars count like any other car. We only mark how you get them.</li>
 <li>Top speed is its own category and doesn't decide the value.</li></ul></div>`;
     if (!v) {
       const miss = list.map((c) => {
-        const m = [c.price == null ? 'price' : '', c.ref == null ? 'reference lap' : ''].filter(Boolean);
+        const m = [c.price == null ? 'cost to register' : '', c.ref == null ? 'reference lap' : ''].filter(Boolean);
         return `<span>${esc(c.model)}: ${m.length ? m.map((x) => `<em>${x}</em>`).join(' · ') : 'ready'}</span>`;
       }).join('');
-      box.innerHTML = `<p class="cp-eb">Our take</p><div class="lock"><div class="lock-m"><h3>Our verdict unlocks with prices and lap times</h3><p>We pick the best value, the fastest and the top speed as soon as the in-game price and our Gellhorn reference lap are known for at least two of these cars.</p><div class="lock-miss">${miss}</div></div><button type="button" class="btn btn-s" data-how>How we judge</button></div>${rules}`;
+      box.innerHTML = `<p class="cp-eb">Our take</p><div class="lock"><div class="lock-m"><h3>Our verdict unlocks with costs to register and lap times</h3><p>We pick the best value, the fastest and the top speed as soon as the cost to register and our Gellhorn reference lap are known for at least two of these cars.</p><div class="lock-miss">${miss}</div></div><button type="button" class="btn btn-s" data-how>How we judge</button></div>${rules}`;
       return;
     }
     const card = (eb: string, x: { car: CmpCar; text: string } | null, link: [string, string], best = false) => x
@@ -172,7 +172,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
 ${card('Best value', v.value, ['Cheapest cars ranking', `${base}cars/rankings/cheapest/`], Boolean(v.value))}
 ${card('Fastest at Gellhorn', v.fastest, ['Gellhorn leaderboard', `${base}time-attack/gellhorn-international-raceway/`])}
 ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars ranking', sp ? `${base}cars/rankings/fastest/${classSlug(sp.cls)}/` : `${base}cars/rankings/fastest/`])}
-</div><div class="tk-foot"><span>Based on our stock Gellhorn reference lap and the in-game price.${new Set(list.map((c) => c.cls)).size > 1 ? ' Different classes – they only meet on the overall leaderboard.' : ''}</span><button type="button" class="tk-how" data-how>How we judge →</button></div>${rules}`;
+</div><div class="tk-foot"><span>Based on our stock Gellhorn reference lap and the in-game cost to register.${new Set(list.map((c) => c.cls)).size > 1 ? ' Different classes – they only meet on the overall leaderboard.' : ''}</span><button type="button" class="tk-how" data-how>How we judge →</button></div>${rules}`;
   }
 
   // ---- table ---------------------------------------------------------------------------
@@ -216,10 +216,10 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
       { label: 'Top speed', sub: 'Stock', dir: 'max', cells: (c) => c.speed != null ? { m: speedHtml(Math.round(c.speed)), raw: String(Math.round(c.speed)), v: c.speed } : { m: nrTb(), raw: 'mal', tba: true } },
     ];
     const price: Row[] = [
-      { label: 'Price', dir: 'min', cells: (c) => c.price != null
+      { label: 'Cost to register', dir: 'min', cells: (c) => c.price != null
         ? { m: money(c.price), s: [c.price === minPrice ? (prices.length > 1 ? 'Cheapest' : '') : cheapest ? `+${moneyShort(c.price - minPrice!)} vs ${cheapest.model}` : '', limited(c) ? (acqNote[c.acq!] ?? '') : ''].filter(Boolean).join('\u2002·\u2002'), v: c.price }
         : { m: nrTb(), raw: 'na', tba: true } },
-      { label: 'Sell value', sub: 'Base price, no upgrades', dir: 'max', cells: (c) => c.sellable === 'no' ? { m: "Can't be sold" }
+      { label: 'Sell value', sub: 'In-game scanner, no upgrades', dir: 'max', cells: (c) => c.sellable === 'no' ? { m: "Can't be sold" }
         : c.sell != null ? { m: money(c.sell), v: c.sell } : { m: nrLong, tba: true } },
     ];
     const car: Row[] = [
@@ -241,7 +241,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
         return n ? { m: `${n} ${n === 1 ? 'driver' : 'drivers'}` } : { m: `<a class="tv-quiet" href="${vhref(c)}">${tb('Be the first →', 'Be the first')}</a>`, raw: 'none' };
       } },
     ];
-    return [{ h: 'Performance', rows: perf }, { h: 'Price', rows: price }, { h: 'The car', rows: car }, { h: 'Community', rows: comm }];
+    return [{ h: 'Performance', rows: perf }, { h: 'Cost', rows: price }, { h: 'The car', rows: car }, { h: 'Community', rows: comm }];
   }
   function renderTable() {
     const list = cars();
@@ -279,7 +279,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     const grid = [0, 1, 2, 3].map((i) => `<line x1="${L}" x2="${W - R}" y1="${T + i * (H - T - B) / 3}" y2="${T + i * (H - T - B) / 3}" stroke="rgba(200,200,222,.10)"/>`).join('')
       + [0, 1, 2, 3, 4].map((i) => `<line y1="${T}" y2="${H - B}" x1="${L + i * (W - L - R) / 4}" x2="${L + i * (W - L - R) / 4}" stroke="rgba(200,200,222,.10)"/>`).join('');
     if (pts.length < 2) {
-      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map, coming soon once prices and Gellhorn reference laps are in">${grid}<text x="${(W + L) / 2}" y="${H / 2 - 4}" text-anchor="middle" fill="#B4B4C2" font-size="15">Coming soon</text><text x="${(W + L) / 2}" y="${H / 2 + 16}" text-anchor="middle" fill="#9C9CAB" font-size="12">once prices and Gellhorn reference laps are in</text><text x="${(W + L) / 2}" y="${H - 6}" text-anchor="middle" fill="#9C9CAB" font-size="11">Price →</text></svg>`;
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map, coming soon once costs to register and Gellhorn reference laps are in">${grid}<text x="${(W + L) / 2}" y="${H / 2 - 4}" text-anchor="middle" fill="#B4B4C2" font-size="15">Coming soon</text><text x="${(W + L) / 2}" y="${H / 2 + 16}" text-anchor="middle" fill="#9C9CAB" font-size="12">once costs to register and Gellhorn reference laps are in</text><text x="${(W + L) / 2}" y="${H - 6}" text-anchor="middle" fill="#9C9CAB" font-size="11">Cost to register →</text></svg>`;
     }
     const px = pts.map((c) => c.price!), py = pts.map((c) => c.ref!);
     const x0 = Math.min(...px), x1 = Math.max(...px), y0 = Math.min(...py), y1 = Math.max(...py);
@@ -296,7 +296,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     }).join('');
     const ticksX = [0, 1, 2, 3, 4].map((i) => `<text x="${L + i * (W - L - R) / 4}" y="${H - B + 16}" text-anchor="middle" fill="#9C9CAB" font-size="11">${moneyShort(x0 + i * (x1 - x0) / 4)}</text>`).join('');
     const ticksY = [0, 1, 2, 3].map((i) => `<text x="${L - 6}" y="${T + i * (H - T - B) / 3 + 4}" text-anchor="end" fill="#9C9CAB" font-size="11">${lapShort(y0 + i * (y1 - y0) / 3)}</text>`).join('');
-    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map: price against Gellhorn reference lap">${grid}<text x="${L + 6}" y="${T + 12}" fill="#D9F58E" font-size="11">↖ better value: faster and cheaper</text>${dots}${ticksX}${ticksY}<text x="${(W + L) / 2}" y="${H - 2}" text-anchor="middle" fill="#9C9CAB" font-size="11">Price →</text></svg>`;
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map: cost to register against Gellhorn reference lap">${grid}<text x="${L + 6}" y="${T + 12}" fill="#D9F58E" font-size="11">↖ better value: faster and cheaper</text>${dots}${ticksX}${ticksY}<text x="${(W + L) / 2}" y="${H - 2}" text-anchor="middle" fill="#9C9CAB" font-size="11">Cost to register →</text></svg>`;
   }
   function renderBottom() {
     const list = cars();

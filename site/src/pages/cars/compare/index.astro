@@ -5,7 +5,7 @@
 // noindex: any combination of cars would be thin content (handoff).
 // COPY STATUS: all texts are Claude placeholders from the mockup -> Codex (DEC-0088).
 import Base from '../../../layouts/Base.astro';
-import { vehicleOptions, vehicleValues } from '../../../data/vehicles';
+import { vehicleOptions, vehicleValues, COST_METRIC } from '../../../data/vehicles';
 import type { CmpCar } from '../../../data/compare';
 
 const base = import.meta.env.BASE_URL;
@@ -15,14 +15,14 @@ const cars: CmpCar[] = vehicleOptions.map((v) => {
     id: v.id, make: v.make, model: v.model, logo: v.logoSlug, cls: v.classes[0], classes: v.classes,
     drive: v.drive, seats: v.seats, acq: v.acquisition ?? null, photo: Boolean(v.photo), based: v.realLifeInspiration ?? null,
     release: Boolean(v.releaseId), sellable: v.sellable ?? null,
-    price: val.price_gtad?.value ?? null, sell: val.sell_price_gtad?.value ?? null, speed: val.top_speed_mph?.value ?? null, ref: val.gellhorn_reference_lap_ms?.value ?? null,
+    price: val[COST_METRIC]?.value ?? null, /* cost to register, DEC-0247 */ sell: val.sell_price_gtad?.value ?? null, speed: val.top_speed_mph?.value ?? null, ref: val.gellhorn_reference_lap_ms?.value ?? null,
   };
 });
 const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>';
 ---
 <Base
   title="Compare cars"
-  description="Compare up to four GTA VI cars side by side: price, top speed, Gellhorn lap times, ratings and more."
+  description="Compare up to four GTA VI cars side by side: cost to register, top speed, Gellhorn lap times, ratings and more."
   section="garage"
   noindex={true}
   breadcrumbs={[{ name: 'Cars', path: 'cars/' }, { name: 'Compare', path: 'cars/compare/' }]}
@@ -33,7 +33,7 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
         <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><span aria-current="page">Compare</span></nav>
         <p class="eyebrow">GTA VI Vehicle Database</p>
         <h1 class="display lr-t2">Compare cars</h1>
-        <p class="cp-sub">Up to four cars side by side: prices, lap times and our take on which one is worth it.</p>
+        <p class="cp-sub">Up to four cars side by side: costs to register, lap times and our take on which one is worth it.</p>
       </div>
       <button type="button" class="btn btn-s cp-share" id="cp-share" aria-label="Share comparison"><Fragment set:html={shareIco} /><span>Share comparison</span></button>
     </div></section>

@@ -6,7 +6,7 @@
 // from the mockup -> Codex review (DEC-0088). About texts: data/vehicle-copy.ts (Codex).
 import Base from '../../../../layouts/Base.astro';
 import CarCard from '../../../../components/CarCard.astro';
-import { MAKES_WITHOUT_LOGO, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs, vehicleStatsAt } from '../../../../data/vehicles';
+import { MAKES_WITHOUT_LOGO, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs, vehicleStatsAt, COST_METRIC, COST_LABEL } from '../../../../data/vehicles';
 import { groupedTitles } from '../../../../data/gta-titles';
 import { speedHtml } from '../../../../data/units';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
@@ -79,7 +79,8 @@ const nextCar = stepList.length > 1 && stepAt >= 0 ? stepList[(stepAt + 1) % ste
 // ---- values -----------------------------------------------------------------
 const vals = vehicleValues[vehicle.id] ?? {};
 const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
-const price = vals.price_gtad?.value ?? null;
+// GTA VI has no car dealers: the money tile shows the in-game cost to register (DEC-0247).
+const price = vals[COST_METRIC]?.value ?? null;
 const speed = vals.top_speed_mph?.value ?? null;
 const sell = vals.sell_price_gtad?.value ?? null;
 const speedRank = speed == null ? null : 1 + classCars.filter((v) => (vehicleValues[v.id]?.top_speed_mph?.value ?? -1) > speed).length;
@@ -245,9 +246,10 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
       <div class="vs-panel">
         <div class="vs-tiles">
           <div class="vt">
-            <span class="vt-l">Price</span>
+            {/* phones: the full label needs ~129 px, a tile has ~119 px at 360 px width -> shorter word there */}
+            <span class="vt-l"><span class="vt-full">{COST_LABEL}</span><span class="vt-short">Registration</span></span>
             <b class:list={['vt-v tnum', { 'is-tba': price == null }]}>{price != null ? money(price) : 'TBA'}</b>
-            <span class="vt-s">{price != null ? (acq ? `${acq} · store price` : 'Store price') : notRecorded}</span>
+            <span class="vt-s">{price != null ? 'In-game scanner' : notRecorded}</span>
           </div>
           <div class="vt">
             <span class="vt-l">Top speed</span>
@@ -522,6 +524,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vs-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .vt { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 10px 14px; border-radius: 6px; background: var(--lr-raised); }
   .vt-l { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lr-muted); }
+  .vt-short { display: none; }
   .vt-v { font-size: 24px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .vt-s { font-size: 13px; color: var(--lr-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   a.vt-link { font-size: 14px; font-weight: 600; color: var(--lr-orange); text-decoration: none; } /* = .arrow (DEC-0170) */
@@ -726,6 +729,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
     .vt { padding: 10px 12px; }
     .vt-v { font-size: 21px; }
     .vt-opt { display: none; }
+    .vt-full { display: none; }
+    .vt-short { display: inline; }
     .vt-s { font-size: 12px; white-space: normal; overflow: visible; } /* phones: wrap instead of cutting off */
     .vs-rows > div { font-size: 14px; }
     .vsec-head { flex-direction: column; align-items: flex-start; gap: 6px; }

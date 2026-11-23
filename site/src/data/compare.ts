@@ -57,13 +57,13 @@ export function verdict(cars: CmpCar[], fmtSpeed: (mph: number) => string = (mph
     const f = buyable[0];
     const cheapest = [...buyable].sort((a, b) => a.price! - b.price!)[0];
     if (cheapest.id === f.id) {
-      value = { car: f, text: `Faster and cheaper than the other priced cars. A clear pick.` };
+      value = { car: f, text: `Faster and cheaper to register than the other cars. A clear pick.` };
     } else {
       const cands = buyable.filter((c) => c.id !== f.id && c.ref! - f.ref! <= VALUE_MAX_SLOWER_MS && c.price! <= f.price! * (1 - VALUE_MIN_CHEAPER))
         .sort((a, b) => a.price! - b.price!);
       const pick = cands[0];
-      if (pick) value = { car: pick, text: `Only ${secs(pick.ref! - f.ref!)} slower than the ${f.model} at Gellhorn, but ${money(f.price! - pick.price!)} cheaper. Our value pick.` };
-      else value = { car: f, text: `None of the cheaper cars stays close enough at Gellhorn. The ${f.model} is worth its price.` };
+      if (pick) value = { car: pick, text: `Only ${secs(pick.ref! - f.ref!)} slower than the ${f.model} at Gellhorn, but ${money(f.price! - pick.price!)} cheaper to register. Our value pick.` };
+      else value = { car: f, text: `None of the cheaper cars stays close enough at Gellhorn. The ${f.model} is worth what it costs to register.` };
     }
   }
   if (value && limited(value.car)) value = { ...value, text: `${value.text} ${limitedNote(value.car)}` };

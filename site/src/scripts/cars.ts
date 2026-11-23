@@ -52,7 +52,7 @@ const ORIGIN: Record<string, string> = { new: 'New in GTA VI', returning: 'Retur
 const SEP = ' · ';
 const fmtMoney = (n: number) => (n >= 1e6 ? `$${+(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `$${+(n / 1e3).toFixed(1)}k` : `$${Math.round(n)}`);
 const FMT: Record<RangeKey, (n: number) => string> = { price: fmtMoney, speed: (n) => speedText(n, currentUnits(), 0, 0), lap: (n) => lapTime(Math.round(n)) };
-const RANGE_NAME: Record<RangeKey, string> = { price: 'Price', speed: 'Top speed', lap: 'Lap' };
+const RANGE_NAME: Record<RangeKey, string> = { price: 'Cost to register', speed: 'Top speed', lap: 'Lap' };
 function valueLabel(g: Group, v: string) {
   if (g === 'make') return makeName.get(v) ?? v;
   if (g === 'seats') return `${v} seats`;
@@ -149,7 +149,7 @@ function sortKey(a: HTMLElement, b: HTMLElement): number {
     default: return order;
   }
 }
-const SORT_LABEL: Record<string, string> = { class: 'Class', name: 'Name A–Z', price: 'Price', speed: 'Top speed', lap: 'Gellhorn lap time', recent: 'Recently added' };
+const SORT_LABEL: Record<string, string> = { class: 'Class', name: 'Name A–Z', price: 'Cost to register', speed: 'Top speed', lap: 'Gellhorn lap time', recent: 'Recently added' };
 
 // ---- did you mean -------------------------------------------------------------
 function lev(a: string, b: string): number {
@@ -534,7 +534,7 @@ if (!DOMAIN.price.has) {
   maxInput.disabled = true;
   maxInput.placeholder = 'TBA'; // short: the field only fits ~9 characters (Fausto 03.11.: coming soon; TBA as on the cards)
   $('ctl-price').classList.add('ctl-off');
-  $('ctl-price').title = 'Prices coming soon';
+  $('ctl-price').title = 'Costs to register coming soon';
 } else {
   maxInput.addEventListener('focus', () => { closeMenus(); document.querySelector<HTMLElement>('[data-menu="max"]')!.hidden = false; });
   const applyMax = () => { state.ranges.price = [state.ranges.price[0], parseMoney(maxInput.value)]; render(); };

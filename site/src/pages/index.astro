@@ -11,7 +11,7 @@ import CarCard from '../components/CarCard.astro';
 import { SITE_NAME } from '../data/site';
 import { homeLbRow } from '../data/home';
 import { sampleEntries, overallRows } from '../data/leaderboard';
-import { vehicleOptions, fastestGellhornLapMs, bandVehicle, statsFeed, statsTotals, statLabels, formatVehicleValueHtml, type VehicleOption } from '../data/vehicles';
+import { vehicleOptions, isMoneyMetric, fastestGellhornLapMs, bandVehicle, statsFeed, statsTotals, statLabels, formatVehicleValueHtml, type VehicleOption } from '../data/vehicles';
 import { classSlug } from '../data/garage-taxonomy';
 import { guideSections, GUIDE_UPDATED } from '../data/guide';
 
@@ -26,8 +26,8 @@ const TA = `${base}time-attack/gellhorn-international-raceway/`;
 const fresh = statsFeed.slice(0, 5);
 const FRESH_CHIPS = 3;
 const absDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-// prices as on the vehicle page ($105,000); everything else as the rankings show it
-const chipValue = (v: (typeof fresh)[number]['changes'][number]['value']) => (v.metric === 'price_gtad' || v.metric === 'sell_price_gtad')
+// money values as on the vehicle page ($24,500); everything else as the rankings show it
+const chipValue = (v: (typeof fresh)[number]['changes'][number]['value']) => isMoneyMetric(v.metric)
   ? `$${Math.round(v.value).toLocaleString('en-US')}` : formatVehicleValueHtml(v);
 const statChip = (c: (typeof fresh)[number]['changes'][number]) => `${statLabels[c.metric]}${c.tuning === 'tuned' ? ' (tuned)' : ''}`;
 
@@ -177,7 +177,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
         <div class="hsec-titles">
           <p class="eyebrow">Live data</p>
           <h2 class="lr-h2 display hsec-title" id="fresh-title">Fresh in the database</h2>
-          <p class="hsec-sub">New prices, top speeds and lap times.</p>
+          <p class="hsec-sub">New top speeds, lap times and costs to register.</p>
         </div>
         <a href={`${base}cars/`} class="arrow">All cars →</a>
       </div>

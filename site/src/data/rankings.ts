@@ -6,7 +6,7 @@
 // (vehicles.previous_games) for NEW_CARS_MIN_COVERAGE of revealed cars; a family
 // page needs its own copy (familyCopy). Values: stock only (measure stock first).
 // COPY STATUS: Codex texts (2026-10-08), approved by Fausto 2026-10-09.
-import { vehicleOptions, vehicleValues, familySlugs, familyMembers, FAMILY_PAGE_MIN, type VehicleOption, type VehicleValue } from './vehicles';
+import { vehicleOptions, vehicleValues, COST_METRIC, familySlugs, familyMembers, FAMILY_PAGE_MIN, type VehicleOption, type VehicleValue } from './vehicles';
 import { classPages, vehiclesInClass } from './garage-taxonomy';
 
 export const RANKING_MIN_ENTRIES = 5;
@@ -48,10 +48,12 @@ export const rankings: RankingDef[] = [
     'top_speed_mph', 'desc', 'Top speed', 'Recorded top speeds for GTA VI cars in stock form, ordered from highest to lowest. Each result includes its source and, where available, the game version.', vehicleOptions),
   ...classPages.map((c) => def(`fastest/${c.slug}`, `Fastest ${classLabels[c.slug] ?? c.name} in GTA 6`, `Compare GTA 6 ${codexClass[c.slug] ?? c.name} by recorded top speed in stock form, with available results and the source of each value.`,
     'top_speed_mph', 'desc', 'Top speed', `${codexClass[c.slug] ?? c.name} with recorded top speeds in stock form, ordered from highest to lowest.`, vehiclesInClass(c.slug), c.slug)),
-  def('most-expensive', 'Most Expensive Cars in GTA 6', 'Compare recorded GTA 6 vehicle purchase prices, highest first. Each listed price includes its source and, where available, the game version.',
-    'price_gtad', 'desc', 'Price', 'Recorded vehicle purchase prices in GTA VI, ordered from highest to lowest. Each price includes its source and, where available, the game version.', vehicleOptions),
-  def('cheapest', 'Cheapest Cars in GTA 6', 'Compare recorded GTA 6 vehicle purchase prices, lowest first. Each listed price includes its source and, where available, the game version.',
-    'price_gtad', 'asc', 'Price', 'Recorded vehicle purchase prices in GTA VI, ordered from lowest to highest. Each price includes its source and, where available, the game version.', vehicleOptions),
+  // URLs and titles stay (search terms), the value is the in-game cost to register (Fausto 23.11.2026, DEC-0247).
+  // COPY: descriptions + intros = Claude placeholders 23.11.2026, Codex review open.
+  def('most-expensive', 'Most Expensive Cars in GTA 6', 'GTA 6 has no car dealers: you steal a car and pay to register it. These cars cost the most to register, each value with its source.',
+    COST_METRIC, 'desc', 'Cost to register', 'GTA VI has no car dealers. You steal a car and pay to register it, so the cost to register is what a car costs you. Ordered from highest to lowest, each value with its source.', vehicleOptions),
+  def('cheapest', 'Cheapest Cars in GTA 6', 'GTA 6 has no car dealers: you steal a car and pay to register it. These cars cost the least to register, each value with its source.',
+    COST_METRIC, 'asc', 'Cost to register', 'GTA VI has no car dealers. You steal a car and pay to register it, so the cost to register is what a car costs you. Ordered from lowest to highest, each value with its source.', vehicleOptions),
   def('gellhorn-lap', 'Fastest Cars at Gellhorn International Raceway', 'Find the best GTA 6 cars for Gellhorn International Raceway by recorded stock reference lap times, with the source of each result.',
     'gellhorn_reference_lap_ms', 'asc', 'Reference lap', 'Recorded reference lap times at Gellhorn International Raceway for cars in stock form, ordered from quickest to slowest. These are vehicle reference results, separate from driver times in the Time Attack leaderboard.', vehicleOptions),
 ];

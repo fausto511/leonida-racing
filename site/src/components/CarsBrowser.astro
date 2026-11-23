@@ -5,7 +5,7 @@
 // compare run in the browser (scripts/cars.ts).
 // COPY STATUS: all texts are Claude placeholders from the mockup -> Codex (DEC-0088).
 import CarCard from './CarCard.astro';
-import { vehicleOptions, garageOrderedVehicles, vehicleValues, fastestGellhornLapMs, compareGarageOrder, type VehicleOption } from '../data/vehicles';
+import { vehicleOptions, garageOrderedVehicles, vehicleValues, COST_METRIC, fastestGellhornLapMs, compareGarageOrder, type VehicleOption } from '../data/vehicles';
 import { isNewInGame } from '../data/releases';
 import { CLOSE_SVG } from '../data/site';
 
@@ -42,7 +42,7 @@ const cardData = (v: VehicleOption, i: number) => ({
   seats: v.seats,
   avail: availability(v),
   origin: origin(v),
-  price: vehicleValues[v.id]?.price_gtad?.value ?? '',
+  price: vehicleValues[v.id]?.[COST_METRIC]?.value ?? '', // cost to register (DEC-0247); key stays 'price' for URLs
   speed: vehicleValues[v.id]?.top_speed_mph?.value ?? '',
   lap: fastestGellhornLapMs(v.id) ?? '',
   release: v.releaseId ?? '',
@@ -59,7 +59,8 @@ const availCounts = count(list.map(availability));
 const originCounts = count(list.map(origin).filter(Boolean));
 const AVAIL: [string, string][] = [['base', 'Base game'], ['pre-order', 'Pre-Order bonus'], ['ultimate-edition', 'Ultimate Edition'], ['gta-plus', 'GTA+']];
 const ORIGIN: [string, string][] = [['new', 'New in GTA VI'], ['returning', 'Returning from earlier games']];
-const PRICE_PRESETS = [['250k', 250000], ['500k', 500000], ['1M', 1000000], ['2M', 2000000], ['5M', 5000000]] as const;
+// cost to register runs in the thousands, not millions like GTA V prices (DEC-0247)
+const PRICE_PRESETS = [['5k', 5000], ['10k', 10000], ['20k', 20000], ['30k', 30000], ['50k', 50000]] as const;
 
 const chev = '<svg class="ico ico-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
 const check = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
@@ -92,17 +93,17 @@ function mc(group: string, value: string | number, label: string, n: number | un
       </div>}
       <span class="ctl ctl-off" title="Tiers coming soon" aria-disabled="true">Tier<Fragment set:html={chev} /></span>
       <div class="dd dd-l">
-        <label class="ctl ctl-price" id="ctl-price">Max $<input type="text" id="f-max" inputmode="decimal" placeholder="e.g. 750k" aria-label="Maximum price" autocomplete="off" /></label>
+        <label class="ctl ctl-price" id="ctl-price">Max $<input type="text" id="f-max" inputmode="decimal" placeholder="e.g. 25k" aria-label="Maximum cost to register" autocomplete="off" /></label>
         <div class="menu menu-price" data-menu="max" hidden>
-          <span class="menu-h">Max price</span>
+          <span class="menu-h">Max cost to register</span>
           <div class="rng rng-single" data-range="price" data-single>
-            <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum price" /></div>
+            <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum cost to register" /></div>
             <div class="rng-vals"><span data-hi>Any</span></div>
           </div>
           <span class="menu-sep"></span>
           {PRICE_PRESETS.map(([l, v]) => <button type="button" class="menu-i" data-pick-max={v}>{'$' + l}</button>)}
           <span class="menu-sep"></span>
-          <span class="menu-h menu-hint">Or type: 750k, 1.5m</span>
+          <span class="menu-h menu-hint">Or type: 7.5k, 25k</span>
         </div>
       </div>
       <button type="button" class="ctl ctl-detail" id="open-detail">
@@ -128,7 +129,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
         <div class="menu" data-menu="sort" hidden>
           {scope !== 'class' && <button type="button" class:list={['menu-i', { on: defaultSort === 'class' }]} data-sort="class">Class</button>}
           <button type="button" class:list={['menu-i', { on: defaultSort === 'name' }]} data-sort="name">Name A–Z</button>
-          <button type="button" class="menu-i" data-sort="price" data-needs="price">Price</button>
+          <button type="button" class="menu-i" data-sort="price" data-needs="price">Cost to register</button>
           <button type="button" class="menu-i" data-sort="speed" data-needs="speed">Top speed</button>
           <button type="button" class="menu-i" data-sort="lap" data-needs="lap">Gellhorn lap time</button>
           <span class="menu-sep"></span>
@@ -176,10 +177,10 @@ function mc(group: string, value: string | number, label: string, n: number | un
     <div class="dsp-q" id="dsp-q" hidden><span class="muted">Search</span><button type="button" class="dsp-qchip" id="dsp-qchip" aria-label="Remove search"><span id="dsp-qtext"></span><b aria-hidden="true"><Fragment set:html={CLOSE_SVG} /></b></button><span class="muted dsp-qhint">The search text counts together with these filters.</span></div>
     <div class="dsp-body">
       {scope !== 'class' && <div class="dsg"><h4>Class <em data-sel="class"></em></h4><div class="mchips" set:html={classesSorted.map(([c, n]) => mc('class', c, c, n)).join('')} /></div>}
-<div class="dsg rng" data-range="price"><h4>Price <em data-sel="price"></em></h4>
-        <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum price" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum price" /></div>
+<div class="dsg rng" data-range="price"><h4>Cost to register <em data-sel="price"></em></h4>
+        <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum cost to register" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum cost to register" /></div>
         <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
-        <p class="rng-off">Prices coming soon.</p>
+        <p class="rng-off">Costs to register coming soon.</p>
       </div>
       <div class="dsg rng" data-range="speed"><h4>Top speed <em data-sel="speed"></em></h4>
         <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label="Minimum top speed" /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label="Maximum top speed" /></div>
@@ -191,7 +192,6 @@ function mc(group: string, value: string | number, label: string, n: number | un
         <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
         <p class="rng-off">Lap-time filtering needs more lap data.</p>
       </div>
-      <div class="dsg"><h4>Dealer</h4><div class="mchips"><span class="mc off">Dealer names coming soon</span></div></div>
       {scope !== 'make' && <div class="dsg dsg-wide">
         <h4>Manufacturer <em data-sel="make"></em><input type="search" class="dsp-msearch" id="dsp-msearch" placeholder={`Search ${makes.length} brands`} aria-label="Search manufacturers" /></h4>
         <div class="mlist" set:html={makes.map(([slug, name]) => mc('make', slug, name, makeCounts.get(slug))).join('')} />
@@ -210,7 +210,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
     <div class="dsp-body sort-list">
       {scope !== 'class' && <button type="button" class:list={['menu-i', { on: defaultSort === 'class' }]} data-sort="class">Class</button>}
       <button type="button" class:list={['menu-i', { on: defaultSort === 'name' }]} data-sort="name">Name A–Z</button>
-      <button type="button" class="menu-i" data-sort="price" data-needs="price">Price</button>
+      <button type="button" class="menu-i" data-sort="price" data-needs="price">Cost to register</button>
       <button type="button" class="menu-i" data-sort="speed" data-needs="speed">Top speed</button>
       <button type="button" class="menu-i" data-sort="lap" data-needs="lap">Gellhorn lap time</button>
       <button type="button" class="menu-i" data-sort="recent">Recently added</button>

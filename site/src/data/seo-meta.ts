@@ -4,13 +4,14 @@
 // new or changed values reach the snippet without manual edits. Missing values are left out; the
 // description always stays one natural sentence.
 // COPY STATUS: templates = Claude placeholders, Codex review pending; Fausto decides.
-import { vehicleValues, type VehicleOption } from './vehicles';
+import { vehicleValues, COST_METRIC, type VehicleOption } from './vehicles';
 
 const TITLE_MAX = 60;   // roughly what Google shows
 const DESC_MAX = 160;
 
 const mphOf = (id: string) => vehicleValues[id]?.top_speed_mph?.value ?? null; // stock values only
-const priceOf = (id: string) => vehicleValues[id]?.price_gtad?.value ?? null;
+// GTA VI has no car dealers: the money value is the in-game cost to register (DEC-0247).
+const priceOf = (id: string) => vehicleValues[id]?.[COST_METRIC]?.value ?? null;
 const usd = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 const kmh = (mph: number) => Math.round(mph * 1.609344);
 
@@ -42,12 +43,12 @@ export function vehicleDescription(v: VehicleOption): string {
   const cls = classPhrase(v.classes);
   const build = (withKmh: boolean, withBased: boolean) => {
     const speed = mph != null ? `a top speed of ${Math.round(mph)} mph${withKmh ? ` (${kmh(mph)} km/h)` : ''}` : '';
-    const cost = price != null ? `a price of ${usd(price)}` : '';
+    const cost = price != null ? `a cost to register of ${usd(price)}` : '';
     const vals = [speed, cost].filter(Boolean).join(' and ');
     const tail = withBased ? based : '';
     return vals
       ? `The ${name} is ${cls} in GTA 6 with ${vals}.${tail}`
-      : `The ${name} is ${cls} in GTA 6${v.realLifeInspiration && withBased ? `, based on the ${v.realLifeInspiration}` : ''}. Top speed, price and specs on Leonida Racing.`;
+      : `The ${name} is ${cls} in GTA 6${v.realLifeInspiration && withBased ? `, based on the ${v.realLifeInspiration}` : ''}. Top speed, cost to register and specs on Leonida Racing.`;
   };
   // shorten step by step if too long: drop km/h, then the inspiration
   return [build(true, true), build(false, true), build(false, false)].find((d) => d.length <= DESC_MAX) ?? build(false, false);

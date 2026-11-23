@@ -69,7 +69,7 @@ export type InGameMetric = 'stat_speed' | 'stat_acceleration' | 'stat_handling_a
   // Nitrous boost per car: the blue plus in the tuning preview, not part of the ratings (19.11.2026).
   | 'boost_speed' | 'boost_acceleration';
 export interface VehicleValue {
-  vehicle_id: string; metric: 'price_gtad' | 'sell_price_gtad' | 'top_speed_mph' | 'gellhorn_reference_lap_ms' | InGameMetric; value: number;
+  vehicle_id: string; metric: 'price_gtad' | 'sell_price_gtad' | 'register_cost_gtad' | 'top_speed_mph' | 'gellhorn_reference_lap_ms' | InGameMetric; value: number;
   /** 'stock' (default) or 'tuned' (Fausto 2026-10-08: measure stock first, tuned later). */
   tuning?: 'stock' | 'tuned';
   source_type: 'in_game' | 'rockstar' | 'controlled_test' | 'community' | 'derived'; method: string | null;
@@ -200,8 +200,9 @@ for (const v of stamped) {
 export interface StatChange { metric: VehicleValue['metric']; tuning: 'stock' | 'tuned'; value: VehicleValue; prev: VehicleValue | null }
 export interface StatsUpdate { vehicle: VehicleOption; at: string; changes: StatChange[]; isNew: boolean }
 const optById = new Map(vehicleOptions.map((v) => [v.id, v]));
-const METRIC_ORDER: VehicleValue['metric'][] = ['top_speed_mph', 'price_gtad', 'gellhorn_reference_lap_ms', 'sell_price_gtad',
-  'stat_speed', 'stat_acceleration', 'stat_handling_asphalt', 'stat_handling_offroad', 'stat_strength', 'rating_road', 'rating_offroad'];
+const METRIC_ORDER: VehicleValue['metric'][] = ['top_speed_mph', 'register_cost_gtad', 'price_gtad', 'gellhorn_reference_lap_ms', 'sell_price_gtad',
+  'stat_speed', 'stat_acceleration', 'stat_handling_asphalt', 'stat_handling_offroad', 'stat_strength', 'rating_road', 'rating_offroad',
+  'boost_speed', 'boost_acceleration'];
 
 /** Latest updates, one entry per car (its values from the last 24 h before its newest value), newest first. */
 export const statsFeed: StatsUpdate[] = Object.entries(vehicleStatsAt)
@@ -235,7 +236,16 @@ export const statLabels: Record<VehicleValue['metric'], string> = {
   price_gtad: 'Price', sell_price_gtad: 'Sell value', top_speed_mph: 'Top speed', gellhorn_reference_lap_ms: 'Gellhorn lap',
   stat_speed: 'Speed', stat_acceleration: 'Acceleration', stat_handling_asphalt: 'Asphalt handling', stat_handling_offroad: 'Off-road handling',
   stat_strength: 'Strength', rating_road: 'Road rating', rating_offroad: 'Off-road rating',
+  // COPY: Claude placeholder 23.11.2026 (Codex review open). "Cost to register" is the in-game scanner wording.
+  register_cost_gtad: 'Cost to register', boost_speed: 'Boost speed', boost_acceleration: 'Boost acceleration',
 };
+
+/** GTA VI has no car dealers: cars are stolen and registered (Fausto 23.11.2026, DEC-0247). The money value
+ *  shown wherever the site used to show a price is the in-game "Cost to register". price_gtad stays in the
+ *  database for a possible purchase price in GTA Online, but nothing displays it. */
+export const COST_METRIC = 'register_cost_gtad' as const;
+export const COST_LABEL = 'Cost to register'; // COPY: Claude placeholder 23.11.2026 (in-game wording)
+export const isMoneyMetric = (m: string) => m.endsWith('_gtad');
 
 export interface UnverifiedVehicle { workingId: string; basedOn: string; photoSource: string; note: string }
 export const unverifiedVehicles: UnverifiedVehicle[] = [
@@ -248,8 +258,9 @@ export const valueSourceLabels: Record<VehicleValue['source_type'], string> = {
 };
 export function formatVehicleValue(v: VehicleValue): string {
   if (v.metric.startsWith('stat_')) return v.value.toFixed(1);
+  if (v.metric.startsWith('boost_')) return `+${v.value.toFixed(1)}`;
   if (v.metric.startsWith('rating_')) return String(Math.round(v.value));
-  if (v.metric === 'price_gtad' || v.metric === 'sell_price_gtad') return `GTA$ ${Math.round(v.value).toLocaleString('en-US')}`;
+  if (isMoneyMetric(v.metric)) return `GTA$ ${Math.round(v.value).toLocaleString('en-US')}`;
   if (v.metric === 'top_speed_mph') return `${v.value.toFixed(1)} mph`;
   const ms = Math.round(v.value); const m = Math.floor(ms / 60000); const s = (ms % 60000) / 1000;
   return `${m}:${s.toFixed(3).padStart(6, '0')}`;

@@ -11,7 +11,7 @@ import { isLaunched } from '../data/launch';
 // Status paragraph switches with the first build after launch (Fausto 18.11.2026).
 const launched = isLaunched();
 const STATUS = launched
-  ? 'Status: GTA VI was released on November 19, 2026. Leonida Racing adds prices, top speeds and Gellhorn lap times as they are measured in the game, each with its source. Lap times are reviewed by moderators before they are published.'
+  ? 'Status: GTA VI was released on November 19, 2026. Leonida Racing adds top speeds, Gellhorn lap times and costs to register as they are measured in the game, each with its source. GTA VI has no car dealers: cars are stolen and registered. Lap times are reviewed by moderators before they are published.'
   : `Status: GTA VI is scheduled for release on November 19, 2026. Leonida Racing is live before the game: current leaderboard entries, lap data, crews, and events marked as samples are demonstration content. GTA VI Time Attack is planned to accept real submissions from launch day, and its rules will be tested against the released game. Vehicles known only from unofficial pre-release material are marked "Not officially revealed" and excluded from search indexing. Users can already create crews and schedule community events in the Community section.`;
 
 export const GET: APIRoute = ({ site }) => {
@@ -25,7 +25,7 @@ ${STATUS}
 
 ## Cars
 
-- [Cars](${u('cars/')}): browse GTA VI vehicles by class and manufacturer, with seats, drivetrain, release details, first appearance, and primary real-life inspiration; prices, tested top speeds, and lap data ${launched ? 'are added as they are measured' : 'follow after launch'}
+- [Cars](${u('cars/')}): browse GTA VI vehicles by class and manufacturer, with seats, drivetrain, release details, first appearance, and primary real-life inspiration; costs to register, tested top speeds, and lap data ${launched ? 'are added as they are measured' : 'follow after launch'}
 
 ## Time Attack
 

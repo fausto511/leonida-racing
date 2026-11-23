@@ -386,13 +386,17 @@ const METRIC_LABEL: Record<string, string> = {
   price_gtad: "Price", sell_price_gtad: "Sell value", top_speed_mph: "Top speed", gellhorn_reference_lap_ms: "Gellhorn lap",
   stat_speed: "Speed", stat_acceleration: "Acceleration", stat_handling_asphalt: "Asphalt handling", stat_handling_offroad: "Off-road handling",
   stat_strength: "Strength", rating_road: "Road rating", rating_offroad: "Off-road rating",
+  // Claude placeholder 23.11.2026 (Codex review open); same names as statLabels on the website
+  register_cost_gtad: "Cost to register", boost_speed: "Boost speed", boost_acceleration: "Boost acceleration",
 };
-const METRIC_ORDER = Object.keys(METRIC_LABEL);
+// order of the stats in a post: top speed and cost to register first (DEC-0247)
+const METRIC_ORDER = ["top_speed_mph", "register_cost_gtad", ...Object.keys(METRIC_LABEL).filter((k) => k !== "top_speed_mph" && k !== "register_cost_gtad")];
 const VALUES_WAIT_MAX_ATTEMPTS = 24;    // re-check every 30 min, give up after ~12 h
 function fmtStat(metric: string, value: number): string {
   if (metric.startsWith("stat_")) return `${value.toFixed(1)} / 10`;
+  if (metric.startsWith("boost_")) return `+${value.toFixed(1)}`;
   if (metric.startsWith("rating_")) return String(Math.round(value));
-  if (metric === "price_gtad" || metric === "sell_price_gtad") return `$${Math.round(value).toLocaleString("en-US")}`;
+  if (metric.endsWith("_gtad")) return `$${Math.round(value).toLocaleString("en-US")}`;
   if (metric === "top_speed_mph") return `${value.toFixed(1)} mph (${(value * 1.609344).toFixed(1)} km/h)`;
   const ms = Math.round(value), m = Math.floor(ms / 60000), s = (ms % 60000) / 1000;
   return `${m}:${s.toFixed(3).padStart(6, "0")}`;

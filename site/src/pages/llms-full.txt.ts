@@ -5,7 +5,7 @@
 // COPY STATUS: header = Claude placeholder; licence sentence follows the Terms once "Using our data" is live.
 import type { APIRoute } from 'astro';
 import { SITE_NAME } from '../data/site';
-import { vehicleOptions, vehicleValues, fastestGellhornLapMs } from '../data/vehicles';
+import { vehicleOptions, vehicleValues, fastestGellhornLapMs, COST_METRIC } from '../data/vehicles';
 import { lapTime } from '../data/leaderboard';
 
 export const GET: APIRoute = ({ site }) => {
@@ -16,7 +16,7 @@ export const GET: APIRoute = ({ site }) => {
     .sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`));
   const lines = cars.map((v) => {
     const val = vehicleValues[v.id] ?? {};
-    const price = val.price_gtad?.value;
+    const price = val[COST_METRIC]?.value; // cost to register (DEC-0247)
     const mph = val.top_speed_mph?.value;
     const ref = val.gellhorn_reference_lap_ms?.value;
     const best = fastestGellhornLapMs(v.id);
@@ -24,7 +24,7 @@ export const GET: APIRoute = ({ site }) => {
       `${v.make} ${v.model}`,
       v.classes.join(', '),
       v.realLifeInspiration ? `based on ${v.realLifeInspiration}` : '',
-      price != null ? `price $${Math.round(price).toLocaleString('en-US')}` : '',
+      price != null ? `cost to register $${Math.round(price).toLocaleString('en-US')}` : '',
       mph != null ? `top speed ${Math.round(mph)} mph (${Math.round(mph * 1.609344)} km/h), stock` : '',
       ref != null ? `Gellhorn reference lap ${lapTime(ref)}` : best != null ? `fastest Gellhorn community lap ${lapTime(best)}` : '',
       u(`cars/vehicles/${v.id}/`),
@@ -33,7 +33,7 @@ export const GET: APIRoute = ({ site }) => {
   const built = new Date().toISOString().slice(0, 10);
   const body = `# ${SITE_NAME} — GTA VI car data
 
-> Officially revealed Grand Theft Auto VI (GTA 6) cars in the ${SITE_NAME} database: class, primary real-life inspiration and, where measured, price, stock top speed and Gellhorn lap time. Values that are not known yet are left out. ${SITE_NAME} is not affiliated with Rockstar Games or Take-Two Interactive.
+> Officially revealed Grand Theft Auto VI (GTA 6) cars in the ${SITE_NAME} database: class, primary real-life inspiration and, where measured, cost to register, stock top speed and Gellhorn lap time. GTA VI has no car dealers: cars are stolen and registered, so the cost to register is the money value we list. Values that are not known yet are left out. ${SITE_NAME} is not affiliated with Rockstar Games or Take-Two Interactive.
 
 Data by ${SITE_NAME} (${u('')}). Please credit "Data by ${SITE_NAME}" with a link when you use this data. Values can change with game updates.
 Generated: ${built} · ${cars.length} cars · Format: name · class · inspiration · values · page

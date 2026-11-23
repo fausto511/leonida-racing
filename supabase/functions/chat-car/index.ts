@@ -57,14 +57,14 @@ async function line(q: string): Promise<string> {
     rest(`public_leaderboard_ranks?scope=eq.vehicle&scope_key=eq.${id}&rank=eq.1&track_id=eq.gellhorn-international-raceway&select=lap_time_ms&limit=1`).catch(() => []),
   ]);
   const v = (m: string) => (vals as { metric: string; tuning?: string; value: number }[]).find((x) => x.metric === m && (x.tuning ?? "stock") === "stock")?.value;
-  const price = v("price_gtad");
+  const price = v("register_cost_gtad"); // GTA VI has no dealers: cost to register (DEC-0247)
   const mph = v("top_speed_mph");
   const ref = v("gellhorn_reference_lap_ms");
   const bestLap = (rank as { lap_time_ms: number }[])[0]?.lap_time_ms;
   const parts = [
     `${c.make} ${c.model}${c.classes?.length ? ` (${c.classes.join(", ")})` : ""}`,
     c.real_life_inspiration ? `based on ${c.real_life_inspiration}` : "",
-    price != null ? `$${Number(price).toLocaleString("en-US")}` : "",
+    price != null ? `$${Number(price).toLocaleString("en-US")} to register` : "",
     mph != null ? `${Math.round(Number(mph))} mph / ${Math.round(Number(mph) * 1.609344)} km/h` : "",
     ref != null ? `Gellhorn ref. lap ${lap(Number(ref))}` : bestLap != null ? `Gellhorn best ${lap(Number(bestLap))}` : "",
     `${SITE}/cars/vehicles/${c.vehicle_id}/`,
