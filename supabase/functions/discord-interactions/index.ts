@@ -95,7 +95,7 @@ const GUILD_COMMANDS = [
 ];
 
 // Classes for /leaderboard (same as vehicles.classes / the website's class chips).
-const LB_CLASSES = ["Super", "Sports", "Sports Classics", "Muscle", "Coupes", "Sedans", "SUVs", "Off-Road"];
+const LB_CLASSES = ["Super", "Sports", "Muscle", "Coupes", "Sedans", "SUVs", "Off-Road", "Pickups", "Vans"]; // in-game vehicle types (DEC-0253)
 // /events, /event, /car, /create-event are open to everyone (Fausto 2026-10-07):
 // read-only or link-only; publishing events still needs the host role on the website.
 const COMMANDS = [
@@ -163,7 +163,7 @@ const COMMANDS = [
     ] }] },
 ];
 // Bump whenever COMMANDS changes -> re-registered automatically after deploy.
-const COMMANDS_VERSION = "2026-11-10.1"; // /edit-event description "upcoming" (Fausto 10.11.)
+const COMMANDS_VERSION = "2026-11-23.1"; // /leaderboard class choices = in-game types (DEC-0253)
 
 // ---------- helpers ----------
 const hex = (h: string) => new Uint8Array(h.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));

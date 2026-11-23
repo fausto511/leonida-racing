@@ -34,7 +34,7 @@ const statChip = (c: (typeof fresh)[number]['changes'][number]) => `${statLabels
 // ---- Time Attack band: sample top 5 until real laps exist ----
 const sampleTop = overallRows(sampleEntries, false).slice(0, 5);
 const sampleTopHtml = sampleTop.map(({ e, rank }) => homeLbRow({ rank, driver: e.driver, crew: e.crew, car: `${e.make} ${e.model}`, ms: e.lap_time_ms })).join('');
-const TA_CHIPS = ['Super', 'Sports', 'Muscle', 'Sports Classics', 'Off-Road'];
+const TA_CHIPS = ['Super', 'Sports', 'Muscle', 'Coupes', 'Off-Road'];
 
 // ---- Fastest at Gellhorn: one car per class (DEC-0116) ----
 // The class's fastest car at Gellhorn; until laps exist, the class's band car

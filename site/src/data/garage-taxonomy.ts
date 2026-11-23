@@ -24,9 +24,6 @@ export const classPages: TaxonomyPage[] = [
   { slug: 'muscle', name: 'Muscle', teaser: 'The Deviant ’72 wears its age proudly, while the Dominator GT brings open-top muscle to a much newer generation.', copyStatus: 'approved', intro: [
     'GTA VI Muscle cars bring big American engines and bold shapes to our car database, from classic pony cars and lowriders to modern Mustang-, Challenger-, and Camaro-inspired builds. The lineup runs from the Buccaneer ’65 and Gauntlet Custom ’69 to the Gauntlet Hellfire and the many faces of the Dominator. Some are clean, some are loud, and subtlety is rarely the point.',
   ] },
-  { slug: 'sports-classics', name: 'Sports Classics', teaser: 'Start with the Mamba GT ’64’s rounded racing silhouette or the Cheetah ’95’s pop-up headlights, then explore the classics around them.', copyStatus: 'approved', intro: [
-    'GTA VI Sports Classics bring together the cars that made their era matter: Italian wedges, 1960s racers, German icons, and American cruisers. The class runs from the Cheetah \'95 and Infernus \'96 to the Sentinel \'85, Mamba GT \'64, and Manana \'77. Take one racing or park it at the meet—the shape already has a story.',
-  ] },
   { slug: 'coupes', name: 'Coupes', teaser: 'The Windsor Drop makes an entrance before anyone gets out, while the FR36 offers a more understated take on two doors.', copyStatus: 'approved', intro: ["GTA VI’s Coupes class runs from understated two-door cars to long luxury shapes and open-top cruisers. The Windsor Drop’s formal proportions, the FR36’s more compact profile, and the Apoc’s grand-tourer shape give collectors very different starting points. A fixed roof or an open cabin can change the mood of the whole car meet."] },
   { slug: 'sedans', name: 'Sedans', teaser: 'Chrome on the Stanier ’55 and a long roof on the Parkland ’71 give this everyday category two very different personalities.', copyStatus: 'approved', intro: [
     'GTA VI Sedans range from ordinary-looking four-doors and wagons to full-size American classics and serious sports sedans. The roster stretches from the Stanier ’98 and Emperor ’85 to the Feroci ’98, Tailgater S, and Schafter V12. Crown Victoria, Lexus GS, Audi, and Cadillac influences make this class far less anonymous than the body style suggests.',
@@ -36,6 +33,14 @@ export const classPages: TaxonomyPage[] = [
   ] },
   { slug: 'off-road', name: 'Off-Road', teaser: 'Oversized tires turn the Dominator ’67 Buggy into an unlikely trail companion for the square-bodied Kamacho and its pickup bed.', copyStatus: 'approved', intro: [
     'GTA VI Off-Road vehicles bring together lifted trucks, 4x4s, and trail builds inspired by the Ford F-150 Raptor, Toyota Hilux, Hummer H1, and Jeep concepts. From the Caracara 4x4 and Rebel ’84 to the Patriot Mil-Spec and Kamacho, the class covers several ways to leave the city behind. When the pavement ends, this is the class you start with.',
+  ] },
+  // 23.11.2026 (Fausto, DEC-0253): classes follow the vehicle type shown in the game; Pickups and Vans added,
+  // Sports Classics removed. COPY: Claude placeholders -> Codex.
+  { slug: 'pickups', name: 'Pickups', teaser: 'A Bison with a work-truck stance and a lifted Caracara 4x4 show how far a pickup can go from the farm road.', copyStatus: 'draft-claude', intro: [
+    'GTA VI Pickups cover work trucks, lifted 4x4s and everyday haulers. The Bison family, the Caracara 4x4, the Sandking XL and the Rebel show how wide the range runs, from a clean daily truck to something built for the trail. An open bed is the common ground; what goes in it is up to you.',
+  ] },
+  { slug: 'vans', name: 'Vans', teaser: 'The Sojourn and the Vivanite trade a sporty shape for space, and that is exactly the point.', copyStatus: 'draft-claude', intro: [
+    'GTA VI Vans are the practical end of the garage: room for the crew, the gear and the drive home. The Sojourn and the Vivanite bring family-vehicle shapes to Leonida, and a van makes an honest support vehicle at any car meet.',
   ] },
 ];
 
@@ -72,8 +77,9 @@ export const vehiclesByMake = (slug: string) => vehicleOptions.filter((v) => v.l
 export const classesAbout = {
   heading: 'Browse GTA VI Cars by Class',
   paragraphs: [
-    'Classes give our car database a useful starting point: choose the kind of car you are interested in, then look more closely at individual models. Sports and Super gather different takes on performance-car design, while Muscle and Sports Classics offer another route through the lineup. Coupes, Sedans, SUVs, and Off-Road help you explore beyond the obvious poster cars.',
-    'These categories organize our database; they do not establish the final vehicle classes or entry rules for GTA VI races. A familiar class label also tells you little about how two cars will compare on the same track. That requires information from the released game and testing under comparable conditions.',
+    // COPY: Claude placeholder 23.11.2026 (classes now follow the in-game vehicle type) -> Codex
+    'Classes give our car database a useful starting point: choose the kind of car you are interested in, then look more closely at individual models. Sports and Super gather different takes on performance-car design, while Muscle and Coupes offer another route through the lineup. Sedans, SUVs, Off-Road, Pickups and Vans help you explore beyond the obvious poster cars.',
+    'Our classes follow the vehicle type the game shows for each car. A shared class tells you little about how two cars will compare on the same track; that takes testing under comparable conditions.',
     'Our car database focuses on racing-relevant cars, rather than every vehicle in GTA VI. Rockstar has named some models directly; others are community identifications from official footage and screenshots. A model name used here should not be read as official confirmation unless Rockstar has provided it.',
   ],
 };

@@ -14,8 +14,7 @@ export const RANKING_MIN_COVERAGE = 0.6;
 export const NEW_CARS_MIN_COVERAGE = 0.8;
 
 const classLabels: Record<string, string> = {
-  super: 'Super Cars', sports: 'Sports Cars', muscle: 'Muscle Cars', 'sports-classics': 'Sports Classics',
-  coupes: 'Coupes', sedans: 'Sedans', suvs: 'SUVs', 'off-road': 'Off-Road Vehicles',
+  super: 'Super Cars', sports: 'Sports Cars', muscle: 'Muscle Cars',   coupes: 'Coupes', sedans: 'Sedans', suvs: 'SUVs', 'off-road': 'Off-Road Vehicles', pickups: 'Pickups', vans: 'Vans',
 };
 
 export interface RankingDef {
@@ -40,8 +39,7 @@ function def(slug: string, title: string, description: string, metric: RankingDe
 
 // COPY: Codex 2026-10-08 (Garage-Texte-2026-10-08.md), approved by Fausto 2026-10-09.
 const codexClass: Record<string, string> = {
-  super: 'Super cars', sports: 'Sports cars', muscle: 'Muscle cars', 'sports-classics': 'Sports Classics',
-  coupes: 'Coupes', sedans: 'Sedans', suvs: 'SUVs', 'off-road': 'Off-Road vehicles',
+  super: 'Super cars', sports: 'Sports cars', muscle: 'Muscle cars',   coupes: 'Coupes', sedans: 'Sedans', suvs: 'SUVs', 'off-road': 'Off-Road vehicles', pickups: 'Pickups', vans: 'Vans',
 };
 export const rankings: RankingDef[] = [
   def('fastest', 'Fastest Cars in GTA 6', 'Compare GTA 6 cars by recorded top speed in stock form. See the vehicles with available results, their speeds and the source of each value.',

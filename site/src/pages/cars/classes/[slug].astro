@@ -4,8 +4,8 @@ import { classPages, vehiclesInClass } from '../../../data/garage-taxonomy';
 
 // Search-facing names per class (RS-0050)
 const labels: Record<string, string> = {
-  super: 'Super Cars', sports: 'Sports Cars', muscle: 'Muscle Cars', 'sports-classics': 'Sports Classics',
-  coupes: 'Coupes', sedans: 'Sedans', suvs: 'SUVs', 'off-road': 'Off-Road Vehicles',
+  super: 'Super Cars', sports: 'Sports Cars', muscle: 'Muscle Cars',
+  coupes: 'Coupes', sedans: 'Sedans', suvs: 'SUVs', 'off-road': 'Off-Road Vehicles', pickups: 'Pickups', vans: 'Vans',
 };
 export function getStaticPaths() {
   return classPages.map((page) => ({ params: { slug: page.slug }, props: { page } }));

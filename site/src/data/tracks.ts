@@ -45,12 +45,12 @@ function classLinkHtml(c: string, preview: boolean): string {
   return `<a class="tr-cl" href="${import.meta.env.BASE_URL}cars/classes/${trackClassSlug(c)}/" title="${esc(c)} in the Garage">${esc(c)}</a>`;
 }
 /** Same classes as the Garage (vehicles.ts); must match the DB check constraint. */
-export const trackVehicleClasses = ['Coupes', 'Muscle', 'Off-Road', 'SUVs', 'Sedans', 'Sports', 'Sports Classics', 'Super'];
+export const trackVehicleClasses = ['Coupes', 'Muscle', 'Off-Road', 'Pickups', 'SUVs', 'Sedans', 'Sports', 'Super', 'Vans']; // DEC-0253
 
 const d = (daysAgo: number) => new Date(Date.UTC(2026, 8, 30) - daysAgo * 864e5).toISOString();
 export const sampleTracks: CommunityTrack[] = [
   { track_id: 't1', title: 'Vice City Night Loop', social_club_url: null, layout: 'circuit', race_types: ['standard', 'street'], vehicle_classes: ['Sports', 'Super'], players_min: 2, players_max: 16, length_km: 4.8, created_at: d(20), updated_at: d(3), creator_name: 'Racer_01' },
-  { track_id: 't2', title: 'Keys Causeway Sprint', social_club_url: null, layout: 'point-to-point', race_types: ['standard'], vehicle_classes: ['Sports', 'Sports Classics', 'Muscle'], players_min: 2, players_max: 12, length_km: 11.2, created_at: d(14), updated_at: d(14), creator_name: 'CoastalRun' },
+  { track_id: 't2', title: 'Keys Causeway Sprint', social_club_url: null, layout: 'point-to-point', race_types: ['standard'], vehicle_classes: ['Sports', 'Coupes', 'Muscle'], players_min: 2, players_max: 12, length_km: 11.2, created_at: d(14), updated_at: d(14), creator_name: 'CoastalRun' },
   { track_id: 't3', title: 'Everglades Mud Run', social_club_url: null, layout: 'point-to-point', race_types: ['standard'], vehicle_classes: ['Off-Road', 'SUVs'], players_min: 2, players_max: 8, length_km: 7.5, created_at: d(40), updated_at: d(9), creator_name: 'MintyTires' },
   { track_id: 't4', title: 'Port Gellhorn Stunt Park', social_club_url: null, layout: 'circuit', race_types: ['stunt'], vehicle_classes: ['Super'], players_min: 1, players_max: 30, length_km: 3.1, created_at: d(6), updated_at: d(6), creator_name: 'NeonDrift' },
 ];

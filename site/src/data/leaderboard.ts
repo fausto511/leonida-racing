@@ -232,7 +232,7 @@ export function inFilter(id: string, logo: string | null, s: Pick<LbState, 'cls'
   return true;
 }
 /** Classes (mockup order first) and manufacturers of the garage vehicles. */
-const CLASS_ORDER = ['Super', 'Sports', 'Muscle', 'Sports Classics', 'Off-Road', 'SUVs', 'Sedans', 'Coupes'];
+const CLASS_ORDER = ['Super', 'Sports', 'Muscle', 'Coupes', 'Sedans', 'SUVs', 'Off-Road', 'Pickups', 'Vans']; // in-game vehicle types (DEC-0253)
 const allClasses = [...new Set(vehicleOptions.flatMap((v) => v.classes))];
 export const lbClasses = [...CLASS_ORDER.filter((c) => allClasses.includes(c)), ...allClasses.filter((c) => !CLASS_ORDER.includes(c)).sort()];
 export const lbMakes = [...new Map(vehicleOptions.map((v) => [v.logoSlug, v.make])).entries()].sort((a, b) => a[1].localeCompare(b[1]));

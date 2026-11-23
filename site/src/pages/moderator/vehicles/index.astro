@@ -172,7 +172,7 @@ const subs = [{ key: 'all', label: 'All vehicles' }, { key: 'missing', label: 'M
   import { esc } from '../../../data/hub';
   import { initModSubs } from '../../../scripts/mod-shell';
 
-  const CLASSES = ['Super', 'Sports', 'Sports Classics', 'Muscle', 'Coupes', 'Sedans', 'Compacts', 'SUVs', 'Off-Road', 'Vans', 'Utility', 'Motorcycles', 'Cycles', 'Open Wheel', 'Industrial', 'Commercial', 'Service', 'Emergency', 'Military'];
+  const CLASSES = ['Super', 'Sports', 'Muscle', 'Coupes', 'Sedans', 'SUVs', 'Off-Road', 'Pickups', 'Vans', 'Utility', 'Motorcycles', 'Cycles', 'Open Wheel', 'Industrial', 'Commercial', 'Service', 'Emergency', 'Military']; // cars: the 9 in-game types (DEC-0253)
   const METRIC: Record<string, string> = { register_cost_gtad: 'Cost to register', price_gtad: 'Purchase price', sell_price_gtad: 'Sell value', top_speed_mph: 'Top speed', gellhorn_reference_lap_ms: 'Gellhorn ref. lap',
     stat_speed: 'Speed (stat)', stat_acceleration: 'Acceleration (stat)', stat_handling_asphalt: 'Asphalt handling (stat)', stat_handling_offroad: 'Off-road handling (stat)', stat_strength: 'Strength (stat)',
     rating_road: 'Road rating', rating_offroad: 'Off-road rating', boost_speed: 'Nitrous boost: speed', boost_acceleration: 'Nitrous boost: acceleration' };
