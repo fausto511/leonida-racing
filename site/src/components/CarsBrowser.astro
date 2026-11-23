@@ -195,17 +195,22 @@ function mc(group: string, value: string | number, label: string, n: number | un
     </div>
     <div class="dsp-q" id="dsp-q" hidden><span class="muted">Search</span><button type="button" class="dsp-qchip" id="dsp-qchip" aria-label="Remove search"><span id="dsp-qtext"></span><b aria-hidden="true"><Fragment set:html={CLOSE_SVG} /></b></button><span class="muted dsp-qhint">The search text counts together with these filters.</span></div>
     <div class="dsp-body">
-      {scope !== 'class' && <div class="dsg"><h4>Class <em data-sel="class"></em></h4><div class="mchips" set:html={classesSorted.map(([c, n]) => mc('class', c, c, n)).join('')} /></div>}
-{RNG_MAIN.map(([k, t]) => (
+      <!-- chip groups first (two stacked columns), so the sliders below line up in rows (Fausto 23.11.2026) -->
+      <div class="dsg-col">
+        {scope !== 'class' && <div class="dsg"><h4>Class <em data-sel="class"></em></h4><div class="mchips" set:html={classesSorted.map(([c, n]) => mc('class', c, c, n)).join('')} /></div>}
+        <div class="dsg"><h4>Drive <em data-sel="drive"></em></h4><div class="mchips" set:html={DRIVES.map((d) => mc('drive', d, d, driveCounts.get(d))).join('')} /></div>
+      </div>
+      <div class="dsg-col">
+        <div class="dsg"><h4>Seats <em data-sel="seats"></em></h4><div class="mchips" set:html={seatsSorted.map(([n, c]) => mc('seats', n, String(n), c)).join('')} /></div>
+        <div class="dsg"><h4>Storage <em data-sel="storage"></em></h4><div class="mchips" set:html={storageSorted.map(([n, c]) => mc('storage', n, `${n} slots`, c)).join('')} /></div>
+      </div>
+      {RNG_MAIN.map(([k, t]) => (
         <div class="dsg rng" data-range={k}><h4>{t} <em data-sel={k}></em></h4>
           <div class="rng-track"><b class="rng-fill"></b><input type="range" class="rng-lo" min="0" max="1000" value="0" aria-label={`Minimum ${t.toLowerCase()}`} /><input type="range" class="rng-hi" min="0" max="1000" value="1000" aria-label={`Maximum ${t.toLowerCase()}`} /></div>
           <div class="rng-vals"><span data-lo>Any</span><em>–</em><span data-hi>Any</span></div>
           <p class="rng-off">Coming soon</p>
         </div>
       ))}
-      <div class="dsg"><h4>Drive <em data-sel="drive"></em></h4><div class="mchips" set:html={DRIVES.map((d) => mc('drive', d, d, driveCounts.get(d))).join('')} /></div>
-      <div class="dsg"><h4>Seats <em data-sel="seats"></em></h4><div class="mchips" set:html={seatsSorted.map(([n, c]) => mc('seats', n, String(n), c)).join('')} /></div>
-      <div class="dsg"><h4>Storage <em data-sel="storage"></em></h4><div class="mchips" set:html={storageSorted.map(([n, c]) => mc('storage', n, `${n} slots`, c)).join('')} /></div>
       {scope !== 'make' && <div class="dsg dsg-wide">
         <h4>Manufacturer <em data-sel="make"></em><input type="search" class="dsp-msearch" id="dsp-msearch" placeholder={`Search ${makes.length} brands`} aria-label="Search manufacturers" /></h4>
         <div class="mlist" set:html={makes.map(([slug, name]) => mc('make', slug, name, makeCounts.get(slug))).join('')} />
@@ -340,6 +345,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .dsg h4 { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); }
   .dsg h4 em { font-style: normal; text-transform: none; letter-spacing: 0; color: var(--lr-pink); font-weight: 600; }
   .dsg-wide { grid-column: 1 / -1; }
+  .dsg-col { display: flex; flex-direction: column; gap: 22px; }
   .dsp-msearch { margin-left: auto; width: 220px; height: var(--lr-field-h); box-sizing: border-box; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; background: transparent; color: var(--lr-text); font: inherit; font-size: 14px; font-weight: 400; letter-spacing: 0; text-transform: none; outline: none; }
   .dsp-msearch:focus { border-color: var(--lr-field-focus); }
   .mchips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -361,15 +367,17 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .sort-list { display: flex; flex-direction: column; gap: 2px; }
 
   /* range sliders (C5/C6, mockup .rng) */
-  .rng-track { position: relative; height: 22px; margin: 4px 9px 10px; }
+  /* one slider look everywhere (detailed search + Max $ menu): solid pink thumb, 16px (Fausto 23.11.2026) */
+  .rng-track { position: relative; height: 22px; margin: 4px 8px 10px; }
   .rng-track::before { content: ''; position: absolute; left: 0; right: 0; top: 9px; height: 4px; border-radius: 999px; background: var(--lr-white-active); }
   .rng-fill { position: absolute; top: 9px; height: 4px; border-radius: 999px; background: var(--lr-pink); left: 0; right: 0; }
-  .rng-track input { position: absolute; left: -9px; right: -9px; top: 0; width: calc(100% + 18px); height: 22px; margin: 0; background: none; -webkit-appearance: none; appearance: none; pointer-events: none; }
+  .rng-track input { position: absolute; left: -8px; right: -8px; top: 0; width: calc(100% + 16px); height: 22px; margin: 0; background: none; -webkit-appearance: none; appearance: none; pointer-events: none; }
   .rng-track input::-webkit-slider-runnable-track { background: none; height: 22px; }
   .rng-track input::-moz-range-track { background: none; }
-  .rng-track input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 18px; height: 18px; margin-top: 2px; border-radius: 999px; background: var(--lr-text); box-shadow: 0 0 0 3px var(--lr-pink); cursor: grab; }
-  .rng-track input::-moz-range-thumb { pointer-events: auto; width: 18px; height: 18px; border: 0; border-radius: 999px; background: var(--lr-text); box-shadow: 0 0 0 3px var(--lr-pink); cursor: grab; }
-  .rng-track input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--lr-pink), 0 0 0 6px var(--lr-orange-border); }
+  .rng-track input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 16px; height: 16px; margin-top: 3px; border: 0; border-radius: 999px; background: var(--lr-pink); cursor: grab; }
+  .rng-track input::-moz-range-thumb { pointer-events: auto; width: 16px; height: 16px; border: 0; border-radius: 999px; background: var(--lr-pink); cursor: grab; }
+  .rng-track input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--lr-orange-border); }
+  .rng-track input:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--lr-orange-border); }
   .rng-vals { display: flex; gap: 10px; align-items: center; }
   .rng-vals span { flex: 1; height: var(--lr-field-h); box-sizing: border-box; display: flex; align-items: center; padding: 0 14px; border: 1px solid var(--lr-line-strong); border-radius: 6px; font-size: 14px; font-variant-numeric: tabular-nums; }
   .rng-vals em { font-style: normal; color: var(--lr-muted); }
@@ -377,8 +385,8 @@ function mc(group: string, value: string | number, label: string, n: number | un
   .rng.is-off { opacity: .5; }
   .rng.is-off .rng-off { display: block; }
   .rng.is-off input { pointer-events: none; }
-  .rng.is-off input::-webkit-slider-thumb { pointer-events: none; cursor: not-allowed; box-shadow: 0 0 0 3px var(--lr-disabled); }
-  .rng.is-off input::-moz-range-thumb { pointer-events: none; box-shadow: 0 0 0 3px var(--lr-disabled); }
+  .rng.is-off input::-webkit-slider-thumb { pointer-events: none; cursor: not-allowed; background: var(--lr-disabled); }
+  .rng.is-off input::-moz-range-thumb { pointer-events: none; background: var(--lr-disabled); }
   .rng.is-off .rng-fill { background: var(--lr-disabled); }
   .menu-price { min-width: 260px; }
   .menu-price .rng-single { padding: 2px 10px 6px; }
@@ -430,6 +438,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
     .dsp-sort { width: 100%; }
     .dsp-h { padding: 16px 16px 12px; }
     .dsp-body { grid-template-columns: minmax(0, 1fr); padding: 14px 16px; gap: 18px; }
+    .dsg-col { gap: 18px; }
     .mlist { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .dsp-msearch { width: 140px; }
     .dsp-f { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
