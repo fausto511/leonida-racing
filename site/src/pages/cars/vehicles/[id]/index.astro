@@ -6,7 +6,7 @@
 // from the mockup -> Codex review (DEC-0088). About texts: data/vehicle-copy.ts (Codex).
 import Base from '../../../../layouts/Base.astro';
 import CarCard from '../../../../components/CarCard.astro';
-import { MAKES_WITHOUT_LOGO, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs, vehicleStatsAt, COST_METRIC, COST_LABEL, sellValueText } from '../../../../data/vehicles';
+import { MAKES_WITHOUT_LOGO, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs, vehicleStatsAt, COST_METRIC, COST_LABEL, sellValueText, vehicleSellValues } from '../../../../data/vehicles';
 import { groupedTitles } from '../../../../data/gta-titles';
 import { speedHtml } from '../../../../data/units';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
@@ -180,6 +180,39 @@ const ico = {
 const star = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.3L14.38 9.62L22.08 9.62L15.85 14.15L18.23 21.48L12 16.95L5.77 21.48L8.15 14.15L1.92 9.62L9.62 9.62Z"/></svg>';
 const starsHtml = [1, 2, 3, 4, 5].map((n) => '<button type="button" class="vr-star" data-star="' + n + '" aria-label="' + n + (n === 1 ? ' star' : ' stars') + '">' + star + '</button>').join('');
 const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrder);
+// ---- FAQ (Fausto 23.11.2026, DEC-0250): last block on the page, compact (<details>), FAQPage JSON-LD.
+// Every answer carries this car's own data; a question only shows when its data exists; no sentence
+// that would read the same on every car page (explanations live in the Guide, linked).
+// COPY STATUS: Claude placeholders 23.11.2026 -> Codex review.
+const kmhOf = (mph: number) => Math.round(mph * 1.609344);
+const usdFaq = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
+const roadR = ratingTiles[0], offR = ratingTiles[1];
+const prevTitles = vehicle.previousGames ? groupedTitles(vehicle.previousGames).map((t) => t.label) : null;
+const sellList = vehicleSellValues[vehicle.id] ?? [];
+type Faq = { q: string; a: string; link?: [string, string] };
+const faqs: Faq[] = vehicle.releaseId ? ([
+  speed != null && { q: `What is the top speed of the ${fullName} in GTA 6?`,
+    a: `The ${fullName} reaches ${speed.toFixed(1)} mph (${kmhOf(speed)} km/h) in stock form${speedRank != null ? `, #${speedRank} of ${classCars.length} ${cls} cars` : ''}.` },
+  price != null && { q: `How much does it cost to register the ${fullName}?`,
+    a: `Registering the ${fullName} costs ${usdFaq(price)}, as shown in the in-game scanner.`, link: [`${base}guide/#theft`, 'How registering works'] },
+  sellList.length > 0 && vehicle.sellable !== 'no' && { q: `How much does the ${fullName} sell for in GTA 6?`,
+    a: `A stolen ${fullName} sells for ${sellList.map((s) => `${usdFaq(s.value)} in ${s.condition} condition`).join(', ')}.` },
+  vehicle.sellable === 'no' && { q: `Can you sell the ${fullName} in GTA 6?`, a: `No, the ${fullName} can't be sold.` },
+  vehicle.tracker && { q: `Does the ${fullName} have a tracker?`,
+    a: `${vehicle.tracker === 'None' ? `No, the ${fullName} has no tracker` : `Yes, the ${fullName} has a ${vehicle.tracker} tracker`}${vehicle.keyCloner ? ', and you need a Key Cloner to steal it' : ''}.`, link: [`${base}guide/#theft`, 'Trackers and selling'] },
+  (roadR.value != null || offR.value != null) && { q: `How does the ${fullName} rate on road and off-road?`,
+    a: [roadR.value != null ? `Road rating ${Math.round(roadR.value)}${roadR.rank != null ? ` (#${roadR.rank} of ${roadR.n} in ${cls})` : ''}` : '',
+        offR.value != null ? `off-road rating ${Math.round(offR.value)}${offR.rank != null ? ` (#${offR.rank} of ${offR.n} in ${cls})` : ''}` : ''].filter(Boolean).join(', ').replace(/^o/, 'O') + ', stock.' },
+  vehicle.specialist && vehicle.specialist !== 'None' && { q: `Which mod shop specialist works on the ${fullName}?`,
+    a: `The ${fullName} goes to a ${vehicle.specialist} specialist.`, link: [`${base}guide/#customization`, 'Mod shops'] },
+  vehicle.realLifeInspiration && { q: `What real car is the ${fullName} based on?`, a: `The ${fullName} is based on the ${vehicle.realLifeInspiration}.` },
+  vehicle.nitrous != null && { q: `Can you add nitrous to the ${fullName}?`,
+    a: vehicle.nitrous ? `Yes, the ${fullName} can be fitted with nitrous.` : `No, the ${fullName} can't be fitted with nitrous.` },
+  prevTitles && { q: `Has the ${vehicle.model} appeared in earlier GTA games?`,
+    a: prevTitles.length ? `Yes, the ${vehicle.model} returns from ${prevTitles.length > 1 ? `${prevTitles.slice(0, -1).join(', ')} and ${prevTitles[prevTitles.length - 1]}` : prevTitles[0]}.` : `No, the ${vehicle.model} is new in GTA VI.` },
+].filter(Boolean) as Faq[]) : [];
+if (faqs.length) vehicleJsonLd.push({ '@context': 'https://schema.org', '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) } as any);
 ---
 <Base
   title={metaTitle}
@@ -450,6 +483,24 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         </div>
       )}
     </section>
+
+    <!-- ---- FAQ (DEC-0250): last block, compact ---- -->
+    {faqs.length > 0 && (
+      <section class="wrap vsec vfaq" id="faq">
+        <div class="vsec-titles">
+          <p class="eyebrow">FAQ</p>
+          <h2 class="lr-h2 vsec-title display">{fullName} FAQ</h2>
+        </div>
+        <div class="vfaq-list">
+          {faqs.map((f) => (
+            <details class="vfaq-i">
+              <summary>{f.q}</summary>
+              <p>{f.a}{f.link && <>{' '}<a href={f.link[0]}>{f.link[1]}&nbsp;→</a></>}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    )}
   </div>
 </Base>
 
@@ -552,6 +603,19 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vs-own :global(.vs-own-btn) { border: 0; padding: 0; background: none; font: inherit; font-weight: 600; color: var(--lr-orange); cursor: pointer; }
   .vs-own :global(.vs-own-btn:hover) { color: var(--lr-pink); }
   .vs-own .vh-g-check { display: none; }
+
+  /* ---- FAQ (DEC-0250): two columns of closed questions, one line each ---- */
+  .vfaq .vsec-titles { margin-bottom: 16px; }
+  .vfaq-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+  .vfaq-i { border-top: 1px solid var(--lr-line); }
+  .vfaq-i summary { display: flex; justify-content: space-between; gap: 12px; padding: 10px 2px; font-size: 15px; font-weight: 600; color: var(--lr-text); cursor: pointer; list-style: none; }
+  .vfaq-i summary::-webkit-details-marker { display: none; }
+  .vfaq-i summary::after { content: '+'; color: var(--lr-muted); font-weight: 400; }
+  .vfaq-i[open] summary::after { content: '–'; }
+  .vfaq-i p { margin: 0 2px 12px; font-size: 15px; line-height: 1.5; color: var(--lr-soft); }
+  .vfaq-i a { color: var(--lr-orange); text-decoration: none; font-weight: 600; white-space: nowrap; }
+  .vfaq-i a:hover { color: var(--lr-pink); }
+  @media (max-width: 760px) { .vfaq-list { grid-template-columns: 1fr; } }
 
   /* ---- sections ---- */
   .vsec { padding-top: var(--lr-gap-sec); }
