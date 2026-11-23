@@ -206,7 +206,7 @@ const faqs: Faq[] = vehicle.releaseId ? ([
     a: [roadR.value != null ? `Road rating ${Math.round(roadR.value)}${roadR.rank != null ? ` (#${roadR.rank} of ${roadR.n} in ${cls})` : ''}` : '',
         offR.value != null ? `off-road rating ${Math.round(offR.value)}${offR.rank != null ? ` (#${offR.rank} of ${offR.n} in ${cls})` : ''}` : ''].filter(Boolean).join(', ').replace(/^o/, 'O') + ', stock.' },
   vehicle.specialist && vehicle.specialist !== 'None' && { q: `Which mod shop specialist works on the ${fullName}?`,
-    a: `The ${fullName} goes to a ${vehicle.specialist} specialist.`, link: [`${base}guide/#customization`, 'Mod shops'] },
+    a: `The ${fullName} goes to ${/^[AEIOU]/i.test(vehicle.specialist) ? 'an' : 'a'} ${vehicle.specialist} specialist.`, link: [`${base}guide/#customization`, 'Mod shops'] },
   vehicle.realLifeInspiration && { q: `What real car is the ${fullName} based on?`, a: `The ${fullName} is based on the ${vehicle.realLifeInspiration}.` },
   vehicle.nitrous != null && { q: `Can you add nitrous to the ${fullName}?`,
     a: vehicle.nitrous ? `Yes, the ${fullName} can be fitted with nitrous.` : `No, the ${fullName} can't be fitted with nitrous.` },

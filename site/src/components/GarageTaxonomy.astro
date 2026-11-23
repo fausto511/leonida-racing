@@ -111,7 +111,8 @@ const makesHere = [...new Map(list.map((v) => [v.logoSlug, v.make])).entries()].
 const classesHere = [...new Set(list.flatMap((v) => v.classes))].sort();
 const makeHere = (slug: string) => list.filter((v) => v.logoSlug === slug).length;
 const classHere = (name: string) => list.filter((v) => v.classes.includes(name)).length;
-const noun = isClass ? `${page.name} cars` : `${page.name} cars`;
+// plural class names read as a noun on their own ("Showing 23 SUVs"), the others need "cars" (23.11.2026)
+const noun = isClass && /s$/.test(page.name) && page.name !== 'Sports' ? page.name : `${page.name} cars`;
 const lbClass = isClass ? page.name : null;
 
 const ico = {

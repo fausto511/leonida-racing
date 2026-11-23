@@ -16,7 +16,7 @@ const usd = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 const kmh = (mph: number) => Math.round(mph * 1.609344);
 
 // "a Sports car", "an SUV", "a sedan" ... (class names are plural labels in the data)
-const SINGULAR: Record<string, string> = { SUVs: 'SUV', Sedans: 'sedan', Coupes: 'coupe' };
+const SINGULAR: Record<string, string> = { SUVs: 'SUV', Sedans: 'sedan', Coupes: 'coupe', Pickups: 'pickup', Vans: 'van' }; // Pickups/Vans: DEC-0253
 function classPhrase(classes: string[]): string {
   if (!classes.length) return 'a car';
   if (classes.length > 1) return `a car in the ${classes.join(' and ')} classes`;
