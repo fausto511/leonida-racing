@@ -22,14 +22,16 @@ const tools = document.getElementById('tools');
 const DEFAULT_SORT = tools?.dataset.defaultSort ?? 'class';
 const NOUN = tools?.dataset.noun ?? 'cars';
 
-type Group = 'class' | 'make' | 'drive' | 'seats' | 'avail' | 'origin';
-type RangeKey = 'price' | 'speed' | 'lap' | 'road' | 'off' | 'sspd' | 'sacc';
+type Group = 'class' | 'make' | 'drive' | 'seats' | 'storage' | 'avail' | 'origin';
+type RangeKey = 'price' | 'speed' | 'lap' | 'road' | 'off' | 'sspd' | 'sacc' | 'sstr' | 'sell';
 // road/off = in-game ratings, sspd/sacc = in-game speed/acceleration stats 0-10 (Fausto 23.11.2026)
-const RANGES: RangeKey[] = ['price', 'speed', 'lap', 'road', 'off', 'sspd', 'sacc'];
+const RANGES: RangeKey[] = ['price', 'speed', 'lap', 'road', 'off', 'sspd', 'sacc', 'sstr', 'sell'];
+// sort-only keys (no slider; seats/storage are chips in the detailed search), all highest first
+const SORT_DESC = ['road', 'off', 'sspd', 'sacc', 'sstr', 'seats', 'storage', 'sell'];
 type FilterKey = Group | RangeKey | 'q' | 'own';
 type Range = [number | null, number | null];
 interface State { q: string; own: '' | 'owned' | 'not'; sort: string; sets: Record<Group, Set<string>>; ranges: Record<RangeKey, Range> }
-const emptySets = (): Record<Group, Set<string>> => ({ class: new Set(), make: new Set(), drive: new Set(), seats: new Set(), avail: new Set(), origin: new Set() });
+const emptySets = (): Record<Group, Set<string>> => ({ class: new Set(), make: new Set(), drive: new Set(), seats: new Set(), storage: new Set(), avail: new Set(), origin: new Set() });
 const emptyRanges = (): Record<RangeKey, Range> => Object.fromEntries(RANGES.map((k) => [k, [null, null]])) as Record<RangeKey, Range>;
 const state: State = { q: '', own: '', sort: DEFAULT_SORT, sets: emptySets(), ranges: emptyRanges() };
 let showAll = false;
@@ -38,7 +40,7 @@ let wished = new Set<string>(); // wishlist (DEC-0189); heart on every card next
 let driverId: string | null = null;
 
 // ---- data available? (C4: fields without data stay greyed out until it exists) ----
-const values = (k: RangeKey) => cards.map((c) => Number(c.dataset[k])).filter((n) => n > 0);
+const values = (k: string) => cards.map((c) => Number(c.dataset[k])).filter((n) => n > 0);
 const DOMAIN: Record<RangeKey, { min: number; max: number; has: boolean; log: boolean }> = {
   price: { ...minMax(values('price')), log: true },
   speed: { ...minMax(values('speed')), log: false },
@@ -47,8 +49,12 @@ const DOMAIN: Record<RangeKey, { min: number; max: number; has: boolean; log: bo
   off: { ...minMax(values('off')), log: false },
   sspd: { ...minMax(values('sspd')), log: false },
   sacc: { ...minMax(values('sacc')), log: false },
+  sstr: { ...minMax(values('sstr')), log: false },
+  sell: { ...minMax(values('sell')), log: true },
 };
 // a slider / sort needs at least 5 cars with values, otherwise it stays greyed out ("coming soon")
+/** enough values to sort or filter by this key (sliders, sort options with data-needs) */
+function hasData(k: string): boolean { return isRange(k) ? DOMAIN[k].has : SORT_DESC.includes(k) ? minMax(values(k)).has : true; }
 function minMax(v: number[]) { return v.length ? { min: Math.min(...v), max: Math.max(...v), has: v.length >= 5 && Math.min(...v) < Math.max(...v) } : { min: 0, max: 0, has: false }; }
 
 // ---- labels -----------------------------------------------------------------
@@ -59,11 +65,12 @@ const ORIGIN: Record<string, string> = { new: 'New in GTA VI', returning: 'Retur
 const SEP = ' · ';
 const fmtMoney = (n: number) => (n >= 1e6 ? `$${+(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `$${+(n / 1e3).toFixed(1)}k` : `$${Math.round(n)}`);
 const stat = (n: number) => n.toFixed(1);
-const FMT: Record<RangeKey, (n: number) => string> = { price: fmtMoney, speed: (n) => speedText(n, currentUnits(), 0, 0), lap: (n) => lapTime(Math.round(n)), road: (n) => String(Math.round(n)), off: (n) => String(Math.round(n)), sspd: stat, sacc: stat };
-const RANGE_NAME: Record<RangeKey, string> = { price: 'Cost to register', speed: 'Top speed', lap: 'Lap', road: 'Road rating', off: 'Off-road rating', sspd: 'Speed', sacc: 'Acceleration' };
+const FMT: Record<RangeKey, (n: number) => string> = { price: fmtMoney, speed: (n) => speedText(n, currentUnits(), 0, 0), lap: (n) => lapTime(Math.round(n)), road: (n) => String(Math.round(n)), off: (n) => String(Math.round(n)), sspd: stat, sacc: stat, sstr: stat, sell: fmtMoney };
+const RANGE_NAME: Record<RangeKey, string> = { price: 'Cost to register', speed: 'Top speed', lap: 'Lap', road: 'Road rating', off: 'Off-road rating', sspd: 'Speed', sacc: 'Acceleration', sstr: 'Strength', sell: 'Sell value' };
 function valueLabel(g: Group, v: string) {
   if (g === 'make') return makeName.get(v) ?? v;
   if (g === 'seats') return `${v} seats`;
+  if (g === 'storage') return `${v} storage slots`;
   if (g === 'avail') return AVAIL[v] ?? v;
   if (g === 'origin') return ORIGIN[v] ?? v;
   return v;
@@ -108,6 +115,7 @@ function fails(c: HTMLElement, st: State): FilterKey[] {
   if (s.make.size && !s.make.has(d.make!)) out.push('make');
   if (s.drive.size && !s.drive.has(d.drive!)) out.push('drive');
   if (s.seats.size && !s.seats.has(d.seats!)) out.push('seats');
+  if (s.storage.size && !s.storage.has(d.storage!)) out.push('storage');
   if (s.avail.size && !s.avail.has(d.avail!)) out.push('avail');
   if (s.origin.size && !s.origin.has(d.origin!)) out.push('origin');
   // A range hides cars without that value (DEC-0117: Max $ hides cars without a price)
@@ -153,12 +161,11 @@ function sortKey(a: HTMLElement, b: HTMLElement): number {
     case 'price': return missingLast(num(a.dataset.price), num(b.dataset.price), 1);
     case 'speed': return missingLast(num(a.dataset.speed), num(b.dataset.speed), -1);
     case 'lap': return missingLast(num(a.dataset.lap), num(b.dataset.lap), 1);
-    case 'road': case 'off': case 'sspd': case 'sacc': return missingLast(num(a.dataset[state.sort]), num(b.dataset[state.sort]), -1);
     case 'recent': return missingLast(releaseTime(a.dataset.release), releaseTime(b.dataset.release), -1);
-    default: return order;
+    default: return SORT_DESC.includes(state.sort) ? missingLast(num(a.dataset[state.sort]), num(b.dataset[state.sort]), -1) : order;
   }
 }
-const SORT_LABEL: Record<string, string> = { class: 'Class', name: 'Name A–Z', price: 'Cost to register', speed: 'Top speed', lap: 'Gellhorn lap time', recent: 'Recently added', road: 'Road rating', off: 'Off-road rating', sspd: 'Speed', sacc: 'Acceleration' };
+const SORT_LABEL: Record<string, string> = { class: 'Class', name: 'Name A–Z', price: 'Cost to register', speed: 'Top speed', lap: 'Gellhorn lap time', recent: 'Recently added', road: 'Road rating', off: 'Off-road rating', sspd: 'Speed', sacc: 'Acceleration', sstr: 'Strength', seats: 'Seats', storage: 'Storage', sell: 'Sell value' };
 
 // ---- did you mean -------------------------------------------------------------
 function lev(a: string, b: string): number {
@@ -203,7 +210,8 @@ function toPos(k: RangeKey, v: number | null, end: 'lo' | 'hi'): number {
 function niceValue(k: RangeKey, v: number): number {
   if (k === 'price') { const p = Math.pow(10, Math.floor(Math.log10(v)) - 1); return Math.round(v / p) * p; }
   if (k === 'lap') return Math.round(v / 100) * 100;
-  if (k === 'sspd' || k === 'sacc') return Math.round(v * 10) / 10;
+  if (k === 'sspd' || k === 'sacc' || k === 'sstr') return Math.round(v * 10) / 10;
+  if (k === 'sell') { const p = Math.pow(10, Math.floor(Math.log10(v)) - 1); return Math.round(v / p) * p; }
   // top speed snaps to whole km/h or whole mph, whichever the visitor reads (DEC-0197); stored in mph
   if (k === 'speed' && currentUnits() === 'metric') return Math.round(v * KMH_PER_MPH) / KMH_PER_MPH;
   return Math.round(v);
@@ -276,7 +284,7 @@ function render() {
   if (single && DOMAIN.price.has) paintRange(single, 'price', [null, state.ranges.price[1]]);
   const qInput = $('f-q') as HTMLInputElement;
   if (document.activeElement !== qInput) qInput.value = state.q;
-  const pro = (['drive', 'seats', 'avail', 'origin'] as Group[]).reduce((n, g) => n + state.sets[g].size, 0)
+  const pro = (['drive', 'seats', 'storage', 'avail', 'origin'] as Group[]).reduce((n, g) => n + state.sets[g].size, 0)
     + RANGES.filter((k) => k !== 'price' && rangeActive(state.ranges[k])).length + (state.ranges.price[0] != null ? 1 : 0);
   $('detail-count').hidden = !pro; $('detail-count').textContent = String(pro);
   const allF = keys.filter((k) => k !== 'q' && k !== 'own').length;
@@ -315,7 +323,7 @@ function render() {
 // ---- URL --------------------------------------------------------------------
 const r2 = (x: number | null) => (x == null ? '' : String(Math.round(x * 100) / 100)); // km/h steps are fractional mph
 const rangeParam = (r: Range) => `${r2(r[0])}~${r2(r[1])}`;
-const URL_KEY: Record<RangeKey, string> = { price: 'price', speed: 'speed', lap: 'lap', road: 'road', off: 'offroad', sspd: 'spd', sacc: 'acc' };
+const URL_KEY: Record<RangeKey, string> = { price: 'price', speed: 'speed', lap: 'lap', road: 'road', off: 'offroad', sspd: 'spd', sacc: 'acc', sstr: 'str', sell: 'sell' };
 function syncUrl() {
   const p = new URLSearchParams();
   if (state.q) p.set('q', state.q);
@@ -343,7 +351,7 @@ function readUrl() {
   }
   for (const k of RANGES) if (k !== 'price' && DOMAIN[k].has) state.ranges[k] = parseR(p.get(URL_KEY[k]));
   const s = p.get('sort');
-  if (s && SORT_LABEL[s] && !(isRange(s) && !DOMAIN[s].has)) state.sort = s;
+  if (s && SORT_LABEL[s] && hasData(s)) state.sort = s;
 }
 
 // ---- hint bubble at the clicked control (C1) -------------------------------------
@@ -559,7 +567,7 @@ if (!DOMAIN.price.has) {
 }
 // sort options without data (C4)
 document.querySelectorAll<HTMLButtonElement>('[data-needs]').forEach((b) => {
-  if (DOMAIN[b.dataset.needs as RangeKey].has) return;
+  if (hasData(b.dataset.needs!)) return;
   b.disabled = true;
   if (!b.querySelector('span')) b.insertAdjacentHTML('beforeend', '<span>coming soon</span>');
 });

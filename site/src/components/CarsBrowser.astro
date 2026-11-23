@@ -5,7 +5,7 @@
 // compare run in the browser (scripts/cars.ts).
 // COPY STATUS: all texts are Claude placeholders from the mockup -> Codex (DEC-0088).
 import CarCard from './CarCard.astro';
-import { vehicleOptions, garageOrderedVehicles, vehicleValues, COST_METRIC, fastestGellhornLapMs, compareGarageOrder, type VehicleOption } from '../data/vehicles';
+import { vehicleOptions, garageOrderedVehicles, vehicleValues, sellValueText, COST_METRIC, fastestGellhornLapMs, compareGarageOrder, type VehicleOption } from '../data/vehicles';
 import { isNewInGame } from '../data/releases';
 import { CLOSE_SVG } from '../data/site';
 
@@ -50,6 +50,8 @@ const cardData = (v: VehicleOption, i: number) => ({
   off: vehicleValues[v.id]?.rating_offroad?.value ?? '',
   sspd: vehicleValues[v.id]?.stat_speed?.value ?? '',
   sacc: vehicleValues[v.id]?.stat_acceleration?.value ?? '',
+  storage: v.storage ?? '',
+  sell: sellValueText(v.id)?.max ?? '', // best recorded condition
   release: v.releaseId ?? '',
 });
 
@@ -69,9 +71,14 @@ const PRICE_PRESETS = [['5k', 5000], ['10k', 10000], ['20k', 20000], ['30k', 300
 
 // sort options that need values; without enough data they stay greyed out with "coming soon" (Fausto 23.11.2026)
 // COPY STATUS: labels draft-claude -> Codex review (DEC-0088)
-const SORT_DATA: [string, string][] = [['road', 'Road rating'], ['off', 'Off-road rating'], ['sspd', 'Speed'], ['sacc', 'Acceleration'], ['price', 'Cost to register'], ['speed', 'Top speed'], ['lap', 'Gellhorn lap time']];
+// no Strength: every stock car reads 3.0 in the game (68 of 68 scans), so it sorts nothing (23.11.2026)
+const SORT_DATA: [string, string][] = [['road', 'Road rating'], ['off', 'Off-road rating'], ['sspd', 'Speed'], ['sacc', 'Acceleration'], ['seats', 'Seats'], ['storage', 'Storage'], ['price', 'Cost to register'], ['sell', 'Sell value']];
+// shown greyed out with "coming soon" while there is too little data (data-needs) or none in the build yet
+const SORT_SOON: [string, string][] = [['speed', 'Top speed'], ['lap', 'Gellhorn lap time']];
 // detailed-search sliders [key, title]; the last two stay greyed out with "Coming soon" until there is data
-const RNG_MAIN: [string, string][] = [['road', 'Road rating'], ['off', 'Off-road rating'], ['sspd', 'Speed'], ['sacc', 'Acceleration'], ['price', 'Cost to register']];
+const RNG_MAIN: [string, string][] = [['road', 'Road rating'], ['off', 'Off-road rating'], ['sspd', 'Speed'], ['sacc', 'Acceleration'], ['price', 'Cost to register'], ['sell', 'Sell value']];
+const storageCounts = count(list.map((v) => v.storage).filter((n): n is number => n != null && n > 0));
+const storageSorted = [...storageCounts.entries()].sort((a, b) => a[0] - b[0]);
 const RNG_SOON: [string, string][] = [['speed', 'Top speed'], ['lap', 'Gellhorn lap time']];
 const seatsSorted = [...seatCounts.entries()].sort((a, b) => a[0] - b[0]);
 const DRIVES = ['AWD', 'RWD', 'FWD'].filter((d) => driveCounts.get(d));
@@ -144,6 +151,8 @@ function mc(group: string, value: string | number, label: string, n: number | un
           <button type="button" class:list={['menu-i', { on: defaultSort === 'name' }]} data-sort="name">Name A–Z</button>
           {SORT_DATA.map(([k, l]) => <button type="button" class="menu-i" data-sort={k} data-needs={k}>{l}</button>)}
           <button type="button" class="menu-i" data-sort="recent">Recently added</button>
+          {SORT_SOON.map(([k, l]) => <button type="button" class="menu-i" data-sort={k} data-needs={k}>{l}</button>)}
+          <button type="button" class="menu-i" disabled>Driver rating<span>coming soon</span></button>
           <button type="button" class="menu-i" disabled>Most owned<span>coming soon</span></button>
         </div>
       </div>
@@ -196,6 +205,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
       ))}
       <div class="dsg"><h4>Drive <em data-sel="drive"></em></h4><div class="mchips" set:html={DRIVES.map((d) => mc('drive', d, d, driveCounts.get(d))).join('')} /></div>
       <div class="dsg"><h4>Seats <em data-sel="seats"></em></h4><div class="mchips" set:html={seatsSorted.map(([n, c]) => mc('seats', n, String(n), c)).join('')} /></div>
+      <div class="dsg"><h4>Storage <em data-sel="storage"></em></h4><div class="mchips" set:html={storageSorted.map(([n, c]) => mc('storage', n, `${n} slots`, c)).join('')} /></div>
       {scope !== 'make' && <div class="dsg dsg-wide">
         <h4>Manufacturer <em data-sel="make"></em><input type="search" class="dsp-msearch" id="dsp-msearch" placeholder={`Search ${makes.length} brands`} aria-label="Search manufacturers" /></h4>
         <div class="mlist" set:html={makes.map(([slug, name]) => mc('make', slug, name, makeCounts.get(slug))).join('')} />
@@ -223,6 +233,8 @@ function mc(group: string, value: string | number, label: string, n: number | un
       <button type="button" class:list={['menu-i', { on: defaultSort === 'name' }]} data-sort="name">Name A–Z</button>
       {SORT_DATA.map(([k, l]) => <button type="button" class="menu-i" data-sort={k} data-needs={k}>{l}</button>)}
       <button type="button" class="menu-i" data-sort="recent">Recently added</button>
+      {SORT_SOON.map(([k, l]) => <button type="button" class="menu-i" data-sort={k} data-needs={k}>{l}</button>)}
+      <button type="button" class="menu-i" disabled>Driver rating<span>coming soon</span></button>
       <button type="button" class="menu-i" disabled>Most owned<span>coming soon</span></button>
     </div>
   </div>
