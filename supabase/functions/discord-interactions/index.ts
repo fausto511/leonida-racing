@@ -341,12 +341,14 @@ function splitValues(rows: any[]) {
   sell.sort((a, b) => CONDITIONS.indexOf(a.condition) - CONDITIONS.indexOf(b.condition));
   return { vals, sell };
 }
-// "$1,000 · Poor condition" (one scan) or "$4,000–6,650 · Average to Top condition" (several), like the car page
-function sellText(sell: SellVal[]): string | null {
+// Value + condition like the car page tile: "$1,000" / "Poor condition" or "$4,000–6,650" / "Average to Top condition".
+// /car puts the condition on its own line (no ugly wrap in the narrow field, Fausto 23.11.); /compare keeps it short on one line.
+function sellText(sell: SellVal[], mode: "card" | "short" = "card"): string | null {
   if (!sell.length) return null;
   const vs = sell.map((x) => x.value), lo = Math.min(...vs), hi = Math.max(...vs);
-  if (sell.length === 1) return `${usd(hi)} \u00b7 ${sell[0].condition} condition`;
-  return `${lo === hi ? usd(hi) : `${usd(lo)}\u2013${usd(hi).slice(1)}`} \u00b7 ${sell[sell.length - 1].condition} to ${sell[0].condition} condition`;
+  const money = lo === hi ? usd(hi) : `${usd(lo)}\u2013${usd(hi).slice(1)}`;
+  const cond = sell.length === 1 ? sell[0].condition : `${sell[sell.length - 1].condition} to ${sell[0].condition}`;
+  return mode === "short" ? `${money} (${cond})` : `${money}\n${cond} condition`;
 }
 async function carValues(v: any): Promise<CarVals> {
   const { data } = await db.from("vehicle_values").select("metric,value,tuning,condition").eq("vehicle_id", v.vehicle_id).eq("status", "current");
@@ -371,7 +373,7 @@ const statBlock = (vals: Record<string, number>) => {
     const x = vals[k];
     if (x == null) return `${label.padEnd(17)}    ${DASH}`;
     const n = Math.max(0, Math.min(10, Math.round(x)));
-    return `${label.padEnd(17)} ${x.toFixed(1).padStart(4)}  ${"\u2588".repeat(n)}${"\u2591".repeat(10 - n)}`;
+    return `${label.padEnd(17)} ${x.toFixed(1).padStart(4)}  ${"\u25A0".repeat(n)}${"\u25A1".repeat(10 - n)}`;
   });
   return "```\n" + rows.join("\n") + "\n```";
 };
@@ -590,7 +592,7 @@ async function cmdCompare(i: any) {
     return [
       `**Class** ${cls(c)}`,
       `**Cost to register** ${vals.register_cost_gtad != null ? usd(vals.register_cost_gtad) : DASH}`,
-      `**Sell value** ${sellText(sell) ?? DASH}`,
+      `**Sell value** ${sellText(sell, "short") ?? DASH}`,
       `**Road rating** ${num("rating_road", (x) => String(Math.round(x)))}`,
       `**Off-road rating** ${num("rating_offroad", (x) => String(Math.round(x)))}`,
       `**Top speed** ${num("top_speed_mph", (x) => `${x.toFixed(1)} mph`)}`,
