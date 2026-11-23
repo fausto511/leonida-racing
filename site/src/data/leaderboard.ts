@@ -73,7 +73,7 @@ const SAMPLE_VEHICLES: [string, number][] = [
   ['piccia-furia', 84200], ['granforma-zorrusso', 84500], ['truffade-thrax', 84900], ['pegassi-tempesta', 85300],
   ['grotti-itali-rsx', 85900], ['pfister-neon', 86500], ['bravado-banshee', 86800], ['invetero-coquette-d10', 87100],
   ['ubermacht-cypher', 87500], ['annis-elegy-retro-custom', 87900], ['obey-8f-drafter', 88200], ['emperor-sultan', 88900],
-  ['ubermacht-sentinel-xs', 89300], ['grotti-cheetah-95', 89600], ['vapid-dominator-gtx', 90400], ['karin-futo', 91200],
+  ['benefactor-schafter-s', 89300], ['grotti-cheetah-95', 89600], ['vapid-dominator-asp', 90400], ['karin-futo', 91200],
   ['dinka-blista-compact', 93800],
 ];
 // Sample times carry the house crews (Fausto 19.10.: BCRW, LOWN, VCSR) -- never the
@@ -118,7 +118,9 @@ function buildSample(): LbEntry[] {
     const entries = count + Math.floor(r() * 30);
     for (const idx of picked) {
       const [id, basePace] = SAMPLE_VEHICLES[idx];
-      const v = vehicleOptions.find((x) => x.id === id)!;
+      // A sample car can disappear from the database (e.g. DEC-0245): skip it instead of breaking the build.
+      const v = vehicleOptions.find((x) => x.id === id);
+      if (!v) continue;
       out.push({
         driver: name,
         driver_id: `sample-${i}`,
