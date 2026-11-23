@@ -1,22 +1,18 @@
 ---
-// Road / off-road rating icons, drawn after the in-game vehicle menu (scan screenshot 21.11.2026, Comet '88):
-// a light square with a dark inner field; road = light road narrowing to the horizon with a dark centre line,
-// off-road = light mountain zigzag. Fausto 23.11.2026: used left of the number (like other car databases).
+// Road / off-road rating icons. Composition traced from the in-game vehicle stats panel
+// (Fausto's screenshot, Jason's '70 Ganado, 23.11.2026): square frame; road = two edge lines
+// narrowing to the horizon with a short / medium / long centre dash; off-road = mountain zigzag
+// (small left peak, tall right peak) running frame to frame. Drawn as thin outlines so they match
+// the site's other icons (heart, garage, stopwatch). Fausto 23.11.2026: used left of the number.
 interface Props { kind: 'road' | 'offroad'; size?: number }
-const { kind, size = 18 } = Astro.props;
+const { kind, size = 17 } = Astro.props;
 ---
-<svg class="rating-ico" viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" focusable="false">
-  <rect x="0.5" y="0.5" width="23" height="23" rx="2.5" fill="var(--lr-text)" />
-  <rect x="3.5" y="3.5" width="17" height="17" rx="1.5" fill="var(--lr-card)" />
-  {kind === 'road' ? (
-    <>
-      <path d="M10.4 3.5h3.2l4.9 17h-13z" fill="var(--lr-text)" />
-      <path d="M11.45 5.2h1.1l.15 2.8h-1.4zM11.3 9.6h1.4l.2 3.4h-1.8zM11.1 14.8h1.8l.3 5.7h-2.4z" fill="var(--lr-card)" />
-    </>
-  ) : (
-    <path d="M3.6 16.2 8.2 10.8l3.3 4.2 3.8-6.4 5.1 6.7" fill="none" stroke="var(--lr-text)" stroke-width="2.6" stroke-linejoin="miter" stroke-linecap="butt" />
-  )}
+<svg class="rating-ico" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <rect x="2.5" y="2.5" width="19" height="19" rx="2" />
+  {kind === 'road'
+    ? <path d="M9.5 2.5 5 21.5M14.5 2.5 19 21.5M12 3.7v1.2M12 8.4v2.8M12 14.6v6.9" />
+    : <path d="M2.5 14.6 5.8 11.6 8.9 15.9 14.6 8.4 21.5 17" />}
 </svg>
 <style>
-  .rating-ico { flex: none; display: block; }
+  .rating-ico { flex: none; display: block; color: var(--lr-soft); }
 </style>
