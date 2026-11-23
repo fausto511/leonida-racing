@@ -31,7 +31,7 @@ if (!URL_ || !KEY) {
 }
 
 const [vehicles, values, previous, releases] = await Promise.all([
-  get('vehicles?select=vehicle_id,make,model,manufacturer_logo_slug,classes,seats,drive,acquisition,has_photo,release_id,first_seen_in,first_seen_url,first_seen_timestamp,real_life_inspiration,family,previous_games,sellable,other_names,game_type,era,storage,nitrous_available,updated_at&order=make.asc,model.asc'),
+  get('vehicles?select=vehicle_id,make,model,manufacturer_logo_slug,classes,seats,drive,acquisition,has_photo,release_id,first_seen_in,first_seen_url,first_seen_timestamp,real_life_inspiration,family,previous_games,sellable,other_names,game_type,era,storage,nitrous_available,specialist,tracker,key_cloner_required,updated_at&order=make.asc,model.asc'),
   get('vehicle_values?status=eq.current&select=vehicle_id,metric,tuning,value,source_type,method,game_release_id,platform,measured_at,evidence_url,created_at,condition&order=vehicle_id.asc,metric.asc'),
   // RS-0130: replaced values, so the home page can show "Updated" with the old value
   get('vehicle_values?status=eq.superseded&select=vehicle_id,metric,tuning,value,created_at&order=created_at.desc&limit=3000'),

@@ -246,6 +246,10 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         )}
       </div>
       <div class="vs-panel">
+        {/* Panel (Fausto 23.11.2026, DEC-0249): the four numbers you see in the game's scanner and vehicle menu.
+             Top speed moved to "by the numbers", the Gellhorn lap tile is gone (Time Attack section below),
+             Era moved to Origins, Release was already there ("Added with"), "Where to get" dropped (no dealers;
+             edition cars keep their pill in the head). COPY: Claude placeholders 23.11.2026. */}
         <div class="vs-tiles">
           <div class="vt">
             {/* phones: the full label needs ~129 px, a tile has ~119 px at 360 px width -> shorter word there */}
@@ -254,26 +258,22 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
             <span class="vt-s">{price != null ? 'In-game scanner' : notRecorded}</span>
           </div>
           <div class="vt">
-            <span class="vt-l">Top speed</span>
-            <b class:list={['vt-v tnum', { 'is-tba': speed == null }]}>{speed != null ? <Fragment set:html={speedHtml(speed)} /> : 'TBA'}</b>
-            <span class="vt-s">{speedRank != null ? `#${speedRank} of ${classCars.length} in ${cls}` : notRecorded}</span>
+            <span class="vt-l">Sell value</span>
+            <b class:list={['vt-v tnum', { 'is-tba': vehicle.sellable !== 'no' && !sellInfo }]}>{vehicle.sellable === 'no' ? "Can't sell" : sellInfo ? sellInfo.main : 'TBA'}</b>
+            <span class="vt-s">{vehicle.sellable === 'no' ? 'Not sellable' : sellInfo ? sellInfo.sub : notRecorded}</span>
           </div>
-          <div class="vt" id="vt-lap">
-            <span class="vt-l">Gellhorn <span class="vt-opt">best </span>lap</span>
-            <b class:list={['vt-v tnum', { 'is-tba': myLap == null }]} data-v>{myLap != null ? lapTime(myLap) : 'No lap yet'}</b>
-            <a class="vt-s vt-link" href="#gellhorn" data-s>{lapRank != null ? `#${lapRank} of ${classCars.length} in ${cls} ↓` : 'Submit the first lap\u00a0↓'}</a>
-          </div>
-          <div class="vt vr" id="vr">
-            <span class="vt-l">Driver rating</span>
-            <span class="vr-line"><b class="vt-v tnum" id="vr-avg" hidden></b><span class="vr-stars" id="vr-stars" role="group" aria-label="Rate this car">{<Fragment set:html={starsHtml} />}</span></span>
-            <span class="vt-s" id="vr-sub">Not enough ratings yet</span>
-          </div>
+          {ratingTiles.map((r) => (
+            <div class="vt">
+              <span class="vt-l">{r.label}</span>
+              <b class:list={['vt-v tnum', { 'is-top': r.top, 'is-tba': r.value == null }]}>{r.value != null ? Math.round(r.value) : 'TBA'}</b>
+              <span class="vt-s">{r.rank != null ? `#${r.rank} of ${r.n} in ${cls}` : r.value == null ? notRecorded : 'In-game vehicle menu'}</span>
+            </div>
+          ))}
         </div>
         <dl class="vs-rows">
-          <div><dt>Where to get</dt><dd class:list={{ 'is-tba': !vehicle.acquisition }}>{vehicle.acquisition ? acqNotes[vehicle.acquisition] : notRecorded}</dd></div>
-          <div><dt>Sell value</dt><dd class:list={{ 'is-tba': vehicle.sellable !== 'no' && sell == null }}>{vehicle.sellable === 'no' ? "Can't be sold" : sellInfo ? <>{sellInfo.main}<span class="vs-cond"> · {sellInfo.sub}</span></> : notRecorded}</dd></div>
-          <div><dt>Era</dt><dd class:list={{ 'is-tba': !vehicle.era }}>{vehicle.era ?? notRecorded}</dd></div>
-          <div><dt>Release</dt><dd class:list={{ 'is-tba': !release }}>{release?.date ? <>{release.name}{' · '}<time datetime={release.date}>{releaseDate}</time></> : releaseText}</dd></div>
+          <div><dt>Specialist</dt><dd class:list={{ 'is-tba': !vehicle.specialist }}>{vehicle.specialist ?? notRecorded}</dd></div>
+          <div><dt>Tracker</dt><dd class:list={{ 'is-tba': !vehicle.tracker }}>{vehicle.tracker ? <>{vehicle.tracker}{vehicle.keyCloner && <span class="vs-cond"> · Key Cloner needed</span>}</> : notRecorded}</dd></div>
+          <div class="vr vs-vr" id="vr"><dt>Driver rating</dt><dd><span class="vr-line"><b class="tnum vr-avg" id="vr-avg" hidden></b><span class="vr-stars" id="vr-stars" role="group" aria-label="Rate this car">{<Fragment set:html={starsHtml} />}</span></span><span class="vr-sub" id="vr-sub">Not enough ratings yet</span></dd></div>
         </dl>
         {/* "Stats updated" moved into the In-game stats block (Fausto 19.11.2026); the attribute stays here for the Discord feed. */}
         {statsAt && <span hidden data-stats-at={statsAt}></span>}
@@ -316,16 +316,8 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
             </dl>
           </div>
           <div class="vst-side">
-            <div class="vst-ratings">
-              {ratingTiles.map((r) => (
-                <div class="vt vst-rt">
-                  <span class="vt-l">{r.label}</span>
-                  <b class:list={['vt-v tnum', { 'is-top': r.top, 'is-tba': r.value == null }]}>{r.value != null ? Math.round(r.value) : 'TBA'}</b>
-                  <span class="vt-s">{r.rank != null ? `#${r.rank} of ${r.n} in ${cls}` : r.value == null ? notRecorded : ''}</span>
-                </div>
-              ))}
-            </div>
             <dl class="vst-facts">
+              <div><dt>Top speed</dt><dd class:list={{ 'is-tba': speed == null }}>{speed != null ? <><Fragment set:html={speedHtml(speed)} />{speedRank != null && <span class="vs-cond"> · #{speedRank} of {classCars.length}</span>}</> : notRecorded}</dd></div>
               <div><dt>Drive</dt><dd class:list={{ 'is-tba': vehicle.drive === 'n/a' }}>{vehicle.drive === 'n/a' ? notRecorded : vehicle.drive}</dd></div>
               <div><dt>Seats</dt><dd class:list={{ 'is-tba': !vehicle.seats }}>{vehicle.seats || notRecorded}</dd></div>
               <div><dt>Storage</dt><dd class:list={{ 'is-tba': vehicle.storage == null }}>{vehicle.storage != null ? `${vehicle.storage} ${vehicle.storage === 1 ? 'slot' : 'slots'}` : notRecorded}</dd></div>
@@ -344,6 +336,7 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
           </div>
         </div>
         <dl class="vst-facts is-solo">
+          <div><dt>Top speed</dt><dd class:list={{ 'is-tba': speed == null }}>{speed != null ? <><Fragment set:html={speedHtml(speed)} />{speedRank != null && <span class="vs-cond"> · #{speedRank} of {classCars.length}</span>}</> : notRecorded}</dd></div>
           <div><dt>Drive</dt><dd class:list={{ 'is-tba': vehicle.drive === 'n/a' }}>{vehicle.drive === 'n/a' ? notRecorded : vehicle.drive}</dd></div>
           <div><dt>Seats</dt><dd class:list={{ 'is-tba': !vehicle.seats }}>{vehicle.seats || notRecorded}</dd></div>
           <div><dt>Storage</dt><dd class:list={{ 'is-tba': vehicle.storage == null }}>{vehicle.storage != null ? `${vehicle.storage} ${vehicle.storage === 1 ? 'slot' : 'slots'}` : notRecorded}</dd></div>
@@ -396,9 +389,10 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
         <p class="eyebrow">Origins</p>
         <dl class="va-card">
           <div><dt>Real-life inspiration</dt><dd class:list={{ 'is-tba': !vehicle.realLifeInspiration }}>{vehicle.realLifeInspiration ?? 'Under review'}</dd></div>
+          <div><dt>Era</dt><dd class:list={{ 'is-tba': !vehicle.era }}>{vehicle.era ?? notRecorded}</dd></div>
           <div><dt>First seen</dt><dd>{vehicle.firstSeenIn && vehicle.firstSeenUrl
             ? <a class="va-src" href={vehicle.firstSeenUrl} target="_blank" rel="noopener">{vehicle.firstSeenIn}{vehicle.firstSeenTimestamp && <>{' · '}{vehicle.firstSeenTimestamp}</>}</a>
-            : <span class:list={{ 'is-tba': !vehicle.firstSeenIn }}>{vehicle.firstSeenIn ?? 'Not officially revealed'}</span>}</dd></div>
+            : <span class:list={{ 'is-tba': !vehicle.firstSeenIn && !vehicle.releaseId }}>{vehicle.firstSeenIn ?? (vehicle.releaseId ? 'Found in the game' : 'Not officially revealed')}</span>}</dd></div>
           <div><dt>Added with</dt><dd class:list={{ 'is-tba': !release }}>{releaseText}</dd></div>
           <div><dt>GTA history</dt><dd class="va-hist">{!vehicle.previousGames
             ? <span class="is-tba">Earlier appearances under review</span>
@@ -547,6 +541,11 @@ const others = makeCars.filter((v) => v.id !== vehicle.id).sort(compareGarageOrd
   .vs-rows > div { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; border-top: 1px solid var(--lr-line); font-size: 15px; }
   .vs-rows dt { color: var(--lr-soft); white-space: nowrap; }
   .vs-rows dd { margin: 0; font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .vs-vr { align-items: flex-start; }
+  .vs-vr dd { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-weight: 400; overflow: visible; }
+  .vs-vr .vr-line { min-height: 0; gap: 8px; }
+  .vs-vr .vr-avg { font-weight: 700; }
+  .vr-sub { font-size: 13px; color: var(--lr-soft); white-space: nowrap; }
   .vs-own { display: flex; align-items: center; gap: 10px; margin: auto 0 0; padding: 8px 2px 0; border-top: 1px solid var(--lr-line); font-size: 14px; color: var(--lr-soft); }
   .vs-own .ico { width: 16px; height: 16px; color: var(--lr-muted); }
   .vs-own :global(b) { color: var(--lr-text); }

@@ -39,6 +39,10 @@ export interface VehicleOption {
   era?: string;
   storage?: number;
   nitrous?: boolean;
+  // scanner info (Fausto 21./23.11.2026): mod shop specialist, tracker, whether the Key Cloner is needed
+  specialist?: string;
+  tracker?: string;
+  keyCloner?: boolean;
 }
 
 // RULE (Fausto, 2026-09-30): vehicleOptions lists ONLY vehicles whose GTA VI
@@ -61,6 +65,7 @@ interface GeneratedVehicle {
   family?: string | null; previous_games?: string[] | null; sellable?: string | null;
   other_names?: string[] | null;
   game_type?: string | null; era?: string | null; storage?: number | null; nitrous_available?: boolean | null;
+  specialist?: string | null; tracker?: string | null; key_cloner_required?: boolean | null;
   updated_at?: string | null;
 }
 // In-game stats (0-10) and ratings shown in the GTA VI vehicle menu (RS-0074, DEC-0132).
@@ -101,6 +106,9 @@ export const vehicleOptions: VehicleOption[] = (generated.vehicles as GeneratedV
   ...(v.era ? { era: v.era } : {}),
   ...(v.storage != null ? { storage: v.storage } : {}),
   ...(v.nitrous_available != null ? { nitrous: v.nitrous_available } : {}),
+  ...(v.specialist ? { specialist: v.specialist } : {}),
+  ...(v.tracker ? { tracker: v.tracker } : {}),
+  ...(v.key_cloner_required != null ? { keyCloner: v.key_cloner_required } : {}),
 }));
 
 /** Model name for tight spots (tiles, chips): adds the make when another car shares the model name,

@@ -261,9 +261,11 @@ function init(root: HTMLElement) {
     $('vg-csub')!.textContent = timed < classIds.length ? `${timed} of ${classIds.length} cars have a lap · tap a car to open it` : 'Best lap per car · tap a car to open it';
     // value tile
     const mineBest = bestBy.get(id) ?? null;
-    const tile = $('vt-lap')!;
-    const v = tile.querySelector<HTMLElement>('[data-v]')!, s = tile.querySelector<HTMLElement>('[data-s]')!;
-    if (mineBest != null) {
+    // the Gellhorn tile left the panel (DEC-0249); keep this for when it returns
+    const tile = $('vt-lap');
+    const v = tile?.querySelector<HTMLElement>('[data-v]'), s = tile?.querySelector<HTMLElement>('[data-s]');
+    if (!v || !s) { /* no tile */ }
+    else if (mineBest != null) {
       const rank = 1 + classRows.filter((r) => r.ms != null && r.ms < mineBest).length;
       v.textContent = lapTime(mineBest); v.classList.remove('is-tba');
       s.textContent = `#${rank} of ${classIds.length} in ${cls} ↓`;
