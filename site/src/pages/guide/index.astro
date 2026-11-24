@@ -137,8 +137,8 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
             </div>
           )}
           {s.cta && <a class={`btn ${s.id === 'garages' ? 'btn-p' : 'btn-s'} gd-cta`} href={`${base}${s.cta.href}`}>{s.cta.label}</a>}
-          <div class="gd-src">
-            <p class="gd-src-h">{s.sourcesHeading ?? 'Sources'} <span>· {s.sources.length}</span></p>
+          <details class="gd-src">
+            <summary class="gd-src-h">{s.sourcesHeading ?? 'Sources'} <span>· {s.sources.length}</span></summary>
             <ul>
               {s.sources.map((x) => {
                 const sp = sourceParts(x);
@@ -161,7 +161,7 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
                 );
               })}
             </ul>
-          </div>
+          </details>
         </section>
       ))}
 
@@ -274,7 +274,12 @@ const kindLabel = { official: 'Official', press: 'Press', community: 'Community'
 
   /* source cards */
   .gd-src { margin-top: 24px; }
-  .gd-src-h { margin: 0 0 10px; font-size: 13px; font-weight: 600; color: var(--lr-soft); }
+  .gd-src-h { display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 6px 0; font-size: 13px; font-weight: 600; color: var(--lr-soft); cursor: pointer; list-style: none; }
+  .gd-src-h::-webkit-details-marker { display: none; }
+  .gd-src-h::before { content: ''; width: 6px; height: 6px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform .15s; margin-right: 4px; }
+  .gd-src[open] > .gd-src-h::before { transform: rotate(45deg); }
+  .gd-src-h:hover { color: var(--lr-text); }
+  .gd-src[open] > ul { margin-top: 10px; }
   .gd-src-h span { color: var(--lr-muted); font-weight: 400; }
   .gd-src ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .gd-src li { display: flex; }
