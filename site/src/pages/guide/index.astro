@@ -48,7 +48,7 @@ const jsonLd = [
 const tocLabel: Record<string, string> = {
   vehicles: 'Vehicles', granforma: 'Brands & rebadging', driving: 'Driving & physics', theft: 'Theft & registration', heat: 'Heat & police',
   ownership: 'Ownership', garages: 'Garages', fuel: 'Fuel & repairs', stats: 'Stats & ratings', customization: 'Tuning & mod shops', classics: 'Classic cars', racing: 'Racing', gellhorn: 'Gellhorn',
-  'car-culture': 'Car culture', 'not-confirmed': 'Open questions',
+  'car-culture': 'Car culture', 'not-confirmed': 'Open questions', standouts: 'Standouts', money: 'Making money',
 };
 const toc: [string, string][] = [
   ...guideSections.map((s) => [s.id, tocLabel[s.id] ?? s.title] as [string, string]),
