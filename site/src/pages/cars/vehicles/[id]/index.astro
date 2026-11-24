@@ -191,7 +191,7 @@ const rivalNote = (v: typeof vehicle) => {
 };
 const rivalsSimilar = (similarAll.length > 3 ? similarAll.slice(3, 5) : similarAll.slice(0, 2)).map((v) => ({ id: v.id, note: rivalNote(v) }));
 const rivals = rivalsLap ?? rivalsSimilar;
-const rivalsSub = rivalsLap ? 'Closest matches at Gellhorn' : 'Most similar cars until it has a lap';
+const rivalsSub = rivalsLap ? 'Closest matches at Gellhorn' : 'Next closest rivals until it has a lap' /* Claude placeholder 24.11. -> Codex */;
 const rivalsHtml = rivals.map((r) => rivalHtml(r.id, r.note, vehicle.id)).join('');
 const sampleRivals = sample ? rivalsFromClass(sampleClass, vehicle.id) : null;
 const sampleRivalsHtml = sampleRivals ? sampleRivals.map((r) => rivalHtml(r.id, r.note, vehicle.id)).join('') : '';
@@ -474,8 +474,8 @@ if (faqs.length) vehicleJsonLd.push({ '@context': 'https://schema.org', '@type':
       <section class="wrap vsec vm" id="v-similar">
         <div class="vsec-head">
           <div class="vsec-titles">
-            <p class="eyebrow">Keep browsing</p>
-            <h2 class="lr-h2 vsec-title display">Similar cars</h2>
+            <p class="eyebrow">Worth a look</p>
+            <h2 class="lr-h2 vsec-title display">Closest rivals</h2>
           </div>
           {classLink && <a class="arrow" href={`${base}${classLink}`}>All {classCars.length} {cls} →</a>}
         </div>
