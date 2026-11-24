@@ -148,19 +148,48 @@ const csubFor = (timed: number) => timed < classCars.length ? `${timed} of ${cla
 const sampleClassHtml = sample ? classRowsHtml(sampleClass, vehicle.id, classMoreHref) : '';
 const sampleCsub = sample ? csubFor(sampleClass.filter((r) => r.ms != null).length) : '';
 
-// ---- Similar cars (Fausto 2026-10-06 scoring) + compare tile ----------------
+// ---- Similar cars (stats-based since Fausto 24.11.2026) + compare tile ----------------
 const family = vehicle.family ? familyMembers(vehicle.family).filter((v) => v.id !== vehicle.id && v.releaseId).sort(compareGarageOrder) : [];
 const familyLabel = vehicle.family ? familyName(vehicle.family) : '';
 const familyPage = vehicle.family && familyMembers(vehicle.family).filter((v) => v.releaseId).length >= FAMILY_PAGE_MIN ? `${base}cars/families/${vehicle.family}/` : null;
+// Similarity by in-game stats (Fausto 24.11.2026): same class first, then the closest
+// five stats (mean difference); drive only as a small tie-break when both are known.
+// Cars without stats go last. If this car has no stats yet: era, seats, specialist, drive instead.
+const SIM_STATS = ['stat_speed', 'stat_acceleration', 'stat_handling_asphalt', 'stat_handling_offroad', 'stat_strength'] as const;
+const statsOf = (id: string) => { const r = vehicleValues[id]; return SIM_STATS.map((k) => r?.[k]?.value ?? null); };
+const myStats = statsOf(vehicle.id);
+const myHasStats = myStats.filter((x) => x != null).length >= 3;
+const statDistance = (id: string): number | null => {
+  const o = statsOf(id); let sum = 0, n = 0;
+  for (let i = 0; i < SIM_STATS.length; i++) if (myStats[i] != null && o[i] != null) { sum += Math.abs(myStats[i]! - o[i]!); n++; }
+  return n >= 3 ? sum / n : null;
+};
+const knownDrive = (d?: string) => !!d && d !== 'n/a';
 const similarAll = vehicleOptions
   .filter((v) => v.id !== vehicle.id && v.releaseId && v.classes.some((c) => vehicle.classes.includes(c)))
-  .map((v) => ({ v, score: (v.classes[0] === cls ? 4 : 0) + (v.drive === vehicle.drive ? 2 : 0) + (v.seats === vehicle.seats ? 1 : 0) }))
-  .sort((a, b) => b.score - a.score || compareGarageOrder(a.v, b.v))
+  .map((v) => {
+    const sameCls = v.classes[0] === cls ? 1 : 0;
+    const dist = myHasStats ? statDistance(v.id) : null;
+    const driveBonus = knownDrive(v.drive) && knownDrive(vehicle.drive) && v.drive === vehicle.drive ? 0.05 : 0;
+    const fallback = (v.era && v.era === vehicle.era ? 2 : 0) + (v.seats === vehicle.seats ? 1 : 0) + (v.specialist && v.specialist === vehicle.specialist ? 1 : 0) + (knownDrive(v.drive) && v.drive === vehicle.drive ? 1 : 0);
+    return { v, sameCls, dist: dist == null ? null : dist - driveBonus, fallback };
+  })
+  .sort((a, b) => b.sameCls - a.sameCls
+    || (a.dist == null ? 1 : 0) - (b.dist == null ? 1 : 0)
+    || (a.dist != null && b.dist != null ? a.dist - b.dist : 0)
+    || b.fallback - a.fallback
+    || compareGarageOrder(a.v, b.v))
   .map((x) => x.v);
 const similar = similarAll.slice(0, 3);
 const lapFor = (id: string) => { const t = realBest(id); return t == null ? null : { rank: 1 + classCars.filter((v) => { const o = realBest(v.id); return o != null && o < t; }).length, ms: t }; };
 const rivalsLap = rivalsFromClass(classRows, vehicle.id);
-const rivalsSimilar = (similarAll.length > 3 ? similarAll.slice(3, 5) : similarAll.slice(0, 2)).map((v) => ({ id: v.id, note: `${v.classes[0]} · ${v.drive}` }));
+// note under head-to-head rivals: class, drive (only if known) and the rating that fits the class
+const rivalNote = (v: typeof vehicle) => {
+  const off = ['Off-Road', 'Pickups'].includes(v.classes[0]);
+  const r = vehicleValues[v.id]?.[off ? 'rating_offroad' : 'rating_road']?.value;
+  return [v.classes[0], knownDrive(v.drive) ? v.drive : null, r != null ? `${off ? 'Off-road' : 'Road'} ${r}` : null].filter(Boolean).join('\u2002·\u2002');
+};
+const rivalsSimilar = (similarAll.length > 3 ? similarAll.slice(3, 5) : similarAll.slice(0, 2)).map((v) => ({ id: v.id, note: rivalNote(v) }));
 const rivals = rivalsLap ?? rivalsSimilar;
 const rivalsSub = rivalsLap ? 'Closest matches at Gellhorn' : 'Most similar cars until it has a lap';
 const rivalsHtml = rivals.map((r) => rivalHtml(r.id, r.note, vehicle.id)).join('');

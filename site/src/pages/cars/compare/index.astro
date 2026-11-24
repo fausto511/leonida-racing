@@ -16,6 +16,7 @@ const cars: CmpCar[] = vehicleOptions.map((v) => {
     drive: v.drive, seats: v.seats, acq: v.acquisition ?? null, photo: Boolean(v.photo), based: v.realLifeInspiration ?? null,
     release: Boolean(v.releaseId), sellable: v.sellable ?? null,
     price: val[COST_METRIC]?.value ?? null, /* cost to register, DEC-0247 */ sell: sellValueText(v.id)?.max ?? null, sellText: sellValueText(v.id) ?? null, speed: val.top_speed_mph?.value ?? null, ref: val.gellhorn_reference_lap_ms?.value ?? null,
+    road: val.rating_road?.value ?? null, off: val.rating_offroad?.value ?? null,
   };
 });
 const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>';
@@ -196,6 +197,11 @@ const shareIco = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circl
 
   /* ---- alternatives + value map ---- */
   .cp-bottom :global(.lock) { flex-direction: column; align-items: flex-start; }
+  /* Road / Off-road switch for alternatives + value map (Fausto 24.11.2026) */
+  .cp-bottom :global(.cp-bot-h) { grid-column: 1 / -1; display: flex; align-items: center; justify-content: flex-end; margin-bottom: -8px; }
+  .cp-bottom :global(.rmode) { display: inline-flex; padding: 3px; border-radius: 8px; background: var(--lr-white-hover); border: 1px solid var(--lr-line); }
+  .cp-bottom :global(.rmode button) { height: 34px; padding: 0 14px; border: 0; border-radius: 6px; background: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--lr-soft); cursor: pointer; }
+  .cp-bottom :global(.rmode button.on) { background: var(--lr-raised); color: var(--lr-text); }
   .cp-bottom { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; padding-bottom: 72px; }
   .cp :global(.al) { display: flex; flex-direction: column; gap: 10px; }
   .cp :global(.al-r) { display: flex; align-items: center; gap: 16px; padding: 12px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-card); }

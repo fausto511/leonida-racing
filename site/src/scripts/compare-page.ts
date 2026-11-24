@@ -13,7 +13,7 @@ import { speedHtml, speedText, currentUnits } from '../data/units';
 import { CLOSE_SVG, STAR_SVG } from '../data/site';
 // check icon instead of the ✓ glyph (DEC-0158)
 const CHECK_SVG = '<svg class="cp-ck" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
-import { COMPARE_MAX, verdict, alternatives, limited, limitedNote, money, moneyShort, secs, ALT_MAX_SLOWER_MS, ALT_MIN_CHEAPER, VALUE_MAX_SLOWER_MS, VALUE_MIN_CHEAPER, type CmpCar } from '../data/compare';
+import { COMPARE_MAX, verdict, alternativesByRating, bestByRating, defaultRatingMode, ratingOf, ALT_MAX_WEAKER, ALT_MAX_PRICE_SHARE, type RatingMode, alternatives, limited, limitedNote, money, moneyShort, secs, ALT_MAX_SLOWER_MS, ALT_MIN_CHEAPER, VALUE_MAX_SLOWER_MS, VALUE_MIN_CHEAPER, type CmpCar } from '../data/compare';
 
 const base = import.meta.env.BASE_URL;
 const TRACK = 'gellhorn-international-raceway';
@@ -271,47 +271,54 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     box.innerHTML = html;
   }
 
-  // ---- alternatives + value map ----------------------------------------------------
-  function mapSvg(cls: string, list: CmpCar[], alts: CmpCar[]): string {
-    const pts = ALL.filter((c) => c.classes.includes(cls) && c.price != null && c.ref != null);
+  // ---- alternatives + value map (by in-game rating, Fausto 24.11.2026) ---------------
+  // Until there are Gellhorn laps: rating (road or off-road, user picks) against cost to
+  // register. Default mode follows the class (Off-Road/Pickups = off-road). COPY: Claude placeholders -> Codex.
+  let rmodePicked: RatingMode | null = null;
+  const MODE_LABEL: Record<RatingMode, string> = { road: 'Road rating', off: 'Off-road rating' };
+  function mapSvg(cls: string, m: RatingMode, list: CmpCar[], alts: CmpCar[]): string {
+    const pts = ALL.filter((c) => c.release && c.classes.includes(cls) && c.price != null && ratingOf(c, m) != null);
     const W = 520, H = 260, L = 50, R = 12, T = 18, B = 34;
-    const lapShort = (ms: number) => `${Math.floor(ms / 60000)}:${((ms % 60000) / 1000).toFixed(1).padStart(4, '0')}`;
     const grid = [0, 1, 2, 3].map((i) => `<line x1="${L}" x2="${W - R}" y1="${T + i * (H - T - B) / 3}" y2="${T + i * (H - T - B) / 3}" stroke="rgba(200,200,222,.10)"/>`).join('')
       + [0, 1, 2, 3, 4].map((i) => `<line y1="${T}" y2="${H - B}" x1="${L + i * (W - L - R) / 4}" x2="${L + i * (W - L - R) / 4}" stroke="rgba(200,200,222,.10)"/>`).join('');
     if (pts.length < 2) {
-      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map, coming soon once costs to register and Gellhorn reference laps are in">${grid}<text x="${(W + L) / 2}" y="${H / 2 - 4}" text-anchor="middle" fill="#B4B4C2" font-size="15">Coming soon</text><text x="${(W + L) / 2}" y="${H / 2 + 16}" text-anchor="middle" fill="#9C9CAB" font-size="12">once costs to register and Gellhorn reference laps are in</text><text x="${(W + L) / 2}" y="${H - 6}" text-anchor="middle" fill="#9C9CAB" font-size="11">Cost to register →</text></svg>`;
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map, not enough data yet">${grid}<text x="${(W + L) / 2}" y="${H / 2 - 4}" text-anchor="middle" fill="#B4B4C2" font-size="15">Not enough data yet</text><text x="${(W + L) / 2}" y="${H / 2 + 16}" text-anchor="middle" fill="#9C9CAB" font-size="12">needs ${esc(cls)} cars with a ${MODE_LABEL[m].toLowerCase()} and a cost to register</text><text x="${(W + L) / 2}" y="${H - 6}" text-anchor="middle" fill="#9C9CAB" font-size="11">Cost to register →</text></svg>`;
     }
-    const px = pts.map((c) => c.price!), py = pts.map((c) => c.ref!);
+    const px = pts.map((c) => c.price!), py = pts.map((c) => ratingOf(c, m)!);
     const x0 = Math.min(...px), x1 = Math.max(...px), y0 = Math.min(...py), y1 = Math.max(...py);
     const sx = (v: number) => L + ((v - x0) / Math.max(1, x1 - x0)) * (W - L - R);
-    const sy = (v: number) => T + ((v - y0) / Math.max(1, y1 - y0)) * (H - T - B); // faster (smaller) = higher
+    const sy = (v: number) => H - B - ((v - y0) / Math.max(1, y1 - y0)) * (H - T - B); // higher rating = higher
     const chosen = new Set(list.map((c) => c.id)), alt = new Set(alts.map((c) => c.id));
     const dots = pts.sort((a, b) => Number(chosen.has(a.id) || alt.has(a.id)) - Number(chosen.has(b.id) || alt.has(b.id))).map((c) => {
-      const x = sx(c.price!), y = sy(c.ref!);
+      const x = sx(c.price!), y = sy(ratingOf(c, m)!);
       const right = x > W * 0.68;
       const lab = (fill: string) => `<text x="${right ? x - 9 : x + 9}" y="${y + 4}" text-anchor="${right ? 'end' : 'start'}" fill="${fill}" font-size="12" font-weight="600">${esc(c.model)}</text>`;
       if (chosen.has(c.id)) return `<circle cx="${x}" cy="${y}" r="6" fill="#F24B9D"/>${lab('#FBF7EA')}`;
       if (alt.has(c.id)) return `<circle cx="${x}" cy="${y}" r="5.5" fill="none" stroke="#FF955A" stroke-width="2"/>${lab('#FF955A')}`;
-      return `<circle cx="${x}" cy="${y}" r="4" fill="#55556A"><title>${esc(c.make)} ${esc(c.model)}</title></circle>`;
+      return `<circle cx="${x}" cy="${y}" r="4" fill="#55556A"><title>${esc(c.make)} ${esc(c.model)} · ${ratingOf(c, m)} · ${money(c.price!)}</title></circle>`;
     }).join('');
     const ticksX = [0, 1, 2, 3, 4].map((i) => `<text x="${L + i * (W - L - R) / 4}" y="${H - B + 16}" text-anchor="middle" fill="#9C9CAB" font-size="11">${moneyShort(x0 + i * (x1 - x0) / 4)}</text>`).join('');
-    const ticksY = [0, 1, 2, 3].map((i) => `<text x="${L - 6}" y="${T + i * (H - T - B) / 3 + 4}" text-anchor="end" fill="#9C9CAB" font-size="11">${lapShort(y0 + i * (y1 - y0) / 3)}</text>`).join('');
-    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map: cost to register against Gellhorn reference lap">${grid}<text x="${L + 6}" y="${T + 12}" fill="#D9F58E" font-size="11">↖ better value: faster and cheaper</text>${dots}${ticksX}${ticksY}<text x="${(W + L) / 2}" y="${H - 2}" text-anchor="middle" fill="#9C9CAB" font-size="11">Cost to register →</text></svg>`;
+    const ticksY = [0, 1, 2, 3].map((i) => `<text x="${L - 6}" y="${T + i * (H - T - B) / 3 + 4}" text-anchor="end" fill="#9C9CAB" font-size="11">${Math.round(y1 - i * (y1 - y0) / 3)}</text>`).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Value map: cost to register against ${MODE_LABEL[m].toLowerCase()}">${grid}<text x="${L + 6}" y="${T + 12}" fill="#D9F58E" font-size="11">↖ better value: higher rating, lower cost</text>${dots}${ticksX}${ticksY}<text x="${(W + L) / 2}" y="${H - 2}" text-anchor="middle" fill="#9C9CAB" font-size="11">Cost to register →</text></svg>`;
   }
   function renderBottom() {
     const list = cars();
     const box = $('cp-bottom');
     if (!list.length) { box.innerHTML = ''; return; }
-    const alts = alternatives(list, ALL);
-    const f = list.filter((c) => c.ref != null && c.price != null).sort((a, b) => a.ref! - b.ref!)[0];
-    const cls = f?.cls ?? list[0].cls;
+    const baseCls = (bestByRating(list, 'road') ?? bestByRating(list, 'off') ?? list[0]).cls;
+    const m: RatingMode = rmodePicked ?? defaultRatingMode(baseCls);
+    const alts = alternativesByRating(list, ALL, m);
+    const f = bestByRating(list, m);
+    const cls = f?.cls ?? baseCls;
+    const seg = `<div class="seg rmode" role="group" aria-label="Rating">${(['road', 'off'] as RatingMode[]).map((k) => `<button type="button" data-rmode="${k}" aria-pressed="${k === m}" class="${k === m ? 'on' : ''}">${k === 'road' ? 'Road' : 'Off-road'}</button>`).join('')}</div>`;
+    const diffText = (d: number) => (d === 0 ? `Same ${MODE_LABEL[m].toLowerCase()} as the ${esc(f!.model)}` : d > 0 ? `${d} higher ${MODE_LABEL[m].toLowerCase()} than the ${esc(f!.model)}` : `${-d} lower ${MODE_LABEL[m].toLowerCase()} than the ${esc(f!.model)}`);
     const left = alts.length
-      ? `<div class="al">${alts.map((a) => `<div class="al-r">${a.car.photo ? `<img class="al-img" src="${img(a.car)}" alt="" loading="lazy" />` : `<span class="al-img al-ph"><img src="${ph}" alt="" loading="lazy" /><img class="al-logo" src="${logo(a.car)}" alt="" loading="lazy" /></span>`}<div class="al-m"><b>${esc(a.car.make)} ${esc(a.car.model)}</b>${limited(a.car) ? `<small class="al-lim">${esc(limitedNote(a.car))}</small>` : ''}<span>${Math.abs(a.slower) < 5 ? `As fast as the ${esc(f.model)}` : a.slower < 0 ? `${secs(-a.slower)} faster than the ${esc(f.model)}` : `${secs(a.slower)} slower than the ${esc(f.model)}`} · <em>${money(a.cheaper)} cheaper</em></span></div><button type="button" class="al-add" data-add="${a.car.id}">+ Compare</button></div>`).join('')}
-<p class="al-note">Same class, within ${(ALT_MAX_SLOWER_MS / 1000).toFixed(1)} s of your fastest pick and at least ${Math.round(ALT_MIN_CHEAPER * 100)} % cheaper.</p></div>`
+      ? `<div class="al">${alts.map((a) => `<div class="al-r">${a.car.photo ? `<img class="al-img" src="${img(a.car)}" alt="" loading="lazy" />` : `<span class="al-img al-ph"><img src="${ph}" alt="" loading="lazy" /><img class="al-logo" src="${logo(a.car)}" alt="" loading="lazy" /></span>`}<div class="al-m"><b>${esc(a.car.make)} ${esc(a.car.model)}</b>${limited(a.car) ? `<small class="al-lim">${esc(limitedNote(a.car))}</small>` : ''}<span>${diffText(a.diff)} · <em>${money(a.cheaper)} cheaper to register</em></span></div><button type="button" class="al-add" data-add="${a.car.id}">+ Compare</button></div>`).join('')}
+<p class="al-note">Same class, ${MODE_LABEL[m].toLowerCase()} at most ${Math.round(ALT_MAX_WEAKER * 100)} % lower than your best pick and at least ${Math.round((1 - ALT_MAX_PRICE_SHARE) * 100)} % cheaper to register.</p></div>`
       : f
-        ? `<div class="lock"><div class="lock-m"><h3>No cheaper alternative</h3><p>No ${esc(cls)} car is close enough at Gellhorn and clearly cheaper.</p></div></div>`
-        : `<div class="lock"><div class="lock-m"><h3>Suggestions unlock with prices and lap times</h3><p>We will suggest ${esc(cls)} cars that are about as fast as your pick but clearly cheaper. Until then, browse the class.</p></div><a class="btn btn-s" href="${base}cars/?class=${encodeURIComponent(cls)}">All ${esc(cls)} cars</a></div>`;
-    box.innerHTML = `<div><p class="cp-eb">Cheaper alternatives</p>${left}</div><div><p class="cp-eb">Value map</p><div class="vmap"><div class="vmap-h"><span>${esc(cls)} cars · price vs. Gellhorn reference lap (stock)</span><span>Higher = faster</span></div>${mapSvg(cls, list, alts.map((a) => a.car))}</div></div>`;
+        ? `<div class="lock"><div class="lock-m"><h3>No cheaper alternative</h3><p>No ${esc(cls)} car comes close to the ${esc(f.model)}'s ${MODE_LABEL[m].toLowerCase()} and is clearly cheaper to register.</p></div><a class="btn btn-s" href="${base}cars/?class=${encodeURIComponent(cls)}">All ${esc(cls)} cars</a></div>`
+        : `<div class="lock"><div class="lock-m"><h3>Not enough data for suggestions yet</h3><p>Suggestions need a ${MODE_LABEL[m].toLowerCase()} and a cost to register for your pick. Until then, browse the class.</p></div><a class="btn btn-s" href="${base}cars/?class=${encodeURIComponent(cls)}">All ${esc(cls)} cars</a></div>`;
+    box.innerHTML = `<div class="cp-bot-h">${seg}</div><div><p class="cp-eb">Cheaper alternatives</p>${left}</div><div><p class="cp-eb">Value map</p><div class="vmap"><div class="vmap-h"><span>${esc(cls)} · cost to register vs. ${MODE_LABEL[m].toLowerCase()} (stock)</span><span>Higher = better</span></div>${mapSvg(cls, m, list, alts.map((a) => a.car))}</div></div>`;
   }
 
   // units switch in the footer (DEC-0197): the sentence in "Our take" is plain text, so redraw
@@ -341,6 +348,8 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     const ad = t.closest<HTMLElement>('[data-add]');
     if (ad) { add(ad.dataset.add!, ad); return; }
     if (t.closest('[data-show-hidden]')) { showHidden = true; renderTable(); return; }
+    const rmb = t.closest<HTMLElement>('[data-rmode]');
+    if (rmb) { rmodePicked = rmb.dataset.rmode as RatingMode; renderBottom(); return; }
     const how = t.closest<HTMLElement>('[data-how]');
     if (how) { const r = document.getElementById('tk-rules'); if (r) r.hidden = !r.hidden; return; }
     const lb = t.closest<HTMLElement>('[data-login]');

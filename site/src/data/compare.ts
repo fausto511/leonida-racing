@@ -13,11 +13,23 @@ export const ALT_MAX_SLOWER_MS = 600;
 /** ... and at least this much cheaper than it */
 export const ALT_MIN_CHEAPER = 0.25;
 export const ALT_MAX = 3;
+/** Rating-based alternatives (Fausto 24.11.2026, until there are Gellhorn laps):
+ *  same class, rating at most this much below your best pick ... */
+export const ALT_MAX_WEAKER = 0.05;
+/** ... and at most this share of its cost to register (0.8 = at least 20 % cheaper) */
+export const ALT_MAX_PRICE_SHARE = 0.8;
+export type RatingMode = 'road' | 'off';
+/** classes where the off-road rating is the natural default (user can switch) */
+export const OFFROAD_CLASSES = ['Off-Road', 'Pickups'];
+export const defaultRatingMode = (cls: string): RatingMode => (OFFROAD_CLASSES.includes(cls) ? 'off' : 'road');
+export const ratingOf = (c: CmpCar, m: RatingMode) => (m === 'road' ? c.road : c.off);
 
 export interface CmpCar {
   id: string; make: string; model: string; logo: string; cls: string; classes: string[];
   drive: string; seats: number; acq: string | null; photo: boolean; based: string | null; release: boolean; sellable: string | null;
   price: number | null; sell: number | null; speed: number | null; ref: number | null;
+  /** in-game ratings (stock): road and off-road, null = not recorded */
+  road: number | null; off: number | null;
   /** sell value text per body condition (DEC-0248) */
   sellText?: { main: string; sub: string; max: number } | null;
 }
@@ -91,5 +103,23 @@ export function alternatives(cars: CmpCar[], all: CmpCar[]): { car: CmpCar; slow
     .filter((c) => c.ref! - f.ref! <= ALT_MAX_SLOWER_MS && c.price! <= f.price! * (1 - ALT_MIN_CHEAPER))
     .map((c) => ({ car: c, slower: c.ref! - f.ref!, cheaper: f.price! - c.price! })) // negative = faster (Codex 02.11.)
     .sort((a, b) => a.slower - b.slower || b.cheaper - a.cheaper)
+    .slice(0, ALT_MAX);
+}
+
+/** Your best pick by rating (among picks with a rating and a cost to register) */
+export function bestByRating(cars: CmpCar[], m: RatingMode): CmpCar | null {
+  return cars.filter((c) => ratingOf(c, m) != null && c.price != null).sort((a, b) => ratingOf(b, m)! - ratingOf(a, m)!)[0] ?? null;
+}
+/** Cheaper alternatives by rating: same class as the best pick, rating >= 95 %, cost <= 80 % */
+export function alternativesByRating(cars: CmpCar[], all: CmpCar[], m: RatingMode): { car: CmpCar; diff: number; cheaper: number }[] {
+  const f = bestByRating(cars, m);
+  if (!f) return [];
+  const fr = ratingOf(f, m)!;
+  const chosen = new Set(cars.map((c) => c.id));
+  return all
+    .filter((c) => !chosen.has(c.id) && c.release && c.classes.includes(f.cls) && ratingOf(c, m) != null && c.price != null)
+    .filter((c) => ratingOf(c, m)! >= fr * (1 - ALT_MAX_WEAKER) && c.price! <= f.price! * ALT_MAX_PRICE_SHARE)
+    .map((c) => ({ car: c, diff: ratingOf(c, m)! - fr, cheaper: f.price! - c.price! }))
+    .sort((a, b) => b.diff - a.diff || b.cheaper - a.cheaper)
     .slice(0, ALT_MAX);
 }
