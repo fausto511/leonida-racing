@@ -193,15 +193,21 @@ export function familyName(family: string): string {
 }
 export const familySlugs = () => [...new Set(vehicleOptions.map((v) => v.family).filter((f): f is string => Boolean(f)))];
 
-// Garage tile order (RS-0049, DEC-0086, Fausto 2026-09-30):
-//  1. vehicles with a photo first (only matters while photos are missing;
-//     once every vehicle has one, this step has no effect),
-//  2. then special-access vehicles (any `acquisition`: pre-order, Ultimate Edition, GTA+, ...),
+// Garage tile order (RS-0049, DEC-0086; changed Fausto 2026-11-24):
+//  1. vehicles with in-game stats first: all five stats, then some, then none,
+//  2. then vehicles with a photo,
 //  3. then alphabetical by model name.
+// (Until 24.11. step 1 was "special-access vehicles first", because only those had photos.)
 // The garage never relies on the order of vehicleOptions in this file.
+const STAT_KEYS = ['stat_speed', 'stat_acceleration', 'stat_handling_asphalt', 'stat_handling_offroad', 'stat_strength'] as const;
+function statTier(v: VehicleOption): number {
+  const r = vehicleValues[v.id];
+  const n = r ? STAT_KEYS.filter((k) => r[k]).length : 0;
+  return n === STAT_KEYS.length ? 2 : n > 0 ? 1 : 0;
+}
 export function compareGarageOrder(a: VehicleOption, b: VehicleOption): number {
-  return (Number(!!b.photo) - Number(!!a.photo))
-    || (Number(!!b.acquisition) - Number(!!a.acquisition))
+  return (statTier(b) - statTier(a))
+    || (Number(!!b.photo) - Number(!!a.photo))
     || a.model.localeCompare(b.model, 'en', { numeric: true, sensitivity: 'base' })
     || a.make.localeCompare(b.make, 'en', { sensitivity: 'base' });
 }
