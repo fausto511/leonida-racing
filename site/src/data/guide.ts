@@ -17,7 +17,7 @@ import { vehicleOptions } from './vehicles';
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
 // Bump on EVERY content change to the Guide (visible as "Last updated" + Article dateModified) — Fausto 27.10.2026.
-export const GUIDE_UPDATED = '2026-11-24';
+export const GUIDE_UPDATED = '2026-11-25';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -556,6 +556,8 @@ export const guideSections: GuideSection[] = [
       `Trailer 1 moves from a woman dancing on a car roof to a passenger standing in a moving pickup’s open doorway. At around <a href="https://www.youtube.com/watch?v=QdBZY2fkU-0&amp;t=55s" rel="noopener">0:55</a>, the <strong>Thrillbilly Mud Club</strong> name appears over a muddy off-road gathering. Later, at around <a href="https://www.youtube.com/watch?v=QdBZY2fkU-0&amp;t=68s" rel="noopener">1:08</a>, a car-scene clip carries <strong>High Rollerz Lifestyle</strong> branding and the handle <strong>@HighRollerzMag</strong>.`,
       `The details matter as much as the gatherings. Trailer 2 shows <strong>swangas</strong>, the outward-projecting wire wheels associated with Houston’s slab scene, adding a new wheel style to GTA. Rideout Customs and Vice Vinyl branding also appears in Trailer 1, alongside the customized vehicles. Rockstar has since named Rideout Customs as a mod shop; Vice Vinyl’s role remains unexplained.`,
       `These scenes give the culture its own people, builds, and places to gather. Which moments become player-controlled actions, and whether you can organize meets or takeovers with judging and rewards, remain open.`,
+      // Photo Studio paragraph: draft-claude 25.11.2026 (Fausto ok), Codex review pending (DEC-0088)
+      `For content creators and photo editors, GTA VI has a built-in photo mode called <strong>Photo Studio</strong>. Open it from the pause menu (Options on PS5, Menu on Xbox Series X|S). You can move the camera, set the depth of field, add lights and filters, and hide your character for a clean car shot. You can also switch a vehicle’s headlights and turn signals on or off. Time of day and weather can’t be changed, so plan the shot around the light you want. Photos are saved to your console’s media gallery.`,
       `A good drive needs something on the radio, too. Rockstar’s October 8 reveal previews six stations, with styles ranging from Latin and country to metal, pop and southern hip-hop. Its official music page also describes in-game podcasts. GTAVice’s coverage of Edge’s print edition reports 23 radio stations in total. The station previews are not a complete playlist or a confirmed soundtrack for racing events.`,
     ],
     cta: { label: 'Find Community Events', href: 'community/events/' },
@@ -566,6 +568,9 @@ export const guideSections: GuideSection[] = [
       { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: EXT_LOOK, note: 'approximately 26:06: parking-lot car-meet scene.' },
       { label: 'Rockstar Games — GTA VI Screenshots', url: R_SHOTS, note: 'official mod-shop and custom-vehicle imagery.' },
       { label: 'GTAVice — Edge preview and print-only Phil Hooker Q&A', url: GTAVICE_EDGE, note: 'October 29, 2026: secondary coverage, including attributed excerpts from the print-only Q&A and the reported 23-station total. Checked October 30, 2026.' },
+      { label: 'Beebom — How to Use Photo Mode in GTA 6', url: 'https://beebom.com/gta-6-photo-mode/', note: 'Photo Studio in the pause menu; camera angles, depth of field, filters, lighting, hiding the character; time of day and weather cannot be changed. Checked November 25, 2026.' },
+      { label: 'TechRadar — GTA 6 players hail the game’s photo mode', url: 'https://www.techradar.com/gaming/gta-6-players-hail-the-games-photo-mode-as-a-cinematography-simulator-pro-lighting-tools-help-capture-its-graphically-beautiful-world', note: 'Photo Studio controls include a vehicle’s headlights and turn signals. Checked November 25, 2026.' },
+      { label: 'Insider Gaming — Where Do Photo Studio Pictures Get Saved in GTA 6?', url: 'https://insider-gaming.com/photo-studio-pictures-gta-6/', note: 'Photo Studio pictures are saved to the console’s media gallery, not in the game. Checked November 25, 2026.' },
     ],
   },
   {
