@@ -64,10 +64,11 @@ export function rankingEntries(r: RankingDef): RankingEntry[] {
   return out.sort((a, b) => (r.order === 'asc' ? a.value.value - b.value.value : b.value.value - a.value.value));
 }
 // Manual gate (Fausto 25.11.2026): indexed now, even below RANKING_MIN_COVERAGE (still needs RANKING_MIN_ENTRIES).
+// Includes all Fastest class pages (Fausto 25.11.2026, 10:41).
 const RANKING_INDEX_FORCED = new Set(['most-expensive', 'cheapest', 'fastest']);
 export function rankingIndexable(r: RankingDef): boolean {
   const n = rankingEntries(r).length;
-  if (RANKING_INDEX_FORCED.has(r.slug)) return n >= RANKING_MIN_ENTRIES;
+  if (RANKING_INDEX_FORCED.has(r.slug) || r.slug.startsWith('fastest/')) return n >= RANKING_MIN_ENTRIES;
   return n >= RANKING_MIN_ENTRIES && r.scope.length > 0 && n / r.scope.length >= RANKING_MIN_COVERAGE;
 }
 
