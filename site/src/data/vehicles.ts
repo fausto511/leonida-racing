@@ -308,7 +308,7 @@ export function formatVehicleValueHtml(v: VehicleValue): string {
   return formatVehicleValue(v).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]!));
 }
 
-// Makes without a usable logo yet (RS-0073: GranForma, only a small emblem in
-// the Bloomberg screenshot). Their logo file is a transparent placeholder so
+// Makes without a usable logo yet. Their logo file is a transparent placeholder so
 // tiles never show a broken image; the vehicle page header hides it.
-export const MAKES_WITHOUT_LOGO = new Set(['granforma', 'piccia', 'sirius', 'ascot']);
+// GranForma has a placeholder badge by Fausto since 25.11.2026 (not the original logo).
+export const MAKES_WITHOUT_LOGO = new Set(['piccia', 'sirius', 'ascot']);
