@@ -27,7 +27,7 @@ const indexable = rankingIndexable(r);
 const complete = entries.length === r.scope.length;
 const isPrice = r.metric === COST_METRIC; // cost to register (DEC-0247)
 const isLap = r.metric === 'gellhorn_reference_lap_ms';
-const isSpeed = r.metric === 'top_speed_mph';
+const isSpeed = r.metric === 'top_speed_mph' || r.metric === 'stat_speed'; // Speed stat since 25.11.2026
 const cls = r.classSlug ? classPages.find((c) => c.slug === r.classSlug) : undefined;
 
 // Visible H1 without "in GTA 6" (DEC-0130: GTA VI stays in title, eyebrow, meta)
@@ -36,7 +36,7 @@ const heading = isLap ? 'Fastest at Gellhorn' : r.title.replace(/ in GTA 6$/, ''
 
 // ---- switcher chips ----
 const metricChips = [
-  { name: 'Top speed', slug: 'fastest', on: isSpeed },
+  { name: 'Speed', slug: 'fastest', on: isSpeed },
   { name: 'Most expensive', slug: 'most-expensive', on: r.slug === 'most-expensive' },
   { name: 'Cheapest', slug: 'cheapest', on: r.slug === 'cheapest' },
   { name: 'Gellhorn reference lap', slug: 'gellhorn-lap', on: isLap },
@@ -65,8 +65,8 @@ const bandCar: VehicleOption | null = isLap ? null : topWithPhoto ?? bandVehicle
 // ---- at a glance ----
 const pct = r.scope.length ? Math.round((entries.length / r.scope.length) * 100) : 0;
 const top = entries[0] ?? null;
-const topLabel = isPrice ? (r.slug === 'cheapest' ? 'Lowest cost to register' : 'Highest cost to register') : isLap ? 'Quickest reference lap' : 'Highest top speed';
-const measuredAs = isPrice ? 'Cost to register, in-game scanner' : isLap ? 'Stock, reference lap' : 'Stock, no upgrades';
+const topLabel = isPrice ? (r.slug === 'cheapest' ? 'Lowest cost to register' : 'Highest cost to register') : isLap ? 'Quickest reference lap' : 'Highest speed stat';
+const measuredAs = isPrice ? 'Cost to register, in-game scanner' : isLap ? 'Stock, reference lap' : 'Stock, in-game vehicle menu';
 
 // ---- loops ----
 const compareIds = entries.slice(0, 4).map((e) => e.vehicle.id);
@@ -166,7 +166,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
             ? 'No costs to register are available yet. Cars will appear here as their costs are recorded in GTA VI.'
             : isLap
               ? 'No reference lap times are available yet. Cars will appear here as their stock results are recorded at Gellhorn International Raceway.'
-              : 'No top-speed results are available yet. Cars will appear here as their stock results are recorded.'}</p>
+              : 'No speed stats are available yet. Cars will appear here as their stock values are read in the game.'}</p>
         )}
         <div class="rk-tiles">
           {waiting.slice(0, WAIT_SHOW).map((v) => (

@@ -42,10 +42,12 @@ const codexClass: Record<string, string> = {
   super: 'Super cars', sports: 'Sports cars', muscle: 'Muscle cars',   coupes: 'Coupes', sedans: 'Sedans', suvs: 'SUVs', 'off-road': 'Off-Road vehicles', pickups: 'Pickups', vans: 'Vans',
 };
 export const rankings: RankingDef[] = [
-  def('fastest', 'Fastest Cars in GTA 6', 'Compare GTA 6 cars by recorded top speed in stock form. See the vehicles with available results, their speeds and the source of each value.',
-    'top_speed_mph', 'desc', 'Top speed', 'Recorded top speeds for GTA VI cars in stock form, ordered from highest to lowest. Each result includes its source and, where available, the game version.', vehicleOptions),
-  ...classPages.map((c) => def(`fastest/${c.slug}`, `Fastest ${classLabels[c.slug] ?? c.name} in GTA 6`, `Compare GTA 6 ${codexClass[c.slug] ?? c.name} by recorded top speed in stock form, with available results and the source of each value.`,
-    'top_speed_mph', 'desc', 'Top speed', `${codexClass[c.slug] ?? c.name} with recorded top speeds in stock form, ordered from highest to lowest.`, vehiclesInClass(c.slug), c.slug)),
+  // Fastest = in-game Speed stat (0-10) from the vehicle menu, stock (Fausto 25.11.2026; no measured
+  // top speeds yet). URLs/titles stay. COPY: descriptions + intros = Claude placeholders 25.11.2026 -> Codex.
+  def('fastest', 'Fastest Cars in GTA 6', 'GTA 6 cars ranked by their Speed stat in the in-game vehicle menu, stock. Every value read in the game.',
+    'stat_speed', 'desc', 'Speed', 'GTA VI cars ranked by the Speed stat (0 to 10) shown in the in-game vehicle menu, stock, from highest to lowest. Every value is read in the game.', vehicleOptions),
+  ...classPages.map((c) => def(`fastest/${c.slug}`, `Fastest ${classLabels[c.slug] ?? c.name} in GTA 6`, `GTA 6 ${codexClass[c.slug] ?? c.name} ranked by their Speed stat in the in-game vehicle menu, stock.`,
+    'stat_speed', 'desc', 'Speed', `${codexClass[c.slug] ?? c.name} ranked by the Speed stat (0 to 10) in the in-game vehicle menu, stock, from highest to lowest.`, vehiclesInClass(c.slug), c.slug)),
   // URLs and titles stay (search terms), the value is the in-game cost to register (Fausto 23.11.2026, DEC-0247).
   // COPY: descriptions + intros = Claude placeholders 23.11.2026, Codex review open.
   def('most-expensive', 'Most Expensive Cars in GTA 6', 'GTA 6 has no car dealers: you steal a car and pay to register it. These cars cost the most to register, each value with its source.',
@@ -61,8 +63,11 @@ export function rankingEntries(r: RankingDef): RankingEntry[] {
   for (const v of r.scope) { const val = vehicleValues[v.id]?.[r.metric]; if (val) out.push({ vehicle: v, value: val }); }
   return out.sort((a, b) => (r.order === 'asc' ? a.value.value - b.value.value : b.value.value - a.value.value));
 }
+// Manual gate (Fausto 25.11.2026): indexed now, even below RANKING_MIN_COVERAGE (still needs RANKING_MIN_ENTRIES).
+const RANKING_INDEX_FORCED = new Set(['most-expensive', 'cheapest', 'fastest']);
 export function rankingIndexable(r: RankingDef): boolean {
   const n = rankingEntries(r).length;
+  if (RANKING_INDEX_FORCED.has(r.slug)) return n >= RANKING_MIN_ENTRIES;
   return n >= RANKING_MIN_ENTRIES && r.scope.length > 0 && n / r.scope.length >= RANKING_MIN_COVERAGE;
 }
 
