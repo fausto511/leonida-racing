@@ -3,12 +3,13 @@
 // Segments Overall / By class / By manufacturer / By car (manufacturer: Fausto 17.10., not in the mockup),
 // class chips, driver/crew search, All times | Video verified only. URL: ?class=Sports&make=grotti&vehicle=<id>&verified=1.
 // Logged in: own row orange + driver ahead/behind, "Your position ↓", hero tile "Your best at Gellhorn" (#ta-tile).
-// The build renders the sample data with the same renderer the browser uses (data/leaderboard.ts); live rows
-// replace it as soon as at least one real run is published.
+// The build renders loading rows; the browser fills in the live rows from public_leaderboard with the same
+// renderer (data/leaderboard.ts). No sample data any more since the first real lap (Fausto 26.11.2026).
 // COPY STATUS: labels/sentences are placeholders until the Codex review (DEC-0088).
-import { sampleEntries, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars } from '../data/leaderboard';
-// SEO (Fausto 27.10.2026): the HTML carries no sample drivers/times; the browser paints the sample (draw()).
+import { initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars } from '../data/leaderboard';
 const first = render([], initialState, false);
+// Loading rows until the live laps are in (no flash of an empty or fake board, Fausto 26.11.2026)
+const loadingRows = Array.from({ length: 5 }, () => '<div class="lb-sk" aria-hidden="true"><span></span></div>').join('');
 const noLap = noLapCars([]);
 const base = import.meta.env.BASE_URL;
 const search = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
@@ -19,9 +20,8 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   <div class="lb-head">
     <div>
       <h2 class="lr-h2 display">Leaderboard</h2>
-      <p id="lb-meta">{first.meta}</p>
+      <p id="lb-meta">Best lap per driver · PS5</p>
     </div>
-    <span class="sample" id="lb-flag" title="Fictional drivers and times. Real laps replace them as soon as the first ones are published." hidden>Sample until first laps</span>
   </div>
 
   <div class="lb-ctl">
@@ -66,7 +66,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 
   <div class="card tbl" id="lb-tbl" role="table" aria-label="Gellhorn leaderboard">
     <div role="rowgroup" id="lb-thead" set:html={headHtml(true)} />
-    <div role="rowgroup" id="lb-tbody" aria-live="polite" set:html={first.body} />
+    <div role="rowgroup" id="lb-tbody" aria-live="polite" aria-busy="true" set:html={loadingRows} />
   </div>
   <p class="lb-legend" aria-hidden="true"><span class="st ok"><i><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>Video verified</span><span class="st no"><i></i>Screenshot only</span><span class="vd-l"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>Watch</p>
   <div class="lb-more" id="lb-more" set:html={first.more} />
@@ -100,8 +100,6 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .lb-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
   .lb-head h2 { margin: 0; }
   .lb-head p { margin: 8px 0 0; color: var(--lr-muted); font-size: 14px; }
-  .sample { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--lr-muted); white-space: nowrap; }
-  .sample[hidden] { display: none; }
 
   .lb-ctl { display: flex; gap: 10px; align-items: center; margin-top: 20px; flex-wrap: wrap; }
   .vseg { display: inline-flex; border: 1px solid var(--lr-line-strong); border-radius: 6px; overflow: hidden; height: 44px; flex: none; }
@@ -207,6 +205,11 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .tbl :global(.you) { flex: none; font-size: 10px; font-weight: 800; padding: 2px 5px; border-radius: 3px; background: var(--lr-orange-fill-hover); color: var(--lr-orange); }
   .tbl :global(.lb-empty) { display: block; padding: 28px 18px; text-align: center; color: var(--lr-muted); font-size: 14px; }
   .tbl :global(.lb-empty a) { color: var(--lr-orange); }
+  .tbl :global(.lb-sk) { display: block; padding: 15px 18px; border-top: 1px solid var(--lr-line, rgba(127, 127, 127, .15)); }
+  .tbl :global(.lb-sk span) { display: block; height: 12px; width: 70%; border-radius: 6px; background: var(--lr-muted); opacity: .16; animation: lb-sk 1.1s ease-in-out infinite alternate; }
+  .tbl :global(.lb-sk:nth-child(even) span) { width: 55%; }
+  @keyframes lb-sk { from { opacity: .1; } to { opacity: .24; } }
+  @media (prefers-reduced-motion: reduce) { .tbl :global(.lb-sk span) { animation: none; } }
   :global(.logo-chip) { width: 36px; height: 36px; flex: none; display: inline-flex; align-items: center; justify-content: center; }
   :global(.logo-chip img) { width: 30px; height: 30px; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-info); }
   :global(.logo-chip-lg) { width: 48px; height: 48px; }
@@ -306,7 +309,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   import { getSupabase, backendConfigured } from '../scripts/supabase-client';
   import { LEADERBOARD_PLATFORM } from '../data/platforms';
   import { loadIconIds } from '../scripts/icons';
-  import { sampleEntries, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, crewsWithLaps, crewInfo, crewTagHtml, type LbEntry, type LbState, type LbMode, type LbCrew } from '../data/leaderboard';
+  import { initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, crewsWithLaps, crewInfo, crewTagHtml, type LbEntry, type LbState, type LbMode, type LbCrew } from '../data/leaderboard';
   import { buildCrews } from '../data/hub';
   import { computeBadges, loadBadges, badgesOn, type Badge } from '../data/badge';
 
@@ -314,10 +317,10 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   const $ = (id: string) => document.getElementById(id)!;
   const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 
-  let data: LbEntry[] = sampleEntries;
+  let data: LbEntry[] = [];
   // Best VERIFIED run per driver + car (RS-0040); "Video verified only" uses its own view.
-  let verifiedData: LbEntry[] = sampleEntries;
-  let sample = true;
+  let verifiedData: LbEntry[] = [];
+  const sample = false; // sample data removed 26.11.2026 (first real lap)
   // Driver Badge (DEC-0230): from all accepted best laps, the same in every view (not from the verified-only list)
   let badges = computeBadges(data);
   let liveBadges: Map<string, Badge> | null = null; // from public_driver_badges (stage 2)
@@ -355,6 +358,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     $('lb-context').innerHTML = r.context;
     $('lb-more').innerHTML = r.more;
     $('lb-meta').textContent = r.meta;
+    $('lb-tbody').removeAttribute('aria-busy');
     $('lb-mypos').hidden = !r.hasMe;
     vehicleSel.innerHTML = vehicleSelectHtml(current(), state); vehicleSel.value = state.vehicle ?? '';
     makeSel.innerHTML = makeSelectHtml(state); makeSel.value = state.make ?? '';
@@ -456,15 +460,8 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     needAll.setAttribute('aria-expanded', String(!rest.hidden));
   });
 
-  draw();
-  if (sample) {
-    $('lb-flag').hidden = false;
-    const nl0 = noLapCars(sampleEntries);
-    $('lb-need').innerHTML = nl0.picks;
-    $('lb-need-rest').innerHTML = nl0.rest;
-    $('lb-need-n').textContent = String(nl0.count);
-    $('lb-need-all').hidden = !nl0.rest;
-  }
+  // Without a backend there is nothing to wait for; otherwise the loading rows stay until loadLive() is done.
+  if (!backendConfigured) draw();
 
   // ---- hero tile + track facts (guest: verified track record; logged in with a lap: own best) ----
   function guestTile() {
@@ -557,8 +554,6 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     data = live.map(toEntry);
     verifiedData = liveVerified.map(toEntry);
     badges = liveBadges ?? computeBadges(data);
-    sample = false;
-    $('lb-flag').hidden = true;
     const nl = noLapCars([...data, ...verifiedData]);
     $('lb-need').innerHTML = nl.picks;
     $('lb-need-rest').innerHTML = nl.rest;
@@ -572,7 +567,8 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     (async () => {
       liveBadges = await loadBadges(getSupabase()).catch(() => null);
       const hasLive = await loadLive().catch(() => false);
-      if (hasLive || badgesOn()) { guestTile(); draw(); }
+      if (hasLive || badgesOn()) guestTile();
+      draw(); // replaces the loading rows: live laps, or the real empty state
       const sb = getSupabase();
       const { data: s } = await sb.auth.getSession();
       if (!s?.session) return;
