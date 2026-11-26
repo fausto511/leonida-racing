@@ -30,4 +30,5 @@ export const vehiclePhotoAlt: Record<string, string> = {
   'declasse-bobcat-xl-84': "Black Declasse Bobcat XL '84 pickup with a bull bar, parked in a parking lot, front three-quarter view",
   'vapid-sandking-xt': 'Silver Vapid Sandking XT dually pickup on a dirt lot, front three-quarter view',
   'albany-primo': 'Brown Albany Primo sedan parked in a parking lot, front three-quarter view',
+  'willard-grouse-92': "Gray Willard Grouse '92 sedan at a gas station, front three-quarter view",
 };
