@@ -24,4 +24,10 @@ export const vehiclePhotoAlt: Record<string, string> = {
   // Added 2026-11-26 (Claude, from Fausto's in-game photos):
   'coil-raiden': 'Champagne Coil Raiden electric sedan parked in a parking space, front three-quarter view',
   'invetero-coquette': 'Silver Invetero Coquette with the roof panel off, parked in a parking lot, front three-quarter view',
+  // Added 2026-11-26 evening (Claude, from Fausto's in-game photos):
+  'declasse-granger-3600lx': "Red Declasse Granger 3600LX parked in front of a shop, front three-quarter view",
+  'benefactor-schafter-v12': 'Green Benefactor Schafter V12 parked in a parking lot, front three-quarter view',
+  'declasse-bobcat-xl-84': "Black Declasse Bobcat XL '84 pickup with a bull bar, parked in a parking lot, front three-quarter view",
+  'vapid-sandking-xt': 'Silver Vapid Sandking XT dually pickup on a dirt lot, front three-quarter view',
+  'albany-primo': 'Brown Albany Primo sedan parked in a parking lot, front three-quarter view',
 };
