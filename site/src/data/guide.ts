@@ -480,18 +480,17 @@ export const guideSections: GuideSection[] = [
     title: 'Fuel, EV Charging, and Gas-Station Repairs',
     status: 'Tested in the game',
     paragraphs: [
-      `Edge reports a fuel gauge and engine-health readout for every vehicle. Refueling is described as quick, with cars covering long distances between stops.`,
+      `While you drive, three gauges sit at the bottom left of the screen: fuel, engine health, and nitrous.`,
       `Fuel is part of every drive: when the tank runs low, you refuel at a gas station. PC Gamer reports that electric vehicles use charging points instead and that fuel lasts long enough that stops are infrequent.`,
       `In published tests, a full tank lasted roughly 18 to 30 minutes of driving, depending on the car. A stolen car may already be low on fuel, so check the gauge before a chase.`,
       `Gas stations can repair your car, too, not just fill the tank.`,
     ],
     sources: [
-      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: refueling at a gas station in story mode.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: refueling at a gas station in story mode. November 26, 2026: fuel, engine and nitrous gauges at the bottom left of the driving screen.' },
       { label: 'PC Gamer — Refueling cars in GTA 6 is barely necessary', url: 'https://www.pcgamer.com/games/grand-theft-auto/gta-6-refuel-repair-cars/', note: 'November 19, 2026: gas-station refueling, EV charging, how often you need to stop, and the Repair option in the gas-station Services menu. Checked November 21, 2026.' },
       { label: 'Kotaku — We Tested How Long It Takes To Run Out Of Gas In GTA 6', url: 'https://kotaku.com/we-tested-how-long-it-takes-to-run-out-of-gas-in-gta-6-2000755601', note: 'Checked November 21, 2026: pickup 29:08; Banshee 18:31.' },
       { label: 'MotiveGTA — How Long Does Fuel REALLY Last in GTA 6?', url: 'https://www.youtube.com/watch?v=jFHpHTjyQ8o&t=244s', note: 'November 2026: Willard Transient result at 4:04, Infernus ’96 at 6:01. Checked November 21, 2026.' },
       { label: 'Digital Car Addict — GTA VI vehicle overview', url: 'https://www.youtube.com/watch?v=ie4vtIle3lU&t=249s', note: 'November 2026: gas stations refuel and repair, and stolen cars can have different fuel levels, at 4:09. Checked November 20, 2026.' },
-      { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: fuel and engine-health displays; qualitative refueling description. Checked October 30, 2026.' },
     ],
   },
   {
