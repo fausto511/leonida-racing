@@ -286,6 +286,37 @@ export const guideSections: GuideSection[] = [
     ],
   },
   {
+    id: 'suspension',
+    title: 'Suspension: Wheel Kits',
+    status: 'Reported by Players',
+    paragraphs: [
+      `Suspension comes as <strong>wheel kits</strong>, found under Pro Builds in the mod shop. There are 17 in total, but each car and shop offers only some of them. Jason’s ’70 Ganado at Coastal Auto Care, for example, has three: stock, raised, and lowered.`,
+      `Lower kits give more grip on asphalt and less off-road. Higher kits do the opposite. Wheel kits also change a car’s ratings. On the Ganado, the lowered kit raised the road rating from 486 to 504, so a different kit can push a car out of a race’s rating range. For Gellhorn and other asphalt races, take Street Racing or Track Racing if your car and shop offer them.`,
+    ],
+    table: {
+      caption: 'Reported effects of wheel kits in GTA VI',
+      head: ['Wheel kit', 'Good for', 'Watch out'],
+      rows: [
+        ['Stock', 'The baseline', '–'],
+        ['Dropped Stance, Slammed Lowrider, Lowered', 'More grip, steadier in corners', 'Little ground clearance'],
+        ['Cambered Stance', 'Looks', 'Hurts handling'],
+        ['Street Racing, Track Racing', 'Best grip on asphalt, fast corners. Track Racing rates one point higher', 'Curbs in the city'],
+        ['Classic Muscle', 'City driving, police chases, launches', 'A little less grip than the racing kits'],
+        ['Drift', 'Drifting', 'Slides in normal driving'],
+        ['Drag Stance', 'Drag launches', 'Almost no grip at the front'],
+        ['Raised', 'Curbs, gravel roads', 'Less grip on asphalt'],
+        ['Moderate Lift', 'Gravel and dirt roads', 'Not enough for rough terrain'],
+        ['All-Terrain Lift', 'Most off-road routes', 'Can roll over'],
+        ['Extreme Off-Road', 'Very rough tracks, big jumps', 'Slower on gravel, rolls easily'],
+        ['Subtle, Medium, Full Donk (Ultimate Edition)', 'Looks, curbs, bumps', 'More understeer the higher you go'],
+      ],
+    },
+    sources: [
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: Wheel Kits under Pro Builds on Jason’s ’70 Ganado at Coastal Auto Care: Stock Calibration, Raised Suspension Kit, and Lowered Suspension Kit, with stat and rating previews.' },
+      { label: 'EenGamer — I Tested all 17 Wheel Kits in GTA 6', url: 'https://www.youtube.com/watch?v=5oc35fKqtlQ', note: 'Handling of all 17 wheel kits, Street Racing versus Track Racing, and Donk kits in the Ultimate Edition; source transcript supplied to Leonida Racing. Transcript checked November 26, 2026.' },
+    ],
+  },
+  {
     id: 'racing',
     images: [IMG.circuitRace, IMG.streetRace],
     title: 'Racing in GTA VI',
@@ -640,6 +671,7 @@ export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'How many mod shops are in GTA VI?', a: 'There are 14: eleven for cars and three for motorcycles. The car shops cover specialties such as retro builds, racing, lowriders, and off-road customization. Rideout Customs and One-Eyed Willie’s require the Ultimate Edition.' },
   { q: 'Which mod shop should I use in GTA VI?', a: 'Check your car’s Specialist field in the WAINK scan or vehicle menu. In Vehicles → Mod Shops on the map, a blue icon beside a shop’s name marks extra options for your current car. Other car mod shops still offer basic upgrades.' },
   { q: 'What do the tires do in GTA VI?', a: 'Tire choice can change asphalt and off-road handling, so check the stat preview before buying. Track tires have the most road grip and the least off-road grip; Extreme tires help most off-road. Tires won’t turn a car into something it isn’t.' },
+  { q: 'Which suspension is best for racing?', a: 'On asphalt, the Street Racing or Track Racing wheel kit. Both give the most grip. Track Racing rates one point higher, so check that your car still fits the race’s rating range.' },
   { q: 'Does GTA VI have garages?', a: 'Yes. Players begin with storage for three vehicles, and buying garages expands that capacity. You buy garages through the Vice City Real Estate app on your phone. Rockstar has also revealed garage content tied to the ’67 Vapid Dominator Buggy and ’55 Vapid Stanier.', aHtml: 'Yes. Players begin with storage for three vehicles, and buying garages expands that capacity. You buy garages through the Vice City Real Estate app on your phone. Rockstar has also revealed garage content tied to the <a href="{base}cars/vehicles/vapid-dominator-67-buggy/">’67 Vapid Dominator Buggy</a> and <a href="{base}cars/vehicles/vapid-stanier-55/">’55 Vapid Stanier</a>.' },
   // COPY: Claude draft 23.11.2026 -> Codex review
   { q: 'How many cars can you own in GTA VI?', a: 'Up to 18 in the standard game: 16 garage spaces plus Jason’s and Lucia’s personal vehicles. The pre-order bonus, the Ultimate Edition and GTA+ each add one more space, for up to 21.' },
