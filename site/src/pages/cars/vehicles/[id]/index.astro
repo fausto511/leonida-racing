@@ -6,7 +6,7 @@
 // from the mockup -> Codex review (DEC-0088). About texts: data/vehicle-copy.ts (Codex).
 import Base from '../../../../layouts/Base.astro';
 import CarCard from '../../../../components/CarCard.astro';
-import { MAKES_WITHOUT_LOGO, vehicleLastmod, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs, vehicleStatsAt, COST_METRIC, COST_LABEL, sellValueText, vehicleSellValues } from '../../../../data/vehicles';
+import { MAKES_WITHOUT_LOGO, vehicleLastmod, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs, vehicleStatsAt, COST_METRIC, COST_LABEL, sellValueText, vehicleSellValues, sellConditionText } from '../../../../data/vehicles';
 import { groupedTitles } from '../../../../data/gta-titles';
 import { speedHtml } from '../../../../data/units';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
@@ -229,7 +229,7 @@ const faqs: Faq[] = vehicle.releaseId ? ([
   price != null && { q: `How much does it cost to register the ${fullName}?`,
     a: `Registering the ${fullName} costs ${usdFaq(price)}, as shown in the in-game scanner.`, link: [`${base}guide/#theft`, 'How registering works'] },
   sellList.length > 0 && vehicle.sellable !== 'no' && { q: `How much does the ${fullName} sell for in GTA 6?`,
-    a: `A stolen ${fullName} sells for ${sellList.map((s) => `${usdFaq(s.value)} in ${s.condition} condition`).join(', ')}.` },
+    a: `A stolen ${fullName} sells for ${sellList.map((s) => `${usdFaq(s.value)} ${sellConditionText(s.condition)}`).join(', ')}.` },
   vehicle.sellable === 'no' && { q: `Can you sell the ${fullName} in GTA 6?`, a: `No, the ${fullName} can't be sold.` },
   vehicle.tracker && { q: `Does the ${fullName} have a tracker?`,
     a: `${vehicle.tracker === 'None' ? `No, the ${fullName} has no tracker` : `Yes, the ${fullName} has a ${vehicle.tracker} tracker`}${vehicle.keyCloner ? ', and you need a Key Cloner to steal it' : ''}.`, link: [`${base}guide/#theft`, 'Trackers and selling'] },

@@ -132,14 +132,18 @@ for (const val of generated.values as VehicleValue[]) {
 }
 
 /** Sell values depend on the car's body condition (Fausto 23.11.2026, DEC-0248): one stock value per
- *  condition, best condition first. Only values with a recorded condition are shown. */
+ *  condition, best condition first. Values without a recorded condition (scanner page only, Fausto 26.11.2026)
+ *  are shown too and sort last. */
 export const CONDITIONS = ['Top', 'Good', 'Average', 'Poor', 'Scrap'] as const;
 export const vehicleSellValues: Record<string, VehicleValue[]> = {};
 for (const val of generated.values as VehicleValue[]) {
-  if (val.metric !== 'sell_price_gtad' || val.tuning === 'tuned' || !val.condition) continue;
+  if (val.metric !== 'sell_price_gtad' || val.tuning === 'tuned') continue;
   (vehicleSellValues[val.vehicle_id] ??= []).push({ ...val, value: Number(val.value) });
 }
-for (const list of Object.values(vehicleSellValues)) list.sort((a, b) => CONDITIONS.indexOf(a.condition as any) - CONDITIONS.indexOf(b.condition as any));
+const condRank = (c?: string | null) => { const i = CONDITIONS.indexOf(c as any); return i < 0 ? CONDITIONS.length : i; };
+for (const list of Object.values(vehicleSellValues)) list.sort((a, b) => condRank(a.condition) - condRank(b.condition));
+/** "in Top condition" or, for a scan without a recorded condition, "(condition not recorded)" -- COPY: Claude placeholder 26.11.2026 */
+export const sellConditionText = (c?: string | null) => (c ? `in ${c} condition` : '(condition not recorded)');
 const usd0 = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 /** "$1,000 · Poor condition" (one scan) or "$4,000–6,650" + "Average to Top" (several); null = none.
  *  COPY: Claude placeholder 23.11.2026 (Codex review open). */
@@ -148,8 +152,12 @@ export function sellValueText(id: string): { main: string; sub: string; max: num
   if (!list?.length) return null;
   const vals = list.map((v) => v.value);
   const lo = Math.min(...vals), hi = Math.max(...vals);
-  if (list.length === 1) return { main: usd0(hi), sub: `${list[0].condition} condition`, max: hi };
-  return { main: lo === hi ? usd0(hi) : `${usd0(lo)}–${usd0(hi).slice(1)}`, sub: `${list[list.length - 1].condition} to ${list[0].condition} condition`, max: hi };
+  const conds = list.map((v) => v.condition).filter((c): c is string => !!c);
+  // COPY: Claude placeholder 26.11.2026 ("Condition not recorded")
+  const sub = !conds.length ? 'Condition not recorded'
+    : conds.length === 1 || conds[0] === conds[conds.length - 1] ? `${conds[0]} condition`
+    : `${conds[conds.length - 1]} to ${conds[0]} condition`;
+  return { main: lo === hi ? usd0(hi) : `${usd0(lo)}–${usd0(hi).slice(1)}`, sub, max: hi };
 }
 
 /** Sitemap lastmod per vehicle page (04.11.2026): latest of the vehicle row's

@@ -5,7 +5,7 @@
 // COPY STATUS: header = Claude placeholder; licence sentence follows the Terms once "Using our data" is live.
 import type { APIRoute } from 'astro';
 import { SITE_NAME } from '../data/site';
-import { vehicleOptions, vehicleValues, fastestGellhornLapMs, COST_METRIC, vehicleSellValues } from '../data/vehicles';
+import { vehicleOptions, vehicleValues, fastestGellhornLapMs, COST_METRIC, vehicleSellValues, sellConditionText } from '../data/vehicles';
 import { lapTime } from '../data/leaderboard';
 
 export const GET: APIRoute = ({ site }) => {
@@ -25,7 +25,7 @@ export const GET: APIRoute = ({ site }) => {
       v.classes.join(', '),
       v.realLifeInspiration ? `based on ${v.realLifeInspiration}` : '',
       price != null ? `cost to register $${Math.round(price).toLocaleString('en-US')}` : '',
-      (vehicleSellValues[v.id] ?? []).length ? `sell value (stolen) ${(vehicleSellValues[v.id] ?? []).map((s) => `$${Math.round(s.value).toLocaleString('en-US')} in ${s.condition} condition`).join(', ')}` : '',
+      (vehicleSellValues[v.id] ?? []).length ? `sell value (stolen) ${(vehicleSellValues[v.id] ?? []).map((s) => `$${Math.round(s.value).toLocaleString('en-US')} ${sellConditionText(s.condition)}`).join(', ')}` : '',
       mph != null ? `top speed ${Math.round(mph)} mph (${Math.round(mph * 1.609344)} km/h), stock` : '',
       ref != null ? `Gellhorn reference lap ${lapTime(ref)}` : best != null ? `fastest Gellhorn community lap ${lapTime(best)}` : '',
       u(`cars/vehicles/${v.id}/`),
