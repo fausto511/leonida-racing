@@ -38,6 +38,8 @@ export interface VehicleOption {
   gameType?: string;
   era?: string;
   storage?: number;
+  // Pickups: seats in the cab only; seats = with an empty bed (+2 in the bed). DEC-0258.
+  seatsCab?: number;
   nitrous?: boolean;
   // scanner info (Fausto 21./23.11.2026): mod shop specialist, tracker, whether the Key Cloner is needed
   specialist?: string;
@@ -64,7 +66,7 @@ interface GeneratedVehicle {
   first_seen_url?: string | null; first_seen_timestamp?: string | null;
   family?: string | null; previous_games?: string[] | null; sellable?: string | null;
   other_names?: string[] | null;
-  game_type?: string | null; era?: string | null; storage?: number | null; nitrous_available?: boolean | null;
+  game_type?: string | null; era?: string | null; storage?: number | null; seats_cab?: number | null; nitrous_available?: boolean | null;
   specialist?: string | null; tracker?: string | null; key_cloner_required?: boolean | null;
   updated_at?: string | null;
 }
@@ -105,6 +107,7 @@ export const vehicleOptions: VehicleOption[] = (generated.vehicles as GeneratedV
   ...(v.game_type ? { gameType: v.game_type } : {}),
   ...(v.era ? { era: v.era } : {}),
   ...(v.storage != null ? { storage: v.storage } : {}),
+  ...(v.seats_cab != null && v.seats != null && v.seats_cab < v.seats ? { seatsCab: v.seats_cab } : {}),
   ...(v.nitrous_available != null ? { nitrous: v.nitrous_available } : {}),
   ...(v.specialist ? { specialist: v.specialist } : {}),
   ...(v.tracker ? { tracker: v.tracker } : {}),

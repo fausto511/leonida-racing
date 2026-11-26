@@ -116,6 +116,8 @@ const ratingTiles = [
 ].map((r) => { const value = valOf(vehicle.id, r.key); return { ...r, value, ...classInfo(r.key, value) }; });
 const hasStats = statRows.some((r) => r.value != null) || ratingTiles.some((r) => r.value != null);
 // Drive / Seats / Storage come from the info page and show even before any stat is read (Fausto 21.11.2026).
+// Pickups: "6 (4 + 2 in the bed)" -- the bed seats only count when it is empty (DEC-0258).
+const seatsText = !vehicle.seats ? notRecorded : vehicle.seatsCab ? `${vehicle.seats} (${vehicle.seatsCab} + ${vehicle.seats - vehicle.seatsCab} in the bed)` : String(vehicle.seats);
 const hasFacts = vehicle.drive !== 'n/a' || !!vehicle.seats || vehicle.storage != null;
 const showAvg = statRows.some((r) => r.avg != null);
 const statVals = [...STAT_ROWS.map((r) => r.key), 'rating_road', 'rating_offroad'].map((k) => (vals as any)[k]).filter(Boolean);
@@ -383,7 +385,7 @@ if (faqs.length) vehicleJsonLd.push({ '@context': 'https://schema.org', '@type':
             <dl class="vst-facts">
               <div><dt>Top speed</dt><dd class:list={{ 'is-tba': speed == null }}>{speed != null ? <><Fragment set:html={speedHtml(speed)} />{speedRank != null && <span class="vs-cond"> · #{speedRank} of {classCars.length}</span>}</> : notRecorded}</dd></div>
               <div><dt>Drive</dt><dd class:list={{ 'is-tba': vehicle.drive === 'n/a' }}>{vehicle.drive === 'n/a' ? notRecorded : vehicle.drive}</dd></div>
-              <div><dt>Seats</dt><dd class:list={{ 'is-tba': !vehicle.seats }}>{vehicle.seats || notRecorded}</dd></div>
+              <div><dt>Seats</dt><dd class:list={{ 'is-tba': !vehicle.seats }}>{seatsText}</dd></div>
               <div><dt>Storage</dt><dd class:list={{ 'is-tba': vehicle.storage == null }}>{vehicle.storage != null ? `${vehicle.storage} ${vehicle.storage === 1 ? 'slot' : 'slots'}` : notRecorded}</dd></div>
             </dl>
           </div>
@@ -402,7 +404,7 @@ if (faqs.length) vehicleJsonLd.push({ '@context': 'https://schema.org', '@type':
         <dl class="vst-facts is-solo">
           <div><dt>Top speed</dt><dd class:list={{ 'is-tba': speed == null }}>{speed != null ? <><Fragment set:html={speedHtml(speed)} />{speedRank != null && <span class="vs-cond"> · #{speedRank} of {classCars.length}</span>}</> : notRecorded}</dd></div>
           <div><dt>Drive</dt><dd class:list={{ 'is-tba': vehicle.drive === 'n/a' }}>{vehicle.drive === 'n/a' ? notRecorded : vehicle.drive}</dd></div>
-          <div><dt>Seats</dt><dd class:list={{ 'is-tba': !vehicle.seats }}>{vehicle.seats || notRecorded}</dd></div>
+          <div><dt>Seats</dt><dd class:list={{ 'is-tba': !vehicle.seats }}>{seatsText}</dd></div>
           <div><dt>Storage</dt><dd class:list={{ 'is-tba': vehicle.storage == null }}>{vehicle.storage != null ? `${vehicle.storage} ${vehicle.storage === 1 ? 'slot' : 'slots'}` : notRecorded}</dd></div>
         </dl>
       </section>

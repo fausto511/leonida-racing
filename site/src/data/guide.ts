@@ -207,9 +207,10 @@ export const guideSections: GuideSection[] = [
       `The <a href="{base}cars/vehicles/dinka-chavos-xs/">Dinka Chavos XS</a> shows how much a race build can change a car. Stock, it has 5.2 Speed, 5.7 Acceleration, 3.9 Asphalt Handling, and a road rating of 497. The race-prepared rental at Gellhorn has 7.7 Speed, 7.9 Acceleration, 6.7 Asphalt Handling, and a road rating of 743. Its Off-Road Handling drops from 4.2 to 1.6.`,
       `At Gellhorn’s <strong>Keep It PG</strong> event, your car needs a road rating between 500 and 780. If yours falls outside that range, you can rent a race-prepared car at the track. Our <a href="{base}cars/">car pages</a> show the stats and ratings of the stock car as we read them in the game.`,
       `The info panel’s <strong>Specialist</strong> field names the type of mod shop with the most options for that car.`,
+      `Pickups can show two different seat counts. When the bed is empty, two more people can ride in the back, so the info panel shows two extra seats. With a loaded bed, it only counts the cab. Our car pages show both, for example “6 (4 + 2 in the bed)”.`,
     ],
     sources: [
-      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: vehicle stat panels checked on Jason’s ’70 Ganado, the Cypher, the Buffalo ’19, and the Chavos XS. Stock-value marks confirmed on stock cars. Stock Chavos XS compared with the race-prepared Gellhorn rental; Keep It PG entry range checked in the event menu. November 23, 2026: stat panel opened from the hood of an owned car.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: vehicle stat panels checked on Jason’s ’70 Ganado, the Cypher, the Buffalo ’19, and the Chavos XS. Stock-value marks confirmed on stock cars. Stock Chavos XS compared with the race-prepared Gellhorn rental; Keep It PG entry range checked in the event menu. November 23, 2026: stat panel opened from the hood of an owned car. November 26, 2026: the same pickup showed 4 seats with a loaded bed and 6 with an empty bed.' },
       { label: 'Digital Car Addict — GTA VI vehicle overview', url: 'https://www.youtube.com/watch?v=ie4vtIle3lU&t=444s', note: 'November 2026: the Specialist field at 7:24. Checked November 21, 2026.' },
     ],
   },
