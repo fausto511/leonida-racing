@@ -260,6 +260,7 @@ export const guideSections: GuideSection[] = [
     paragraphs: [
       `Tires can change how a car handles on asphalt and dirt. Check the mod-shop stat preview before buying: not every tire is a performance upgrade. <strong>Whisler Motorsport</strong> stocks Track, Drag, Performance, Sport, Vintage, and Rally tires; <strong>Wasteland Off-Road</strong> offers Rally, All-terrain, Extreme, Sand, and Paddle tires.`,
       `Tires won’t turn a car into something it isn’t. Rally tires did little for sporty cars on dirt in these tests, so start with a car whose base handling suits the job. <strong>Vice Auto Customs</strong> also offers Drift tires.`,
+      `On grass or gravel, track tires can leave you stuck. Even one wheel off the track costs a lot of time.`,
     ],
     table: {
       caption: 'Reported effects of car tires in GTA VI',
@@ -278,6 +279,7 @@ export const guideSections: GuideSection[] = [
       ],
     },
     sources: [
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 24, 2026: track tires at Gellhorn; leaving the track onto grass or gravel left the car stuck. November 26, 2026: tire previews checked at a mod shop.' },
       { label: 'EenGamer — What do the Race Tyres do in GTA 6?', url: 'https://www.youtube.com/watch?v=RDuzqlbhKgM', note: 'Tire comparisons; source transcript supplied to Leonida Racing. Transcript checked November 24, 2026.' },
       { label: 'EenGamer — I Tested ALL 18 Tyres in GTA 6', url: 'https://www.youtube.com/watch?v=BMCe6hSfBoQ', note: 'Car-tire effects and equivalent tire types; source transcript supplied to Leonida Racing. Transcript checked November 24, 2026.' },
       { label: 'Digital Car Addict — GTA 6: All 14 Mod Shops Explained', url: 'https://www.youtube.com/watch?v=ijiUKmXx69Y', note: 'Shop tire selections and Drift tire availability; source transcript supplied to Leonida Racing. Transcript checked November 24, 2026.' },
@@ -297,14 +299,14 @@ export const guideSections: GuideSection[] = [
       `Racing can interrupt a getaway, too. Edge describes a customized 4x4 with purple underglow challenging Nelson’s station wagon on the highway. Its occupants keep taunting him until he accepts, and a passenger hangs out of the window as they pull ahead.`,
       `At <strong>Keep It PG</strong>, the event menu lists the lap count, field size, maximum payout, and accepted car ratings. You can compare those details before choosing your car.`,
       `At Gellhorn, races charge an entry fee, with a rental fee on top if you borrow a car. A win covers those costs and leaves a profit. In the races we played, the AI used heavy rubber-banding: rivals slowed sharply when we fell behind and caught up quickly when we pulled away.`,
-      `Nitrous returns as an upgrade: on Jason’s ’70 Ganado, it sits under <strong>Boost</strong> in the Performance menu.`,
+      `Nitrous returns as an upgrade: on Jason’s ’70 Ganado, it sits under <strong>Boost</strong> in the Performance menu. Nitrous is allowed in Gellhorn races.`,
       `For your own car comparisons, keep <strong>top speed</strong> separate from <strong>lap time</strong>. One measures speed; the other includes the corners, braking, and acceleration of a particular route. Our car rankings keep Gellhorn laps separate from driver leaderboard results. Compare the same tuning category and read the test conditions before treating two times as equivalent.`,
     ],
     cta: { label: 'Go to Time Attack', href: 'time-attack/gellhorn-international-raceway/' },
     sources: [
       { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: `${EXT_LOOK}&t=1061s`, note: 'August 27, 2026: circuit race at approximately 17:41–17:47, off-road race at 18:35–18:39, and street race with nitrous at 20:21–20:25.' },
       { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: highway challenge involving a customized 4x4 with purple underglow. Checked October 30, 2026.' },
-      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: Keep It PG event menu at Gellhorn checked for laps, field size, maximum payout, and the accepted road-rating range. Nitrous checked in the Performance menu at Coastal Auto Care. November 21, 2026: entry fees and heavy rubber-banding in our Gellhorn races. November 22, 2026: race series and race counts checked in the Progress menu.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: Keep It PG event menu at Gellhorn checked for laps, field size, maximum payout, and the accepted road-rating range. Nitrous checked in the Performance menu at Coastal Auto Care. November 21, 2026: entry fees and heavy rubber-banding in our Gellhorn races. November 22, 2026: race series and race counts checked in the Progress menu. November 24, 2026: nitrous allowed in Gellhorn races.' },
       { label: 'PowerPyx — GTA 6 All Unique Race Locations', url: 'https://www.powerpyx.com/gta-6-all-unique-race-locations-racing-activities/', note: 'November 18, 2026: 40 unique races, 20 different wins for Earn Cash, Not Kudos, 30 for 100% completion, entry and rental fees, and winning for a profit. Checked November 22, 2026.' },
       { label: 'PowerPyx — GTA 6 All Race Challenge Locations & Gold Medals', url: 'https://www.powerpyx.com/gta-6-all-race-challenge-locations-gold-medals/', note: 'November 18, 2026: 13 separate medal challenges, with 10 gold medals required for 100% completion. Checked November 22, 2026.' },
     ],
@@ -505,7 +507,7 @@ export const guideSections: GuideSection[] = [
       `Some Standout parts cannot be reapplied after you change them. Read the mod-shop warning before replacing them.`,
     ],
     sources: [
-      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 20, 2026: Annis Drifter Elegy found in the garage behind the drag strip at Gellhorn International Raceway.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 20, 2026: Annis Drifter Elegy found in the garage behind the drag strip at Gellhorn International Raceway. November 26, 2026: Standout tab and themed sets checked under Map → Progress → Vehicles.' },
       { label: 'PowerPyx — GTA 6 Progress Database', url: 'https://www.powerpyx.com/gta-6-collectible-guide-progress-database/', note: 'November 18, 2026: separate Standout category and themed sets. Checked November 23, 2026.' },
       { label: 'GTABase — GTA VI vehicles', url: 'https://www.gtabase.com/gta-6/vehicles/', note: 'Custom variants and the warning about losing unique Standout parts. Checked November 23, 2026.' },
       { label: 'HowToVideoGame — GTA 6 Standout vehicles', url: 'https://howtovideogame.com/gta-6-standout-vehicles/', note: 'November 20, 2026: in-game warning that some unique parts cannot be reapplied after modification. Checked November 23, 2026.' },
