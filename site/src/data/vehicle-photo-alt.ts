@@ -21,4 +21,7 @@ export const vehiclePhotoAlt: Record<string, string> = {
   'vapid-ganado-70': "Yellow Vapid Ganado '70 driving along a coastal road",
   'vapid-riata-classic': 'Dirt-covered white Vapid Riata ’70 with retro side stripes, close-up',
   'vapid-stanier-55': "Yellow and white Vapid Stanier '55 on a neon-lit street",
+  // Added 2026-11-26 (Claude, from Fausto's in-game photos):
+  'coil-raiden': 'Champagne Coil Raiden electric sedan parked in a parking space, front three-quarter view',
+  'invetero-coquette': 'Silver Invetero Coquette with the roof panel off, parked in a parking lot, front three-quarter view',
 };
