@@ -17,7 +17,7 @@ import { vehicleOptions } from './vehicles';
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
 // Bump on EVERY content change to the Guide (visible as "Last updated" + Article dateModified) — Fausto 27.10.2026.
-export const GUIDE_UPDATED = '2026-11-26';
+export const GUIDE_UPDATED = '2026-11-27';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -324,7 +324,8 @@ export const guideSections: GuideSection[] = [
     status: 'Tested in the game',
     paragraphs: [
       `GTA VI includes structured circuit, off-road, and street racing. Rockstar’s Extended Look shows all three with an active race HUD rather than presenting them only as background scenes.`,
-      `Story mode groups its races into series, including <strong>Hit and Run VC</strong>, <strong>Animal Crackers</strong>, and the events at <strong>Gellhorn International Raceway</strong>, <strong>Boone Speedway</strong>, and the <strong>Thrillbilly Mud Club</strong>.`,
+      // Six series + table: draft-claude 27.11.2026 (Fausto: reliable data belongs in the guide), Codex review pending (DEC-0088)
+      `Story mode groups its races into six series: <strong>Hit and Run VC</strong> street races in Vice City, <strong>Animal Crackers</strong>, the events at <strong>Gellhorn International Raceway</strong>, elimination races at <strong>Boone Speedway</strong>, demolition races at <strong>Ambrosia Raceway</strong>, and the <strong>Thrillbilly Mud Club</strong>. The table below shows where each series races. Race venues show up on the map as blue icons once you get close.`,
       `Story mode has <strong>40 unique races</strong>. Win 20 different races for <strong>Earn Cash, Not Kudos</strong>, or 30 for the racing requirement toward 100% completion. Repeating the same race does not add another unique win.`,
       `The <strong>13 Race Challenges</strong> are a separate category, with time or score targets and bronze, silver, and gold medals. You need gold in 10 of them for 100% completion.`,
       `At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1061s" rel="noopener">17:41</a>, 16 cars race two laps on a wet paved circuit, with position, lap, and timing information on screen. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1115s" rel="noopener">18:35</a>, a 12-entry field of quads, motorcycles, and off-road pickups runs two laps on a dirt course. At around <a href="https://www.youtube.com/watch?v=tJbzMqJGH4k&amp;t=1221s" rel="noopener">20:21</a>, a six-car street race tracks progress as a percentage. These are the events shown, not a fixed rule for grid sizes or race distances.`,
@@ -335,12 +336,24 @@ export const guideSections: GuideSection[] = [
       `For your own car comparisons, keep <strong>top speed</strong> separate from <strong>lap time</strong>. One measures speed; the other includes the corners, braking, and acceleration of a particular route. Our car rankings keep Gellhorn laps separate from driver leaderboard results. Compare the same tuning category and read the test conditions before treating two times as equivalent.`,
     ],
     cta: { label: 'Go to Time Attack', href: 'time-attack/gellhorn-international-raceway/' },
+    table: {
+      caption: 'GTA VI race series and where to find them',
+      head: ['Series', 'Races', 'Type', 'Where'],
+      rows: [
+        ['Hit and Run VC', '9', 'Street races', 'Vice City: Salton (3), La Perle (2), Ocean Beach (2), Gloriana Key (2)'],
+        ['Animal Crackers', '8', 'Not confirmed yet', 'Lummox and Mariana counties: Grayson, Redshaw’s, Ranchers, Big Pine (2 each)'],
+        ['Gellhorn International Raceway', '11', 'Circuit races, starting with the Keep It PG series', 'Kelly County, south of Port Gellhorn'],
+        ['Boone Speedway', '2', 'Elimination races', 'Vice-Dale County, southwest corner of Hamlet'],
+        ['Ambrosia Raceway', '2', 'Demolition races', 'Kelly County, Ambrosia area'],
+        ['Thrillbilly Mud Club', '8', 'Dirt track (6) and oval (2)', 'North Kelly County'],
+      ],
+    },
     sources: [
       { label: 'Sambo iRacing — GTA 6 Racetrack Guide | Location, Races & A Full Lap', url: 'https://www.youtube.com/watch?v=1jToICSmPes', note: 'Prize money for the top three only, respawning, and AI behavior on the outside line at Gellhorn; source transcript supplied to Leonida Racing. Transcript checked November 26, 2026.' },
       { label: 'Rockstar Games — Grand Theft Auto VI: An Extended Look', url: `${EXT_LOOK}&t=1061s`, note: 'August 27, 2026: circuit race at approximately 17:41–17:47, off-road race at 18:35–18:39, and street race with nitrous at 20:21–20:25.' },
       { label: 'Edge / GamesRadar — Grand Theft Auto VI exclusive: The state that never sleeps', url: EDGE_GR, note: 'October 29, 2026: highway challenge involving a customized 4x4 with purple underglow. Checked October 30, 2026.' },
       { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: Keep It PG event menu at Gellhorn checked for laps, field size, maximum payout, and the accepted road-rating range. Nitrous checked in the Performance menu at Coastal Auto Care. November 21, 2026: entry fees and heavy rubber-banding in our Gellhorn races. November 22, 2026: race series and race counts checked in the Progress menu. November 24, 2026: nitrous allowed in Gellhorn races. November 26, 2026: road rating unchanged with and without nitrous (Thrax, 857). November 26, 2026: prize money only for the top three, touchpad respawn on PS5, and AI drivers pushing you wide on the outside line confirmed.' },
-      { label: 'PowerPyx — GTA 6 All Unique Race Locations', url: 'https://www.powerpyx.com/gta-6-all-unique-race-locations-racing-activities/', note: 'November 18, 2026: 40 unique races, 20 different wins for Earn Cash, Not Kudos, 30 for 100% completion, entry and rental fees, and winning for a profit. Checked November 22, 2026.' },
+      { label: 'PowerPyx — GTA 6 All Unique Race Locations', url: 'https://www.powerpyx.com/gta-6-all-unique-race-locations-racing-activities/', note: 'November 18, 2026: 40 unique races, 20 different wins for Earn Cash, Not Kudos, 30 for 100% completion, entry and rental fees, and winning for a profit. Six series with race counts, race types and locations, blue map icons. Checked November 27, 2026; series and race counts match our Progress-menu check.' },
       { label: 'PowerPyx — GTA 6 All Race Challenge Locations & Gold Medals', url: 'https://www.powerpyx.com/gta-6-all-race-challenge-locations-gold-medals/', note: 'November 18, 2026: 13 separate medal challenges, with 10 gold medals required for 100% completion. Checked November 22, 2026.' },
     ],
   },
