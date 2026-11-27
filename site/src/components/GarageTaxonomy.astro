@@ -59,6 +59,9 @@ const N = list.length;
 const path = custom?.path ?? `cars/${isClass ? 'classes' : 'manufacturers'}/${page.slug}/`;
 // Search title + description from the database (Fausto 07.11.2026, data/seo-meta.ts); brand shown by Google separately
 const metaTitle = collectionTitle(isClass, label);
+// Default order: best road rating first, so interesting cars lead instead of A–Z; Off-Road class by off-road rating.
+// Cars without the rating go last. Driver ratings have too few votes for this yet (Fausto 27.11.2026).
+const defaultSort = isClass && page.slug === 'off-road' ? 'off' : 'road';
 const copy = taxonomyCopy[page.slug];
 const heading = copy?.h1 ?? label;
 // Class page -> Community tracks filtered by this class (Sackgassen-Check 04.11.2026)
@@ -236,7 +239,7 @@ const more = custom
     </nav>
   )}
 
-  <CarsBrowser vehicles={list} scope={custom ? (custom.scope ?? null) : isClass ? 'class' : 'make'} noun={custom?.noun ?? noun} defaultSort="name">
+  <CarsBrowser vehicles={list} scope={custom ? (custom.scope ?? null) : isClass ? 'class' : 'make'} noun={custom?.noun ?? noun} defaultSort={defaultSort}>
     <Fragment slot="after-grid">
       <section class="wrap tmore">
         <p class="tsec-eb">More on {heading}</p>

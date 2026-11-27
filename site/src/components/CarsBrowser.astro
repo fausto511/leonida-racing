@@ -16,7 +16,8 @@ interface Props {
   scope?: 'class' | 'make' | null;
   /** "Sports cars" -> "Showing 29 Sports cars" */
   noun?: string;
-  defaultSort?: 'class' | 'name';
+  /** 'class' | 'name' | a SORT_DATA key such as 'road' (class/manufacturer pages, Fausto 27.11.2026) */
+  defaultSort?: string;
 }
 const { vehicles = garageOrderedVehicles, scope = null, noun = 'cars', defaultSort = 'class' } = Astro.props;
 const list = vehicles === garageOrderedVehicles ? vehicles : [...vehicles].sort(compareGarageOrder);
@@ -134,7 +135,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
     <!-- phone: search full width, then Filters + Sort -->
     <div class="tools-phone">
       <button type="button" class="ctl" id="open-filters"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<b class="ctl-count" id="filter-count" hidden></b></button>
-      <button type="button" class="ctl" id="open-sort-phone"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg>Sort: <b data-sort-label>{defaultSort === 'name' ? 'Name A–Z' : 'Class'}</b></button>
+      <button type="button" class="ctl" id="open-sort-phone"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg>Sort: <b data-sort-label>{defaultSort === 'name' ? 'Name A–Z' : defaultSort === 'class' ? 'Class' : (SORT_DATA.find(([k]) => k === defaultSort)?.[1] ?? 'Class')}</b></button>
     </div>
     <div class="tools-row2">
       <div class="chips" id="chips" aria-live="polite"><span class="muted" id="result-count">Showing {N} {noun}</span></div>
@@ -145,11 +146,11 @@ function mc(group: string, value: string | number, label: string, n: number | un
       </span>
       <button type="button" class="ctl cmpb" id="cmp-btn" title="Open the comparison">Compare <span id="cmp-n">0 / 4</span></button>
       <div class="dd dd-sort">
-        <button type="button" class="ctl dd-btn" data-dd="sort" aria-haspopup="true" aria-expanded="false">Sort: <b data-sort-label>{defaultSort === 'name' ? 'Name A–Z' : 'Class'}</b><Fragment set:html={chev} /></button>
+        <button type="button" class="ctl dd-btn" data-dd="sort" aria-haspopup="true" aria-expanded="false">Sort: <b data-sort-label>{defaultSort === 'name' ? 'Name A–Z' : defaultSort === 'class' ? 'Class' : (SORT_DATA.find(([k]) => k === defaultSort)?.[1] ?? 'Class')}</b><Fragment set:html={chev} /></button>
         <div class="menu" data-menu="sort" hidden>
           {scope !== 'class' && <button type="button" class:list={['menu-i', { on: defaultSort === 'class' }]} data-sort="class">Class</button>}
           <button type="button" class:list={['menu-i', { on: defaultSort === 'name' }]} data-sort="name">Name A–Z</button>
-          {SORT_DATA.map(([k, l]) => <button type="button" class="menu-i" data-sort={k} data-needs={k}>{l}</button>)}
+          {SORT_DATA.map(([k, l]) => <button type="button" class:list={['menu-i', { on: defaultSort === k }]} data-sort={k} data-needs={k}>{l}</button>)}
           <button type="button" class="menu-i" data-sort="recent">Recently added</button>
           {SORT_SOON.map(([k, l]) => <button type="button" class="menu-i" data-sort={k} data-needs={k}>{l}</button>)}
           <button type="button" class="menu-i" disabled>Driver rating<span>coming soon</span></button>
@@ -236,7 +237,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
     <div class="dsp-body sort-list">
       {scope !== 'class' && <button type="button" class:list={['menu-i', { on: defaultSort === 'class' }]} data-sort="class">Class</button>}
       <button type="button" class:list={['menu-i', { on: defaultSort === 'name' }]} data-sort="name">Name A–Z</button>
-      {SORT_DATA.map(([k, l]) => <button type="button" class="menu-i" data-sort={k} data-needs={k}>{l}</button>)}
+      {SORT_DATA.map(([k, l]) => <button type="button" class:list={['menu-i', { on: defaultSort === k }]} data-sort={k} data-needs={k}>{l}</button>)}
       <button type="button" class="menu-i" data-sort="recent">Recently added</button>
       {SORT_SOON.map(([k, l]) => <button type="button" class="menu-i" data-sort={k} data-needs={k}>{l}</button>)}
       <button type="button" class="menu-i" disabled>Driver rating<span>coming soon</span></button>
