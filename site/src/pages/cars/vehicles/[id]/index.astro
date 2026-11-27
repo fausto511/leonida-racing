@@ -6,7 +6,7 @@
 // from the mockup -> Codex review (DEC-0088). About texts: data/vehicle-copy.ts (Codex).
 import Base from '../../../../layouts/Base.astro';
 import CarCard from '../../../../components/CarCard.astro';
-import { MAKES_WITHOUT_LOGO, vehicleLastmod, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs, vehicleStatsAt, COST_METRIC, COST_LABEL, sellValueText, vehicleSellValues, sellConditionText } from '../../../../data/vehicles';
+import { MAKES_WITHOUT_LOGO, vehicleLastmod, vehicleOptions, vehicleValues, compareGarageOrder, familyMembers, familyName, FAMILY_PAGE_MIN, fastestGellhornLapMs, vehicleStatsAt, COST_METRIC, COST_LABEL, sellValueText } from '../../../../data/vehicles';
 import { groupedTitles } from '../../../../data/gta-titles';
 import { speedHtml } from '../../../../data/units';
 import { vehicleCopy } from '../../../../data/vehicle-copy';
@@ -84,7 +84,7 @@ const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 // GTA VI has no car dealers: the money tile shows the in-game cost to register (DEC-0247).
 const price = vals[COST_METRIC]?.value ?? null;
 const speed = vals.top_speed_mph?.value ?? null;
-// sell value per body condition (DEC-0248): "$1,000 · Poor condition"
+// typical sell value (Fausto 27.11.2026): one value, no body condition
 const sellInfo = sellValueText(vehicle.id);
 const sell = sellInfo?.max ?? null;
 const speedRank = speed == null ? null : 1 + classCars.filter((v) => (vehicleValues[v.id]?.top_speed_mph?.value ?? -1) > speed).length;
@@ -221,15 +221,15 @@ const kmhOf = (mph: number) => Math.round(mph * 1.609344);
 const usdFaq = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
 const roadR = ratingTiles[0], offR = ratingTiles[1];
 const prevTitles = vehicle.previousGames ? groupedTitles(vehicle.previousGames).map((t) => t.label) : null;
-const sellList = vehicleSellValues[vehicle.id] ?? [];
 type Faq = { q: string; a: string; link?: [string, string] };
 const faqs: Faq[] = vehicle.releaseId ? ([
   speed != null && { q: `What is the top speed of the ${fullName} in GTA 6?`,
     a: `The ${fullName} reaches ${speed.toFixed(1)} mph (${kmhOf(speed)} km/h) in stock form${speedRank != null ? `, #${speedRank} of ${classCars.length} ${cls} cars` : ''}.` },
   price != null && { q: `How much does it cost to register the ${fullName}?`,
     a: `Registering the ${fullName} costs ${usdFaq(price)}, as shown in the in-game scanner.`, link: [`${base}guide/#theft`, 'How registering works'] },
-  sellList.length > 0 && vehicle.sellable !== 'no' && { q: `How much does the ${fullName} sell for in GTA 6?`,
-    a: `A stolen ${fullName} sells for ${sellList.map((s) => `${usdFaq(s.value)} ${sellConditionText(s.condition)}`).join(', ')}.` },
+  sell != null && vehicle.sellable !== 'no' && { q: `How much does the ${fullName} sell for in GTA 6?`,
+    // COPY: Claude placeholder 27.11.2026 (Codex review open)
+    a: `A stolen ${fullName} typically sells for ${usdFaq(sell)}.` },
   vehicle.sellable === 'no' && { q: `Can you sell the ${fullName} in GTA 6?`, a: `No, the ${fullName} can't be sold.` },
   vehicle.tracker && { q: `Does the ${fullName} have a tracker?`,
     a: `${vehicle.tracker === 'None' ? `No, the ${fullName} has no tracker` : `Yes, the ${fullName} has a ${vehicle.tracker} tracker`}${vehicle.keyCloner ? ', and you need a Key Cloner to steal it' : ''}.`, link: [`${base}guide/#theft`, 'Trackers and selling'] },

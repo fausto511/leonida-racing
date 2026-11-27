@@ -131,33 +131,36 @@ for (const val of generated.values as VehicleValue[]) {
   (target[val.vehicle_id] ??= {})[val.metric] = { ...val, value: Number(val.value) };
 }
 
-/** Sell values depend on the car's body condition (Fausto 23.11.2026, DEC-0248): one stock value per
- *  condition, best condition first. Values without a recorded condition (scanner page only, Fausto 26.11.2026)
- *  are shown too and sort last. */
+/** Sell values (Fausto 27.11.2026, SELL-VALUE-Analyse-2026-11-27): body condition showed no effect in our
+ *  scans; most scans sell for about 27% of the cost to register, some come out unusually low or high
+ *  (hidden factor, not understood yet). The site shows one typical value: the most common scan within
+ *  24-30% of the cost to register; scans outside that band are left out. No cost to register known ->
+ *  most common scan. Ties -> lower value. All scans stay in the DB (condition still recorded). */
 export const CONDITIONS = ['Top', 'Good', 'Average', 'Poor', 'Scrap'] as const;
 export const vehicleSellValues: Record<string, VehicleValue[]> = {};
 for (const val of generated.values as VehicleValue[]) {
   if (val.metric !== 'sell_price_gtad' || val.tuning === 'tuned') continue;
   (vehicleSellValues[val.vehicle_id] ??= []).push({ ...val, value: Number(val.value) });
 }
-const condRank = (c?: string | null) => { const i = CONDITIONS.indexOf(c as any); return i < 0 ? CONDITIONS.length : i; };
-for (const list of Object.values(vehicleSellValues)) list.sort((a, b) => condRank(a.condition) - condRank(b.condition));
-/** "in Top condition" or, for a scan without a recorded condition, "(condition not recorded)" -- COPY: Claude placeholder 26.11.2026 */
-export const sellConditionText = (c?: string | null) => (c ? `in ${c} condition` : '(condition not recorded)');
+export const SELL_BAND = [0.24, 0.30] as const;
 const usd0 = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`;
-/** "$1,000 · Poor condition" (one scan) or "$4,000–6,650" + "Average to Top" (several); null = none.
- *  COPY: Claude placeholder 23.11.2026 (Codex review open). */
-export function sellValueText(id: string): { main: string; sub: string; max: number } | null {
+/** Typical sell value of a model, or null (none recorded or only unusual scans). */
+export function typicalSellValue(id: string): number | null {
   const list = vehicleSellValues[id];
   if (!list?.length) return null;
-  const vals = list.map((v) => v.value);
-  const lo = Math.min(...vals), hi = Math.max(...vals);
-  const conds = list.map((v) => v.condition).filter((c): c is string => !!c);
-  // COPY: Claude placeholder 26.11.2026 ("Condition not recorded")
-  const sub = !conds.length ? 'Condition not recorded'
-    : conds.length === 1 || conds[0] === conds[conds.length - 1] ? `${conds[0]} condition`
-    : `${conds[conds.length - 1]} to ${conds[0]} condition`;
-  return { main: lo === hi ? usd0(hi) : `${usd0(lo)}–${usd0(hi).slice(1)}`, sub, max: hi };
+  const reg = vehicleValues[id]?.register_cost_gtad?.value;
+  const vals = list.map((v) => v.value).filter((v) => !reg || (v >= reg * SELL_BAND[0] && v <= reg * SELL_BAND[1]));
+  if (!vals.length) return null;
+  const count = new Map<number, number>();
+  for (const v of vals) count.set(v, (count.get(v) ?? 0) + 1);
+  let best = vals[0], n = 0;
+  for (const [v, c] of count) if (c > n || (c === n && v < best)) { best = v; n = c; }
+  return best;
+}
+/** Tile/card text: "$1,000" + "Typical value". COPY: Claude placeholder 27.11.2026 (Codex review open). */
+export function sellValueText(id: string): { main: string; sub: string; max: number } | null {
+  const v = typicalSellValue(id);
+  return v == null ? null : { main: usd0(v), sub: 'Typical value', max: v };
 }
 
 /** Sitemap lastmod per vehicle page (04.11.2026): latest of the vehicle row's
