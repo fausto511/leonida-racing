@@ -156,6 +156,10 @@ const subs = [
   :global(.decision-msg.is-error) { color: var(--lr-coral); }
   :global(.decision-msg.is-ok) { color: #D9F58E; }
   :global(.decision-hint) { margin: .4rem 0 0; color: var(--gh-muted); font-size: .76rem; }
+  /* Quick reasons (Fausto 27.11.2026): one click puts a ready-made reason into the box; several can be combined. */
+  :global(.reason-chips) { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
+  :global(.reason-chip) { padding: .35rem .65rem; border-radius: 999px; border: 1px solid var(--gh-line); background: var(--gh-bg); color: var(--gh-text); font-size: .76rem; cursor: pointer; }
+  :global(.reason-chip:hover), :global(.reason-chip:focus-visible) { border-color: var(--gh-yellow); }
   :global(.corr-note) { margin: 0 0 16px; } /* RS-0091: correction asked / done */
 
   :global(.override-box) { border-color: var(--lr-line); margin-top: 1.25rem; }
@@ -181,6 +185,21 @@ const subs = [
   // placeholder in production (2026-10-04) and broke Reveal / Approve.
   const MODERATE_SUBMISSION_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/moderate-submission` : '';
   const backendConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+
+  // Quick reasons for the decision box (Fausto 27.11.2026). [chip label, text the driver reads].
+  // COPY: Claude placeholder 27.11.2026, Codex review pending.
+  const QUICK_REASONS: [string, string][] = [
+    ['Not the results screen', 'Your screenshot does not show the results screen. Please upload the results screen with your PSN name, car and lap time readable.'],
+    ['Car not identifiable', 'The car in your proof cannot be identified clearly. Please send a screenshot or video where the car is clearly visible.'],
+    ['Wrong car selected', 'The car in your proof does not match the car you selected. Please pick the car shown in your proof.'],
+    ['Time does not match', 'The lap time in your proof does not match the time you entered.'],
+    ['PSN name does not match', 'The PSN name in your proof does not match your submission.'],
+    ['Unreadable screenshot', 'Your screenshot is too blurry, too small or cut off to read. Please upload a clear screenshot.'],
+    ['Edited screenshot', 'Your screenshot appears to be edited. Please upload the original, unedited screenshot.'],
+    ['Video not a full lap', 'Your video does not show the full, uncut lap.'],
+    ['Video unavailable', 'Your video link does not work or the video is private.'],
+    ['Duplicate', 'This lap was already submitted.'],
+  ];
 
   const noticeEl = document.getElementById('backend-notice');
   const authBoxEl = document.getElementById('auth-box');
@@ -623,6 +642,7 @@ const subs = [
 
       <div class="review-box decision-box">
         <div class="review-box-head"><h3>Decision</h3><span>Reason required for correction, reject or invalidate</span></div>
+        <div class="reason-chips" aria-label="Quick reasons">${QUICK_REASONS.map(([label], i) => `<button type="button" class="reason-chip" data-reason-i="${i}">${label}</button>`).join('')}</div>
         <textarea id="decision-reason" placeholder="Moderator reason / internal note"></textarea>
         <p class="decision-hint">For “Request Correction” the driver sees this reason in My laps – write it to them, e.g. “The screenshot shows a Pfister Comet, please pick that car.”</p>
         <div class="decision-actions">
@@ -934,6 +954,17 @@ const subs = [
         revealBtn.textContent = originalLabel;
         revealBtn.disabled = false;
         showDecisionMsg(err instanceof Error ? err.message : String(err), true);
+      }
+      return;
+    }
+
+    const chip = event.target.closest('.reason-chip');
+    if (chip) {
+      const box = document.getElementById('decision-reason');
+      const text = QUICK_REASONS[Number(chip.dataset.reasonI)]?.[1];
+      if (box && text && !box.value.includes(text)) {
+        box.value = box.value.trim() ? `${box.value.trim()} ${text}` : text;
+        box.focus();
       }
       return;
     }
