@@ -197,7 +197,16 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     const minPrice = prices.length ? Math.min(...prices) : null;
     const cheapest = list.find((c) => c.price === minPrice);
     const open = Date.now() >= RATINGS_OPEN_AT;
+    // In-game ratings + stats first: every car has them, laps and top speed are still rare (Fausto 27.11.2026).
+    // Labels as on the vehicle page; ▲-style highlight via dir 'max'.
+    const num = (x: number | null | undefined, dec: number): Cell => (x != null ? { m: dec ? x.toFixed(dec) : String(Math.round(x)), v: x } : { m: nrTb(), raw: 'mal', tba: true });
     const perf: Row[] = [
+      { label: 'Road rating', sub: 'In-game, stock', dir: 'max', cells: (c) => num(c.road, 0) },
+      { label: 'Off-road rating', sub: 'In-game, stock', dir: 'max', cells: (c) => num(c.off, 0) },
+      { label: 'Speed', sub: 'In-game stat, 0–10', dir: 'max', cells: (c) => num(c.spd, 1) },
+      { label: 'Acceleration', sub: 'In-game stat, 0–10', dir: 'max', cells: (c) => num(c.acc, 1) },
+      { label: 'Asphalt handling', sub: 'In-game stat, 0–10', dir: 'max', cells: (c) => num(c.hAsp, 1) },
+      { label: 'Off-road handling', sub: 'In-game stat, 0–10', dir: 'max', cells: (c) => num(c.hOff, 1) },
       { label: 'Gellhorn reference lap', sub: 'Stock · our test driver', dir: 'min', cells: (c) => c.ref != null
         ? { m: lapTime(c.ref), s: c.ref === minRef ? (refs.length > 1 ? 'Fastest' : '') : `+${secs(c.ref - minRef!)}`, v: c.ref }
         : { m: nrTb(), raw: 'mal', tba: true } },

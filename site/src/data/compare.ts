@@ -30,6 +30,8 @@ export interface CmpCar {
   price: number | null; sell: number | null; speed: number | null; ref: number | null;
   /** in-game ratings (stock): road and off-road, null = not recorded */
   road: number | null; off: number | null;
+  /** in-game stats (stock, 0-10): speed, acceleration, asphalt / off-road handling (Fausto 27.11.2026) */
+  spd?: number | null; acc?: number | null; hAsp?: number | null; hOff?: number | null;
   /** sell value text per body condition (DEC-0248) */
   sellText?: { main: string; sub: string; max: number } | null;
 }
