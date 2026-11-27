@@ -36,7 +36,19 @@ function rotate(gridId: string, total: number, shuffleAll: boolean) {
   const shown = shuffleAll ? shuffle([...fixed, ...picked]) : [...fixed, ...picked];
   shown.forEach((c) => { c.dataset.rotate = 'shown'; grid.appendChild(c); });
 }
-rotate('fastest', 4, true);
+// GTA 6 Rankings (Fausto 27.11.2026): 4 tiles per load, never two with the same #1 car.
+function rotateRankings(gridId: string, total: number) {
+  const grid = $(gridId);
+  if (!grid) return;
+  const cards = [...grid.children] as HTMLElement[];
+  const out: HTMLElement[] = [];
+  const leads = new Set<string>();
+  for (const c of shuffle(cards)) if (out.length < total && !leads.has(c.dataset.lead ?? '')) { out.push(c); leads.add(c.dataset.lead ?? ''); }
+  for (const c of cards) if (out.length < total && !out.includes(c)) out.push(c);
+  cards.forEach((c) => { c.dataset.rotate = 'pool'; });
+  out.forEach((c) => { c.dataset.rotate = 'shown'; grid.appendChild(c); });
+}
+rotateRankings('rank-tiles', 4);
 rotate('guide-cards', 3, false);
 
 // Compare "+" on the car cards (same storage as the Cars page).

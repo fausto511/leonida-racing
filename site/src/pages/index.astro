@@ -1,19 +1,19 @@
 ---
 // Home — Redesign Phase 3 (DEC-0116, mockup boards Home guest / active driver /
-// new driver / phone). Order: Hero → Time Attack band → Fastest at Gellhorn →
+// new driver / phone). Order: Hero → Time Attack band → GTA 6 Rankings →
 // Community → Guide → Discord band. Everything a guest sees is in the HTML;
 // the logged-in dashboard, live leaderboard, live events/crews and the
 // rotations are filled in by scripts/home.ts.
 // COPY STATUS: all new texts are Claude placeholders from the mockup
 // (Codex brief Claude outputs/Codex-Brief-Home-Redesign-2026-10-11.md, DEC-0088).
 import Base from '../layouts/Base.astro';
-import CarCard from '../components/CarCard.astro';
 import { SITE_NAME } from '../data/site';
 import { homeLbRow } from '../data/home';
 import { sampleEntries, overallRows } from '../data/leaderboard';
-import { vehicleOptions, isMoneyMetric, fastestGellhornLapMs, bandVehicle, statsFeed, statsTotals, statLabels, formatVehicleValueHtml, type VehicleOption } from '../data/vehicles';
+import { vehicleOptions, isMoneyMetric, statsFeed, statsTotals, statLabels, formatVehicleValueHtml, type VehicleOption } from '../data/vehicles';
 import { classSlug } from '../data/garage-taxonomy';
 import { guideSections, GUIDE_UPDATED } from '../data/guide';
+import { rankings, rankingEntries } from '../data/rankings';
 
 const base = import.meta.env.BASE_URL;
 const N = vehicleOptions.length; // DEC-0117: N always from data
@@ -36,23 +36,46 @@ const sampleTop = overallRows(sampleEntries, false).slice(0, 5);
 const sampleTopHtml = sampleTop.map(({ e, rank }) => homeLbRow({ rank, driver: e.driver, crew: e.crew, car: `${e.make} ${e.model}`, ms: e.lap_time_ms })).join('');
 const TA_CHIPS = ['Super', 'Sports', 'Muscle', 'Coupes', 'Off-Road'];
 
-// ---- Fastest at Gellhorn: one car per class (DEC-0116) ----
-// The class's fastest car at Gellhorn; until laps exist, the class's band car
-// (first car with a photo). Super and Sports always, two more classes picked at
-// random in the browser; classes without a car are skipped.
-const classNames = [...new Set(vehicleOptions.flatMap((v) => v.classes))];
-const anyLap = vehicleOptions.some((v) => fastestGellhornLapMs(v.id) != null);
-type Pick = { cls: string; v: VehicleOption; ms: number | null };
-const picks: Pick[] = classNames.map((cls) => {
-  const inClass = vehicleOptions.filter((v) => v.classes.includes(cls));
-  const timed = inClass.filter((v) => fastestGellhornLapMs(v.id) != null).sort((a, b) => fastestGellhornLapMs(a.id)! - fastestGellhornLapMs(b.id)!);
-  // before any lap exists: only classes that have a car with a photo (Fausto 15.10.: no placeholder cards here)
-  const v = timed[0] ?? (anyLap ? null : bandVehicle(inClass));
-  return v ? { cls, v, ms: fastestGellhornLapMs(v.id) } : null;
-}).filter((p): p is Pick => p !== null);
-const fixed = ['Super', 'Sports'];
-const fastFixed = fixed.map((c) => picks.find((p) => p.cls === c)).filter((p): p is Pick => Boolean(p));
-const fastRest = picks.filter((p) => !fixed.includes(p.cls));
+// ---- GTA 6 Rankings (Fausto 27.11.2026): top 3 of each car ranking, 4 tiles at a time. Replaces
+// "Fastest at Gellhorn" (class records), which repeated the Time Attack band right above it.
+// Tile photo = the #1 car (else the first top-3 car with a photo); rows show logos, no car photos.
+// Rotation per page load in scripts/home.ts: never two tiles with the same #1 car at once.
+// Gellhorn reference lap joins as a tile once that ranking has 3 cars.
+// COPY STATUS: titles/sublines = Claude 27.11.2026, approved by Fausto in the mockup; Codex review open (DEC-0088).
+const RANK_TILES: { slug: string; title: string; sub: string; icon: string; cta: string }[] = [
+  { slug: 'best', title: 'Best road rating', sub: 'In-game, stock', icon: 'road', cta: 'All road ratings' },
+  { slug: 'best-off-road', title: 'Best off-road', sub: 'Off-road rating · in-game, stock', icon: 'off', cta: 'All off-road ratings' },
+  { slug: 'fastest', title: 'Highest speed', sub: 'Speed stat · in-game, stock', icon: 'speed', cta: 'All speed stats' },
+  { slug: 'quickest', title: 'Best acceleration', sub: 'Acceleration stat · in-game, stock', icon: 'acc', cta: 'All acceleration stats' },
+  { slug: 'most-expensive', title: 'Most expensive', sub: 'Cost to register', icon: 'gem', cta: 'All prices' },
+  { slug: 'cheapest', title: 'Cheapest', sub: 'Cost to register', icon: 'sale', cta: 'All prices' },
+  { slug: 'most-valuable', title: 'Best sell value', sub: 'Typical price when you sell', icon: 'dollar', cta: 'All sell values' },
+  { slug: 'gellhorn-lap', title: 'Fastest at Gellhorn', sub: 'Reference lap · stock', icon: 'lap', cta: 'All lap times' },
+];
+const RANK_ICON: Record<string, string> = {
+  road: '<path d="M9 3 5 21M15 3l4 18M12 5v2M12 11v2M12 17v2"/>',
+  off: '<path d="m3 18 5-7 4 5 3-4 6 6"/>',
+  speed: '<path d="m12 14 4-4"/><path d="M3.3 17a9 9 0 1 1 17.4 0"/>',
+  acc: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  gem: '<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M12 21 8 9l4-6 4 6z"/>',
+  sale: '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="m8 13 5-5"/><circle cx="8.5" cy="8.5" r=".8"/><circle cx="12.5" cy="12.5" r=".8"/>',
+  dollar: '<path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  lap: '<path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/>',
+};
+const rankTiles = RANK_TILES.flatMap((t) => {
+  const r = rankings.find((x) => x.slug === t.slug);
+  if (!r) return [];
+  const top = rankingEntries(r).slice(0, 3);
+  if (top.length < 3) return []; // a tile needs a full top 3
+  const photo = top.find((e) => e.vehicle.photo)?.vehicle ?? null;
+  return [{ ...t, href: `${base}${r.path}`, top, photo, lead: top[0].vehicle.id }];
+});
+// Without JavaScript: the first four tiles with different #1 cars.
+const rankShown = new Set<string>();
+{ const leads = new Set<string>(); for (const t of rankTiles) if (rankShown.size < 4 && !leads.has(t.lead)) { rankShown.add(t.slug); leads.add(t.lead); } }
+// money as on the vehicle page and in the Fresh chips ($87,400), so names keep their room
+const rankValue = (v: (typeof rankTiles)[number]['top'][number]['value']) => isMoneyMetric(v.metric) ? `$${Math.round(v.value).toLocaleString('en-US')}` : formatVehicleValueHtml(v);
+const rankLogo = (v: VehicleOption) => `${base}images/logos/${v.logoSlug}-gta-6-logo.svg`;
 
 // ---- Community: loading rows in the HTML; the browser fills in live rows, and only
 // falls back to the sample rows when nothing live comes back (no flash of fake data, Fausto 15.10.)
@@ -259,22 +282,44 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
     </div>
   </section>
 
-  <!-- ===== Fastest at Gellhorn ===== -->
+  <!-- ===== GTA 6 Rankings (Fausto 27.11.2026) ===== -->
+  {rankTiles.length >= 4 && (
   <section class="wrap hsec">
     <div class="hsec-head">
       <div class="hsec-titles">
-        <p class="eyebrow">Cars</p>
-        <h2 class="lr-h2 display hsec-title">Fastest at Gellhorn</h2>
-        <!-- Two states (Fausto 03.11.2026): until the first published lap the cards are photo picks, not record holders -->
-        <p class="hsec-sub">{anyLap ? 'The cars holding each class record right now. Beat a time and the spot is yours.' : 'No class records yet. Put down the first lap and the spot is yours.'}</p>
+        <p class="eyebrow">Top 3</p>
+        <h2 class="lr-h2 display hsec-title">GTA 6 Rankings</h2>
+        <p class="hsec-sub">The top 3 cars in each ranking, every value read in the game. Tap a ranking for the full list.</p>
       </div>
-      <a href={`${base}cars/`} class="arrow">All {N} cars →</a>
     </div>
-    <div class="cgrid" id="fastest">
-      {fastFixed.map((p) => <CarCard vehicle={p.v} cls={p.cls} lap={p.ms != null ? { rank: 1, ms: p.ms } : null} rotate="fixed" />)}
-      {fastRest.map((p, i) => <CarCard vehicle={p.v} cls={p.cls} lap={p.ms != null ? { rank: 1, ms: p.ms } : null} rotate={i < 4 - fastFixed.length ? 'pool-default' : 'pool'} />)}
+    <div class="rk-grid" id="rank-tiles">
+      {rankTiles.map((t) => (
+        <a class="rkt card" href={t.href} data-lead={t.lead} data-rotate={rankShown.has(t.slug) ? 'shown' : 'pool'}>
+          <div class="rkt-hd">
+            <p class="rkt-t"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={RANK_ICON[t.icon]} /><span>{t.title}</span></p>
+            <p class="rkt-s">{t.sub}</p>
+          </div>
+          <div class="rkt-ph">
+            {t.photo
+              ? <img src={`${base}images/vehicles/${t.photo.id}-640.webp`} srcset={`${base}images/vehicles/${t.photo.id}-640.webp 640w, ${base}images/vehicles/${t.photo.id}-1280.webp 1280w`} sizes="(max-width: 760px) 82vw, 320px" alt="" width="640" height="360" loading="lazy" />
+              : <img src={`${base}images/garage/garage-hero-placeholder-640.webp`} alt="" width="640" height="360" loading="lazy" />}
+          </div>
+          <ol class="rkt-list">
+            {t.top.map((e, i) => (
+              <li class:list={{ r1: i === 0 }}>
+                <i>{i + 1}</i>
+                <span class="rkt-lg">{e.vehicle.logoSlug && <img src={rankLogo(e.vehicle)} alt="" width="26" height="26" loading="lazy" />}</span>
+                <span class="rkt-n"><b>{e.vehicle.make} {e.vehicle.model}</b><small>{e.vehicle.classes[0] ?? ''}</small></span>
+                <span class="rkt-v tnum" set:html={rankValue(e.value)} />
+              </li>
+            ))}
+          </ol>
+          <span class="rkt-go">{t.cta} →</span>
+        </a>
+      ))}
     </div>
   </section>
+  )}
 
   <!-- ===== Community ===== -->
   <section class="wrap hsec">
@@ -465,6 +510,33 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   .cgrid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .cgrid > :global([data-rotate="pool"]) { display: none; }
 
+
+  /* ---- GTA 6 Rankings tiles (Fausto 27.11.2026) ---- */
+  .rk-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  .rk-grid > [data-rotate="pool"] { display: none; }
+  .rkt { display: flex; flex-direction: column; padding: 0; overflow: hidden; text-decoration: none; color: var(--lr-text); }
+  .rkt-hd { padding: 16px 16px 14px; }
+  .rkt-t { display: flex; align-items: center; gap: 8px; margin: 0; font-family: var(--gh-font-display); font-weight: 800; font-size: 18px; line-height: 1.1; letter-spacing: .005em; text-transform: uppercase; white-space: nowrap; }
+  .rkt-t svg { flex: none; color: var(--lr-orange); }
+  .rkt-t span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .rkt-s { margin: 4px 0 0 26px; font-size: 12px; color: var(--lr-muted); }
+  .rkt-ph { aspect-ratio: 16 / 9; background: var(--lr-raised); }
+  .rkt-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .rkt-list { list-style: none; margin: 0; padding: 6px 16px 0; }
+  .rkt-list li { display: grid; grid-template-columns: 16px 28px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--lr-line); }
+  .rkt-list li:last-child { border-bottom: 0; }
+  .rkt-list i { font-style: normal; font-weight: 800; font-size: 14px; color: var(--lr-muted); text-align: center; }
+  .rkt-list li.r1 i { color: var(--lr-orange); }
+  .rkt-lg { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+  .rkt-lg img { width: 26px; height: 26px; object-fit: contain; filter: var(--lr-logo-filter); opacity: var(--lr-logo-info); }
+  .rkt-n { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+  .rkt-n b { font-size: 14px; font-weight: 600; }
+  .rkt-n small { font-size: 12px; color: var(--lr-muted); }
+  .rkt-v { font-size: 14px; font-weight: 700; white-space: nowrap; }
+  .rkt-list li.r1 .rkt-v { font-size: 16px; font-weight: 800; }
+  .rkt-go { margin: auto 16px 16px; padding-top: 10px; font-size: 13px; font-weight: 600; color: var(--lr-pink); }
+  .rkt:hover .rkt-go { text-decoration: underline; }
+
   /* ---- community cards ---- */
   .ccards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
   .ccard { display: flex; flex-direction: column; }
@@ -606,6 +678,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
   @media (max-width: 1100px) {
     .htiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .cgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .rk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .cgrid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .tband { grid-template-columns: minmax(0, 1fr); }
     .tband-img { min-height: 240px; }
@@ -653,6 +726,8 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
     /* horizontal carousels (mockup phone) */
     .cgrid, .cgrid-3 { display: flex; overflow-x: auto; gap: 12px; margin: 0 calc(-1 * clamp(1.25rem, 4vw, 2.5rem)); padding: 0 clamp(1.25rem, 4vw, 2.5rem) 4px; scroll-snap-type: x mandatory; scroll-padding-left: clamp(1.25rem, 4vw, 2.5rem); scrollbar-width: none; }
     .cgrid > :global(*) { flex: 0 0 272px; scroll-snap-align: start; }
+    .rk-grid { display: flex; overflow-x: auto; gap: 12px; margin: 0 calc(-1 * clamp(1.25rem, 4vw, 2.5rem)); padding: 0 clamp(1.25rem, 4vw, 2.5rem) 4px; scroll-snap-type: x mandatory; scroll-padding-left: clamp(1.25rem, 4vw, 2.5rem); scrollbar-width: none; }
+    .rk-grid > .rkt { flex: 0 0 280px; scroll-snap-align: start; }
 
     .cimg { height: 110px; }
     .cbody { padding: 14px 12px; }
