@@ -6,11 +6,14 @@
 // The build renders loading rows; the browser fills in the live rows from public_leaderboard with the same
 // renderer (data/leaderboard.ts). No sample data any more since the first real lap (Fausto 26.11.2026).
 // COPY STATUS: labels/sentences are placeholders until the Codex review (DEC-0088).
-import { initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars } from '../data/leaderboard';
-const first = render([], initialState, false);
+import { initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, buildBoard } from '../data/leaderboard';
+// SEO (Fausto 27.11.2026): real rows fetched at build time go into the HTML (track record, drivers, times
+// visible to search engines); the browser reloads them live. Loading rows only when the build has none.
+const hasBuild = buildBoard.all.length > 0;
+const first = render(buildBoard.all, initialState, false);
 // Loading rows until the live laps are in (no flash of an empty or fake board, Fausto 26.11.2026)
 const loadingRows = Array.from({ length: 5 }, () => '<div class="lb-sk" aria-hidden="true"><span></span></div>').join('');
-const noLap = noLapCars([]);
+const noLap = noLapCars([...buildBoard.all, ...buildBoard.verified]);
 const base = import.meta.env.BASE_URL;
 const search = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
 const people = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
@@ -20,7 +23,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   <div class="lb-head">
     <div>
       <h2 class="lr-h2 display">Leaderboard</h2>
-      <p id="lb-meta">Best lap per driver · PS5</p>
+      <p id="lb-meta">{hasBuild ? first.meta : 'Best lap per driver · PS5'}</p>
     </div>
   </div>
 
@@ -66,7 +69,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 
   <div class="card tbl" id="lb-tbl" role="table" aria-label="Gellhorn leaderboard">
     <div role="rowgroup" id="lb-thead" set:html={headHtml(true)} />
-    <div role="rowgroup" id="lb-tbody" aria-live="polite" aria-busy="true" set:html={loadingRows} />
+    <div role="rowgroup" id="lb-tbody" aria-live="polite" aria-busy={hasBuild ? undefined : 'true'} set:html={hasBuild ? first.body : loadingRows} />
   </div>
   <p class="lb-legend" aria-hidden="true"><span class="st ok"><i><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>Video verified</span><span class="st no"><i></i>Screenshot only</span><span class="vd-l"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>Watch</p>
   <div class="lb-more" id="lb-more" set:html={first.more} />
@@ -309,7 +312,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   import { getSupabase, backendConfigured } from '../scripts/supabase-client';
   import { LEADERBOARD_PLATFORM } from '../data/platforms';
   import { loadIconIds } from '../scripts/icons';
-  import { initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, crewsWithLaps, crewInfo, crewTagHtml, type LbEntry, type LbState, type LbMode, type LbCrew } from '../data/leaderboard';
+  import { buildBoard, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, crewsWithLaps, crewInfo, crewTagHtml, type LbEntry, type LbState, type LbMode, type LbCrew } from '../data/leaderboard';
   import { buildCrews } from '../data/hub';
   import { computeBadges, loadBadges, badgesOn, type Badge } from '../data/badge';
 
@@ -317,9 +320,9 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   const $ = (id: string) => document.getElementById(id)!;
   const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 
-  let data: LbEntry[] = [];
+  let data: LbEntry[] = buildBoard.all; // build-time rows (SEO 27.11.2026), replaced by the live load
   // Best VERIFIED run per driver + car (RS-0040); "Video verified only" uses its own view.
-  let verifiedData: LbEntry[] = [];
+  let verifiedData: LbEntry[] = buildBoard.verified;
   const sample = false; // sample data removed 26.11.2026 (first real lap)
   // Driver Badge (DEC-0230): from all accepted best laps, the same in every view (not from the verified-only list)
   let badges = computeBadges(data);

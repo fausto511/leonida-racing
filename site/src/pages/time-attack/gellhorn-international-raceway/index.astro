@@ -7,10 +7,19 @@ import Base from '../../../layouts/Base.astro';
 import { isLaunched } from '../../../data/launch';
 const launched = isLaunched(); // Track guide card (Fausto 18.11.)
 import Leaderboard from '../../../components/Leaderboard.astro';
-import { sampleEntries, trackStats, recordWhoHtml, lapTime } from '../../../data/leaderboard';
+import { trackStats, recordWhoHtml, lapTime, buildBoard } from '../../../data/leaderboard';
 const base = import.meta.env.BASE_URL;
 // No sample record in the HTML (SEO, 27.10.2026); Leaderboard.astro paints the sample tile in the browser.
-const st = trackStats([], []);
+// SEO (Fausto 27.11.2026): real leaderboard rows from the build -> record, facts and snippet in the HTML.
+const st = trackStats(buildBoard.all, buildBoard.verified);
+// Title/description: placeholders until the Codex review (Claude 27.11.2026).
+const pageTitle = 'Gellhorn International Raceway: Fastest Laps in GTA 6';
+const descTail = 'See the fastest GTA 6 laps at Gellhorn International Raceway and submit your own.';
+const recLead = st.rec ? `Track record: ${lapTime(st.rec.lap_time_ms)} by ${st.rec.driver}` : '';
+const recCar = st.rec ? ` in the ${st.rec.make} ${st.rec.model}` : '';
+const pageDesc = !st.rec
+  ? 'Track the fastest GTA 6 laps at Gellhorn International Raceway. Compare drivers and cars on the Time Attack leaderboard and submit your own lap.'
+  : [`${recLead}${recCar}. ${descTail}`, `${recLead}. ${descTail}`].find((d) => d.length <= 160) ?? `${recLead}. Fastest GTA 6 laps at Gellhorn.`;
 const fmt = (n: number) => n.toLocaleString('en-US');
 const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>';
 const DRIVE = 'https://www.thedrive.com/news/theres-convincing-evidence-that-sebring-raceway-will-be-in-grand-theft-auto-6';
@@ -34,8 +43,8 @@ const jsonLd = [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEnti
 const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg>';
 ---
 <Base
-  title="Gellhorn International Raceway — GTA 6 Race Track"
-  description="Explore the GTA 6 race track known as Gellhorn International Raceway, compare Time Attack lap times, and find the rules for submitting your own lap."
+  title={pageTitle}
+  description={pageDesc}
   jsonLd={jsonLd}
   section="time-attack"
   breadcrumbs={[{ name: 'Gellhorn International Raceway', path: 'time-attack/gellhorn-international-raceway/' }]}
@@ -84,7 +93,7 @@ const trophy = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stro
         <dl class="facts">
           <div><dt>Length</dt><dd class="p">Not measured</dd></div>
           <div><dt>Grid</dt><dd>16 cars</dd></div>
-          <div><dt>Track record</dt><dd id="ta-fact-rec">No record yet</dd></div>
+          <div><dt>Track record</dt><dd id="ta-fact-rec">{st.rec ? lapTime(st.rec.lap_time_ms) : 'No record yet'}</dd></div>
         </dl>
       </div>
     </div>

@@ -16,6 +16,7 @@ import { taxonomyCopy } from './taxonomy-copy';
 import { buildCrews, esc } from './hub';
 import { iconTagHtml } from './icons';
 import { badgeHtml, type Badge } from './badge';
+import generated from './vehicles.generated.json';
 
 export interface LbEntry {
   /** best run of one driver on one vehicle (= one row of public_leaderboard) */
@@ -139,6 +140,18 @@ function buildSample(): LbEntry[] {
   return out;
 }
 export const sampleEntries: LbEntry[] = buildSample();
+
+// Real leaderboard rows fetched at build time (scripts/fetch-vehicles.mjs, SEO Fausto 27.11.2026).
+// Rendered into the HTML; the browser reloads them live (crew tags, ICON badges come from the live load).
+type BoardRow = { driver: string; driver_id: string; vehicle_id: string; make: string; model: string; manufacturer_logo_slug: string | null; lap_time_ms: number; track_entries: number; video_verified: boolean; video_url: string | null };
+const boardEntry = (r: BoardRow): LbEntry => ({
+  driver: r.driver, driver_id: r.driver_id, crew: null, icon: false,
+  vehicle_id: r.vehicle_id, make: r.make, model: r.model, logo: r.manufacturer_logo_slug,
+  lap_time_ms: Number(r.lap_time_ms), entries: Number(r.track_entries) || 0,
+  verified: Boolean(r.video_verified), video_url: r.video_url,
+});
+const gBoard = (generated as { board?: { all?: BoardRow[]; verified?: BoardRow[] } }).board;
+export const buildBoard = { all: (gBoard?.all ?? []).map(boardEntry), verified: (gBoard?.verified ?? []).map(boardEntry) };
 
 // ---------------------------------------------------------------------------
 // Ranking + filtering
