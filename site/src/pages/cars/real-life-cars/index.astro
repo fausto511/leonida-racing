@@ -1,0 +1,94 @@
+---
+// Real-life inspirations of all GTA VI cars on one page (Fausto 27.11.2026, idea 1). Our in-game photo next to the
+// real car's name; no photos of real cars (rights). Searchable by game name or real car.
+// Searchers ask "what car is the X in real life" -> one answer per row, linked to the vehicle page.
+// COPY: title, lede, description, labels = Claude placeholders 27.11.2026 -> Codex (DEC-0088).
+import Base from '../../../layouts/Base.astro';
+import { vehicleOptions } from '../../../data/vehicles';
+
+const base = import.meta.env.BASE_URL;
+const list = vehicleOptions
+  .filter((v) => v.releaseId && v.realLifeInspiration)
+  .sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`));
+const title = 'GTA 6 Cars in Real Life';
+const description = 'Every GTA 6 car next to the real car it is based on, from the Dinka Chavos XS to the Pegassi Vitello. Search by game name or real car.';
+const pageUrl = new URL(`${base}cars/real-life-cars/`, Astro.site).href;
+const jsonLd = [{
+  '@context': 'https://schema.org', '@type': 'ItemList', name: title, url: pageUrl, numberOfItems: list.length,
+  itemListElement: list.map((v, i) => ({ '@type': 'ListItem', position: i + 1, name: `${v.make} ${v.model}`, url: new URL(`${base}cars/vehicles/${v.id}/`, Astro.site).href })),
+}];
+---
+<Base title={title} description={description} section="garage" jsonLd={jsonLd}
+  breadcrumbs={[{ name: 'Cars', path: 'cars/' }, { name: 'Real-life cars', path: 'cars/real-life-cars/' }]}>
+  <section class="wrap rl-head">
+    <nav class="lr-crumb" aria-label="Breadcrumb"><a href={`${base}cars/`}>Cars</a><span aria-hidden="true">/</span><span aria-current="page">Real-life cars</span></nav>
+    <p class="eyebrow">GTA VI Vehicle Database</p>
+    <h1 class="display lr-t2">GTA 6 cars in real life</h1>
+    <p class="lr-lede">Most GTA VI cars are styled after a real model. Find the car you saw in the game and see which real car it is based on.</p>
+    <label class="rl-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input type="search" id="rl-q" placeholder="Search a game car or a real car, e.g. Porsche" aria-label="Search cars" autocomplete="off" /></label>
+    <p class="rl-count" id="rl-count">{list.length} cars</p>
+  </section>
+
+  <div class="wrap">
+    <ul class="rl-list" id="rl-list">
+      {list.map((v) => (
+        <li class="rl-row" data-s={`${v.make} ${v.model} ${v.realLifeInspiration}`.toLowerCase()}>
+          <a href={`${base}cars/vehicles/${v.id}/`}>
+            <span class="rl-img">{v.photo
+              ? <img src={`${base}images/vehicles/${v.id}-640.webp`} alt={`${v.make} ${v.model} in GTA VI`} width="640" height="360" loading="lazy" />
+              : <img class="is-ph" src={`${base}images/logos/${v.logoSlug}-gta-6-logo.svg`} alt="" width="48" height="48" loading="lazy" />}</span>
+            <span class="rl-game"><small>{v.make} · {v.classes[0]}</small><b>{v.model}</b></span>
+            <span class="rl-arrow" aria-hidden="true">→</span>
+            <span class="rl-real"><small>Based on</small><b>{v.realLifeInspiration}</b></span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="rl-none" id="rl-none" hidden>No car matches your search.</p>
+  </div>
+</Base>
+
+<script>
+  const q = document.getElementById('rl-q') as HTMLInputElement;
+  const rows = [...document.querySelectorAll<HTMLElement>('.rl-row')];
+  const count = document.getElementById('rl-count')!;
+  const none = document.getElementById('rl-none')!;
+  q.addEventListener('input', () => {
+    const t = q.value.trim().toLowerCase();
+    let n = 0;
+    for (const r of rows) { const on = !t || r.dataset.s!.includes(t); r.hidden = !on; if (on) n++; }
+    count.textContent = `${n} ${n === 1 ? 'car' : 'cars'}`;
+    none.hidden = n > 0;
+  });
+</script>
+
+<style>
+  .rl-head { padding-top: 28px; padding-bottom: 8px; }
+  .rl-head .lr-lede { max-width: 640px; }
+  .rl-search { display: flex; align-items: center; gap: 10px; max-width: 520px; height: 48px; margin-top: 22px; padding: 0 14px; border: 1px solid var(--lr-line); border-radius: 10px; background: var(--lr-card); }
+  .rl-search svg { width: 18px; height: 18px; fill: none; stroke: var(--lr-soft); stroke-width: 1.8; stroke-linecap: round; flex: none; }
+  .rl-search input { flex: 1; min-width: 0; border: 0; background: none; color: var(--lr-text); font: inherit; font-size: 15px; outline: none; }
+  .rl-count { margin: 12px 0 0; color: var(--lr-muted); font-size: 13px; }
+  .rl-list { list-style: none; margin: 16px 0 48px; padding: 0; display: grid; gap: 10px; }
+  .rl-row a { display: grid; grid-template-columns: 132px minmax(0, 1fr) 28px minmax(0, 1.2fr); align-items: center; gap: 18px; padding: 10px 18px 10px 10px; border: 1px solid var(--lr-line); border-radius: 12px; background: var(--lr-card); color: inherit; text-decoration: none; }
+  .rl-row a:hover { border-color: var(--lr-line-strong); }
+  .rl-img { display: flex; align-items: center; justify-content: center; width: 132px; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: var(--lr-raised); }
+  .rl-img img { width: 100%; height: 100%; object-fit: cover; }
+  .rl-img img.is-ph { width: 40px; height: 40px; object-fit: contain; opacity: .55; }
+  .rl-game, .rl-real { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .rl-game small, .rl-real small { color: var(--lr-muted); font-size: 12px; letter-spacing: .02em; }
+  .rl-game b { font-size: 17px; }
+  .rl-real b { font-size: 16px; font-weight: 600; }
+  .rl-arrow { color: var(--lr-orange); font-size: 20px; text-align: center; }
+  .rl-none { color: var(--lr-muted); margin-bottom: 48px; }
+  @media (max-width: 720px) {
+    .rl-row a { grid-template-columns: 104px minmax(0, 1fr); grid-template-areas: 'img game' 'img real'; gap: 4px 14px; padding: 8px 12px 8px 8px; }
+    .rl-img { grid-area: img; width: 104px; }
+    .rl-game { grid-area: game; }
+    .rl-real { grid-area: real; }
+    .rl-arrow { display: none; }
+    .rl-game b { font-size: 15px; }
+    .rl-real b { font-size: 14px; }
+  }
+</style>
