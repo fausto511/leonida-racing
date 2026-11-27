@@ -3,6 +3,10 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { vehicleOptions, vehicleLastmod } from './src/data/vehicles.ts';
 import { dataNoindexPaths } from './src/data/rankings.ts';
+import { contentDates } from './scripts/content-dates.mjs';
+
+// lastmod = latest of database change, new text, new photo (Fausto 27.11.2026)
+const textPhotoDates = contentDates();
 
 // noindex pages that must stay out of the sitemap (RS-0050): vehicles without
 // an official release (leak-only) and the submit form until launch day.
@@ -41,7 +45,8 @@ export default defineConfig({
       // rather than a misleading build date.
       serialize(item) {
         const id = item.url.match(/\/cars\/vehicles\/([^/]+)\/$/)?.[1];
-        if (id && vehicleLastmod[id]) item.lastmod = new Date(vehicleLastmod[id]).toISOString();
+        const dates = id ? [vehicleLastmod[id], textPhotoDates[id]].filter(Boolean).map((d) => new Date(d).getTime()) : [];
+        if (dates.length) item.lastmod = new Date(Math.max(...dates)).toISOString();
         return item;
       },
       filter: (page) =>

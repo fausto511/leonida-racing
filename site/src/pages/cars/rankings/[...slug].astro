@@ -28,6 +28,10 @@ const complete = entries.length === r.scope.length;
 const isPrice = r.metric === COST_METRIC; // cost to register (DEC-0247)
 const isLap = r.metric === 'gellhorn_reference_lap_ms';
 const isSpeed = r.metric === 'top_speed_mph' || r.metric === 'stat_speed'; // Speed stat since 25.11.2026
+const isSell = r.metric === 'sell_price_gtad';
+// per-metric wording (Fausto 27.11.2026; COPY: Claude placeholders -> Codex)
+const METRIC_TOP: Record<string, string> = { stat_speed: 'Highest speed stat', rating_road: 'Highest road rating', rating_offroad: 'Highest off-road rating', stat_acceleration: 'Highest acceleration stat', sell_price_gtad: 'Highest sell value' };
+const METRIC_EMPTY: Record<string, string> = { rating_road: 'road ratings', rating_offroad: 'off-road ratings', stat_acceleration: 'acceleration stats', sell_price_gtad: 'sell values' };
 const cls = r.classSlug ? classPages.find((c) => c.slug === r.classSlug) : undefined;
 
 // Visible H1 without "in GTA 6" (DEC-0130: GTA VI stays in title, eyebrow, meta)
@@ -36,16 +40,22 @@ const heading = isLap ? 'Fastest at Gellhorn' : r.title.replace(/ in GTA 6$/, ''
 
 // ---- switcher chips ----
 const metricChips = [
-  { name: 'Speed', slug: 'fastest', on: isSpeed },
+  { name: 'Road rating', slug: 'best', on: r.group === 'best' },
+  { name: 'Off-road rating', slug: 'best-off-road', on: r.group === 'best-off-road' },
+  { name: 'Speed', slug: 'fastest', on: r.group === 'fastest' },
+  { name: 'Acceleration', slug: 'quickest', on: r.group === 'quickest' },
   { name: 'Most expensive', slug: 'most-expensive', on: r.slug === 'most-expensive' },
   { name: 'Cheapest', slug: 'cheapest', on: r.slug === 'cheapest' },
+  { name: 'Sell value', slug: 'most-valuable', on: isSell },
   { name: 'Gellhorn reference lap', slug: 'gellhorn-lap', on: isLap },
 ];
-const fastestAll = rankings.find((x) => x.slug === 'fastest')!;
-const classChips = isSpeed
+// class chips for the groups with per-class pages (fastest, best, best-off-road, quickest)
+const groupAll = rankings.find((x) => x.slug === r.group);
+const groupClasses = rankings.filter((x) => x.classSlug && x.group === r.group);
+const classChips = groupAll && groupClasses.length
   ? [
-      { name: 'All classes', slug: 'fastest', count: fastestAll.scope.length, on: !r.classSlug },
-      ...rankings.filter((x) => x.classSlug).map((x) => ({ name: classPages.find((c) => c.slug === x.classSlug)?.name ?? x.classSlug!, slug: x.slug, count: x.scope.length, on: x.slug === r.slug })),
+      { name: 'All classes', slug: groupAll.slug, count: groupAll.scope.length, on: !r.classSlug },
+      ...groupClasses.map((x) => ({ name: classPages.find((c) => c.slug === x.classSlug)?.name ?? x.classSlug!, slug: x.slug, count: x.scope.length, on: x.slug === r.slug })),
     ]
   : [];
 
@@ -65,8 +75,8 @@ const bandCar: VehicleOption | null = isLap ? null : topWithPhoto ?? bandVehicle
 // ---- at a glance ----
 const pct = r.scope.length ? Math.round((entries.length / r.scope.length) * 100) : 0;
 const top = entries[0] ?? null;
-const topLabel = isPrice ? (r.slug === 'cheapest' ? 'Lowest cost to register' : 'Highest cost to register') : isLap ? 'Quickest reference lap' : 'Highest speed stat';
-const measuredAs = isPrice ? 'Cost to register, in-game scanner' : isLap ? 'Stock, reference lap' : 'Stock, in-game vehicle menu';
+const topLabel = isPrice ? (r.slug === 'cheapest' ? 'Lowest cost to register' : 'Highest cost to register') : isLap ? 'Quickest reference lap' : METRIC_TOP[r.metric] ?? 'Highest value';
+const measuredAs = isPrice ? 'Cost to register, in-game scanner' : isSell ? 'Typical sell value, in-game' : isLap ? 'Stock, reference lap' : 'Stock, in-game vehicle menu';
 
 // ---- loops ----
 const compareIds = entries.slice(0, 4).map((e) => e.vehicle.id);
@@ -166,7 +176,7 @@ const source = (e: (typeof entries)[number]) => `${valueSourceLabels[e.value.sou
             ? 'No costs to register are available yet. Cars will appear here as their costs are recorded in GTA VI.'
             : isLap
               ? 'No reference lap times are available yet. Cars will appear here as their stock results are recorded at Gellhorn International Raceway.'
-              : 'No speed stats are available yet. Cars will appear here as their stock values are read in the game.'}</p>
+              : `No ${METRIC_EMPTY[r.metric] ?? 'speed stats'} are available yet. Cars will appear here as their ${isSell ? 'values' : 'stock values'} are read in the game.`}</p>
         )}
         <div class="rk-tiles">
           {waiting.slice(0, WAIT_SHOW).map((v) => (

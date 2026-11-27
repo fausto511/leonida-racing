@@ -39,6 +39,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # full history (without file contents) so the sitemap can date text/photo changes per car (site/scripts/content-dates.mjs, 27.11.2026)
+          fetch-depth: 0
+          filter: blob:none
 
       - uses: actions/setup-node@v4
         with:

@@ -28,6 +28,12 @@ export function getStaticPaths() {
 const { vehicle } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const copy = vehicleCopy[vehicle.id];
+// Specialist -> mod shop (guide table "GTA VI car mod shops and their specialties"; Fausto 27.11.2026). UE = Ultimate Edition shop.
+const SPECIALIST_SHOP: Record<string, string> = {
+  Tuner: 'Vice Auto Customs', Luxury: 'Euroform Automotive', 'Off-Road': 'Wasteland Off-Road', Muscle: 'Capri Classic',
+  Donks: 'Rideout Customs (Ultimate Edition)', Lowriders: 'Lowballers Customs', 'Hot Rods': 'Stockyard Speedshop',
+};
+const modShop = vehicle.specialist ? SPECIALIST_SHOP[vehicle.specialist] ?? null : null;
 const sources = vehicleSources[vehicle.id] ?? [];
 // "Stats updated" (RS-0130, Fausto 16./18.11.2026): date of the newest published value. data-stats-at
 // carries the exact time for the Discord feed, which posts only once the page shows the new stats.
@@ -237,7 +243,7 @@ const faqs: Faq[] = vehicle.releaseId ? ([
     a: [roadR.value != null ? `Road rating ${Math.round(roadR.value)}${roadR.rank != null ? ` (#${roadR.rank} of ${roadR.n} in ${cls})` : ''}` : '',
         offR.value != null ? `off-road rating ${Math.round(offR.value)}${offR.rank != null ? ` (#${offR.rank} of ${offR.n} in ${cls})` : ''}` : ''].filter(Boolean).join(', ').replace(/^o/, 'O') + ', stock.' },
   vehicle.specialist && vehicle.specialist !== 'None' && { q: `Which mod shop specialist works on the ${fullName}?`,
-    a: `The ${fullName} goes to ${/^[AEIOU]/i.test(vehicle.specialist) ? 'an' : 'a'} ${vehicle.specialist} specialist.`, link: [`${base}guide/#customization`, 'Mod shops'] },
+    a: `The ${fullName} goes to ${/^[AEIOU]/i.test(vehicle.specialist) ? 'an' : 'a'} ${vehicle.specialist} specialist${modShop ? `: ${modShop}` : ''}.`, link: [`${base}guide/#customization`, 'Mod shops'] },
   vehicle.realLifeInspiration && { q: `What real car is the ${fullName} based on?`, a: `The ${fullName} is based on the ${vehicle.realLifeInspiration}.` },
   vehicle.nitrous != null && { q: `Can you add nitrous to the ${fullName}?`,
     a: vehicle.nitrous ? `Yes, the ${fullName} can be fitted with nitrous.` : `No, the ${fullName} can't be fitted with nitrous.` },
@@ -337,7 +343,7 @@ if (faqs.length) vehicleJsonLd.push({ '@context': 'https://schema.org', '@type':
           ))}
         </div>
         <dl class="vs-rows">
-          <div><dt>Specialist</dt><dd class:list={{ 'is-tba': !vehicle.specialist }}>{vehicle.specialist ?? notRecorded}</dd></div>
+          <div><dt>Specialist</dt><dd class:list={{ 'is-tba': !vehicle.specialist }}>{vehicle.specialist ? <>{vehicle.specialist}{modShop && <span class="vs-cond"> · <a href={`${base}guide/#customization`}>{modShop}</a></span>}</> : notRecorded}</dd></div>
           <div><dt>Tracker</dt><dd class:list={{ 'is-tba': !vehicle.tracker }}>{vehicle.tracker ? <>{vehicle.tracker}{vehicle.keyCloner && <span class="vs-cond"> · Key Cloner needed</span>}</> : notRecorded}</dd></div>
           <div class="vr vs-vr" id="vr"><dt>Driver rating</dt><dd><span class="vr-line"><b class="tnum vr-avg" id="vr-avg" hidden></b><span class="vr-stars" id="vr-stars" role="group" aria-label="Rate this car">{<Fragment set:html={starsHtml} />}</span></span><span class="vr-sub" id="vr-sub">Not enough ratings yet</span></dd></div>
         </dl>
