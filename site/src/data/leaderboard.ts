@@ -209,7 +209,7 @@ function crewTag(c: LbEntry['crew']) {
   return `<a class="crew-tag crew-tag-sm lb-crew-tag" rel="nofollow" style="--crew-color:${c.color}" href="${base}community/crews/?q=${encodeURIComponent(c.tag)}" title="Crew ${esc(c.tag)}">${esc(c.tag)}</a>`;
 }
 const CHECK = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
-const PLAY = '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+const PLAY = '<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>';
 function statusCell(verified: boolean) {
   return verified
     ? `<span class="st ok" role="cell" title="Video verified"><i>${CHECK}</i><span class="st-t">Video verified</span></span>`
@@ -393,6 +393,6 @@ export function trackStats(all: LbEntry[], verified: LbEntry[]) {
 export function recordWhoHtml(rec: LbEntry | null, badges?: Map<string, Badge>): string {
   if (!rec) return '<span>No video-verified lap yet</span>';
   // Watch link for the record lap (Fausto 27.11.2026): plain link, no embedded player.
-  const vd = rec.video_url && /^https:\/\//.test(rec.video_url) ? `<a class="rec-vd lr-noext" href="${esc(rec.video_url)}" target="_blank" rel="noopener"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Watch the record lap</a>` : '';
+  const vd = rec.video_url && /^https:\/\//.test(rec.video_url) ? `<a class="rec-vd lr-noext" href="${esc(rec.video_url)}" target="_blank" rel="noopener"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>Watch the record lap</a>` : '';
   return `${badgeHtml(badges?.get(rec.driver_id), 24)}<b>${esc(rec.driver)}</b>${iconTagHtml(rec.icon)}${crewTag(rec.crew)}<span>in ${esc(rec.make)} ${esc(rec.model)}</span>${vd}`;
 }

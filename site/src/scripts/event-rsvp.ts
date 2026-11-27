@@ -45,7 +45,7 @@ export function createEventRsvp(root: HTMLElement) {
       : discord
         ? 'Join the host\u2019s Discord so they can send your lobby invite.'
         : 'Add the host on PlayStation and message them for your lobby invite.';
-    const cal = `<button type="button" class="ev-ics" data-ics="${esc(e.event_id)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>Add to calendar</button>`;
+    const cal = `<button type="button" class="ev-ics" data-ics="${esc(e.event_id)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>Add to calendar</button>`;
     return `<div class="ev-next"><p class="ev-next-text"><strong>You\u2019re in \u2014 one more step.</strong> ${text} ${cal}</p>${buttons ? `<div class="ev-next-actions">${buttons}</div>` : ''}</div>`;
   }
 

@@ -15,7 +15,7 @@ const first = render(buildBoard.all, initialState, false);
 const loadingRows = Array.from({ length: 5 }, () => '<div class="lb-sk" aria-hidden="true"><span></span></div>').join('');
 const noLap = noLapCars([...buildBoard.all, ...buildBoard.verified]);
 const base = import.meta.env.BASE_URL;
-const search = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+const search = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>';
 const people = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
 const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>';
 ---
@@ -71,7 +71,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     <div role="rowgroup" id="lb-thead" set:html={headHtml(true)} />
     <div role="rowgroup" id="lb-tbody" aria-live="polite" aria-busy={hasBuild ? undefined : 'true'} set:html={hasBuild ? first.body : loadingRows} />
   </div>
-  <p class="lb-legend" aria-hidden="true"><span class="st ok"><i><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>Video verified</span><span class="st no"><i></i>Screenshot only</span><span class="vd-l"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>Watch</p>
+  <p class="lb-legend" aria-hidden="true"><span class="st ok"><i><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>Video verified</span><span class="st no"><i></i>Screenshot only</span><span class="vd-l"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></span>Watch</p>
   <div class="lb-more" id="lb-more" set:html={first.more} />
 
   <div class="ta-2">

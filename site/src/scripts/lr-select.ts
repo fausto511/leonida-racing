@@ -8,7 +8,7 @@
 const SEARCH_FROM = 13; // long lists (cars, makes, ...) get a search field
 const PHONE = '(max-width: 560px)';
 const CHECK = '<svg class="lr-dd-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
-const SEARCH = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+const SEARCH = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>';
 const CLOSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
 
 let open = null; // { sel, btn, panel, items, active, backdrop }

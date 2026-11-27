@@ -202,7 +202,7 @@ export function eventDiscordHtml(e: HubEvent, sample = false): string {
  *  COPY STATUS: approved (Codex 2026-10-02, Fausto). */
 export function eventStreamHtml(e: HubEvent, sample = false): string {
   if (e.status === 'cancelled' || !e.streams?.length) return '';
-  const icon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+  const icon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>';
   return [...e.streams].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)).map((s) => {
     const label = `Watch on ${streamPlatformLabels[s.platform] ?? 'stream'}`;
     if (sample) return `<span class="ev-watch is-disabled" title="Sample event — no real stream">${icon}${label}</span>`;

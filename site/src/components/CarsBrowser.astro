@@ -95,7 +95,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
   <section class="wrap tools" id="tools" data-noun={noun} data-default-sort={defaultSort}>
     <div class="tools-row">
       <label class="ctl ctl-search">
-        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
         <input type="search" id="f-q" placeholder={`Search ${noun}`} aria-label={`Search ${noun}`} autocomplete="off" />
       </label>
       {scope !== 'class' && <div class="dd dd-l">
@@ -128,13 +128,13 @@ function mc(group: string, value: string | number, label: string, n: number | un
         </div>
       </div>
       <button type="button" class="ctl ctl-detail" id="open-detail">
-        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H3"/><path d="M12 19H3"/><path d="M14 3v4"/><path d="M16 17v4"/><path d="M21 12h-9"/><path d="M21 19h-5"/><path d="M21 5h-7"/><path d="M8 10v4"/><path d="M8 12H3"/></svg>
         Detailed search<b class="ctl-count" id="detail-count" hidden></b>
       </button>
     </div>
     <!-- phone: search full width, then Filters + Sort -->
     <div class="tools-phone">
-      <button type="button" class="ctl" id="open-filters"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<b class="ctl-count" id="filter-count" hidden></b></button>
+      <button type="button" class="ctl" id="open-filters"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H3"/><path d="M12 19H3"/><path d="M14 3v4"/><path d="M16 17v4"/><path d="M21 12h-9"/><path d="M21 19h-5"/><path d="M21 5h-7"/><path d="M8 10v4"/><path d="M8 12H3"/></svg>Filters<b class="ctl-count" id="filter-count" hidden></b></button>
       <button type="button" class="ctl" id="open-sort-phone"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg>Sort: <b data-sort-label>{defaultSort === 'name' ? 'Name A–Z' : defaultSort === 'class' ? 'Class' : (SORT_DATA.find(([k]) => k === defaultSort)?.[1] ?? 'Class')}</b></button>
     </div>
     <div class="tools-row2">

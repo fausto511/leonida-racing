@@ -63,7 +63,7 @@ function init(root: HTMLElement, ALL: CmpCar[]) {
   const ratings = new Map<string, { avg: number; count: number }>();
 
   // ---- strip ----------------------------------------------------------------------
-  const houseIco = '<svg class="g1" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12M7 21v-7h10v7"/></svg><svg class="g2" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/></svg>';
+  const houseIco = '<svg class="g1" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 21V10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v11"/><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 1.132-1.803l7.95-3.974a2 2 0 0 1 1.837 0l7.948 3.974A2 2 0 0 1 22 8z"/><path d="M6 13h12"/><path d="M6 17h12"/></svg><svg class="g2" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 1.132-1.803l7.95-3.974a2 2 0 0 1 1.837 0l7.948 3.974A2 2 0 0 1 22 8z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></svg>';
   function tile(c: CmpCar): string {
     const pic = c.photo
       ? `<img src="${img(c)}" alt="" width="640" height="360" loading="lazy" />`
