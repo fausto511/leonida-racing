@@ -6,11 +6,9 @@
 export const vehiclePhotoAlt: Record<string, string> = {
   'granforma-zorrusso': 'Red GranForma Zorrusso parked at a curb, front three-quarter view',
   // Added 2026-10-06 (Claude, from the photos; Fausto allowed alt texts without Codex):
-  'albany-manana': 'Rust-red Albany Manana ’77 convertible with the top down, parked on a driveway, front three-quarter view',
   'annis-elegy-retro-custom': 'Annis Elegy Retro Custom with graphic livery and glowing taillights at night, rear view',
   'declasse-tulip': 'Red Declasse Tulip driving toward the camera on a sunny road',
   'ubermacht-cypher': 'White Übermacht Cypher race car with a rear wing on a wet track, rear view',
-  'ubermacht-sentinel-classic': 'Red Übermacht Sentinel ’85 convertible parked in front of a shop, front view',
   'vapid-caracara-4x4': 'Silver Vapid Caracara 4x4 pickup with hood stripe on a gravel driveway',
   'canis-kamacho': 'Green Canis Kamacho off-road truck against a glowing green backdrop',
   'declasse-mamba-gt': 'Red Declasse Mamba GT race car with number 36 livery',
@@ -31,4 +29,9 @@ export const vehiclePhotoAlt: Record<string, string> = {
   'vapid-sandking-xt': 'Silver Vapid Sandking XT dually pickup on a dirt lot, front three-quarter view',
   'albany-primo': 'Brown Albany Primo sedan parked in a parking lot, front three-quarter view',
   'willard-grouse-92': "Gray Willard Grouse '92 sedan at a gas station, front three-quarter view",
+  // Added 2026-11-27 (Claude, from Fausto's in-game photos):
+  'karin-futo': "Dark blue Karin Futo '85 parked in a parking lot in front of a concrete wall, front three-quarter view",
+  'albany-manana': "Black Albany Manana '77 with the top up, parked in a parking lot, front three-quarter view",
+  'imponte-phoenix': "Black Imponte Phoenix '77 parked in front of a shop, front three-quarter view",
+  'ubermacht-sentinel-classic': "Cream Übermacht Sentinel '85 convertible with the top up, parked in a parking lot, front three-quarter view",
 };
