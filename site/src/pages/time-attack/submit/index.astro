@@ -14,7 +14,7 @@ const base = import.meta.env.BASE_URL;
 const active = PLATFORMS.find((p) => p.active)!;
 const vehicles = [...vehicleOptions]
   .sort((a, b) => a.make.localeCompare(b.make) || a.model.localeCompare(b.model))
-  .map((v) => ({ id: v.id, make: v.make, model: v.model, logo: v.logoSlug ? `${base}images/logos/${v.logoSlug}-gta-6-logo.svg` : '' }));
+  .map((v) => ({ id: v.id, make: v.make, model: v.model, logo: v.logoSlug ? `${base}images/logos/${v.logoSlug}-gta-6-logo.svg` : '', ...(v.nitrous === false ? { noNitro: true } : {}) }));
 const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
 ---
 <Base
@@ -179,6 +179,15 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
                 <label class="field-label" for="lap_time">Lap time</label>
                 <input id="lap_time" class="lr-field-xl" name="lap_time" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="1:24.683" />
                 <p class="hint">Just type the digits: 124683 becomes 1:24.683.</p>
+              </div>
+              <!-- Nitrous per lap (Fausto 27.11.2026, DEC-0259). Text not yet reviewed by Codex. -->
+              <div class="field">
+                <p class="field-label" id="nitro-label">Did you use nitrous on this lap?</p>
+                <div class="sb-name-opts" role="radiogroup" aria-labelledby="nitro-label" id="nitro-opts">
+                  <label><input type="radio" name="nitro" value="yes" /><span>Yes</span></label>
+                  <label><input type="radio" name="nitro" value="no" /><span>No</span></label>
+                </div>
+                <p class="hint" id="nitro-hint" hidden>This car has no nitrous.</p>
               </div>
             </div>
           </div>
@@ -404,6 +413,18 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const VEH = JSON.parse($('veh-data').textContent || '[]');
   const vById = new Map(VEH.map((v) => [v.id, v]));
+  // Nitrous answer: 'yes' | 'no' | '' (not answered). Cars without nitrous are set to No and locked.
+  const nitroVal = () => (form.querySelector('input[name="nitro"]:checked')?.value ?? '');
+  function syncNitro() {
+    const v = vById.get($('vehicle_id').value);
+    const lock = !!v?.noNitro;
+    const yes = form.querySelector('input[name="nitro"][value="yes"]');
+    const no = form.querySelector('input[name="nitro"][value="no"]');
+    if (lock) { no.checked = true; yes.checked = false; }
+    yes.disabled = lock;
+    yes.closest('label').classList.toggle('is-off', lock);
+    $('nitro-hint').hidden = !lock;
+  }
 
   const form = $('submit-form');
   const guestEl = $('sb-guest');
@@ -493,6 +514,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
       if (!psn) return 'Add PSN name';
       if (!$('vehicle_id').value) return 'Pick your car';
       if (parseLapTimeToMs($('lap_time').value) === null) return 'Enter lap time';
+      if (!nitroVal()) return 'Nitrous: yes or no?';
       return null;
     }
     return null;
@@ -529,6 +551,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
       else if (!PSN_RE.test(psn)) { list.push('PSN name: 3–16 characters, starts with a letter; letters, digits, - and _ only.'); $('psn_name').setAttribute('aria-invalid', 'true'); }
       if (!$('vehicle_id').value) { list.push('Pick the car you drove.'); $('veh-q').setAttribute('aria-invalid', 'true'); }
       if (parseLapTimeToMs($('lap_time').value) === null) { list.push('Enter the lap time, e.g. 124683 or 1:24.683.'); $('lap_time').setAttribute('aria-invalid', 'true'); }
+      if (!nitroVal()) list.push('Tell us if you used nitrous on this lap.');
     }
     return list;
   }
@@ -694,13 +717,14 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
     clearBtn.hidden = false;
     list.hidden = true; q.setAttribute('aria-expanded', 'false');
     q.removeAttribute('aria-invalid');
+    syncNitro();
     refresh();
   }
   function clearVehicle() {
     vidEl.value = ''; q.value = ''; logoEl.hidden = true; clearBtn.hidden = true; $('veh-hint').textContent = '';
-    refresh(); q.focus();
+    syncNitro(); refresh(); q.focus();
   }
-  q.addEventListener('input', () => { if (vidEl.value) { vidEl.value = ''; logoEl.hidden = true; clearBtn.hidden = !q.value; $('veh-hint').textContent = ''; } openList(); refresh(); });
+  q.addEventListener('input', () => { if (vidEl.value) { vidEl.value = ''; logoEl.hidden = true; clearBtn.hidden = !q.value; $('veh-hint').textContent = ''; syncNitro(); } openList(); refresh(); });
   q.addEventListener('focus', () => { if (!vidEl.value && q.value) openList(); });
   q.addEventListener('keydown', (e) => {
     if (list.hidden || !hits.length) return;
@@ -730,6 +754,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
       ['PSN name', $('psn_name').value.trim(), 2],
       ['Car', v ? `${v.make} ${v.model}` : '', 2],
       ['Lap time', normalizeLapTime($('lap_time').value) ?? '', 2, 't'],
+      ['Nitrous', nitroVal() === 'yes' ? 'Used' : nitroVal() === 'no' ? 'Not used' : '', 2],
       ['Platform', 'PS5', 0],
     ];
     $('sum-list').innerHTML = rows.map(([k, val, s, cls]) => `<dt>${k}</dt><dd${cls ? ` class="${cls}"` : ''}>${esc(val)}</dd><dd class="e">${s ? `<button type="button" class="link-btn" data-edit="${s}">Edit</button>` : ''}</dd>`).join('');
@@ -802,7 +827,7 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, apikey: SUPABASE_ANON_KEY },
         body: JSON.stringify({
           track_id: TRACK, vehicle_id: vehicleId, lap_time_ms: lapTimeMs, platform: PLATFORM,
-          standard_version: 'v0-draft', conditions: {},
+          standard_version: 'v0-draft', conditions: { nitro: nitroVal() === 'yes' },
           // The leaderboard always shows the driver's display name; the name is chosen in step 3.
           display_name_consent: true,
           evidence,
@@ -857,6 +882,8 @@ const check = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" strok
     clearScreenshot();
     $('video_url').value = ''; videoId = null; $('vid-ok').hidden = true;
     $('lap_time').value = '';
+    form.querySelectorAll('input[name="nitro"]').forEach((r) => { r.checked = false; });
+    syncNitro();
     show('form'); go(1);
   });
 

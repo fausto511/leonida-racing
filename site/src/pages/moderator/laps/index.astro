@@ -216,6 +216,7 @@ const subs = [
   const subs = initModSubs('review', (key) => { currentFilter = key; onFilterChange(); });
   currentFilter = subs.current;
   let currentModeratorDriverId = null;
+  let gamePatches = []; // game_patches rows (version, released_on), DEC-0259
   let allVehicles = [];
   let allReleases = []; // game_releases (RS-0048): game version per run
 
@@ -423,11 +424,15 @@ const subs = [
   async function loadQueue() {
     queueErrorEl.hidden = true;
     const sb = getSupabase();
+    if (!gamePatches.length) {
+      const { data: gp } = await sb.from('game_patches').select('version, released_on').order('released_on');
+      gamePatches = gp ?? [];
+    }
     const { data, error } = await sb
       .from('runs')
       .select(
         `run_id, driver_id, vehicle_id, track_id, lap_time_ms, platform,
-         vehicle_text_observed, vehicle_state, game_version, standard_version,
+         vehicle_text_observed, vehicle_state, game_version, standard_version, nitro_used, game_mode,
          review_status, publication_status, verification_tier, display_name_consent, video_use_ok,
          correction_note, corrected_at, correction_prev,
          submitted_at, driven_at, created_at,
@@ -596,6 +601,8 @@ const subs = [
           <div class="fact-row"><span>Vehicle</span><strong>${vehicleLabel(run.vehicles)}</strong></div>
           <div class="fact-row"><span>As typed at submission</span><strong>${run.vehicle_text_observed || '—'}</strong></div>
           <div class="fact-row"><span>Lap time</span><strong>${formatLapTime(run.lap_time_ms)}</strong></div>
+          <div class="fact-row"><span>Nitrous</span><strong class="nitro-set" id="nitro-set">${nitroButtonsHtml(run.nitro_used)}</strong></div>
+          <div class="fact-row"><span>Mode · patch</span><strong>${run.game_mode === 'online' ? 'Online' : 'Story'} · ${patchAt(run.submitted_at ?? run.created_at)}</strong></div>
           <div class="fact-row"><span>Track</span><strong>${run.tracks?.name ?? '—'}</strong></div>
           <div class="fact-row"><span>Platform</span><strong>${platformLabel(run.platform)}</strong></div>
           <div class="fact-row"><span>Game version</span><strong>${releaseLabel(run.game_version)}</strong></div>
@@ -853,6 +860,45 @@ const subs = [
     await loadQueue();
   }
 
+  // Nitrous per lap (Fausto 27.11.2026, DEC-0259): the driver's answer, corrected here after a video check.
+  function patchAt(ts) {
+    if (!ts) return '—';
+    const day = new Date(ts).toISOString().slice(0, 10);
+    if (gamePatches.some((p) => p.released_on === day)) return 'uncertain (patch day)';
+    const before = gamePatches.filter((p) => p.released_on < day);
+    return before.length ? before[before.length - 1].version : '—';
+  }
+  function nitroButtonsHtml(val) {
+    const opts = [['yes', 'Used', val === true], ['no', 'Not used', val === false], ['none', 'Not given', val == null]];
+    return opts.map(([k, label, on]) => `<button type="button" class="btn btn-sm ${on ? 'btn-p' : 'btn-s'}" data-action="set-nitro" data-nitro="${k}" aria-pressed="${on}">${label}</button>`).join(' ');
+  }
+  async function setNitro(run, key, btn) {
+    const value = key === 'yes' ? true : key === 'no' ? false : null;
+    if (value === run.nitro_used) return;
+    const box = document.getElementById('nitro-set');
+    box?.querySelectorAll('button').forEach((b) => (b.disabled = true));
+    const sb = getSupabase();
+    const { error } = await sb.from('runs').update({ nitro_used: value }).eq('run_id', run.run_id);
+    if (error) {
+      showDecisionMsg(`Could not save nitrous: ${error.message}`, true);
+      box?.querySelectorAll('button').forEach((b) => (b.disabled = false));
+      return;
+    }
+    if (currentModeratorDriverId) {
+      await sb.from('moderation_log').insert({
+        run_id: run.run_id,
+        moderator_driver_id: currentModeratorDriverId,
+        action: 'manual_override',
+        previous_value: { nitro_used: run.nitro_used },
+        new_value: { nitro_used: value },
+        reason: 'Nitrous set by moderator (video check)',
+      });
+    }
+    run.nitro_used = value;
+    if (box) box.innerHTML = nitroButtonsHtml(value);
+    showDecisionMsg('Nitrous saved.');
+  }
+
   async function callModerate(action, runId, reason, extra) {
     const accessToken = currentSession?.access_token;
     if (!accessToken) throw new Error('No active session.');
@@ -900,6 +946,10 @@ const subs = [
 
     if (action === 'save-override') {
       await saveOverride(run, actionBtn);
+      return;
+    }
+    if (action === 'set-nitro') {
+      await setNitro(run, actionBtn.dataset.nitro, actionBtn);
       return;
     }
 
