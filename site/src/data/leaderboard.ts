@@ -281,7 +281,7 @@ export function render(all: LbEntry[], s: LbState, sample: boolean, badges?: Map
   const vf = s.verifiedOnly ? 'verified ' : '';
   const driverCount = new Set(all.map((e) => e.driver_id)).size;
   const laps = [...new Map(all.map((e) => [e.driver_id, e.entries])).values()].reduce((a, b) => a + b, 0);
-  const meta = `Best lap per driver · PS5 · ${driverCount} driver${driverCount === 1 ? '' : 's'} · ${laps} accepted lap${laps === 1 ? '' : 's'}`;
+  const meta = `Best lap per driver · Gellhorn Raceway Time Trial · PS5 · ${driverCount} driver${driverCount === 1 ? '' : 's'} · ${laps} accepted lap${laps === 1 ? '' : 's'}`;
 
   let ranked: Ranked;
   let context = '';
@@ -392,5 +392,7 @@ export function trackStats(all: LbEntry[], verified: LbEntry[]) {
 }
 export function recordWhoHtml(rec: LbEntry | null, badges?: Map<string, Badge>): string {
   if (!rec) return '<span>No video-verified lap yet</span>';
-  return `${badgeHtml(badges?.get(rec.driver_id), 24)}<b>${esc(rec.driver)}</b>${iconTagHtml(rec.icon)}${crewTag(rec.crew)}<span>in ${esc(rec.make)} ${esc(rec.model)}</span>`;
+  // Watch link for the record lap (Fausto 27.11.2026): plain link, no embedded player.
+  const vd = rec.video_url && /^https:\/\//.test(rec.video_url) ? `<a class="rec-vd lr-noext" href="${esc(rec.video_url)}" target="_blank" rel="noopener"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Watch the record lap</a>` : '';
+  return `${badgeHtml(badges?.get(rec.driver_id), 24)}<b>${esc(rec.driver)}</b>${iconTagHtml(rec.icon)}${crewTag(rec.crew)}<span>in ${esc(rec.make)} ${esc(rec.model)}</span>${vd}`;
 }
