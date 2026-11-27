@@ -71,7 +71,12 @@ export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null
     meEl.innerHTML = parts.join('');
   }
 
+  // Two loads can overlap (e.g. auth event + reload). Each load gets a number; an older
+  // load that finishes later stops instead of overwriting the newer one's driver ID and
+  // results (that race caused crew_memberships queries with driver_id=eq.null). Claude 27.11.2026
+  let loadSeq = 0;
   async function loadMine() {
+    const seq = ++loadSeq;
     mine = [];
     leads = new Set();
     if (!live) { mine = readSample().map((id) => ({ membership_id: id, crew_id: id, status: 'pending' as const })); return; }
@@ -79,12 +84,15 @@ export function createCrewMembership(root: HTMLElement, meEl: HTMLElement | null
     if (!session) return;
     const sb = getSupabase();
     const own = await sb.from('drivers').select('driver_id').eq('auth_user_id', session.user.id).maybeSingle();
-    ownDriverId = own.data?.driver_id ?? null;
-    if (!ownDriverId) return;
-    const roles = await sb.from('hub_roles').select('role, crew_id').eq('driver_id', ownDriverId).eq('role', 'crew_leader');
+    if (seq !== loadSeq) return;
+    const driverId: string | null = own.data?.driver_id ?? null;
+    ownDriverId = driverId;
+    if (!driverId) return;
+    const roles = await sb.from('hub_roles').select('role, crew_id').eq('driver_id', driverId).eq('role', 'crew_leader');
+    let res: any = await sb.from('crew_memberships').select('membership_id, crew_id, status, is_primary').eq('driver_id', driverId);
+    if (res.error) res = await sb.from('crew_memberships').select('membership_id, crew_id, status').eq('driver_id', driverId);
+    if (seq !== loadSeq) return;
     leads = new Set(((roles.data ?? []) as { crew_id: string }[]).map((r) => r.crew_id));
-    let res: any = await sb.from('crew_memberships').select('membership_id, crew_id, status, is_primary').eq('driver_id', ownDriverId);
-    if (res.error) res = await sb.from('crew_memberships').select('membership_id, crew_id, status').eq('driver_id', ownDriverId);
     mine = (res.data ?? []) as Mine[];
   }
 

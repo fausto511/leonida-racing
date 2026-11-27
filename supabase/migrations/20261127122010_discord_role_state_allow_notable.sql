@@ -1,0 +1,3 @@
+-- Icon role (hub_roles.role = 'notable') is synced by discord-dispatch, but the check did not allow it (Claude 27.11.2026)
+alter table public.discord_role_state drop constraint discord_role_state_role_key_check;
+alter table public.discord_role_state add constraint discord_role_state_role_key_check check (role_key = any (array['member'::text, 'crew_leader'::text, 'event_host'::text, 'creator'::text, 'notable'::text]));
