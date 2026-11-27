@@ -311,7 +311,8 @@ export function formatVehicleValue(v: VehicleValue): string {
   if (v.metric.startsWith('stat_')) return v.value.toFixed(1);
   if (v.metric.startsWith('boost_')) return `+${v.value.toFixed(1)}`;
   if (v.metric.startsWith('rating_')) return String(Math.round(v.value));
-  if (isMoneyMetric(v.metric)) return `GTA$ ${Math.round(v.value).toLocaleString('en-US')}`;
+  // always "$", never "GTA$" (Fausto 27.11.2026), as on the vehicle pages
+  if (isMoneyMetric(v.metric)) return `$${Math.round(v.value).toLocaleString('en-US')}`;
   if (v.metric === 'top_speed_mph') return `${v.value.toFixed(1)} mph`;
   const ms = Math.round(v.value); const m = Math.floor(ms / 60000); const s = (ms % 60000) / 1000;
   return `${m}:${s.toFixed(3).padStart(6, '0')}`;

@@ -73,8 +73,6 @@ const rankTiles = RANK_TILES.flatMap((t) => {
 // Without JavaScript: the first four tiles with different #1 cars.
 const rankShown = new Set<string>();
 { const leads = new Set<string>(); for (const t of rankTiles) if (rankShown.size < 4 && !leads.has(t.lead)) { rankShown.add(t.slug); leads.add(t.lead); } }
-// money as on the vehicle page and in the Fresh chips ($87,400), so names keep their room
-const rankValue = (v: (typeof rankTiles)[number]['top'][number]['value']) => isMoneyMetric(v.metric) ? `$${Math.round(v.value).toLocaleString('en-US')}` : formatVehicleValueHtml(v);
 const rankLogo = (v: VehicleOption) => `${base}images/logos/${v.logoSlug}-gta-6-logo.svg`;
 
 // ---- Community: loading rows in the HTML; the browser fills in live rows, and only
@@ -310,7 +308,7 @@ const discordPath = 'M20.33 4.23C18.78 3.5 17.12 2.97 15.38 2.67C15.17 3.06 14.9
                 <i>{i + 1}</i>
                 <span class="rkt-lg">{e.vehicle.logoSlug && <img src={rankLogo(e.vehicle)} alt="" width="26" height="26" loading="lazy" />}</span>
                 <span class="rkt-n"><b>{e.vehicle.make} {e.vehicle.model}</b><small>{e.vehicle.classes[0] ?? ''}</small></span>
-                <span class="rkt-v tnum" set:html={rankValue(e.value)} />
+                <span class="rkt-v tnum" set:html={formatVehicleValueHtml(e.value)} />
               </li>
             ))}
           </ol>
