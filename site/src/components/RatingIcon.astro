@@ -1,17 +1,14 @@
 ---
-// Road / off-road rating icons. Composition traced from the in-game vehicle stats panel
-// (Fausto's screenshot, Jason's '70 Ganado, 23.11.2026): square frame; road = two edge lines
-// narrowing to the horizon with a short / medium / long centre dash; off-road = mountain zigzag
-// (small left peak, tall right peak) running frame to frame. Drawn as thin outlines so they match
-// the site's other icons (heart, garage, stopwatch). Fausto 23.11.2026: used left of the number.
+// Road / off-road rating icons: Lucide "road" and "mountain" (lucide.dev, ISC; DEC-0162).
+// Fausto 27.11.2026: Lucide everywhere, replaces the frame icons traced from the in-game panel (23.11.2026).
+// Used left of the number (vehicle pages, cards, filters, home rankings tiles).
 interface Props { kind: 'road' | 'offroad'; size?: number }
 const { kind, size = 17 } = Astro.props;
 ---
-<svg class="rating-ico" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-  <rect x="2.5" y="2.5" width="19" height="19" rx="2" />
+<svg class="rating-ico" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
   {kind === 'road'
-    ? <path d="M9.5 2.5 5 21.5M14.5 2.5 19 21.5M12 3.7v1.2M12 8.4v2.8M12 14.6v6.9" />
-    : <path d="M2.5 14.6 5.8 11.6 8.9 15.9 14.6 8.4 21.5 17" />}
+    ? <Fragment><path d="M12 17v4" /><path d="M12 5V3" /><path d="M12 9v3" /><path d="M2.077 18.449A2 2 0 0 0 4 21h16a2 2 0 0 0 1.924-2.55l-4-14A2 2 0 0 0 16 3H8a2 2 0 0 0-1.924 1.45z" /></Fragment>
+    : <path d="m8 3 4 8 5-5 5 15H2L8 3z" />}
 </svg>
 <style>
   .rating-ico { flex: none; display: block; color: var(--lr-soft); }
