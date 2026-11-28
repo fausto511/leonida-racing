@@ -17,7 +17,7 @@ import { vehicleOptions } from './vehicles';
 
 /** Date shown as "Last updated" and used as dateModified. Change on every content update. */
 // Bump on EVERY content change to the Guide (visible as "Last updated" + Article dateModified) — Fausto 27.10.2026.
-export const GUIDE_UPDATED = '2026-11-27';
+export const GUIDE_UPDATED = '2026-11-28';
 export const GUIDE_PUBLISHED = '2026-10-03';
 
 export interface GuideSource { label: string; url: string; note: string }
@@ -203,14 +203,17 @@ export const guideSections: GuideSection[] = [
     status: 'Tested in the game',
     paragraphs: [
       `The vehicle stat panel shows five values on a 0–10 scale: <strong>Speed</strong>, <strong>Acceleration</strong>, <strong>Asphalt Handling</strong>, <strong>Off-Road Handling</strong>, and <strong>Strength</strong>. It also shows separate road and off-road ratings. Asphalt and off-road handling describe different strengths, so a lifted 4x4 and a lowered sports car can both look strong for different jobs.`,
+      `Speed is a 0–10 stat, not a top speed in mph or km/h. How the two relate isn’t clear yet.`,
       `A small mark on each bar shows the car’s stock value, so you can see what upgrades have changed. You can also open the panel from the vehicle menu while driving, or pop the hood of a car you own or have stolen. When you change parts, compare the road and off-road ratings directly.`,
       `The <a href="{base}cars/vehicles/dinka-chavos-xs/">Dinka Chavos XS</a> shows how much a race build can change a car. Stock, it has 5.2 Speed, 5.7 Acceleration, 3.9 Asphalt Handling, and a road rating of 497. The race-prepared rental at Gellhorn has 7.7 Speed, 7.9 Acceleration, 6.7 Asphalt Handling, and a road rating of 743. Its Off-Road Handling drops from 4.2 to 1.6.`,
+      `The road rating comes from three stats: Speed, Acceleration, and Asphalt Handling. Off-road handling and Strength don’t count. Acceleration and Asphalt Handling weigh about twice as much as Speed, so an engine or handling upgrade moves the rating more than you might expect.`,
       `At Gellhorn’s <strong>Keep It PG</strong> event, your car needs a road rating between 500 and 780. If yours falls outside that range, you can rent a race-prepared car at the track. Our <a href="{base}cars/">car pages</a> show the stats and ratings of the stock car as we read them in the game.`,
       `The info panel’s <strong>Specialist</strong> field names the type of mod shop with the most options for that car.`,
       `Pickups can show two different seat counts. When the bed is empty, two more people can ride in the back, so the info panel shows two extra seats. With a loaded bed, it only counts the cab. Our car pages show both, for example “6 (4 + 2 in the bed)”.`,
     ],
     sources: [
-      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: vehicle stat panels checked on Jason’s ’70 Ganado, the Cypher, the Buffalo ’19, and the Chavos XS. Stock-value marks confirmed on stock cars. Stock Chavos XS compared with the race-prepared Gellhorn rental; Keep It PG entry range checked in the event menu. November 23, 2026: stat panel opened from the hood of an owned car. November 26, 2026: the same pickup showed 4 seats with a loaded bed and 6 with an empty bed.' },
+      { label: 'Leonida Racing — In-game check (PS5)', url: '', note: 'November 19, 2026: vehicle stat panels checked on Jason’s ’70 Ganado, the Cypher, the Buffalo ’19, and the Chavos XS. Stock-value marks confirmed on stock cars. Stock Chavos XS compared with the race-prepared Gellhorn rental; Keep It PG entry range checked in the event menu. November 23, 2026: stat panel opened from the hood of an owned car. November 26, 2026: the same pickup showed 4 seats with a loaded bed and 6 with an empty bed. November 27, 2026: road ratings of 106 stock cars compared with their Speed, Acceleration, and Asphalt Handling; all fit one weighting within ±5 points.' },
+      { label: 'EenGamer — I Tested the Top Speed of EVERY Supercar in GTA 6', url: 'https://www.youtube.com/watch?v=utIBay_8BBY', note: 'Top speeds of all nine supercars, with upgrades fitted; source transcript supplied to Leonida Racing. Transcript checked November 27, 2026.' },
       { label: 'Digital Car Addict — GTA VI vehicle overview', url: 'https://www.youtube.com/watch?v=ie4vtIle3lU&t=444s', note: 'November 2026: the Specialist field at 7:24. Checked November 21, 2026.' },
     ],
   },
@@ -664,6 +667,7 @@ export const guideFaq: { q: string; a: string; aHtml?: string }[] = [
   { q: 'Do AI racers rubber-band in GTA VI?', a: 'Yes, and it’s very noticeable. In the races we played at Gellhorn, rivals slowed sharply when we fell behind and caught up quickly when we pulled away.' },
   { q: 'How do you respawn in a race in GTA VI?', a: 'On PS5, hold the touchpad to respawn on the track. It helps when you get stuck on grass or in a gravel trap.' },
   { q: 'Is the fastest GTA VI car also the best for Gellhorn?', a: 'Top speed and lap time measure different things. Use Gellhorn laps to compare tested cars, and the driver leaderboard to compare submitted runs. Keep tuning categories and test conditions consistent.' },
+  { q: 'What’s the fastest supercar in GTA VI?', a: 'The Truffade Thrax. In EenGamer’s top-speed test of all nine supercars, with upgrades fitted, it reached about 299 km/h (186 mph), around 10 km/h more than the next car. The others topped out between about 280 and 290 km/h.' },
   { q: 'How do you use turn signals in GTA VI?', a: 'On PS5, tap left or right on the D-pad while driving.' },
   { q: 'How do you open or close a convertible roof in GTA VI?', a: 'Hold left on the D-pad to open the radio menu. Use the right stick to select Vehicle, then choose the roof control.' },
   { q: 'How do you reduce vehicle damage in GTA VI?', a: 'Turn on Reduced Vehicle Damage near the bottom of Settings → Gameplay. Your car takes less damage in crashes.' },
