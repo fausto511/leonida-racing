@@ -6,7 +6,7 @@
 // The build renders loading rows; the browser fills in the live rows from public_leaderboard with the same
 // renderer (data/leaderboard.ts). No sample data any more since the first real lap (Fausto 26.11.2026).
 // COPY STATUS: labels/sentences are placeholders until the Codex review (DEC-0088).
-import { initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, buildBoard } from '../data/leaderboard';
+import { initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, buildBoard, NITRO_ICON, TL_ICON } from '../data/leaderboard';
 // SEO (Fausto 27.11.2026): real rows fetched at build time go into the HTML (track record, drivers, times
 // visible to search engines); the browser reloads them live. Loading rows only when the build has none.
 const hasBuild = buildBoard.all.length > 0;
@@ -17,6 +17,7 @@ const noLap = noLapCars([...buildBoard.all, ...buildBoard.verified]);
 const base = import.meta.env.BASE_URL;
 const search = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>';
 const people = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+const sliders = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 5H3"/><path d="M12 19H3"/><path d="M14 3v4"/><path d="M16 17v4"/><path d="M21 12h-9"/><path d="M21 19h-5"/><path d="M21 5h-7"/><path d="M8 10v4"/><path d="M8 12H3"/></svg>';
 const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>';
 ---
 <section id="leaderboard" class="wrap lb">
@@ -50,12 +51,18 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
       </div>
     </div>
     <button type="button" class="mypos" id="lb-mypos" hidden><span class="lg-l">Your position</span><span class="sm-l">Me</span> ↓</button>
-    <span class="lbl">Show</span>
-    <div class="vseg sm lb-toggle" role="group" aria-label="Times shown">
-      <button type="button" class="on" aria-pressed="true" data-verified="0">All times</button>
-      <button type="button" class="v" aria-pressed="false" data-verified="1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="lg-l">Video verified only</span><span class="sm-l">Verified</span></button>
+    <!-- Filter menu (Fausto 28.11.2026): replaces the All times | Video verified toggle; nitrous and track limits
+         are marked on every lap and can be hidden. COPY: Claude placeholder, Codex review pending. -->
+    <div class="lb-filt" id="lb-filt">
+      <button type="button" class="ctl lb-filt-btn" id="lb-filt-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="lb-filt-pop"><Fragment set:html={sliders} /><span>Filter</span><b class="lb-filt-n" id="lb-filt-n" hidden></b></button>
+      <div class="lb-filt-pop" id="lb-filt-pop" role="dialog" aria-label="Filter laps" hidden>
+        <label class="lb-filt-opt"><input type="checkbox" data-f="verifiedOnly" /><span><b>Video verified only</b><small>Laps with a checked full-lap video</small></span></label>
+        <label class="lb-filt-opt"><input type="checkbox" data-f="hideNitro" /><span><b><Fragment set:html={NITRO_ICON} />Hide laps with nitrous</b><small>Shows each driver’s best lap without nitrous</small></span></label>
+        <label class="lb-filt-opt"><input type="checkbox" data-f="hideTL" /><span><b><Fragment set:html={TL_ICON} />Hide track-limit violations</b><small>Track limits are checked in lap videos</small></span></label>
+      </div>
     </div>
   </div>
+  <div class="lb-fchips" id="lb-fchips" hidden></div>
 
   <div class="lb-pick" id="lb-pick-make" hidden>
     <label class="sel"><span class="sr-only">Manufacturer</span><select class="ui-select" id="lb-make" set:html={makeSelectHtml(initialState)}></select></label>
@@ -71,7 +78,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     <div role="rowgroup" id="lb-thead" set:html={headHtml(true)} />
     <div role="rowgroup" id="lb-tbody" aria-live="polite" aria-busy={hasBuild ? undefined : 'true'} set:html={hasBuild ? first.body : loadingRows} />
   </div>
-  <p class="lb-legend" aria-hidden="true"><span class="st ok"><i><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>Video verified</span><span class="st no"><i></i>Screenshot only</span><span class="vd-l"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></span>Watch</p>
+  <p class="lb-legend" aria-hidden="true"><span class="st ok"><i><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>Video verified</span><span class="st no"><i></i>Screenshot only</span><span class="vd-l"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></span>Watch<span class="lf-l"><Fragment set:html={NITRO_ICON} />Nitrous</span><span class="lf-l"><Fragment set:html={TL_ICON} />Track limits exceeded</span></p>
   <div class="lb-more" id="lb-more" set:html={first.more} />
 
   <div class="ta-2">
@@ -143,9 +150,34 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .lb-crew-pop :global(.lb-crew-opt small) { margin-left: auto; flex: none; color: var(--lr-muted); font-size: 12px; }
   .lb-crew-pop :global(.lb-crew-none) { margin: 8px 6px 4px; font-size: 13px; color: var(--lr-muted); }
   #lb-crew-list { margin-top: 6px; }
+  /* Filter menu (Fausto 28.11.2026) */
+  .lb-filt { position: relative; display: inline-flex; flex: none; margin-left: auto; }
+  .lb-filt-btn { background: transparent; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .lb-filt-btn:hover, .lb-filt.on .lb-filt-btn { color: var(--lr-text); border-color: var(--lr-line-hover); }
+  .lb-filt-btn:focus-visible { outline: 2px solid var(--lr-orange); outline-offset: -2px; }
+  .lb-filt-n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--lr-text); color: var(--lr-card); font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .lb-filt-n[hidden] { display: none; }
+  .lb-filt-pop { position: absolute; top: 50px; right: 0; z-index: 20; width: 320px; max-width: calc(100vw - 32px); padding: 6px; border: 1px solid var(--lr-line-strong); border-radius: 8px; background: var(--lr-raised); box-shadow: 0 12px 32px rgba(0,0,0,.5); }
+  .lb-filt-pop[hidden] { display: none; }
+  .lb-filt-opt { display: flex; gap: 12px; align-items: flex-start; padding: 10px; border-radius: 6px; cursor: pointer; }
+  .lb-filt-opt:hover { background: var(--lr-white-hover); }
+  .lb-filt-opt input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: var(--lr-orange); }
+  .lb-filt-opt span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .lb-filt-opt b { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--lr-text); }
+  .lb-filt-opt b :global(svg) { color: var(--lr-muted); }
+  .lb-filt-opt small { font-size: 12px; color: var(--lr-muted); line-height: 1.4; }
+  .lb-fchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .lb-fchips[hidden] { display: none; }
+  .lb-fchips :global(.fchip) { height: 30px; padding: 0 6px 0 12px; display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; border: 1px solid var(--lr-line-strong); background: transparent; color: var(--lr-text); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .lb-fchips :global(.fchip:hover) { border-color: var(--lr-line-hover); }
+  .lb-fchips :global(.fchip svg) { color: var(--lr-muted); }
+  .lb-fchips :global(.fchip-x) { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; color: var(--lr-muted); font-size: 15px; line-height: 1; }
+  /* lap flags left of the time; the time column is wide enough for two icons (no wrap) */
+  .tbl :global(.tm) { white-space: nowrap; }
+  .tbl :global(.lfs) { display: inline-flex; gap: 3px; margin-right: 6px; vertical-align: -2px; color: var(--lr-muted); }
+  .tbl :global(.lf) { display: inline-flex; font-style: normal; }
   .mypos { height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--lr-orange-border); background: transparent; color: var(--lr-orange); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
   .mypos[hidden] { display: none; }
-  .lbl { font-size: 13px; color: var(--lr-muted); margin-left: auto; }
 
   .lb-pick { margin-top: 14px; }
   .lb-pick[hidden] { display: none; }
@@ -169,8 +201,8 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 
   /* ---- table (div grid, rows inserted at runtime -> :global) ---- */
   .tbl { margin-top: 16px; overflow: hidden; padding: 0; }
-  .tbl :global(.tr) { display: grid; grid-template-columns: 56px minmax(0,1.3fr) minmax(0,1.4fr) 80px 100px 150px 80px; align-items: center; column-gap: 12px; min-height: 56px; padding: 0 18px; border-top: 1px solid var(--lr-line-soft); font-size: 15px; color: var(--lr-soft); }
-  .tbl.nocar :global(.tr) { grid-template-columns: 56px minmax(0,2fr) 80px 100px 150px 80px; }
+  .tbl :global(.tr) { display: grid; grid-template-columns: 56px minmax(0,1.3fr) minmax(0,1.4fr) 80px 136px 150px 80px; align-items: center; column-gap: 12px; min-height: 56px; padding: 0 18px; border-top: 1px solid var(--lr-line-soft); font-size: 15px; color: var(--lr-soft); }
+  .tbl.nocar :global(.tr) { grid-template-columns: 56px minmax(0,2fr) 80px 136px 150px 80px; }
   .tbl :global(.tr > *), .tbl :global(.mt > *) { grid-row: 1; }
   .tbl :global(.mt) { display: contents; }
   .tbl :global(.rk) { grid-column: 1; }
@@ -252,9 +284,8 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   .box-cta .btn { min-height: 40px; height: 40px; padding: 0 16px; font-size: 14px; }
 
   @media (max-width: 1100px) {
-    .lbl { margin-left: 0; }
-    .tbl :global(.tr) { grid-template-columns: 44px minmax(0,1.2fr) minmax(0,1.4fr) 64px 92px 40px 74px; }
-    .tbl.nocar :global(.tr) { grid-template-columns: 44px minmax(0,2fr) 64px 92px 40px 74px; }
+    .tbl :global(.tr) { grid-template-columns: 44px minmax(0,1.2fr) minmax(0,1.4fr) 64px 128px 40px 74px; }
+    .tbl.nocar :global(.tr) { grid-template-columns: 44px minmax(0,2fr) 64px 128px 40px 74px; }
     .tbl :global(.st-t) { display: none; }
   }
   @media (max-width: 760px) {
@@ -262,19 +293,19 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     .lb-head { flex-direction: column; align-items: flex-start; gap: 6px; }
     .lg-l { display: none; }
     .sm-l { display: inline; }
-    .lb-ctl { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 10px; }
+    .lb-ctl { display: grid; grid-template-columns: minmax(0,1fr) auto auto auto; gap: 10px; }
     .seg4 { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); }
     .seg4 button { justify-content: center; padding: 0 6px; }
     .lb-q { max-width: none; grid-column: 1; }
     .lb-crew { grid-column: 2; }
     .mypos { grid-column: 3; }
+    .lb-filt { grid-column: 4; margin-left: 0; }
     .lb-ctl:has(.mypos[hidden]) .lb-q { grid-column: 1 / 3; }
     .lb-ctl:has(.mypos[hidden]) .lb-crew { grid-column: 3; }
+    .lb-filt-btn span { display: none; }
+    .lb-filt-btn { padding: 0 12px; gap: 6px; }
     .lb-crew-btn { max-width: 150px; }
     .lb-crew-pop { left: auto; right: 0; }
-    .lbl { display: none; }
-    .lb-toggle { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
-    .lb-toggle button { justify-content: center; }
     .sel { max-width: none; }
     .chips { flex-wrap: nowrap; overflow-x: auto; margin-right: -16px; padding-right: 16px; scrollbar-width: none; }
     .chips::-webkit-scrollbar { display: none; }
@@ -299,6 +330,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     .tbl :global(.st.ok i) { width: 16px; height: 16px; }
     .lb-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 10px 0 0; font-size: 12px; color: var(--lr-muted); }
     .lb-legend .st { font-size: 12px; color: var(--lr-muted); }
+    .lb-legend .lf-l { display: inline-flex; align-items: center; gap: 4px; }
     .lb-legend .vd-l { width: 18px; height: 18px; border: 1px solid var(--lr-line-strong); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--lr-text); margin-right: -8px; }
     .lb-more :global(.lb-more-btn) { width: 100%; }
     .ta-2 { grid-template-columns: 1fr; }
@@ -312,7 +344,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   import { getSupabase, backendConfigured } from '../scripts/supabase-client';
   import { LEADERBOARD_PLATFORM } from '../data/platforms';
   import { loadIconIds } from '../scripts/icons';
-  import { buildBoard, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, crewsWithLaps, crewInfo, crewTagHtml, type LbEntry, type LbState, type LbMode, type LbCrew } from '../data/leaderboard';
+  import { bestPerCar, activeFilters, NITRO_ICON, TL_ICON, buildBoard, initialState, render, headHtml, vehicleSelectHtml, classChipsHtml, makeSelectHtml, noLapCars, trackStats, recordWhoHtml, lapTime, lbClasses, lbMakes, crewsWithLaps, crewInfo, crewTagHtml, type LbEntry, type LbState, type LbMode, type LbCrew } from '../data/leaderboard';
   import { buildCrews } from '../data/hub';
   import { computeBadges, loadBadges, badgesOn, type Badge } from '../data/badge';
 
@@ -327,7 +359,9 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   // Driver Badge (DEC-0230): from all accepted best laps, the same in every view (not from the verified-only list)
   let badges = computeBadges(data);
   let liveBadges: Map<string, Badge> | null = null; // from public_driver_badges (stage 2)
-  const current = () => (state.verifiedOnly ? verifiedData : data);
+  // Every published lap with nitrous / track limits (public_leaderboard_laps, Fausto 28.11.2026); null until loaded.
+  let laps: LbEntry[] | null = null;
+  const current = () => (laps ? bestPerCar(laps, state) : state.verifiedOnly ? verifiedData : data);
   const state: LbState = { ...initialState };
 
   // Shareable state: ?class=&make=&vehicle=&verified=1
@@ -336,17 +370,21 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   const pm = params.get('make'); if (pm && lbMakes.some(([k]) => k === pm)) state.make = pm;
   if (params.get('vehicle')) { state.vehicle = params.get('vehicle'); state.cls = null; state.make = null; }
   if (params.get('verified') === '1') state.verifiedOnly = true;
+  if (params.get('nonitro') === '1') state.hideNitro = true;
+  if (params.get('notl') === '1') state.hideTL = true;
   const pcr = params.get('crew'); if (pcr && /^[a-z0-9-]{1,80}$/.test(pcr)) state.crew = pcr;
   state.mode = state.vehicle ? 'car' : state.make ? 'make' : state.cls ? 'class' : 'overall';
 
   function syncUrl() {
     const u = new URL(location.href);
-    ['vehicle', 'class', 'make', 'verified', 'crew', 'lb'].forEach((k) => u.searchParams.delete(k));
+    ['vehicle', 'class', 'make', 'verified', 'nonitro', 'notl', 'crew', 'lb'].forEach((k) => u.searchParams.delete(k));
     if (state.crew) u.searchParams.set('crew', state.crew);
     if (state.cls) u.searchParams.set('class', state.cls);
     if (state.make) u.searchParams.set('make', state.make);
     if (state.vehicle) u.searchParams.set('vehicle', state.vehicle);
     if (state.verifiedOnly) u.searchParams.set('verified', '1');
+    if (state.hideNitro) u.searchParams.set('nonitro', '1');
+    if (state.hideTL) u.searchParams.set('notl', '1');
     history.replaceState(null, '', u.pathname + u.search + u.hash);
   }
 
@@ -373,10 +411,7 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
       const on = b.dataset.mode === state.mode;
       b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
     });
-    document.querySelectorAll<HTMLButtonElement>('.lb-toggle button').forEach((b) => {
-      const on = (b.dataset.verified === '1') === state.verifiedOnly;
-      b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
-    });
+    drawFilter();
     drawCrewBtn();
     syncUrl();
   }
@@ -445,9 +480,35 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
   });
   vehicleSel.addEventListener('change', () => { state.vehicle = vehicleSel.value || null; state.showAll = false; draw(); });
   makeSel.addEventListener('change', () => { state.make = makeSel.value || null; state.showAll = false; draw(); });
-  document.querySelectorAll<HTMLButtonElement>('.lb-toggle button').forEach((b) => b.addEventListener('click', () => {
-    state.verifiedOnly = b.dataset.verified === '1'; draw();
-  }));
+  // ---- filter menu (Fausto 28.11.2026) ----
+  type FKey = 'verifiedOnly' | 'hideNitro' | 'hideTL';
+  const CHECKMARK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  // COPY: Claude placeholder 28.11.2026 (chip labels), Codex review pending.
+  const F_CHIP: [FKey, string][] = [['verifiedOnly', `${CHECKMARK}Video verified`], ['hideNitro', `${NITRO_ICON}No nitrous`], ['hideTL', `${TL_ICON}Within track limits`]];
+  const filtWrap = $('lb-filt'), filtBtn = $('lb-filt-btn') as HTMLButtonElement, filtPop = $('lb-filt-pop');
+  function drawFilter() {
+    const n = activeFilters(state);
+    filtWrap.classList.toggle('on', n > 0);
+    const badge = $('lb-filt-n'); badge.hidden = !n; badge.textContent = String(n);
+    filtBtn.setAttribute('aria-label', n ? `Filter, ${n} active` : 'Filter');
+    filtPop.querySelectorAll<HTMLInputElement>('input[data-f]').forEach((i) => { i.checked = state[i.dataset.f as FKey]; });
+    const chips = F_CHIP.filter(([k]) => state[k]);
+    $('lb-fchips').hidden = !chips.length;
+    $('lb-fchips').innerHTML = chips.map(([k, l]) => `<button type="button" class="fchip" data-fx="${k}" aria-label="Remove filter">${l}<span class="fchip-x" aria-hidden="true">×</span></button>`).join('');
+  }
+  function openFilt(open: boolean) { filtPop.hidden = !open; filtBtn.setAttribute('aria-expanded', String(open)); }
+  filtBtn.addEventListener('click', () => openFilt(filtPop.hidden));
+  filtPop.addEventListener('change', (e) => {
+    const i = (e.target as HTMLElement).closest<HTMLInputElement>('input[data-f]');
+    if (!i) return;
+    state[i.dataset.f as FKey] = i.checked; state.showAll = false; draw();
+  });
+  $('lb-fchips').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-fx]');
+    if (b) { state[b.dataset.fx as FKey] = false; state.showAll = false; draw(); }
+  });
+  document.addEventListener('click', (e) => { if (!filtPop.hidden && !filtWrap.contains(e.target as Node)) openFilt(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !filtPop.hidden) { openFilt(false); filtBtn.focus(); } });
   $('leaderboard').addEventListener('click', (e) => {
     if ((e.target as HTMLElement).closest('[data-lb-more]')) { state.showAll = true; draw(); }
     if ((e.target as HTMLElement).closest('[data-crew-clear]')) setCrew(null);
@@ -532,7 +593,9 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
       .eq('track_id', TRACK_ID)
       .eq('platform', LEADERBOARD_PLATFORM) // DEC-0073: PS5 board only
       .order('lap_time_ms', { ascending: true });
-    const [allRes, verRes] = await Promise.all([query('public_leaderboard'), query('public_leaderboard_verified')]);
+    const [allRes, verRes, lapRes] = await Promise.all([query('public_leaderboard'), query('public_leaderboard_verified'),
+      sb.from('public_leaderboard_laps').select(`${cols}, nitro_used, track_limits`).eq('track_id', TRACK_ID)
+        .eq('platform', LEADERBOARD_PLATFORM).order('lap_time_ms', { ascending: true })]);
     const rows = allRes.data;
     if (allRes.error || !rows || rows.length === 0) return false;
     const live = rows as LiveRow[];
@@ -556,6 +619,9 @@ const stopwatch = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
     });
     data = live.map(toEntry);
     verifiedData = liveVerified.map(toEntry);
+    // Without the laps view (not deployed yet / error) the board keeps working without the nitrous / track-limit filters.
+    laps = lapRes.error || !lapRes.data ? null : (lapRes.data as (LiveRow & { nitro_used: boolean | null; track_limits: 'respected' | 'violated' | null })[])
+      .map((r) => ({ ...toEntry(r), nitro: r.nitro_used, tl: r.track_limits }));
     badges = liveBadges ?? computeBadges(data);
     const nl = noLapCars([...data, ...verifiedData]);
     $('lb-need').innerHTML = nl.picks;

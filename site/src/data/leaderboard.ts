@@ -34,6 +34,10 @@ export interface LbEntry {
   entries: number; // published laps of this driver on the track
   verified: boolean;
   video_url: string | null;
+  /** nitrous on this lap (null = not given); track limits after the video check (null = not checked).
+   *  Only set from public_leaderboard_laps (Fausto 28.11.2026). */
+  nitro?: boolean | null;
+  tl?: 'respected' | 'violated' | null;
 }
 
 export interface LbCrew { tag: string; color: string; slug?: string; name?: string; id?: string }
@@ -53,9 +57,28 @@ export interface LbState {
   /** Crew filter (crew slug), independent of the segment: only members whose active crew it is (Fausto 06.11.) */
   crew: string | null;
   verifiedOnly: boolean;
+  /** Filter menu (Fausto 28.11.2026): hide laps with nitrous / with track-limit violations.
+   *  Only laps that are known to have them are hidden; "not given" / "not checked" stay. */
+  hideNitro: boolean;
+  hideTL: boolean;
   showAll: boolean;
 }
-export const initialState: LbState = { mode: 'overall', me: null, vehicle: null, cls: null, make: null, qDriver: '', crew: null, verifiedOnly: false, showAll: false };
+export const initialState: LbState = { mode: 'overall', me: null, vehicle: null, cls: null, make: null, qDriver: '', crew: null, verifiedOnly: false, hideNitro: false, hideTL: false, showAll: false };
+
+/** Every published lap -> best lap per driver + car after the filters (the best lap can change with them). */
+export function bestPerCar(laps: LbEntry[], s: Pick<LbState, 'verifiedOnly' | 'hideNitro' | 'hideTL'>): LbEntry[] {
+  const best = new Map<string, LbEntry>();
+  for (const e of laps) {
+    if (s.verifiedOnly && !e.verified) continue;
+    if (s.hideNitro && e.nitro === true) continue;
+    if (s.hideTL && e.tl === 'violated') continue;
+    const k = `${e.driver_id}|${e.vehicle_id}`;
+    const cur = best.get(k);
+    if (!cur || e.lap_time_ms < cur.lap_time_ms) best.set(k, e);
+  }
+  return [...best.values()];
+}
+export const activeFilters = (s: LbState) => Number(s.verifiedOnly) + Number(s.hideNitro) + Number(s.hideTL);
 export const PAGE = 12;
 
 // ---------------------------------------------------------------------------
@@ -220,6 +243,16 @@ function videoCell(e: LbEntry, sample: boolean) {
   if (e.verified && sample) return `<span class="vd is-off" title="Sample data — no real video">${PLAY}<span class="vd-t">Watch</span></span>`;
   return '<span class="vd x" aria-label="No video">—</span>';
 }
+// Lap flags (Fausto 28.11.2026): neutral grey marks, no judgement -- Lucide zap + traffic-cone.
+const ZAP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></svg>';
+const CONE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.05 10.966a5 2.5 0 0 1-8.1 0"/><path d="m16.923 14.049 4.48 2.04a1 1 0 0 1 .001 1.831l-8.574 3.9a2 2 0 0 1-1.66 0l-8.574-3.91a1 1 0 0 1 0-1.83l4.484-2.04"/><path d="M16.949 14.14a5 2.5 0 1 1-9.9 0L10.063 3.5a2 2 0 0 1 3.874 0z"/><path d="M9.194 6.57a5 2.5 0 0 0 5.61 0"/></svg>';
+// COPY: Claude placeholder 28.11.2026 (tooltips), Codex review pending.
+export const NITRO_ICON = ZAP, TL_ICON = CONE;
+function lapFlags(e: LbEntry) {
+  const f = (e.nitro === true ? `<i class="lf" title="Nitrous used">${ZAP}<span class="sr-only">Nitrous used</span></i>` : '')
+    + (e.tl === 'violated' ? `<i class="lf" title="Track limits exceeded">${CONE}<span class="sr-only">Track limits exceeded</span></i>` : '');
+  return f ? `<span class="lfs">${f}</span>` : '';
+}
 const empty = (text: string) => `<div class="tr lb-empty" role="row"><span role="cell">${text}</span></div>`;
 
 /** Crews with at least one lap in the data (crew picker): crew + number of drivers, most drivers first. */
@@ -278,7 +311,7 @@ function pick(rows: Ranked, s: LbState, searching: boolean): { list: Ranked; bre
 
 export function render(all: LbEntry[], s: LbState, sample: boolean, badges?: Map<string, Badge>): Rendered {
   const qd = norm(s.qDriver);
-  const vf = s.verifiedOnly ? 'verified ' : '';
+  const vf = activeFilters(s) ? 'matching ' : '';
   const driverCount = new Set(all.map((e) => e.driver_id)).size;
   const laps = [...new Map(all.map((e) => [e.driver_id, e.entries])).values()].reduce((a, b) => a + b, 0);
   const meta = `Best lap per driver · Gellhorn Raceway Time Trial · PS5 · ${driverCount} driver${driverCount === 1 ? '' : 's'} · ${laps} accepted lap${laps === 1 ? '' : 's'}`;
@@ -330,7 +363,7 @@ export function render(all: LbEntry[], s: LbState, sample: boolean, badges?: Map
       if (me) hasMe = true;
       const cls = ['tr', rank === 1 ? 'first' : '', me ? 'me' : '', rank === breakBefore ? 'brk' : ''].filter(Boolean).join(' ');
       const gp = e.lap_time_ms === best ? '' : `+${((e.lap_time_ms - best) / 1000).toFixed(3)}`;
-      return `<div class="${cls}" role="row"${me ? ' id="lb-me"' : ''}><span class="rk" role="cell">${rank}${ov ? `<small title="#${ov} overall">#${ov}</small>` : ''}</span><span class="dr" role="cell">${badgeHtml(badges?.get(e.driver_id))}<span class="n">${esc(e.driver)}</span>${iconTagHtml(e.icon)}${crewTag(e.crew)}${me ? '<span class="you">YOU</span>' : ''}</span>${carCol ? carCell(e, s.cls) : ''}<span class="mt"><span class="gp" role="cell">${gp}</span>${statusCell(e.verified)}${videoCell(e, sample)}</span><span class="tm" role="cell">${lapTime(e.lap_time_ms)}</span></div>`;
+      return `<div class="${cls}" role="row"${me ? ' id="lb-me"' : ''}><span class="rk" role="cell">${rank}${ov ? `<small title="#${ov} overall">#${ov}</small>` : ''}</span><span class="dr" role="cell">${badgeHtml(badges?.get(e.driver_id))}<span class="n">${esc(e.driver)}</span>${iconTagHtml(e.icon)}${crewTag(e.crew)}${me ? '<span class="you">YOU</span>' : ''}</span>${carCol ? carCell(e, s.cls) : ''}<span class="mt"><span class="gp" role="cell">${gp}</span>${statusCell(e.verified)}${videoCell(e, sample)}</span><span class="tm" role="cell">${lapFlags(e)}${lapTime(e.lap_time_ms)}</span></div>`;
     }).join('')
     : empty(ranked.length ? 'No driver matches your search.' : s.crew ? `No ${vf}times from this crew in this selection yet.` : s.vehicle || s.cls || s.make ? `No ${vf}times in this selection yet. <a href="${base}time-attack/submit/">Be the first — submit a lap</a>.` : `No ${vf}times yet.`);
   const shownCount = list.length;
