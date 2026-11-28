@@ -25,7 +25,7 @@ ${STATUS}
 
 ## Cars
 
-- [Cars](${u('cars/')}): browse GTA VI vehicles by class and manufacturer, with seats, drivetrain, release details, first appearance, and primary real-life inspiration; costs to register, tested top speeds, and lap data ${launched ? 'are added as they are measured' : 'follow after launch'}
+- [Cars](${u('cars/')}): browse GTA VI vehicles by class and manufacturer, with seats, drivetrain (carried over from GTA V), release details, first appearance, and primary real-life inspiration; costs to register, tested top speeds, and lap data ${launched ? 'are added as they are measured' : 'follow after launch'}
 - [How we measure](${u('cars/how-we-measure/')}): where the car data comes from: cost to register, sell value with body condition, stats and ratings, read in the game on a PS5 with the current game version
 
 ## Time Attack

@@ -233,7 +233,7 @@ ${card('Top speed', v.speed, [sp ? `Fastest ${sp.cls} ranking` : 'Fastest cars r
     ];
     const car: Row[] = [
       { label: 'Class', cells: (c) => ({ m: esc(c.classes.join(' / ')) }) },
-      { label: 'Drive', cells: (c) => ({ m: esc(c.drive) }) },
+      { label: 'Drive', sub: 'From GTA V, not confirmed', cells: (c) => ({ m: esc(c.drive) }) },
       { label: 'Seats', cells: (c) => ({ m: String(c.seats) }) },
       { label: 'Where to get', cells: (c) => c.acq ? { m: acqNote[c.acq] ?? esc(c.acq) } : { m: nrLong, tba: true } },
       { label: 'Based on', cells: (c) => c.based ? { m: esc(c.based) } : { m: 'Under review', tba: true } },

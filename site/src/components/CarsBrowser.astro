@@ -199,7 +199,7 @@ function mc(group: string, value: string | number, label: string, n: number | un
       <!-- chip groups first (two stacked columns), so the sliders below line up in rows (Fausto 23.11.2026) -->
       <div class="dsg-col">
         {scope !== 'class' && <div class="dsg"><h4>Class <em data-sel="class"></em></h4><div class="mchips" set:html={classesSorted.map(([c, n]) => mc('class', c, c, n)).join('')} /></div>}
-        <div class="dsg"><h4>Drive <em data-sel="drive"></em></h4><div class="mchips" set:html={DRIVES.map((d) => mc('drive', d, d, driveCounts.get(d))).join('')} /></div>
+        <div class="dsg"><h4><span title="From GTA V, not yet confirmed in GTA VI">Drive</span> <em data-sel="drive"></em></h4><div class="mchips" set:html={DRIVES.map((d) => mc('drive', d, d, driveCounts.get(d))).join('')} /></div>
       </div>
       <div class="dsg-col">
         <div class="dsg"><h4>Seats <em data-sel="seats"></em></h4><div class="mchips" set:html={seatsSorted.map(([n, c]) => mc('seats', n, String(n), c)).join('')} /></div>

@@ -390,7 +390,7 @@ if (faqs.length) vehicleJsonLd.push({ '@context': 'https://schema.org', '@type':
           <div class="vst-side">
             <dl class="vst-facts">
               <div><dt>Top speed</dt><dd class:list={{ 'is-tba': speed == null }}>{speed != null ? <><Fragment set:html={speedHtml(speed)} />{speedRank != null && <span class="vs-cond"> · #{speedRank} of {classCars.length}</span>}</> : notRecorded}</dd></div>
-              <div><dt>Drive</dt><dd class:list={{ 'is-tba': vehicle.drive === 'n/a' }}>{vehicle.drive === 'n/a' ? notRecorded : vehicle.drive}</dd></div>
+              <div><dt><span class="vs-gv" title="From GTA V, not yet confirmed in GTA VI" tabindex="0">Drive</span></dt><dd class:list={{ 'is-tba': vehicle.drive === 'n/a' }}>{vehicle.drive === 'n/a' ? notRecorded : vehicle.drive}</dd></div>
               <div><dt>Seats</dt><dd class:list={{ 'is-tba': !vehicle.seats }}>{seatsText}</dd></div>
               <div><dt>Storage</dt><dd class:list={{ 'is-tba': vehicle.storage == null }}>{vehicle.storage != null ? `${vehicle.storage} ${vehicle.storage === 1 ? 'slot' : 'slots'}` : notRecorded}</dd></div>
             </dl>
@@ -409,7 +409,7 @@ if (faqs.length) vehicleJsonLd.push({ '@context': 'https://schema.org', '@type':
         </div>
         <dl class="vst-facts is-solo">
           <div><dt>Top speed</dt><dd class:list={{ 'is-tba': speed == null }}>{speed != null ? <><Fragment set:html={speedHtml(speed)} />{speedRank != null && <span class="vs-cond"> · #{speedRank} of {classCars.length}</span>}</> : notRecorded}</dd></div>
-          <div><dt>Drive</dt><dd class:list={{ 'is-tba': vehicle.drive === 'n/a' }}>{vehicle.drive === 'n/a' ? notRecorded : vehicle.drive}</dd></div>
+          <div><dt><span class="vs-gv" title="From GTA V, not yet confirmed in GTA VI" tabindex="0">Drive</span></dt><dd class:list={{ 'is-tba': vehicle.drive === 'n/a' }}>{vehicle.drive === 'n/a' ? notRecorded : vehicle.drive}</dd></div>
           <div><dt>Seats</dt><dd class:list={{ 'is-tba': !vehicle.seats }}>{seatsText}</dd></div>
           <div><dt>Storage</dt><dd class:list={{ 'is-tba': vehicle.storage == null }}>{vehicle.storage != null ? `${vehicle.storage} ${vehicle.storage === 1 ? 'slot' : 'slots'}` : notRecorded}</dd></div>
         </dl>
@@ -787,6 +787,8 @@ if (faqs.length) vehicleJsonLd.push({ '@context': 'https://schema.org', '@type':
   .vst-facts > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; font-size: 15px; }
   .vst-facts > div + div { border-top: 1px solid var(--lr-line-soft); }
   .vst-facts dt { color: var(--lr-soft); white-space: nowrap; }
+  /* Fausto 28.11.2026: drivetrain is carried over from GTA V; GTA VI's vehicle panel doesn't show it */
+  .vs-gv { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
   .vst-facts dd { margin: 0; font-weight: 600; text-align: right; }
   .vst-facts.is-solo { max-width: 460px; }
   .vst-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
